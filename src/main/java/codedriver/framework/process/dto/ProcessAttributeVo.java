@@ -6,8 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.module.process.constvalue.AttributeHandler;
-import codedriver.module.process.constvalue.AttributeType;
+import codedriver.framework.attribute.constvalue.AttributeHandler;
+import codedriver.framework.attribute.constvalue.AttributeType;
 
 public class ProcessAttributeVo implements Serializable, Comparable<ProcessAttributeVo> {
 	/**

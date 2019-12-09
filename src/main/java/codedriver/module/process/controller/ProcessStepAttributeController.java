@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import codedriver.framework.process.attribute.core.AttributeHandlerFactory;
-import codedriver.framework.process.attribute.core.IAttributeHandler;
-import codedriver.framework.process.dto.AttributeVo;
+import codedriver.framework.attribute.core.AttributeHandlerFactory;
+import codedriver.framework.attribute.core.IAttributeHandler;
+import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.module.process.service.AttributeService;

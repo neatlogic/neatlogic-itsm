@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.framework.common.ReturnJson;
-import codedriver.framework.process.dto.AttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.FormVo;
 import codedriver.module.process.service.AttributeService;

@@ -2,8 +2,8 @@ package codedriver.module.process.service;
 
 import java.util.List;
 
-import codedriver.framework.process.dto.AttributeVo;
-import codedriver.framework.process.dto.DataCubeVo;
+import codedriver.framework.attribute.dto.AttributeVo;
+import codedriver.framework.attribute.dto.DataCubeVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessVo;
 

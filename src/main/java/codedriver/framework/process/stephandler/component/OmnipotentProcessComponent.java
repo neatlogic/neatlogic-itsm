@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.attribute.core.AttributeHandlerFactory;
-import codedriver.framework.process.attribute.core.IAttributeHandler;
+import codedriver.framework.attribute.core.AttributeHandlerFactory;
+import codedriver.framework.attribute.core.IAttributeHandler;
 import codedriver.framework.process.dto.ProcessTaskAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskAttributeValueVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;

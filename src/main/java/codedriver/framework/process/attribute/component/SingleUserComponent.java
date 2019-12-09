@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.attribute.core.AttributeComponentBase;
-import codedriver.module.process.constvalue.AttributeHandler;
+import codedriver.framework.attribute.constvalue.AttributeHandler;
+import codedriver.framework.attribute.core.AttributeComponentBase;
 
 public class SingleUserComponent extends AttributeComponentBase {
 

@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.attribute.core.AttributeHandlerFactory;
-import codedriver.framework.process.attribute.core.IAttributeHandler;
+import codedriver.framework.attribute.core.AttributeHandlerFactory;
+import codedriver.framework.attribute.core.IAttributeHandler;
 
 public class ProcessTaskStepAttributeVo implements Comparable<ProcessTaskStepAttributeVo> {
 	private Long processTaskId;

@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import codedriver.framework.attribute.dao.mapper.AttributeMapper;
+import codedriver.framework.attribute.dto.AttributeVo;
+import codedriver.framework.attribute.dto.DataCubeVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dto.AttributeVo;
-import codedriver.framework.process.dto.DataCubeVo;
-import codedriver.framework.process.mapper.AttributeMapper;
 
 @Service
 public class AttributeServiceImpl implements AttributeService {

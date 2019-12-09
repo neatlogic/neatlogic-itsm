@@ -7,16 +7,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import codedriver.framework.attribute.constvalue.AttributeHandler;
+import codedriver.framework.attribute.dao.mapper.AttributeMapper;
+import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.process.dto.AttributeVo;
 import codedriver.framework.process.dto.ProcessTaskAttributeValueVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.framework.process.mapper.AttributeMapper;
 import codedriver.framework.process.mapper.ProcessTaskMapper;
-import codedriver.module.process.constvalue.AttributeHandler;
 import codedriver.module.process.constvalue.WorkerPolicy;
 
 @Service

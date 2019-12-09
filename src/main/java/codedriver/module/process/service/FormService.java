@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import codedriver.framework.process.dto.AttributeVo;
+import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.FormVo;
 

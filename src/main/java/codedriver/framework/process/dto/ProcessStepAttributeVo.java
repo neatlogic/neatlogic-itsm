@@ -6,8 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.attribute.core.AttributeHandlerFactory;
-import codedriver.framework.process.attribute.core.IAttributeHandler;
+import codedriver.framework.attribute.core.AttributeHandlerFactory;
+import codedriver.framework.attribute.core.IAttributeHandler;
 
 public class ProcessStepAttributeVo implements Serializable, Comparable<ProcessStepAttributeVo> {
 	private static final long serialVersionUID = -5446328695229737942L;

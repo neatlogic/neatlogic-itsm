@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.attribute.core.AttributeHandlerFactory;
+import codedriver.framework.attribute.core.IAttributeHandler;
+import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.framework.common.config.Config;
-import codedriver.framework.process.attribute.core.AttributeHandlerFactory;
-import codedriver.framework.process.attribute.core.IAttributeHandler;
-import codedriver.framework.process.dto.AttributeVo;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.module.process.service.AttributeService;
