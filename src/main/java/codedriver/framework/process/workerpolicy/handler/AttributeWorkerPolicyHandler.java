@@ -12,12 +12,12 @@ import codedriver.framework.attribute.dao.mapper.AttributeMapper;
 import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.process.dto.ProcessTaskAttributeValueVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.framework.process.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.module.process.constvalue.WorkerPolicy;
+import codedriver.module.process.dto.ProcessTaskAttributeValueVo;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerPolicyVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 
 @Service
 public class AttributeWorkerPolicyHandler implements IWorkerPolicyHandler {

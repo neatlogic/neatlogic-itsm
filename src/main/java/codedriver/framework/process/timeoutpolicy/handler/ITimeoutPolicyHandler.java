@@ -2,8 +2,8 @@ package codedriver.framework.process.timeoutpolicy.handler;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import codedriver.framework.process.dto.ProcessTaskStepTimeoutPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepTimeoutPolicyVo;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 public interface ITimeoutPolicyHandler {
 	public String getType();

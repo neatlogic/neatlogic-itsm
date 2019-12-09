@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 //需要把事务隔离级别调低，避免并发insert时因为gap lock导致deadlock
 public interface IProcessStepHandler {

@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.framework.process.workerdispatcher.IWorkerDispatcher;
-import codedriver.framework.process.workerdispatcher.WorkerDispatcherFactory;
+import codedriver.framework.process.workerdispatcher.core.IWorkerDispatcher;
+import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherFactory;
 import codedriver.module.process.constvalue.WorkerPolicy;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerPolicyVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 
 @Service
 public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {

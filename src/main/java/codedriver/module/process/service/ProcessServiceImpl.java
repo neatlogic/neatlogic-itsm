@@ -6,19 +6,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.process.dto.ProcessAttributeVo;
-import codedriver.framework.process.dto.ProcessFormVo;
-import codedriver.framework.process.dto.ProcessStepAttributeVo;
-import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
-import codedriver.framework.process.dto.ProcessStepRelVo;
-import codedriver.framework.process.dto.ProcessStepTimeoutPolicyVo;
-import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessVo;
-import codedriver.framework.process.dto.WorkerDispatcherVo;
-import codedriver.framework.process.mapper.ProcessMapper;
-import codedriver.framework.process.mapper.WorkerDispatcherMapper;
+import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.module.process.constvalue.ProcessStepType;
+import codedriver.module.process.dto.ProcessAttributeVo;
+import codedriver.module.process.dto.ProcessFormVo;
+import codedriver.module.process.dto.ProcessStepAttributeVo;
+import codedriver.module.process.dto.ProcessStepFormAttributeVo;
+import codedriver.module.process.dto.ProcessStepRelVo;
+import codedriver.module.process.dto.ProcessStepTimeoutPolicyVo;
+import codedriver.module.process.dto.ProcessStepVo;
+import codedriver.module.process.dto.ProcessStepWorkerPolicyVo;
+import codedriver.module.process.dto.ProcessVo;
 
 @Service
 public class ProcessServiceImpl implements ProcessService {
@@ -26,8 +24,6 @@ public class ProcessServiceImpl implements ProcessService {
 	@Autowired
 	private ProcessMapper processMapper;
 
-	@Autowired
-	private WorkerDispatcherMapper workerDispatcherMapper;
 
 	@Override
 	public ProcessVo getProcessByUuid(String processUuid) {
@@ -69,10 +65,6 @@ public class ProcessServiceImpl implements ProcessService {
 		return null;
 	}
 
-	@Override
-	public List<WorkerDispatcherVo> getAllActiveWorkerDispatcher() {
-		return workerDispatcherMapper.getAllActiveWorkerDispatcher();
-	}
 
 	@Override
 	public int saveProcess(ProcessVo processVo) {

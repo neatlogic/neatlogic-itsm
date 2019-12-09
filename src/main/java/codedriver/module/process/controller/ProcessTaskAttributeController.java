@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.alibaba.fastjson.JSONArray;
 
-import codedriver.framework.process.dto.ProcessTaskStepAttributeVo;
+import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.service.ProcessTaskAttributeService;
 
 //@Controller

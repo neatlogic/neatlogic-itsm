@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.process.dao.mapper.ProcessMapper">
+	<select id="getProcessFormByProcessUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessFormVo">
+		SELECT
+		`process_uuid` AS processUuid,
+		`form_uuid` AS formUuid
+		FROM
+		`process_form`
+		WHERE
+		process_uuid = #{value}
+	</select>
+
+	<select id="checkProcessIsExists" parameterType="java.lang.String" resultType="int">
+		SELECT
+		count(1)
+		FROM
+		`process`
+		WHERE
+		uuid = #{value}
+	</select>
+
+	<select id="getProcessStepRelByProcessUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessStepRelVo">
+		SELECT
+		`process_uuid` AS processUuid,
+		`uuid`,
+		`from_step_uuid` AS fromStepUuid,
+		`to_step_uuid` AS toStepUuid,
+		`condition`
+		FROM
+		`process_step_rel`
+		WHERE
+		process_uuid = #{processUuid}
+	</select>
+
+	<resultMap id="processStepDetailMap" type="codedriver.module.process.dto.ProcessStepVo">
+		<id column="processUuid" property="processUuid" />
+		<id column="uuid" property="uuid" />
+		<result column="type" property="type" />
+		<result column="name" property="name" />
+		<result column="handler" property="handler" />
+		<result column="editPage" property="editPage" />
+		<result column="viewPage" property="viewPage" />
+		<result column="stepConfig" property="config" />
+		<collection property="attributeList" ofType="codedriver.module.process.dto.ProcessStepAttributeVo">
+			<id column="attributeUuid" property="attributeUuid" />
+			<result column="attributeHandler" property="handler" />
+			<result column="dataCubeTextField" property="dataCubeTextField" />
+			<result column="dataCubeUuid" property="dataCubeUuid" />
+			<result column="dataCubeValueField" property="dataCubeValueField" />
+			<result column="attributeDescription" property="description" />
+			<result column="attributeLabel" property="label" />
+			<result column="attributeType" property="type" />
+			<result column="attributeUnit" property="unit" />
+			<result column="attributeGroup" property="group" />
+			<result column="attributeHelp" property="help" />
+			<result column="attributeName" property="name" />
+			<result column="attributeSort" property="sort" />
+			<result column="isDisplay" property="isDisplay" />
+			<result column="isEditable" property="isEditable" />
+			<result column="isRequired" property="isRequired" />
+			<result column="attributeConfig" property="config" />
+		</collection>
+		<collection property="formAttributeList" ofType="codedriver.module.process.dto.ProcessStepFormAttributeVo">
+			<id column="formAttributeUuid" property="attributeUuid" />
+			<result column="formUuid" property="formUuid" />
+			<result column="formAttributeHandler" property="handler" />
+			<result column="formDataCubeTextField" property="dataCubeTextField" />
+			<result column="formDataCubeUuid" property="dataCubeUuid" />
+			<result column="formDataCubeValueField" property="dataCubeValueField" />
+			<result column="formAttributeDescription" property="description" />
+			<result column="formAttributeLabel" property="label" />
+			<result column="formAttributeType" property="type" />
+			<result column="formAttributeUnit" property="unit" />
+			<result column="formAttributeIsEditable" property="isEditable" />
+			<result column="formAttributeData" property="data" />
+			<result column="formAttributeConfig" property="config" />
+		</collection>
+		<collection property="workerPolicyList" ofType="codedriver.module.process.dto.ProcessStepWorkerPolicyVo">
+			<id column="workerPolicy" property="policy" />
+			<result column="workerPolicyProcessUuid" property="processUuid" />
+			<result column="workerPolicyProcessStepUuid" property="processStepUuid" />
+			<result column="workerPolicySort" property="sort" />
+			<result column="workerPolicyConfig" property="config" />
+		</collection>
+		<collection property="timeoutPolicyList" ofType="codedriver.module.process.dto.ProcessStepTimeoutPolicyVo">
+			<result column="timeoutPolicy" property="policy" />
+			<result column="timeoutPolicyProcessUuid" property="processUuid" />
+			<result column="timeoutPolicyProcessStepUuid" property="processStepUuid" />
+			<result column="timeoutPolicySort" property="sort" />
+			<result column="timeoutPolicyConfig" property="config" />
+			<result column="timeoutPolicyTime" property="time" />
+		</collection>
+	</resultMap>
+
+	<select id="getProcessStepDetailByProcessUuid" parameterType="java.lang.String" resultMap="processStepDetailMap">
+		SELECT
+		a.`process_uuid` AS processUuid,
+		a.`uuid`,
+		a.`name`,
+		a.`type`,
+		a.`handler`,
+		a.`edit_page` AS editPage,
+		a.`view_page` AS viewPage,
+		a.`config` AS stepConfig,
+		c.`attribute_uuid` AS attributeUuid,
+		c.`config` AS attributeConfig,
+		c.`is_editable` AS isEditable,
+		c.`config` AS attributeConfig,
+		f.`handler` AS attributeHandler,
+		f.`datacube_textfield` AS dataCubeTextField,
+		f.`datacube_uuid` AS dataCubeUuid,
+		f.`datacube_valuefield` AS dataCubeValueField,
+		f.`description` AS attributeDescription,
+		f.`type` AS attributeType,
+		f.`unit` AS attributeUnit,
+		d.`form_uuid` AS formUuid,
+		d.`attribute_uuid` AS formAttributeUuid,
+		d.`is_editable` AS formAttributeIsEditable,
+		d.`config` AS formAttributeConfig,
+		d.`data` AS formAttributeData,
+		e.`label` AS formAttributeLabel,
+		e.`handler` AS formAttributeHandler,
+		e.`datacube_textfield` AS formDataCubeTextField,
+		e.`datacube_uuid` AS formDataCubeUuid,
+		e.`datacube_valuefield` AS
+		formDataCubeValueField,
+		e.`description` AS formAttributeDescription,
+		e.`type` AS formAttributeType,
+		e.`unit` AS formAttributeUnit,
+		g.`label` AS attributeLabel,
+		g.`group` AS attributeGroup,
+		g.`help` AS attributeHelp,
+		g.`name` AS attributeName,
+		g.`sort` AS attributeSort,
+		g.`width` AS attributeWidth,
+		h.`policy` AS workerPolicy,
+		h.`sort` AS workerPolicySort,
+		h.`config` AS workerPolicyConfig,
+		h.`process_uuid` AS workerPolicyProcessUuid,
+		h.`process_step_uuid` AS workerPolicyProcessStepUuid,
+		i.`policy` AS timeoutPolicy,
+		i.`time` AS timeoutPolicyTime,
+		i.`sort` AS timeoutPolicySort,
+		i.`config` AS timeoutPolicyConfig,
+		i.`process_uuid` AS timeoutPolicyProcessUuid,
+		i.`process_step_uuid` AS timeoutPolicyProcessStepUuid
+		FROM
+		`process_step` a
+		LEFT JOIN `process_step_attribute` c ON a.`uuid` = c.`process_step_uuid`
+		LEFT JOIN `process_step_formattribute` d ON a.`uuid` = d.`process_step_uuid`
+		LEFT JOIN `attribute` e ON d.`attribute_uuid` = e.`uuid` AND e.is_active = 1
+		LEFT JOIN `attribute` f ON
+		c.`attribute_uuid` = f.`uuid`
+		AND f.is_active = 1
+		LEFT JOIN `process_attribute` g ON a.`process_uuid` = g.`process_uuid` AND f.`uuid` =
+		g.`attribute_uuid`
+		LEFT JOIN `process_step_worker_policy` h ON a.`uuid` = h.`process_step_uuid`
+		LEFT JOIN `process_step_timeout_policy` i ON a.`uuid` = i.`process_step_uuid`
+		WHERE a.`process_uuid` = #{value}
+	</select>
+
+	<select id="getProcessStepAttributeByStepUuid" parameterType="codedriver.module.process.dto.ProcessStepAttributeVo" resultType="codedriver.module.process.dto.ProcessStepAttributeVo">
+		SELECT
+		a.`process_uuid` AS processUuid,
+		a.`process_step_uuid` AS processStepUuid,
+		a.`attribute_uuid` AS attributeUuid,
+		a.`is_display` AS isDisplay,
+		a.`is_editable` AS isEditable,
+		a.`is_required` AS isRequired,
+		a.`config`,
+		a.`data`,
+		b.`group`,
+		b.`help`,
+		b.`name`,
+		b.`sort`,
+		b.`width`,
+		c.`handler`,
+		c.`type`,
+		c.`unit`,
+		b.`label`,
+		c.`datacube_textfield` AS dataCubeTextField,
+		c.`datacube_uuid` AS dataCubeUuid,
+		c.`datacube_valuefield` AS dataCubeValueField,
+		c.`is_active` AS isActive,
+		c.`edit_template` AS editTemplate,
+		c.`view_template` AS viewTemplate,
+		c.`config_template` AS configTemplate
+		FROM
+		`process_step_attribute` a JOIN `process_attribute` b
+		ON a.`attribute_uuid` = b.`attribute_uuid` JOIN `attribute` c ON a.`attribute_uuid` = c.`uuid`
+		WHERE
+		c.`is_active` = 1
+		AND
+		a.`process_step_uuid` = #{processStepUuid}
+		<if test="attributeUuid != null and attributeUuid != ''">
+			AND
+			a.attribute_uuid = #{attributeUuid}
+		</if>
+		ORDER BY b.sort
+	</select>
+
+	<select id="getProcessStepFormAttributeByStepUuid" parameterType="codedriver.module.process.dto.ProcessStepFormAttributeVo" resultType="codedriver.module.process.dto.ProcessStepFormAttributeVo">
+		SELECT
+		a.`process_uuid` AS processUuid,
+		a.`process_step_uuid` AS processStepUuid,
+		a.`attribute_uuid` AS attributeUuid,
+		a.`form_uuid` AS formUuid,
+		a.`is_editable` AS isEditable,
+		a.`config`,
+		a.`data`,
+		c.`handler`,
+		c.`type`,
+		c.`unit`,
+		c.`description`,
+		c.`datacube_textfield` AS dataCubeTextField,
+		c.`datacube_uuid` AS dataCubeUuid,
+		c.`datacube_valuefield` AS dataCubeValueField,
+		c.`is_active` AS isActive,
+		c.`edit_template` AS editTemplate,
+		c.`view_template` AS viewTemplate,
+		c.`config_template` AS configTemplate
+		FROM
+		`process_step_formattribute` a JOIN `attribute` c ON a.`attribute_uuid` = c.`uuid`
+		WHERE
+		c.`is_active` = 1
+		AND
+		a.`process_step_uuid` = #{processStepUuid}
+		<if test="attributeUuid != null and attributeUuid != ''">
+			AND
+			a.attribute_uuid = #{attributeUuid}
+		</if>
+	</select>
+
+	<resultMap id="processDetailMap" type="codedriver.module.process.dto.ProcessVo">
+		<id column="uuid" property="uuid" />
+		<result column="name" property="name" />
+		<result column="type" property="type" />
+		<result column="isActive" property="isActive" />
+		<result column="formUuid" property="formUuid" />
+		<result column="config" property="config" />
+		<collection property="attributeList" ofType="codedriver.module.process.dto.ProcessAttributeVo">
+			<id column="attributeUuid" property="attributeUuid" />
+			<result column="attributeHelp" property="help" />
+			<result column="attributeName" property="name" />
+			<result column="attributeLabel" property="label" />
+			<result column="attributeSort" property="sort" />
+			<result column="attributeWidth" property="width" />
+			<result column="attributeConfig" property="config" />
+			<result column="dataCubeTextField" property="dataCubeTextField" />
+			<result column="dataCubeUuid" property="dataCubeUuid" />
+			<result column="dataCubeValueField" property="dataCubeValueField" />
+			<result column="attributeDescription" property="description" />
+			<result column="attributeHandler" property="handler" />
+			<result column="attributeType" property="type" />
+			<result column="attributeUnit" property="unit" />
+		</collection>
+	</resultMap>
+
+	<select id="getProcessByUuid" parameterType="java.lang.String" resultMap="processDetailMap">
+		SELECT
+		a.`uuid`,
+		a.`name`,
+		a.`type`,
+		a.`is_active` AS isActive,
+		a.`config`,
+		b.`name` AS attributeName,
+		b.`attribute_uuid` AS attributeUuid,
+		b.`group` AS attributeGroup,
+		b.`help` AS attributeHelp,
+		b.`label` AS attributeLabel,
+		b.`sort` AS attributeSort,
+		b.`width` AS attributeWidth,
+		c.`config` AS attributeConfig,
+		c.`datacube_textfield` AS dataCubeTextField,
+		c.`datacube_uuid` AS dataCubeUuid,
+		c.`datacube_valuefield` AS dataCubeValueField,
+		c.`description` AS attributeDescription,
+		c.`handler` AS attributeHandler,
+		c.`type` AS attributeType,
+		c.`unit` AS attributeUnit,
+		d.`form_uuid` AS formUuid
+		FROM
+		`process` a
+		LEFT JOIN `process_attribute` b ON a.`uuid` = b.`process_uuid`
+		LEFT JOIN `attribute` c ON b.`attribute_uuid` = c.`uuid` AND c.`is_active` = 1
+		LEFT JOIN `process_form` d ON a.`uuid` = d.`process_uuid`
+		WHERE
+		a.uuid = #{value}
+	</select>
+
+	<select id="getProcessBaseInfoByUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessVo">
+		SELECT
+		`uuid`,
+		`name`,
+		`type`,
+		`is_active` AS isActive,
+		`config`
+		FROM
+		`process`
+		WHERE
+		uuid = #{value}
+	</select>
+
+	<select id="searchProcessStep" parameterType="codedriver.module.process.dto.ProcessStepVo" resultType="codedriver.module.process.dto.ProcessStepVo">
+		SELECT
+		`process_uuid` AS processUuid,
+		`uuid`,
+		`name`,
+		`type`,
+		`handler`,
+		`edit_page` AS editPage,
+		`view_page` AS viewPage,
+		`config`
+		FROM
+		`process_step`
+		WHERE
+		1=1
+		<if test="processUuid != null and processUuid != ''">
+			AND process_uuid = #{processUuid}
+		</if>
+		<if test="type != null and type != ''">
+			AND `type` = #{type}
+		</if>
+	</select>
+
+	<insert id="insertProcessStepTimeoutPolicy" parameterType="codedriver.module.process.dto.ProcessStepTimeoutPolicyVo">
+		INSERT INTO `process_step_timeout_policy` (
+		`process_uuid`,
+		`process_step_uuid`,
+		`policy`,
+		`sort`,
+		`time`,
+		`config`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{processStepUuid},
+		#{policy},
+		#{sort},
+		#{time},
+		#{config}
+		)
+	</insert>
+
+	<insert id="replaceProcess" parameterType="codedriver.module.process.dto.ProcessVo">
+		REPLACE INTO `process` (
+		`uuid`,
+		`name`,
+		`type`,
+		`is_active`,
+		`config`
+		)
+		VALUES
+		(
+		#{uuid},
+		#{name},
+		#{type},
+		#{isActive},
+		#{config}
+		)
+	</insert>
+
+	<insert id="insertProcessAttribute" parameterType="codedriver.module.process.dto.ProcessAttributeVo">
+		INSERT INTO `process_attribute` (
+		`attribute_uuid`,
+		`process_uuid`,
+		`name`,
+		`label`,
+		`sort`,
+		`width`,
+		`help`,
+		`group`
+		)
+		VALUES
+		(
+		#{attributeUuid},
+		#{processUuid},
+		#{name},
+		#{label},
+		#{sort},
+		#{width},
+		#{help},
+		#{group}
+		)
+	</insert>
+
+	<insert id="insertProcessStep" parameterType="codedriver.module.process.dto.ProcessStepVo">
+		INSERT INTO `process_step` (
+		`process_uuid`,
+		`uuid`,
+		`name`,
+		`type`,
+		`handler`,
+		`edit_page`,
+		`view_page`,
+		`config`,
+		`description`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{uuid},
+		#{name},
+		#{type},
+		#{handler},
+		#{editPage},
+		#{viewPage},
+		#{config},
+		#{description}
+		)
+	</insert>
+
+	<insert id="insertProcessStepWorkerPolicy" parameterType="codedriver.module.process.dto.ProcessStepWorkerPolicyVo">
+		INSERT INTO `process_step_worker_policy` (
+		`process_uuid`,
+		`process_step_uuid`,
+		`policy`,
+		`sort`,
+		`config`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{processStepUuid},
+		#{policy},
+		#{sort},
+		#{config}
+		)
+	</insert>
+
+	<insert id="insertProcessStepAttribute" parameterType="codedriver.module.process.dto.ProcessStepAttributeVo">
+		INSERT INTO `process_step_attribute` (
+		`process_uuid`,
+		`process_step_uuid`,
+		`attribute_uuid`,
+		`is_editable`,
+		`is_required`,
+		`config`,
+		`data`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{processStepUuid},
+		#{attributeUuid},
+		#{isEditable},
+		#{isRequired},
+		#{config},
+		#{data}
+		)
+	</insert>
+
+	<insert id="insertProcessStepFormAttribute" parameterType="codedriver.module.process.dto.ProcessStepFormAttributeVo">
+		INSERT INTO `process_step_formattribute` (
+		`process_uuid`,
+		`process_step_uuid`,
+		`form_uuid`,
+		`attribute_uuid`,
+		`is_editable`,
+		`config`,
+		`data`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{processStepUuid},
+		#{formUuid},
+		#{attributeUuid},
+		#{isEditable},
+		#{config},
+		#{data}
+		)
+	</insert>
+
+	<insert id="insertProcessStepRel" parameterType="codedriver.module.process.dto.ProcessStepRelVo">
+		INSERT INTO `process_step_rel` (
+		`process_uuid`,
+		`uuid`,
+		`from_step_uuid`,
+		`to_step_uuid`,
+		`condition`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{uuid},
+		#{fromStepUuid},
+		#{toStepUuid},
+		#{condition}
+		)
+	</insert>
+
+	<insert id="insertProcessStepTeam" parameterType="codedriver.module.process.dto.ProcessStepTeamVo">
+		INSERT INTO `process_step_team` (
+		`process_step_uuid`,
+		`team_id`,
+		`team_name`
+		)
+		VALUES
+		(
+		#{processStepUuid},
+		#{teamId},
+		#{teamName}
+		)
+	</insert>
+
+	<insert id="insertProcessStepUser" parameterType="codedriver.module.process.dto.ProcessStepUserVo">
+		INSERT INTO `process_step_user` (
+		`process_uuid`,
+		`process_step_uuid`,
+		`user_id`,
+		`user_name`,
+		`sort`
+		)
+		VALUES
+		(
+		#{processUuid},
+		#{processStepUuid},
+		#{userId},
+		#{userName},
+		#{sort}
+		)
+	</insert>
+
+	<insert id="replaceProcessForm">
+		REPLACE INTO `process_form` (`process_uuid`, `form_uuid`)
+		VALUES
+		(#{processUuid}, #{formUuid})
+	</insert>
+
+	<delete id="deleteProcessAttributeByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_attribute`
+		WHERE
+		`process_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteProcessStepByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step`
+		WHERE `process_uuid` = #{uuid}
+	</delete>
+
+	<delete id="deleteProcessStepRelByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_rel`
+		WHERE `process_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteProcessStepUserByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_user`
+		WHERE `process_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteProcessStepTeamByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_team`
+		WHERE `process_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteProcessStepWorkerPolicyByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_worker_policy`
+		WHERE process_uuid = #{value}
+	</delete>
+
+	<delete id="deleteProcessStepAttributeByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_attribute`
+		WHERE `process_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteProcessStepTimeoutPolicyByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_timeout_policy`
+		WHERE `process_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteProcessStepFormAttributeByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_step_formattribute`
+		WHERE `process_uuid` = #{value}
+	</delete>
+</mapper>

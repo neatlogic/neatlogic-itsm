@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.process.dto.ProcessTaskStepAttributeVo;
-import codedriver.framework.process.mapper.ProcessTaskAttributeMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskAttributeMapper;
+import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 
 @Service
 public class ProcessTaskAttributeServiceImpl implements ProcessTaskAttributeService {

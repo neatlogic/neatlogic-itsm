@@ -2,10 +2,10 @@ package codedriver.module.process.service;
 
 import java.util.List;
 
-import codedriver.framework.process.dto.ProcessTaskFormVo;
-import codedriver.framework.process.dto.ProcessTaskStepAttributeVo;
-import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskFormVo;
+import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
+import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 public interface ProcessTaskService {
 	public ProcessTaskStepVo getProcessTaskStepDetailById(Long processTaskStepId);

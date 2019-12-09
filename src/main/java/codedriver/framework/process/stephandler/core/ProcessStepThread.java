@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 public abstract class ProcessStepThread extends CodeDriverThread {
 	Logger logger = LoggerFactory.getLogger(ProcessStepThread.class);

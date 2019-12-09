@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -17,16 +16,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.ReturnJson;
-import codedriver.framework.process.dto.ProcessFormVo;
-import codedriver.framework.process.dto.ProcessStepAttributeVo;
-import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
-import codedriver.framework.process.dto.ProcessStepHandlerVo;
-import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessVo;
-import codedriver.framework.process.dto.WorkerDispatcherVo;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherFactory;
+import codedriver.module.process.dto.ProcessFormVo;
+import codedriver.module.process.dto.ProcessStepAttributeVo;
+import codedriver.module.process.dto.ProcessStepFormAttributeVo;
+import codedriver.module.process.dto.ProcessStepHandlerVo;
+import codedriver.module.process.dto.ProcessStepVo;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessVo;
+import codedriver.module.process.dto.WorkerDispatcherVo;
 import codedriver.module.process.service.ProcessService;
-import codedriver.module.process.service.ProcessStepHandlerService;
 import codedriver.module.process.service.ProcessTaskService;
 
 //@Controller
@@ -40,8 +40,6 @@ public class ProcessController {
 	@Autowired
 	private ProcessTaskService processTaskService;
 
-	@Autowired
-	private ProcessStepHandlerService processHandlerService;
 
 	@RequestMapping(value = "/step/{stepUuid}/formattribute/{attributeUuid}")
 	@ResponseBody
@@ -110,7 +108,7 @@ public class ProcessController {
 			request.setAttribute("processVo", processVo);
 		}
 		// List<FlowTypeVo> typeList = flowService.getFlowTypeList();
-		List<ProcessStepHandlerVo> componentList = processHandlerService.getActiveProcessStepHandler();
+		List<ProcessStepHandlerVo> componentList = ProcessStepHandlerFactory.getActiveProcessStepHandler();
 		request.setAttribute("componentList", componentList);
 		// request.setAttribute("typeList", typeList);
 		// request.setAttribute("actionTypeList", actionTypeList);
@@ -120,7 +118,7 @@ public class ProcessController {
 	@RequestMapping(value = "/workerdispatcher/list")
 	@ResponseBody
 	public List<WorkerDispatcherVo> getAllActiveWorkerDispatcher() {
-		return processService.getAllActiveWorkerDispatcher();
+		return WorkerDispatcherFactory.getAllActiveWorkerDispatcher();
 	}
 
 	@RequestMapping(value = "/save")

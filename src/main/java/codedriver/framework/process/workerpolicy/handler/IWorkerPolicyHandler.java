@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerPolicyVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 
 public interface IWorkerPolicyHandler {
 	public String getType();

@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 
 import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.dto.FormVo;
-import codedriver.framework.process.mapper.FormMapper;
+import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.module.process.dto.FormAttributeVo;
+import codedriver.module.process.dto.FormVersionVo;
+import codedriver.module.process.dto.FormVo;
 
 @Service("ProcessFormService")
 public class FormServiceImpl implements FormService {

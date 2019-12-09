@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,12 +17,11 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.attribute.core.AttributeHandlerFactory;
 import codedriver.framework.attribute.core.IAttributeHandler;
 import codedriver.framework.attribute.dto.AttributeVo;
-import codedriver.framework.common.config.Config;
-import codedriver.framework.process.dto.ProcessStepHandlerVo;
-import codedriver.framework.process.dto.ProcessVo;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.module.process.dto.ProcessStepHandlerVo;
+import codedriver.module.process.dto.ProcessVo;
 import codedriver.module.process.service.AttributeService;
 import codedriver.module.process.service.ProcessService;
-import codedriver.module.process.service.ProcessStepHandlerService;
 
 //@Controller
 @RequestMapping("/attribute")
@@ -32,8 +30,6 @@ public class AttributeController {
 	@Autowired
 	private ProcessService processService;
 
-	@Autowired
-	private ProcessStepHandlerService processHandlerService;
 
 	@Autowired
 	private AttributeService attributeService;
@@ -81,7 +77,7 @@ public class AttributeController {
 			request.setAttribute("processVo", processVo);
 		}
 		// List<FlowTypeVo> typeList = flowService.getFlowTypeList();
-		List<ProcessStepHandlerVo> componentList = processHandlerService.getActiveProcessStepHandler();
+		List<ProcessStepHandlerVo> componentList = ProcessStepHandlerFactory.getActiveProcessStepHandler();
 		request.setAttribute("componentList", componentList);
 		// request.setAttribute("typeList", typeList);
 		// request.setAttribute("actionTypeList", actionTypeList);

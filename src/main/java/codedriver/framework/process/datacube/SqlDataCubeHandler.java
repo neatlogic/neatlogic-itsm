@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
 
-import codedriver.framework.process.dto.ProcessDataCubeVo;
-import codedriver.framework.process.dto.ProcessDataCubeVo.DataCubeType;
+import codedriver.module.process.dto.ProcessDataCubeVo;
+import codedriver.module.process.dto.ProcessDataCubeVo.DataCubeType;
 
 @Component
 public class SqlDataCubeHandler implements IDataCubeHandler {

@@ -3,8 +3,8 @@ package codedriver.framework.process.stephandler.core;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 @Service
 public class ProcessTaskStepTimeoutDetector extends Thread {

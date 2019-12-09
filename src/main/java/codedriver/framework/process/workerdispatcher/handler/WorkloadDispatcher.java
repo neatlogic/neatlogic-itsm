@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.workerdispatcher.WorkerDispatcherBase;
+import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherBase;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 @Component
 public class WorkloadDispatcher extends WorkerDispatcherBase {

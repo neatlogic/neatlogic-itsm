@@ -12,10 +12,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.constvalue.WorkerPolicy;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerPolicyVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 
 @Service
 public class ManualWorkerPolicyHandler implements IWorkerPolicyHandler {

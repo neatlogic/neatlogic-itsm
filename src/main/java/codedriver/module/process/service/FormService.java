@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 import codedriver.framework.attribute.dto.AttributeVo;
-import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.dto.FormVo;
+import codedriver.module.process.dto.FormVersionVo;
+import codedriver.module.process.dto.FormVo;
 
 public interface FormService {
 	public FormVo getFormDetailByUuid(String formUuid);

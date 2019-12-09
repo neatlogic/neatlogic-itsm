@@ -2,7 +2,7 @@ package codedriver.framework.process.datacube;
 
 import com.alibaba.fastjson.JSONArray;
 
-import codedriver.framework.process.dto.ProcessDataCubeVo;
+import codedriver.module.process.dto.ProcessDataCubeVo;
 
 public interface IDataCubeHandler {
 	public String getType();

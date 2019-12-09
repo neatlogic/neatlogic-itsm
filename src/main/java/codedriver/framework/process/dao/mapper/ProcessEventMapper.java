@@ -1,0 +1,58 @@
+package codedriver.framework.process.dao.mapper;
+
+import java.util.List;
+
+import codedriver.module.process.dto.ProcessAttributeVo;
+import codedriver.module.process.dto.ProcessStepAttributeVo;
+import codedriver.module.process.dto.ProcessStepRelVo;
+import codedriver.module.process.dto.ProcessStepTeamVo;
+import codedriver.module.process.dto.ProcessStepUserVo;
+import codedriver.module.process.dto.ProcessStepVo;
+import codedriver.module.process.dto.ProcessStepWorkerPolicyVo;
+import codedriver.module.process.dto.ProcessVo;
+
+public interface ProcessEventMapper {
+	public int checkProcessIsExists(String processUuid);
+
+	public List<ProcessStepRelVo> getProcessStepRelByProcessUuid(String processUuid);
+
+	public List<ProcessStepVo> getProcessStepDetailByProcessUuid(String processUuid);
+
+	public List<ProcessStepAttributeVo> getProcessStepAttributeByStepUuid(String processStepUuid);
+
+	public ProcessVo getProcessByUuid(String processUuid);
+
+	public ProcessVo getProcessBaseInfoByUuid(String processUuid);
+
+	public List<ProcessStepVo> searchProcessStep(ProcessStepVo processStepVo);
+
+	public int replaceProcess(ProcessVo processVo);
+
+	public int insertProcessStep(ProcessStepVo processStepVo);
+
+	public int insertProcessAttribute(ProcessAttributeVo processAttributeVo);
+
+	public int insertProcessStepRel(ProcessStepRelVo processStepRelVo);
+
+	public int insertProcessStepUser(ProcessStepUserVo processStepUserVo);
+
+	public int insertProcessStepTeam(ProcessStepTeamVo processStepTeamVo);
+
+	public int insertProcessStepWorkerPolicy(ProcessStepWorkerPolicyVo processStepWorkerPolicyVo);
+
+	public int insertProcessStepAttribute(ProcessStepAttributeVo processStepAttributeVo);
+
+	public int deleteProcessStepByProcessUuid(String processUuid);
+
+	public int deleteProcessStepRelByProcessUuid(String processUuid);
+
+	public int deleteProcessStepUserByProcessUuid(String processUuid);
+
+	public int deleteProcessAttributeByProcessUuid(String processUuid);
+
+	public int deleteProcessStepTeamByProcessUuid(String processUuid);
+
+	public int deleteProcessStepWorkerPolicyByProcessUuid(String processUuid);
+
+	public int deleteProcessStepAttributeByProcessUuid(String processUuid);
+}

@@ -11,18 +11,18 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.attribute.core.AttributeHandlerFactory;
 import codedriver.framework.attribute.core.IAttributeHandler;
-import codedriver.framework.process.dto.ProcessTaskAttributeDataVo;
-import codedriver.framework.process.dto.ProcessTaskAttributeValueVo;
-import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepAttributeVo;
-import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
-import codedriver.framework.process.dto.ProcessTaskStepRelVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.ProcessTaskAbortException;
 import codedriver.framework.process.exception.ProcessTaskException;
 import codedriver.framework.process.exception.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
+import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
+import codedriver.module.process.dto.ProcessTaskAttributeValueVo;
+import codedriver.module.process.dto.ProcessTaskContentVo;
+import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
+import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
+import codedriver.module.process.dto.ProcessTaskStepRelVo;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 @Service
 public class OmnipotentProcessComponent extends ProcessStepHandlerBase {

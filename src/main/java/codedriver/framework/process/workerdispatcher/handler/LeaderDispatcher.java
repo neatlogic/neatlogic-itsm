@@ -11,8 +11,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.workerdispatcher.WorkerDispatcherBase;
+import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherBase;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 @Service
 public class LeaderDispatcher extends WorkerDispatcherBase {
