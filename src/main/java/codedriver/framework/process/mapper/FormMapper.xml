@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.techsure.balantflow.process.mapper.FormMapper">
+
+	<select id="getActionFormVersionByFormUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.FormVersionVo">
+		SELECT
+		a.`uuid`,
+		a.`version`,
+		a.`is_active` AS isActive,
+		a.`form_uuid` AS formUuid,
+		a.`content`,
+		b.`name` AS formName
+		FROM
+		`form_version` a
+		JOIN `form` b
+		ON a.`form_uuid` = b.`uuid`
+		AND b.`is_active` = 1
+		WHERE a.`form_uuid` = #{value}
+		AND a.`is_active` = 1
+	</select>
+
+	<select id="getAttributeByFormUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.AttributeVo">
+		SELECT
+		c.`uuid`,
+		c.`label`,
+		c.`type`,
+		c.`handler`,
+		c.`unit`,
+		c.`datacube_textfield` AS dataCubeTextField,
+		c.`datacube_valuefield` AS dataCubeValueField,
+		c.`datacube_uuid` AS dataCubeUuid,
+		c.`config`,
+		c.`description`,
+		c.`is_active` AS isActive
+		FROM
+		`form_attribute` a
+		JOIN `form_version` b
+		ON a.`formversion_uuid` = b.`uuid`
+		AND b.`is_active` = 1
+		AND a.`form_uuid` = #{value}
+		JOIN `attribute` c
+		ON a.`attribute_uuid` = c.`uuid` AND c.`is_active` = 1
+	</select>
+
+	<select id="searchForm" parameterType="com.techsure.balantflow.process.dto.FormVo" resultType="com.techsure.balantflow.process.dto.FormVo">
+		SELECT
+		`uuid`,
+		`name`,
+		`is_active`,
+		`description`
+		FROM
+		`form`
+		WHERE
+		1=1
+		<if test="isActive != null">
+			AND is_active = #{isActive}
+		</if>
+		<if test="name != null and name != ''">
+			AND (name LIKE CONCAT('%', #{name},'%') OR uuid = #{name})
+		</if>
+		<if test="needPage == true">
+			LIMIT #{startNum}, #{pageSize}
+		</if>
+	</select>
+
+	<select id="searchFormCount" parameterType="com.techsure.balantflow.process.dto.FormVo" resultType="int">
+		SELECT
+		COUNT(1)
+		FROM
+		`form`
+		WHERE
+		1=1
+		<if test="isActive != null">
+			AND is_active = #{isActive}
+		</if>
+		<if test="name != null and name != ''">
+			AND (name LIKE CONCAT('%', #{name},'%') OR uuid = #{name})
+		</if>
+	</select>
+
+	<select id="getMaxVersionByFormUuid" parameterType="java.lang.String" resultType="java.lang.Integer">
+		SELECT max(version) FROM `form_version` WHERE form_uuid = #{value} FOR UPDATE
+	</select>
+
+	<select id="getFormVersionByUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.FormVersionVo">
+		SELECT
+		`uuid`,
+		`version`,
+		`is_active` AS isActive,
+		`form_uuid` AS formUuid,
+		`content`,
+		DATE_FORMAT(`fcd`,'%Y-%m-%d %H:%i:%s') AS fcd,
+		`fcu`,
+		DATE_FORMAT(`lcd`,'%Y-%m-%d %H:%i:%s') AS lcd,
+		`lcu`
+		FROM
+		`form_version`
+		WHERE
+		uuid = #{value}
+	</select>
+
+	<select id="getFormByUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.FormVo">
+		SELECT
+		`uuid`,
+		`name`,
+		`is_active` AS isActive,
+		`description`
+		FROM
+		`form`
+		WHERE `uuid` = #{value}
+	</select>
+
+	<select id="getFormVersionByFormUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.FormVersionVo">
+		SELECT
+		`uuid`,
+		`version`,
+		`is_active` AS isActive,
+		`form_uuid` AS formUuid,
+		`content`,
+		DATE_FORMAT(`fcd`,'%Y-%m-%d %H:%i:%s') AS fcd,
+		`fcu`,
+		DATE_FORMAT(`lcd`,'%Y-%m-%d %H:%i:%s') AS lcd,
+		`lcu`
+		FROM
+		`form_version`
+		WHERE
+		form_uuid = #{value}
+	</select>
+
+	<update id="updateFormVersion" parameterType="com.techsure.balantflow.process.dto.FormVersionVo">
+		UPDATE
+		`form_version`
+		SET
+		`is_active` = #{isActive},
+		`content` = #{content},
+		`lcd` = NOW(),
+		`lcu` = #{editor}
+		WHERE `uuid` = #{uuid}
+	</update>
+
+	<update id="resetFormVersionIsActiveByFormUuid" parameterType="java.lang.String">
+		UPDATE `form_version`
+		SET
+		`is_active` = 0
+		WHERE
+		form_uuid = #{value}
+	</update>
+
+	<insert id="replaceForm" parameterType="com.techsure.balantflow.process.dto.FormVo">
+		REPLACE INTO `form` (
+		`uuid`,
+		`name`,
+		`is_active`,
+		`description`
+		)
+		VALUES
+		(
+		#{uuid},
+		#{name},
+		#{isActive},
+		#{description}
+		)
+	</insert>
+
+	<insert id="insertFormVersion" parameterType="com.techsure.balantflow.process.dto.FormVersionVo">
+		INSERT INTO `form_version` (
+		`uuid`,
+		`version`,
+		`is_active`,
+		`form_uuid`,
+		`content`,
+		`fcd`,
+		`fcu`
+		)
+		VALUES
+		(
+		#{uuid},
+		#{version},
+		#{isActive},
+		#{formUuid},
+		#{content},
+		NOW(),
+		#{editor}
+		)
+	</insert>
+
+	<insert id="insertFormAttribute" parameterType="com.techsure.balantflow.process.dto.FormAttributeVo">
+		INSERT INTO `form_attribute` (
+		`form_uuid`,
+		`attribute_uuid`,
+		`formversion_uuid`,
+		`config`
+		)
+		VALUES
+		(
+		#{formUuid},
+		#{attributeUuid},
+		#{formVersionUuid},
+		#{config}
+		)
+	</insert>
+
+	<delete id="deleteFormAttributeByFormUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`form_attribute`
+		WHERE `form_uuid` = #{value}
+	</delete>
+</mapper>
