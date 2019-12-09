@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.techsure.balantflow.process.mapper.ProcessTaskAttributeMapper">
-	<resultMap id="processTaskStepAttributeResultMap" type="com.techsure.balantflow.process.dto.ProcessTaskStepAttributeVo">
+<mapper namespace="codedriver.framework.process.mapper.ProcessTaskAttributeMapper">
+	<resultMap id="processTaskStepAttributeResultMap" type="codedriver.module.process.dto.ProcessTaskStepAttributeVo">
 		<id property="processTaskStepId" column="processTaskStepId" />
 		<id property="processTaskAttributeId" column="processTaskAttributeId" />
 		<result property="isDisplay" column="isDisplay" />
 		<result property="isEditable" column="isEditable" />
 		<result property="isRequired" column="isRequired" />
-		<association property="attributeVo" javaType="com.techsure.balantflow.process.dto.ProcessTaskAttributeVo">
+		<association property="attributeVo" javaType="codedriver.module.process.dto.ProcessTaskAttributeVo">
 			<result property="id" column="processTaskAttributeId" />
 			<result property="name" column="name" />
 			<result property="label" column="label" />
@@ -17,7 +17,7 @@
 			<result property="dataCubeTextField" column="dataCubeTextField" />
 			<result property="processTaskId" column="processTaskId" />
 			<result property="sort" column="processTaskSort"/>
-			<association property="dataCubeVo" javaType="com.techsure.balantflow.process.dto.ProcessDataCubeVo">
+			<association property="dataCubeVo" javaType="codedriver.module.process.dto.ProcessDataCubeVo">
 				<id property="id" column="dataCubeId" />
 				<result property="name" column="dataCubeName" />
 				<result property="sql" column="dataCubeSql" />

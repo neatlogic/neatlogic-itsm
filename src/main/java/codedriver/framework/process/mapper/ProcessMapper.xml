@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.techsure.balantflow.process.mapper.ProcessMapper">
-	<select id="getProcessFormByProcessUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.ProcessFormVo">
+<mapper namespace="codedriver.framework.process.mapper.ProcessMapper">
+	<select id="getProcessFormByProcessUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessFormVo">
 		SELECT
 		`process_uuid` AS processUuid,
 		`form_uuid` AS formUuid
@@ -20,7 +20,7 @@
 		uuid = #{value}
 	</select>
 
-	<select id="getProcessStepRelByProcessUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.ProcessStepRelVo">
+	<select id="getProcessStepRelByProcessUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessStepRelVo">
 		SELECT
 		`process_uuid` AS processUuid,
 		`uuid`,
@@ -33,7 +33,7 @@
 		process_uuid = #{processUuid}
 	</select>
 
-	<resultMap id="processStepDetailMap" type="com.techsure.balantflow.process.dto.ProcessStepVo">
+	<resultMap id="processStepDetailMap" type="codedriver.module.process.dto.ProcessStepVo">
 		<id column="processUuid" property="processUuid" />
 		<id column="uuid" property="uuid" />
 		<result column="type" property="type" />
@@ -42,7 +42,7 @@
 		<result column="editPage" property="editPage" />
 		<result column="viewPage" property="viewPage" />
 		<result column="stepConfig" property="config" />
-		<collection property="attributeList" ofType="com.techsure.balantflow.process.dto.ProcessStepAttributeVo">
+		<collection property="attributeList" ofType="codedriver.module.process.dto.ProcessStepAttributeVo">
 			<id column="attributeUuid" property="attributeUuid" />
 			<result column="attributeHandler" property="handler" />
 			<result column="dataCubeTextField" property="dataCubeTextField" />
@@ -61,7 +61,7 @@
 			<result column="isRequired" property="isRequired" />
 			<result column="attributeConfig" property="config" />
 		</collection>
-		<collection property="formAttributeList" ofType="com.techsure.balantflow.process.dto.ProcessStepFormAttributeVo">
+		<collection property="formAttributeList" ofType="codedriver.module.process.dto.ProcessStepFormAttributeVo">
 			<id column="formAttributeUuid" property="attributeUuid" />
 			<result column="formUuid" property="formUuid" />
 			<result column="formAttributeHandler" property="handler" />
@@ -76,14 +76,14 @@
 			<result column="formAttributeData" property="data" />
 			<result column="formAttributeConfig" property="config" />
 		</collection>
-		<collection property="workerPolicyList" ofType="com.techsure.balantflow.process.dto.ProcessStepWorkerPolicyVo">
+		<collection property="workerPolicyList" ofType="codedriver.module.process.dto.ProcessStepWorkerPolicyVo">
 			<id column="workerPolicy" property="policy" />
 			<result column="workerPolicyProcessUuid" property="processUuid" />
 			<result column="workerPolicyProcessStepUuid" property="processStepUuid" />
 			<result column="workerPolicySort" property="sort" />
 			<result column="workerPolicyConfig" property="config" />
 		</collection>
-		<collection property="timeoutPolicyList" ofType="com.techsure.balantflow.process.dto.ProcessStepTimeoutPolicyVo">
+		<collection property="timeoutPolicyList" ofType="codedriver.module.process.dto.ProcessStepTimeoutPolicyVo">
 			<result column="timeoutPolicy" property="policy" />
 			<result column="timeoutPolicyProcessUuid" property="processUuid" />
 			<result column="timeoutPolicyProcessStepUuid" property="processStepUuid" />
@@ -160,7 +160,7 @@
 		WHERE a.`process_uuid` = #{value}
 	</select>
 
-	<select id="getProcessStepAttributeByStepUuid" parameterType="com.techsure.balantflow.process.dto.ProcessStepAttributeVo" resultType="com.techsure.balantflow.process.dto.ProcessStepAttributeVo">
+	<select id="getProcessStepAttributeByStepUuid" parameterType="codedriver.module.process.dto.ProcessStepAttributeVo" resultType="codedriver.module.process.dto.ProcessStepAttributeVo">
 		SELECT
 		a.`process_uuid` AS processUuid,
 		a.`process_step_uuid` AS processStepUuid,
@@ -200,7 +200,7 @@
 		ORDER BY b.sort
 	</select>
 
-	<select id="getProcessStepFormAttributeByStepUuid" parameterType="com.techsure.balantflow.process.dto.ProcessStepFormAttributeVo" resultType="com.techsure.balantflow.process.dto.ProcessStepFormAttributeVo">
+	<select id="getProcessStepFormAttributeByStepUuid" parameterType="codedriver.module.process.dto.ProcessStepFormAttributeVo" resultType="codedriver.module.process.dto.ProcessStepFormAttributeVo">
 		SELECT
 		a.`process_uuid` AS processUuid,
 		a.`process_step_uuid` AS processStepUuid,
@@ -232,14 +232,14 @@
 		</if>
 	</select>
 
-	<resultMap id="processDetailMap" type="com.techsure.balantflow.process.dto.ProcessVo">
+	<resultMap id="processDetailMap" type="codedriver.module.process.dto.ProcessVo">
 		<id column="uuid" property="uuid" />
 		<result column="name" property="name" />
 		<result column="type" property="type" />
 		<result column="isActive" property="isActive" />
 		<result column="formUuid" property="formUuid" />
 		<result column="config" property="config" />
-		<collection property="attributeList" ofType="com.techsure.balantflow.process.dto.ProcessAttributeVo">
+		<collection property="attributeList" ofType="codedriver.module.process.dto.ProcessAttributeVo">
 			<id column="attributeUuid" property="attributeUuid" />
 			<result column="attributeHelp" property="help" />
 			<result column="attributeName" property="name" />
@@ -289,7 +289,7 @@
 		a.uuid = #{value}
 	</select>
 
-	<select id="getProcessBaseInfoByUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.ProcessVo">
+	<select id="getProcessBaseInfoByUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessVo">
 		SELECT
 		`uuid`,
 		`name`,
@@ -302,7 +302,7 @@
 		uuid = #{value}
 	</select>
 
-	<select id="searchProcessStep" parameterType="com.techsure.balantflow.process.dto.ProcessStepVo" resultType="com.techsure.balantflow.process.dto.ProcessStepVo">
+	<select id="searchProcessStep" parameterType="codedriver.module.process.dto.ProcessStepVo" resultType="codedriver.module.process.dto.ProcessStepVo">
 		SELECT
 		`process_uuid` AS processUuid,
 		`uuid`,
@@ -324,7 +324,7 @@
 		</if>
 	</select>
 
-	<insert id="insertProcessStepTimeoutPolicy" parameterType="com.techsure.balantflow.process.dto.ProcessStepTimeoutPolicyVo">
+	<insert id="insertProcessStepTimeoutPolicy" parameterType="codedriver.module.process.dto.ProcessStepTimeoutPolicyVo">
 		INSERT INTO `process_step_timeout_policy` (
 		`process_uuid`,
 		`process_step_uuid`,
@@ -344,7 +344,7 @@
 		)
 	</insert>
 
-	<insert id="replaceProcess" parameterType="com.techsure.balantflow.process.dto.ProcessVo">
+	<insert id="replaceProcess" parameterType="codedriver.module.process.dto.ProcessVo">
 		REPLACE INTO `process` (
 		`uuid`,
 		`name`,
@@ -362,7 +362,7 @@
 		)
 	</insert>
 
-	<insert id="insertProcessAttribute" parameterType="com.techsure.balantflow.process.dto.ProcessAttributeVo">
+	<insert id="insertProcessAttribute" parameterType="codedriver.module.process.dto.ProcessAttributeVo">
 		INSERT INTO `process_attribute` (
 		`attribute_uuid`,
 		`process_uuid`,
@@ -386,7 +386,7 @@
 		)
 	</insert>
 
-	<insert id="insertProcessStep" parameterType="com.techsure.balantflow.process.dto.ProcessStepVo">
+	<insert id="insertProcessStep" parameterType="codedriver.module.process.dto.ProcessStepVo">
 		INSERT INTO `process_step` (
 		`process_uuid`,
 		`uuid`,
@@ -412,7 +412,7 @@
 		)
 	</insert>
 
-	<insert id="insertProcessStepWorkerPolicy" parameterType="com.techsure.balantflow.process.dto.ProcessStepWorkerPolicyVo">
+	<insert id="insertProcessStepWorkerPolicy" parameterType="codedriver.module.process.dto.ProcessStepWorkerPolicyVo">
 		INSERT INTO `process_step_worker_policy` (
 		`process_uuid`,
 		`process_step_uuid`,
@@ -430,7 +430,7 @@
 		)
 	</insert>
 
-	<insert id="insertProcessStepAttribute" parameterType="com.techsure.balantflow.process.dto.ProcessStepAttributeVo">
+	<insert id="insertProcessStepAttribute" parameterType="codedriver.module.process.dto.ProcessStepAttributeVo">
 		INSERT INTO `process_step_attribute` (
 		`process_uuid`,
 		`process_step_uuid`,
@@ -452,7 +452,7 @@
 		)
 	</insert>
 
-	<insert id="insertProcessStepFormAttribute" parameterType="com.techsure.balantflow.process.dto.ProcessStepFormAttributeVo">
+	<insert id="insertProcessStepFormAttribute" parameterType="codedriver.module.process.dto.ProcessStepFormAttributeVo">
 		INSERT INTO `process_step_formattribute` (
 		`process_uuid`,
 		`process_step_uuid`,
@@ -474,7 +474,7 @@
 		)
 	</insert>
 
-	<insert id="insertProcessStepRel" parameterType="com.techsure.balantflow.process.dto.ProcessStepRelVo">
+	<insert id="insertProcessStepRel" parameterType="codedriver.module.process.dto.ProcessStepRelVo">
 		INSERT INTO `process_step_rel` (
 		`process_uuid`,
 		`uuid`,
@@ -492,7 +492,7 @@
 		)
 	</insert>
 
-	<insert id="insertProcessStepTeam" parameterType="com.techsure.balantflow.process.dto.ProcessStepTeamVo">
+	<insert id="insertProcessStepTeam" parameterType="codedriver.module.process.dto.ProcessStepTeamVo">
 		INSERT INTO `process_step_team` (
 		`process_step_uuid`,
 		`team_id`,
@@ -506,7 +506,7 @@
 		)
 	</insert>
 
-	<insert id="insertProcessStepUser" parameterType="com.techsure.balantflow.process.dto.ProcessStepUserVo">
+	<insert id="insertProcessStepUser" parameterType="codedriver.module.process.dto.ProcessStepUserVo">
 		INSERT INTO `process_step_user` (
 		`process_uuid`,
 		`process_step_uuid`,

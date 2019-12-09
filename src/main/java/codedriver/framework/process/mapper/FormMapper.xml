@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.techsure.balantflow.process.mapper.FormMapper">
+<mapper namespace="codedriver.framework.process.mapper.FormMapper">
 
-	<select id="getActionFormVersionByFormUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.FormVersionVo">
+	<select id="getActionFormVersionByFormUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.FormVersionVo">
 		SELECT
 		a.`uuid`,
 		a.`version`,
@@ -19,7 +19,7 @@
 		AND a.`is_active` = 1
 	</select>
 
-	<select id="getAttributeByFormUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.AttributeVo">
+	<select id="getAttributeByFormUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.AttributeVo">
 		SELECT
 		c.`uuid`,
 		c.`label`,
@@ -42,7 +42,7 @@
 		ON a.`attribute_uuid` = c.`uuid` AND c.`is_active` = 1
 	</select>
 
-	<select id="searchForm" parameterType="com.techsure.balantflow.process.dto.FormVo" resultType="com.techsure.balantflow.process.dto.FormVo">
+	<select id="searchForm" parameterType="codedriver.module.process.dto.FormVo" resultType="codedriver.module.process.dto.FormVo">
 		SELECT
 		`uuid`,
 		`name`,
@@ -63,7 +63,7 @@
 		</if>
 	</select>
 
-	<select id="searchFormCount" parameterType="com.techsure.balantflow.process.dto.FormVo" resultType="int">
+	<select id="searchFormCount" parameterType="codedriver.module.process.dto.FormVo" resultType="int">
 		SELECT
 		COUNT(1)
 		FROM
@@ -82,7 +82,7 @@
 		SELECT max(version) FROM `form_version` WHERE form_uuid = #{value} FOR UPDATE
 	</select>
 
-	<select id="getFormVersionByUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.FormVersionVo">
+	<select id="getFormVersionByUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.FormVersionVo">
 		SELECT
 		`uuid`,
 		`version`,
@@ -99,7 +99,7 @@
 		uuid = #{value}
 	</select>
 
-	<select id="getFormByUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.FormVo">
+	<select id="getFormByUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.FormVo">
 		SELECT
 		`uuid`,
 		`name`,
@@ -110,7 +110,7 @@
 		WHERE `uuid` = #{value}
 	</select>
 
-	<select id="getFormVersionByFormUuid" parameterType="java.lang.String" resultType="com.techsure.balantflow.process.dto.FormVersionVo">
+	<select id="getFormVersionByFormUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.FormVersionVo">
 		SELECT
 		`uuid`,
 		`version`,
@@ -127,7 +127,7 @@
 		form_uuid = #{value}
 	</select>
 
-	<update id="updateFormVersion" parameterType="com.techsure.balantflow.process.dto.FormVersionVo">
+	<update id="updateFormVersion" parameterType="codedriver.module.process.dto.FormVersionVo">
 		UPDATE
 		`form_version`
 		SET
@@ -146,7 +146,7 @@
 		form_uuid = #{value}
 	</update>
 
-	<insert id="replaceForm" parameterType="com.techsure.balantflow.process.dto.FormVo">
+	<insert id="replaceForm" parameterType="codedriver.module.process.dto.FormVo">
 		REPLACE INTO `form` (
 		`uuid`,
 		`name`,
@@ -162,7 +162,7 @@
 		)
 	</insert>
 
-	<insert id="insertFormVersion" parameterType="com.techsure.balantflow.process.dto.FormVersionVo">
+	<insert id="insertFormVersion" parameterType="codedriver.module.process.dto.FormVersionVo">
 		INSERT INTO `form_version` (
 		`uuid`,
 		`version`,
@@ -184,7 +184,7 @@
 		)
 	</insert>
 
-	<insert id="insertFormAttribute" parameterType="com.techsure.balantflow.process.dto.FormAttributeVo">
+	<insert id="insertFormAttribute" parameterType="codedriver.module.process.dto.FormAttributeVo">
 		INSERT INTO `form_attribute` (
 		`form_uuid`,
 		`attribute_uuid`,
