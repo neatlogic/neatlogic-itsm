@@ -1,10 +1,13 @@
 package codedriver.framework.process.file;
 
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.file.core.FileTypeHandlerBase;
 import codedriver.framework.file.dto.FileVo;
 
+@Component
 public class ProcessFileHandler extends FileTypeHandlerBase {
 
 	@Override
@@ -22,7 +25,7 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
 	}
 
 	@Override
-	public String getBelong() {
+	public String getName() {
 		return "ITSM";
 	}
 
