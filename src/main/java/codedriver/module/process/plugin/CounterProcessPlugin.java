@@ -40,7 +40,7 @@ public class CounterProcessPlugin extends GlobalCounterBase {
     @Override
     public Object getMyShowData() {
         JSONObject dataObj = new JSONObject();
-        dataObj.put("name", "test");
+        dataObj.put("name", "itsmtest");
         return dataObj;
     }
 }
