@@ -121,7 +121,7 @@ public class ProcessController {
 		return WorkerDispatcherFactory.getAllActiveWorkerDispatcher();
 	}
 
-	@RequestMapping(value = "/save")
+	/*@RequestMapping(value = "/save")
 	public void saveProcess(ProcessVo processVo, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			System.out.println(processVo.getConfig());
@@ -135,6 +135,6 @@ public class ProcessController {
 			ReturnJson.error(ex.getMessage(), response);
 		}
 
-	}
+	}*/
 
 }

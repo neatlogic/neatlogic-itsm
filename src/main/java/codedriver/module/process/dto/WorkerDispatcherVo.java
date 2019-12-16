@@ -1,9 +1,20 @@
 package codedriver.module.process.dto;
 
+import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.restful.annotation.EntityField;
+
 public class WorkerDispatcherVo {
+	@EntityField(name = "分派器名称",
+			type = ApiParamType.STRING)
 	private String name;
+	@EntityField(name = "分派器处理类",
+			type = ApiParamType.STRING)
 	private String handler;
+	@EntityField(name = "是否激活",
+			type = ApiParamType.INTEGER)
 	private Integer isActive;
+	@EntityField(name = "输入帮助",
+			type = ApiParamType.STRING)
 	private String help;
 	private String configPage;
 	private String moduleId;

@@ -17,6 +17,7 @@ import codedriver.module.process.constvalue.ProcessStepType;
 
 public class ProcessVo implements Serializable {
 	private static final long serialVersionUID = 4684015408674741157L;
+	
 	private String uuid;
 	private String name;
 	private String type;
@@ -233,7 +234,7 @@ public class ProcessVo implements Serializable {
 
 							}
 							userData.remove("timeoutPolicyList");
-							processStepVo.setConfig(userData.toJSONString(4));
+							processStepVo.setConfig(userData.toJSONString());
 							this.stepList.add(processStepVo);
 
 						}
