@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.process.dao.mapper.CatalogMapper">
+	<select id="getCatalogList" resultType="codedriver.module.process.dto.CatalogVo">
+	SELECT 
+	  `uuid`,
+	  `name`,
+	  `parent_uuid` AS `parentUuid`,
+	  `is_active` AS `isActive`,
+	  `icon`,
+	  `color`,
+	  `desc`,
+	  `sort` 
+	FROM
+	  `catalog`
+	 WHERE 1=1
+	 <if test="isActive != null">
+	 	AND `is_active` = #{isActive}
+	 </if>
+	 <if test="parentUuid != null">
+	 	and `parent_uuid` = #{parentUuid}
+	 </if>
+	</select>
+	
+	<select id="getCatalogByUuid" resultType="codedriver.module.process.dto.CatalogVo">
+	SELECT 
+	  `uuid`,
+	  `name`,
+	  `parent_uuid` AS `parentUuid`,
+	  `is_active` AS `isActive`,
+	  `icon`,
+	  `color`,
+	  `desc`,
+	  `sort` 
+	FROM
+	  `catalog`
+	 where `uuid` = #{uuid}
+	</select>
+</mapper>
