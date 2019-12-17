@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.process.dao.mapper.ChannelMapper">
+
+	<select id="searchChannelCount" resultType="int">
+	SELECT 
+	  count(c.`uuid`) 
+	FROM
+	  `channel` c
+	<if test="isFavorite != 1">
+	LEFT 
+	</if>
+	JOIN `channel_user` cu ON cu.`channel_uuid` = c.`uuid` AND cu.user_id = #{userId} 	
+	WHERE 1=1
+	<if test="parentUuid != null">
+	 AND c.`parent_uuid` = #{parentUuid}
+	</if>
+	<if test="keyword != null">
+	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
+	</if> 
+	</select>
+	
+	<select id="searchChannelList" resultType="codedriver.module.process.dto.ChannelVo">
+	SELECT 
+	  c.`uuid`,
+	  c.`name`,
+	  c.`parent_uuid` as parentUuid,
+	  c.`is_active` as isActive,
+	  c.`icon`,
+	  c.`color`,
+	  c.`desc`,
+	  CASE WHEN cu.user_id IS NULL THEN 0 ELSE 1 END AS `isFavorite`,
+	  c.`sort` 
+	FROM
+	  `channel` c 
+	<if test="isFavorite != 1">
+	LEFT  
+	</if>
+ 	JOIN `channel_user` cu ON cu.`channel_uuid` = c.`uuid` AND cu.user_id = #{userId}
+	WHERE 1=1
+	<if test="parentUuid != null">
+	 AND c.`parent_uuid` = #{parentUuid}
+	</if>
+	<if test="keyword != null">
+	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
+	</if> 
+	<choose>
+		<when test="isFavorite == 1">
+		ORDER BY cu.`insert_time` DESC
+		</when>
+		<otherwise>
+		ORDER BY c.`parent_uuid`, c.`sort`
+		</otherwise>
+	</choose>	
+	<if test="needPage">
+	limit #{startNum}, #{pageSize}
+	</if>
+	</select>
+
+	<select id="getChannelByUuid" resultType="codedriver.module.process.dto.ChannelVo">
+	SELECT 
+	  `uuid`,
+	  `name`,
+	  `parent_uuid` as parentUuid,
+	  `is_active` as isActive,
+	  `icon`,
+	  `color`,
+	  `desc`,
+	  `sort` 
+	FROM
+	  `channel`
+	WHERE `uuid` = #{uuid}
+	</select>
+
+	<insert id="insertChannel">
+	INSERT INTO `channel` (
+	  `uuid`,
+	  `name`,
+	  `parent_uuid`,
+	  `is_active`,
+	  `icon`,
+	  `color`,
+	  `desc`,
+	  `sort`
+	) 
+	VALUES
+	  (
+	    #{uuid},
+	    #{name},
+	    #{parentUuid},
+	    #{isActive},
+	    #{icon},
+	    #{color},
+	    #{desc},
+	    #{sort}
+	  )
+	</insert>
+	
+	<insert id="replaceChannelUser">
+	REPLACE INTO `channel_user` (`user_id`, `channel_uuid`, `insert_time`) VALUES(#{userId}, #{channelUuid}, now())
+	</insert>
+
+	<delete id="deleteChannelUser">
+	DELETE FROM `channel_user` WHERE `user_id` = #{userId} AND `channel_uuid` = #{channelUuid}
+	</delete>
+</mapper>
