@@ -20,6 +20,11 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
 		return WorkerPolicy.FORM.getValue();
 	}
 
+	@Override
+	public String getName() {
+		return WorkerPolicy.FORM.getText();
+	}
+	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 

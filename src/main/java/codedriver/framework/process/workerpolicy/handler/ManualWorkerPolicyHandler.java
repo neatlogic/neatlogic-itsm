@@ -25,6 +25,11 @@ public class ManualWorkerPolicyHandler implements IWorkerPolicyHandler {
 		return WorkerPolicy.MANUAL.getValue();
 	}
 
+	@Override
+	public String getName() {
+		return WorkerPolicy.MANUAL.getText();
+	}
+	
 	@Autowired
 	private UserMapper userMapper;
 

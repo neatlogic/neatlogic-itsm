@@ -11,6 +11,10 @@ public class AdvancedTimeoutPolicyHandler implements ITimeoutPolicyHandler {
 		return TimeoutPolicy.ADVANCED.getValue();
 	}
 
+	public String getName() {
+		return TimeoutPolicy.ADVANCED.getText();
+	}
+	
 	public Boolean execute(ProcessTaskStepTimeoutPolicyVo timeoutPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		return false;
 	}

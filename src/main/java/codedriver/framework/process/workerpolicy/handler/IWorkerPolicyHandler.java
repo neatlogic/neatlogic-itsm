@@ -11,6 +11,8 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 public interface IWorkerPolicyHandler {
 	public String getType();
 
+	public String getName();
+	
 	/**
 	 * @Author: chenqiwei
 	 * @Time:Sep 18, 2019

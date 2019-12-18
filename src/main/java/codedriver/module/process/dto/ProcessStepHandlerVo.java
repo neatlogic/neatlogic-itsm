@@ -1,11 +1,21 @@
 package codedriver.module.process.dto;
 
+import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.restful.annotation.EntityField;
+
 public class ProcessStepHandlerVo implements Comparable<ProcessStepHandlerVo> {
+	
+	@EntityField(name = "类型", type = ApiParamType.STRING)
 	private String type;
+	@EntityField(name = "名称", type = ApiParamType.STRING)
 	private String name;
+	@EntityField(name = "模块id", type = ApiParamType.STRING)
 	private String moduleId;
+	@EntityField(name = "是否激活", type = ApiParamType.STRING)
 	private Integer isActive;
+	@EntityField(name = "图标", type = ApiParamType.STRING)
 	private String icon;
+	@EntityField(name = "排序", type = ApiParamType.INTEGER)
 	private Integer sort;
 
 	public String getIcon() {

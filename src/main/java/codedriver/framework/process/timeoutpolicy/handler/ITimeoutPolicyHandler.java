@@ -8,6 +8,8 @@ import codedriver.module.process.dto.ProcessTaskStepVo;
 public interface ITimeoutPolicyHandler {
 	public String getType();
 
+	public String getName();
+	
 	/**
 	* @Author: chenqiwei
 	* @Time:Sep 18, 2019
