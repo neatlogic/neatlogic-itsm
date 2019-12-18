@@ -28,13 +28,7 @@ public class TimeoutPolicyHandlerFactory implements ApplicationListener<ContextR
 	}
 	
 	public static List<TimeoutPolicyVo> getAllActiveTimeoutPolicy(){
-		List<TimeoutPolicyVo> returnTimeoutPolicyList = new ArrayList<>();
-		for(TimeoutPolicyVo timeoutPolicy : timePolicyList) {
-			if(TenantContext.get().containsModule(timeoutPolicy.getModuleId())) {
-				returnTimeoutPolicyList.add(timeoutPolicy);
-			}
-		}
-		return returnTimeoutPolicyList;
+		return timePolicyList;
 	}
 
 	@Override

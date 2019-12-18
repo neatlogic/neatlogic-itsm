@@ -28,13 +28,7 @@ public class WorkerPolicyHandlerFactory implements ApplicationListener<ContextRe
 	}
 
 	public static List<WorkerPolicyVo> getAllActiveWorkerPolicy(){
-		List<WorkerPolicyVo> returnWorkerPolicyList = new ArrayList<>();
-		for(WorkerPolicyVo workerPolicy : workerPolicyList) {
-			if(TenantContext.get().containsModule(workerPolicy.getModuleId())) {
-				returnWorkerPolicyList.add(workerPolicy);
-			}
-		}
-		return returnWorkerPolicyList;
+		return workerPolicyList;
 	}
 	
 	@Override
