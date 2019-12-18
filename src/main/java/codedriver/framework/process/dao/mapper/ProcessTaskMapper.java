@@ -133,4 +133,6 @@ public interface ProcessTaskMapper {
 	public int deleteProcessTaskFormAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId") Long processTaskId, @Param("attributeUuid") String attributeUuid);
 
 	public int deleteProcessTaskStepWorker(ProcessTaskStepWorkerVo processTaskStepWorkerVo);
+	
+	public int deleteOtherProcessTaskStepWorker(String userId);
 }

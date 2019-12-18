@@ -236,7 +236,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			}
 
 			currentProcessTaskStepVo.setIsActive(1);
-			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.PENDING.getValue());
 		} catch (ProcessTaskException e) {
 			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
 			currentProcessTaskStepVo.setError(e.getMessage());
@@ -381,37 +381,76 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 
 	@Override
 	public final int start(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
-
-		return myStart(currentProcessTaskStepVo);
+		/** 获得步骤处理锁 **/
+		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
+		/** 校验用户是否合法 **/
+		authHandleRole(currentProcessTaskStepVo.getId());
+		/** 检查步骤是否激活**/
+		ProcessTaskStepVo processTaskStepVo = authIsActive(currentProcessTaskStepVo.getId());
+		/** 判断工单步骤状态是否 “未开始” **/
+		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
+			throw new ProcessTaskRuntimeException("当前步骤处理人已开始处理，你没权限处理当前步骤。");
+		}
+		/** 更新工单步骤状态为 “进行中” **/
+		processTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+		processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+		/** 更新 当前登录人 到 工单步骤处理人表 **/
+		ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+		processTaskStepUserVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskStepUserVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+		processTaskStepUserVo.setUserId(UserContext.get().getUserId());
+		myStart(currentProcessTaskStepVo);
+		processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
+		/** 删除 workklist 其它人**/
+		processTaskMapper.deleteOtherProcessTaskStepWorker(UserContext.get().getUserId());
+		return 0;
 	}
 
 	protected abstract int myStart(ProcessTaskStepVo currentProcessTaskStepVo);
 
-	@Override
-	public final int complete(ProcessTaskStepVo currentProcessTaskStepVo) {
-		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
-
-		/** 校验用户是否合法 **/
+	/**
+	 * 校验用户是否合法
+	 * @param processTaskStepId 工单步骤id
+	 * @return
+	 */
+	private void authHandleRole(Long processTaskStepId) {
 		boolean hasRole = false;
-		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(currentProcessTaskStepVo.getId());
+		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
 		for (ProcessTaskStepWorkerVo worker : workerList) {
 			if (worker.getUserId().equals(UserContext.get().getUserId())) {
 				hasRole = true;
 				break;
 			}
 		}
-
 		if (!hasRole) {
 			throw new ProcessTaskRuntimeException("您不是当前步骤的处理人，没有权限处理");
 		}
-
-		/** 检查步骤是否激活，状态是否正常 **/
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+	}
+	
+	/**
+	 * 校验工单步骤是否激活
+	 * @param processTaskStepId 工单步骤id
+	 * @return
+	 */
+	private ProcessTaskStepVo authIsActive(Long processTaskStepId) {
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		if (!processTaskStepVo.getIsActive().equals(1)) {
 			throw new ProcessTaskRuntimeException("流程步骤未激活");
 		}
+		return processTaskStepVo;
+	}
+	
+	@Override
+	public final int complete(ProcessTaskStepVo currentProcessTaskStepVo) {
+		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
 
+		/** 校验用户是否合法 **/
+		authHandleRole(currentProcessTaskStepVo.getId());
+
+		/** 检查步骤是否激活 **/
+		ProcessTaskStepVo processTaskStepVo = authIsActive(currentProcessTaskStepVo.getId());
+
+		/** 状态是否进行中 **/
 		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
 			throw new ProcessTaskRuntimeException("步骤状态不是进行中");
 		}

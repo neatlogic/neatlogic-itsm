@@ -14,6 +14,7 @@ import org.springframework.core.annotation.Order;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.RootComponent;
 import codedriver.framework.dto.ModuleVo;
+import codedriver.framework.process.exception.ProcessStepHandlerNotFoundException;
 import codedriver.module.process.dto.ProcessStepHandlerVo;
 
 @RootComponent
@@ -29,7 +30,7 @@ public class ProcessStepHandlerFactory implements ApplicationListener<ContextRef
 
 	public static IProcessStepHandler getHandler(String handler) {
 		if (!componentMap.containsKey(handler) || componentMap.get(handler) == null) {
-			throw new RuntimeException("找不到类型为：" + handler + "的流程组件");
+			throw new ProcessStepHandlerNotFoundException(handler);
 		}
 		return componentMap.get(handler);
 	}

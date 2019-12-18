@@ -53,7 +53,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myStart(ProcessTaskStepVo processTaskStepVo) {
+	protected int myStart(ProcessTaskStepVo processTaskStepVo){
 		return 0;
 	}
 

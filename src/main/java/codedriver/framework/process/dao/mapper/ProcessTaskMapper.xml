@@ -944,4 +944,14 @@
 			AND `user_id` = #{userId}
 		</if>
 	</delete>
+	
+	<delete id="deleteOtherProcessTaskStepWorker" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`processtask_step_worker`
+		WHERE `processtask_step_id` = #{processtaskStepId}
+		<if test="userId != null and userId != ''">
+			AND `user_id` != #{userId}
+		</if>
+	</delete>
 </mapper>
