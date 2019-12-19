@@ -239,6 +239,7 @@
 		<result column="isActive" property="isActive" />
 		<result column="formUuid" property="formUuid" />
 		<result column="config" property="config" />
+		<result column="belong" property="belong"/>
 		<collection property="attributeList" ofType="codedriver.module.process.dto.ProcessAttributeVo">
 			<id column="attributeUuid" property="attributeUuid" />
 			<result column="attributeHelp" property="help" />
@@ -264,6 +265,7 @@
 		a.`type`,
 		a.`is_active` AS isActive,
 		a.`config`,
+		a.`belong`,
 		b.`name` AS attributeName,
 		b.`attribute_uuid` AS attributeUuid,
 		b.`group` AS attributeGroup,
@@ -295,7 +297,8 @@
 		`name`,
 		`type`,
 		`is_active` AS isActive,
-		`config`
+		`config`,
+		`belong`
 		FROM
 		`process`
 		WHERE
@@ -324,6 +327,10 @@
 		</if>
 	</select>
 
+	<select id="getAllProcessType" resultType="codedriver.module.process.dto.ProcessTypeVo">
+		SELECT `id`, `name` FROM `process_type`
+	</select>
+	
 	<insert id="insertProcessStepTimeoutPolicy" parameterType="codedriver.module.process.dto.ProcessStepTimeoutPolicyVo">
 		INSERT INTO `process_step_timeout_policy` (
 		`process_uuid`,
@@ -350,7 +357,8 @@
 		`name`,
 		`type`,
 		`is_active`,
-		`config`
+		`config`,
+		`belong`
 		)
 		VALUES
 		(
@@ -358,7 +366,8 @@
 		#{name},
 		#{type},
 		#{isActive},
-		#{config}
+		#{config},
+		#{belong}
 		)
 	</insert>
 

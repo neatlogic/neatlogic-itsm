@@ -20,7 +20,12 @@ public class CopyWorkerPolicyHandler implements IWorkerPolicyHandler {
 	public String getType() {
 		return WorkerPolicy.COPY.getValue();
 	}
-
+	
+	@Override
+	public String getName() {
+		return WorkerPolicy.COPY.getText();
+	}
+	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 

@@ -27,6 +27,11 @@ public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {
 	}
 
 	@Override
+	public String getName() {
+		return WorkerPolicy.AUTOMATIC.getText();
+	}
+	
+	@Override
 	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
 		if (workerPolicyVo.getConfigObj() != null) {
