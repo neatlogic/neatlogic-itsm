@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -20,6 +21,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.CatalogVo;
 import codedriver.module.process.dto.ITree;
 @Service
+@Transactional
 public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 
 	@Autowired

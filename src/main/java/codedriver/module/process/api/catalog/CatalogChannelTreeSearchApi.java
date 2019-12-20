@@ -13,51 +13,56 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.CatalogVo;
+import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ITree;
+
 @Service
 @Transactional
-public class CatalogTreeSearchApi extends ApiComponentBase {
-	
+public class CatalogChannelTreeSearchApi extends ApiComponentBase {
+
 	@Autowired
 	private CatalogMapper catatlogMapper;
 	
+	@Autowired
+	private ChannelMapper channelMapper;
+	
 	@Override
 	public String getToken() {
-		return "catalog/tree/search";
+		return "catalog/channel/tree/search";
 	}
 
 	@Override
 	public String getName() {
-		return "获取所有服务目录（包含层级关系）接口";
+		return "服务目录及通道树查询接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-	
+
 	@Input({
 		@Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired= true, desc = "已选中的服务目录uuid")
 		})
 	@Output({
-		@Param(name="Return",explode=CatalogVo[].class,desc="服务目录列表")
+		@Param(name="Return",explode=CatalogVo[].class,desc="服务目录及通道树")
 	})
-	@Description(desc = "获取所有服务目录（包含层级关系）接口")
+	@Description(desc = "服务目录及通道树查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String catalogUuid = jsonObj.getString("catalogUuid");
-		
-		CatalogVo catalogVo = new CatalogVo();
-		catalogVo.setIsActive(1);
-		List<CatalogVo> catalogList = catatlogMapper.getCatalogList(catalogVo);
-		
-		List<ITree> treeList = new ArrayList<>(catalogList);
+		String catalogUuid = jsonObj.getString("catalogUuid");	
+		List<CatalogVo> catalogList = catatlogMapper.getCatalogList(null);
+		List<ChannelVo> channelList = channelMapper.searchChannelList(null);
+		List<ITree> treeList = new ArrayList<>(catalogList.size() + channelList.size());
+		treeList.addAll(catalogList);
+		treeList.addAll(channelList);
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
 		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
 		List<ITree> children = null;
@@ -79,13 +84,6 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		buildTree(root, parentUuidKeyMap, catalogUuid);
 		
 		List<ITree> resultChildren = root.getChildren();
-		root.setChildren(null);
-		if(ITree.ROOT_UUID.equals(catalogUuid)) {
-			root.setSelected(true);
-		}else {
-			root.setSelected(false);
-		}
-		resultChildren.add(root);
 		return resultChildren;
 	}
 
@@ -104,7 +102,8 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 			for(ITree child : children) {
 				child.setParent(parent);
 				if(child.getUuid().equals(selectedUuid)) {
-					child.setSelectedCascade(true);
+					child.setSelected(true);
+					child.setOpenCascade(true);
 				}
 				buildTree(child, parentUuidKeyMap, selectedUuid);				
 			}
