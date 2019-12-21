@@ -96,6 +96,27 @@
 		WHERE
 		processtask_step_id = #{value}
 	</select>
+	
+	<select id="getProcessTaskStepUserByStepId" resultType="codedriver.module.process.dto.ProcessTaskStepUserVo">
+		SELECT
+		`processtask_id` as processTaskId,
+		`processtask_step_id` as processTaskStepId,
+		`user_id` as userId,
+		`user_type` as userType,
+		`user_name` as userName,
+		`status` as status,
+		`action`,
+		DATE_FORMAT(`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
+		DATE_FORMAT(`end_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
+		DATE_FORMAT(`active_time`,'%Y-%m-%d %H:%i:%s') AS activeTime
+		FROM
+		`processtask_step_user`
+		WHERE
+		processtask_step_id = #{processTaskStepId} 
+		<if test="userType != null and userType != ''">
+			and user_type = #{userType}
+		</if>
+	</select>
 
 	<select id="searchProcessTaskStep" parameterType="codedriver.module.process.dto.ProcessTaskStepVo" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
 		SELECT
@@ -242,6 +263,25 @@
 
 	<select id="getProcessTaskLockById" parameterType="java.lang.Long" resultType="java.lang.Long">
 		SELECT id FROM processtask WHERE id = #{value} FOR UPDATE
+	</select>
+	
+	<select id="getProcessTaskStepLockById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
+		SELECT
+		`id`,
+		`processtask_id` AS processTaskId,
+		`name`,
+		`process_step_uuid` AS processStepUuid,
+		`status`,
+		`result`,
+		`type`,
+		`handler`,
+		`is_active` AS isActive,
+		`start_time`,
+		`end_time`,
+		`error`
+		FROM
+		`processtask_step`
+		WHERE id = #{value} for update
 	</select>
 
 	<select id="getToProcessTaskStepByFromId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
@@ -854,7 +894,8 @@
 		`user_type`,
 		`user_name`,
 		`status`,
-		`active_time`
+		`active_time`,
+		`start_time`
 		)
 		VALUES
 		(
@@ -864,6 +905,7 @@
 		#{userType},
 		#{userName},
 		#{status},
+		NOW(3),
 		NOW(3)
 		)
 	</insert>
@@ -945,13 +987,16 @@
 		</if>
 	</delete>
 	
-	<delete id="deleteOtherProcessTaskStepWorker" parameterType="java.lang.String">
+	<delete id="deleteProcessTaskStepOtherWorker" >
 		DELETE
 		FROM
 		`processtask_step_worker`
 		WHERE `processtask_step_id` = #{processtaskStepId}
 		<if test="userId != null and userId != ''">
 			AND `user_id` != #{userId}
+		</if>
+		<if test="action != null and action != ''">
+			AND `action` != #{action}
 		</if>
 	</delete>
 </mapper>

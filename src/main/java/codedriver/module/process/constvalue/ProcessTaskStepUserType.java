@@ -1,12 +1,12 @@
 package codedriver.module.process.constvalue;
 
-public enum ProcessTaskStatus {
-	RUNNING("running", "处理中"), ABORTED("aborted", "已终止"), SUCCEED("succeed", "已成功"), PENDING("pending", "待处理"), FAILED("failed", "已失败"), ABORTING("aborting", "终止中");
+public enum ProcessTaskStepUserType {
+	MAJOR("major", "主处理人"), MINOR("minor", "协助处理人");
 
 	private String status;
 	private String text;
 
-	private ProcessTaskStatus(String _status, String _text) {
+	private ProcessTaskStepUserType(String _status, String _text) {
 		this.status = _status;
 		this.text = _text;
 	}
@@ -20,7 +20,7 @@ public enum ProcessTaskStatus {
 	}
 
 	public static String getValue(String _status) {
-		for (ProcessTaskStatus s : ProcessTaskStatus.values()) {
+		for (ProcessTaskStepUserType s : ProcessTaskStepUserType.values()) {
 			if (s.getValue().equals(_status)) {
 				return s.getValue();
 			}
@@ -29,7 +29,7 @@ public enum ProcessTaskStatus {
 	}
 
 	public static String getText(String _status) {
-		for (ProcessTaskStatus s : ProcessTaskStatus.values()) {
+		for (ProcessTaskStepUserType s : ProcessTaskStepUserType.values()) {
 			if (s.getValue().equals(_status)) {
 				return s.getText();
 			}

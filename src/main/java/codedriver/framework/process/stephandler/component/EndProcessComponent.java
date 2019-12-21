@@ -83,7 +83,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

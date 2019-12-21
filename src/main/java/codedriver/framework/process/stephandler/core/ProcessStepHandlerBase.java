@@ -7,12 +7,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -34,6 +36,8 @@ import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.ProcessTaskStepUserStatus;
+import codedriver.module.process.constvalue.ProcessTaskStepUserType;
+import codedriver.module.process.constvalue.ProcessTaskStepWorkerAction;
 import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.ProcessAttributeVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
@@ -206,13 +210,13 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 						processTaskMapper.insertProcessTaskStepWorker(workerVo);
 					}
 				}
+				/** 如果下个处理节点设置了“自动开始”，且仅有一个可处理的人，则自动开始 **/
 				if (stepConfigObj.containsKey("isAutoStart") && stepConfigObj.getString("isAutoStart").equals("1") && workerList.size() == 1) {
 					if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
 						ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
 						userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 						userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 						userVo.setUserId(workerList.get(0).getUserId());
-						userVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
 						processTaskMapper.insertProcessTaskStepUser(userVo);
 					}
 				}
@@ -381,16 +385,18 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 
 	@Override
 	public final int start(ProcessTaskStepVo currentProcessTaskStepVo) {
-		/** 获得步骤处理锁 **/
-		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
-		/** 校验用户是否合法 **/
-		authHandleRole(currentProcessTaskStepVo.getId());
-		/** 检查步骤是否激活**/
-		ProcessTaskStepVo processTaskStepVo = authIsActive(currentProcessTaskStepVo.getId());
+		/** 获得工单步骤行锁 **/
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepLockById(currentProcessTaskStepVo.getId());
+		/** 检查步骤是否“已激活”**/
+		if (!processTaskStepVo.getIsActive().equals(1)) {
+			throw new ProcessTaskRuntimeException("流程步骤未激活");
+		}
 		/** 判断工单步骤状态是否 “未开始” **/
 		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
 			throw new ProcessTaskRuntimeException("当前步骤处理人已开始处理，你没权限处理当前步骤。");
 		}
+		/** 校验用户是否有开始操作权限 **/
+		authHandleRole(currentProcessTaskStepVo.getId());
 		/** 更新工单步骤状态为 “进行中” **/
 		processTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
@@ -401,8 +407,12 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		processTaskStepUserVo.setUserId(UserContext.get().getUserId());
 		myStart(currentProcessTaskStepVo);
 		processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
-		/** 删除 workklist 其它人**/
-		processTaskMapper.deleteOtherProcessTaskStepWorker(UserContext.get().getUserId());
+		/** 删除 workklist 其它可以 “处理” 的人**/
+		processTaskMapper.deleteProcessTaskStepOtherWorker(UserContext.get().getUserId(),ProcessTaskStepWorkerAction.HANDLE.getValue());
+		
+		// TODO 记录audit
+		
+		// TODO notify
 		return 0;
 	}
 
@@ -426,122 +436,47 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			throw new ProcessTaskRuntimeException("您不是当前步骤的处理人，没有权限处理");
 		}
 	}
-	
-	/**
-	 * 校验工单步骤是否激活
-	 * @param processTaskStepId 工单步骤id
-	 * @return
-	 */
-	private ProcessTaskStepVo authIsActive(Long processTaskStepId) {
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		
+	@Override
+	public final int complete(ProcessTaskStepVo currentProcessTaskStepVo){
+		/** 获得工单步骤行锁 **/
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepLockById(currentProcessTaskStepVo.getId());
+		/** 检查步骤是否 “已激活” **/
 		if (!processTaskStepVo.getIsActive().equals(1)) {
 			throw new ProcessTaskRuntimeException("流程步骤未激活");
 		}
-		return processTaskStepVo;
-	}
-	
-	@Override
-	public final int complete(ProcessTaskStepVo currentProcessTaskStepVo) {
-		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
-
-		/** 校验用户是否合法 **/
-		authHandleRole(currentProcessTaskStepVo.getId());
-
-		/** 检查步骤是否激活 **/
-		ProcessTaskStepVo processTaskStepVo = authIsActive(currentProcessTaskStepVo.getId());
-
-		/** 状态是否进行中 **/
+		/** 状态是否为 “进行中” **/
 		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
 			throw new ProcessTaskRuntimeException("步骤状态不是进行中");
 		}
-
-		/** 写入当前步骤的自定义属性值 **/
-
-		// ProcessTaskStepAttributeVo attributeVo = new
-		// ProcessTaskStepAttributeVo();
-		// attributeVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		// List<ProcessTaskStepAttributeVo> attributeList =
-		// processTaskMapper.getProcessTaskStepAttributeByStepId(attributeVo);
-		// currentProcessTaskStepVo.setAttributeList(attributeList);
-		// JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-		// if (attributeList != null && attributeList.size() > 0) {
-		// JSONArray attributeObjList = null;
-		// if (paramObj != null && paramObj.containsKey("attributeValueList") &&
-		// paramObj.get("attributeValueList") instanceof JSONArray) {
-		// attributeObjList = paramObj.getJSONArray("attributeValueList");
-		// }
-		// for (ProcessTaskStepAttributeVo attribute : attributeList) {
-		// if (attribute.getIsEditable().equals(1)) {
-		// if (attributeObjList != null && attributeObjList.size() > 0) {
-		// for (int i = 0; i < attributeObjList.size(); i++) {
-		// JSONObject attrObj = attributeObjList.getJSONObject(i);
-		// if (attrObj.getString("uuid").equals(attribute.getAttributeUuid())) {
-		// ProcessTaskAttributeDataVo attributeData = new
-		// ProcessTaskAttributeDataVo();
-		// attributeData.setData(attrObj.getString("value"));
-		// attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-		// attributeData.setAttributeUuid(attribute.getAttributeUuid());
-		// processTaskMapper.replaceProcessTaskAttributeData(attributeData);
-		// /** 清除原来的attribute value **/
-		// processTaskMapper.deleteProcessTaskAttributeValueByProcessTaskIdAndAttributeUuid(currentProcessTaskStepVo.getProcessTaskId(),
-		// attribute.getAttributeUuid());
-		//
-		// attribute.setData(attributeData);
-		// IAttributeHandler handler =
-		// AttributeHandlerFactory.getHandler(attribute.getHandler());
-		// if (handler != null) {
-		// List<String> valueList = handler.getValueList(attrObj.get("value"));
-		// if (valueList != null && valueList.size() > 0) {
-		// for (String value : valueList) {
-		// if (StringUtils.isNotBlank(value)) {
-		// ProcessTaskAttributeValueVo attributeValue = new
-		// ProcessTaskAttributeValueVo();
-		// attributeValue.setValue(value);
-		// attributeValue.setAttributeUuid(attribute.getAttributeUuid());
-		// attributeValue.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-		// processTaskMapper.insertProcessTaskAttributeValue(attributeValue);
-		// }
-		// }
-		// }
-		// }
-		// break;
-		// }
-		// }
-		// }
-		// if (attribute.getIsRequired().equals(1) && (attribute.getValueList()
-		// == null || attribute.getValueList().size() == 0)) {
-		// throw new ProcessTaskRuntimeException("缺少必要参数：" +
-		// attribute.getLabel());
-		// }
-		// }
-		//
-		// }
-		// }
-
-		ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
-		processTaskStepUserVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		processTaskStepUserVo.setUserId(UserContext.get().getUserId());
-		try {
-			myComplete(currentProcessTaskStepVo);
-
-			processTaskStepUserVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
-
-			/** 如果已经完成，则清除worker表 **/
-			if (currentProcessTaskStepVo.getIsAllDone()) {
-				processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getId()));
-			} else if (currentProcessTaskStepVo.getIsCurrentUserDone()) {
-				processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getId(), UserContext.get().getUserId()));
+		/** 校验用户是否有“完成”权限 **/
+		ProcessTaskStepUserVo processTaskMajorUser = null;
+		List<ProcessTaskStepUserVo> processTaskUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(),ProcessTaskStepUserType.MAJOR.getValue());
+		if(processTaskUserList != null) {
+			List<ProcessTaskStepUserVo> processTaskCurrentUserList = processTaskUserList.stream().filter(user -> user.getUserId().equals(UserContext.get().getUserId())).collect(Collectors.toList());
+			if(processTaskCurrentUserList == null || processTaskCurrentUserList.size() == 0) {
+				throw new ProcessTaskRuntimeException("您不是当前步骤的处理人，没有权限处理");
+			}else {
+				processTaskMajorUser = processTaskCurrentUserList.get(0);
 			}
-		} catch (ProcessTaskException ex) {
-			processTaskStepUserVo.setStatus(ProcessTaskStatus.FAILED.getValue());
-		} finally {
-			processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
+		}else {
+			throw new ProcessTaskRuntimeException("步骤没有处理人，请先'开始'步骤");
 		}
-		// TODO Auto-generated method stub
+		/** 组件完成动作 **/
+		myComplete(currentProcessTaskStepVo);
+		/** 更新工单步骤状态为 “已成功” **/
+		processTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+		processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+		/** 更新用户状态**/
+		processTaskMajorUser.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+		processTaskMapper.updateProcessTaskStepUserStatus(processTaskMajorUser);
+		// TODO 记录audit
+		
+		// TODO notify
 		return 0;
 	}
 
-	protected abstract int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException;
+	protected abstract int myComplete(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	@Override
 	public final int retreat(ProcessTaskStepVo currentProcessTaskStepVo) {

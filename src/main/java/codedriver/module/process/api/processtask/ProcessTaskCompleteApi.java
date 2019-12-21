@@ -33,7 +33,7 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "工单开始接口";
+		return "工单完成接口";
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 			isRequired = true)
 	})
 	@Output({})
-	@Description(desc = "工单开始接口")
+	@Description(desc = "工单完成接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject result = new JSONObject();
 		Long processTaskStepId = jsonObj.getLong("processtaskStepId");
