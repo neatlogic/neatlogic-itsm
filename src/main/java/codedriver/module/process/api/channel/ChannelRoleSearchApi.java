@@ -72,7 +72,7 @@ public class ChannelRoleSearchApi extends ApiComponentBase {
 			for(ChannelRoleVo channelRoleVo : channelRoleVoList) {
 				List<String> typeList = channelRoleVo.getTypeList();
 				if(isSelect.intValue() == 1) {//已选择
-					if(inputTypeList.retainAll(typeList)) {
+					if(typeList.removeAll(inputTypeList)) {
 						roleNameList.add(channelRoleVo.getRoleName());
 					}
 				}else {//未选择
