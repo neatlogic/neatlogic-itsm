@@ -960,6 +960,20 @@
 		`processtask_step_id` = #{processTaskStepId}
 		AND `user_id` = #{userId}
 	</update>
+	
+	<update id="updateProcessTaskStatus" parameterType="codedriver.module.process.dto.ProcessTaskVo">
+		UPDATE
+		`processtask`
+		SET
+		`status` = #{status},
+		<choose>
+			<when test="status == 'succeed' or status == 'failed' or status == 'aborted'">
+				`end_time` = NOW(3)
+			</when>
+		</choose>
+		WHERE
+		`id` = #{id}
+	</update>
 
 	<delete id="deleteProcessTaskAttributeValueByProcessTaskIdAndAttributeUuid">
 		DELETE

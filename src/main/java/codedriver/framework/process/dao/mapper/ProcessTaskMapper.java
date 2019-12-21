@@ -124,6 +124,8 @@ public interface ProcessTaskMapper {
 
 	public int updateProcessTaskStepStatus(ProcessTaskStepVo processTaskStepVo);
 
+	public int updateProcessTaskStatus(ProcessTaskVo processTaskVo);
+	
 	public int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId") Long fromProcessTaskStepId, @Param("toProcessTaskStepId") Long toProcessTaskStepId, @Param("isHit") Integer isHit);
 
 	public int updateProcessTaskStepConvergeIsCheck(@Param("isCheck") Integer isCheck, @Param("convergeId") Long convergeId, @Param("processTaskStepId") Long processTaskStepId);

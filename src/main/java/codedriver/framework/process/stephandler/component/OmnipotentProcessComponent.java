@@ -258,7 +258,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myAbort(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskAbortException {
+	protected int myAbort(ProcessTaskStepVo currentProcessTaskStepVo){
 		// TODO Auto-generated method stub
 		return 0;
 	}

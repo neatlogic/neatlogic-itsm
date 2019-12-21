@@ -392,7 +392,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			throw new ProcessTaskRuntimeException("流程步骤未激活");
 		}
 		/** 判断工单步骤状态是否 “未开始” **/
-		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
+		if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
 			throw new ProcessTaskRuntimeException("当前步骤处理人已开始处理，你没权限处理当前步骤。");
 		}
 		/** 校验用户是否有开始操作权限 **/
@@ -446,7 +446,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			throw new ProcessTaskRuntimeException("流程步骤未激活");
 		}
 		/** 状态是否为 “进行中” **/
-		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
+		if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
 			throw new ProcessTaskRuntimeException("步骤状态不是进行中");
 		}
 		/** 校验用户是否有“完成”权限 **/
@@ -470,7 +470,28 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		/** 更新用户状态**/
 		processTaskMajorUser.setStatus(ProcessTaskStatus.SUCCEED.getValue());
 		processTaskMapper.updateProcessTaskStepUserStatus(processTaskMajorUser);
-		// TODO 记录audit
+		/** 处理历史记录 **/
+		saveProcessTaskStepAudit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
+		/** 流转到下一步 **/
+		List<ProcessTaskStepVo> nextStepList = getNext(currentProcessTaskStepVo);
+		if(nextStepList.size() == 0) {
+			ProcessTaskVo processTaskVo = new ProcessTaskVo();
+			processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
+			processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+			processTaskMapper.updateProcessTaskStatus(processTaskVo);
+		}else {
+			for (ProcessTaskStepVo nextStep : nextStepList) {
+				IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
+				doNext(new ProcessStepThread(nextStep) {
+					@Override
+					public void execute() {
+						nextStepHandler.active(nextStep);
+					}
+	
+				});
+			}
+		}
+		// TODO timecost
 		
 		// TODO notify
 		return 0;
@@ -487,11 +508,49 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 
 	@Override
 	public final int abort(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
+		/** 获得工单步骤行锁 **/
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepLockById(currentProcessTaskStepVo.getId());
+		/** 检查步骤是否 “已激活” **/
+		if (!processTaskStepVo.getIsActive().equals(1)) {
+			throw new ProcessTaskRuntimeException("流程步骤未激活");
+		}
+		/** 状态是否为 “进行中” **/
+		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.HUNG.getValue())&&!processTaskStepVo.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue())) {
+			throw new ProcessTaskRuntimeException("步骤状态无法取消，请刷新后重试");
+		}
+		/** 校验用户是否有“取消”权限 **/ //TODO 权限干预的取消终止工单
+		ProcessTaskStepUserVo processTaskMajorUser = null;
+		List<ProcessTaskStepUserVo> processTaskUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(),ProcessTaskStepUserType.MAJOR.getValue());
+		if(processTaskUserList != null) {
+			List<ProcessTaskStepUserVo> processTaskCurrentUserList = processTaskUserList.stream().filter(user -> user.getUserId().equals(UserContext.get().getUserId())).collect(Collectors.toList());
+			if(processTaskCurrentUserList == null || processTaskCurrentUserList.size() == 0) {
+				throw new ProcessTaskRuntimeException("您不是当前步骤的处理人，没有权限处理");
+			}else {
+				processTaskMajorUser = processTaskCurrentUserList.get(0);
+			}
+		}else {
+			throw new ProcessTaskRuntimeException("步骤没有处理人，请先'开始'步骤");
+		}
+		/** 组件完成动作 **/
+		myAbort(currentProcessTaskStepVo);
+		/** 更新工单步骤状态为 “已取消” **/
+		processTaskStepVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
+		processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
+		/** 更新用户状态**/
+		processTaskMajorUser.setStatus(ProcessTaskStatus.ABORTED.getValue());
+		processTaskMapper.updateProcessTaskStepUserStatus(processTaskMajorUser);
+		/** 更新工单状态 **/
+		ProcessTaskVo procesTaskVo = new ProcessTaskVo();
+		procesTaskVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
+		procesTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskMapper.updateProcessTaskStatus(procesTaskVo);
+		// TODO 记录audit
+		
+		// TODO notify
 		return 1;
 	}
 
-	protected abstract int myAbort(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskAbortException;
+	protected abstract int myAbort(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	@Override
 	public final int accept(ProcessTaskStepVo currentProcessTaskStepVo) {
