@@ -25,7 +25,7 @@ public class CatalogMoveApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "catalog/move";
+		return "process/catalog/move";
 	}
 
 	@Override

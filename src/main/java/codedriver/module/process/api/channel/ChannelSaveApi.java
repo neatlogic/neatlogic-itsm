@@ -39,7 +39,7 @@ public class ChannelSaveApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "channel/save";
+		return "process/channel/save";
 	}
 
 	@Override

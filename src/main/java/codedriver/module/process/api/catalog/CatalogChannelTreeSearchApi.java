@@ -35,7 +35,7 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "catalog/channel/tree/search";
+		return "process/catalog/channel/tree/search";
 	}
 
 	@Override

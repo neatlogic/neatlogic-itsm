@@ -29,7 +29,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "catalog/save";
+		return "process/catalog/save";
 	}
 
 	@Override

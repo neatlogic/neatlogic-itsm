@@ -20,6 +20,8 @@ public class ChannelRoleVo extends BasePageVo{
 	private Integer isSelect;
 	private List<String> typeList;
 	
+	List<String> roleNameList;
+	
 	public String getChannelUuid() {
 		return channelUuid;
 	}
@@ -61,5 +63,11 @@ public class ChannelRoleVo extends BasePageVo{
 	}
 	public void setTypeList(List<String> typeList) {
 		this.typeList = typeList;
+	}
+	public List<String> getRoleNameList() {
+		return roleNameList;
+	}
+	public void setRoleNameList(List<String> roleNameList) {
+		this.roleNameList = roleNameList;
 	}
 }

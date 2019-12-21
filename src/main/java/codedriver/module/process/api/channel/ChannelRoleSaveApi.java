@@ -26,7 +26,7 @@ public class ChannelRoleSaveApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "channel/role/save";
+		return "process/channel/role/save";
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package codedriver.module.process.api.channel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class ChannelRoleSearchApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "channel/role/search";
+		return "process/channel/role/search";
 	}
 
 	@Override
@@ -45,7 +46,7 @@ public class ChannelRoleSearchApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务通道uuid"),
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "模糊匹配角色名"),
-		@Param(name = "isSelect", type = ApiParamType.ENUM, isRequired = false, desc = "1:已选择，0：未选择，不传查全部"),
+		@Param(name = "isSelect", type = ApiParamType.ENUM, isRequired = false, desc = "1:已选择，0：未选择，不传查全部", rule = "0,1"),
 		@Param(name = "typeList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "权限类型，多选列表"),
 		@Param(name = "typeList[0]", type = ApiParamType.ENUM, isRequired = false, desc = "权限类型", rule = "report,selfreport,replace,search"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
@@ -62,20 +63,43 @@ public class ChannelRoleSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
-		ChannelRoleVo channelRoleVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelRoleVo>() {});
-		if(channelRoleVo.getNeedPage()) {
-			int rowNum = channelMapper.searchChannelRoleNameCount(channelRoleVo);
-			int pageCount = PageUtil.getPageCount(rowNum, channelRoleVo.getPageSize());
-			channelRoleVo.setPageCount(pageCount);
-			channelRoleVo.setRowNum(rowNum);
-			resultObj.put("currentPage", channelRoleVo.getCurrentPage());
-			resultObj.put("pageSize", channelRoleVo.getPageSize());
+		List<String> roleNameList = new ArrayList<>();
+		ChannelRoleVo channelRole = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelRoleVo>() {});
+		Integer isSelect = channelRole.getIsSelect();
+		List<String> inputTypeList = channelRole.getTypeList();
+		if(isSelect != null && inputTypeList != null && inputTypeList.size() > 0) {
+			List<ChannelRoleVo> channelRoleVoList = channelMapper.getChannelRoleListByChannelUuid(channelRole.getChannelUuid());
+			for(ChannelRoleVo channelRoleVo : channelRoleVoList) {
+				List<String> typeList = channelRoleVo.getTypeList();
+				if(isSelect.intValue() == 1) {//已选择
+					if(inputTypeList.retainAll(typeList)) {
+						roleNameList.add(channelRoleVo.getRoleName());
+					}
+				}else {//未选择
+					if(typeList.containsAll(inputTypeList)) {
+						roleNameList.add(channelRoleVo.getRoleName());
+					}
+				}
+			}
+			if(roleNameList.size() > 0) {
+				channelRole.setRoleNameList(roleNameList);			
+			}
+		}
+		
+		if(channelRole.getNeedPage()) {
+			int rowNum = channelMapper.searchChannelRoleCount(channelRole);
+			int pageCount = PageUtil.getPageCount(rowNum, channelRole.getPageSize());
+			channelRole.setPageCount(pageCount);
+			channelRole.setRowNum(rowNum);
+			resultObj.put("currentPage", channelRole.getCurrentPage());
+			resultObj.put("pageSize", channelRole.getPageSize());
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
 		}
-		List<String> roleNameList = channelMapper.searchChannelRoleNameList(channelRoleVo);
-		List<ChannelRoleVo> channelRoleList = channelMapper.searchChannelRoleList(roleNameList, channelRoleVo.getChannelUuid());
-		return channelRoleList;
+		List<ChannelRoleVo> channelRoleList = channelMapper.searchChannelRoleList(channelRole);
+		resultObj.put("roleList", channelRoleList);
+		
+		return resultObj;
 	}
 
 }

@@ -30,7 +30,7 @@ public class ChannelMoveApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "channel/move";
+		return "process/channel/move";
 	}
 
 	@Override

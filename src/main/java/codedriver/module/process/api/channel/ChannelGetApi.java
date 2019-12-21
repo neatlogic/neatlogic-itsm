@@ -29,7 +29,7 @@ public class ChannelGetApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "channel/get";
+		return "process/channel/get";
 	}
 
 	@Override

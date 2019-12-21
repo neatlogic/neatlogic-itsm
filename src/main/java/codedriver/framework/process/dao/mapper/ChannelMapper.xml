@@ -76,7 +76,7 @@
 	WHERE `uuid` = #{uuid}
 	</select>
 	
-	<select id="searchChannelRoleNameCount" resultType="int">
+	<select id="searchChannelRoleCount" resultType="int">
 	SELECT 
 	count(DISTINCT r.`name`) 
 	FROM `role` r
@@ -85,45 +85,22 @@
 	<if test="keyword != null">
 	AND r.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if>
-	<if test="isSelect != null">
-	AND cr.`type` 
+	<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
+	AND r.`name` 
 		<if test="isSelect == 0">
 		NOT
 		</if>
 	IN 
-		<foreach collection="typeList" item="type" open="(" close=")" separator=",">
-		#{type}
+		<foreach collection="roleNameList" item="roleName" open="(" close=")" separator=",">
+		#{roleName}
 		</foreach>
 	</if>
 	</select>
 	
-	<select id="searchChannelRoleNameList" resultType="java.lang.String">
-	SELECT 
-	DISTINCT r.`name` 
-	FROM role r 
-	LEFT JOIN channel_role cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid} 
-	WHERE 1=1 
 	
-	<if test="keyword != null">
-	AND r.`name` LIKE CONCAT('%',#{keyword},'%')
-	</if>
-	<if test="isSelect != null">
-	AND cr.`type` 
-		<if test="isSelect == 0">
-		NOT
-		</if>
-	IN 
-		<foreach collection="typeList" item="type" open="(" close=")" separator=",">
-		#{type}
-		</foreach>
-	</if>
-	<if test="needPage">
-	limit #{startNum}, #{pageSize}
-	</if>
-	</select>
 	
 	<resultMap type="codedriver.module.process.dto.ChannelRoleVo" id="channelRoleMap">
-		<id column="roleName" property="roleName"/>
+		<id column="role_name" property="roleName"/>
 		<result column="roleDesc" property="roleDesc"/>
 		<collection property="typeList" ofType="java.lang.String">
 			<id column="type"/>
@@ -131,16 +108,36 @@
 	</resultMap>
 	<select id="searchChannelRoleList" resultMap="channelRoleMap">
 	SELECT 
-	r.`name` AS roleName, 
+	r.`name` AS role_name, 
 	r.`description` AS roleDesc,
 	cr.`type`
 	FROM role r
 	LEFT JOIN channel_role cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid}
-	WHERE 
-	r.`name` IN 
-	<foreach collection="roleNameList" item="roleName" open="(" close=")" separator=",">
-	#{roleName}
-	</foreach>
+	WHERE 1=1 
+	<if test="keyword != null">
+	AND r.`name` LIKE CONCAT('%',#{keyword},'%')
+	</if>
+	<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
+	AND r.`name` 
+		<if test="isSelect == 0">
+		NOT
+		</if>
+	IN 
+		<foreach collection="roleNameList" item="roleName" open="(" close=")" separator=",">
+		#{roleName}
+		</foreach>
+	</if>
+	<if test="needPage">
+	limit #{startNum}, #{pageSize}
+	</if>
+	</select>
+	
+	<select id="getChannelRoleListByChannelUuid" resultMap="channelRoleMap">
+	SELECT 
+	cr.`role_name`,
+	cr.`type`  
+	FROM channel_role cr  
+	WHERE cr.`channel_uuid`=#{channelUuid}		
 	</select>
 	
 	<select id="getMaxSortByParentUuid" resultType="int">

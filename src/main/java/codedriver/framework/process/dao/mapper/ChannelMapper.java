@@ -16,11 +16,11 @@ public interface ChannelMapper {
 
 	ChannelVo getChannelByUuid(String channelUuid);
 
-	int searchChannelRoleNameCount(ChannelRoleVo channelRoleVo);
+	int searchChannelRoleCount(ChannelRoleVo channelRoleVo);
 	
-	List<String> searchChannelRoleNameList(ChannelRoleVo channelRoleVo);
+	List<ChannelRoleVo> searchChannelRoleList(ChannelRoleVo channelRoleVo);
 	
-	List<ChannelRoleVo> searchChannelRoleList(@Param("roleNameList")List<String> roleNameList, @Param("channelUuid")String channelUuid);	
+	List<ChannelRoleVo> getChannelRoleListByChannelUuid(String channelUuid);
 	
 	int getMaxSortByParentUuid(String parentUuid);
 

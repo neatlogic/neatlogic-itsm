@@ -32,7 +32,7 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "catalog/delete";
+		return "process/catalog/delete";
 	}
 
 	@Override

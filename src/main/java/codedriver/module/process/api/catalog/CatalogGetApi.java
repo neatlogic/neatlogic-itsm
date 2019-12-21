@@ -27,7 +27,7 @@ public class CatalogGetApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "catalog/get";
+		return "process/catalog/get";
 	}
 
 	@Override

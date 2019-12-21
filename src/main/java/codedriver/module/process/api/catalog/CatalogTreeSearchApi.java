@@ -29,7 +29,7 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "catalog/tree/search";
+		return "process/catalog/tree/search";
 	}
 
 	@Override

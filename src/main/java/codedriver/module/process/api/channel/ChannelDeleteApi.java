@@ -23,7 +23,7 @@ public class ChannelDeleteApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "channel/delete";
+		return "process/channel/delete";
 	}
 
 	@Override
