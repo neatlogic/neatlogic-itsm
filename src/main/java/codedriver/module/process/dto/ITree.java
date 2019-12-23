@@ -19,8 +19,6 @@ public interface ITree {
 	void setParent(ITree parent);
 	void setOpenCascade(boolean open);
 	void setSelectedCascade(boolean selected);
-	String getNextUuid();
-	void setNextUuid(String nextUuid);
 	Integer getSort();
 	void setSort(Integer sort);	
 	String getType();
