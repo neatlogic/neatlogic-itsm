@@ -1013,4 +1013,14 @@
 			AND `action` != #{action}
 		</if>
 	</delete>
+	
+	<delete id="deleteProcessTaskStepUser" >
+		DELETE
+		FROM
+		`processtask_step_user`
+		WHERE `processtask_step_id` = #{processtaskStepId}
+		<if test="userType != null and userType != ''">
+			AND `user_type` != #{userType}
+		</if>
+	</delete>
 </mapper>

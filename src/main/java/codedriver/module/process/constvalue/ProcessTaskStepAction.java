@@ -1,7 +1,7 @@
 package codedriver.module.process.constvalue;
 
 public enum ProcessTaskStepAction {
-	INIT("init", "上报"), COMPLETE("complete", "完成"), ACCEPT("accept", "接受"), ABORT("abort", "终止"), TRANSFER("transfer", "转交");
+	INIT("init", "上报"), START("start", "开始"),COMPLETE("complete", "完成"), ACCEPT("accept", "接受"), ABORT("abort", "终止"), TRANSFER("transfer", "转交");
 
 	private String status;
 	private String text;
