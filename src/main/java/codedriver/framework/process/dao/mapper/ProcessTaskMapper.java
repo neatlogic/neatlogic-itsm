@@ -79,7 +79,9 @@ public interface ProcessTaskMapper {
 	public int insertProcessTaskForm(ProcessTaskFormVo processTaskFormVo);
 
 	public int insertProcessTask(ProcessTaskVo processTaskVo);
-
+	
+	public int insertProcessTaskChannel(ProcessTaskVo processTaskVo);
+	
 	public int insertProcessTaskContent(ProcessTaskContentVo processTaskContentVo);
 
 	public int insertProcessTaskStep(ProcessTaskStepVo processTaskStepVo);

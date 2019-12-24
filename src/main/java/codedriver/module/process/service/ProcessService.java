@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import codedriver.module.process.dto.ProcessConfigHistoryVo;
 import codedriver.module.process.dto.ProcessFormVo;
 import codedriver.module.process.dto.ProcessStepAttributeVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
@@ -27,4 +28,7 @@ public interface ProcessService {
 
 	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo);
 
+	public ProcessConfigHistoryVo getProcessConfigHistoryByMd(String historyMd);
+	
+	public int saveProcessConfigHistory(ProcessConfigHistoryVo processConfigHistoryVo);
 }
