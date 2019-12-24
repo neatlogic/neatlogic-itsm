@@ -11,24 +11,42 @@ import org.apache.commons.lang3.StringUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.restful.annotation.EntityField;
 import codedriver.module.process.constvalue.ProcessStepType;
 
 public class ProcessVo implements Serializable {
 	private static final long serialVersionUID = 4684015408674741157L;
 	
+	@EntityField(name = "流程uuid", type = ApiParamType.STRING)
 	private String uuid;
+	
+	@EntityField(name = "流程名称", type = ApiParamType.STRING)
 	private String name;
-	private String type;
+	
+	@EntityField(name = "流程类型id", type = ApiParamType.LONG)
+	private Long type;
+	
+	@EntityField(name = "流程类型名称", type = ApiParamType.STRING)
 	private String typeName;
+	
+	@EntityField(name = "是否激活", type = ApiParamType.STRING)
 	private Integer isActive = 1;
+	
+	@EntityField(name = "流程图配置", type = ApiParamType.STRING)
 	private String config;
+	
 	private String belong;
+	
 	private JSONObject configObj;
 	private JSONArray attributeObjList;
+//	@EntityField(name = "流程表单uuid", type = ApiParamType.STRING)
 	private String formUuid;
 	private List<ProcessStepVo> stepList;
+	
+//	@EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessAttributeVo> attributeList;
 	private List<ProcessStepRelVo> stepRelList;
 	private boolean isAttributeListSorted = false;
@@ -52,11 +70,11 @@ public class ProcessVo implements Serializable {
 		this.name = name;
 	}
 
-	public String getType() {
+	public Long getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(Long type) {
 		this.type = type;
 	}
 

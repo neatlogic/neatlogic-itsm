@@ -18,8 +18,9 @@
 	 	AND `is_active` = #{isActive}
 	 </if>
 	 <if test="parentUuid != null">
-	 	and `parent_uuid` = #{parentUuid}
+	 	AND `parent_uuid` = #{parentUuid}
 	 </if>
+	 ORDER BY `sort`
 	</select>
 	
 	<select id="getCatalogByUuid" resultType="codedriver.module.process.dto.CatalogVo">
@@ -36,4 +37,41 @@
 	  `catalog`
 	 where `uuid` = #{uuid}
 	</select>
+	
+	<select id="getMaxSortByParentUuid" resultType="int">
+	SELECT  IFNULL(MAX(`sort`), 0) FROM `catalog` WHERE `parent_uuid` = #{parentUuid}
+	</select>
+	
+	<select id="getCatalogRoleNameListByCatalogUuid" resultType="java.lang.String">
+	SELECT `role_name` FROM `catalog_role` WHERE `catalog_uuid` = #{catalogUuid}
+	</select>
+	
+	<select id="checkCatalogIsExists" resultType="int">
+	SELECT COUNT(`uuid`) FROM `catalog` where `uuid`=#{uuid}
+	</select>
+	
+	<insert id="replaceCatalog">
+	REPLACE INTO `catalog`(`uuid`, `name`, `parent_uuid`, `is_active`, `icon`, `color`, `desc`, `sort`) 
+	VALUES(#{uuid}, #{name}, #{parentUuid}, #{isActive}, #{icon}, #{color}, #{desc}, #{sort})
+	</insert>
+	
+	<insert id="insertCatalogRole">
+	INSERT INTO `catalog_role`(`catalog_uuid`, `role_name`) VALUES(#{catalogUuid}, #{roleName})
+	</insert>
+	
+	<update id="updateAllNextCatalogSortForMove">
+	UPDATE `catalog` SET `sort` = `sort` + 1 WHERE `parent_uuid` = #{parentUuid} AND `sort` >= #{sort} 
+	</update>
+	
+	<update id="updateCatalogForMove">
+	UPDATE `catalog` SET `parent_uuid` = #{parentUuid}, `sort` = #{sort} WHERE `uuid` = #{uuid}
+	</update>
+	
+	<delete id="deleteCatalogByUuid">
+	DELETE FROM `catalog` WHERE `uuid` = #{uuid}
+	</delete>
+	
+	<delete id="deleteCatalogRoleByUuid">
+	DELETE FROM `catalog_role` WHERE `catalog_uuid` = #{catalogUuid}
+	</delete>
 </mapper>

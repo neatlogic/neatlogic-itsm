@@ -26,7 +26,12 @@ public class AttributeWorkerPolicyHandler implements IWorkerPolicyHandler {
 	public String getType() {
 		return WorkerPolicy.ATTRIBUTE.getValue();
 	}
-
+	
+	@Override
+	public String getName() {
+		return WorkerPolicy.ATTRIBUTE.getText();
+	}
+	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 

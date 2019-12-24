@@ -47,7 +47,15 @@ public class ChannelVo extends BasePageVo implements ITree{
 	
 	private transient String userId;
 	
-	private transient String nextUuid;
+	private String processUuid;
+	
+	private String worktimeUuid;
+	
+	private Long time;
+	
+	private List<String> priorityUuidList;
+	
+	private String defaultPriorityUuid;
 	
 	@Override
 	public String getUuid() {
@@ -140,14 +148,7 @@ public class ChannelVo extends BasePageVo implements ITree{
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-	@Override
-	public String getNextUuid() {
-		return nextUuid;
-	}
-	@Override
-	public void setNextUuid(String nextUuid) {
-		this.nextUuid = nextUuid;
-	}
+	
 	@Override
 	public Integer getSort() {
 		return sort;
@@ -190,5 +191,34 @@ public class ChannelVo extends BasePageVo implements ITree{
 	public String getType() {
 		return type;
 	}
-	
+	public String getProcessUuid() {
+		return processUuid;
+	}
+	public void setProcessUuid(String processUuid) {
+		this.processUuid = processUuid;
+	}
+	public String getWorktimeUuid() {
+		return worktimeUuid;
+	}
+	public void setWorktimeUuid(String worktimeUuid) {
+		this.worktimeUuid = worktimeUuid;
+	}
+	public Long getTime() {
+		return time;
+	}
+	public void setTime(Long time) {
+		this.time = time;
+	}
+	public List<String> getPriorityUuidList() {
+		return priorityUuidList;
+	}
+	public void setPriorityUuidList(List<String> priorityUuidList) {
+		this.priorityUuidList = priorityUuidList;
+	}
+	public String getDefaultPriorityUuid() {
+		return defaultPriorityUuid;
+	}
+	public void setDefaultPriorityUuid(String defaultPriorityUuid) {
+		this.defaultPriorityUuid = defaultPriorityUuid;
+	}	
 }

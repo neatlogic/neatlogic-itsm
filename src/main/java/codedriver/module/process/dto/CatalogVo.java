@@ -42,9 +42,9 @@ public class CatalogVo extends BasePageVo implements ITree{
 	@EntityField(name = "类型", type = ApiParamType.STRING)
 	private String type = "catalog";
 	
-	private transient ITree parent;
+	private List<String> roleNameList;
 	
-	private transient String nextUuid;
+	private transient ITree parent;
 	
 	private transient Integer sort;
 	
@@ -159,15 +159,6 @@ public class CatalogVo extends BasePageVo implements ITree{
 			parent.setSelectedCascade(selected);
 		}
 	}
-	@Override
-	public String getNextUuid() {
-		return nextUuid;
-	}
-
-	@Override
-	public void setNextUuid(String nextUuid) {
-		this.nextUuid = nextUuid;		
-	}
 
 	@Override
 	public Integer getSort() {
@@ -182,6 +173,14 @@ public class CatalogVo extends BasePageVo implements ITree{
 	@Override
 	public String getType() {
 		return type;
+	}
+
+	public List<String> getRoleNameList() {
+		return roleNameList;
+	}
+
+	public void setRoleNameList(List<String> roleNameList) {
+		this.roleNameList = roleNameList;
 	}
 
 }

@@ -14,6 +14,7 @@ import codedriver.module.process.dto.ProcessStepTimeoutPolicyVo;
 import codedriver.module.process.dto.ProcessStepUserVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessStepWorkerPolicyVo;
+import codedriver.module.process.dto.ProcessTypeVo;
 import codedriver.module.process.dto.ProcessVo;
 
 public interface ProcessMapper {
@@ -35,6 +36,8 @@ public interface ProcessMapper {
 
 	public List<ProcessStepVo> searchProcessStep(ProcessStepVo processStepVo);
 
+	public List<ProcessTypeVo> getAllProcessType();
+	
 	public int replaceProcess(ProcessVo processVo);
 
 	public int insertProcessStep(ProcessStepVo processStepVo);
@@ -74,4 +77,5 @@ public interface ProcessMapper {
 	public int deleteProcessStepTimeoutPolicyByProcessUuid(String processUuid);
 
 	public int deleteProcessStepFormAttributeByProcessUuid(String processUuid);
+
 }

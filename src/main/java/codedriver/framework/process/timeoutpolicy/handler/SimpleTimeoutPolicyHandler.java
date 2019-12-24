@@ -21,6 +21,10 @@ public class SimpleTimeoutPolicyHandler implements ITimeoutPolicyHandler {
 		return TimeoutPolicy.SIMPLE.getValue();
 	}
 
+	public String getName() {
+		return TimeoutPolicy.SIMPLE.getText();
+	}
+	
 	public Boolean execute(ProcessTaskStepTimeoutPolicyVo timeoutPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		if (timeoutPolicyVo.getConfigObj() != null) {
 			String uuid = timeoutPolicyVo.getConfigObj().getString("uuid");
