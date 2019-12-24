@@ -50,6 +50,14 @@
 	SELECT COUNT(`uuid`) FROM `catalog` where `uuid`=#{uuid}
 	</select>
 	
+	<select id="getHasActiveChannelCatalogUuidList" resultType="java.lang.String">
+	SELECT 
+	ca.`uuid` 
+	FROM catalog ca
+	JOIN channel ch ON ch.`parent_uuid`=ca.`uuid` AND ch.`is_active` = 1
+	WHERE ca.`is_active` = 1
+	</select>
+	
 	<insert id="replaceCatalog">
 	REPLACE INTO `catalog`(`uuid`, `name`, `parent_uuid`, `is_active`, `icon`, `color`, `desc`, `sort`) 
 	VALUES(#{uuid}, #{name}, #{parentUuid}, #{isActive}, #{icon}, #{color}, #{desc}, #{sort})
