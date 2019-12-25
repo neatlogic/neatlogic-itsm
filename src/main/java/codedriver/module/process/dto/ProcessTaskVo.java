@@ -29,7 +29,12 @@ public class ProcessTaskVo {
 	public ProcessTaskVo() {
 
 	}
-
+	
+	public ProcessTaskVo(Long _id,String _status) {
+		this.id = _id;
+		this.status = _status;
+	}
+	
 	public ProcessTaskVo(Long _id) {
 		this.id = _id;
 	}

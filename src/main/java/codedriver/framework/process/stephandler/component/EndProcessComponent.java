@@ -83,7 +83,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -95,13 +95,31 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myAbort(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskAbortException {
+	protected int myAbort(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int mySave(ProcessTaskStepVo currentProcessTaskStepVo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected int myComment(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

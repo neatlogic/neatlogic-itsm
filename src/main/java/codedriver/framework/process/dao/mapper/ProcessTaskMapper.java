@@ -38,7 +38,7 @@ public interface ProcessTaskMapper {
 
 	public Long getProcessTaskStepContentIdByProcessTaskStepId(Long processTaskStepId);
 
-	public List<ProcessTaskStepUserVo> getProcessTaskStepUserByStepId(Long processTaskStepId);
+	public List<ProcessTaskStepUserVo> getProcessTaskStepUserByStepId(@Param("processTaskStepId") Long processTaskStepId, @Param("userType") String userType);
 
 	public List<ProcessTaskStepVo> searchProcessTaskStep(ProcessTaskStepVo processTaskStepVo);
 
@@ -55,6 +55,8 @@ public interface ProcessTaskMapper {
 	public List<ProcessTaskStepWorkerVo> getProcessTaskStepWorkerByProcessTaskStepId(Long processTaskStepId);
 
 	public Long getProcessTaskLockById(Long processTaskId);
+	
+	public ProcessTaskStepVo getProcessTaskStepLockById(Long processTaskStepId);
 
 	public int checkProcessTaskConvergeIsExists(ProcessTaskConvergeVo processTaskStepConvergeVo);
 
@@ -124,15 +126,22 @@ public interface ProcessTaskMapper {
 
 	public int updateProcessTaskStepStatus(ProcessTaskStepVo processTaskStepVo);
 
+	public int updateProcessTaskStatus(ProcessTaskVo processTaskVo);
+	
 	public int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId") Long fromProcessTaskStepId, @Param("toProcessTaskStepId") Long toProcessTaskStepId, @Param("isHit") Integer isHit);
 
 	public int updateProcessTaskStepConvergeIsCheck(@Param("isCheck") Integer isCheck, @Param("convergeId") Long convergeId, @Param("processTaskStepId") Long processTaskStepId);
 
 	public int updateProcessTaskStepUserStatus(ProcessTaskStepUserVo processTaskStepUserVo);
-
+	
 	public int deleteProcessTaskAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId") Long processTaskId, @Param("attributeUuid") String attributeUuid);
 
 	public int deleteProcessTaskFormAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId") Long processTaskId, @Param("attributeUuid") String attributeUuid);
 
 	public int deleteProcessTaskStepWorker(ProcessTaskStepWorkerVo processTaskStepWorkerVo);
+	
+	public int deleteProcessTaskStepOtherWorker(@Param("userId") String userId,@Param("action") String action);
+	
+	public int deleteProcessTaskStepUser(@Param("action") String action);
+
 }

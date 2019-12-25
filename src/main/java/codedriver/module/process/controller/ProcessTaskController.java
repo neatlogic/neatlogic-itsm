@@ -120,7 +120,7 @@ public class ProcessTaskController {
 				startTaskStep.setParamObj(paramObj);
 				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startStepVo.getHandler());
 				if (handler != null) {
-					handler.init(startTaskStep,processTaskVo);
+					handler.init(startTaskStep);
 				}
 			}
 			ReturnJson.success(response);

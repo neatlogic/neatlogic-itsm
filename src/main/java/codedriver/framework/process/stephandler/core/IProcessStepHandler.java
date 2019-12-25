@@ -184,6 +184,28 @@ public interface IProcessStepHandler {
 	 * @return int
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
-	public int init(ProcessTaskStepVo processTaskStepVo,ProcessTaskVo processTaskVo);
+	public int init(ProcessTaskStepVo processTaskStepVo);
+	
+	/**
+	* @Author: 
+	* @Time:
+	* @Description: 回退步骤 
+	* @param @param processTaskStepVo
+	* @param @return 
+	* @return int
+	 */
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
+	public int back(ProcessTaskStepVo processTaskStepVo);
+	
+	/**
+	* @Author: 
+	* @Time:
+	* @Description: 回复 
+	* @param @param processTaskStepVo
+	* @param @return 
+	* @return int
+	 */
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
+	public int comment(ProcessTaskStepVo processTaskStepVo);
 
 }
