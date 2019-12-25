@@ -157,6 +157,10 @@
 	SELECT COUNT(`uuid`) FROM `channel` where `uuid`=#{uuid}
 	</select>
 	
+	<select id="checkCatalogIsDuplicateName" resultType="int">
+	SELECT COUNT(1) FROM `channel` where name=#{name} AND `uuid`!=#{uuid}
+	</select>
+	
 	<insert id="replaceChannel">
 	REPLACE INTO `channel` (
 	  `uuid`,

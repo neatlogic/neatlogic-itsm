@@ -15,6 +15,7 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.exception.CatalogNotFoundException;
+import codedriver.framework.process.exception.ChannelDuplicateNameException;
 import codedriver.framework.process.exception.ChannelIllegalParameterException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -54,7 +55,7 @@ public class ChannelSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "服务通道uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "服务通道名称"),
+		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "服务通道名称", length = 30, xss = true),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired = true, desc = "父级uuid"),
 		@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作流uuid"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活", rule = "0,1"),
@@ -79,6 +80,9 @@ public class ChannelSaveApi extends ApiComponentBase {
 		String parentUuid = channelVo.getParentUuid();
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
+		}
+		if(channelMapper.checkCatalogIsDuplicateName(channelVo) > 0) {
+			throw new ChannelDuplicateNameException(channelVo.getName());
 		}
 		int sort;
 		String uuid = channelVo.getUuid();

@@ -19,6 +19,8 @@ public interface CatalogMapper {
 	int checkCatalogIsExists(String catalogUuid);
 
 	List<String> getHasActiveChannelCatalogUuidList();
+
+	int checkCatalogIsDuplicateName(CatalogVo catalogVo);
 	
 	int replaceCatalog(CatalogVo catalogVo);
 

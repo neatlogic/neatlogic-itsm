@@ -343,6 +343,10 @@
 		SELECT `id`, `name` FROM `process_type`
 	</select>
 	
+	<select id="checkProcessIsDuplicateName" resultType="int">
+	SELECT count(1) FROM `process` WHERE name=#{name} AND uuid != #{uuid}
+	</select>
+	
 	<insert id="insertProcessStepTimeoutPolicy" parameterType="codedriver.module.process.dto.ProcessStepTimeoutPolicyVo">
 		INSERT INTO `process_step_timeout_policy` (
 		`process_uuid`,

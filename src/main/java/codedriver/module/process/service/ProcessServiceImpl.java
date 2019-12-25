@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.exception.ProcessDuplicateNameException;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.dto.ProcessAttributeVo;
 import codedriver.module.process.dto.ProcessConfigHistoryVo;
@@ -69,6 +70,9 @@ public class ProcessServiceImpl implements ProcessService {
 
 	@Override
 	public int saveProcess(ProcessVo processVo) {
+		if(processMapper.checkProcessIsDuplicateName(processVo) > 0) {
+			throw new ProcessDuplicateNameException(processVo.getName());
+		}
 		if (processMapper.checkProcessIsExists(processVo.getUuid()) > 0) {
 			processMapper.deleteProcessAttributeByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessStepWorkerPolicyByProcessUuid(processVo.getUuid());

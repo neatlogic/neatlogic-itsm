@@ -12,6 +12,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.exception.CatalogDuplicateNameException;
 import codedriver.framework.process.exception.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -44,7 +45,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 	
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "服务目录uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired= true, desc = "服务目录名称"),
+		@Param(name = "name", type = ApiParamType.STRING, isRequired= true, desc = "服务目录名称", length = 30, xss = true),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired= true, desc = "父级uuid"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, isRequired= true, desc = "是否激活", rule = "0,1"),
 		@Param(name = "icon", type = ApiParamType.STRING, isRequired= false, desc = "图标"),
@@ -64,6 +65,9 @@ public class CatalogSaveApi extends ApiComponentBase {
 		String parentUuid = catalogVo.getParentUuid();
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
+		}
+		if(catalogMapper.checkCatalogIsDuplicateName(catalogVo) > 0) {
+			throw new CatalogDuplicateNameException(catalogVo.getName());
 		}
 		int sort;
 		String uuid = catalogVo.getUuid();
