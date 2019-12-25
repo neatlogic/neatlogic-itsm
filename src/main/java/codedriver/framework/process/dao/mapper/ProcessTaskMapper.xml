@@ -78,24 +78,6 @@
 		WHERE
 		processtask_step_id = #{value}
 	</select>
-
-	<select id="getProcessTaskStepUserByStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepUserVo">
-		SELECT
-		`processtask_id` as processTaskId,
-		`processtask_step_id` as processTaskStepId,
-		`user_id` as userId,
-		`user_type` as userType,
-		`user_name` as userName,
-		`status` as status,
-		`action`,
-		DATE_FORMAT(`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
-		DATE_FORMAT(`end_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
-		DATE_FORMAT(`active_time`,'%Y-%m-%d %H:%i:%s') AS activeTime
-		FROM
-		`processtask_step_user`
-		WHERE
-		processtask_step_id = #{value}
-	</select>
 	
 	<select id="getProcessTaskStepUserByStepId" resultType="codedriver.module.process.dto.ProcessTaskStepUserVo">
 		SELECT
