@@ -281,4 +281,10 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
+	@Override
+	protected int myComment(ProcessTaskStepVo currentProcessTaskStepVo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

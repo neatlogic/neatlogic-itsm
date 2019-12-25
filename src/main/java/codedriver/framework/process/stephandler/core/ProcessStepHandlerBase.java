@@ -587,7 +587,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.HUNG.getValue())&&!processTaskStepVo.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue())) {
 			throw new ProcessTaskRuntimeException("步骤状态无法取消，请刷新后重试");
 		}
-		/** 校验用户是否有“取消”权限 **/
+		/** 校验用户是否有“转交”权限 **/
 		authHandleRole(currentProcessTaskStepVo.getId(),ProcessTaskStepAction.TRANSFER);
 		/** 判断是否转交到人或组 **/
 		JSONArray toUserList = currentProcessTaskStepVo.getParamObj().getJSONArray("userList");
@@ -633,9 +633,29 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 	}
 	
 	protected abstract int myBack(ProcessTaskStepVo currentProcessTaskStepVo);
-
+	
+	@Override
+	public final int comment(ProcessTaskStepVo currentProcessTaskStepVo) {
+		/** 保存回复内容 **/
+		
+		
+		/** 保存附件 **/
+		
+		myComment(currentProcessTaskStepVo);
+		return 0;
+	}
+	
+	protected abstract int myComment(ProcessTaskStepVo currentProcessTaskStepVo);
+	
 	@Override
 	public final int save(ProcessTaskStepVo currentProcessTaskStepVo) {
+		/** 暂存表单信息 **/
+		
+		/** 暂存回复内容 **/
+		
+		/** 暂存附件 **/
+		
+		
 		return 0;
 	}
 
