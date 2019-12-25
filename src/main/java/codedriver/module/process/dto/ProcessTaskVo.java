@@ -22,6 +22,8 @@ public class ProcessTaskVo {
 	private Long timeCost;
 	private String timeCostStr;
 	private String expireTime;
+	private String channelUuid;
+	private String processMd;
 	private List<ProcessTaskStepVo> stepList;
 
 	public ProcessTaskVo() {
@@ -32,7 +34,7 @@ public class ProcessTaskVo {
 		this.id = _id;
 		this.status = _status;
 	}
-
+	
 	public ProcessTaskVo(Long _id) {
 		this.id = _id;
 	}
@@ -179,6 +181,22 @@ public class ProcessTaskVo {
 
 	public void setExpireTime(String expireTime) {
 		this.expireTime = expireTime;
+	}
+
+	public String getChannelUuid() {
+		return channelUuid;
+	}
+
+	public void setChannelUuid(String channelUuid) {
+		this.channelUuid = channelUuid;
+	}
+
+	public String getProcessMd() {
+		return processMd;
+	}
+
+	public void setProcessMd(String processMd) {
+		this.processMd = processMd;
 	}
 
 }

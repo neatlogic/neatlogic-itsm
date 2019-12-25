@@ -27,7 +27,7 @@
 		SELECT
 		`config`
 		FROM
-		`bsm`.`processtask_step_config`
+		`processtask_step_config`
 		WHERE `processtask_step_id` = #{value}
 	</select>
 
@@ -811,6 +811,7 @@
 		INSERT INTO `processtask` (
 		`title`,
 		`process_uuid`,
+		`process_md`,
 		`status`,
 		`config`,
 		`start_time`,
@@ -822,12 +823,25 @@
 		(
 		#{title,typeHandler=XssHandler},
 		#{processUuid},
+		#{processMd},
 		#{status},
 		#{config},
 		NOW(3),
 		#{owner},
 		#{reporter},
 		#{expireTime}
+		)
+	</insert>
+
+	<insert id="insertProcessTaskChannel" parameterType="codedriver.module.process.dto.ProcessTaskVo">
+		INSERT INTO `processtask_channel` (
+		`processtask_id`,
+		`channel_uuid`
+		)
+		VALUES
+		(
+		#{id},
+		#{channelUuid}
 		)
 	</insert>
 

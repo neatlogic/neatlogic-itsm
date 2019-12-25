@@ -679,6 +679,12 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			}
 			if (paramObj.containsKey("owner")) {
 				processTaskVo.setOwner(paramObj.getString("owner"));
+			} 			
+			if (paramObj.containsKey("channelUuid")) {
+				processTaskVo.setChannelUuid(paramObj.getString("channelUuid"));
+			}
+			if (paramObj.containsKey("processMd")) {
+				processTaskVo.setProcessMd(paramObj.getString("processMd"));
 			} else {
 				processTaskVo.setOwner(UserContext.get().getUserId());
 			}
@@ -690,6 +696,12 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		processTaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		processTaskMapper.insertProcessTask(processTaskVo);
 
+		
+		/** 写入关联通道 **/
+		if(processTaskVo.getChannelUuid()!=null) {
+			processTaskMapper.insertProcessTaskChannel(processTaskVo);
+		}
+		
 		/** 写入流程属性 **/
 		if (processVo.getAttributeList() != null && processVo.getAttributeList().size() > 0) {
 			// List<ProcessTaskAttributeVo> processTaskAttributeList = new
@@ -802,7 +814,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				currentProcessTaskStepVo.setError(ex.getMessage());
 			}
 			/** 加入上报人为处理人，让处理人可以处理异常 **/
-			ProcessTaskStepWorkerVo processTaskStepWorkerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), processTaskVo.getReporter());
+			ProcessTaskStepWorkerVo processTaskStepWorkerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(),processTaskVo.getReporter());
 			processTaskMapper.insertProcessTaskStepWorker(processTaskStepWorkerVo);
 		} finally {
 			processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);

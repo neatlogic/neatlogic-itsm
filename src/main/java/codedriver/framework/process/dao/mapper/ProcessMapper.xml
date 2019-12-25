@@ -32,6 +32,18 @@
 		WHERE
 		process_uuid = #{processUuid}
 	</select>
+	
+	<select id="getProcessConfigHistoryByMd" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessConfigHistoryVo">
+		SELECT
+		`process_md` AS processMd,
+		`history_process_config` AS historyProcessConfig
+		FROM
+		`process_config_history`
+		WHERE
+		process_md = #{historyMd}
+	</select>
+	
+	
 
 	<resultMap id="processStepDetailMap" type="codedriver.module.process.dto.ProcessStepVo">
 		<id column="processUuid" property="processUuid" />
@@ -537,6 +549,19 @@
 		REPLACE INTO `process_form` (`process_uuid`, `form_uuid`)
 		VALUES
 		(#{processUuid}, #{formUuid})
+	</insert>
+	
+	
+	<insert id="insertProcessConfigHistory" parameterType="codedriver.module.process.dto.ProcessConfigHistoryVo">
+		INSERT INTO `process_config_history` (
+		`process_md`,
+		`history_process_config`
+		)
+		VALUES
+		(
+		#{processMd},
+		#{historyProcessConfig}
+		)
 	</insert>
 
 	<delete id="deleteProcessAttributeByProcessUuid" parameterType="java.lang.String">

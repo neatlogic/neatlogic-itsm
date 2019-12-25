@@ -28,6 +28,7 @@ import codedriver.module.process.dto.ProcessTaskFormVo;
 import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskVo;
 import codedriver.module.process.service.ProcessService;
 import codedriver.module.process.service.ProcessTaskService;
 
@@ -110,6 +111,7 @@ public class ProcessTaskController {
 	@RequestMapping(value = "/{uuid}/startnewtask")
 	public void startNewProcessTask(@PathVariable("uuid") String uuid, @RequestBody JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) {
 		try {
+			ProcessTaskVo processTaskVo = new ProcessTaskVo();
 			Map<String, String[]> paramMap = request.getParameterMap();
 			ProcessStepVo startStepVo = processService.getProcessStartStep(uuid);
 			if (startStepVo != null) {

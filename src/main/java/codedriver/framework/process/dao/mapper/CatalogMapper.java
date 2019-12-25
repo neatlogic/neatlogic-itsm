@@ -17,6 +17,8 @@ public interface CatalogMapper {
 	List<String> getCatalogRoleNameListByCatalogUuid(String catalogUuid);
 	
 	int checkCatalogIsExists(String catalogUuid);
+
+	List<String> getHasActiveChannelCatalogUuidList();
 	
 	int replaceCatalog(CatalogVo catalogVo);
 

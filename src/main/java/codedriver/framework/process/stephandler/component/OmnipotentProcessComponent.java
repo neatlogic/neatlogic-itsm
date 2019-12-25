@@ -286,5 +286,4 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
 }
