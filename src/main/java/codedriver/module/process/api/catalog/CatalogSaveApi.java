@@ -43,7 +43,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "服务目录uuid"),
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "服务目录uuid"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired= true, desc = "服务目录名称"),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired= true, desc = "父级uuid"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, isRequired= true, desc = "是否激活", rule = "0,1"),
@@ -56,7 +56,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "服务目录uuid")
 		})
-	@Description(desc = "服务目录删除接口")
+	@Description(desc = "服务目录保存信息接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		CatalogVo catalogVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<CatalogVo>() {});
