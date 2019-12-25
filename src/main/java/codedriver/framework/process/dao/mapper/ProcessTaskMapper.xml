@@ -672,7 +672,7 @@
 		`processtask_id`,
 		`processtask_step_id`,
 		`user_id`,
-		`team_id`,
+		`team_uuid`,
 		`role_name`,
 		`action`
 		)
@@ -681,7 +681,7 @@
 		#{processTaskId},
 		#{processTaskStepId},
 		#{userId},
-		#{teamId},
+		#{teamUuid},
 		#{roleName},
 		#{action}
 		)

@@ -115,7 +115,9 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 			int rowNum = calalogBreadcrumbList.size();
 			int pageCount = PageUtil.getPageCount(rowNum, pageSize);
 			int startNum = Math.max((currentPage - 1) * pageSize, 0);
-			resultObj.put("breadcrumbList", calalogBreadcrumbList.subList(startNum, startNum+pageSize));
+			int endNum = startNum + pageSize;
+			endNum = endNum >  rowNum ? rowNum : endNum;
+			resultObj.put("breadcrumbList", calalogBreadcrumbList.subList(startNum, endNum));
 			resultObj.put("currentPage", currentPage);
 			resultObj.put("pageSize", pageSize);
 			resultObj.put("pageCount", pageCount);
