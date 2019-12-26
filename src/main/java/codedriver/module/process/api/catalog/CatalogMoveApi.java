@@ -80,7 +80,10 @@ public class CatalogMoveApi extends ApiComponentBase {
 		String parentUuidTemp = parentUuid;
 		do {
 			CatalogVo parent = catalogMapper.getCatalogByUuid(parentUuidTemp);
-			parentUuidTemp = parent.getUuid();
+			if(parent == null) {
+				throw new CatalogIllegalParameterException("将服务目录：" + uuid + "的parentUuid设置为：" + parentUuid + "会导致该目录脱离根目录");
+			}
+			parentUuidTemp = parent.getParentUuid();
 			if(parentUuid.equals(parentUuidTemp)) {
 				throw new CatalogIllegalParameterException("将服务目录：" + uuid + "的parentUuid设置为：" + parentUuid + "会导致该目录脱离根目录");
 			}
