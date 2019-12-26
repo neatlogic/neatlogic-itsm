@@ -1,5 +1,7 @@
 package codedriver.module.process.api.channel;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +42,7 @@ public class ChannelRoleSaveApi extends ApiComponentBase {
 	}
 	@Input({
 		@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired= true, desc = "服务通道uuid"),
-		@Param(name = "roleName", type = ApiParamType.STRING, isRequired= true, desc = "角色名"),
+		@Param(name = "roleNameList", type = ApiParamType.JSONARRAY, isRequired= true, desc = "角色名列表"),
 		@Param(name = "type", type = ApiParamType.ENUM, isRequired= true, desc = "权限类型", rule = "report,selfreport,replace,search"),
 		@Param(name = "action", type = ApiParamType.ENUM, isRequired= true, desc = "1：授权，0：取消", rule = "0,1")
 		})
@@ -52,12 +54,19 @@ public class ChannelRoleSaveApi extends ApiComponentBase {
 			throw new ChannelNotFoundException(channelRole.getChannelUuid());
 		}
 		int action = jsonObj.getIntValue("action");
-		if(action == 1) {
-			// TODO linbq判断角色是否存在
-			channelMapper.replaceChannelRole(channelRole);
-		}else {
-			channelMapper.deleteChannelRole(channelRole);
+		List<String> roleNameList = channelRole.getRoleNameList();
+		if(roleNameList != null && roleNameList.size() > 0) {
+			for(String roleName : roleNameList) {
+				// TODO linbq判断角色是否存在
+				channelRole.setRoleName(roleName);
+				if(action == 1) {					
+					channelMapper.replaceChannelRole(channelRole);
+				}else {
+					channelMapper.deleteChannelRole(channelRole);
+				}
+			}
 		}
+		
 		return null;
 	}
 
