@@ -50,7 +50,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		@Param(name = "isActive", type = ApiParamType.ENUM, isRequired= true, desc = "是否激活", rule = "0,1"),
 		@Param(name = "icon", type = ApiParamType.STRING, isRequired= false, desc = "图标"),
 		@Param(name = "color", type = ApiParamType.STRING, isRequired= false, desc = "颜色"),
-		@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "描述"),
+		@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "描述", length = 200, xss = true),
 		@Param(name = "roleNameList", type = ApiParamType.JSONARRAY, isRequired= false, desc = "角色列表"),
 		@Param(name = "roleNameList[0]", type = ApiParamType.STRING, isRequired= false, desc = "角色名")
 		})

@@ -61,7 +61,7 @@ public class ChannelSaveApi extends ApiComponentBase {
 		@Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活", rule = "0,1"),
 		@Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作时间窗口uuid"),
 		@Param(name = "time", type = ApiParamType.INTEGER, desc = "通道时效"),
-		@Param(name = "desc", type = ApiParamType.STRING, desc = "通道说明"),
+		@Param(name = "desc", type = ApiParamType.STRING, desc = "通道说明", length = 200, xss = true),
 		@Param(name = "icon", type = ApiParamType.STRING, desc = "图标"),
 		@Param(name = "color", type = ApiParamType.STRING, desc = "颜色"),
 		@Param(name = "allow_desc", type = ApiParamType.ENUM, isRequired = true, desc = "是否显示上报页描述", rule = "0,1"),
