@@ -459,24 +459,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		
 		return processTaskStepHandleUser;
 	}
-	
-	/**
-	 *  保存回复 	
-	 * @param currentProcessTaskStepVo
-	 * @param paramObj
-	 * @return
-	 */
-	private ProcessTaskStepVo saveContent(ProcessTaskStepVo currentProcessTaskStepVo) {
-		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-		if (paramObj != null && paramObj.containsKey("content") && StringUtils.isNotBlank(paramObj.getString("content"))) {
-			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(paramObj.getString("content"));
-			processTaskMapper.insertProcessTaskContent(contentVo);
-			processTaskMapper.insertProcessTaskStepContent(currentProcessTaskStepVo.getId(), contentVo.getId());
-			currentProcessTaskStepVo.setContentId(contentVo.getId());
-		}
-		return currentProcessTaskStepVo;
-	}
-	
+		
 	@Override
 	public final int complete(ProcessTaskStepVo currentProcessTaskStepVo){
 		/** 获得工单步骤行锁 **/
@@ -493,8 +476,6 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		ProcessTaskStepUserVo processTaskMajorUser = authHandleRole(currentProcessTaskStepVo.getId(),ProcessTaskStepAction.COMPLETE);
 		/** 组件完成动作 **/
 		myComplete(currentProcessTaskStepVo);
-		/** 保存内容 **/
-		saveContent(currentProcessTaskStepVo);
 		/** 更新工单步骤状态为 “已成功” **/
 		processTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
 		processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
@@ -555,8 +536,6 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		authHandleRole(currentProcessTaskStepVo.getId(),ProcessTaskStepAction.ABORT);
 		/** 组件完成动作 **/
 		myAbort(currentProcessTaskStepVo);
-		/** 保存内容 **/
-		saveContent(currentProcessTaskStepVo);
 		/** 更新工单步骤状态为 “已取消” **/
 		processTaskStepVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
 		processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
