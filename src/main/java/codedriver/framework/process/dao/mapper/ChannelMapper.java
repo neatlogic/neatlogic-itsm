@@ -27,6 +27,8 @@ public interface ChannelMapper {
 	List<ChannelPriorityVo> getChannelPriorityListByChannelUuid(String uuid);
 	
 	int checkChannelIsExists(String channelUuid);
+
+	int checkCatalogIsDuplicateName(ChannelVo channelVo);
 	
 	int replaceChannelUser(@Param("userId")String userId, @Param("channelUuid")String channelUuid);	
 

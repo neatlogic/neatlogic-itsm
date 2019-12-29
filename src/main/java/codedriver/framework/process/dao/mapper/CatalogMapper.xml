@@ -58,6 +58,10 @@
 	WHERE ca.`is_active` = 1
 	</select>
 	
+	<select id="checkCatalogIsDuplicateName" resultType="int">
+	SELECT COUNT(1) FROM `catalog` where `name`=#{name} AND `uuid`!=#{uuid}
+	</select>
+	
 	<insert id="replaceCatalog">
 	REPLACE INTO `catalog`(`uuid`, `name`, `parent_uuid`, `is_active`, `icon`, `color`, `desc`, `sort`) 
 	VALUES(#{uuid}, #{name}, #{parentUuid}, #{isActive}, #{icon}, #{color}, #{desc}, #{sort})

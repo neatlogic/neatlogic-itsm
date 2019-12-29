@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.exception.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -26,7 +27,7 @@ import codedriver.module.process.dto.ITree;
 public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 
 	@Autowired
-	private CatalogMapper catatlogMapper;
+	private CatalogMapper catalogMapper;
 	
 	@Override
 	public String getToken() {
@@ -62,10 +63,13 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String catalogUuid = jsonObj.getString("catalogUuid");
+		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
+			throw new CatalogNotFoundException(catalogUuid);
+		}
 		CatalogVo catalogVo = new CatalogVo();
 		catalogVo.setIsActive(1);
-		List<CatalogVo> catalogList = catatlogMapper.getCatalogList(catalogVo);
-		List<String> hasActiveChannelCatalogUuidList = catatlogMapper.getHasActiveChannelCatalogUuidList();
+		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
+		List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList();
 		List<ITree> treeList = new ArrayList<>(catalogList);
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
 		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
@@ -115,7 +119,9 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 			int rowNum = calalogBreadcrumbList.size();
 			int pageCount = PageUtil.getPageCount(rowNum, pageSize);
 			int startNum = Math.max((currentPage - 1) * pageSize, 0);
-			resultObj.put("breadcrumbList", calalogBreadcrumbList.subList(startNum, startNum+pageSize));
+			int endNum = startNum + pageSize;
+			endNum = endNum >  rowNum ? rowNum : endNum;
+			resultObj.put("breadcrumbList", calalogBreadcrumbList.subList(startNum, endNum));
 			resultObj.put("currentPage", currentPage);
 			resultObj.put("pageSize", pageSize);
 			resultObj.put("pageCount", pageCount);

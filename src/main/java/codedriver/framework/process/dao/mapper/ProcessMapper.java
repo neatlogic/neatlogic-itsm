@@ -40,6 +40,8 @@ public interface ProcessMapper {
 	public List<ProcessStepVo> searchProcessStep(ProcessStepVo processStepVo);
 
 	public List<ProcessTypeVo> getAllProcessType();
+
+	public int checkProcessIsDuplicateName(ProcessVo processVo);
 	
 	public int replaceProcess(ProcessVo processVo);
 

@@ -14,6 +14,7 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.exception.ChannelNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -65,10 +66,14 @@ public class ChannelRoleSearchApi extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		List<String> roleNameList = new ArrayList<>();
 		ChannelRoleVo channelRole = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelRoleVo>() {});
+		String channelUuid = channelRole.getChannelUuid();
+		if(channelMapper.checkChannelIsExists(channelUuid) == 0) {
+			throw new ChannelNotFoundException(channelUuid);
+		}
 		Integer isSelect = channelRole.getIsSelect();
 		List<String> inputTypeList = channelRole.getTypeList();
 		if(isSelect != null && inputTypeList != null && inputTypeList.size() > 0) {
-			List<ChannelRoleVo> channelRoleVoList = channelMapper.getChannelRoleListByChannelUuid(channelRole.getChannelUuid());
+			List<ChannelRoleVo> channelRoleVoList = channelMapper.getChannelRoleListByChannelUuid(channelUuid);
 			for(ChannelRoleVo channelRoleVo : channelRoleVoList) {
 				List<String> typeList = channelRoleVo.getTypeList();
 				if(isSelect.intValue() == 1) {//已选择
