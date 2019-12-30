@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.process.dao.mapper.WorktimeMapper">
+
+	<resultMap id="worktimeMap" type="codedriver.module.process.dto.WorktimeVo">
+		<id column=uuid" property="uuid"/>
+		<result column="name" property="name"/>
+		<result column="is_active" property="isActive"/>
+		<result column="lcu" property="lcu"/>
+		<result column="lcd" property=""/>
+		<collection property="worktimeDefineList" ofType="codedriver.module.process.dto.WorktimeDefineVo">
+			<result column="worktime_uuid" property="worktimeUuid"/>
+			<result column="weekday" property="weekday"/>
+			<result column="start_time" property="startTime"/>
+			<result column="end_time" property="endTime"/>
+		</collection>
+	</resultMap>
+
+	<select id="" resultMap="worktimeMap">
+	SELECT 
+	  wt.`uuid`,
+	  wt.`name`,
+	  wt.`is_active` AS isActive,
+	  wt.`lcu`,
+	  wt.`lcd`,
+	  wtd.`worktime_uuid` AS worktimeUuid,
+	  wtd.`weekday`,
+	  wtd.`start_time` AS startTime,
+	  wtd.`end_time` AS endTime
+	FROM `worktime` wt
+	JOIN `worktime_define` wtd
+	WHERE wt.`uuid` = #{uuid}
+	</select>
+
+	<select id="checkWorktimeIsExists" resultType="int">
+	SELECT COUNT(`uuid`) FROM `worktime` WHERE `uuid`=#{uuid}
+	</select>
+
+	<select id="searchWorktimeList" resultType="codedriver.module.process.dto.WorktimeVo">
+	SELECT 
+	  wt.`uuid`,
+	  wt.`name`,
+	  wt.`is_active` AS isActive,
+	  wt.`lcu`,
+	  wt.`lcd`
+	FROM `worktime` wt
+	WHERE 1 = 1
+	<if test="isActive != null">
+	AND wt.`is_active` = #{isActive}
+	</if>
+	</select>
+
+	<select id="getWorktimeDetailListByWorktimeUuid" resultType="codedriver.module.process.dto.WorktimeDetailVo">
+	SELECT 
+	  `work_year` AS workYear,
+	  `work_date` AS workDate,
+	  `worktime_uuid` AS `worktimeUuid`,
+	  `work_start` AS workStart,
+	  `work_end` AS workEnd
+	FROM
+	  `worktime_detail` 
+	WHERE `worktime_uuid` = #{worktimeUuid}
+	</select>
+	
+
+	<select id="getWorktimeDateList" resultType="java.lang.String">
+	SELECT 
+	  DISTINCT `work_date`
+	FROM
+	  `worktime_detail` 
+	WHERE `worktime_uuid` = #{worktimeUuid} 
+	AND `work_year` = #{workYear}
+	</select>
+
+	<insert id="insertWorktime">
+	INSERT INTO `worktime` ( `uuid`, `name`, `is_active`, `lcu`, `lcd` ) 
+	VALUES ( #{uuid}, #{name}, #{isActive}, #{lcu}, now()})
+	</insert>
+
+	<insert id="insertBatchWorktimeDefine">
+	INSERT INTO `worktime_define` ( `worktime_uuid`, `weekday`, `start_time`, `end_time` ) 
+	VALUES 
+	<foreach collection="worktimeDefineList" item="worktimeDefine" open="(" close=")" separator=",">
+	#{worktimeDefine.worktimeUuid}, #{worktimeDefine.weekday}, #{worktimeDefine.startTime}, #{worktimeDefine.endTime}
+	</foreach>
+	</insert>
+
+	<insert id="insertBatchWorktimeDetail">
+	INSERT INTO `worktime_detail` ( `work_year`, `work_date`, `worktime_uuid`, `work_start`, `work_end` ) 
+	VALUES
+	<foreach collection="worktimeDetailList" item="worktimeDetail" open="(" close=")" separator=",">
+	#{worktimeDetail.workYear}, #{worktimeDetail.workDate}, #{worktimeDetail.worktimeUuid}, #{worktimeDetail.workStart}, #{worktimeDetail.workEnd}
+	</foreach>
+	</insert>
+
+	<update id="updateWorktime">
+	UPDATE 
+	`worktime` 
+	SET
+	  `uuid` = #{uuid},
+	  `name` = #{name},
+	  `is_active` = #{isActive},
+	  `lcu` = #{lcu},
+	  `lcd` = now() 
+	WHERE `uuid` = #{uuid}
+	</update>
+
+	<delete id="deleteWorktimeByUuid">
+	DELETE FROM `worktime` WHERE `uuid`=#{uuid}
+	</delete>
+
+	<delete id="deleteWorktimeDefineByWorktimeUuid">
+	DELETE FROM `worktime_define` WHERE `worktime_uuid` = #{worktimeUuid}
+	</delete>
+
+	<delete id="deleteWorktimeDetail">
+	delete from `worktime_detail` 
+	where `worktime_uuid` = #{worktimeUuid}
+	<if test="workYear != null">
+	AND `work_year` = #{workYear}
+	</if>
+	</delete>
+</mapper>
