@@ -30,19 +30,17 @@ public interface ProcessMapper {
 	public List<ProcessStepAttributeVo> getProcessStepAttributeByStepUuid(ProcessStepAttributeVo processStepAttributeVo);
 
 	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo);
-	
+
 	public ProcessVo getProcessByUuid(String processUuid);
 
 	public ProcessVo getProcessBaseInfoByUuid(String processUuid);
-	
-	public ProcessTaskConfigVo getProcessConfigHistoryByMd(String historyMd);
 
 	public List<ProcessStepVo> searchProcessStep(ProcessStepVo processStepVo);
 
 	public List<ProcessTypeVo> getAllProcessType();
 
 	public int checkProcessIsDuplicateName(ProcessVo processVo);
-	
+
 	public int replaceProcess(ProcessVo processVo);
 
 	public int insertProcessStep(ProcessStepVo processStepVo);
@@ -62,10 +60,10 @@ public interface ProcessMapper {
 	public int insertProcessStepWorkerPolicy(ProcessStepWorkerPolicyVo processStepWorkerPolicyVo);
 
 	public int insertProcessStepAttribute(ProcessStepAttributeVo processStepAttributeVo);
-	
-	public int insertProcessConfigHistory(ProcessTaskConfigVo processConfigHistoryVo);
 
-	public int replaceProcessForm(@Param("processUuid") String processUuid, @Param("formUuid") String formUuid);
+	public int replaceProcessForm(@Param("processUuid")
+	String processUuid, @Param("formUuid")
+	String formUuid);
 
 	public int deleteProcessStepByProcessUuid(String processUuid);
 

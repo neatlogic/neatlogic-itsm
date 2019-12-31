@@ -132,14 +132,5 @@ public class ProcessServiceImpl implements ProcessService {
 		return processMapper.getProcessStepAttributeByStepUuid(processStepAttributeVo);
 	}
 
-	@Override
-	public ProcessTaskConfigVo getProcessConfigHistoryByMd(String historyMd) {
-		return processMapper.getProcessConfigHistoryByMd(historyMd);
-	}
-
-	@Override
-	public int saveProcessConfigHistory(ProcessTaskConfigVo processConfigHistoryVo) {
-		return processMapper.insertProcessConfigHistory(processConfigHistoryVo);
-	}
 
 }
