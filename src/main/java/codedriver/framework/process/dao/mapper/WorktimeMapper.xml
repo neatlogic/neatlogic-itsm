@@ -32,7 +32,7 @@
 	WHERE wt.`uuid` = #{uuid}
 	</select>
 
-	<select id="checkWorktimeIsDuplicateName" resultType="int">
+	<select id="checkWorktimeNameIsRepeat" resultType="int">
 	SELECT COUNT(1) FROM `worktime` WHERE `name` = #{name} AND `uuid` != #{uuid}
 	</select>
 	
