@@ -118,7 +118,7 @@ public class ProcessTaskController {
 				startTaskStep.setParamObj(paramObj);
 				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startStepVo.getHandler());
 				if (handler != null) {
-					handler.init(startTaskStep);
+					handler.startProcess(startTaskStep);
 				}
 				result.put("processTaskId", startTaskStep.getProcessTaskId());
 			}

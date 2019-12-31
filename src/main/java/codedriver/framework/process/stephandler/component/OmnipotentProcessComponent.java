@@ -53,7 +53,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myStart(ProcessTaskStepVo processTaskStepVo){
+	protected int myStart(ProcessTaskStepVo processTaskStepVo) {
 		return 0;
 	}
 
@@ -246,7 +246,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo){
+	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -258,7 +258,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myAbort(ProcessTaskStepVo currentProcessTaskStepVo){
+	protected int myAbort(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -276,7 +276,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) {
+	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -286,4 +286,11 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	@Override
+	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

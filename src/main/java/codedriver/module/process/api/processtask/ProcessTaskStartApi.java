@@ -93,7 +93,7 @@ public class ProcessTaskStartApi extends ApiComponentBase {
 			startTaskStep.setParamObj(jsonObj);
 			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startStepVo.getHandler());
 			if (handler != null) {
-				handler.init(startTaskStep);
+				handler.startProcess(startTaskStep);
 			}
 		}
 		//return "上报成功!";
