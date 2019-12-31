@@ -10,7 +10,7 @@ import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.exception.ProcessNameRepeatException;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.dto.ProcessAttributeVo;
-import codedriver.module.process.dto.ProcessConfigHistoryVo;
+import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessFormVo;
 import codedriver.module.process.dto.ProcessStepAttributeVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
@@ -132,14 +132,5 @@ public class ProcessServiceImpl implements ProcessService {
 		return processMapper.getProcessStepAttributeByStepUuid(processStepAttributeVo);
 	}
 
-	@Override
-	public ProcessConfigHistoryVo getProcessConfigHistoryByMd(String historyMd) {
-		return processMapper.getProcessConfigHistoryByMd(historyMd);
-	}
-
-	@Override
-	public int saveProcessConfigHistory(ProcessConfigHistoryVo processConfigHistoryVo) {
-		return processMapper.insertProcessConfigHistory(processConfigHistoryVo);
-	}
 
 }

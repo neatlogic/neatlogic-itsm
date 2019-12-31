@@ -683,11 +683,6 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 			if (paramObj.containsKey("channelUuid")) {
 				processTaskVo.setChannelUuid(paramObj.getString("channelUuid"));
 			}
-			if (paramObj.containsKey("processMd")) {
-				processTaskVo.setProcessMd(paramObj.getString("processMd"));
-			} else {
-				processTaskVo.setOwner(UserContext.get().getUserId());
-			}
 			processTaskVo.setReporter(UserContext.get().getUserId());
 		}
 		if (StringUtils.isBlank(processTaskVo.getTitle())) {
