@@ -12,7 +12,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
-import codedriver.framework.process.exception.CatalogDuplicateNameException;
+import codedriver.framework.process.exception.CatalogNameRepeatException;
 import codedriver.framework.process.exception.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -67,7 +67,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 			throw new CatalogNotFoundException(parentUuid);
 		}
 		if(catalogMapper.checkCatalogIsDuplicateName(catalogVo) > 0) {
-			throw new CatalogDuplicateNameException(catalogVo.getName());
+			throw new CatalogNameRepeatException(catalogVo.getName());
 		}
 		int sort;
 		String uuid = catalogVo.getUuid();
