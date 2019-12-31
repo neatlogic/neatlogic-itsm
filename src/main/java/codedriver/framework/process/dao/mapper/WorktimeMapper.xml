@@ -3,11 +3,11 @@
 <mapper namespace="codedriver.framework.process.dao.mapper.WorktimeMapper">
 
 	<resultMap id="worktimeMap" type="codedriver.module.process.dto.WorktimeVo">
-		<id column=uuid" property="uuid"/>
+		<id column="uuid" property="uuid"/>
 		<result column="name" property="name"/>
 		<result column="is_active" property="isActive"/>
 		<result column="lcu" property="lcu"/>
-		<result column="lcd" property=""/>
+		<result column="lcd" property="lcd"/>
 		<collection property="worktimeDefineList" ofType="codedriver.module.process.dto.WorktimeDefineVo">
 			<result column="worktime_uuid" property="worktimeUuid"/>
 			<result column="weekday" property="weekday"/>
@@ -16,24 +16,28 @@
 		</collection>
 	</resultMap>
 
-	<select id="" resultMap="worktimeMap">
+	<select id="getWorktimeByUuid" resultMap="worktimeMap">
 	SELECT 
 	  wt.`uuid`,
 	  wt.`name`,
-	  wt.`is_active` AS isActive,
+	  wt.`is_active`,
 	  wt.`lcu`,
 	  wt.`lcd`,
-	  wtd.`worktime_uuid` AS worktimeUuid,
+	  wtd.`worktime_uuid`,
 	  wtd.`weekday`,
-	  wtd.`start_time` AS startTime,
-	  wtd.`end_time` AS endTime
+	  wtd.`start_time`,
+	  wtd.`end_time`
 	FROM `worktime` wt
-	JOIN `worktime_define` wtd
+	JOIN `worktime_define` wtd ON wtd.`worktime_uuid` = wt.`uuid`
 	WHERE wt.`uuid` = #{uuid}
 	</select>
 
+	<select id="checkWorktimeIsDuplicateName" resultType="int">
+	SELECT COUNT(1) FROM `worktime` WHERE `name` = #{name} AND `uuid` != #{uuid}
+	</select>
+	
 	<select id="checkWorktimeIsExists" resultType="int">
-	SELECT COUNT(`uuid`) FROM `worktime` WHERE `uuid`=#{uuid}
+	SELECT COUNT(`uuid`) FROM `worktime` WHERE `uuid` = #{uuid}
 	</select>
 
 	<select id="searchWorktimeList" resultType="codedriver.module.process.dto.WorktimeVo">
@@ -62,7 +66,6 @@
 	WHERE `worktime_uuid` = #{worktimeUuid}
 	</select>
 	
-
 	<select id="getWorktimeDateList" resultType="java.lang.String">
 	SELECT 
 	  DISTINCT `work_date`
@@ -74,22 +77,22 @@
 
 	<insert id="insertWorktime">
 	INSERT INTO `worktime` ( `uuid`, `name`, `is_active`, `lcu`, `lcd` ) 
-	VALUES ( #{uuid}, #{name}, #{isActive}, #{lcu}, now()})
+	VALUES ( #{uuid}, #{name}, #{isActive}, #{lcu}, now())
 	</insert>
 
 	<insert id="insertBatchWorktimeDefine">
 	INSERT INTO `worktime_define` ( `worktime_uuid`, `weekday`, `start_time`, `end_time` ) 
 	VALUES 
-	<foreach collection="worktimeDefineList" item="worktimeDefine" open="(" close=")" separator=",">
-	#{worktimeDefine.worktimeUuid}, #{worktimeDefine.weekday}, #{worktimeDefine.startTime}, #{worktimeDefine.endTime}
+	<foreach collection="list" item="worktimeDefine" separator=",">
+	(#{worktimeDefine.worktimeUuid}, #{worktimeDefine.weekday}, #{worktimeDefine.startTime}, #{worktimeDefine.endTime})
 	</foreach>
 	</insert>
 
 	<insert id="insertBatchWorktimeDetail">
 	INSERT INTO `worktime_detail` ( `work_year`, `work_date`, `worktime_uuid`, `work_start`, `work_end` ) 
 	VALUES
-	<foreach collection="worktimeDetailList" item="worktimeDetail" open="(" close=")" separator=",">
-	#{worktimeDetail.workYear}, #{worktimeDetail.workDate}, #{worktimeDetail.worktimeUuid}, #{worktimeDetail.workStart}, #{worktimeDetail.workEnd}
+	<foreach collection="list" item="worktimeDetail" separator=",">
+	(#{worktimeDetail.workYear}, #{worktimeDetail.workDate}, #{worktimeDetail.worktimeUuid}, #{worktimeDetail.workStart}, #{worktimeDetail.workEnd})
 	</foreach>
 	</insert>
 

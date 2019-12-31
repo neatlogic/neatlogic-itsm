@@ -24,7 +24,7 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "worktime/calendar/get";
+		return "process/worktime/calendar/get";
 	}
 
 	@Override

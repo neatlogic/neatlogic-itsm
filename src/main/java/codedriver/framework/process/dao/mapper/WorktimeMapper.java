@@ -12,6 +12,8 @@ public interface WorktimeMapper {
 	
 	WorktimeVo getWorktimeByUuid(String uuid);
 
+	int checkWorktimeIsDuplicateName(WorktimeVo worktimeVo);
+	
 	int checkWorktimeIsExists(String uuid);
 	
 	List<WorktimeVo> searchWorktimeList(WorktimeVo worktimeVo);

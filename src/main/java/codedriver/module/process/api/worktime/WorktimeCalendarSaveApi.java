@@ -35,7 +35,7 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "worktime/calendar/save";
+		return "process/worktime/calendar/save";
 	}
 
 	@Override
@@ -70,6 +70,7 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 			defineList = weekdayDefineMap.get(weekday);
 			if(defineList == null) {
 				defineList = new ArrayList<>();
+				weekdayDefineMap.put(weekday, defineList);
 			}
 			defineList.add(worktimeDefine);
 		}
@@ -77,14 +78,14 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 		Integer workYear = worktimeDetailVo.getWorkYear();
 		worktimeMapper.deleteWorktimeDetail(worktimeUuid, workYear);
 		
-		SimpleDateFormat sdf = new SimpleDateFormat();
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 		Calendar calendar = Calendar.getInstance();
 		WorktimeDetailVo worktimeDetail = null;
 		List<WorktimeDetailVo> worktimeDetailList = new ArrayList<>();
 		List<String> workDateList = worktimeDetailVo.getWorkDateList();
 		for(String workDate : workDateList) {
-			sdf.applyPattern("yyyy-MM-dd");
-			Date date = sdf.parse(workDate);
+			simpleDateFormat.applyPattern("yyyy-MM-dd");
+			Date date = simpleDateFormat.parse(workDate);
 			calendar.setTime(date);
 			int weekday = calendar.get(Calendar.DAY_OF_WEEK);
 			if(weekday == 1) {
@@ -93,32 +94,26 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 				weekday -= 1;
 			}
 			defineList = weekdayDefineMap.get(weekday);
-			sdf.applyPattern("yyyy-MM-dd H:mm");
+			if(defineList == null) {
+				continue;
+			}
+			simpleDateFormat.applyPattern("yyyy-MM-dd H:mm");
 			for(WorktimeDefineVo worktimeDefine : defineList) {
 				worktimeDetail = new WorktimeDetailVo();
 				worktimeDetail.setWorktimeUuid(worktimeUuid);
 				worktimeDetail.setWorkYear(worktimeDetailVo.getWorkYear());
 				worktimeDetail.setWorkDate(workDate);			
-				worktimeDetail.setWorkStart(sdf.parse(workDate + " " + worktimeDefine.getStartTime()).getTime());
-				worktimeDetail.setWorkEnd(sdf.parse(workDate + " " + worktimeDefine.getEndTime()).getTime());
+				worktimeDetail.setWorkStart(simpleDateFormat.parse(workDate + " " + worktimeDefine.getStartTime()).getTime());
+				worktimeDetail.setWorkEnd(simpleDateFormat.parse(workDate + " " + worktimeDefine.getEndTime()).getTime());
 				worktimeDetailList.add(worktimeDetail);
 				if(worktimeDetailList.size() > 1000) {
 					worktimeMapper.insertBatchWorktimeDetail(worktimeDetailList);
 					worktimeDetailList.clear();
 				}
-			}
+			}	
 		}
+		worktimeMapper.insertBatchWorktimeDetail(worktimeDetailList);
 		return null;
 	}
 
-	public static void main(String[] args) {
-//		SimpleDateFormat sdf = new SimpleDateFormat();
-//		sdf.applyPattern("yyyy-MM-dd");
-//		System.out.println(sdf.format(new Date()));
-//		sdf.applyPattern("yyyy-MM-dd H:mm");
-//		System.out.println(sdf.format(new Date()));
-//		Calendar calendar = Calendar.getInstance();
-//		calendar.setFirstDayOfWeek(Calendar.MONDAY);
-//		System.out.println(calendar.get(Calendar.DAY_OF_WEEK));
-	}
 }
