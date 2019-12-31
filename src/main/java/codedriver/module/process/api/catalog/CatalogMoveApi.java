@@ -15,6 +15,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.CatalogVo;
+import codedriver.module.process.dto.ITree;
 
 @Service
 @Transactional
@@ -74,6 +75,19 @@ public class CatalogMoveApi extends ApiComponentBase {
 		catalogVo.setUuid(uuid);
 		catalogVo.setSort(sort);
 		catalogMapper.updateCatalogForMove(catalogVo);
+		
+		//判断移动后是否会脱离根目录
+		String parentUuidTemp = parentUuid;
+		do {
+			CatalogVo parent = catalogMapper.getCatalogByUuid(parentUuidTemp);
+			if(parent == null) {
+				throw new CatalogIllegalParameterException("将服务目录：" + uuid + "的parentUuid设置为：" + parentUuid + "会导致该目录脱离根目录");
+			}
+			parentUuidTemp = parent.getParentUuid();
+			if(parentUuid.equals(parentUuidTemp)) {
+				throw new CatalogIllegalParameterException("将服务目录：" + uuid + "的parentUuid设置为：" + parentUuid + "会导致该目录脱离根目录");
+			}
+		}while(!ITree.ROOT_UUID.equals(parentUuidTemp));		
 		return null;
 	}
 

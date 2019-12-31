@@ -15,7 +15,7 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.exception.CatalogNotFoundException;
-import codedriver.framework.process.exception.ChannelDuplicateNameException;
+import codedriver.framework.process.exception.ChannelNameRepeatException;
 import codedriver.framework.process.exception.ChannelIllegalParameterException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -82,12 +82,13 @@ public class ChannelSaveApi extends ApiComponentBase {
 			throw new CatalogNotFoundException(parentUuid);
 		}
 		if(channelMapper.checkCatalogIsDuplicateName(channelVo) > 0) {
-			throw new ChannelDuplicateNameException(channelVo.getName());
+			throw new ChannelNameRepeatException(channelVo.getName());
 		}
 		int sort;
 		String uuid = channelVo.getUuid();
 		ChannelVo existedChannel = channelMapper.getChannelByUuid(uuid);
 		if(existedChannel == null) {//新增
+			channelVo.setUuid(null);
 			sort = channelMapper.getMaxSortByParentUuid(parentUuid) + 1;
 		}else {//修改
 			channelMapper.deleteChannelPriorityByChannelUuid(uuid);

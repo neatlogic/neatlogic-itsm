@@ -126,7 +126,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 					}
 				}
 				if (!hasDoingStep) {
-					canFire = true;
+					canFire = true; 
 				}
 			}
 

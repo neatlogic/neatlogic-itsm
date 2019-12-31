@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.exception.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -25,7 +26,7 @@ import codedriver.module.process.dto.ITree;
 public class CatalogTreeSearchApi extends ApiComponentBase {
 	
 	@Autowired
-	private CatalogMapper catatlogMapper;
+	private CatalogMapper catalogMapper;
 	
 	@Override
 	public String getToken() {
@@ -52,10 +53,12 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String catalogUuid = jsonObj.getString("catalogUuid");
-		
+		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
+			throw new CatalogNotFoundException(catalogUuid);
+		}
 		CatalogVo catalogVo = new CatalogVo();
 		catalogVo.setIsActive(1);
-		List<CatalogVo> catalogList = catatlogMapper.getCatalogList(catalogVo);
+		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
 		
 		List<ITree> treeList = new ArrayList<>(catalogList);
 		Map<String, ITree> uuidKeyMap = new HashMap<>();

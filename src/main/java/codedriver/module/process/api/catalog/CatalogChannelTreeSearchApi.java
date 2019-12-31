@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.exception.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -28,7 +29,7 @@ import codedriver.module.process.dto.ITree;
 public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 
 	@Autowired
-	private CatalogMapper catatlogMapper;
+	private CatalogMapper catalogMapper;
 	
 	@Autowired
 	private ChannelMapper channelMapper;
@@ -57,8 +58,11 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 	@Description(desc = "服务目录及通道树查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String catalogUuid = jsonObj.getString("catalogUuid");	
-		List<CatalogVo> catalogList = catatlogMapper.getCatalogList(null);
+		String catalogUuid = jsonObj.getString("catalogUuid");
+		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
+			throw new CatalogNotFoundException(catalogUuid);
+		}
+		List<CatalogVo> catalogList = catalogMapper.getCatalogList(null);
 		List<ChannelVo> channelList = channelMapper.searchChannelList(null);
 		List<ITree> treeList = new ArrayList<>(catalogList.size() + channelList.size());
 		treeList.addAll(catalogList);
