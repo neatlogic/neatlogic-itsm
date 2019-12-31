@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.exception.WorktimeDefineIsEmptyException;
 import codedriver.framework.process.exception.WorktimeNameRepeatException;
@@ -64,6 +65,7 @@ public class WorktimeSaveApi extends ApiComponentBase {
 		if(worktimeMapper.checkWorktimeNameIsRepeat(worktimeVo) > 0) {
 			throw new WorktimeNameRepeatException(worktimeVo.getName());
 		}
+		worktimeVo.setLcu(UserContext.get().getUserId());
 		String uuid = worktimeVo.getUuid();
 		if(worktimeMapper.checkWorktimeIsExists(uuid) == 0) {
 			worktimeVo.setUuid(null);

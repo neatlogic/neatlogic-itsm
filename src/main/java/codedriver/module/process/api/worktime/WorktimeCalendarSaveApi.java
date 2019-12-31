@@ -96,7 +96,7 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 			if(defineList == null) {
 				continue;
 			}
-			simpleDateFormat.applyPattern("yyyy-MM-dd H:mm");
+			simpleDateFormat.applyPattern("yyyy-MM-dd HH:mm");
 			for(WorktimeDefineVo worktimeDefine : defineList) {
 				worktimeDetail = new WorktimeDetailVo();
 				worktimeDetail.setWorktimeUuid(worktimeUuid);
