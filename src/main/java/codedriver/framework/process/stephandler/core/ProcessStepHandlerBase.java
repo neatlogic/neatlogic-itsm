@@ -480,7 +480,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		myStart(currentProcessTaskStepVo);
 		processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
 		/** 删除 workklist 其它可以 “处理” 的人 **/
-		processTaskMapper.deleteProcessTaskStepOtherWorker(UserContext.get().getUserId(), ProcessTaskStepWorkerAction.HANDLE.getValue());
+		//processTaskMapper.deleteProcessTaskStepOtherWorker(UserContext.get().getUserId(), ProcessTaskStepWorkerAction.HANDLE.getValue());
 		/** 处理历史记录 **/
 		saveProcessTaskStepAudit(currentProcessTaskStepVo, ProcessTaskStepAction.START);
 		// TODO notify
