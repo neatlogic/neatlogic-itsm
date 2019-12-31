@@ -95,7 +95,7 @@
 	
 	<select id="calculateCostTime" resultType="long">
 	SELECT 
-	  (SUM(IF(wtd.`work_end` > #{workEnd}, #{workEnd}, wtd.`work_end`)) - SUM(IF(wtd.`work_start` &lt; #{workStart}, #{workStart}, wtd.`work_start`)))
+	  SUM(IF(wtd.`work_end` > #{workEnd}, #{workEnd}, wtd.`work_end`) - IF(wtd.`work_start` &lt; #{workStart}, #{workStart}, wtd.`work_start`))
 	FROM `worktime_detail` wtd
 	WHERE wtd.`worktime_uuid` = #{worktimeUuid}
 	AND wtd.`work_end` >= #{workStart} 
