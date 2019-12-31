@@ -16,6 +16,7 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private Long id;
 	private Long processTaskId;
 	private Long fromProcessTaskStepId;
+	private Long startProcessTaskStepId;
 	private String processUuid;
 	private String processStepUuid;
 	private String name;
@@ -419,6 +420,14 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setFormAttributeList(List<ProcessTaskStepFormAttributeVo> formAttributeList) {
 		this.formAttributeList = formAttributeList;
+	}
+
+	public Long getStartProcessTaskStepId() {
+		return startProcessTaskStepId;
+	}
+
+	public void setStartProcessTaskStepId(Long startProcessTaskStepId) {
+		this.startProcessTaskStepId = startProcessTaskStepId;
 	}
 
 }

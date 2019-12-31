@@ -67,6 +67,20 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
 	public int active(ProcessTaskStepVo processTaskStepVo);
+	
+	/**
+	 * 
+	 * @Author: chenqiwei
+	 * @Time:May 24, 2019
+	 * @Description: 挂起流程步骤
+	 * @param @param
+	 *            workflowStepVo
+	 * @param @return
+	 * @return int
+	 */
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
+	public int hang(ProcessTaskStepVo processTaskStepVo);
+	
 
 	/**
 	 * 
@@ -179,12 +193,12 @@ public interface IProcessStepHandler {
 	/**
 	 * @Author: chenqiwei
 	 * @Time:Aug 7, 2019
-	 * @Description: 创建流程作业
+	 * @Description: 开始流程，将会创建一个作业
 	 * @param @return
 	 * @return int
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
-	public int init(ProcessTaskStepVo processTaskStepVo);
+	public int startProcess(ProcessTaskStepVo processTaskStepVo) ;
 	
 	/**
 	* @Author: 

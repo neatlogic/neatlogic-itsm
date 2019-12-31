@@ -142,6 +142,8 @@ public interface ProcessTaskMapper {
 	
 	public int deleteProcessTaskStepOtherWorker(@Param("userId") String userId,@Param("action") String action);
 	
-	public int deleteProcessTaskStepUser(@Param("action") String action);
+	public int deleteProcessTaskStepUser(@Param("processtaskStepId") Long processtaskStepId, @Param("userType")String userType);
+	
+	public int deleteProcessTaskConvergeByStepId(Long processTaskStepId);
 
 }
