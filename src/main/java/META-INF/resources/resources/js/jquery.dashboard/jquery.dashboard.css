@@ -1,0 +1,142 @@
+.jquery-dashboard {
+	position: relative;
+}
+
+.jquery-dashboard-portlet {
+	margin: 0px;
+	padding: 5px;
+	transition: all .1s ease;
+	z-index: 2;
+	position: absolute;
+	top:0;
+	left:0;
+	moz-user-select: -moz-none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.jquery-dashboard-shadow {
+	opacity: 0.2;
+	position: absolute;
+	z-index: 1;
+	transition: all .1s ease;
+}
+
+.jquery-dashboard-container {
+	width: 100%;
+	height: 100%;
+	padding: 40px 4px 4px 4px;
+	position: relative;
+	border: 1px solid #ddd;
+	background: #fff;
+}
+.jquery-dashboard-container.empty-container{
+    padding: 0;
+    opacity: .8;
+    border-color:#fff;	
+}
+.jquery-dashboard-container.empty-container:hover{
+    opacity: 1;	
+}
+.jquery-dashboard-container.empty-container .jquery-dashboard-header{
+	border:0 none;
+	height:100%;	
+}
+.jquery-dashboard-container.empty-container .jquery-dashboard-header .jquery-dashboard-closer{
+	line-height:22px;
+	height:22px;
+}
+.jquery-dashboard-header {
+	position: absolute;
+	padding: 0px 8px;
+	width: 100%;
+	height: 38px;
+	font-size: 16px;
+	line-height: 40px;
+	border-bottom: 1px solid #eee;
+	text-align: right;
+	top: 0px;
+	left: 0px;
+}
+
+.jquery-dashboard-title {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	padding: 0px 80px 0px 10px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	text-align: left;
+	z-index: 1;
+}
+
+.jquery-dashboard-body {
+	overflow: auto;
+	width: 100%;
+	height: 100%;
+	max-height: none;
+}
+
+.jquery-dashboard-actionicon{
+	color: #555;
+	font-size: 12px;
+	cursor: pointer;
+	margin-left: 5px;
+	position: relative;
+	z-index: 2;
+	display: none;
+}
+.jquery-dashboard-portlet:hover .jquery-dashboard-actionicon{
+	display:inline-block;
+	
+}
+.jquery-dashboard-resizebox {
+	position: absolute;
+	right: -2px;
+	bottom: -2px;
+	opacity: .6;
+	width: 10px;
+	height: 10px;
+	border-bottom: 2px solid #888;
+	border-right: 2px solid #888;
+	cursor: se-resize;
+}
+
+.jquery-dashboard-titleinputer {
+	padding: 3px;
+	border: 1px solid #ddd;
+	width: 100%;
+	height: 100%;
+	font-size: 14px;
+	border-radius: 3px;
+}
+
+.view-container .jquery-dashboard-container.empty-container{
+    opacity: 0;	
+    visibility: hidden;
+}
+.jquery-dashboard-actionicon{
+	height:38px;
+	line-height:38px;
+}
+
+.ts-fullscreen, .ts-normalsize{
+	font-weight:bold;
+	
+}
+
+#formDiv{
+	min-height: 100vh;	
+	background-position: center center;
+	background-size: cover;
+}
+
+.theme-dark .jquery-dashboard-body .emptydatatips{
+	opacity: .2;
+}

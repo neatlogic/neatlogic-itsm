@@ -1,0 +1,12 @@
+<div class="grid-stack-item" data-gs-x="4" data-gs-y="0" data-gs-width="6" data-gs-height="2">
+	<div class="grid-stack-item-content">
+		<label class="grid-col-xs-4 control-label max-width-100" style="line-height: 1.6;">{{=it['form-label']}}：</label>
+		<div class="grid-col-xs-8 grid-text-left">
+				{{~it.radios :value:index}}
+			<div class="radio">
+				<label style="line-height: 1.6;"><input x-check-type="{{=it.required}}" form-label="{{=it['form-label']}}" form-group="{{=it['form-group']}}" type="radio" {{?value.indexOf('|') > 0}}checked{{?}} value="{{?value.indexOf('|') > 0}}{{=value.substring(0, value.indexOf('|'))}}{{??}}{{=value}}{{?}}" name="{{=it.id}}">{{?value.indexOf('|') > 0}}{{=value.substring(0, value.indexOf('|'))}}{{??}}{{=value}}{{?}}</label>
+			</div>
+				{{~}}
+		</div>
+	</div>
+</div>

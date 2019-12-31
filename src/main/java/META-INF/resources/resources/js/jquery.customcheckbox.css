@@ -1,0 +1,203 @@
+.customcheckbox_slide {
+  width: 40px;
+  height: 17px;
+  background: #ffffff;
+  border-radius: 10px;
+  position: relative;
+  display: inline-block;
+}
+.customcheckbox_slide label {
+  display: block;
+  width: 17px;
+  height: 17px;
+  border-radius: 50px;
+  -webkit-transition: all .4s ease;
+  -o-transition: all .4s ease;
+  transition: all .4s ease;
+  cursor: pointer;
+  position: absolute;
+  top: 3px;
+  z-index: 1;
+  left: 4px;
+  -moz-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  background: #fcfff4;
+}
+.customcheckbox_slide label:after {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50px;
+  background: #FF6666;
+  left: 4px;
+  top: 4px;
+  -moz-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 1), 0px 1px 0px rgba(255, 255, 255, 0.9);
+  -webkit-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 1), 0px 1px 0px rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 1), 0px 1px 0px rgba(255, 255, 255, 0.9);
+}
+.customcheckbox_slide input[type=checkbox]:checked + label {
+  left: 19px;
+}
+.customcheckbox_slide input[type=checkbox]:checked + label:after {
+  background: #99CC66;
+}
+.customcheckbox_square,
+.customradio_square {
+  background: transparent;
+  position: relative;
+  display: inline-block;
+  margin: 8px 3px;
+  vertical-align: middle;
+}
+.customcheckbox_square label,
+.customradio_square label {
+  cursor: pointer;
+  margin: 0;
+  color: #ffffff;
+  display: block;
+  border: 1px solid #999999;
+  border-radius: 3px;
+  overflow: hidden;
+  font-family: ts;
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+  text-decoration: inherit;
+  font-variant: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.customradio_square.customradio_disabled label{
+	cursor: not-allowed;
+	opacity: .5;
+}
+.customcheckbox_square label:after,
+.customradio_square label:after {
+  display: block;
+  width: 12px;
+  height: 12px;
+  line-height: 12px;
+  font-size: 12px;
+  text-align: center;
+  opacity: 0;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  filter: alpha(opacity=0);
+  background: #336eff;
+}
+.customcheckbox_square.customcheckbox_disabled input:not(:checked) + label,
+.customradio_square.customcheckbox_disabled input:not(:checked) + label {
+  cursor: not-allowed;
+  opacity: 0.5;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  filter: alpha(opacity=50);
+  background: #ddd;
+}
+.customcheckbox_square.customcheckbox_disabled input:not(:checked) + label:after,
+.customradio_square.customcheckbox_disabled input:not(:checked) + label:after {
+  color: #ddd;
+}
+.customcheckbox_square.customcheckbox_disabled input:checked + label,
+.customradio_square.customcheckbox_disabled input:checked + label {
+  cursor: not-allowed;
+  opacity: 0.5;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  filter: alpha(opacity=50);
+}
+.table .customcheckbox_square,
+.table .customradio_square {
+  margin: 4px 3px;
+}
+.customradio_square label {
+  border-radius: 50%;
+}
+.customcheckbox_square label:after {
+  content: '\eaac';
+}
+.customradio_square label:after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin: 3px;
+}
+.customcheckbox_square label:hover::after {
+  opacity: 0.5;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  filter: alpha(opacity=50);
+}
+.customradio_square label:hover::after {
+  opacity: 0.5;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  filter: alpha(opacity=50);
+}
+.customcheckbox_square input[type=checkbox]:checked + label {
+  border-color: #336eff;
+  background: #336eff;
+}
+.customcheckbox_square input[type=checkbox]:checked + label:after {
+  opacity: 1;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  filter: alpha(opacity=100);
+}
+.customcheckbox_square label:hover {
+  border-color: #336eff;
+  background: #336eff;
+}
+.customradio_square input[type=radio]:checked + label:after {
+  opacity: 1;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  filter: alpha(opacity=100);
+}
+.tsradio_toggle{
+    background: #BFBFBF;
+    min-width: 40px;
+    height: 20px;
+    line-height: 20px;
+    border-radius: 10px;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    vertical-align: middle;
+    margin: 0 4px;
+    padding-left: 24px;
+    padding-right: 0;
+    transition: all .3s linear;
+    border-color: transparent;
+}
+.tsradio_toggle.active{
+    background: #336EFF;
+   	padding-left: 0;
+	padding-right: 24px;	
+}
+.tsradio_toggle.disabled{
+	opacity: .6;
+	cursor: not-allowed;
+}
+
+.tsradio_toggle>input{
+	display: none;
+}
+.tsradio_toggle:after{
+    content: '';
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border-color: transparent;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background: #fff;
+    transition: all .3s linear;
+}
+.tsradio_toggle.active:after{
+	left: 100%;
+    margin-left: -18px;	
+}
+.theme_black{
+	
+	
+}

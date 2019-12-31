@@ -1,0 +1,188 @@
+@import "base.less";
+
+#toast-container {
+	position: fixed;
+	z-index: 999999;
+	&.toast-top-full-width,&.toast-bottom-full-width{
+	   >div{
+	      width: 96%;
+	      margin: auto;
+	   }
+	}
+	&.toast-top-center,&.toast-bottom-center{
+	   >div{
+	      width: 300px;
+	      margin: auto;
+	   }
+	}
+	* {
+	   .box-sizing(border-box);
+    }
+    >div {
+	   position: relative;
+	   overflow: hidden;
+	   margin: 0 0 @body-padding;
+	   padding: @body-padding*2 30px @body-padding*2 50px;
+	   width: 350px;
+	   .border-radius(3px);
+	   color: @color-base;
+	   .box-shadow(0 0 6px 1px rgba(0, 0, 0, 0.2));
+    }
+}
+
+#toast-container>.toast{
+    background-color: @bgcolor-base;
+    .toast-title{
+       font-weight: bold;
+       .fz(16);
+       padding-bottom: @body-padding;
+    }
+    .toast-message{
+      .word-wrap(break-word);
+      label{
+         color: @color-href;
+      }      
+    }
+    >.toast-progress {
+	   position: absolute;
+	   left: 0;
+	   bottom: 0;
+	   height: 4px;
+    }
+    &:before,&.toast-success:before,&.toast-info:before,&.toast-warning:before,&.toast-error:before{
+        position: fixed;
+        font-family: 'FontAwesome';
+        .fz(25);
+        line-height: 25px;
+        float: left;
+        padding-right: 0.5em;
+        margin: 0.2em 0.5em auto -1.2em;
+    }
+    &.toast-success {
+        &:before{
+           content: "\f058";
+           color:@color-success;
+        }
+        >.toast-title {
+           color:@color-success;
+        }
+        >.toast-progress {
+           background-color: @color-success;
+        }
+    }
+    &.toast-info {
+        &:before{
+           content: "\f059";
+           color:@color-primary;
+        }
+        >.toast-title {
+           color:@color-primary;
+        }
+        >.toast-progress {
+           background-color: @color-primary;
+        }
+    }
+    &.toast-warning {
+       &:before{
+          content: "\f06a";
+          color:@color-warning;
+       }
+       >.toast-title {
+           color:@color-warning; 
+       }
+       >.toast-progress {
+           background-color: @color-warning; 
+       }
+    }
+    &.toast-error { 
+      &:before{
+           content: "\f057";
+           color:@color-danger;
+        }
+      >.toast-title {
+           color:@color-danger;
+       }
+      >.toast-progress {
+           background-color: @color-danger;
+      }
+    }
+}
+
+.toast-close-button {
+	position: absolute;
+	top: 1em;
+    right: 1em;
+	.fz(16);
+	color: @bd-grey-hover;
+	&:hover,&:focus{
+	   color: @color-lighten;
+	   cursor: pointer;
+	}
+}
+
+button.toast-close-button {
+	padding: 0;
+	cursor: pointer;
+	background: transparent;
+	border: 0;
+	-webkit-appearance: none;
+}
+
+
+.toast-@{row-top}-center,.toast-@{row-top}-full-width{
+    top: 0;
+	right: 0;
+	width: 100%;
+}
+
+.toast-@{row-bottom}-center,.toast-@{row-bottom}-full-width{
+    top: 0;
+	right: 0;
+	width: 100%;
+}
+
+.toast-@{row-top}{
+    bottom: 12px;
+	right: 12px;
+}
+
+.toast-top-right {
+	top: 50px;
+	right: 16px;
+}
+
+.toast-@{row-bottom},.toast-@{row-bottom}-right{
+    bottom: 12px;
+	right: 12px;
+}
+
+
+
+@media all and (max-width: 240px) {
+	#toast-container>div {
+		padding: 8px 8px 8px 50px;
+		width: 13em;
+	}
+	#toast-container .toast-close-button {
+		right: -0.2em;
+		top: -0.2em;
+	}
+}
+
+@media all and (min-width: 241px) and (max-width: 480px) {
+	#toast-container>div {
+		padding: 8px 8px 8px 50px;
+		width: 20em;
+	}
+	#toast-container .toast-close-button {
+		right: -0.2em;
+		top: -0.2em;
+	}
+}
+
+@media all and (min-width: 481px) and (max-width: 768px) {
+	#toast-container>div {
+		padding: 15px 15px 15px 50px;
+		width: 27em;
+	}
+}

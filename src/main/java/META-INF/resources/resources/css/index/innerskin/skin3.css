@@ -1,0 +1,118 @@
+/* 蓝色主题 */
+.textskin{
+	color: #225a8e !important;
+}
+.bdskin{
+	border-color: #4b88c1 !important;
+}
+.borderskin{
+	border-color:#225a8e !important;
+}
+
+.bgskin, .jvm-nav .active, .in.textskin:hover{
+	background: #4b88c1 !important;
+}
+
+.tsactive>a{
+	color:#225a8e !important;	
+	border-color: #225a8e !important;
+	font-weight: bold;
+}
+.tssvg{
+	background: linear-gradient(#223d56 , #0d2133);
+}
+.bgskin.opbgskin{
+	border-color: #4b88c1 !important;
+	color: #225a8e !important;
+	background: #fff !important;
+	transition:all .5s;	
+}
+.bgskin.opbgskin:hover{
+	color:#fff !important;
+	background: #4b88c1 !important;
+}
+
+/* new text style */
+.tstext-purple{
+	color:#1818a0 !important;
+}
+.btnlist .tstext-purple:hover{
+	background-color: #1818a0 !important;
+	color:#fff !important;
+}
+.tstext-tan{
+	color:#a5962b !important;
+}
+.btnlist .tstext-tan:hover{
+	background-color: #a5962b !important;
+	color:#fff !important;
+}
+.tstext-olive{
+	color:#238c52 !important;
+}
+.btnlist .tstext-olive:hover{
+	background-color: #238c52 !important;
+	color:#fff !important;
+}
+.tstext-garnet{
+	color:#a54828 !important;
+}
+.btnlist .tstext-garnet:hover{
+	background-color: #a54828 !important;
+	color:#fff !important;
+}
+
+/* 左侧菜单大块布局 */
+.skinul li:hover a{
+	color:#225a8e !important;	
+}
+
+.skinul li.active a{
+	color:#225a8e !important;
+	border-color:#225a8e !important;
+	border-right-color:#fff !important;
+}
+.skinul li:hover a{
+	color:#225a8e !important;
+}
+
+.skintable tbody tr:not(.tr_page):hover{
+    box-shadow:0 1px 4px #6e8498 !important;
+}
+.skinslectBox .tsselectList li .fa{
+	color:#225a8e !important;	
+}
+.skinslectBox .tsselectList li.selected{
+	color:#225a8e !important;		
+}
+/* table which with skin thead */
+table.skinthead thead tr th{
+	background: #eff6fd !important;
+}
+table.skinthead tbody tr td{
+	border-color: #e1e8ef !important;
+}
+/* skinleftnav */
+.skinleftnav li.active{
+	border-color:#4b88c1 !important;
+}
+.skinleftnav li.active a, .skinleftnav li.active{
+	color:#225a8e !important;
+}
+
+.SumoSelect>.optWrapper.multiple>.options>li.selected span i, .SumoSelect .select-all.selected>span i, .SumoSelect .select-all.partial>span i{
+	background-color: #225a8e !important;		
+}
+.slidedialog_backdrop{
+	background: #eef4f9 !important;
+}
+.modal-open .modal{
+	background: rgba(238, 244, 249, .2) !important;
+}
+.filterselect>span.active{
+	color: #225a8e !important;	
+}
+.filterselect>span.active:before{
+	background: #225a8e !important;	
+}
+

@@ -1,0 +1,60 @@
+ 
+#alertMessage
+{
+	margin-top:20px;
+ 	margin-left:200px;
+ 	width:300px;
+}
+
+.borderClass
+{
+	 border:1px solid #DDDDDD;
+}
+
+.title {
+	margin-bottom:20px;
+	padding-top:20px;
+    background-color: #029fe4;
+    color: #595959;
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    height: 45px;
+    padding-left: 5px;
+}
+
+.imgStyleClass {
+    background-repeat: no-repeat;
+    float: left;
+    margin-left: 8px;
+    margin-right: 10px;
+    margin-top: 0px;
+    width:32px;
+    height:32px;
+}
+
+.use_description{
+	padding-top:20px;
+	padding-left:100px;
+	padding-right:100px;
+}
+
+.refClassBox{
+	float: left;
+}
+
+.searchBoxRefDiv{
+	min-width: 100px;
+	padding-left:5px;
+	display: inline-block;
+	border: 1px solid #cccccc;
+	height: 30px;
+	vertical-align: middle;
+	line-height:30px;   
+}
+.searchBoxSpan{
+	display: inline-block;
+	margin-top: 3px;
+	margin-right: 5px;
+	vertical-align: middle;
+}

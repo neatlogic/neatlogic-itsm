@@ -1,0 +1,25 @@
+<select id="custom_{{=it.propid}}" style="max-width:80%" name="custom_{{=it.propid}}" class="form-control input-sm" 
+{{? it.propneed == '1'}}check-type="required"{{?}}>
+	<option value="">请选择...</option>
+	
+ {{?it.setList && it.setList != null}} 
+	{{~it.setList : set : index}}
+	<option value="{value:'{{=set.value}}',text:'{{=set.text}}'}" 
+	
+	{{if( it.valueList && it.valueList.length > 0 ){ }}
+		{{~it.valueList : prop : index2}}	
+			 {{?set.value==prop.propValue}}selected{{?}}
+		{{~}}
+	{{ }else{ }}
+		{{?set.value==it.defaultvalue}}selected{{?}}	
+	{{ } }}	
+	 
+	{{ for(var prop in set) { }}
+	{{?prop != "value" && prop != "text"}}
+		{{=prop}}="{{=set[prop]}}" 
+	{{?}} 
+	{{ } }}
+	>{{=set.text}}</option>
+	{{~}}
+	{{?}}
+</select>

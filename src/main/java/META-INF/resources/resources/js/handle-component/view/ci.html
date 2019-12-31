@@ -1,0 +1,9 @@
+ <div class="form-group">
+        <label for="ci{{=it.id}}" class="col-sm-2 col-lg-1 control-label propLabel">
+{{=it.propName}}
+        </label>
+        <div class="col-sm-10 col-lg-11">
+            <a class="btn btn-default btn-xs ciSelector" id="ci{{=it.id}}" data-id="{{=it.id}}" data-cmdb="{{=it.propCmdb}}" data-name="{{=it.propId}}"><span class="glyphicon glyphicon-hand-right"></span> 选择配置项</a>
+            <span id="spanCi{{=it.propId}}"></span>
+        </div>
+    </div>

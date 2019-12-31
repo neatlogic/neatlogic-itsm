@@ -1,7 +1,14 @@
 package codedriver.module.process.constvalue;
 
 public enum ProcessTaskStatus {
-	RUNNING("running", "处理中"), ABORTED("aborted", "已终止"), SUCCEED("succeed", "已成功"), PENDING("pending", "待处理"), FAILED("failed", "已失败"), ABORTING("aborting", "终止中"),HUNG("hung","已挂起");
+	RUNNING("running", "处理中"),
+	ABORTED("aborted", "已终止"),
+	SUCCEED("succeed", "已成功"),
+	PENDING("pending", "待处理"),
+	FAILED("failed", "已失败"),
+	ABORTING("aborting", "终止中"),
+	BACK("back", "已回退"),
+	HANG("hang", "已挂起");
 
 	private String status;
 	private String text;

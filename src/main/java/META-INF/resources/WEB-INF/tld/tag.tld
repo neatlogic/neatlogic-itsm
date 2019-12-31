@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+	version="2.0">
+	<description>Custom Authorization Tag</description>
+	<tlib-version>1.0</tlib-version>
+	<short-name>auth</short-name>
+	<uri>/WEB-INF/tld/tag.tld</uri>
+	<tag>
+		<name>button</name>
+		<tag-class>com.techsure.balantflow.component.auth.CustomAuthButtonTag</tag-class>
+		<body-content>scriptless</body-content>
+		<dynamic-attributes>true</dynamic-attributes>
+		<attribute>
+			<name>action</name> <!-- 动作名称 -->
+			<required>true</required><!-- 是否必选 -->
+			<rtexprvalue>true</rtexprvalue><!--是否支持 el 表达式 -->
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>a</name>
+		<tag-class>com.techsure.balantflow.component.auth.CustomAuthLinkTag</tag-class>
+		<body-content>scriptless</body-content>
+		<dynamic-attributes>true</dynamic-attributes>
+		<attribute>
+			<name>action</name> <!-- 动作名称 -->
+			<required>true</required><!-- 是否必选 -->
+			<rtexprvalue>true</rtexprvalue><!--是否支持 el 表达式 -->
+		</attribute>
+	</tag>
+	
+	<function>
+    	<name>check</name>
+    	<function-class>com.techsure.balantflow.component.auth.AuthActionChecker</function-class>
+        <function-signature>
+            java.lang.Boolean check(java.lang.String)
+        </function-signature>
+    </function>
+</taglib>

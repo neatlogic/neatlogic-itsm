@@ -1,0 +1,27 @@
+body {
+  overflow: hidden;
+  background-color: white;
+  background-image: url(/balantflow/resources/images/flowchart/bg.png);
+}
+
+body, div, textarea, input, label {
+  color: black;
+  font-family: verdana;
+  font-size: 12px;
+}
+
+a {
+  text-decoration: none;
+  color: black;  
+  padding-left: 3px;
+  padding-right: 3px;
+  border: solid 1px #333333;
+  background-color: #d3d3d3;
+}
+
+
+a:hover {
+  background-color: #BBBBBB;
+}
+
+

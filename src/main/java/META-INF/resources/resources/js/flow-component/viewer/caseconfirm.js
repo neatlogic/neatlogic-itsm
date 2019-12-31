@@ -1,0 +1,1 @@
+draw2d.shape.node.FlowStateCaseConfirm = draw2d.shape.node.FlowBaseImage.extend({});

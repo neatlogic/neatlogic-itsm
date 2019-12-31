@@ -1,0 +1,12 @@
+<div class="grid-stack-item" data-gs-x="4" data-gs-y="4" data-gs-width="6" data-gs-height="62">
+	<div class="grid-stack-item-content">
+		<label class="item-label" title="{{=it['form-label']}}" >{{=it['form-label']}}：</label>
+		<div class="tal">
+			<select form-group="{{=it['form-group']}}" form-label="{{=it['form-label']}}" parentbindname="{{=it.parentbindname}}" x-check-type="{{=it.required}}" class="form-control input-sm {{=it.inputsize}}" name="{{=it.id}}">
+				{{~it.options :value:index}}
+				<option {{?value.indexOf('|') > 0}}selected{{?}} value="{{?value.indexOf('|') > 0}}{{=value.substring(0, value.indexOf('|'))}}{{??}}{{=value}}{{?}}">{{?value.indexOf('|') > 0}}{{=value.substring(0, value.indexOf('|'))}}{{??}}{{=value}}{{?}}</option>
+				{{~}}
+			</select>
+		</div>
+	</div>
+</div>

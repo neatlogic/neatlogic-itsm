@@ -1,0 +1,1172 @@
+/* graph */
+div.graph-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+div.graph-container div {
+    box-sizing: border-box;
+}
+div.graph-bar {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    margin-top: -32px;
+    width: 12px;
+    height: 64px;
+    cursor: pointer;
+    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAABACAYAAAAu75bwAAAAAXNSR0IArs4c6QAAAfxJREFUSA3tlj1Lw1AUhs1HQV0bpZOTUBcXRUSp4ODiooOgDiIutltBUP+Bg4O4uKRYEMU/UL9RnFzESVz8BbWatrRdm7S+Z7ghafNxsim0EG6bvM895z6kye2rVqvrfRE+smVZG4Dm2Ey5XB6rVCoPhmEk2RDC84CuS6XSMBtCpU0cl8VicTAIksVFTdPOJUn6jMViB+12WxHnA0cEVbSn49jzC9oVKIAKpqIo+xhnIulGeATreYyku1arTQJ6jqQbwDJ030bVnXXqdi3ay0w8Hj+BhC+hW/IKdZ6D7n60dorxnQXQBLQOVVVvQlsS1RKJxA99ZwMC7AHCRND4ly3l8/mkruvjQf3TNXsNpmkO4fcToOkgyAYymcwL7vsthAtBkA3QrOl0+i4McgEcqAvwgFwiPAGC/D6eQC6XW8T/9wzQEmR8OOEuoCP86gzTdxcQFnYBcJ9ytNE1s6hkV8AjxMDJBfTsGxYQe8Qj882uwKV6AMfUf7ZE7zlaI+sdh7CMXcFhq9X6Zi0a4SzCKnY8x2qYSrxuV1BhqtlsbuMRZAXmEZ7FLX3F2jrU6/VRhO9Zm5NGo6EhXGBtf9DvAMIXaGctsF+6SPoQPEIbu35hl1a0sAN9MunzA2ytmHkVFSZY+jBzCm3wNrqkDbPz9FGfNDNLn1gUS58IY/wFIdMzq3uuez8AAAAASUVORK5CYII=");
+    z-index: 1;
+}
+svg.graph {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    /*border: 1px solid black;*/
+}
+div.graph-container .hide {
+    display: none;
+}
+svg.graph .titleG text {
+    /*text-anchor: start;*/
+}
+svg.graph g.tick text {
+    fill: #999999;
+}
+svg.graph line {
+    stroke-width: 0.8;
+}
+.trans {
+    transition: 200ms;
+}
+
+svg.graph .colorLabelG {
+    font-size: 12px;
+}
+
+svg.graph .colorLabelG .bright {
+    opacity: 1;
+}
+
+svg.graph .colorLabelG .dark {
+    opacity: .5;
+    transition: 0.2s;
+}
+
+svg.graph .colorLabelG .colorLabel rect {
+    cursor: pointer;
+}
+
+svg.graph .colorLabelG text {
+    text-anchor: start;
+    dominant-baseline: middle;
+}
+
+/* legend */
+div.legend {
+    height: 100%;
+    display: flex;
+    align-items:center;
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+}
+div.legend div.item {
+    width: 140px;
+    flex-wrap: nowrap;
+}
+div.legend div.item .num {
+    line-height: 1.2;
+    font-size: 22px;
+    width: 140px;
+    text-align: left;
+}
+div.legend div.item .tit {
+    line-height: 2;
+    font-size: 12px;
+    display: flex;
+    align-items:center;
+}
+div.legend div.item .tit .colorbar {
+    display: inline-block;
+    width: 12px;
+    height: 3px;
+    background: #00ccff;
+    vertical-align: middle;
+}
+div.legend div.item .tit .name {
+    display: inline-block;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 10px 0 6px;
+    vertical-align: middle;
+    text-align: left;
+}
+
+div.legend2 {
+    /*border: 1px solid #ccc;*/
+}
+div.legend2 div.item{
+    padding: 4px 4px 4px 6px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+div.legend2 div.item:hover,
+div.legend2 div.item.active{
+    background: rgba(204, 204, 204, 0.2);
+}
+div.legend2 div.item div {
+    /*float: left;*/
+    display: inline-block;
+    vertical-align: middle;
+}
+div.legend2 div.item div.colorblock {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid #f7b437;
+    margin-right: 11px;
+    cursor: pointer;
+    /*opacity: 0.6;*/
+}
+
+div.legend2 div.item .num {
+    line-height: 1.2;
+    font-size: 20px;
+    margin-right: 10px;
+    /*min-width: 55px;*/
+    text-align: left;
+}
+div.legend2 div.item .tit {
+    font-size:12px;
+    /*color:#999999;*/
+    /*flex: 1;*/
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    margin-right: 6px;
+}
+
+div.legendDiv {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 0;
+    /*color:#666666;*/
+    box-sizing: border-box;
+    padding: 10px 2px 10px 0;
+}
+div.legendDiv div.legendcon {
+    height: 100%;
+    overflow: hidden;
+}
+div.legendDiv.pie .legendcon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+div.legend3 {
+    font-size: 12px;
+    /*transition: 50ms;*/
+}
+div.legend3 div.item {
+    display: flex;
+    align-items: center;
+    padding: 8px 4px 8px 10px;
+    cursor: pointer;
+    width: 100%;
+}
+div.legendDiv div.legend3 div.item:hover {
+    background: rgba(204, 204, 204, 0.5);
+}
+div.legend3 .itme > div {
+    height: 10px;
+}
+div.legend3 .colorblock {
+    width: 12px;
+    height: 3px;
+    margin-right: 11px;
+    /*background-color: #00ccff;*/
+}
+
+.tooltip1 div.legend3 .colorblock {
+    width: 10px;
+    height: 10px;
+}
+div.legend3 div.item .tit {
+    flex:1;
+    /*width: 0;*/
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    margin-right: 6px;
+}
+
+div.legendDiv div.dragbar {
+    position: absolute;
+    width: 2px;
+    right: -3px;
+    top: 0;
+    height: 100%;
+    border-top: 0;
+    border-bottom: 0;
+    cursor: ew-resize;
+}
+div.legendDiv div.dragbar div{
+    height: 50%;
+    border-left: 1px solid rgba(236, 236, 236, 0.8);
+}
+div.legendDiv div.dragbar div:first-child {
+    margin-top: -31px;
+}
+div.legendDiv div.dragbar div:last-child {
+    margin-top: 62px;
+}
+div.legendDiv div.dragarrow {
+    position: absolute;
+    right: -13px;
+    top: 50%;
+    margin-top: -32.5px;
+    width: 12px;
+    height: 65px;
+    cursor: pointer;
+    text-align: center;
+}
+div.legendDiv div.legscroll {
+    width: 3px;
+    border-radius: 3px;
+    height: 300px;
+    position: absolute;
+    right: 3px;
+    top: 10px;
+    background: rgba(216, 216, 216, 0.4);
+}
+div.legendDiv div.legscroll > div{
+    width: 100%;
+    height: 100px;
+    background: #d8d8d8;
+    border-radius: 3px;
+}
+/* tooltip */
+div.graph-container > div.tooltip1 {
+    position: absolute;
+    top: 10px;
+    /*right: 10px;*/
+    background: rgba(58, 58, 58, 0.35);
+    border-radius: 6px;
+    /*width: 340px;*/
+    /*max-width: 300px;*/
+    color: white;
+    /*transition: 50ms;*/
+}
+div.graph-container > div.tooltip1:not(.pie) {
+    /*position: fixed;*/
+    z-index: 2;
+}
+.zIndex {
+    z-index: 6;
+}
+/*.onfull div.graph-container > div.tooltip1 {*/
+    /*max-width: 400px;*/
+/*}*/
+div.graph-container > div.tooltip1.pie {
+    transition: 0ms;
+}
+div.graph-container > div.tooltip1 div.item {
+    padding: 4px 4px 4px 6px;
+}
+div.graph-container > div.tooltip1 div.item.time {
+    min-width: 130px;
+}
+div.graph-container > div.tooltip1 div.more {
+    padding-top: 0;
+    padding-bottom: 8px;
+}
+div.graph-container > div.tooltip1 .arrow {
+    width: 0;
+    height: 0;
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    margin-left: -2px;
+    border-top: 4px solid rgba(58, 58, 58, 0.35);
+    border-right: 4px solid transparent;
+    border-bottom: 0px solid transparent;
+    border-left: 4px solid transparent;
+}
+svg.graph .auxiliarylineG line.hoverline {
+    stroke: #d8d8d8;
+    /*transition: 50ms;*/
+}
+svg.graph .auxiliarylineG line.legendline {
+    stroke: rgb(175, 176, 185);
+}
+svg.graph .auxiliarylineG circle.hoverpoints {
+    fill: white;
+    /*transition: 50ms;*/
+    cursor: pointer;
+}
+svg.graph .auxiliarylineG circle.legendpoints {
+    fill: white;
+    cursor: pointer;
+    fill-opacity: 0.8;
+}
+
+
+/* tip */
+div.graph-container > div.tip {
+    position: absolute;
+    font-size: 12px;
+    left: 4px;
+    top: -22px;
+    border: 1px solid #888888;
+    display: none;
+}
+
+div.graph-container > div.tip .item.first {
+    line-height: 26px;
+    background: #313131;
+}
+
+div.graph-container > div.tip .item {
+    padding: 4px 8px;
+    background: #232323;
+    font-size: 12px;
+    color: white;
+}
+
+div.graph-container > div.tip .item.act {
+    border-left: 2px deepskyblue solid;
+    border-right: 2px deepskyblue solid;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+div.graph-container svg .hoverbg rect {
+    fill: #2a2730;
+    fill-opacity: 0.2;
+}
+
+div.graph-container > div.tip .item > div {
+    display: inline;
+}
+
+div.graph-container > div.tip .item > div.color {
+    float: right;
+    width: 16px;
+    height: 16px;
+}
+
+/* svg */
+svg.graph .textMid {
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+svg.graph .textSta {
+    text-anchor: start;
+    dominant-baseline: middle;
+}
+
+svg.graph .textEnd {
+    text-anchor: end;
+    dominant-baseline: middle;
+}
+
+svg.graph .y path.domain {
+    stroke-width: 0;
+}
+
+svg.graph .y .tick:nth-child(2) line {
+    stroke: transparent;
+}
+
+svg.graph .domain{
+    stroke-opacity: 0.6;
+}
+
+svg.graph .brushAssistG {
+    font-size: 10px;
+    fill: white;
+}
+
+svg.graph .yAssistLineG line {
+    stroke-width: 1px;
+    stroke: #919191;
+}
+
+svg.graph .yAssistLineG circle {
+    stroke-width: 1;
+    fill: #6f6f6f;
+}
+
+svg.graph .zoomG rect {
+    fill: rgba(177, 223, 187, 0.29);
+    cursor: e-resize;
+}
+
+svg.graph text.noData {
+    font-size: 24px;
+    fill: #969696;
+    cursor: default;
+    opacity: .3;
+}
+svg.graph .brushG rect.selection {
+    fill: navajowhite;
+    fill-opacity: 0.6;
+}
+/* pillar */
+/*svg.pillar.graph .graphG .pillar rect {*/
+    /*rx: 5;*/
+    /*ry: 5;*/
+/*}*/
+
+svg.pillar.graph .graphG .pillar text {
+    font-size: 14px;
+    fill: black;
+}
+
+svg.pillar.graph .graphG .pillar.dark {
+    opacity: .25;
+    transition: .25s;
+}
+
+svg.pillar.graph .graphG .pillar rect.bright {
+    opacity: 1;
+}
+
+svg.pillar.graph .graphG .pillar g:hover rect {
+    opacity: 1;
+}
+
+svg.pillar.graph .graphG .pillar rect {
+    cursor: pointer;
+}
+svg.pillar.graph .legendG .colorLabel text {
+    fill: #999999;
+}
+
+/* pie */
+svg.pie.graph .graphG .pieG .pathG {
+    font-size: 10px;
+}
+
+svg.pie.graph .graphG .quotespie text {
+    text-anchor: middle;
+    dominant-baseline: middle;
+    fill: floralwhite;
+    font-size: 10px;
+}
+
+svg.pie.graph .graphG .pieG .label path {
+    fill: none!important;
+    stroke: black;
+}
+
+svg.pie.graph .graphG .pieG .label text {
+    fill: black;
+    stroke: none;
+    font-size: 12px;
+}
+/*.onfull svg.pie.graph .graphG .pieG .label text {*/
+    /*font-size: 36px!important;*/
+/*}*/
+svg.pie.graph .graphG .label foreignObject > div{
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.57);
+    color: white;
+}
+svg.pie.graph .graphG .sum text{
+    fill: #3a3a3a;
+}
+svg.pie.graph .graphG .label foreignObject > div > div{
+    padding: 4px 8px;
+}
+    /* curve */
+svg.curve.graph .curveG path.path {
+    fill: none;
+    stroke-width: 2;
+    cursor: pointer;
+}
+svg.curve.graph .curveG path.area {
+    stroke: none!important;
+    /*fill: linear-gradient(red, blue);*/
+}
+svg.curve.graph .curveG path.before {
+    stroke-width: 2;
+    stroke-opacity: 0.5;
+}
+
+svg.curve.graph .curveG path.k {
+    /*stroke-dasharray: 3 5;*/
+}
+
+svg.curve.graph .curveG path.above {
+    stroke: red;
+}
+
+svg.curve.graph .curveG path.below {
+    stroke: green;
+}
+
+svg.curve.graph .curveG path.normal {
+    stroke: green;
+}
+
+/* area */
+svg.graph.area .areaG path.pathG {
+    stroke: none!important;
+}
+svg.graph.area .areaG path.lineG {
+    /*stroke: transparent;*/
+    fill: none!important;
+}
+svg.graph.area .areaG path {
+    fill-opacity: 0.5;
+}
+
+svg.graph.area .areaG path.normal {
+    fill: rgba(12, 78, 156, 1);
+}
+
+svg.graph.area .areaG path.above {
+    fill: rgb(255, 0, 0);
+}
+
+svg.graph.area .areaG path.below {
+    fill: rgb(0, 128, 0);
+}
+
+svg.graph.area .yAxis.areaPile > path {
+    stroke-width: 1;
+    fill: #ccc;
+    stroke: none;
+}
+
+/* scatter */
+svg.graph.scatter .scatterG g.normal {
+    /*fill: black;*/
+}
+
+svg.graph.scatter .scatterG g.above {
+    fill: red;
+}
+
+svg.graph.scatter .scatterG g.below {
+    /*fill: rgb(0, 128, 0);*/
+}
+/* numerical */
+svg.graph.numerical .graphG rect.bg {
+    fill: rgba(28, 115, 163, 1);
+}
+
+svg.graph.numerical .numericalG text {
+    fill: white;
+}
+
+svg.graph.numerical .numericalG text.num {
+    font-size: 72px;
+}
+
+svg.graph.numerical .numericalG text.info {
+    font-size: 16px;
+    text-anchor: start;
+    dominant-baseline: central;
+}
+
+svg.graph.numerical .areaG path.normal {
+    fill: rgba(12, 78, 156, 1);
+}
+
+svg.graph.gauge .graphG path.curve {
+    fill: none;
+    stroke-opacity: 0.4;
+    stroke-width: 2;
+}
+
+svg.graph.gauge .graphG path.area {
+    fill-opacity: 0.1;
+    stroke: none;
+}
+svg.graph.gauge .graphG rect.overlay {
+    fill: black;
+    stroke: none;
+    fill-opacity: 0.2;
+}
+/* gauge */
+svg.graph.gauge .graphG .dishG path{
+    /*fill: #5779f5;*/
+}
+svg.graph.gauge .graphG .dishG .cenpoint{
+    fill: #e4e5ed;
+}
+svg.graph.gauge .graphG .dishG .tick{
+    fill: #c4c6cc;
+    stroke: none;
+}
+svg.graph.gauge .graphG .dishG text.gaugetext {
+    text-anchor: middle;
+    dominant-baseline: text-bottom;
+}
+svg.graph.gauge .graphG .dishG .btext {
+    font-size: 30px;
+    fill: #3a3a3a;
+}
+svg.graph.gauge .graphG .dishG .stext {
+    font-size: 16px;
+    fill: #c4c6cc;
+}
+svg.graph.gauge .graphG .dishG .dirpointer {
+    fill: #e45767;
+}
+
+/* change tint */
+/* color */
+
+div.graph-container g.tick text {
+    fill: #999999;
+}
+div.graph-container .domain,
+div.graph-container g.tick line {
+    stroke: #ececec;
+}
+div.graph-container .hoverbg rect {
+    fill: #2a2730;
+}
+div.graph-container div.legend div.item {
+    color: #3a3a3a;
+}
+div.graph-container div.legend div.item .tit {
+    color: #999999;
+}
+div.graph-container div.tooltip1 {
+    background: rgba(58, 58, 58, 0.8);
+}
+div.graph-container .auxiliarylineG line.hoverline{
+    stroke: #d8d8d8;
+}
+div.graph-container .graphG .pieG .label text {
+    fill: black;
+}
+div.graph-container .barbgG rect {
+    fill: #ececec;
+    fill-opacity: 0.4;
+}
+div.graph-container .graphG .dishG .btext {
+    fill: #3a3a3a;
+}
+div.graph-container div.legendDiv {
+    color: #3a3a3a;
+}
+div.graph-container div.legend2 div.item .tit {
+    /*color: #999999;*/
+}
+/*div.graph-container div.legendDiv div.dragbar{*/
+    /*border: 1px solid rgba(236, 236, 236, 0.8);*/
+    /*color: #999999;*/
+/*}*/
+div.graph-container div.legendDiv div.dragarrow {
+    /*border-left: 0;*/
+    /*background-color: rgba(255, 255, 255, 0.05);*/
+    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAABACAYAAAAu75bwAAAAAXNSR0IArs4c6QAAAfxJREFUSA3tlj1Lw1AUhs1HQV0bpZOTUBcXRUSp4ODiooOgDiIutltBUP+Bg4O4uKRYEMU/UL9RnFzESVz8BbWatrRdm7S+Z7ghafNxsim0EG6bvM895z6kye2rVqvrfRE+smVZG4Dm2Ey5XB6rVCoPhmEk2RDC84CuS6XSMBtCpU0cl8VicTAIksVFTdPOJUn6jMViB+12WxHnA0cEVbSn49jzC9oVKIAKpqIo+xhnIulGeATreYyku1arTQJ6jqQbwDJ030bVnXXqdi3ay0w8Hj+BhC+hW/IKdZ6D7n60dorxnQXQBLQOVVVvQlsS1RKJxA99ZwMC7AHCRND4ly3l8/mkruvjQf3TNXsNpmkO4fcToOkgyAYymcwL7vsthAtBkA3QrOl0+i4McgEcqAvwgFwiPAGC/D6eQC6XW8T/9wzQEmR8OOEuoCP86gzTdxcQFnYBcJ9ytNE1s6hkV8AjxMDJBfTsGxYQe8Qj882uwKV6AMfUf7ZE7zlaI+sdh7CMXcFhq9X6Zi0a4SzCKnY8x2qYSrxuV1BhqtlsbuMRZAXmEZ7FLX3F2jrU6/VRhO9Zm5NGo6EhXGBtf9DvAMIXaGctsF+6SPoQPEIbu35hl1a0sAN9MunzA2ytmHkVFSZY+jBzCm3wNrqkDbPz9FGfNDNLn1gUS58IY/wFIdMzq3uuez8AAAAASUVORK5CYII=");
+}
+div.graph-container div.legendDiv div.dragarrow.open {
+    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAABACAYAAAAu75bwAAAAAXNSR0IArs4c6QAAAg5JREFUSA3tlrtKA0EUhrOXgNpmkVRWojZpFBElgoWNjRaCWojYmHQBQX0DCwuxsdlgIYovEO8oVjZiJTY+QYzmQpI2buJ/YmaZ3aybs2UgC8nMzvz/OWe+bGYnVCqV1kIBLtWyrHWYZtmeQqEwViwW7/P5/CjbBPEcTFe5XG6QbUKmDXwustnsgJ9JFZOGYZwpivIRDof3G42GJsZ9Wwh1lGfis/uf0M5AAmT40TRtD+10INwQD2E9D4Fwl8vlCZieAuGGYQm4b4LiTsm4HYv2IhOJRI4B4VPgVrxE7jHg7kNpJ2jfWAYKQOvQdf26Y0kiWzQa/aY+2yCMPYMg4dd2EyXTNGPpdHrEvR7PNUA8BeEjns62fUp3R2iJM/gPbCYSiWf3vCODS3zrFtO9beCIbQPEMdyIMjwjk5guO8PfbefvpiGZTL5Duggqp0C54GezM8D0wjHZBorKMTkMbhNgxGlMvtoMNNnKNI8fr7lTyIZAfWyZr54Z/KL0DH50xFw3U6L3HK2D9Y6DWMWp4KBer3+xFg1xCmIdJ56jtn1J4BMtXrfLyDBZq9W28LhbYtyzhXgGj/Ql6+hQqVSGIb5jHU6q1aoBcYZ1/EG9/RCfo5xVzzrlQcIH4SHK2JHH5b4DK0rYBj6V8MkiuW9jReQVZBhn4UPkOMrgHXQJG6Lz8FFtFJmFTyyEhU+I0f4C21gzoCP+rJkAAAAASUVORK5CYII=");
+}
+
+div.graph-container div.legendDiv div.dragbar {
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+}
+
+ /*div.graph-container {*/
+    /*background: #273142;*/
+/*}*/
+
+body.theme-dark div.graph-container g.tick text {
+    fill: #ffffff;
+    opacity: 0.4;
+}
+body.theme-dark div.graph-container .hoverbg rect {
+    fill: #ffffff;
+    fill-opacity: 0.1;
+}
+body.theme-dark div.graph-container .domain,
+body.theme-dark div.graph-container g.tick line {
+    stroke: #3f4d61;
+}
+
+body.theme-dark div.graph-container div.legend div.item {
+    color: #ffffff;
+}
+body.theme-dark div.graph-container div.legend div.tit .name {
+    color: rgba(255, 255, 255, 0.4);
+}
+body.theme-dark div.graph-container div.tooltip1 {
+    background: rgba(27, 36, 49, 0.8);
+}
+body.theme-dark div.graph-container .auxiliarylineG line.hoverline{
+    stroke: #999999;
+    opacity: 0.8;
+}
+body.theme-dark div.graph-container .graphG .pieG .label path {
+    stroke: white;
+    /*opacity: 0.6;*/
+}
+body.theme-dark div.graph-container .graphG .pieG .label text {
+    fill: white;
+}
+body.theme-dark div.graph-container .barbgG rect {
+    fill: #ffffff;
+    fill-opacity: 0.1;
+}
+body.theme-dark div.graph-container .graphG .dishG .btext {
+    fill: white;
+}
+body.theme-dark div.graph-container div.legendDiv {
+    color: #ffffff;
+}
+body.theme-dark div.graph-container div.legend2 div.item .tit,
+body.theme-dark div.graph-container div.legend3 div.item .tit{
+    opacity: 0.4;
+}
+body.theme-dark div.graph-container div.legendDiv div.dragbar,
+body.theme-dark div.graph-container div.legendDiv div.dragarrow{
+    border-color: rgba(63, 77, 97, 0.8);
+}
+/* pillar */
+div.graph-container svg.pillar .fillNone {
+    fill: none!important;
+}
+
+body.theme-dark div.graph-container:not(.customclr) svg.pillar .clr0 rect{
+    fill: #00bcd4;
+    stroke: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pillar .clr1 rect{
+    fill: #4e8ec6;
+    stroke: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pillar .clr2 rect{
+    fill: #4253af;
+    stroke: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pillar .clr3 rect{
+    fill: #d76e33;
+    stroke: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pillar .clr4 rect{
+    fill: #677077;
+    stroke: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pillar .clr5 rect{
+    fill: #009688;
+    stroke: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pillar .clr6 rect{
+    fill: #62bcfa;
+    stroke: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pillar .clr7 rect{
+    fill: #81d553;
+    stroke: #81d553;
+}
+
+/* pie */
+body.theme-dark div.graph-container:not(.customclr) svg.pie .clr0:not(.label) path{
+    fill: #00bcd4;
+    stroke: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pie .clr1:not(.label) path{
+    fill: #4e8ec6;
+    stroke: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pie .clr2:not(.label) path{
+    fill: #4253af;
+    stroke: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pie .clr3:not(.label) path{
+    fill: #d76e33;
+    stroke: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pie .clr4:not(.label) path{
+    fill: #677077;
+    stroke: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pie .clr5:not(.label) path{
+    fill: #009688;
+    stroke: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pie .clr6:not(.label) path{
+    fill: #62bcfa;
+    stroke: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.pie .clr7:not(.label) path{
+    fill: #81d553;
+    stroke: #81d553;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend2 div.clr0{
+    border-color: #00bcd4!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend2 div.clr1{
+    border-color: #4e8ec6!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend2 div.clr2{
+    border-color: #4253af!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend2 div.clr3{
+    border-color: #d76e33!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend2 div.clr4{
+    border-color: #677077!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend2 div.clr5{
+    border-color: #009688!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend2 div.clr6{
+    border-color: #62bcfa!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend2 div.clr7{
+    border-color: #81d553!important;
+}
+
+/* curve*/
+body.theme-dark div.graph-container:not(.customclr) svg .clr0 path{
+    stroke: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg .clr1 path{
+    stroke: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg .clr2 path{
+    stroke: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg .clr3 path{
+    stroke: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg .clr4 path{
+    stroke: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg .clr5 path{
+    stroke: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg .clr6 path{
+    stroke: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg .clr7 path{
+    stroke: #81d553;
+}
+
+body.theme-dark div.graph-container:not(.customclr) svg.curve defs #clr0 stop{
+    stop-color: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve defs #clr1 stop{
+    stop-color: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve defs #clr2 stop{
+    stop-color: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve defs #clr3 stop{
+    stop-color: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve defs #clr4 stop{
+    stop-color: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve defs #clr5 stop{
+    stop-color: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve defs #clr6 stop{
+    stop-color: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve defs #clr7 stop{
+    stop-color: #81d553;
+}
+
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr0{
+    stroke: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr1{
+    stroke: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr2{
+    stroke: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr3{
+    stroke: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr4{
+    stroke: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr5{
+    stroke: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr6{
+    stroke: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr7{
+     stroke: #00bcd4;
+ }
+
+body div.graph-container svg.gauge .graphG .number:not(.custom) {
+    fill: #00bcd4;
+}
+div.graph-container .legendG .colorLabel text {
+    fill: #999999;
+}
+body.theme-dark div.graph-container .legendG .colorLabel text {
+    fill: #ffffff;
+    opacity: 0.4;
+}
+
+body.theme-dark div.graph-container:not(.customclr) svg.curve .legendG .clr0 rect {
+    fill: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve .legendG .clr1 rect {
+    fill: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve .legendG .clr2 rect {
+    fill: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve .legendG .clr3 rect {
+    fill: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve .legendG .clr4 rect {
+    fill: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve .legendG .clr5 rect {
+    fill: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve .legendG .clr6 rect {
+    fill: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve .legendG .clr7 rect {
+    fill: #81d553;
+}
+
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr0{
+    fill: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr1{
+    fill: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr2{
+    fill: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr3{
+    fill: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr4{
+    fill: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr5{
+    fill: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr6{
+    fill: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve circle.clr7{
+    fill: #81d553;
+}
+
+body.theme-dark div.graph-container:not(.customclr) svg.curve line.clr0{
+    stroke: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve line.clr1{
+    stroke: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve line.clr2{
+    stroke: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve line.clr3{
+    stroke: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve line.clr4{
+    stroke: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve line.clr5{
+    stroke: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve line.clr6{
+    stroke: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.curve line.clr7{
+    stroke: #81d553;
+}
+
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr0:not(.fillNone) {
+    background: #00bcd4!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr0 {
+    border: 2px solid #00bcd4!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr1:not(.fillNone) {
+    background: #4e8ec6!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr1 {
+    border: 2px solid #4e8ec6!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr2:not(.fillNone) {
+    background: #4253af!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr2 {
+    border: 2px solid #4253af!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr3{
+    background: #d76e33!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr4{
+    background: #677077!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr5{
+    background: #009688!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr6{
+    background: #62bcfa!important;
+}
+body.theme-dark div.graph-container:not(.customclr) .legend3 div.clr7{
+    background: #81d553!important;
+}
+/* area */
+body.theme-dark div.graph-container:not(.customclr) svg.area .clr0{
+    fill: #00bcd4;
+    stroke: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.area .clr1{
+    fill: #4e8ec6;
+    stroke: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.area .clr2{
+    fill: #4253af;
+    stroke: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.area .clr3{
+    fill: #d76e33;
+    stroke: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.area .clr4{
+    fill: #677077;
+    stroke: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.area .clr5{
+    fill: #009688;
+    stroke: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.area .clr6{
+    fill: #62bcfa;
+    stroke: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.area .clr7{
+    fill: #81d553;
+    stroke: #81d553;
+}
+
+/* points */
+body.theme-dark div.graph-container svg.scatter .colorLabel text{
+   fill: #999999;
+}
+div.graph-container svg.scatter .colorLabel text{
+    fill: #999999;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .scatterG .clr0{
+    stroke: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .scatterG .clr1{
+    stroke: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .scatterG .clr2{
+    stroke: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .scatterG .clr3{
+    stroke: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .scatterG .clr4{
+    stroke: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .scatterG .clr5{
+    stroke: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .scatterG .clr6{
+    stroke: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .scatterG .clr7{
+    stroke: #81d553;
+}
+
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .clr0 rect{
+    fill: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .colorLabel.clr1 rect{
+    fill: #4e8ec6;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .colorLabel.clr2 rect{
+    fill: #4253af;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .colorLabel.clr3 rect{
+    fill: #d76e33;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .colorLabel.clr4 rect{
+    fill: #677077;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .colorLabel.clr5 rect{
+    fill: #009688;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .colorLabel.clr6 rect{
+    fill: #62bcfa;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.scatter .colorLabel.clr7 rect{
+    fill: #81d553;
+}
+
+body.theme-dark div.graph-container svg.gauge .graphG .number:not(.custom) {
+    fill: #00bcd4;
+}
+
+body.theme-dark div.graph-container svg.gauge .graphG .text:not(.custom) {
+    fill: #ffffff;
+    fill-opacity: 0.4;
+}
+body.theme-dark div.graph-container svg.gauge .graphG .borderLine {
+    stroke: #ececec;
+    stroke-opacity: 0.1;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.gauge .graphG path.curve {
+    stroke: #00bcd4;
+}
+body.theme-dark div.graph-container:not(.customclr) svg.gauge defs #clrNumBg0 stop{
+    stop-color: #00bcd4;
+}
+
+body.theme-dark div.graph-container .graphG .sum text{
+    fill: #ffffff;
+}
+body.theme-dark div.graph-container .graphG .pieG .label text {
+    fill: white;
+}
+body.theme-dark div.graph-container .graphG .pillar text {
+    fill: white;
+}
+div.graph-container .titleG text {
+    fill: #999999;
+}
+body.theme-dark div.graph-container .titleG text {
+    fill: #ffffff;
+    opacity: 0.8;
+}
+/*div.graph-container .barbg {*/
+    /*display: none;*/
+/*}*/
+/*body.theme-dark div.graph-container .barbg {*/
+    /*display: none;*/
+/*}*/
+body.theme-dark div.graph-bar {
+    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAABACAYAAAAu75bwAAAAAXNSR0IArs4c6QAAAXpJREFUSA3tlsFOwkAURVuUgEKIxCjKwpULl36fX+JXikFXKKnnYmfitDOdNys1oclloL1n5s1tgVc1TTOvCo4R3hnQ1MoI2KALoLEVqjCfoRt0UgLNAa6RVk0e/mJd1++4PtASqE4RHmgNr4wyL0wAqzQYX9CUVexxYz5FCsEct5KboFtUFPc5QHHcCyAfdzelWDhvnPxEh7iTef8kWUETX6KdCRAMpMdmZSlJ/op7tNdoBmTWcQS+cxh+/csp8ays0d3wDsI7rS/+E9B9DvLXMT+i5xTE+bU3uzdDUBQQmIKSQAfyQQgovnGu9GAsKillbssMUxoy9wDMDyh5D2JA9tFgwrCkYOeRDwKKYz0CkSR7p/5zSjwWh/JN/3GY5VuivXXT+s0StM0CzD7DOEGbtnnhbeLArK5mhfKdGqYxUp+Rb040I9LM+fYH0whdoWiDFWwak4tv1/aAvd0FAFddr7ftOdsTHmhL+O34VBal2OJzm0rF5653xy8Tay8A8sLL6QAAAABJRU5ErkJggg==");
+}
+body.theme-dark div.graph-container div.legendDiv div.dragarrow.open {
+    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAABACAYAAAAu75bwAAAAAXNSR0IArs4c6QAAAYNJREFUSA3tltFOwjAYhTeUgEJQYhDxwisvvPT5fBKfUgh6hZD5HVibrWvX9sqQsOTQ0Z2v/XtYwl9UVTUtMq4B3gnQOJURsEb3QMNUqMB8g57QVQ40BXhE2jV42YdlWf7g+kVzoDJEWKA2bBhlniUB7FJh/EJjdkmPG/M1UgjJcSu5EVqhrLhvAbLjngHZuN2UfOF8M7lHx7iDeTdJdtDCD2iXBAgG0muzTClJ/oLf6KAxGZBZ1wU45dD/eU4p8e68oJV7Iu8ZML5i/EB3LtD5LjP6RO/uQ+aeW3N9ZhlbQMzcAjDrgN4ymiVoB++hm6bgfVZJZpUYpJKM1459kBcQ2YDe7Eqn+e4OxgDUeTWCOxjIHQVkx3oB3Bh93885JV6LY/lJ/3GY5ZujQ+qh1awI2kYBVp9gHKF13bxwG7gwq6tZoninhmmI1GfEmxOtiLRyvP3BNEAL5G2wWofGZOLb1T1g53QtgKem19t2nPWEBeoS/js+lUUpafGZQ4XiM8/d8Q9uEy7/4XgAHgAAAABJRU5ErkJggg==");
+}
+body.theme-dark div.graph-container div.legendDiv div.dragbar div {
+    border-left: 1px solid rgba(236, 236, 236, 0.1);
+}

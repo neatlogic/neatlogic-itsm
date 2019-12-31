@@ -1,0 +1,222 @@
+@import "base.less";
+
+.jquery-ciinfo-panelcontainer {
+	display: inline-block;
+	position: relative;
+	.jquery-ciinfo-panelheader{
+		position: relative;
+		padding: 5px;
+		font-size: 14px;
+		//white-space: nowrap;
+		.jquery-ciinfo-closebtn {
+			font-size: 12px;
+			color: @color-muted-hover;
+			cursor: pointer;
+			position: absolute;
+			top: 6px;
+			right: 6px;
+		}
+	}
+	.jquery-ciinfo-panelbody{
+		text-align: center;
+		padding:@body-padding;	
+		width: 550px;
+		padding-top:0;
+		overflow-x:auto;
+		.tab-pane{
+			max-height:300px;
+		}
+		ul{
+			padding: 0;
+		}
+	}
+	.jquery-ciinfo-paneltitle{
+		width: 550px;
+	    padding: 0 15px 0 0;
+		>.title{
+			white-space: nowrap;
+			overflow:hidden;
+			 >.ciInfo{
+				vertical-align: top;
+				color:@color-grey;
+				line-height:20px;
+				overflow: hidden;
+    			text-overflow: ellipsis;
+				&.now{
+					color:@color-default;
+				}
+				>i{
+					display: none;
+				}
+				&:hover{
+					max-width:none !important;
+				}			 
+			 }
+
+		}
+	}
+	.ciInfo{
+		color: @color-base;
+		padding: 2px 5px;
+		text-decoration: underline;
+		cursor: pointer;
+		white-space: nowrap;
+	    display: inline-block;
+	    &:hover,&:focus,&:visited{
+			color: @color-base;
+			text-decoration: underline;    
+	    }
+	}	
+}
+
+.jquery-ciinfo-configcontainer {
+	position: absolute;
+	display: none;
+}
+
+.jquery-ciinfo-ciinfomain{
+	border-top: 1px solid @bd-grey;
+	padding: 5px 0px;
+	&:after{
+		display: block;
+		content: '';
+		clear: both;
+		visibility: hidden;	
+	}
+	&:first-child{
+		border-top: 0;
+	}
+}
+.jquery-ciinfo-citable {
+	width: 100%;
+}
+
+.jquery-ciinfo-citable td {
+	padding: 5px;
+}
+
+.jquery-ciinfo-citable tr:last-child>td {
+	border-bottom: 0px;
+}
+
+.jquery-ciinfo-citable-tdtitle {
+	text-align: right;
+	vertical-align: top;
+	color: @color-lighten;
+}
+
+.jquery-ciinfo-citable-tdcontent {
+	text-align: left;
+	width: 80%;
+	color: @color-base;
+}
+
+.jquery-ciinfo-error:hover {
+	border-color: #eee;
+}
+
+.jquery-ciinfo-error {
+	border-color: red;
+}
+
+.jquery-ciinfo-panel {
+	position: absolute;
+	border: 1px solid @bd-grey;
+	border-radius: 4px;
+	background: @bgcolor-base;
+	z-index: 100;
+	.box-shadow(~"0 5px 10px rgba(0, 0, 0, 0.2)");
+	.jquery-ciinfo-panelbox{
+		position:relative;
+		>.arrow{
+			border-width: 11px;
+			& ,&:before{
+				position: absolute;
+				display: block;
+				width: 0;
+				height: 0;
+				border-color: transparent;
+				border-style: solid;		
+			}
+			&:before{
+				border-width: 10px;
+				content: "";		
+			}
+		}		
+	}
+	&.top,&.top-right,&.top-left{
+		.jquery-ciinfo-panelbox{
+			>.arrow{
+				bottom: -11px;
+				margin-left: -11px;
+				border-top-color: @bd-grey;
+				border-bottom-width: 0;	
+				&:before{
+					bottom: 2px;
+					margin-left: -10px;
+					border-top-color: #fff;
+					border-bottom-width: 0;			
+				}	
+			}		
+		}
+	}
+	&.top,&.bottom{
+		.jquery-ciinfo-panelbox{
+			>.arrow{
+				left: 50%;
+			}		
+		}
+	}
+	&.top-right,&.bottom-right{
+		.jquery-ciinfo-panelbox{
+			>.arrow{
+				left: 20px;
+			}		
+		}
+	}
+	&.top-left,&.bottom-left{
+		.jquery-ciinfo-panelbox{
+			>.arrow{
+				right: 20px;
+			}		
+		}
+	}
+	&.bottom,&.bottom-right,&.bottom-left{
+		.jquery-ciinfo-panelbox{
+			>.arrow{
+				top: -11px;
+				margin-left: -11px;
+				border-bottom-color:@bd-grey;
+				border-top-width: 0	;
+				&:before{
+					top: 2px;
+					margin-left: -10px;
+					border-bottom-color: #fff;
+					border-top-width: 0	;		
+				}	
+			}		
+		}
+	}
+}
+.jquery-ciinfo-label {
+	display: inline-block;
+	padding: 0px 5px;
+	color: #fff;
+	border-radius: 3px;
+}
+.jquery-ciinfo-paneltitle .ciInfo{
+	&:first-child{
+		padding-left:0;
+	}
+	&:before{
+		content: ' ';
+		margin-right:3px;
+		display:inline-block;
+		color: #d2d0d0;	
+		width:10px;
+		text-align:center;
+	}
+	&:not(:first-child):before{
+		content: '>';
+	}
+}

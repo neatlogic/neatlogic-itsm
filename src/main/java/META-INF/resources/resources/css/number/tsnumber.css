@@ -1,0 +1,35 @@
+@font-face {
+  font-family: 'tsnumber';
+  src: url('font/tsnumber.eot');
+  src: url('font/tsnumber.eot?#iefix') format('embedded-opentype'),
+       url('font/tsnumber.woff2') format('woff2'),
+       url('font/tsnumber.woff') format('woff'),
+       url('font/tsnumber.ttf') format('truetype'),
+       url('font/tsnumber.svg?#tsnumber') format('svg');
+}
+
+.tsnumber-0, .tsnumber-1, .tsnumber-2, .tsnumber-3, .tsnumber-4, .tsnumber-5, .tsnumber-6, .tsnumber-7, .tsnumber-8, .tsnumber-9, .tsnumber-none{
+  font-family: "tsnumber";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+  display: inline-block;
+  text-decoration: inherit;
+  text-align: center;
+  vertical-align: top;
+  font-variant: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.tsnumber-0:before { content: '\e800'; }
+.tsnumber-1:before { content: '\e801'; }
+.tsnumber-2:before { content: '\e802'; }
+.tsnumber-3:before { content: '\e803'; }
+.tsnumber-4:before { content: '\e804'; }
+.tsnumber-5:before { content: '\e805'; }
+.tsnumber-6:before { content: '\e806'; }
+.tsnumber-7:before { content: '\e807'; }
+.tsnumber-8:before { content: '\e808'; }
+.tsnumber-9:before { content: '\e809'; }
+.tsnumber-none:before { content: '\e80a'; }

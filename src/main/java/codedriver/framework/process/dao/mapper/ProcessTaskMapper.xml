@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskMapper">
@@ -78,7 +79,7 @@
 		WHERE
 		processtask_step_id = #{value}
 	</select>
-	
+
 	<select id="getProcessTaskStepUserByStepId" resultType="codedriver.module.process.dto.ProcessTaskStepUserVo">
 		SELECT
 		`processtask_id` as processTaskId,
@@ -94,7 +95,7 @@
 		FROM
 		`processtask_step_user`
 		WHERE
-		processtask_step_id = #{processTaskStepId} 
+		processtask_step_id = #{processTaskStepId}
 		<if test="userType != null and userType != ''">
 			and user_type = #{userType}
 		</if>
@@ -246,7 +247,7 @@
 	<select id="getProcessTaskLockById" parameterType="java.lang.Long" resultType="java.lang.Long">
 		SELECT id FROM processtask WHERE id = #{value} FOR UPDATE
 	</select>
-	
+
 	<select id="getProcessTaskStepLockById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
 		SELECT
 		`id`,
@@ -956,7 +957,7 @@
 		`processtask_step_id` = #{processTaskStepId}
 		AND `user_id` = #{userId}
 	</update>
-	
+
 	<update id="updateProcessTaskStatus" parameterType="codedriver.module.process.dto.ProcessTaskVo">
 		UPDATE
 		`processtask`
@@ -970,6 +971,14 @@
 		WHERE
 		`id` = #{id}
 	</update>
+
+	<delete id="deleteProcessTaskConvergeByStepId" parameterType="java.lang.Long">
+		DELETE
+		FROM
+		`processtask_converge`
+		WHERE 
+		`processtask_step_id` = #{value}
+	</delete>
 
 	<delete id="deleteProcessTaskAttributeValueByProcessTaskIdAndAttributeUuid">
 		DELETE
@@ -996,8 +1005,8 @@
 			AND `user_id` = #{userId}
 		</if>
 	</delete>
-	
-	<delete id="deleteProcessTaskStepOtherWorker" >
+
+	<delete id="deleteProcessTaskStepOtherWorker">
 		DELETE
 		FROM
 		`processtask_step_worker`
@@ -1009,8 +1018,8 @@
 			AND `action` != #{action}
 		</if>
 	</delete>
-	
-	<delete id="deleteProcessTaskStepUser" >
+
+	<delete id="deleteProcessTaskStepUser">
 		DELETE
 		FROM
 		`processtask_step_user`

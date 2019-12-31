@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>警告：浏览器版本低！</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<meta http-equiv="Vary" content="*" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<style>
+*{
+	padding:0;
+	margin: 0;
+}
+html,body{
+	height:100%;
+	width:100%;
+}
+body{
+	background:#f6f7fb;
+	font-family: "PingFang SC","Helvetica Neue","思源黑体","Microsoft YaHei","微软雅黑",Helvetica;
+}
+.ietips{
+	position:absolute;
+	top:10%;
+    width: 50%;
+    text-align: center;
+    color: #666;
+    left:25%;
+    background: #fff;
+    border: 1px solid #326eff;	
+}
+.ietips h4{
+	font-size:20px;
+	line-height:3;
+    color: #fff;
+    background: #336eff;
+}
+#btnInstall{
+	cursor: pointer;
+    color: #336eff;
+    margin-left:10px;
+}
+</style>
+<script type="text/javascript" src="../js/jquery/jquery-1.11.1.js"></script>
+<!--[if gt IE 10]> 
+<script type="text/javascript">
+ 	window.location.href = '/balantflow';
+</script>
+<![endif]-->
+<script type="text/javascript">
+$(function() {
+	$('#btnInstall').click(function(){
+		openChrome();
+	});
+});
+function openChrome() {
+	var domain = document.domain;
+	var myshell = new ActiveXObject("WScript.shell");
+	myshell.Run('chrome ' + domain, 1, false);
+}
+</script>
+</head>
+<body>
+	<div class="ietips">
+		<h4>您的浏览器版本过低！</h4>
+		<div style="line-height: 5;font-size:18px;">建议使用<span id="btnInstall"><img alt="chrome" title="chrome" vspace="10" src="../images/compatible_chrome.gif" height="12">谷歌浏览器</span></div>
+		<div style="line-height: 5;font-size: 12px;">若未安装该浏览器，请联系分公司IT或总部服务台人员。</div>
+	</div>
+</body>
+</html>

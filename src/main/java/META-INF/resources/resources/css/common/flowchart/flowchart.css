@@ -1,0 +1,101 @@
+.inputarea {
+  position: relative;
+  border: 0px;
+  top: -1px;
+  left: -1px ! important;
+  left: 0px;
+}
+
+#flowchart_context_menu ul, #flowchart_sub_menu ul {
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+  border: solid 1px black;
+  border-bottom: 0px;
+}
+
+#flowchart_context_menu li, #flowchart_sub_menu li {
+  background-color: #d3d3d3;
+  border-bottom: solid 1px black;
+  padding: 2px;
+  padding-left: 4px;
+  display:block;
+  cursor: pointer;
+}
+
+#flowchart_context_menu li:hover, #flowchart_sub_menu li:hover {
+  background-color: #BBBBBB;
+}
+
+.top_left, .top_right, .bottom_left, .bottom_right, .top_left_on, .top_right_on, .bottom_left_on, .bottom_right_on {
+  background-image: url('/balantflow/resources/images/flowchart/corners.gif');
+  height: 9px; 
+  font-size: 2px;
+}
+
+
+.top_left_on, .top_right_on, .bottom_left_on, .bottom_right_on {
+  background-image: url('/balantflow/resources/images/flowchart/corners_on.gif');
+}
+
+.top_left, .bottom_left, .top_left_on, .bottom_left_on {
+  margin-right: 9px;
+}
+
+.top_right, .bottom_right, .top_right_on, .bottom_right_on {
+  margin-left: 9px;
+  margin-top: -9px;
+}
+
+.top_right, .top_right_on {
+  background-position: 100% 0;
+}
+
+.bottom_left, .bottom_left_on { 
+  background-position: 0 -9px;
+}
+
+.bottom_right, .bottom_right_on { 
+  background-position: 100% -9px;
+}
+
+.resize {
+  position: absolute;
+  right: 1px;
+  width: 25px;
+  height: 25px;
+  margin-top: -11px;
+  margin-right: -7px;
+  cursor: se-resize;
+  z-index: 100;
+}
+
+
+
+.inside, .inside_on {
+  background: #EFEFEF;
+  height: 50px;
+  color: #000000;
+  padding-left: 10px;
+  padding-right:10px;
+  padding-top: 1px;
+  overflow: hidden;
+}
+
+.buildInside{
+	text-align: center;
+}
+
+.inside {
+  border-left: 1px solid #1D0FA6;
+  border-right: 1px solid #1D0FA6;
+}
+
+.inside_on {
+  border-left: 1px solid #C00000;
+  border-right: 1px solid #C00000;
+}
+
+.trans {
+  visibility: hidden;
+}

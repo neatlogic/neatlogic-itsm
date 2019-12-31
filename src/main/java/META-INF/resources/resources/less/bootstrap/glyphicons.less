@@ -1,0 +1,30 @@
+@charset "utf-8";
+@glyph-font-path:        "../../fonts/glyphicon";
+@glyph-css-prefix:       glyphicon;
+
+@font-face {
+  font-family: @glyph-css-prefix;
+  src: url('@{glyph-font-path}/glyphicon.eot');
+  src: url('@{glyph-font-path}/glyphicon.eot?#iefix') format('embedded-opentype'),
+    url('@{glyph-font-path}/glyphicon.woff2') format('woff2'),
+    url('@{glyph-font-path}/glyphicon.woff') format('woff'),
+    url('@{glyph-font-path}/glyphicon.ttf') format('truetype'),
+    url('@{glyph-font-path}/glyphicon.svg?glyphicon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+[class^="@{glyph-css-prefix}-"], [class*=" @{glyph-css-prefix}-"] , .@{glyph-css-prefix}{
+  font-family: @glyph-css-prefix;
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+  display: inline-block;
+  text-decoration: inherit;
+  text-align: center;
+  vertical-align: middle;
+  font-variant: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@import "icons.less";

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.process.dao.mapper.test.ProcessTaskMapper1">
+	<select id="getProcessTaskStepRelByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepRelVo">
+		SELECT
+		`processtask_id` AS processTaskId,
+		`from_process_step_uuid` AS fromProcessStepUuid,
+		`to_process_step_uuid` AS toProcessStepUuid,
+		`from_processtask_step_id` AS fromProcessTaskStepId,
+		`to_processtask_step_id` AS toProcessTaskStepId,
+		(SELECT xx.`handler` FROM `processtask_step` xx WHERE xx.id = `to_processtask_step_id`) AS toProcessStepHandler,
+		`condition`,
+		`uuid` as processStepRelUuid,
+		`is_hit` AS isHit
+		FROM
+		`processtask_step_rel`
+		WHERE processtask_id = #{value}
+	</select>
+	
+	
+	<select id="getProcessTaskStepStatusByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
+		SELECT
+		a.`id`,
+		a.`process_step_uuid` as processStepUuid,
+		a.`status`,
+		DATE_FORMAT( a.`start_time`, '%Y-%m-%d %H:%i:%s' ) AS startTime,
+		DATE_FORMAT( a.`end_time`, '%Y-%m-%d %H:%i:%s' ) AS endTime,
+		a.`is_active` AS isActive,
+		a.`type` AS `type`,
+		a.`name` AS `name`,
+		a.`error` AS error
+		FROM
+		`processtask_step` a
+		
+		WHERE
+		a.processtask_id = #{value}
+	</select>
+	
+	<select id="getProcessTaskBaseInfoById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskVo">
+		SELECT
+		`id`,
+		`status`,
+		DATE_FORMAT( `start_time`, '%d' ) AS startDay,
+		DATE_FORMAT( `start_time`, '%Y-%m-%d %H:%i:%s' ) AS startTime,
+		DATE_FORMAT( `end_time`, '%Y-%m-%d %H:%i:%s' ) AS endTime,
+		`config`
+		FROM
+		`processtask`
+		WHERE
+		id =
+		#{value}
+	</select>
+</mapper>

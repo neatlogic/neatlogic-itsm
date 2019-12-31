@@ -1,0 +1,60 @@
+.jquery-snapmessage-container {
+	position: absolute;
+	display: inline-block;
+	/* border: 1px solid #ddd; */
+	border-radius: 3px;
+	/* background: #FFFFdd; */
+	z-index: 99999;
+	padding: 3px 8px;
+	color:#fff;
+	box-shadow: 0px 1px 4px #ededed;
+	word-break: keep-all;
+    white-space: nowrap;
+}
+.jquery-snapmessage-container:before{
+	font-family: 'ts';
+	content:'';
+    vertical-align: middle;
+    margin-right: 4px;
+    font-size: 15px;
+}
+.snapmessage-notice{
+	background-color: #336eff;
+	background-color: rgba(51, 110, 255, 0.8);
+	box-shadow: 0px 1px 4px #117763;
+}
+.snapmessage-notice:before{
+	content: '\e804'; 
+}
+.snapmessage-success {
+	background-color: #2ed373;
+	background-color: rgba(46, 211, 115, 0.8);
+	box-shadow: 0px 1px 4px #2d882d;
+}
+.snapmessage-success:before{
+	content: '\eaac';
+}
+.snapmessage-error {
+	background-color: #e42332;
+	background-color: rgba(228, 35, 50, 0.8);
+	box-shadow: 0px 1px 4px #8c0f1c;
+}
+.snapmessage-error:before{
+	content: '\e84d';
+}
+.snapmessage-info {
+	background-color: #00c1de;
+	background-color: rgba(0, 193, 222, 0.8);
+	box-shadow: 0px 1px 4px #005673;
+}
+.snapmessage-info:before{
+	content: '\e804';
+}
+.snapmessage-warning {
+	background-color: #f7b538;
+	background-color: rgba(247, 181, 56, 0.8);;
+	box-shadow: 0px 1px 4px #814605;
+}
+.snapmessage-warning:before{
+	content: '\e803';
+}

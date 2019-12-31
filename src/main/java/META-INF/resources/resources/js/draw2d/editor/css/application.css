@@ -1,0 +1,130 @@
+.dropdown-menu {
+	min-width: 80px;
+}
+
+#canvas{
+	position:relative
+}
+#canvas svg .nodeFigure {
+	fill: #cccccc;
+}
+
+#canvas svg .deviceNode {
+	fill: #cccccc;
+}
+
+#canvas svg .appNode {
+	fill: #99ccff;
+}
+
+#canvas svg .appNodeCritical {
+	fill: red;
+}
+
+#canvas svg .appNodeWarn {
+	fill: orange;
+}
+
+#canvas svg .bizNode {
+}
+
+#canvas svg .appLabel {
+	fill: #cccccc;
+	stroke-width: 0;
+}
+
+#canvas svg .dataPanel {
+	fill: #E8E8E8;
+}
+
+#container {
+	padding: 0px;
+	margin: 0px;
+}
+
+#canvas {
+	padding: 0px;
+	margin: 0px;
+	background-color: #FFFFFF;
+	/*background : transparent url(background_drak.jpg);*/
+	width: 100%;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+#navigation {
+	padding: 0px;
+	margin: 0px;
+	/*background : transparent url(background_drak.jpg);*/
+	/*background-color: #d3d3d3;*/
+	text-align: center;
+}
+
+#toolbar {
+	padding: 5px;
+	margin: 0px;
+	height: 40px;
+	background-color: #ececec;
+	border-bottom: 2px solid #2aa956;
+}
+
+.ui-layout-pane {
+	padding: 0px;
+}
+
+.tinyGroup {
+	margin: 0;
+}
+/******************************************************************
+ * Einstellungen der PropertyViews im Editmodus der "Form".
+ ******************************************************************/
+#propertypane {
+	padding: 0px;
+	margin: 0px;
+	width: 150px;
+	background-color: #7D7D7D;
+	border-top: 0px;
+}
+
+/*container of a single property entry*/
+.property_container {
+	padding: 5px;
+	padding-bottom: 15px;
+}
+
+.toolbar_delimiter {
+	margin-left: 40px;
+}
+
+#content {
+	padding: 0px;
+	margin: 0px;
+}
+
+.palette_node_element {
+	border: 1px solid #dde7da;
+	background-color: #f3f3f3;
+	padding: 3px;
+	cursor: move;
+	height: 35px;
+	margin: 5px auto;
+	text-align: center;
+	align: center;
+	border-radius: 5px;
+}
+
+.palette_node_element:hover {
+	background-color: #f1f4a8;
+	border: 1px solid #8dd028;
+}
+
+.shadow {
+	-moz-box-shadow: 3px 3px 4px #000;
+	-webkit-box-shadow: 3px 3px 4px #000;
+	box-shadow: 3px 3px 4px #000;
+	/* For IE 8 */
+	-ms-filter:
+		"progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
+	/* For IE 5.5 - 7 */
+	filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135,
+		Color='#000000');
+}

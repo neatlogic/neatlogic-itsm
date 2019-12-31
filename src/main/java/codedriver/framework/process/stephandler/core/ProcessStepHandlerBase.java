@@ -20,6 +20,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskAuditMapper;
@@ -68,6 +70,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 	protected static ProcessTaskMapper processTaskMapper;
 	protected static ProcessTaskAuditMapper processTaskAuditMapper;
 	protected static FormMapper formMapper;
+	protected static UserMapper userMapper;
 
 	@Autowired
 	public void setProcessMapper(ProcessMapper _processMapper) {
@@ -89,173 +92,243 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		formMapper = _formMapper;
 	}
 
+	@Autowired
+	public void setUserMapper(UserMapper _userMapper) {
+		userMapper = _userMapper;
+	}
+
 	@Override
 	public final int active(ProcessTaskStepVo currentProcessTaskStepVo) {
-		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
-		// 判断前置步骤是不是都完成
-		List<ProcessTaskStepVo> stepList = processTaskMapper.getProcessTaskStepByConvergeId(currentProcessTaskStepVo.getId());
-		List<ProcessTaskStepVo> fromStepList = processTaskMapper.getFromProcessTaskStepByToId(currentProcessTaskStepVo.getId());
-		List<ProcessTaskStepRelVo> fromStepRelList = processTaskMapper.getProcessTaskStepRelByToId(currentProcessTaskStepVo.getId());
-		String stepConfig = processTaskMapper.getProcessTaskStepConfigByStepId(currentProcessTaskStepVo.getId());
-		JSONObject stepConfigObj = null;
-		if (StringUtils.isNotBlank(stepConfig)) {
-			try {
-				stepConfigObj = JSONObject.parseObject(stepConfig);
-			} catch (Exception ex) {
-				logger.error("转换步骤设置配置失败，" + ex.getMessage(), ex);
+		try {
+			/** 锁定当前流程 **/
+			processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
+			boolean canFire = false;
+			/** 获取当前步骤的所有前置步骤 **/
+			/** 获取当前步骤的所有前置连线 **/
+			List<ProcessTaskStepRelVo> fromProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(currentProcessTaskStepVo.getId());
+			/** 场景一：当前步骤只有1个前置关系，并且该前置关系状态为已流转，则当前步骤允许激活 **/
+			if (fromProcessTaskStepRelList.size() == 1) {
+				ProcessTaskStepRelVo fromProcessTaskStepRelVo = fromProcessTaskStepRelList.get(0);
+				if (fromProcessTaskStepRelVo.getIsHit().equals(1)) {
+					canFire = true;
+				}
 			}
-		}
-		if (currentProcessTaskStepVo.getFromProcessTaskStepId() != null) {
-			processTaskMapper.updateProcessTaskStepConvergeIsCheck(1, currentProcessTaskStepVo.getId(), currentProcessTaskStepVo.getFromProcessTaskStepId());
-		}
-		boolean hasDoingStep = false;
-		boolean hasUntriggerStep = false;// 流转未触发标记位，如果因为前置步骤流转未触发，则不需要修改任何状态，只需等待。
-		// List<Long> checkStepIdList = new ArrayList<>();
-		for (ProcessTaskStepVo step : stepList) {
-			if (step.getIsActive().equals(1)) {
-				hasDoingStep = true;
-				break;
-			} else {
-				/** 检查路径是否已经流转过，解决冲突问题，当有fromStep的时候才检查 **/
-				if (currentProcessTaskStepVo.getFromProcessTaskStepId() != null && fromStepList.contains(step) && step.getIsCheck().equals(0) && !step.getId().equals(currentProcessTaskStepVo.getFromProcessTaskStepId())) {
-					hasUntriggerStep = true;
-					for (ProcessTaskStepRelVo relVo : fromStepRelList) {
-						if (relVo.getFromProcessTaskStepId().equals(step.getId()) && relVo.getIsHit().equals(-1)) {// 如果路径状态是不流转的，则跳过检查
-							hasUntriggerStep = false;
-						}
-					}
-					if (hasUntriggerStep) {
+			/** 场景二：当前步骤有大于1个前置关系，则需要使用多种规则来判断当前步骤是否具备激活条件。 **/
+			else if (fromProcessTaskStepRelList.size() > 1) {
+				/** 获取汇聚节点是当前节点的所有前置节点 **/
+				List<ProcessTaskStepVo> convergeStepList = processTaskMapper.getProcessTaskStepByConvergeId(currentProcessTaskStepVo.getId());
+				boolean hasDoingStep = false;
+				for (ProcessTaskStepVo convergeStepVo : convergeStepList) {
+					/** 任意前置节点处于处理中状态 **/
+					if (convergeStepVo.getIsActive().equals(1)) {
+						hasDoingStep = true;
 						break;
 					}
 				}
-				/**
-				 * 检查关键节点是否已经流转到后续任意一条路径，如果已经流转过，证明关键节点到当前节点是死路，则不需要等待，可以fire
-				 **/
-				List<ProcessTaskStepRelVo> toStepRelList = processTaskMapper.getProcessTaskStepRelByFromId(step.getId());
-				boolean isFlowed = false;
-				for (ProcessTaskStepRelVo toStepRel : toStepRelList) {
-					if (toStepRel.getIsHit().equals(1)) {
-						isFlowed = true;
-					}
-				}
-				if (!isFlowed) {
-					hasUntriggerStep = true;
+				if (!hasDoingStep) {
+					canFire = true; 
 				}
 			}
-		}
 
-		/** 判断路径是否有激活 **/
-		if (!hasDoingStep && !hasUntriggerStep) {
-			fromStepList.retainAll(stepList);
-			for (ProcessTaskStepVo fromStep : fromStepList) {
-				for (ProcessTaskStepRelVo relVo : fromStepRelList) {
-					if (relVo.getFromProcessTaskStepId().equals(fromStep.getId())) {
-						if (relVo.getIsHit().equals(0)) {
-							hasUntriggerStep = true;
+			if (canFire) {
+				myActive(currentProcessTaskStepVo);
+				/** 设置当前步骤状态为未开始 **/
+				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.PENDING.getValue());
+
+				/** 遍历后续节点所有步骤，写入汇聚步骤数据 **/
+				resetConvergeInfo(currentProcessTaskStepVo);
+
+				/** 如果当前步骤是二次进入(后续路径已经走过)，则需要对所有后续流转过的步骤都进行挂起操作 **/
+				/** 获取当前步骤状态 **/
+				List<ProcessTaskStepRelVo> nextTaskStepRelList = processTaskMapper.getProcessTaskStepRelByFromId(currentProcessTaskStepVo.getId());
+				for (ProcessTaskStepRelVo nextTaskStepRelVo : nextTaskStepRelList) {
+					if (nextTaskStepRelVo != null && nextTaskStepRelVo.getIsHit().equals(1)) {
+						ProcessTaskStepVo nextProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(nextTaskStepRelVo.getToProcessTaskStepId());
+						if (nextProcessTaskStepVo != null) {
+							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(nextProcessTaskStepVo.getType());
+							// 标记挂起操作来源步骤
+							nextProcessTaskStepVo.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
+							// 标记挂起操作的发起步骤，避免出现死循环
+							nextProcessTaskStepVo.setStartProcessTaskStepId(currentProcessTaskStepVo.getId());
+							doNext(new ProcessStepThread(nextProcessTaskStepVo) {
+								@Override
+								public void execute() {
+									handler.hang(nextProcessTaskStepVo);
+								}
+							});
 						}
 					}
+					// 恢复路径命中状态为0，代表路径未通过
+					processTaskMapper.updateProcessTaskStepRelIsHit(currentProcessTaskStepVo.getId(), nextTaskStepRelVo.getToProcessTaskStepId(), 0);
 				}
-			}
-		}
 
-		/** 如果有处理中步骤，则什么都不做 **/
-		if (hasDoingStep) {
-			/** 如果无法流转下去，再次根据前置步骤的状态，决定是否更新作业流程状态 **/
-			updateProcessTaskStatus(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));
-			return 1;
-		}
-		if (hasUntriggerStep) {
-			/** 如果无法流转下去，再次根据前置步骤的状态，决定是否更新作业流程状态 **/
-			updateProcessTaskStatus(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));
-			return 1;
-		}
-
-		try {
-			myActive(currentProcessTaskStepVo);
-			if (stepConfigObj != null) {
-				List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
-				if (stepConfigObj.containsKey("assignPolicy")) {
-					/** 顺序分配处理人 **/
-					if ("serial".equals(stepConfigObj.getString("assignPolicy"))) {
-						List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
-						if (workerPolicyList != null && workerPolicyList.size() > 0) {
-							for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
-								IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
-								if (workerPolicyHandler != null) {
-									workerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
-									if (workerList.size() > 0) {
-										// 找到处理人，则退出
-										break;
+				/** 分配处理人 **/
+				String stepConfig = processTaskMapper.getProcessTaskStepConfigByStepId(currentProcessTaskStepVo.getId());
+				JSONObject stepConfigObj = null;
+				if (StringUtils.isNotBlank(stepConfig)) {
+					try {
+						stepConfigObj = JSONObject.parseObject(stepConfig);
+					} catch (Exception ex) {
+						logger.error("转换步骤设置配置失败，" + ex.getMessage(), ex);
+					}
+				}
+				if (stepConfigObj != null) {
+					List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
+					if (stepConfigObj.containsKey("assignPolicy")) {
+						/** 顺序分配处理人 **/
+						if ("serial".equals(stepConfigObj.getString("assignPolicy"))) {
+							List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
+							if (workerPolicyList != null && workerPolicyList.size() > 0) {
+								for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
+									IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
+									if (workerPolicyHandler != null) {
+										workerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
+										if (workerList.size() > 0) {
+											// 找到处理人，则退出
+											break;
+										}
+									}
+								}
+							}
+						} else if ("parallel".equals(stepConfigObj.getString("assignPolicy"))) {
+							List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
+							if (workerPolicyList != null && workerPolicyList.size() > 0) {
+								for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
+									IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
+									if (workerPolicyHandler != null) {
+										List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
+										// 去重取并集
+										tmpWorkerList.removeAll(workerList);
+										workerList.addAll(tmpWorkerList);
 									}
 								}
 							}
 						}
-					} else if ("parallel".equals(stepConfigObj.getString("assignPolicy"))) {
-						List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
-						if (workerPolicyList != null && workerPolicyList.size() > 0) {
-							for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
-								IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
-								if (workerPolicyHandler != null) {
-									List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
-									// 去重并集
-									tmpWorkerList.removeAll(workerList);
-									workerList.addAll(tmpWorkerList);
-								}
+					}
+					if (workerList.size() > 0) {
+						for (ProcessTaskStepWorkerVo workerVo : workerList) {
+							processTaskMapper.insertProcessTaskStepWorker(workerVo);
+						}
+					}
+					/** 处理自动开始 **/
+					if (stepConfigObj.containsKey("isAutoStart") && stepConfigObj.getString("isAutoStart").equals("1") && workerList.size() == 1) {
+						if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
+							ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
+							userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+							userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+							userVo.setUserId(workerList.get(0).getUserId());
+							userVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
+							processTaskMapper.insertProcessTaskStepUser(userVo);
+							/** 设置当前步骤状态为处理中 **/
+							currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+						}
+					}
+				}
+
+				/** 启动超时计时器 **/
+				List<ProcessTaskStepTimeoutPolicyVo> timeoutPolicyList = processTaskMapper.getProcessTaskStepTimeoutPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
+				if (timeoutPolicyList != null && timeoutPolicyList.size() > 0) {
+					boolean hasTimeout = false;
+					for (ProcessTaskStepTimeoutPolicyVo timeoutPolicyVo : timeoutPolicyList) {
+						if (hasTimeout) {
+							break;
+						}
+						ITimeoutPolicyHandler timeoutPolicyHandler = TimeoutPolicyHandlerFactory.getHandler(timeoutPolicyVo.getPolicy());
+						if (timeoutPolicyHandler != null) {
+							hasTimeout = timeoutPolicyHandler.execute(timeoutPolicyVo, currentProcessTaskStepVo);
+						}
+					}
+					if (hasTimeout && currentProcessTaskStepVo.getExpireTimeLong() != null) {
+						/** TODO 结合工作日历计算最终超时时间，启动超时告警线程 **/
+					}
+				}
+
+				currentProcessTaskStepVo.setIsActive(1);
+			}
+		} catch (ProcessTaskException e) {
+			logger.error(e.getMessage(), e);
+			currentProcessTaskStepVo.setIsActive(0);
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
+			currentProcessTaskStepVo.setError(e.getMessage());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			currentProcessTaskStepVo.setIsActive(0);
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
+			currentProcessTaskStepVo.setError(ExceptionUtils.getStackTrace(e));
+		} finally {
+			if (currentProcessTaskStepVo.getIsActive().equals(1)) {
+				processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
+			} else {
+				/**
+				 * 发生异常不能激活当前步骤，执行当前步骤的回退操作
+				 */
+				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getType());
+				doNext(new ProcessStepThread(currentProcessTaskStepVo) {
+					@Override
+					public void execute() {
+						handler.back(currentProcessTaskStepVo);
+					}
+				});
+			}
+		}
+		return 1;
+	}
+
+	protected abstract int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException, Exception;
+
+	/**
+	 * hang操作原则上不允许出现任何异常，所有异常都必须解决以便流程可以顺利挂起，否则流程可能会卡死在某个节点不能前进或后退
+	 */
+	@Override
+	public final int hang(ProcessTaskStepVo currentProcessTaskStepVo) {
+		try {
+			// 锁定当前流程
+			processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
+
+			myHang(currentProcessTaskStepVo);
+			// 删除当前节点的汇聚记录
+			processTaskMapper.deleteProcessTaskConvergeByStepId(currentProcessTaskStepVo.getId());
+
+			// 获取流转过的路径
+			List<ProcessTaskStepRelVo> toProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByFromId(currentProcessTaskStepVo.getId());
+
+			for (ProcessTaskStepRelVo processTaskStepRelVo : toProcessTaskStepRelList) {
+				// 沿着流转过的路径向后找激活过的节点并挂起
+				if (processTaskStepRelVo.getIsHit().equals(1)) {
+					ProcessTaskStepVo toProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepRelVo.getToProcessTaskStepId());
+					if (toProcessTaskStepVo != null) {
+						// 如果下一个步骤不等于发起步骤，则继续挂起
+						if (!toProcessTaskStepVo.getId().equals(currentProcessTaskStepVo.getStartProcessTaskStepId())) {
+							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(toProcessTaskStepVo.getHandler());
+							toProcessTaskStepVo.setStartProcessTaskStepId(currentProcessTaskStepVo.getStartProcessTaskStepId());
+							toProcessTaskStepVo.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
+							if (handler != null) {
+								doNext(new ProcessStepThread(toProcessTaskStepVo) {
+									@Override
+									public void execute() {
+										handler.hang(toProcessTaskStepVo);
+									}
+								});
 							}
 						}
 					}
 				}
-				if (workerList.size() > 0) {
-					for (ProcessTaskStepWorkerVo workerVo : workerList) {
-						processTaskMapper.insertProcessTaskStepWorker(workerVo);
-					}
-				}
-				/** 如果下个处理节点设置了“自动开始”，且仅有一个可处理的人，则自动开始 **/
-				if (stepConfigObj.containsKey("isAutoStart") && stepConfigObj.getString("isAutoStart").equals("1") && workerList.size() == 1) {
-					if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
-						ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
-						userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-						userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-						userVo.setUserId(workerList.get(0).getUserId());
-						processTaskMapper.insertProcessTaskStepUser(userVo);
-					}
-				}
-			}
-			/** 启动超时计时器 **/
-			List<ProcessTaskStepTimeoutPolicyVo> timeoutPolicyList = processTaskMapper.getProcessTaskStepTimeoutPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
-			if (timeoutPolicyList != null && timeoutPolicyList.size() > 0) {
-				boolean hasTimeout = false;
-				for (ProcessTaskStepTimeoutPolicyVo timeoutPolicyVo : timeoutPolicyList) {
-					if (hasTimeout) {
-						break;
-					}
-					ITimeoutPolicyHandler timeoutPolicyHandler = TimeoutPolicyHandlerFactory.getHandler(timeoutPolicyVo.getPolicy());
-					if (timeoutPolicyHandler != null) {
-						hasTimeout = timeoutPolicyHandler.execute(timeoutPolicyVo, currentProcessTaskStepVo);
-					}
-				}
-				if (hasTimeout && currentProcessTaskStepVo.getExpireTimeLong() != null) {
-					/** TODO 结合工作日历计算最终超时时间，启动超时告警线程 **/
-				}
 			}
 
-			currentProcessTaskStepVo.setIsActive(1);
-			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.PENDING.getValue());
-		} catch (ProcessTaskException e) {
-			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
-			currentProcessTaskStepVo.setError(e.getMessage());
-			logger.error(e.getMessage(), e);
+			currentProcessTaskStepVo.setIsActive(0);
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.HANG.getValue());
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			currentProcessTaskStepVo.setIsActive(0);
 			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
-			currentProcessTaskStepVo.setError(e.getMessage());
+			currentProcessTaskStepVo.setError(ExceptionUtils.getStackTrace(e));
 		} finally {
 			processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
 		}
 		return 1;
 	}
 
-	protected abstract int myActive(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException;
+	protected abstract int myHang(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception;
 
 	@Override
 	public final int handle(ProcessTaskStepVo currentProcessTaskStepVo) {
@@ -284,13 +357,16 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				}
 				if (currentProcessTaskStepVo.getIsAllDone()) {
 					doNext(new ProcessStepThread(currentProcessTaskStepVo) {
+
 						@Override
 						public void execute() {
 							handler.abort(currentProcessTaskStepVo);
 						}
 					});
 				}
-			} catch (ProcessTaskException ex) {// 异常
+			} catch (
+
+			ProcessTaskException ex) {// 异常
 				logger.error(ex.getMessage(), ex);
 				processTaskMapper.updateProcessTaskStepUserStatus(new ProcessTaskStepUserVo(currentProcessTaskStepVo.getId(), UserContext.get().getUserId(), ProcessTaskStatus.ABORTED.getValue()));
 				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
@@ -299,8 +375,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				} else {
 					currentProcessTaskStepVo.setError(ExceptionUtils.getStackTrace(ex));
 				}
-			} finally {
-				/** 告诉超时探测器步骤已经完成 **/
+			} finally {/** 告诉超时探测器步骤已经完成 **/
 				// timeoutDetector.setIsDone(true);
 				// timeoutDetector.interrupt();
 
@@ -387,7 +462,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 	public final int start(ProcessTaskStepVo currentProcessTaskStepVo) {
 		/** 获得工单步骤行锁 **/
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepLockById(currentProcessTaskStepVo.getId());
-		/** 检查步骤是否“已激活”**/
+		/** 检查步骤是否“已激活” **/
 		if (!processTaskStepVo.getIsActive().equals(1)) {
 			throw new ProcessTaskRuntimeException("流程步骤未激活");
 		}
@@ -396,16 +471,16 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			throw new ProcessTaskRuntimeException("当前步骤处理人已开始处理，你没权限处理当前步骤。");
 		}
 		/** 校验用户是否有开始操作权限 **/
-		authHandleRole(currentProcessTaskStepVo.getId(),ProcessTaskStepAction.START);
+		authHandleRole(currentProcessTaskStepVo.getId(), ProcessTaskStepAction.START);
 		/** 更新工单步骤状态为 “进行中” **/
 		processTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
 		/** 更新 当前登录人 到 工单步骤处理人表 **/
-		ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),UserContext.get().getUserId(),ProcessTaskStepUserStatus.DOING.getValue());
+		ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), UserContext.get().getUserId(), ProcessTaskStepUserStatus.DOING.getValue());
 		myStart(currentProcessTaskStepVo);
 		processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
-		/** 删除 workklist 其它可以 “处理” 的人**/
-		processTaskMapper.deleteProcessTaskStepOtherWorker(UserContext.get().getUserId(),ProcessTaskStepWorkerAction.HANDLE.getValue());
+		/** 删除 workklist 其它可以 “处理” 的人 **/
+		processTaskMapper.deleteProcessTaskStepOtherWorker(UserContext.get().getUserId(), ProcessTaskStepWorkerAction.HANDLE.getValue());
 		/** 处理历史记录 **/
 		saveProcessTaskStepAudit(currentProcessTaskStepVo, ProcessTaskStepAction.START);
 		// TODO notify
@@ -416,16 +491,18 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 
 	/**
 	 * 校验用户是否合法
-	 * @param processTaskStepId 工单步骤id
-	 * @return 
+	 * 
+	 * @param processTaskStepId
+	 *            工单步骤id
+	 * @return
 	 * @return
 	 */
-	private ProcessTaskStepUserVo authHandleRole(Long processTaskStepId,ProcessTaskStepAction processTaskStepAction) {
+	private ProcessTaskStepUserVo authHandleRole(Long processTaskStepId, ProcessTaskStepAction processTaskStepAction) {
 		boolean hasRole = false;
 		ProcessTaskStepUserVo processTaskStepHandleUser = null;
-		if(processTaskStepAction.getValue().equals(ProcessTaskStepAction.START.getValue())) {
+		if (processTaskStepAction.getValue().equals(ProcessTaskStepAction.START.getValue())) {
 			List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
-			if(workerList == null || workerList.size() == 0) {
+			if (workerList == null || workerList.size() == 0) {
 				throw new ProcessTaskRuntimeException("当前步骤没有分派处理人，请联系管理员检查指派规则");
 			}
 			for (ProcessTaskStepWorkerVo worker : workerList) {
@@ -434,9 +511,9 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 					break;
 				}
 			}
-		}else if (processTaskStepAction.getValue().equals(ProcessTaskStepAction.COMPLETE.getValue())||processTaskStepAction.getValue().equals(ProcessTaskStepAction.TRANSFER.getValue())||processTaskStepAction.getValue().equals(ProcessTaskStepAction.ABORT.getValue())) {
-			List<ProcessTaskStepUserVo> processTaskUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId,ProcessTaskStepUserType.MAJOR.getValue());
-			if(processTaskUserList == null || processTaskUserList.size() == 0) {
+		} else if (processTaskStepAction.getValue().equals(ProcessTaskStepAction.COMPLETE.getValue()) || processTaskStepAction.getValue().equals(ProcessTaskStepAction.TRANSFER.getValue()) || processTaskStepAction.getValue().equals(ProcessTaskStepAction.ABORT.getValue())) {
+			List<ProcessTaskStepUserVo> processTaskUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessTaskStepUserType.MAJOR.getValue());
+			if (processTaskUserList == null || processTaskUserList.size() == 0) {
 				throw new ProcessTaskRuntimeException("步骤没有处理人，请先'开始'步骤");
 			}
 			for (ProcessTaskStepUserVo user : processTaskUserList) {
@@ -447,21 +524,38 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				}
 			}
 		}
-		
-		
+
 		if (!hasRole) {
-			//TODO 允许有权限的角色干预 “取消”、“转交”
-			if(processTaskStepAction.getValue().equals(ProcessTaskStepAction.TRANSFER.getValue())||processTaskStepAction.getValue().equals(ProcessTaskStepAction.ABORT.getValue())) {
-				
+			// TODO 允许有权限的角色干预 “取消”、“转交”
+			if (processTaskStepAction.getValue().equals(ProcessTaskStepAction.TRANSFER.getValue()) || processTaskStepAction.getValue().equals(ProcessTaskStepAction.ABORT.getValue())) {
+
 			}
 			throw new ProcessTaskRuntimeException("您不是当前步骤的处理人，没有权限处理");
 		}
-		
+
 		return processTaskStepHandleUser;
 	}
-		
+
+	/**
+	 * 保存回复
+	 * 
+	 * @param currentProcessTaskStepVo
+	 * @param paramObj
+	 * @return
+	 */
+	private ProcessTaskStepVo saveContent(ProcessTaskStepVo currentProcessTaskStepVo) {
+		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+		if (paramObj != null && paramObj.containsKey("content") && StringUtils.isNotBlank(paramObj.getString("content"))) {
+			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(paramObj.getString("content"));
+			processTaskMapper.insertProcessTaskContent(contentVo);
+			processTaskMapper.insertProcessTaskStepContent(currentProcessTaskStepVo.getId(), contentVo.getId());
+			currentProcessTaskStepVo.setContentId(contentVo.getId());
+		}
+		return currentProcessTaskStepVo;
+	}
+
 	@Override
-	public final int complete(ProcessTaskStepVo currentProcessTaskStepVo){
+	public final int complete(ProcessTaskStepVo currentProcessTaskStepVo) {
 		/** 获得工单步骤行锁 **/
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepLockById(currentProcessTaskStepVo.getId());
 		/** 检查步骤是否 “已激活” **/
@@ -473,13 +567,15 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			throw new ProcessTaskRuntimeException("步骤状态不是进行中");
 		}
 		/** 校验用户是否有“完成”权限 **/
-		ProcessTaskStepUserVo processTaskMajorUser = authHandleRole(currentProcessTaskStepVo.getId(),ProcessTaskStepAction.COMPLETE);
+		ProcessTaskStepUserVo processTaskMajorUser = authHandleRole(currentProcessTaskStepVo.getId(), ProcessTaskStepAction.COMPLETE);
 		/** 组件完成动作 **/
 		myComplete(currentProcessTaskStepVo);
+		/** 保存内容 **/
+		saveContent(currentProcessTaskStepVo);
 		/** 更新工单步骤状态为 “已成功” **/
 		processTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
 		processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
-		/** 更新用户状态**/
+		/** 更新用户状态 **/
 		processTaskMajorUser.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
 		processTaskMapper.updateProcessTaskStepUserStatus(processTaskMajorUser);
 		/** 删除所有worker **/
@@ -488,12 +584,12 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		saveProcessTaskStepAudit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
 		/** 流转到下一步 **/
 		List<ProcessTaskStepVo> nextStepList = getNext(currentProcessTaskStepVo);
-		if(nextStepList.size() == 0) {
+		if (nextStepList.size() == 0) {
 			ProcessTaskVo processTaskVo = new ProcessTaskVo();
 			processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
 			processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
 			processTaskMapper.updateProcessTaskStatus(processTaskVo);
-		}else {
+		} else {
 			for (ProcessTaskStepVo nextStep : nextStepList) {
 				IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
 				doNext(new ProcessStepThread(nextStep) {
@@ -501,12 +597,12 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 					public void execute() {
 						nextStepHandler.active(nextStep);
 					}
-	
+
 				});
 			}
 		}
 		// TODO timecost
-		
+
 		// TODO notify
 		return 0;
 	}
@@ -528,19 +624,21 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		if (!processTaskStepVo.getIsActive().equals(1)) {
 			throw new ProcessTaskRuntimeException("流程步骤未激活");
 		}
-		/** 是否 “待处理”、“处理中” 状态**/
-		if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())&&processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
+		/** 是否 “待处理”、“处理中” 状态 **/
+		if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue()) && processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
 			throw new ProcessTaskRuntimeException("步骤状态无法取消，请刷新后重试");
 		}
 		/** 校验用户是否有“取消”权限 **/
-		authHandleRole(currentProcessTaskStepVo.getId(),ProcessTaskStepAction.ABORT);
+		authHandleRole(currentProcessTaskStepVo.getId(), ProcessTaskStepAction.ABORT);
 		/** 组件完成动作 **/
 		myAbort(currentProcessTaskStepVo);
+		/** 保存内容 **/
+		saveContent(currentProcessTaskStepVo);
 		/** 更新工单步骤状态为 “已取消” **/
 		processTaskStepVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
 		processTaskMapper.updateProcessTaskStepStatus(processTaskStepVo);
 		/** 更新工单状态 **/
-		processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId(),ProcessTaskStatus.ABORTED.getValue()));
+		processTaskMapper.updateProcessTaskStatus(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskStatus.ABORTED.getValue()));
 		/** 处理历史记录 **/
 		saveProcessTaskStepAudit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORT);
 		// TODO notify
@@ -551,6 +649,46 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 
 	@Override
 	public final int accept(ProcessTaskStepVo currentProcessTaskStepVo) {
+		/** 获得工单步骤行锁 **/
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepLockById(currentProcessTaskStepVo.getId());
+		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(currentProcessTaskStepVo.getId());
+		boolean canTake = false;
+		if (workerList != null && workerList.size() > 0) {
+			for (ProcessTaskStepWorkerVo workerVo : workerList) {
+				if (StringUtils.isNotBlank(workerVo.getUserId()) && workerVo.getUserId().equals(UserContext.get().getUserId())) {
+					canTake = true;
+					break;
+				} else if (StringUtils.isNotBlank(workerVo.getRoleName()) && UserContext.get().getRoleNameList().contains(workerVo.getRoleName())) {
+					canTake = true;
+					break;
+				} else if (StringUtils.isNotBlank(workerVo.getTeamUuid()) && userMapper.checkUserIsInTeam(UserContext.get().getUserId(), workerVo.getTeamUuid()) > 0) {
+					canTake = true;
+					break;
+				}
+			}
+		}
+		if (canTake) {
+			/** 清空worker表，只留下当前处理人 **/
+			ProcessTaskStepWorkerVo workerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getId());
+			processTaskMapper.deleteProcessTaskStepWorker(workerVo);
+			workerVo.setUserId(UserContext.get().getUserId());
+			processTaskMapper.insertProcessTaskStepWorker(workerVo);
+
+			/** 删除user表主处理人，更换为当前处理人 **/
+			processTaskMapper.deleteProcessTaskStepUser(currentProcessTaskStepVo.getId(), ProcessTaskStepUserType.MAJOR.getValue());
+			UserVo userVo = userMapper.getUserByUserId(UserContext.get().getUserId());
+			if (userVo == null) {
+				throw new ProcessTaskRuntimeException("用户：" + UserContext.get().getUserId() + "不存在");
+			}
+			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+			processTaskStepUserVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+			processTaskStepUserVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+			processTaskStepUserVo.setUserId(UserContext.get().getUserId());
+			processTaskStepUserVo.setUserName(userVo.getUserName());
+			processTaskStepUserVo.setUserType(ProcessTaskStepUserType.MAJOR.getValue());
+			processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
+			processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
+		}
 		return 0;
 	}
 
@@ -562,35 +700,35 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		if (!processTaskStepVo.getIsActive().equals(1)) {
 			throw new ProcessTaskRuntimeException("流程步骤未激活");
 		}
-		/** 非 “挂起”、“已处理完” 状态**/
-		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.HUNG.getValue())&&!processTaskStepVo.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue())) {
+		/** 非 “挂起”、“已处理完” 状态 **/
+		if (!processTaskStepVo.getStatus().equals(ProcessTaskStatus.HANG.getValue()) && !processTaskStepVo.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue())) {
 			throw new ProcessTaskRuntimeException("步骤状态无法取消，请刷新后重试");
 		}
 		/** 校验用户是否有“转交”权限 **/
-		authHandleRole(currentProcessTaskStepVo.getId(),ProcessTaskStepAction.TRANSFER);
+		authHandleRole(currentProcessTaskStepVo.getId(), ProcessTaskStepAction.TRANSFER);
 		/** 判断是否转交到人或组 **/
 		JSONArray toUserList = currentProcessTaskStepVo.getParamObj().getJSONArray("userList");
 		Long teamId = currentProcessTaskStepVo.getParamObj().getLong("teamId");
-		if((toUserList == null || toUserList.size() == 0) && teamId == null) {
+		if ((toUserList == null || toUserList.size() == 0) && teamId == null) {
 			throw new ProcessTaskRuntimeException("请选择要转交的分组或处理人");
 		}
 		/** 如果仅转交到一个具体的人，则判断是否和原主处理人一样 **/
-		if(toUserList != null && toUserList.size() == 1 && toUserList.get(0).equals(UserContext.get().getUserId())) {
+		if (toUserList != null && toUserList.size() == 1 && toUserList.get(0).equals(UserContext.get().getUserId())) {
 			throw new ProcessTaskRuntimeException("不能转交给原处理人");
 		}
 		myTransfer(currentProcessTaskStepVo);
 		/** TODO 跟新步骤超时时间点（expireTime） **/
-		
+
 		/** 删除主处理用户 **/
-		processTaskMapper.deleteProcessTaskStepUser(ProcessTaskStepUserType.MAJOR.getValue());
+		processTaskMapper.deleteProcessTaskStepUser(currentProcessTaskStepVo.getId(), ProcessTaskStepUserType.MAJOR.getValue());
 		/** 更新待处理用户or team **/
 		processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo());
-		if(toUserList != null && toUserList.size()>0) {
-			for(Object userId : toUserList) {
-				processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),userId.toString(),ProcessTaskStepWorkerAction.HANDLE.getValue()));
+		if (toUserList != null && toUserList.size() > 0) {
+			for (Object userId : toUserList) {
+				processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), userId.toString(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
 			}
-		}else {
-			processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),null,teamId.toString(),ProcessTaskStepWorkerAction.HANDLE.getValue()));
+		} else {
+			processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), null, teamId.toString(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
 		}
 		/** 更新工单步骤状态为 “待处理” **/
 		processTaskStepVo.setStatus(ProcessTaskStatus.PENDING.getValue());
@@ -599,49 +737,98 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		saveProcessTaskStepAudit(currentProcessTaskStepVo, ProcessTaskStepAction.TRANSFER);
 		return 0;
 	}
-	
+
 	protected abstract int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo);
-	
+
+	/**
+	 * back操作不允许出现任何异常，所有异常都必须解决以便流程可以顺利回退，否则流程可能会卡死在某个节点不能前进或后退
+	 */
 	@Override
 	public final int back(ProcessTaskStepVo currentProcessTaskStepVo) {
-		/** 获得工单步骤行锁 **/
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepLockById(currentProcessTaskStepVo.getId());
-		
-		myBack(currentProcessTaskStepVo);
-		return 0;
+		try {
+			// 锁定当前流程
+			processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
+
+			myBack(currentProcessTaskStepVo);
+
+			// 获取来源路径
+			List<ProcessTaskStepRelVo> fromProcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByToId(currentProcessTaskStepVo.getId());
+
+			for (ProcessTaskStepRelVo processTaskStepRelVo : fromProcessTaskStepRelList) {
+				// 沿着流转过的路径向前找节点并重新激活
+				if (!processTaskStepRelVo.getIsHit().equals(0)) {
+					ProcessTaskStepVo fromProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepRelVo.getFromProcessTaskStepId());
+					if (fromProcessTaskStepVo != null) {
+						// 如果是汇聚型节点，则再次调用back查找上一个处理节点
+						if (fromProcessTaskStepVo.getType().equals(ProcessStepType.CONVERGE.getValue())) {
+							// 如果是处理节点，则重新激活
+							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromProcessTaskStepVo.getHandler());
+							if (handler != null) {
+								fromProcessTaskStepVo.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
+								doNext(new ProcessStepThread(fromProcessTaskStepVo) {
+									@Override
+									public void execute() {
+										handler.back(fromProcessTaskStepVo);
+									}
+								});
+							}
+						} else if (fromProcessTaskStepVo.getType().equals(ProcessStepType.PROCESS.getValue()) || fromProcessTaskStepVo.getType().equals(ProcessStepType.START.getValue())) {
+							// 如果是处理节点，则重新激活
+							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromProcessTaskStepVo.getHandler());
+							if (handler != null) {
+								fromProcessTaskStepVo.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
+								doNext(new ProcessStepThread(fromProcessTaskStepVo) {
+									@Override
+									public void execute() {
+										handler.active(fromProcessTaskStepVo);
+									}
+								});
+							}
+						}
+					}
+				}
+			}
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.BACK.getValue());
+			currentProcessTaskStepVo.setIsActive(0);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			currentProcessTaskStepVo.setError(ExceptionUtils.getStackTrace(e));
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
+		} finally {
+			processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
+		}
+		return 1;
 	}
-	
-	protected abstract int myBack(ProcessTaskStepVo currentProcessTaskStepVo);
-	
+
+	protected abstract int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception;
+
 	@Override
 	public final int comment(ProcessTaskStepVo currentProcessTaskStepVo) {
 		/** 保存回复内容 **/
-		
-		
+
 		/** 保存附件 **/
-		
+
 		myComment(currentProcessTaskStepVo);
 		return 0;
 	}
-	
+
 	protected abstract int myComment(ProcessTaskStepVo currentProcessTaskStepVo);
-	
+
 	@Override
 	public final int save(ProcessTaskStepVo currentProcessTaskStepVo) {
 		/** 暂存表单信息 **/
-		
+
 		/** 暂存回复内容 **/
-		
+
 		/** 暂存附件 **/
-		
-		
+
 		return 0;
 	}
 
 	protected abstract int mySave(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	@Override
-	public final int init(ProcessTaskStepVo currentProcessTaskStepVo) {
+	public final int startProcess(ProcessTaskStepVo currentProcessTaskStepVo) {
 
 		ProcessTaskVo processTaskVo = new ProcessTaskVo();
 		processTaskVo.setProcessUuid(currentProcessTaskStepVo.getProcessUuid());
@@ -658,7 +845,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			}
 			if (paramObj.containsKey("owner")) {
 				processTaskVo.setOwner(paramObj.getString("owner"));
-			} 			
+			}
 			if (paramObj.containsKey("channelUuid")) {
 				processTaskVo.setChannelUuid(paramObj.getString("channelUuid"));
 			}
@@ -675,12 +862,11 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		processTaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		processTaskMapper.insertProcessTask(processTaskVo);
 
-		
 		/** 写入关联通道 **/
-		if(processTaskVo.getChannelUuid()!=null) {
+		if (processTaskVo.getChannelUuid() != null) {
 			processTaskMapper.insertProcessTaskChannel(processTaskVo);
 		}
-		
+
 		/** 写入流程属性 **/
 		if (processVo.getAttributeList() != null && processVo.getAttributeList().size() > 0) {
 			// List<ProcessTaskAttributeVo> processTaskAttributeList = new
@@ -793,7 +979,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				currentProcessTaskStepVo.setError(ex.getMessage());
 			}
 			/** 加入上报人为处理人，让处理人可以处理异常 **/
-			ProcessTaskStepWorkerVo processTaskStepWorkerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(),processTaskVo.getReporter());
+			ProcessTaskStepWorkerVo processTaskStepWorkerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), processTaskVo.getReporter());
 			processTaskMapper.insertProcessTaskStepWorker(processTaskStepWorkerVo);
 		} finally {
 			processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
@@ -882,14 +1068,14 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			}
 			for (ProcessTaskStepVo step : nextStepList) {
 				processTaskMapper.updateProcessTaskStepRelIsHit(currentProcessTaskStepVo.getId(), step.getId(), 1);
-				resetConvergeInfo(step);
+				// resetConvergeInfo(step);
 			}
 		}
 		return nextStepList;
 	}
 
 	private void resetConvergeInfo(ProcessTaskStepVo nextStepVo) {
-		processTaskMapper.getProcessTaskLockById(nextStepVo.getProcessTaskId());
+
 		List<ProcessTaskStepVo> stepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(nextStepVo.getProcessTaskId(), ProcessStepType.END.getValue());
 		ProcessTaskStepVo endStepVo = null;
 		if (stepList.size() == 1) {

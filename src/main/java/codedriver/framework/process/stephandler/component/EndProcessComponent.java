@@ -124,4 +124,10 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
+	@Override
+	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

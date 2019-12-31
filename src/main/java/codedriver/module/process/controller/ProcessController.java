@@ -1,5 +1,7 @@
 package codedriver.module.process.controller;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,13 +11,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.ReturnJson;
+import codedriver.framework.common.config.Config;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.ModuleVo;
+import codedriver.framework.dto.TeamVo;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherFactory;
 import codedriver.module.process.dto.ProcessFormVo;
@@ -29,7 +41,7 @@ import codedriver.module.process.dto.WorkerDispatcherVo;
 import codedriver.module.process.service.ProcessService;
 import codedriver.module.process.service.ProcessTaskService;
 
-//@Controller
+@Controller
 @RequestMapping("/process")
 public class ProcessController {
 	Logger logger = LoggerFactory.getLogger(ProcessController.class);
@@ -39,6 +51,11 @@ public class ProcessController {
 
 	@Autowired
 	private ProcessTaskService processTaskService;
+	
+	@Autowired
+	private UserMapper userMapper;
+	@Autowired
+	private TeamMapper teamMapper;
 
 
 	@RequestMapping(value = "/step/{stepUuid}/formattribute/{attributeUuid}")
@@ -121,7 +138,7 @@ public class ProcessController {
 		return WorkerDispatcherFactory.getAllActiveWorkerDispatcher();
 	}
 
-	/*@RequestMapping(value = "/save")
+	@RequestMapping(value = "/save")
 	public void saveProcess(ProcessVo processVo, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			System.out.println(processVo.getConfig());
@@ -135,6 +152,60 @@ public class ProcessController {
 			ReturnJson.error(ex.getMessage(), response);
 		}
 
-	}*/
+	}
+	
+	@RequestMapping("searchuserandteam")
+	public void searchUserAndTeam(String k, Integer limit, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		UserVo userVo = new UserVo();
+		userVo.setUserId(k);
+		userVo.setPageSize(limit);
+		if (userVo.getNeedPage()) {
+			int rowNum = userMapper.searchUserCount(userVo);
+			userVo.setPageCount(PageUtil.getPageCount(rowNum, userVo.getPageSize()));
+			userVo.setRowNum(rowNum);
+		}
+		List<UserVo> userList = userMapper.searchUser(userVo);
+		JSONArray userObjList = new JSONArray();
+		for (UserVo user : userList) {
+			JSONObject userObj = new JSONObject();
+			userObj.put("text", user.getUserName());
+			userObj.put("value", user.getUserId());
+			userObj.put("icon", "ts-user");
+			userObjList.add(userObj);
+		}
+
+		TeamVo teamVo = new TeamVo();
+		teamVo.setName(k);
+		teamVo.setPageSize(limit);
+		List<TeamVo> teamList = teamMapper.searchTeam(teamVo);
+		JSONArray teamObjList = new JSONArray();
+		for (TeamVo team : teamList) {
+			JSONObject teamObj = new JSONObject();
+			teamObj.put("value", team.getUuid());
+			teamObj.put("text", team.getName());
+			teamObj.put("icon", "ts-team");
+			teamObjList.add(teamObj);
+		}
+
+		JSONObject returnObj = new JSONObject();
+		JSONArray returnList = new JSONArray();
+		if (userObjList.size() > 0) {
+			JSONObject userDataObj = new JSONObject();
+			userDataObj.put("text", "用户");
+			userDataObj.put("value", "user");
+			userDataObj.put("data", userObjList);
+			returnList.add(userDataObj);
+		}
+		if (teamObjList.size() > 0) {
+			JSONObject teamDataObj = new JSONObject();
+			teamDataObj.put("text", "分组");
+			teamDataObj.put("value", "team");
+			teamDataObj.put("data", teamObjList);
+			returnList.add(teamDataObj);
+		}
+		returnObj.put("data", returnList);
+		response.setContentType(Config.RESPONSE_TYPE_JSON);
+		response.getWriter().print(returnObj);
+	}
 
 }

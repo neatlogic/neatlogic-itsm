@@ -1,0 +1,261 @@
+.@{color-text-prefix}-href{
+	color: @color-href;
+}
+.@{color-text-prefix}-href:hover{
+	color: @color-href-hover;
+	text-decoration: underline;
+}
+.@{color-text-prefix}-action{
+	color: @color-base;
+}
+.@{color-text-prefix}-action:hover{
+	color: @color-href-hover;
+	text-decoration: underline;
+}
+.@{color-text-prefix}-muted{
+	color: @color-muted;
+}
+.@{color-text-prefix}-muted:hover{
+	color: @color-muted-hover;
+}
+.@{color-text-prefix}-primary{
+	color: @color-primary;
+}
+.@{color-text-prefix}-primary:hover{
+	color: @color-primary-hover;
+}
+.@{color-text-prefix}-success{
+	color: @color-success;
+}
+.@{color-text-prefix}-success:hover{
+	color: @color-success-hover;
+}
+.@{color-text-prefix}-info{
+	color: @color-info;
+}
+.@{color-text-prefix}-info:hover{
+	color: @color-info-hover;
+}
+.@{color-text-prefix}-warning{
+	color: @color-warning;
+}
+.@{color-text-prefix}-warning:hover{
+	color: @color-warning-hover;
+}
+.@{color-text-prefix}-danger, .@{color-text-prefix}-error{
+	color: @color-danger;
+}
+.@{color-text-prefix}-danger:hover, .@{color-text-prefix}-error:hover{
+	color: @color-danger-hover;
+}
+.@{color-text-prefix}-assist{
+	color: @color-assist;
+}
+.@{color-text-prefix}-assist:hover{
+	color:@color-assist-hover;
+}
+.@{color-text-prefix}-lighten{
+	color: @color-lighten;
+}
+.@{color-text-prefix}-lighten:hover{
+	color: @color-lighten-hover;
+}
+
+.@{color-bg-prefix}-muted,
+.@{color-bg-prefix}-primary,
+.@{color-bg-prefix}-success,
+.@{color-bg-prefix}-info,
+.@{color-bg-prefix}-warning,
+.@{color-bg-prefix}-danger,
+.@{color-bg-prefix}-muted:hover,
+.@{color-bg-prefix}-primary:hover,
+.@{color-bg-prefix}-success:hover,
+.@{color-bg-prefix}-info:hover,
+.@{color-bg-prefix}-warning:hover,
+.@{color-bg-prefix}-danger:hover,
+.@{color-bg-prefix}-assist,
+.@{color-bg-prefix}-assist:hover{
+	color:@opcolor-base;
+	padding:4px;
+}
+.@{color-bg-prefix}-muted{
+    background-color: @color-muted;
+}
+a.@{color-bg-prefix}-muted:hover{
+    background-color: @color-muted-hover;
+}
+.@{color-bg-prefix}-primary{
+    background-color: lighten(@color-primary,20%);
+}
+a.@{color-bg-prefix}-primary:hover{
+    background-color: @color-primary-hover;
+}
+.@{color-bg-prefix}-success{
+    background-color: @color-success;
+}
+a.@{color-bg-prefix}-success:hover{
+    background-color: @color-success-hover;
+}
+.@{color-bg-prefix}-info{
+    background-color: @color-info;
+}
+a.@{color-bg-prefix}-info:hover{
+    background-color: @color-info-hover;
+}
+.@{color-bg-prefix}-warning{
+    background-color: @color-warning;
+}
+a.@{color-bg-prefix}-warning:hover{
+    background-color: @color-warning-hover;
+}
+.@{color-bg-prefix}-danger{
+    background-color: @color-danger;
+}
+a.@{color-bg-prefix}-danger:hover{
+    background-color: @color-danger-hover;
+}
+.@{color-bg-prefix}-assist{
+    background-color: @color-assist;
+}
+a.@{color-bg-prefix}-assist:hover{
+    background-color: @color-assist-hover;
+}
+
+
+// 状态的的文字'pending','running','succeed','failed','aborted','waitconfirm','paused' 
+// 'pending','running','succeed','failed','aborted','waitconfirm','paused','undo','doing','done' 
+// 'pending','running','succeed','failed','aborted','ignored' 
+//ABORT:1003,CHECKING:1005,CREATING:1004,DOING:1001,DONE:1002,FAILED:1007,NOSTART:1000,PAUSE:1008,SUCCESS:1006
+
+.textstatus-pending, .textstatus-1003, .textstatus-undo, .textstatus-1000,.textstatus-ignored{
+	color: @color-lighten;
+}
+.textstatus-paused,.textstatus-1008,.textstatus-aborted,.textstatus-aborting{
+	color: @color-warning;
+}
+.textstatus-aborting{
+	opacity:.8;
+}
+.textstatus-succeed, .textstatus-done, .textstatus-1002, .textstatus-1006, .textstatus-1004{
+	color: @color-success;
+}
+.textstatus-waitconfirm, .textstatus-failed, .textstatus-1007 ,.textstatus-1005{
+	color: @color-danger;
+}
+.textstatus-waitconfirm:before ,.textstatus-1005:before{
+	content: "";
+	width: 6px;
+	height: 6px;
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 3px;
+	background: @color-danger;
+	border-radius: 6px;
+}
+.textstatus-running, .textstatus-doing , .textstatus-1001{
+	color: @color-default;
+}
+.textstatus-running:after, .textstatus-doing:after , .textstatus-1001:after, .textstatus-aborting:after {
+	content: "";
+    width: 6px;
+    height: 6px;
+    display: inline-block;
+    vertical-align: super;
+    margin-left: 1px;
+    .opacity(0.6);
+    .border-radius(6px);
+    .animation(mysucceed 5s 0s infinite);
+} 
+.textstatus-running:after, .textstatus-doing:after , .textstatus-1001:after{
+    background: @color-default;
+}
+.textstatus-aborting:after {
+    background: @color-warning;
+}
+@-webkit-keyframes mysucceed {
+  25% {
+    -webkit-transform: perspective(100px) rotateX(180deg) rotateY(0);
+            transform: perspective(100px) rotateX(180deg) rotateY(0); }
+  50% {
+    -webkit-transform: perspective(100px) rotateX(180deg) rotateY(180deg);
+            transform: perspective(100px) rotateX(180deg) rotateY(180deg); }
+  75% {
+    -webkit-transform: perspective(100px) rotateX(0) rotateY(180deg);
+            transform: perspective(100px) rotateX(0) rotateY(180deg); }
+  100% {
+    -webkit-transform: perspective(100px) rotateX(0) rotateY(0);
+            transform: perspective(100px) rotateX(0) rotateY(0); } 
+ }
+@keyframes mysucceed {
+  25% {
+    -webkit-transform: perspective(100px) rotateX(180deg) rotateY(0);
+            transform: perspective(100px) rotateX(180deg) rotateY(0); }
+  50% {
+    -webkit-transform: perspective(100px) rotateX(180deg) rotateY(180deg);
+            transform: perspective(100px) rotateX(180deg) rotateY(180deg); }
+  75% {
+    -webkit-transform: perspective(100px) rotateX(0) rotateY(180deg);
+            transform: perspective(100px) rotateX(0) rotateY(180deg); }
+  100% {
+    -webkit-transform: perspective(100px) rotateX(0) rotateY(0);
+            transform: perspective(100px) rotateX(0) rotateY(0); }
+ }
+ 
+ *[class^='bgstatus-']{
+    color:#fff;
+ }
+ 
+.bgstatus-pending, .bgstatus-aborted,.bgstatus-1003, .bgstatus-undo, .bgstatus-1000,.bgstatus-ignored{
+	background-color:lighten(@color-lighten, 10%);
+	border-color:@color-lighten;
+}
+.bgstatus-paused,.bgstatus-1008{
+	background-color: lighten(@color-warning, 10%);
+	border-color:@color-warning;
+}
+.bgstatus-succeed, .bgstatus-done, .bgstatus-1002, .bgstatus-1006, .bgstatus-1004{
+    background-color: lighten(@color-success, 10%);
+    border-color:@color-success;
+}
+.bgstatus-waitconfirm, .bgstatus-failed, .bgstatus-1007 ,.bgstatus-1005{
+	background-color: lighten(@color-danger, 10%);
+	border-color:@color-danger;
+}
+.bgstatus-running, .bgstatus-doing , .bgstatus-1001{
+	background-color: lighten(@color-default, 10%);
+	position:relative;
+	border-color:@color-default;
+}
+.bgstatus-running:before, .bgstatus-doing:before , .bgstatus-1001:before{
+    content: "";
+    width: 40px;
+    height: 10px;
+    display: inline-block;
+    vertical-align: bottom;
+    margin-left: 1px;
+    background: #fff;
+    right: -50%;
+    opacity: 0.2;
+    position: absolute;
+    transform: rotate(45deg);
+    .animation(myrunning 2s 0s infinite);
+}
+
+@-webkit-keyframes myrunning {
+  0% {
+    right:-50%;
+  } 
+  100% {
+    right:100%;
+  } 
+ }
+@keyframes myrunning {
+  0% {
+    right:-50%;
+  } 
+  100% {
+    right:100%;
+  } 
+ }
+
+

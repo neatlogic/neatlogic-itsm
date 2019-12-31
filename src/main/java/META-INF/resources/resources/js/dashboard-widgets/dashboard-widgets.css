@@ -1,0 +1,158 @@
+
+/* //tsgauge */
+.unselectable {
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* css formats for the gauge */
+        .gauge .domain {
+            stroke-width: 2px;
+            stroke: #fff;
+        }
+
+        .gauge .tick line {
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+        
+        .gauge line {
+            stroke: #fff;
+            shape-rendering:initial;
+        }
+
+        .gauge .arc, .gauge .cursor {
+            opacity: 0;
+        }
+
+        .gauge .major {
+            fill: #fff;
+            font-size: 20px;
+            font-family: 'Play', verdana, sans-serif;
+            font-weight: normal;
+        }
+        
+        .gauge .indicator {
+            stroke: none;
+            fill: rgb(0, 160, 233);
+            stroke-width: 4px;
+            opacity:0.6;
+        }
+        .gauge .title,.gauge .number{
+            fill:#fff;
+        }
+        
+    
+        
+
+
+/* //tsliquidgauge */
+
+         .tsliquidGaugeText { 
+            font-family: Helvetica;
+             font-weight: bold;
+             fill:#9068be; }
+        .tsliquidgauge .outercircle{
+            fill:#62bcfa;
+        }
+        .tsliquidgauge .wavecircle{
+            fill:#98dafc;
+        }
+
+
+/* //tsradar */
+
+.legend {
+                font-family: 'Raleway', sans-serif;
+                fill:#fff;/* fill: #333333; */
+            }
+            
+            .tooltip {
+                fill: #333333;
+            }
+            .tsradar .gridCircle{
+                fill:#9068be;
+                stroke:#bcd5d1;
+                fill-opacity:0.2;
+            }
+            .tsradar .axisLabel{
+                fill:#fff;/* fill:#737373; */
+            }
+
+
+/* //ts3dpie */
+
+path.slice{
+    stroke-width:2px;
+}
+polyline{
+    opacity: .3;
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+} 
+svg g.percent{
+    fill:white;
+    text-anchor:middle;
+    font-size:12px;
+    pointer-events:none;
+}
+.tsareachart .axis path, .tsareachart .axis line {
+    fill: none;
+    stroke: #f3f3f3;
+    shape-rendering: crispEdges;
+    opacity:0.2;
+}
+
+.tsareachart .areaM {
+    fill: rgba(0, 160, 233, 0.7);
+}
+.tsareachart .axis text,.tsareachart .legend text{
+    font-size: .7em;
+    fill:#fff;
+}
+
+.tsareachart .areaU {
+    fill: rgba(0, 160, 233, 0.6);
+}
+
+.tsareachart .areaD {
+    fill: rgba(34, 172, 56, 0.6);
+}
+
+.tsareachart .tipPoints {
+    stroke: white;
+    stroke-width: 2px;
+    opacity: 0;
+}
+
+.tsareachart .tipNetPoints {
+    stroke: white;
+    stroke-width: 2px;
+    opacity: 0;
+}
+
+.tsareachart .tipDot {
+    stroke: black;
+    stroke-width: 0.5px;
+}
+
+
+.panel-body h1 {
+    font-size: 6.5em;
+    font-weight: bold;
+    text-align: center;
+    padding-top: 15px;
+    color:rgb(0, 160, 233);
+    
+}
+.panel-title h5{
+	font-size:1em;
+	font-weight:bold;
+	text-align:left;
+	color:rgb(0, 160, 233);
+}
+

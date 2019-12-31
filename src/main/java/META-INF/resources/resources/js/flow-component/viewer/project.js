@@ -1,0 +1,1 @@
+draw2d.shape.node.FlowStateProject = draw2d.shape.node.FlowBaseImage.extend({});

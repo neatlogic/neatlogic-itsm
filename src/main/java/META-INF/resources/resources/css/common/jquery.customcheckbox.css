@@ -1,0 +1,211 @@
+@charset "utf-8";
+.customcheckbox_slide {
+  width: 40px;
+  height: 18px;
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  background: #dddddd;
+  border-radius: 10px;
+}
+.customcheckbox_slide label {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  -webkit-transition: all .4s ease;
+  -o-transition: all .4s ease;
+  transition: all .4s ease;
+  cursor: pointer;
+  position: absolute;
+  top: 0px;
+  z-index: 1;
+  left: 0px;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  margin: 0;
+}
+.customcheckbox_slide label:after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #dddddd;
+  left: 2px;
+  top: 2px;
+}
+.customcheckbox_slide input[type=checkbox]:checked + label {
+  left: 21px;
+  border-color: #336eff;
+}
+.customcheckbox_slide input[type=checkbox]:checked + label:after {
+  background: #336eff;
+}
+.customcheckbox_square,
+.customradio_square {
+  background: transparent;
+  position: relative;
+  display: inline-block;
+  margin: 8px 3px;
+  vertical-align: middle;
+}
+.customcheckbox_square label,
+.customradio_square label {
+  cursor: pointer;
+  margin: 0;
+  color: #ffffff;
+  display: block;
+  border: 1px solid #d8d7d7;
+  border-radius: 2px;
+  overflow: hidden;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  font-family: ts;
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+  text-decoration: inherit;
+  font-variant: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.customcheckbox_square label:after,
+.customradio_square label:after {
+  display: block;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  font-size: 12px;
+  text-align: center;
+  opacity: 0;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  filter: alpha(opacity=0);
+  background: #336eff;
+}
+.customcheckbox_square.customcheckbox_disabled input + label {
+  cursor: not-allowed;
+  opacity: 0.5;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  filter: alpha(opacity=50);
+}
+.customcheckbox_square label:after {
+  content: '\eaac';
+}
+.customcheckbox_square label:hover {
+  border-color: #336eff;
+}
+.customcheckbox_square input[type=checkbox]:checked + label {
+  border-color: #336eff;
+  background: #336eff;
+}
+.customcheckbox_square input[type=checkbox]:checked + label:after {
+  opacity: 1;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  filter: alpha(opacity=100);
+}
+.customradio_square.customradio_disabled input + label {
+  cursor: not-allowed;
+  opacity: 0.5;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  filter: alpha(opacity=50);
+}
+.customradio_square label {
+  border-radius: 50%;
+}
+.customradio_square label:after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin: 3px;
+}
+.customradio_square label:hover {
+  border-color: #336eff;
+}
+.customradio_square input[type=radio]:checked + label {
+  border-color: #336eff;
+}
+.customradio_square input[type=radio]:checked + label:after {
+  opacity: 1;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  filter: alpha(opacity=100);
+}
+.table .customcheckbox_square,
+.table .customradio_square {
+  margin: 4px 3px;
+}
+.tsradio_toggle {
+  background: #d8d7d7;
+  min-width: 40px;
+  height: 20px;
+  line-height: 20px;
+  border-radius: 10px;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  vertical-align: middle;
+  margin: 0 4px;
+  padding-left: 24px;
+  padding-right: 0;
+  border-color: transparent;
+  -webkit-transition: all .3s ease;
+  -o-transition: all .3s ease;
+  transition: all .3s ease;
+}
+.tsradio_toggle.active {
+  background: #336eff;
+  padding-left: 0;
+  padding-right: 24px;
+}
+.tsradio_toggle.active:after {
+  left: 100%;
+  margin-left: -18px;
+}
+.tsradio_toggle.disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+.tsradio_toggle > input {
+  display: none;
+}
+.tsradio_toggle:after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border-color: transparent;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background: #ffffff;
+  -webkit-transition: all .3s ease;
+  -o-transition: all .3s ease;
+  transition: all .3s ease;
+}
+html.theme_black {
+  color: #afb2b7;
+}
+html.theme_black body {
+  background: #1b2431;
+}
+html.theme_black body.body-row,
+html.theme_black body.body-column,
+html.theme_black body.bg-grey {
+  background: #1b2431;
+}
+html.theme_black body.bg-grey > .block-main {
+  background: #1b2431;
+}
+html.theme_black {
+  color: #afb2b7;
+}
+html.theme_black .tsradio {
+  background: #1b2431;
+}
+html.theme_black .customcheckbox_slide {
+  background: #38404b;
+}

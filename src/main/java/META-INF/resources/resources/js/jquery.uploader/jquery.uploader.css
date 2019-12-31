@@ -1,0 +1,195 @@
+.uploader-main {
+  padding: 8px 0px;
+}
+.uploader-previewlist {
+  list-style: none;
+  float: left;
+}
+.progress {
+  height: auto;
+  margin-bottom: 0px;
+}
+.progress.uploader-process {
+  position: absolute;
+  width: 100%;
+  top: 0px;
+  bottom: 0px;
+  z-index: 10;
+}
+.progress.uploader-process .uploader-cancel {
+  color: #fff;
+}
+.progress.uploader-process:hover .uploader-cancel {
+  display: inline-block;
+}
+.progress.uploader-process .progress-bar-success {
+  z-index: 10;
+  background-color: #336eff;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  padding: 15px 0px 15px 15px;
+}
+.progress.uploader-process .progress-bar-success .progress-filename {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  white-space: nowrap;
+  width: 100%;
+}
+.progress.uploader-process .progress-bar-success .state-text {
+  font-size: 11px;
+  opacity: 0.6;
+}
+.progress.uploader-process .progress-bar-success .progress-state {
+  background: #ddd;
+  width: auto;
+  margin: 6px 15px 5px 0px;
+  height: 4px;
+  position: relative;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress.uploader-process .progress-bar-success .progress-state .inner-state {
+  background: #fff;
+  width: 0%;
+  position: absolute;
+  height: 4px;
+}
+.progress .state-success {
+  font-size: 20px;
+  display: block;
+  margin-top: 15px;
+  margin-right: 15px;
+}
+.uploader-download {
+  display: none;
+  top: -1px;
+  font-size: 14px;
+  right: 20px;
+  position: absolute;
+  color: #ccc;
+  cursor: pointer;
+}
+.uploader-download:hover {
+  color: #999999;
+}
+.uploader-dropbox,
+.uploader-previewbox {
+  position: relative;
+  border: 1px solid #dddddd;
+  width: 118px;
+  height: 95px;
+  text-align: center;
+  border-radius: 5px;
+  margin: 0px 8px 8px 0px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.uploader-dropbox .uploader-uploadicon,
+.uploader-previewbox .uploader-uploadicon {
+  font-size: 22px;
+  color: #666;
+  margin-top: 32px;
+}
+.uploader-dropbox .uploader-fileicon,
+.uploader-previewbox .uploader-fileicon {
+  font-size: 18.5px;
+  color: #666;
+  margin: 3px 0px 3px 0px;
+}
+.uploader-dropbox {
+  cursor: pointer;
+}
+.uploader-dropbox .uploader-help {
+  text-align: center;
+  color: #336eff;
+  visibility: hidden;
+}
+.uploader-dropbox:hover {
+  border: 1px dotted #336eff;
+  background: rgba(51, 110, 255, 0.1);
+  color: #336eff;
+}
+.uploader-dropbox:hover .uploader-remove {
+  display: block;
+}
+.uploader-dropbox:hover .uploader-uploadicon {
+  color: #336eff;
+}
+.uploader-dropbox:hover .uploader-help,
+.uploader-dropbox:hover .uploader-filetype {
+  visibility: visible;
+}
+.uploader-dropbox .uploader-filetype {
+  color: #999999;
+  font-size: 12px;
+  visibility: hidden;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 80%;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  white-space: nowrap;
+}
+.uploader-previewbox {
+  padding: 17px 0px 10px 0px;
+  background: #fff;
+}
+.uploader-previewbox .uploader-remove,
+.uploader-previewbox .uploader-cancel {
+  display: none;
+  top: -1px;
+  font-size: 14px;
+  right: 2px;
+  position: absolute;
+  color: #ccc;
+  cursor: pointer;
+}
+.uploader-previewbox .uploader-remove:hover,
+.uploader-previewbox .uploader-cancel:hover {
+  color: #999999;
+}
+.uploader-previewbox .uploader-uploadicon {
+  margin-top: 10px;
+  font-size: 25px;
+}
+.uploader-previewbox .uploader-filename {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 16px;
+}
+.uploader-previewbox .uploader-size {
+  color: #999;
+  font-size: 12px;
+  line-height: 12px;
+  display: block;
+}
+.uploader-previewbox .uploader-imagediv {
+  height: 34px;
+  vertical-align: middle;
+  line-height: 34px;
+}
+.uploader-previewbox .uploader-imagediv .uploader-image {
+  max-height: 31px;
+  max-width: 95%;
+  border-radius: 5px;
+}
+.uploader-previewbox .btn-delerror{
+    position: absolute;
+    top: 0;
+    right: 2px;
+    cursor: pointer;
+    color: #ccc;
+    opacity: .1;	
+}
+.uploader-previewbox:hover .btn-delerror{
+    opacity: 1;	
+}

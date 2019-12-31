@@ -1,0 +1,218 @@
+     *{
+         box-sizing: border-box;
+     }
+     html, body, ul, li, ol, dl, dd, dt, p, h1, h2, h3, h4, h5, h6, form, fieldset, legend, img, i, em, a { margin:0; padding:0; } 
+     fieldset, img {border:none;  }
+     img{vertical-align: middle;}
+     ul, ol { list-style:none; }
+     select, input { vertical-align:middle; font-size: 1em;line-height: 32px;height: 32px; }
+     select, input, textarea {  margin:0; }
+     table { border-collapse:collapse; }
+     li{list-style:none;}
+     button:focus, input:focus, select:focus{outline:0;}
+     a, a:hover, a:visited, a:focus{
+         text-decoration:none;
+     }
+     i, em{text-decoration: none;font-style: normal;}
+     label{font-weight: normal; }
+     .clearfix:after, .clearfix:before{content:"";display:table;clear:both;}
+     .clearfix{*zoom:1;}
+     .fl{float: left;}
+     .fr{float: right;} 
+     .fa{font-size: small;margin-right: 2px;}
+     h6{
+         font-size: 16px;
+         line-height: 2em;
+     }
+     .checkbox label{
+     	min-height: 14px;
+		padding-left: 0;
+     }
+     #tableType li{
+         width: 250px;
+         font-size: 12px;
+         box-sizing: border-box;
+         margin: 5px;
+         padding: 2px;
+         border: 1px dashed transparent;
+     }
+     #tableType li.wt1{
+         width: 1000px;
+     }
+     #tableType li:hover{
+         /* background:#e8e5e3; */
+             cursor: pointer;
+             border: 1px dashed #e8e5e3;
+         }
+         #tableType li .tableLf{
+             width: 75px;
+             display: inline-block;
+             padding-left: 5px;
+             line-height: 26px;
+             height: 26px;
+         }
+         #tableType li .tableRt{
+             width: 150px;
+             display: inline-block;
+             box-sizing: border-box;
+             margin:0;
+             margin-left: 5px;
+             margin-right: 5px;
+             line-height: 26px;
+             height: 26px;
+         }
+         #tableType li .input, #tableArea .input{
+             border: 1px solid #999;
+             border-radius: 2px;
+             padding-left: 5px;
+             color:#999;
+         }
+         #tableType li .textarea, #tableArea .textarea{
+             border: 1px solid #999;
+             border-radius: 1px;
+             padding-left: 5px;
+             color:#999;
+         }
+         #tableType li .textarea{
+             width: 865px;
+         }
+         #tableType li .selectbox, #tableArea .selectbox{
+             border: 1px solid #999;
+             border-radius: 4px;
+             padding-left: 5px;
+             width: 100px;                
+         }
+         #tableType li .selectbox i.fa, #tableArea .selectbox i.fa{
+             float: right;
+             margin-right: 5px;
+             margin-top: 5px;
+             color: #999;             
+         }
+         #tableType .checkbox i, #tableType .radiobox i , #tableArea .checkbox i, #tableArea .radiobox i{
+             margin-right: 10px;
+         }
+         #tableArea{
+             min-height: 400px;
+             position: relative;
+             background:#fff;
+             border: 1px dashed #ccc;
+             padding:1px;
+         }
+
+         .tableList{
+             display: inline-block;
+             width: 33%;
+             font-size: 12px;
+             z-index:3;
+             padding:5px 10px 10px 5px;
+             vertical-align: top;
+         }
+         #tableArea .tableList{
+         	border: 1px solid #f9d9ce;
+         	margin: 1px;
+         	position:relative;
+         }
+         #tableArea .tableList:hover .rejusticon{
+         	display:block;
+         }
+         #tableArea .tableList .rejusticon{
+		    position: absolute;
+		    bottom: 0;
+		    right: 0;
+		    width: 14px;
+		    height: 14px;
+		    text-align: center;
+		    padding: 0;
+		    color:#999;
+		    display:none;
+    
+         }
+         #tableArea .tableList .rejusticon:hover{
+         	color:#333;
+         }
+         #tableArea .tableList:hover{
+             background: #e1f3df;
+             position: relative;
+             border-color: #e67a54;
+             cursor:move;
+         }
+         #tableArea .tableList.on{
+         	border-color: #e67a54;
+         }
+         #tableArea .tableList:hover .editIcon{
+             display: block;
+         }
+         #tableArea .tableList .editIcon{
+             position: absolute;
+             top: -25px;
+             right: 0;
+             padding: 5px;
+             border:1px solid #cea92a;
+             background:#fff;
+             display: none;
+         }
+         #tableArea .tableList .editIcon .fa{
+             font-size: 14px;
+             line-height: 24px;
+             height: 24px;
+             display: inline-block;
+             padding-left: 4px;
+             padding-right: 4px;
+             cursor: pointer;
+             
+         }
+         #tableArea .tableList .editIcon .fa:not(:last-child){
+             border-right: 1px solid #cea92a;
+         }
+         #tableArea .tableList:hover .editIcon{
+             display: block;
+         }
+
+         .tableList .tableLf{
+             height: 32px;
+             line-height: 32px;
+             display:block;
+             overflow: hidden;
+             white-space: nowrap;
+             text-overflow: ellipsis;
+             font-weight:bold;
+         }
+         .tableList .tableRt{
+             display:block;
+             margin: 0;
+             padding: 0;
+             padding-top: 5px;
+             padding-bottom: 5px;
+         }
+         .edittext{
+             padding: 1px;
+         }
+
+         #editArea .tableList .tableRt input[type='text'], #editArea .tableList .tableRt textarea, #editArea .tableList .tableRt select{
+             border: 1px solid #999;
+             border-radius: 4px;
+             padding-left: 5px;
+             color:#999;
+             max-width: 100%;
+             width: 100%;
+         }
+         #editArea .tableList .tableRt input[type='text']{
+             line-height: 30px;
+             height: 30px;
+         }
+         .edittext .form-group{
+             padding:5px 10px;
+             margin-bottom: 0;
+             font-size: 14px;
+             background: #fff;
+         }
+
+         .tableList.sortable-ghost {
+		    background: #f9f3f0;
+		}
+		@media (max-width: 800px) {
+			.tableList{
+				width: 100% !important;
+			}
+		}
+			

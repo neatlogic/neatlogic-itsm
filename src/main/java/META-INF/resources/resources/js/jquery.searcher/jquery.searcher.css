@@ -1,0 +1,65 @@
+.searcher_wrapper {
+  display: inline-block;
+  position: relative;
+}
+.searcher_wrapper > .searcher_target {
+  padding-right: 15px;
+  padding-left: 5px;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  min-height: 32px;
+  position: relative;
+  vertical-align: middle;
+  display: inline-block;
+  min-width: 210px;
+  line-height: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  white-space: nowrap;
+}
+.searcher_wrapper > .searcher_main {
+  height: auto;
+  background: #ffffff;
+  border: 0px solid #dddddd;
+  -moz-border-radius: 0px 0px 4px 4px;
+  -webkit-border-radius: 0px 0px 4px 4px;
+  border-radius: 0px 0px 4px 4px;
+  display: none;
+  position: absolute;
+  z-index: 3334;
+  -moz-box-shadow: 0 0 5px 0 rgba(0,0,0,0.10);
+  -webkit-box-shadow: 0 0 5px 0 rgba(0,0,0,0.10);
+  box-shadow: 0 0 5px 0 rgba(0,0,0,0.10);
+}
+.searcher_wrapper .seacher_label {
+  width: 120px;
+  text-align: right;
+  float: left;
+  line-height: 2.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  white-space: nowrap;
+}
+.searcher_wrapper .searcher_container_foot {
+  background: #f0f0f0;
+  text-align: right;
+  margin-top: 5px;
+  padding: 5px;
+  border-top: 1px solid #dddddd;
+}
+.searcher_wrapper .searcher_container_foot .btn {
+  float: none;
+}
+.searcher_wrapper .searcher_clear {
+  color: #d8d7d7;
+  cursor: pointer;
+  float: right;
+  right: 3px;
+  font-size: 12px;
+  position: absolute;
+}
+.searcher_wrapper .searcher_clear:hover {
+  color: #999999;
+}

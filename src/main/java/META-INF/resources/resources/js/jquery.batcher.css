@@ -1,0 +1,74 @@
+@charset "utf-8";
+.baseBg{ background-image:url(/balantflow/resources/images/batchOperate/base_bg.png); background-repeat: no-repeat;}
+/* J-relation */
+.J-relation{ height:34px;position:fixed; bottom:10px; z-index:900;float: left;margin-left: 20px;}
+.J-relation-item{ position:relative; padding:0px 6px; height:34px;}
+.J-relation-pos{ position:absolute; width:6px; height:34px;z-index:920; top:-3px;}
+.J-L-ico{background-position:-55px -84px; left:0px;}
+.J-R-ico{background-position:-66px -84px; right:0px;}
+.J-relation-main{position:relative;}
+.J-relation-title{ height:27px; cursor:pointer;line-height:27px;padding:0px 10px 4px 10px; position:relative; z-index:920;background:url(/balantflow/resources/images/batchOperate/bg5.png) repeat-x 0px 0px;}
+.J-relation-title .J-go{ color:#fff; display:block; float:left;}
+.J-relation-title .J-go em{ display:inline-block; width:17px; height:14px; vertical-align:middle; margin:-2px 10px 0px 0px; margin-top:0px\9; background-position:-56px -124px;}
+.J-relation-num{ 
+	font-size:10px;
+}
+.J-relation-body{ 
+	width:277px;
+	display:none;
+	border:solid 1px #d6d6d6; 
+	box-shadow:0px 0px 5px #8b8b8b;
+	behavior: url(js/pie.htc); 
+	padding:10px 10px 35px 10px; 
+	position:absolute; 
+	bottom:5px; 
+	left:0px;
+	background:url(/balantflow/resources/images/batchOperate/p-bg.png) repeat; 
+	z-index:910;
+	max-height: 400px;
+	overflow:auto;
+}
+.J-relation-list{ 
+	padding:1px;color:#999;
+	border:solid 1px #e3e3e3; 
+	background:#fff; 
+	min-height:25px; 
+	margin-bottom:2px; 
+	position:relative;
+	word-break: break-all;
+	word-wrap: break-word;
+}
+.J-relation-list-remove{ background:#ffd2d3;}
+.J-relation-list img{ float:left;}
+.J-relation-list-a{ float:left; width:185px;}
+.J-relation-close{ 
+	position:absolute; 
+	cursor:pointer; 
+	right:5px; 
+	top:5px; 
+	width:8px; 
+	height:11px; 
+	background-position:-34px -147px;
+}
+.J-relation-close:hover{
+	background-position:-43px -147px;
+}
+.J-relation-buy{ height:26px;}
+.J-relation-buy span{ float:left; color:#555;}
+.J-relation-buy a{ width:112px; height:26px; background-position:-3px -249px; display:inline; }
+.J-relation-buy a:hover{ background-position:-3px -277px; }
+.J-relation-px{width:275px;border:solid 1px #d6d6d6; display:none; box-shadow:0px 0px 5px #8b8b8b;behavior: url(js/pie.htc); height:28px; position:absolute; bottom:5px; left:0px;background:url(/balantflow/resources/images/batchOperate/p-bg.png) repeat; z-index:905;}
+.J-relation-mx{width:113px; position:absolute; left:-3px; top:-3px; height:3px; background-position:-4px -187px; z-index:921;}
+.J-relation-small{ width:119px;}
+#floatOrder{ 
+	width:800px; 
+	height:30px;
+	padding:2px; 
+	/* background:#fff; 
+	border:solid 5px #e54144; */ 
+	overflow:hidden; 
+	position:absolute; 
+	z-index:890;
+}
+.dis-click{}
+.batchOperateAdd{cursor: pointer;}
