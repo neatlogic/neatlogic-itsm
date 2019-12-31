@@ -19,7 +19,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ProcessConfigHistoryVo;
+import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskVo;
@@ -76,9 +76,9 @@ public class ProcessTaskStartApi extends ApiComponentBase {
 				processMd = DigestUtils.md5DigestAsHex(processConfig.getBytes());
 				processMd = "{MD5}" + processVo.getUuid() + processMd;				
 			}
-			ProcessConfigHistoryVo processConfigHistoryVo = processService.getProcessConfigHistoryByMd(processMd);
+			ProcessTaskConfigVo processConfigHistoryVo = processService.getProcessConfigHistoryByMd(processMd);
 			if(processConfigHistoryVo==null) {//不存在 说明是新修改或新增的流程(或第一次在此流程上上报工单)
-				processService.saveProcessConfigHistory(new ProcessConfigHistoryVo(processMd,processConfig));																//插入process_config_history中
+				processService.saveProcessConfigHistory(new ProcessTaskConfigVo(processMd,processConfig));																//插入process_config_history中
 			}
 			jsonObj.put("processMd", processMd);//需要保存到processtask表中的			
 		}else {

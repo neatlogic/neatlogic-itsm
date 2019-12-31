@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.DigestUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -41,6 +42,7 @@ import codedriver.module.process.constvalue.ProcessTaskStepUserType;
 import codedriver.module.process.constvalue.ProcessTaskStepWorkerAction;
 import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.ProcessAttributeVo;
+import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
@@ -126,7 +128,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 					}
 				}
 				if (!hasDoingStep) {
-					canFire = true; 
+					canFire = true;
 				}
 			}
 
@@ -240,6 +242,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 					}
 					if (hasTimeout && currentProcessTaskStepVo.getExpireTimeLong() != null) {
 						/** TODO 结合工作日历计算最终超时时间，启动超时告警线程 **/
+
 					}
 				}
 
@@ -480,7 +483,8 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		myStart(currentProcessTaskStepVo);
 		processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
 		/** 删除 workklist 其它可以 “处理” 的人 **/
-		//processTaskMapper.deleteProcessTaskStepOtherWorker(UserContext.get().getUserId(), ProcessTaskStepWorkerAction.HANDLE.getValue());
+		// processTaskMapper.deleteProcessTaskStepOtherWorker(UserContext.get().getUserId(),
+		// ProcessTaskStepWorkerAction.HANDLE.getValue());
 		/** 处理历史记录 **/
 		saveProcessTaskStepAudit(currentProcessTaskStepVo, ProcessTaskStepAction.START);
 		// TODO notify
@@ -835,6 +839,13 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		processTaskVo.setReporter(UserContext.get().getUserId());
 
 		ProcessVo processVo = processMapper.getProcessByUuid(currentProcessTaskStepVo.getProcessUuid());
+		/** 对流程配置进行散列处理 **/
+		if (StringUtils.isNotBlank(processVo.getConfig())) {
+			String hash = DigestUtils.md5DigestAsHex(processVo.getConfig().getBytes());
+			processTaskVo.setConfigKey(hash);
+			processTaskMapper.replaceProcessTaskConfig(new ProcessTaskConfigVo(hash, processVo.getConfig()));
+		}
+
 		List<ProcessStepVo> processStepList = processMapper.getProcessStepDetailByProcessUuid(currentProcessTaskStepVo.getProcessUuid());
 		List<ProcessStepRelVo> processStepRelList = processMapper.getProcessStepRelByProcessUuid(currentProcessTaskStepVo.getProcessUuid());
 
@@ -848,11 +859,6 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			}
 			if (paramObj.containsKey("channelUuid")) {
 				processTaskVo.setChannelUuid(paramObj.getString("channelUuid"));
-			}
-			if (paramObj.containsKey("processMd")) {
-				processTaskVo.setProcessMd(paramObj.getString("processMd"));
-			} else {
-				processTaskVo.setOwner(UserContext.get().getUserId());
 			}
 			processTaskVo.setReporter(UserContext.get().getUserId());
 		}

@@ -8,6 +8,7 @@ import codedriver.module.process.dto.ProcessTaskAssignUserVo;
 import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskAttributeValueVo;
 import codedriver.module.process.dto.ProcessTaskAttributeVo;
+import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskConvergeVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
@@ -77,6 +78,8 @@ public interface ProcessTaskMapper {
 	public List<ProcessTaskStepAttributeVo> getProcessTaskStepAttributeByStepId(ProcessTaskStepAttributeVo processTaskStepAttributeVo);
 
 	public ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId);
+	
+	public int replaceProcessTaskConfig(ProcessTaskConfigVo processTaskConfigVo);
 
 	public int insertProcessTaskForm(ProcessTaskFormVo processTaskFormVo);
 
