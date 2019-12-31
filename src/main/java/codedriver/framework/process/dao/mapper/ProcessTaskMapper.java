@@ -140,7 +140,7 @@ public interface ProcessTaskMapper {
 
 	public int deleteProcessTaskStepWorker(ProcessTaskStepWorkerVo processTaskStepWorkerVo);
 	
-	public int deleteProcessTaskStepOtherWorker(@Param("userId") String userId,@Param("action") String action);
+	public int deleteProcessTaskStepOtherWorker(@Param("processTaskStepId") Long processTaskStepId,@Param("userId") String userId,@Param("action") String action);
 	
 	public int deleteProcessTaskStepUser(@Param("processtaskStepId") Long processtaskStepId, @Param("userType")String userType);
 	

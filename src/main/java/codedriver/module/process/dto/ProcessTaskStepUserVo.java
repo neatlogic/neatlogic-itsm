@@ -15,6 +15,7 @@ public class ProcessTaskStepUserVo {
 	private String statusName;
 	private String startTime;
 	private String endTime;
+	private String action;
 	private Long timeCost;
 	private String timeCostStr;
 
@@ -134,6 +135,14 @@ public class ProcessTaskStepUserVo {
 
 	public void setProcessTaskId(Long processTaskId) {
 		this.processTaskId = processTaskId;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
 	}
 
 }
