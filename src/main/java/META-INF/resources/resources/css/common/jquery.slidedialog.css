@@ -1,0 +1,57 @@
+.slidedialog_backdrop {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  opacity: 0.6;
+  background: #fff;
+}
+.slidedialog_container {
+  outline: none !important;
+  position: fixed;
+  top: 0px;
+  height: 100%;
+  background: #ffffff;
+  -moz-box-shadow: -5px 0px 10px rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: -5px 0px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: -5px 0px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+.slidedialog_main {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 40px 0px 0px 0px;
+  color: #666666;
+}
+.slidedialog_body {
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+}
+.slidedialog_header {
+  height: 40px;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  color: #3a3a3a;
+  font-size: 16px;
+  font-size: 1.14285714rem;
+}
+.slidedialog_footer {
+  border-top: 1px solid #dddddd;
+  padding: 6px;
+  text-align: right;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+}
+.slidedialog_footer > .btn + .btn {
+  margin-left: 6px;
+  margin-bottom: 0;
+}

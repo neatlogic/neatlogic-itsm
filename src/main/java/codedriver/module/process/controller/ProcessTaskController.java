@@ -16,23 +16,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.ReturnJson;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.dto.FormVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
 import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
+import codedriver.module.process.dto.ProcessTaskStepRelVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 import codedriver.module.process.service.ProcessService;
 import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.test.ProcessTaskService1;
 
-//@Controller
+@Controller
 @RequestMapping("/processtask")
 public class ProcessTaskController {
 	Logger logger = LoggerFactory.getLogger(ProcessTaskController.class);
@@ -41,6 +45,8 @@ public class ProcessTaskController {
 	private ProcessService processService;
 	@Autowired
 	private ProcessTaskService processTaskService;
+	@Autowired
+	private ProcessTaskService1 processTaskService1;
 
 	@RequestMapping(value = "/step/{stepId}/formattribute/{attributeUuid}")
 	@ResponseBody
@@ -100,20 +106,12 @@ public class ProcessTaskController {
 		return "/processtask/handleStep";
 	}
 
-	@RequestMapping(value = "/processtaskstep/{id}")
-	public void getProcessTaskStepById(@PathVariable("id") Long processTaskStepId, HttpServletResponse response) throws IOException {
-		ProcessTaskStepVo processTaskStepVo = processTaskService.getProcessTaskStepDetailById(processTaskStepId);
-		//JSONObject jsonObj = JSONObject.parseObject(processTaskStepVo);
-		//response.setContentType(Config.RESPONSE_TYPE_JAVASCRIPT);
-		//response.getWriter().print(jsonObj.toString());
-	}
-
 	@RequestMapping(value = "/{uuid}/startnewtask")
 	public void startNewProcessTask(@PathVariable("uuid") String uuid, @RequestBody JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) {
 		try {
-			ProcessTaskVo processTaskVo = new ProcessTaskVo();
 			Map<String, String[]> paramMap = request.getParameterMap();
 			ProcessStepVo startStepVo = processService.getProcessStartStep(uuid);
+			JSONObject result = new JSONObject();
 			if (startStepVo != null) {
 				ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo(startStepVo);
 				// startTaskStep.setParamMap(request.getParameterMap());
@@ -122,8 +120,11 @@ public class ProcessTaskController {
 				if (handler != null) {
 					handler.init(startTaskStep);
 				}
+				result.put("processTaskId", startTaskStep.getProcessTaskId());
 			}
-			ReturnJson.success(response);
+			
+			
+			ReturnJson.success(result,response);
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 			ReturnJson.error(ex.getMessage(), response);
@@ -159,5 +160,73 @@ public class ProcessTaskController {
 		}
 
 	}
+	
+	@RequestMapping(value = "/processtaskstep/{id}/start")
+	public void start(@PathVariable("id") Long processTaskStepId, @RequestBody JSONObject paramObj, HttpServletResponse response, HttpServletRequest request) {
+		ProcessTaskStepVo processTaskStepVo = processTaskService.getProcessTaskStepBaseInfoById(processTaskStepId);
+		if (processTaskStepVo != null) {
+			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+			if (handler != null) {
+				processTaskStepVo.setParamObj(paramObj);
+				handler.start(processTaskStepVo);
+			}
+		} else {
+			throw new RuntimeException("流程步骤不存在");
+		}
 
+	}
+
+	@RequestMapping(value = "/flowjobconfig/{flowJobId}")
+	public void getFlowJobConfigById(@PathVariable("flowJobId") Long processTaskId, HttpServletResponse response) throws IOException {
+		ProcessTaskVo flowJobVo = processTaskService1.getProcessTaskBaseInfoById(processTaskId);
+		response.setContentType(Config.RESPONSE_TYPE_JSON);
+		if (flowJobVo.getConfig() != null && !flowJobVo.getConfig().equals("")) {
+			response.getWriter().print(flowJobVo.getConfig());
+		} else {
+			response.getWriter().print("{}");
+		}
+	}
+	
+	@RequestMapping(value = "/processTaskPic.do")
+	public String processTaskPic(String processTaskId, HttpServletRequest request, HttpServletResponse response) {
+		request.setAttribute("processTaskId", processTaskId);
+		return "/processtask/processTaskPicture";
+	}
+	
+	@RequestMapping(value = "/{processTaskId}/stepstatus")
+	public void getFlowJobStepStatus(@PathVariable("processTaskId") Long processTaskId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		List<ProcessTaskStepVo> stepList = processTaskService1.getProcessTaskStepStatusByFlowJobId(processTaskId);
+		//ProcessTaskVo processTaskVo = processTaskService.getProcessTaskBaseInfoById(processTaskId);
+		JSONArray stepObjList = new JSONArray();
+		JSONArray relObjList = new JSONArray();
+		JSONObject returnObj = new JSONObject();
+
+		for (ProcessTaskStepVo stepVo : stepList) {
+			if (!stepVo.getType().equals(ProcessStepHandler.START.getType()) && !stepVo.getType().equals(ProcessStepHandler.END.getType())) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("id", stepVo.getId());
+				jsonObj.put("name", stepVo.getName());
+				jsonObj.put("uid", stepVo.getProcessStepUuid());
+				jsonObj.put("type", stepVo.getType());
+				jsonObj.put("status", stepVo.getStatus());
+				jsonObj.put("startTime", stepVo.getStartTime());
+				jsonObj.put("endTime", stepVo.getEndTime());
+				jsonObj.put("isActive", stepVo.getIsActive());
+				jsonObj.put("hasRunRole", true);
+				stepObjList.add(jsonObj);
+			}
+		}
+		returnObj.put("stepList", stepObjList);
+		List<ProcessTaskStepRelVo> relList = processTaskService1.getProcessTaskStepRelByProcessTaskId(processTaskId);
+		for (ProcessTaskStepRelVo relVo : relList) {
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put("uid", relVo.getProcessStepRelUuid());
+			jsonObj.put("status", relVo.getIsHit());
+			relObjList.add(jsonObj);
+		}
+		returnObj.put("relList", relObjList);
+		response.setContentType(Config.RESPONSE_TYPE_JSON);
+		response.getWriter().print(returnObj);
+	}
+	
 }

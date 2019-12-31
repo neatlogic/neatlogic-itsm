@@ -1,0 +1,1 @@
+draw2d.shape.node.FlowFConverge = draw2d.shape.node.FlowBaseImage.extend({});

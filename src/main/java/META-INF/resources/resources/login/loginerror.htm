@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="/balantflow/resources/js/jquery/jquery-1.11.1.js"></script>
+<link href="/balantflow/resources/css/bootstrap.common.css" rel="stylesheet" media="screen, projection">
+<link rel="stylesheet" href="/balantflow/resources/assets/css/bootstrap.min.css" />
+<link rel="stylesheet" href="/balantflow/resources/assets/css/font-awesome.min.css" />
+<title>登录失败</title>
+<script type="text/javascript">
+	$(function() {
+		$('#btnRelogin').click(function() {
+			var url = window.location.href;
+			url = url.replace('/resources/login/loginerror.htm#', '');
+			location.href = url;
+		});
+	});
+</script>
+</head>
+<body>
+<body style="background-color: #f4f4f4">
+	<div class="alert alert-danger" style="margin: auto; width: 500px; margin-top: 100px;">
+		<p>登录失败, 原因:
+		<ul>
+			<li>工号不存在</li>
+		</ul>
+		</p>
+	</div>
+</body>
+</html>

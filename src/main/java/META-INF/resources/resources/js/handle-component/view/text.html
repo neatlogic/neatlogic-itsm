@@ -1,0 +1,11 @@
+<input maxlength="100" id="custom_{{=it.propid}}" 
+style="max-width:100%" type="text" name="custom_{{=it.propid}}" 
+{{if( it.valueList && it.valueList.length > 0 ){ }}
+	{{~it.valueList : prop : index}}	
+		 value="{{=prop.propValue}}"
+	{{~}}
+{{ }else{ }}
+	 value="{{=it.defaultvalue}}"
+{{ } }}	
+class="custom_{{=it.propid}} form-control input-sm" 
+{{?it.propneed == '1'}}check-type="required"{{?}}>

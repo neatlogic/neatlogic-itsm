@@ -1,0 +1,27 @@
+{{?it.setList && it.setList != null}} 
+{{~it.setList : set : index}}
+<span style="vertical-align:middle;display:inline-block;padding:1px;margin:2px">
+<input type="radio" 
+{{ for(var prop in set) { }}
+	{{?prop != "value" && prop != "text"}}
+		{{=prop}}="{{=set[prop]}}" 
+	{{?}} 
+	{{ } }} 
+	
+	class="custom_{{=it.propid}}" 
+	name="custom_{{=it.propid}}" 
+	value="{value:'{{=set.value}}',text:'{{=set.text}}'}" 
+	
+	{{if( it.valueList && it.valueList.length > 0 ){ }}
+		{{~it.valueList : prop : index2}}	
+			 {{?set.value==prop.propValue}}checked{{?}}
+		{{~}}
+	{{ }else{ }}
+		{{?set.value == it.defaultvalue}}checked{{?}}	
+	{{ } }}	
+	
+	>{{=set.text}}
+	
+</span>
+{{~}}
+{{?}}

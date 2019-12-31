@@ -1,0 +1,27 @@
+<tr id="tr{{=it.count}}">
+	<td>
+		{{=it.typeName}}
+		<input type="hidden" name="propType_{{=it.count}}" value="{{=it.type}}">
+	</td>
+	<td>
+		<input type="text" class="form-control input-sm" name="propId_{{=it.count}}" placeholder="英文字母" check-type="required" />
+	</td>
+	<td>
+		<input type="text" class="form-control input-sm" name="propName_{{=it.count}}" check-type="required" />
+	</td>
+	<td>
+		<select id="sltBind_{{=it.count}}" name="optionSetId_{{=it.count}}" check-type="required" class="form-control input-sm"></select>
+	</td>
+	<td>
+		<select id="sltDefaultValue_{{=it.count}}" name="propDefaultValue_{{=it.count}}" class="form-control input-sm sltDefaultValue" data-count="{{=it.count}}"></select>
+		<input id="hidDefaultValue_{{=it.count}}" type="hidden" name="propDefaultValueName_{{=it.count}}" value="">
+	</td>
+	<td>
+		<input type="checkbox" name="propNeed_{{=it.count}}" value="1" />
+	</td>
+	<td>
+		<button type="button" class="btnDelete btn btn-xs btn-danger" index="{{=it.count}}">
+			<i class="icon-white icon-trash"></i>
+		</button>
+	</td>
+</tr>

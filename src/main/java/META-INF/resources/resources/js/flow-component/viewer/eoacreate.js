@@ -1,0 +1,1 @@
+draw2d.shape.node.FlowStateEoaCreate = draw2d.shape.node.FlowBaseImage.extend({});

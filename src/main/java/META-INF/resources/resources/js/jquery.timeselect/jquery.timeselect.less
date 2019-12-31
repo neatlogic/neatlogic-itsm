@@ -1,0 +1,169 @@
+@import "../../less/common/base.less";
+@timeselect : ~"tstimeselect";
+
+.@{timeselect}-wrapper{
+	display: inline-block;
+    position: relative;
+	.@{timeselect}-input{
+		display:none;
+	}
+	.@{timeselect}-shower{
+	    height: 32px;
+	    border-bottom: 1px solid @bd-grey;
+	    border-radius: 3px;
+	    min-width: 150px;
+	    padding: 0 16px 0 8px;
+	    position: relative;
+	    cursor: pointer;
+	    .@{timeselect}-icon{
+			width: 16px;
+		    height: 32px;
+		    line-height: 32px;
+		    position: absolute;
+		    top: 0;
+		    text-align: center;
+		    font-size: 10px;
+		    cursor: pointer;
+		    color: @color-default;
+		    font-weight: bolder;
+		    &.prevbtn{
+		    	left:0;
+		    }	
+		    &.nextbtn{
+		    	right: 0;
+		    }
+		    &.disabled{
+		    	.opacity(0.2);
+		    	color:@color-muted;
+	    	    cursor: not-allowed;
+		    }	
+	    }
+	    .@{timeselect}-txt{
+	    	user-select: none;
+	    	height: 32px;
+	    	line-height: 32px;
+	    	display:block;
+	    }
+	}
+	.@{timeselect}-dropdown{
+		display:none;
+		position: absolute;
+	    min-width: auto;
+	    background: @bgcolor-base;
+	    border: 1px solid @bd-grey;
+	    word-break: keep-all;
+	    white-space: nowrap;
+	    padding: 4px;
+	    border-radius: 3px;
+	    margin-top: 2px;
+	    left: 0;
+	    top: 100%;
+	    &.ontop{
+	    	top: auto;
+	    	bottom: 100%;
+	    	margin-bottom: 2px;	
+	    	margin-top: 0;	        	
+	    }
+	    &.onleft{
+	    	left: auto;
+	    	right: 0;
+	    }
+	    .@{timeselect}-ul{
+	    	max-height: 260px;
+    		overflow: auto;
+	    }
+	    .@{timeselect}-option{
+			display: block;
+		    line-height: 24px;
+		    height: 24px;
+		    font-size: 95%;
+		    padding: 0 2px;
+	        cursor: pointer;
+	        margin-bottom:2px;
+	        &:hover{
+	        	color: @color-default;
+	        }
+	        &.selected{
+	        	position:relative;
+	        	padding-right:20px;
+	        	color: @color-default;
+	        	background: lighten(@color-default,36%);
+	        	&:after{
+	        		content:'\eaac';
+	        		.tsfont();
+	        		position: absolute;
+	        		top:0;
+	        		right:0;
+	        		width:20px;
+        		    font-size: 14px;
+    				font-weight: bold;
+	        		height:24px;
+	        		line-height: 24px;
+	        		color: @color-default;
+	        		.ta(center);
+	        	}
+	        }
+	        
+	    }
+	    .@{timeselect}-range{
+	    	border-top: 1px solid @bd-grey;
+	    	padding: 8px 4px 0px;
+	    	.@{timeselect}-timer{
+	    		font-size: 12px;
+	    		border: 0 none;
+	    		border-radius: 0;
+	    		border-bottom: 1px solid @bd-grey;
+	    		width: 108px;
+			    padding-left: 2px;
+			    padding-right: 2px;
+		        height: 24px;
+    			line-height: 22px;
+			    display: block;
+			    background: @bgcolor-base;
+			    .ta(left);
+			    &:focus{
+			    	.box-shadow(~"none");
+			    }
+	    	}
+	    	.btnConfirm{
+			    margin-left: 4px;
+			    padding: 0 4px;
+			    line-height: 26px;
+			    height: 26px;
+			    font-size: 10px;
+	    	}
+	    	.timer-wrapper{
+	    		position: relative;
+    		    display: inline-block;
+	    		>i{
+				    position: absolute;
+				    top: 5px;
+				    left: 4px;
+				    font-size: 10px;
+				    height: 16px;
+				    line-height: 16px;
+				    opacity: .6;
+			        transition: all .3s;
+				    &.on{
+				    	transform: scale(0.8) translate(-4px, -16px);
+				    }
+	    		}
+	    	}
+	    }			
+	}
+	&.ondrop{
+		.@{timeselect}-dropdown{
+			display:block;
+			.box-shadow(~"0 1px 4px #ddd");
+		}
+	}
+	&.isSwitch{
+		.@{timeselect}-shower{
+			padding-left:16px;
+		}	
+	}
+}
+
+.WdateDiv #dpTime input:focus{
+	.box-shadow(~"none");
+}

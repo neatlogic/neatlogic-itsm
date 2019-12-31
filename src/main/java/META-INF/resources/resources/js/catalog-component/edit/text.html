@@ -1,0 +1,57 @@
+<tr>
+	<td>
+		<input type="text" name="sort" value="{{=it.count}}" class="form-control input-sm input-mini" style="text-align:center;padding: 0px; width: 30px">
+	</td>
+	<td>
+		{{=it.typeName}}
+		<input type="hidden" name="propType" value="{{=it.type}}">
+		<input type="hidden" value="" name="propDefId" />
+	</td>
+	<td>
+		<input type="text" class="form-control input-sm" name="propId" placeholder="请输入英文字母" check-type="required" />
+	</td>
+	<td>
+		<input type="text" class="form-control input-sm" name="propName" check-type="required" />
+	</td>
+	<td>
+		-
+		<input type="hidden" name="optionSetId" value="" />
+	</td>
+	<td>
+		<input type="text" name="propDefaultValue" placeholder="允许为空" class="form-control input-sm" />
+	</td>
+	<td>
+		<select name="propNeed" class="form-control input-sm" style="padding: 0px; width: 45px">
+			<option value="1">是</option>
+			<option value="0">否</option>
+		</select>
+	</td>
+	<td>
+		<select name="propSave" class="form-control input-sm" style="padding: 0px; width: 45px">
+			<option value="1">是</option>
+			<option value="0">否</option>
+		</select>
+	</td>
+	<td>
+		<select name="propSearch" class="form-control input-sm" style="padding: 0px; width: 45px">
+			<option value="1">是</option>
+			<option value="0">否</option>
+		</select>
+	</td>
+	<td>
+		<input type="text" name="propMemo" maxlength="200" value="" title="长度小于200" class="form-control input-sm classTooltip" />
+	</td>
+	<td>
+		<select name="width" class="form-control input-sm" style="padding: 0px; width: 60px">
+			<option value="1">100%</option>
+			<option value="2">50%</option>
+			<option value="3">30%</option>
+		</select>
+	</td>
+	<td style="text-align:right">
+		<input type="hidden" name="propConfig" id="hidPropConfig{{=it.count}}">
+		<button type="button" class="btnDelete btn btn-sm btn-danger-border">
+			<i class="glyphicon glyphicon-trash"></i>
+		</button>
+	</td>
+</tr>

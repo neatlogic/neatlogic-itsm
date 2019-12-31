@@ -1,0 +1,17 @@
+<form id="formConfig">
+	<div class="form-group">
+		<label>超链接：</label>
+		<input type="text" value="{{=it.url||''}}" class="form-control input-sm" name="url">
+	</div>
+	<div class="form-group">
+		<label>根路径：</label>
+		<input type="text" value="{{=it.rootpath||''}}" class="form-control input-sm" name="rootpath">
+	</div>
+	<div class="form-group">
+		<label>是否多选：</label>
+		<select class="form-control input-sm" name="ismultiple">
+			<option value="0">否</option>
+			<option value="1" {{=it.ismultiple?'selected':''}}>是</option>
+		</select>
+	</div>
+</form>

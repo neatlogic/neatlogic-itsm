@@ -1,0 +1,104 @@
+.plugin-searchInput {
+  display: inline-block;
+  outline: none;
+  position: relative;
+}
+.plugin-searchInput > .serchshow {
+  outline: none;
+  padding: 0px 3px 0px 3px !important;
+  min-height: 32px;
+  display: inline-block;
+  min-width: 210px;
+  height: auto;
+}
+.plugin-searchInput > .serchshow .serchinput {
+  margin-right: 15px;
+  border: 0px;
+  outline: none;
+  min-width: 80px;
+  line-height: 28px;
+  height: 28px;
+  vertical-align: baseline;
+  margin: 0;
+}
+.plugin-searchInput > .serchshow .serchinput:focus,
+.plugin-searchInput > .serchshow .serchinput:active {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+.plugin-searchInput > .serchshow .serchspandiv {
+  display: inline-block;
+  min-width: 100%;
+}
+.plugin-searchInput > .serchshow .serchspandiv .serchp {
+  display: inline-block;
+  margin: 3px 15px 3px 0px;
+  height: 22px;
+  border-radius: 4px;
+  position: relative;
+  border: 1px dashed #ececec;
+  padding: 0px 6px;
+  line-height: 20px;
+}
+.plugin-searchInput > .serchshow .serchspandiv .serchp .serchdelete {
+  background: #ffffff;
+  font-size: 12px;
+  margin-left: 2px;
+  color: #ccc;
+  cursor: pointer;
+  display: initial;
+  position: absolute;
+  top: -6px;
+  line-height: 12px;
+  height: 12px;
+  right: -3px;
+  display: none;
+}
+.plugin-searchInput > .serchshow .serchspandiv .serchp:hover .serchdelete {
+  display: block;
+}
+.plugin-searchInput .showmore,
+.plugin-searchInput .serchul {
+  border: 1px solid #dddddd;
+  display: inline-block;
+  position: absolute;
+  box-shadow: 0 0 5px 2px #eee;
+  padding: 5px 0px;
+  background: #ffffff;
+  z-index: 1;
+}
+.plugin-searchInput .showmore > li,
+.plugin-searchInput .serchul > li {
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 5px 5px;
+  color: #6d6b6b;
+  font-size: 14px;
+  cursor: default;
+}
+.plugin-searchInput .showmore > li.select,
+.plugin-searchInput .serchul > li.select {
+  background: #e5edff;
+}
+.plugin-searchInput .showmore > li:hover,
+.plugin-searchInput .serchul > li:hover {
+  background: #e5edff;
+  color: #262626;
+}
+.plugin-searchInput .showmore > li:hover .moredelete,
+.plugin-searchInput .serchul > li:hover .moredelete {
+  display: inline-block;
+}
+.plugin-searchInput .serchul > li {
+  cursor: pointer;
+}
+.plugin-searchInput .txtValue {
+  width: 0px;
+  border: none;
+  height: 0px;
+  resize: none;
+  overflow: hidden;
+}

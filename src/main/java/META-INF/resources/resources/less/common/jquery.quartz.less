@@ -1,0 +1,65 @@
+@import "base.less";
+
+.jquery-quartz-container {
+	display:inline-block;
+	vertical-align:middle;
+}
+
+.form-group .jquery-quartz-container {
+	margin-top:7px;
+}
+
+.jquery-quartz-controller-container {
+	white-space: nowrap;
+	position: relative;
+	cursor: pointer;
+	margin: 0px 3px;
+	display: inline-block;
+}
+
+.jquery-quartz-controller-text {
+	border: 1px solid @bd-grey;
+	border-radius: 3px;
+	height:32px;
+	line-height:32px;
+	.btnpadding(6px);
+}
+
+.td-cron .jquery-quartz-container label{
+    margin: 0px;
+}
+.td-cron .jquery-quartz-controller-text{
+     border: none; 
+     border-radius: 0; 
+     height: auto; 
+     line-height: 1.2;
+     padding: 0px; 
+}
+
+.jquery-quartz-dropdown-container {
+	position: absolute;
+	left: 0px;
+	padding: 5px;
+	border-radius: 5px;
+	border: 1px solid @bd-grey;
+	display: none;
+	background-color: @bgcolor-base;
+	.user-select(none);
+	.box-shadow(~"0 5px 10px rgba(0, 0, 0, 0.2)");
+	z-index:999;
+}
+
+.jquery-quartz-dropdown-item {
+	float: left;
+	text-align: center;
+	white-space: nowrap;
+	padding: 3px;
+	margin: 2px;
+	min-width: 40px;
+	border-radius:3px;
+	.user-select(none);
+	&:hover,&.selected{
+		background: @color-default;
+		color: @opcolor-base;	
+	}
+}

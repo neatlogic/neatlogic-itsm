@@ -1,0 +1,25 @@
+<tr>
+	<td>
+		<select class="form-control input-sm">
+			<option value="">请选择...</option>
+			{{~it.fileGroupList:filegroup:index}}
+			<option value="{{=filegroup.value}}">{{=filegroup.text}}</option>
+			{{~}}
+		</select>
+	</td>
+	<td>
+		<select class="form-control input-sm input-mini">
+			<option value="1">是</option>
+			<option value="0">否</option>
+		</select>
+	</td>
+	<td><input type="text" class="form-control input-sm" style="widtd:100%"></td>
+	<td nowrap="nowrap">
+		<button class="btn btn-default btn-sm btnAdd">
+			<i class="icon-plus"></i>
+		</button>
+		<button class="btn btn-default btn-sm btnDel">
+			<i class="icon-minus"></i>
+		</button>
+	</td>
+</tr>

@@ -1,0 +1,78 @@
+div .fc-toolbar h2 {
+	display: inline-block;
+	vertical-align: middle;
+	padding: 0 10px;
+}
+
+div button.fc-next-button, button.prev, button.next, div button.fc-prev-button{
+	background: transparent;
+	border: none;
+	color: #999;
+}
+
+div button.fc-next-button:hover, div button.fc-prev-button:hover, button.prev:hover,button.next:hover {
+	color: #666;
+}
+
+button.fc-button {
+	text-shadow: none;
+	box-shadow: none;
+}
+
+
+.fc-unthemed .fc-divider, .fc-unthemed .fc-list-heading td, .fc-unthemed .fc-popover .fc-header {
+    background: #f6f7fb;
+}
+
+.fc-unthemed .fc-list-heading td, .fc-unthemed th, .fc-unthemed thead {
+	line-height:2.5;
+}
+.fc-unthemed th, .fc-agendaWeek-view .fc-week td.fc-widget-content{
+	border-color:#ececec;
+}
+
+.fc-ltr .fc-basic-view .fc-day-top .fc-day-number{
+	float:none;
+	padding:0 5px;
+	color:#999;
+	
+}
+.fc-toolbar .fc-left, .fc-toolbar .fc-right{
+	padding-top: 1em;
+}
+.fc .fc-button-group>*{
+    border-radius: 0;
+}
+hr.fc-divider{
+	padding:0;	
+}
+.fc-agendaWeek-view:hover hr.fc-divider{
+	box-shadow:0 1px 2px #ddd;
+	position: relative;
+    z-index: 2;
+}
+.fc-time-grid .fc-slats .fc-minor td{
+	border-top:0 none;
+}
+.fc-event{
+	padding:4px;
+	margin:2px 0;
+}
+.fc-agendaWeek-view .fc-event{
+	padding:0;
+	margin:2px 0;
+}
+.fc-ltr .fc-axis{
+	text-align:left;
+	color:#999;
+}
+.fc-row .fc-content-skeleton td, .fc-row .fc-helper-skeleton td{
+	padding:0 6px;
+}
+.fc-timeline .fc-head .fc-cell-content{
+	text-align:center;
+}
+.fc-unthemed .fc-popover{
+	max-height: 100%;
+    overflow: auto;
+}

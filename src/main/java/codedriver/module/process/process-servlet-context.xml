@@ -16,7 +16,13 @@
 		http://codedriver.techsure.com/schema/codedriver.xsd">
 
 	<codedriver:module id="process" name="工作流引擎模块" />
-
+	
+	<!-- TODO 临时后端测试页面试用  start-->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/module/process/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+    <!-- TODO 临时后端测试页面试用  end-->
 	<context:component-scan base-package="codedriver.module.process" />
 
 	<context:annotation-config />
@@ -39,4 +45,7 @@
 			</list>
 		</property>
 	</bean>
+	
+
+	
 </beans>

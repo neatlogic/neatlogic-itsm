@@ -1,0 +1,112 @@
+.jquery-cascader {
+	
+}
+
+.jquery-cascader-inputer {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0px 15px 0px 5px;
+    white-space: nowrap;
+    min-height: 30px;
+    line-height: 30px;
+    position: relative;
+    text-overflow: ellipsis;
+}
+
+.jquery-cascader-close {
+	position: absolute;
+	right: 5px;
+	top: 15px;
+	font-size: 12px;
+	color: #aaa;
+	cursor: pointer;
+	line-height: 1;
+}
+
+.jquery-cascader-icon {
+	position: absolute;
+	right: 6px;
+	top: 2px;
+	font-size: 12px;
+	color: #aaa;
+	cursor: pointer;
+	line-height: 1;
+}
+
+.jquery-cascader-wraper {
+	position: relative;
+	text-align: left;
+	vertical-align: middle;
+	display: inline-block;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	cursor: pointer;
+	min-width: 210px;
+	min-height: 30px;
+}
+
+.jquery-cascader-title, .jquery-cascader-searchcontainer {
+	border-bottom: 1px solid #eee;
+	padding: 5px;
+}
+
+.jquery-cascader-td {
+	vertical-align: top;
+	padding: 0px 5px;
+	border-right: 1px solid #eee;
+	padding: 0px 5px;
+	min-width: 150px;
+}
+
+.jquery-cascader-td:last-child {
+	border: 0px
+}
+
+.jquery-cascader-container {
+	position: absolute;
+	top: 30px;
+	transition: opacity 200ms ease-out, top 200ms ease-out, visibility 200ms
+		ease-out;
+	-webkit-transition: opacity 200ms ease-out, top 200ms ease-out,
+		visibility 200ms ease-out;
+	-moz-transition: opacity 200ms ease-out, top 200ms ease-out, visibility
+		200ms ease-out;
+	-ms-transition: opacity 200ms ease-out, top 200ms ease-out, visibility
+		200ms ease-out;
+	-o-transition: opacity 200ms ease-out, top 200ms ease-out, visibility
+		200ms ease-out;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	z-index: 9999;
+	background: #fff;
+	border: 1px solid #ddd;
+	box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.11);
+	border-radius: 3px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	width: auto;
+	transition: opacity 200ms ease-out, top 200ms ease-out, visibility 200ms
+		ease-out;
+}
+
+.jquery-cascader-ul {
+	display: inline-block;
+	list-style: none;
+	padding: 0px;
+	width: 100%;
+}
+
+.jquery-cascader-li {
+	cursor:default;
+	padding: 5px;
+}
+
+.jquery-cascader-li:hover {
+	background: #eee
+}
+
+.jquery-cascader-li.selected {
+	background: #ddd;
+}

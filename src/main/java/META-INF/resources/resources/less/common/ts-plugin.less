@@ -1,0 +1,764 @@
+@charset "utf-8";
+@import "base.less";
+//滚动条整体
+::-webkit-scrollbar{
+	width: 6px;
+	cursor: pointer;
+	height: 6px;
+}
+::selection{
+    background:	#a9bdec;
+    color: @opcolor-base;
+}
+scrollbar-base-color{
+	background:#b3b0b0;
+}
+//外层轨道
+::-webkit-scrollbar-track, ::-webkit-scrollbar-track-piece{
+	background: #f5f5f5;
+}
+//滚动条里面可以拖动的那部分
+::-webkit-scrollbar-thumb {
+	background: #bdbcbc;
+	border-radius: 6px;
+	&:hover{
+		background: #828282;
+	}
+}
+.srcoll-box{
+	overflow:hidden;
+	padding-right:8px;
+	width:100%;
+	position:relative;
+	&:hover{
+		overflow:auto;
+		padding-right:0;
+	}
+}
+#loading-bar{
+	position:absolute;
+	top:0;
+	left:0px;
+	width:100%;
+	height: 3px;
+	border-radius: 2px;
+}
+#loading-item {
+	position: absolute;
+    left: 0;
+    margin: 0px;
+    width: 0;
+    height: 3px;
+    top: 0px;
+    background-color: #dde5f9;
+    .transition(~"width .3s");
+}
+.theme_black #loading-item {
+    background-color: #183971;
+}
+//jquery-ztreeselect
+.jquery-ztreeselect-searcher {
+	background:	url(/balantflow/resources/images/plugin/jquery.ztreeselect.png)	no-repeat;
+	background-position: 0, -45px;
+}
+.jquery-ztreeselect-up {
+	background:	url(/balantflow/resources/images/plugin/jquery.ztreeselect.png)	no-repeat;
+	background-position: 0px 0px;
+	display: inline-block;
+	width: 15px;
+	height: 15px;
+}
+.jquery-listselect-listitem {
+	padding: 5px 6px;
+	text-align: left;
+	margin: 0px 3px;
+	cursor: pointer;
+	&:hover{
+		padding: 5px 6px;
+		background: #069;
+		text-align: left;
+		color: #fff;
+		margin: 0px 3px;
+		cursor: pointer;	
+	}
+}
+.jquery-listselect-close {
+	background:	url(/balantflow/resources/images/plugin/jquery.ztreeselect.png)	no-repeat;
+	background-position: 0px -60px;
+	display: inline-block;
+	width: 15px;
+	height: 15px;
+	cursor: pointer;
+	color: @color-base;
+}
+.jquery-listselect-categoryitem {
+	font-weight: bold;
+	text-align: left;
+	margin: 0px 2px;
+	padding: 6px 4px;
+	color: @color-lighten;
+}
+//btn-bar
+div.btn-bar {
+	text-align: right;
+	padding: 0 2*@body-padding;
+	width: 100%;
+	position: fixed;
+	margin: 0px !important;
+	bottom: 0px;
+	left: 0px;
+	background: @bottonbtn-bg;
+	height: 50px;
+	.box-shadow(0 0 5px #d8d7d7);
+	z-index:110;
+	&.absolute{
+	   position: absolute;
+	   bottom: auto;
+	   .box-shadow(none);
+	}
+	> .btn-group {
+		> .btn{
+			.btnpadding(24px);
+		}
+	}
+}
+
+.btn-bar:empty, .btn-bar:blank {
+	display: none;
+}
+//animateBox
+.animateBox{
+    background-size: 40px 40px;
+    background-image: linear-gradient(45deg,rgba(225,225,225,.3) 25%,transparent 25%,transparent 50%,rgba(225,225,225,.3) 50%,rgba(225,225,225,.3) 75%,transparent 75%,transparent);
+    animation: active 1.5s linear infinite;  	
+}
+@keyframes active{
+    from{background-position: 40px 0;}
+    to{background-position: 0 0;}
+}
+//ts-hurry
+.ts-hurry{
+	color:@color-danger;
+	margin-left:3px;
+}
+.ts-hurry:hover{
+	color:@color-danger-hover;	
+}
+//nodatatips
+.nodatatips{
+    display: inline-block;
+    font-size:16px;
+    font-size:1.1428571428571428rem;
+    color:@color-lighten;
+    line-height:1;
+	.nodataImg{
+		.opacity(.8);
+	}
+    .nodataImg{
+		font-size:75px;
+		font-size:5.357142857142857rem;
+    }
+}
+.nodataTxt{
+	line-height:2;
+    margin-bottom: 10px;
+}
+//the lazy nodatatips
+.emptydatatips{
+	display:block;
+    font-size:16px;
+    font-size:1.1428571428571428rem;
+    color:@color-lighten;
+	line-height:2;
+    padding-bottom: 10px;
+    text-align: center;
+    padding-top: 10px;
+	&:before{
+		content:'';
+		width:100%;
+		display:block;
+		height:90px;
+		background:url(../../images/error/emptydata.svg) no-repeat center center;
+		background-size: auto 80px;
+	}
+}
+//arrow
+.arrowBox{
+    position: relative;
+}
+.arr-top, .arr-bottom, .arr-left, .arr-right{
+    position: absolute;
+    background:@bgcolor-base;
+    border: 1px solid @bd-grey !important;
+    border-radius:@border-radius-base;
+    padding: 10px;
+    min-height:30px;
+    min-width:30px;
+    &:before,&:after{
+	    content:'';
+	    width: 0;
+	    height: 0;
+	    position: absolute;
+	    border-width: 8px;
+	    border-style: solid;
+	    border-color: transparent transparent transparent transparent;    
+    }
+}
+.arr-top{
+    margin-top: 10px;
+    top:100%;
+    left:0%;
+    &:before,&:after{
+	    top: -16px;
+	    left: 8px;
+	    border-bottom-color: @bgcolor-base;    
+    }
+    &:before{
+	    top: -17px;
+	    border-bottom-color: darken(@bd-grey,20%);    
+    }
+}
+.arr-bottom{
+    margin-bottom: 10px;
+	bottom:100%;
+    left:0%;
+    &:before,&:after{
+	    bottom: -16px;
+	    left: 8px;
+	    border-top-color: @bgcolor-base;    
+    }
+    &:before{
+	    bottom: -17px;
+	    border-top-color: darken(@bd-grey,20%);    
+    }
+}
+.arr-left{
+    margin-left: 10px;
+    left:0%;
+    top:0%;
+    &:before,&:after{
+	    top: 8px;
+	    left: -16px;
+	    border-right-color: @bgcolor-base;    
+    }
+    &:before{
+	    left: -17px;
+	    border-right-color: darken(@bd-grey,20%);    
+    }
+}
+.arr-right{
+    margin-right: 10px;
+    top: 0;
+    right: -100%;
+    &:before,&:after{
+	    top: 8px;
+	    right: -16px;
+	    border-left-color: @bgcolor-base;    
+    }
+    &:before{
+	    right: -17px;
+	    border-left-color: darken(@bd-grey,20%);    
+    }
+}
+.arrow-top, .arrow-bottom, .arrow-left, .arrow-right{
+    position: absolute;
+    background:@bgcolor-base;
+    padding: 10px;
+    border-radius: @border-radius-base;
+    border:1px solid @bd-grey;
+    color:@color-base;
+    >.tsin,>.tsout{
+	    position: absolute;
+	    border-width:6px;
+	    border-style:solid;
+	    width: 0;
+	    height: 0;
+	    border-color: transparent transparent transparent transparent;    
+    }
+}
+.arrow-top{
+    margin-top: 10px;
+    top:100%;
+    left:0%;
+    >.tsin{
+	    top: -12px;
+	    left: 6px;
+	    border-bottom-color: @bd-grey;
+    }
+    >.tsout{
+	    top: -11px;
+	    left: 6px;
+	    border-bottom-color: @bgcolor-base;    
+    }
+}
+.arrow-bottom{
+    margin-bottom: 10px;
+	bottom:100%;
+    left:0%;
+    >.tsin{
+	    bottom: -12px;
+	    left: 6px;
+	    border-top-color: @bd-grey;
+    }
+    >.tsout{
+	    bottom: -11px;
+	    left: 6px;
+	    border-top-color: @bgcolor-base;    
+    }
+}
+.arrow-left{
+    margin-left: 10px;
+    left:0%;
+    top:0%;
+    >.tsin{
+	    top: 6px;
+	    left: -12px;
+	    border-right-color: @bd-grey;
+    }
+    >.tsout{
+	    top: 6px;
+	    left: -11px;
+	    border-right-color: @bgcolor-base;    
+    }
+}
+.arrow-right{
+    margin-right: 10px;
+    top: 0;
+    right: -100%;
+    >.tsin{
+	    top: 6px;
+	    right: -12px;
+	    border-left-color: @bd-grey;
+    }
+    >.tsout{
+	    top: 6px;
+	    right: -11px;
+	    border-left-color: @bgcolor-base;    
+    }
+}
+.title{
+	padding: 2px;
+    margin-bottom: 2px;
+}
+//loading
+#loading-box{
+	background-color: rgba(255, 255, 255, 0.6);
+	height: 100%;
+	width: 100%;
+	position: fixed;
+	z-index: 999;
+	margin-top: 0px;
+	top: 0px;
+	left:0;
+	.loader {
+		width: 100%;
+		height: 60%;
+	    background:url(../../images/loading.svg) no-repeat center center;
+	    background-size: 60px 60px;
+	}
+}
+
+.table-data{
+	width:100%;
+	height:100%;
+	margin-bottom:0;
+	&.table tbody tr td{
+	    border-width: 0px;
+        vertical-align: middle;
+        text-align:center;
+        padding: 0;
+	}
+}
+.emptydata-box,.errordata-box{
+	width:100%;
+	height:100%;
+    display:table;
+    font-size:14px;
+    font-size:1rem;
+    &:before{
+		content:'NO DATA';
+		display: table-cell;
+		vertical-align: middle;
+	    text-align: center;
+	    opacity: .7;    
+    }
+}
+.errordata-box:before{
+	content:'ERROR';
+	color:@color-danger;	
+}
+//tstooltips-container 
+.tstooltips-container{
+    position: relative;
+    .tstooltips-tip{
+	    cursor: pointer;
+    }
+    .tstooltips-text{
+	    position: absolute;
+	    left: 100%;
+	    top:0;
+	    word-break: keep-all;
+        white-space: nowrap;
+	    font-size: 90%;
+	    background: #fff;
+	    border-radius: 4px;
+	    padding: 5px;
+	    border: 1px solid #ddd;
+	    box-shadow: 1px 1px 3px #ddd;
+	    margin-left:4px;
+	    display: none;
+	    color: #666;
+	    &:before,&:after{
+	    	content:'';
+	    	width:0;
+	    	height:0;
+	    	top:4px;
+	    	position: absolute;
+	    	border-style:solid;
+	    	border-width:4px;
+	    }
+	    &:before{
+	    	border-color: transparent #ddd transparent transparent;
+	    	left:-8px;
+	    }
+	    &:after{
+	    	border-color: transparent #fff transparent transparent;
+	    	left:-7px;	    
+	    }
+    }
+    &:hover .tstooltips-text{
+    	display: block;
+    }
+    &.left{
+    	.tstooltips-text{
+		    right: 100%;
+		    left: auto;
+		    margin-right:6px;
+		    box-shadow: -1px 1px 3px #ddd;
+		    &:before,&:after{
+		    	left:100%;
+		    }
+		    &:before{
+		    	border-color: transparent transparent transparent #ddd;
+		    	margin-left:1px;
+		    }
+		    &:after{
+		    	border-color: transparent transparent transparent #fff;
+		    }
+    	}
+    }
+}
+//移上去才显示的滚动条，主要兼容chrome浏览器
+.tsscroll-container{
+	overflow: auto;
+	&::-webkit-scrollbar {
+	    width: 6px;
+	    cursor: pointer;
+	    height: 6px
+	}
+	&::-webkit-scrollbar-track,&::-webkit-scrollbar-track-piece,&::-webkit-scrollbar-thumb{
+		background: transparent;
+	}
+	&:hover{
+		&::-webkit-scrollbar-track,&::-webkit-scrollbar-track-piece{
+			background: #f5f5f5;
+		}
+		&::-webkit-scrollbar-thumb{
+			background:#bdbcbc;
+		}
+		&::-webkit-scrollbar-thumb:hover{
+			background:#828282;
+		}	
+	}
+}
+//拟下拉select
+.tsselect-container{
+    padding-top: 8px;
+    padding-bottom: 8px;
+    position: relative;
+    .tsselect-text{
+	    line-height: 32px;
+	    height: 32px;
+	    font-weight: bold;
+	    cursor: pointer;
+	    color: @color-base;
+	    .tsselect-down{
+		    width:32px;
+		    height:32px;
+		    text-align:center;
+		    display:inline-block;
+		    .fz(16);
+		    .transition(~" all 0.3s");
+	    }
+    }
+    .tsselect-dropdown{
+	    position: absolute;
+	    top: 40px;
+	    left: 0;
+	    border: 1px solid @bd-grey;
+	    background: @bgcolor-base;
+	    display:none;   
+	    &:hover{
+	    	.box-shadow(~"0 3px 8px rgba(0,0,0,0.175)");
+	    } 
+    }
+    &.on{
+    	.tsselect-text{
+    		color: @color-title;
+    		.tsselect-down{
+    			.transform(~"rotate(180deg)");
+    		}
+    	}
+    	.tsselect-dropdown{
+    		display:block;
+    		z-index:3;
+    	}
+    }
+    &.disabled{
+    	.tsselect-text{
+    		cursor: auto;
+    		.tsselect-down{
+    			display: none!important;
+    		}
+    	}
+     	.tsselect-dropdown{
+    		display: none!important;
+    	}   
+    }
+}
+//排序按钮
+.tssort{
+    position:relative;
+    display:inline-block;
+    width:16px;
+    height:18px;
+    text-align:center;
+    font-size:13px;
+    cursor: pointer;
+    color:@color-default;
+    vertical-align: middle;
+    &:before,&:after{
+	    content:'';
+	    position:absolute;
+	    left: 4px;
+	    width:0;
+	    height:0;
+	    border-style:solid;
+	    border-width:4px;
+	    .transition(~" all 0.3s");    
+    }
+    &:before{
+	    border-color: transparent transparent @bd-grey transparent;
+	    border-bottom-width:5px;
+	    top:-1px;    
+    }
+    &:after{
+	    border-color: @bd-grey transparent transparent transparent;
+	    border-top-width:5px;
+	    bottom:-1px;   
+    }
+    &.up:after{
+    	border-color: #0d6cff transparent transparent transparent;
+    }
+    &.down:before{
+    	border-color: transparent transparent #0d6cff transparent;
+    }
+}
+
+//深色皮肤
+html.theme_black{
+	.theme01();
+	::selection{
+	    background:	#828282;
+	    color: @color-base;
+	}
+	scrollbar-base-color{
+		background:#7a95bb;
+	}
+	::-webkit-scrollbar-track, ::-webkit-scrollbar-track-piece{
+		background: #7a95bb;
+	}
+	::-webkit-scrollbar-thumb {
+		background: #1d232b;
+		&:hover{
+			background: #283950;
+		}
+	}	
+}
+//块状列表布局（默认大屏6等份普通笔记本4等份超小屏幕2等份）
+.tsblock-ul{
+	*zoom:1;
+	&:after{
+	    visibility: hidden;
+	    clear: both;
+	    display: block;
+	    content: "";
+	    height: 0;	
+	}
+	>li{
+	    padding: 8px;
+        width: 16.66666667%;
+        position: relative;
+        float: left;	
+        >div{
+			padding: 4px 8px;
+		    border: 1px solid @bd-grey;
+		    background: @bgcolor-base;
+		    height: 120px;     
+		    position: relative; 
+		    overflow: hidden;  
+        	>h5{
+			    line-height: 34px;
+			    height: 34px;
+			    overflow: hidden;
+			    text-overflow: ellipsis;
+			    word-break: break-all;
+			    white-space: nowrap;    
+			    padding-right: 24px;    	
+        	}
+        	.tsblock-detail{
+				padding:10px;
+			    color: @color-lighten;
+			    line-height: 22px;
+			    overflow: hidden;
+			    height: 80px;
+			    min-height: 80px;
+			    text-overflow: ellipsis;
+			    display: -webkit-box;
+			    -webkit-box-orient: vertical;
+			    -webkit-line-clamp: 3;
+			    background: @bgcolor-base;
+			    position: absolute;
+			    top: 40px;
+			    left: -1px;
+			    right: -1px;
+			    border: 1px solid @bd-grey;
+			    border-top: 0 none;	
+		        .transition(~"height 3s");       	
+        	}
+    	    >.tsblock-actionlist{
+				position: absolute;
+			    top: 4px;
+			    right: 8px;
+			    background: #d4d4d4;
+			    word-break: keep-all;
+			    white-space: nowrap; 
+			    display:none; 
+			    .transition(~"all 3s");
+			    >span,>a{
+        			font-size:12px;
+        			height:30px;
+        			line-height:30px;
+        			width: 16px;
+        			text-align: center;	
+        			color: @opcolor-base;
+        			margin-left:4px;
+        			cursor: pointer;
+        			&:hover{
+        				color: @color-default;
+        			}			    	
+			    }
+			    &.hasshow{
+			    	display: block; 
+			    	background: transparent;	
+			    	 >span,>a{
+			    	 	color: @color-base;
+	        			&:hover{
+	        				color: @color-default;
+	        			}			    	 	
+			    	 }
+			    }      		
+    		}
+        	.tsblock-action{
+        		position: absolute;
+        		top: 4px;
+        		right: 4px;
+        		width:20px;
+        		text-align: right;
+        		>.icon{
+        			color: @color-default;
+        			font-size:12px;
+        			height:34px;
+        			line-height:34px;
+        			width: 16px;
+        			text-align: center;
+        			cursor: pointer;
+        		}
+        		>.action-list{
+					position: absolute;
+				    top: 0;
+				    right: 0;
+				    background: #d4d4d4;
+				    word-break: keep-all;
+				    white-space: nowrap;
+				    width: 0;
+				    overflow: hidden;
+				    display: none;
+				    .transition(~"all 3s");
+				    >span,>a{
+	        			font-size:12px;
+	        			height:30px;
+	        			line-height:30px;
+	        			width: 16px;
+	        			text-align: center;	
+	        			margin-left:4px;
+	        			cursor: pointer;
+	        			&:hover{
+	        				color: @color-default;
+	        			}			    	
+				    }
+        		}
+        		&:hover{
+        			>.action-list{
+        				display:block;
+        				width: auto;
+        			}
+        		}
+        	}
+        }
+		&:hover{
+			z-index:3;
+			>div{
+				margin-top:-4px;
+				margin-bottom: 4px;
+				border-top: 2px solid @color-default;
+				overflow: visible; 
+			    background: #d4d4d4; 
+				.tsblock-detail{
+				    height: auto;
+				    -webkit-line-clamp: initial;
+			        background: #d4d4d4; 		
+				}
+				>.tsblock-actionlist{
+					display: block;
+				}
+			}
+		}
+	}
+	&.hasradius{
+		>li{
+			>div{
+				border-radius: 4px;
+				.tsblock-detail{
+				    border-radius: 4px;
+				    border-top-left-radius: 0;
+				    border-top-right-radius: 0;
+				}
+			}
+		}
+	}
+}
+@media (max-width: 1410px) {
+	.tsblock-ul>li{
+		width: 25%;
+	}
+}
+@media (max-width: 948px) {
+	.tsblock-ul>li{
+		width: 50%;
+	}
+}
+//CodeMirror的提示文字
+.CodeMirror-placeholder{
+	opacity: .2;
+}

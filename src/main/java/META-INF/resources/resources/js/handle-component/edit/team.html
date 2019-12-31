@@ -1,0 +1,24 @@
+<tr id="tr{{=it.count}}">
+	<td>
+		{{=it.typeName}}
+		<input type="hidden" name="propType_{{=it.count}}" value="{{=it.type}}">
+	</td>
+	<td>
+		<input type="text" class="form-control input-sm" name="propId_{{=it.count}}" placeholder="英文字母" check-type="required" value="teamid" />
+	</td>
+	<td>
+		<input type="text" class="form-control input-sm" name="propName_{{=it.count}}" check-type="required" />
+	</td>
+	<td>
+		<input type="hidden" name="optionSetId_{{=it.count}}" value="" />
+		<input type="hidden" name="propDefaultValue_{{=it.count}}" class="form-control input-sm" value="">
+	</td>
+	<td>
+		<input type="checkbox" name="propNeed_{{=it.count}}" value="1" />
+	</td>
+	<td>
+		<button type="button" class="btnDelete btn btn-xs btn-danger" index="{{=it.count}}">
+			<i class="icon-white icon-trash"></i>
+		</button>
+	</td>
+</tr>

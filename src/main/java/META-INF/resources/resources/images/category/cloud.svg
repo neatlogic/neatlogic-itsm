@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   id="svg2"
+   style="fill:#ffffff">
+  <defs
+     id="defs4" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1">
+    <g
+       id="g3072"
+       style="fill:#029fe4;display:block">
+      <rect
+         width="16"
+         height="16"
+         x="0"
+         y="0"
+         id="rect3392"
+         style="opacity:0;fill:#029fe4" />
+      <g
+         transform="matrix(0.53333333,0,0,0.56521739,0,-1.5434782)"
+         id="g3">
+        <g
+           id="g5">
+          <path
+         alert="false"    d="M 25.86187,12.712 C 24.993745,10.251 22.766246,8.5 20.156246,8.5 19.555309,8.5 18.974997,8.593 18.425622,8.766 16.938747,6.205 14.280935,4.5 11.249998,4.5 6.6524987,4.5 2.9118744,8.424 2.8143744,13.303 1.1315623,14.342 0,16.283 0,18.5 c 0,3.312 2.5199995,6 5.6249989,6 l 5.6249991,0 0,-2 -5.6278116,0 c -2.065312,0 -3.7471868,-1.791 -3.7471868,-4 0,-1.893 1.2346873,-3.482 2.894062,-3.896 -0.054376,-0.359 -0.081562,-0.728 -0.081562,-1.104 0,-3.866 2.9381244,-7 6.5624984,-7 2.964374,0 5.469374,2.097 6.283123,4.975 0.720939,-0.611 1.630313,-0.975 2.623125,-0.975 2.17125,0 3.960938,1.75 4.193438,4 l 0.02813,0 c 2.065312,0 3.747186,1.791 3.747186,4 0,2.205 -1.677186,4 -3.747186,4 l -5.627812,0 0,2 5.624999,0 C 27.48,24.5 30,21.807 30,18.5 30,15.735 28.246875,13.407 25.861876,12.712 z"
+             id="path7"
+             style="fill:#029fe4" />
+          <polygon
+             points="18,27.5 18,19.5 21,19.5 16,13.5 11,19.5 14,19.5 14,27.5 "
+             id="polygon9" />
+        </g>
+      </g>
+    </g>
+    <rect
+       width="16"
+       height="16"
+       x="0"
+       y="0"
+       id="rect3079"
+       style="fill-opacity:0" />
+  </g>
+</svg>

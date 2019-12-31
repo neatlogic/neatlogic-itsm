@@ -1,0 +1,47 @@
+.jquery-scrollbar-container {
+	overflow: hidden;
+}
+.jquery-scrollbar-container>.jquery-scrollbar {
+	position: absolute;
+	width: 6px;
+	right: 0px;
+	border-radius: 4px;
+	background: rgba(0,0,0,.1);
+	opacity:0;
+}
+.jquery-scrollbar-container:hover>.jquery-scrollbar{
+	opacity:.4;	
+}
+.jquery-scrollbar-container:hover>.jquery-scrollbar:hover, .jquery-scrollbar-container>.jquery-scrollbar.active{
+	opacity:1;	
+}
+.jquery-scrollbar-container>.jquery-scrollbar>.jquery-scroller {
+	position: absolute;
+	width: 6px;
+	right: 0;
+	border-radius: 3px;
+	background-color: #828282;
+	cursor: pointer;
+}
+.jquery-scrollbar-container>.jquery-scrollbar-x {
+	position: absolute;
+	height: 15px;
+	bottom: 3px;
+	border-radius: 4px;
+	background: rgba(0,0,0,.1); 
+	opacity:0;
+}
+.jquery-scrollbar-container>.jquery-scrollbar-x>.jquery-scroller-x {
+	position: absolute;
+	height: 9px;
+	bottom: 0;
+	border-radius: 3px;
+	background-color: #828282;
+	cursor: pointer;
+}
+.jquery-scrollbar-container:hover>.jquery-scrollbar-x{
+	opacity:.4;	
+}
+.jquery-scrollbar-container:hover>.jquery-scrollbar-x:hover, .jquery-scrollbar-container>.jquery-scrollbar-x.active{
+	opacity:1;	
+}
