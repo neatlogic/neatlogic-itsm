@@ -52,6 +52,7 @@
 	<if test="isActive != null">
 	AND wt.`is_active` = #{isActive}
 	</if>
+	ORDER BY wt.`lcd`
 	</select>
 
 	<select id="getWorktimeDetailListByWorktimeUuid" resultType="codedriver.module.process.dto.WorktimeDetailVo">
@@ -64,6 +65,7 @@
 	FROM
 	  `worktime_detail` 
 	WHERE `worktime_uuid` = #{worktimeUuid}
+	ORDER BY `work_start`
 	</select>
 	
 	<select id="getWorktimeDateList" resultType="java.lang.String">
@@ -73,8 +75,33 @@
 	  `worktime_detail` 
 	WHERE `worktime_uuid` = #{worktimeUuid} 
 	AND `work_year` = #{workYear}
+	ORDER BY `work_date`
 	</select>
 
+	<select id="getRecentWorktimeDetail" resultType="codedriver.module.process.dto.WorktimeDetailVo">
+	SELECT 
+	  `work_year` AS workYear,
+	  `work_date` AS workDate,
+	  `worktime_uuid` AS `worktimeUuid`,
+	  `work_start` AS workStart,
+	  `work_end` AS workEnd
+	FROM
+	  `worktime_detail` 
+	WHERE `worktime_uuid` = #{worktimeUuid} 
+	AND `work_end` > #{workStart}
+	ORDER BY `work_start`
+	limit 0,1
+	</select>
+	
+	<select id="calculateCostTime" resultType="long">
+	SELECT 
+	  (SUM(IF(wtd.`work_end` > #{workEnd}, #{workEnd}, wtd.`work_end`)) - SUM(IF(wtd.`work_start` &lt; #{workStart}, #{workStart}, wtd.`work_start`)))
+	FROM `worktime_detail` wtd
+	WHERE wtd.`worktime_uuid` = #{worktimeUuid}
+	AND wtd.`work_end` >= #{workStart} 
+	AND wtd.`work_start` &lt;= #{workEnd}
+	</select>
+	
 	<insert id="insertWorktime">
 	INSERT INTO `worktime` ( `uuid`, `name`, `is_active`, `lcu`, `lcd` ) 
 	VALUES ( #{uuid}, #{name}, #{isActive}, #{lcu}, now())

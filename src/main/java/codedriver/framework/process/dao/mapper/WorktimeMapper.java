@@ -2,8 +2,6 @@ package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
-
 import codedriver.module.process.dto.WorktimeDefineVo;
 import codedriver.module.process.dto.WorktimeDetailVo;
 import codedriver.module.process.dto.WorktimeVo;
@@ -12,7 +10,7 @@ public interface WorktimeMapper {
 	
 	WorktimeVo getWorktimeByUuid(String uuid);
 
-	int checkWorktimeIsDuplicateName(WorktimeVo worktimeVo);
+	int checkWorktimeNameIsRepeat(WorktimeVo worktimeVo);
 	
 	int checkWorktimeIsExists(String uuid);
 	
@@ -20,7 +18,11 @@ public interface WorktimeMapper {
 	
 	List<WorktimeDetailVo> getWorktimeDetailListByWorktimeUuid(String worktimeUuid);
 	
-	List<String> getWorktimeDateList(@Param("worktimeUuid")String worktimeUuid, @Param("workYear")Integer workYear);
+	List<String> getWorktimeDateList(WorktimeDetailVo worktimeDetailVo);
+	
+	WorktimeDetailVo getRecentWorktimeDetail(WorktimeDetailVo worktimeDetailVo);
+	
+	long calculateCostTime(WorktimeDetailVo worktimeDetailVo);
 	
 	int insertWorktime(WorktimeVo worktimeVo);
 	
@@ -34,5 +36,5 @@ public interface WorktimeMapper {
 	
 	int deleteWorktimeDefineByWorktimeUuid(String worktimeUuid);
 	
-	int deleteWorktimeDetail(@Param("worktimeUuid")String worktimeUuid, @Param("workYear")Integer workYear);
+	int deleteWorktimeDetail(WorktimeDetailVo worktimeDetailVo);
 }

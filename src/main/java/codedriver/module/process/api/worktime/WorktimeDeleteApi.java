@@ -13,6 +13,7 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.dto.WorktimeDetailVo;
 
 @Service
 @Transactional
@@ -48,7 +49,9 @@ public class WorktimeDeleteApi extends ApiComponentBase {
 		}
 		worktimeMapper.deleteWorktimeByUuid(uuid);
 		worktimeMapper.deleteWorktimeDefineByWorktimeUuid(uuid);
-		worktimeMapper.deleteWorktimeDetail(uuid, null);
+		WorktimeDetailVo worktimeDetailVo = new WorktimeDetailVo();
+		worktimeDetailVo.setWorktimeUuid(uuid);
+		worktimeMapper.deleteWorktimeDetail(worktimeDetailVo);
 		return null;
 	}
 

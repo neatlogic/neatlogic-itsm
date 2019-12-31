@@ -50,7 +50,7 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作时间窗口uuid"),
-		@Param(name = "workYear", type = ApiParamType.INTEGER, desc = "年份"),
+		@Param(name = "workYear", type = ApiParamType.INTEGER, isRequired = true, desc = "年份"),
 		@Param(name = "workDateList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工作日历列表")
 	})
 	@Description(desc = "工作日历信息保存接口")
@@ -75,8 +75,7 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 			defineList.add(worktimeDefine);
 		}
 		
-		Integer workYear = worktimeDetailVo.getWorkYear();
-		worktimeMapper.deleteWorktimeDetail(worktimeUuid, workYear);
+		worktimeMapper.deleteWorktimeDetail(worktimeDetailVo);
 		
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 		Calendar calendar = Calendar.getInstance();

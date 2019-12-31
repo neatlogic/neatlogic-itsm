@@ -61,7 +61,7 @@ public class WorktimeSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		WorktimeVo worktimeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<WorktimeVo>() {});
-		if(worktimeMapper.checkWorktimeIsDuplicateName(worktimeVo) > 0) {
+		if(worktimeMapper.checkWorktimeNameIsRepeat(worktimeVo) > 0) {
 			throw new WorktimeDuplicateNameException(worktimeVo.getName());
 		}
 		String uuid = worktimeVo.getUuid();
