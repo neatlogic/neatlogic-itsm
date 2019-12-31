@@ -696,7 +696,8 @@
 		`from_processtask_step_id`,
 		`to_processtask_step_id`,
 		`condition`,
-		`is_hit`
+		`is_hit`,
+		`uuid`
 		)
 		VALUES
 		(
@@ -706,7 +707,8 @@
 		#{fromProcessTaskStepId},
 		#{toProcessTaskStepId},
 		#{condition},
-		#{isHit}
+		#{isHit},
+		#{processStepRelUuid}
 		)
 	</insert>
 
@@ -1000,7 +1002,7 @@
 		DELETE
 		FROM
 		`processtask_step_worker`
-		WHERE `processtask_step_id` = #{processtaskStepId}
+		WHERE `processtask_step_id` = #{processTaskStepId}
 		<if test="userId != null and userId != ''">
 			AND `user_id` = #{userId}
 		</if>
@@ -1010,7 +1012,7 @@
 		DELETE
 		FROM
 		`processtask_step_worker`
-		WHERE `processtask_step_id` = #{processtaskStepId}
+		WHERE `processtask_step_id` = #{processTaskStepId}
 		<if test="userId != null and userId != ''">
 			AND `user_id` != #{userId}
 		</if>
@@ -1023,7 +1025,7 @@
 		DELETE
 		FROM
 		`processtask_step_user`
-		WHERE `processtask_step_id` = #{processtaskStepId}
+		WHERE `processtask_step_id` = #{processTaskStepId}
 		<if test="userType != null and userType != ''">
 			AND `user_type` != #{userType}
 		</if>
