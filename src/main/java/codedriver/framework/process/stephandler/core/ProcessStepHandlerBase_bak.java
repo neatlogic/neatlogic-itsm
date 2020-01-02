@@ -729,7 +729,7 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 				ptStepVo.setProcessTaskId(processTaskVo.getId());
 				processTaskMapper.insertProcessTaskStep(ptStepVo);
 				if (StringUtils.isNotBlank(ptStepVo.getConfig())) {
-					processTaskMapper.insertProcessTaskStepConfig(ptStepVo.getId(), ptStepVo.getConfig());
+					//processTaskMapper.insertProcessTaskStepConfig(ptStepVo.getId(), ptStepVo.getConfig());
 				}
 				stepIdMap.put(ptStepVo.getProcessStepUuid(), ptStepVo.getId());
 
