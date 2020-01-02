@@ -23,7 +23,7 @@ public class ProcessTaskVo {
 	private String timeCostStr;
 	private String expireTime;
 	private String channelUuid;
-	private String configKey;
+	private String configHash;
 	private List<ProcessTaskStepVo> stepList;
 
 	public ProcessTaskVo() {
@@ -191,12 +191,12 @@ public class ProcessTaskVo {
 		this.channelUuid = channelUuid;
 	}
 
-	public String getConfigKey() {
-		return configKey;
+	public String getConfigHash() {
+		return configHash;
 	}
 
-	public void setConfigKey(String configKey) {
-		this.configKey = configKey;
+	public void setConfigHash(String configHash) {
+		this.configHash = configHash;
 	}
 
 }

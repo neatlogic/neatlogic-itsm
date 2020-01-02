@@ -37,6 +37,7 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private Long expireTimeLong;
 	private String error;
 	private String result;
+	private String configHash;
 	private JSONObject configObj;
 	private Boolean isAllDone = false;
 	private Boolean isCurrentUserDone = false;
@@ -428,6 +429,14 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setStartProcessTaskStepId(Long startProcessTaskStepId) {
 		this.startProcessTaskStepId = startProcessTaskStepId;
+	}
+
+	public String getConfigHash() {
+		return configHash;
+	}
+
+	public void setConfigHash(String configHash) {
+		this.configHash = configHash;
 	}
 
 }

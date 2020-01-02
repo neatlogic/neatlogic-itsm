@@ -38,16 +38,16 @@
 	
 	<select id="getProcessTaskBaseInfoById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskVo">
 		SELECT
-		`id`,
-		`status`,
-		DATE_FORMAT( `start_time`, '%d' ) AS startDay,
-		DATE_FORMAT( `start_time`, '%Y-%m-%d %H:%i:%s' ) AS startTime,
-		DATE_FORMAT( `end_time`, '%Y-%m-%d %H:%i:%s' ) AS endTime,
-		`config`
+		a.`id`,
+		a.`status`,
+		DATE_FORMAT( a.`start_time`, '%d' ) AS startDay,
+		DATE_FORMAT( a.`start_time`, '%Y-%m-%d %H:%i:%s' ) AS startTime,
+		DATE_FORMAT( a.`end_time`, '%Y-%m-%d %H:%i:%s' ) AS endTime,
+		b.`config`
 		FROM
-		`processtask`
+ 		`processtask` a JOIN `processtask_config` b ON a.config_hash = b.hash
 		WHERE
-		id =
+		a.id =
 		#{value}
 	</select>
 </mapper>
