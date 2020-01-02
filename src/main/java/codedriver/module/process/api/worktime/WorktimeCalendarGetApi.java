@@ -17,7 +17,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.WorktimeDetailVo;
+import codedriver.module.process.dto.WorktimeRangeVo;
 
 @Service
 public class WorktimeCalendarGetApi extends ApiComponentBase {
@@ -42,7 +42,7 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作时间窗口uuid"),
-		@Param(name = "workYear", type = ApiParamType.INTEGER, isRequired = true, desc = "年份")
+		@Param(name = "year", type = ApiParamType.INTEGER, isRequired = true, desc = "年份")
 	})
 	@Output({
 		@Param(name = "Return", type = ApiParamType.JSONARRAY, desc = "工作日历列表")
@@ -50,7 +50,7 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 	@Description(desc = "工作日历信息获取接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		WorktimeDetailVo worktimeDetailVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<WorktimeDetailVo>() {});
+		WorktimeRangeVo worktimeDetailVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<WorktimeRangeVo>() {});
 		if(worktimeMapper.checkWorktimeIsExists(worktimeDetailVo.getWorktimeUuid()) == 0) {
 			throw new WorktimeNotFoundException(worktimeDetailVo.getWorktimeUuid());
 		}

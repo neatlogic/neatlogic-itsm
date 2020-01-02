@@ -1,6 +1,5 @@
 package codedriver.module.process.dto;
 
-import java.util.List;
 import java.util.UUID;
 
 public class WorktimeVo {
@@ -10,8 +9,7 @@ public class WorktimeVo {
 	private Integer isActive;
 	private String lcu;
 	private String lcd;
-	
-	private List<WorktimeDefineVo> worktimeDefineList;
+	private String config;
 	
 	public synchronized String getUuid() {
 		if(uuid == null) {
@@ -46,10 +44,11 @@ public class WorktimeVo {
 	public void setLcd(String lcd) {
 		this.lcd = lcd;
 	}
-	public List<WorktimeDefineVo> getWorktimeDefineList() {
-		return worktimeDefineList;
+	public String getConfig() {
+		return config;
 	}
-	public void setWorktimeDefineList(List<WorktimeDefineVo> worktimeDefineList) {
-		this.worktimeDefineList = worktimeDefineList;
+	public void setConfig(String config) {
+		this.config = config;
 	}
+
 }

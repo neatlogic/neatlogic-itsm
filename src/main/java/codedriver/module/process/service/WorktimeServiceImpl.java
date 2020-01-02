@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.exception.WorktimeNotFoundException;
-import codedriver.module.process.dto.WorktimeDetailVo;
+import codedriver.module.process.dto.WorktimeRangeVo;
 
 @Service
 @Transactional
@@ -16,36 +16,36 @@ public class WorktimeServiceImpl implements WorktimeService{
 	private WorktimeMapper worktimeMapper;
 	
 	@Override
-	public Long calculateTimeoutPoint(long startTime, long timeLimit, String worktimeUuid) {		
+	public Long calculateTimeoutPoint(long activeTime, long timeLimit, String worktimeUuid) {		
 		if(worktimeMapper.checkWorktimeIsExists(worktimeUuid) == 0) {
 			throw new WorktimeNotFoundException(worktimeUuid);
 		}
 		if(timeLimit == 0) {
-			return startTime;
+			return activeTime;
 		}
-		WorktimeDetailVo worktimeDetailVo = new WorktimeDetailVo();
-		WorktimeDetailVo recentWorktimeDetail = null;
-		long workStart = 0;
-		long workEnd = 0;
+		WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
+		WorktimeRangeVo recentWorktimeRange = null;
+		long startTime = 0;
+		long endTime = 0;
 		long duration = 0;
 		while(true) {
-			worktimeDetailVo.setWorktimeUuid(worktimeUuid);
-			worktimeDetailVo.setWorkStart(startTime);
-			recentWorktimeDetail = worktimeMapper.getRecentWorktimeDetail(worktimeDetailVo);
-			if(recentWorktimeDetail == null) {
-				return startTime;
+			worktimeRangeVo.setWorktimeUuid(worktimeUuid);
+			worktimeRangeVo.setStartTime(activeTime);
+			recentWorktimeRange = worktimeMapper.getRecentWorktimeRange(worktimeRangeVo);
+			if(recentWorktimeRange == null) {
+				return activeTime;
 			}
-			workStart = recentWorktimeDetail.getWorkStart();
-			workEnd = recentWorktimeDetail.getWorkEnd();
-			if(workStart > startTime) {
-				startTime = workStart;
+			startTime = recentWorktimeRange.getStartTime();
+			endTime = recentWorktimeRange.getEndTime();
+			if(startTime > activeTime) {
+				activeTime = startTime;
 			}
-			duration = workEnd - startTime;
+			duration = endTime - activeTime;
 			if(duration > timeLimit) {
-				return startTime + timeLimit;
+				return activeTime + timeLimit;
 			}else {
 				timeLimit -= duration;
-				startTime = workEnd;
+				activeTime = endTime;
 			}
 		}
 	}

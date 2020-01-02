@@ -8,12 +8,7 @@
 		<result column="is_active" property="isActive"/>
 		<result column="lcu" property="lcu"/>
 		<result column="lcd" property="lcd"/>
-		<collection property="worktimeDefineList" ofType="codedriver.module.process.dto.WorktimeDefineVo">
-			<result column="worktime_uuid" property="worktimeUuid"/>
-			<result column="weekday" property="weekday"/>
-			<result column="start_time" property="startTime"/>
-			<result column="end_time" property="endTime"/>
-		</collection>
+		<result column="config" property="config"/>
 	</resultMap>
 
 	<select id="getWorktimeByUuid" resultMap="worktimeMap">
@@ -23,12 +18,8 @@
 	  wt.`is_active`,
 	  wt.`lcu`,
 	  wt.`lcd`,
-	  wtd.`worktime_uuid`,
-	  wtd.`weekday`,
-	  wtd.`start_time`,
-	  wtd.`end_time`
+	  wt.`config`
 	FROM `worktime` wt
-	JOIN `worktime_define` wtd ON wtd.`worktime_uuid` = wt.`uuid`
 	WHERE wt.`uuid` = #{uuid}
 	</select>
 
@@ -55,71 +46,63 @@
 	ORDER BY wt.`lcd`
 	</select>
 
-	<select id="getWorktimeDetailListByWorktimeUuid" resultType="codedriver.module.process.dto.WorktimeDetailVo">
+	<select id="getWorktimeRangeListByWorktimeUuid" resultType="codedriver.module.process.dto.WorktimeRangeVo">
 	SELECT 
-	  `work_year` AS workYear,
-	  `work_date` AS workDate,
+	  `year`,
+	  `date`,
 	  `worktime_uuid` AS `worktimeUuid`,
-	  `work_start` AS workStart,
-	  `work_end` AS workEnd
+	  `start_time` AS startTime,
+	  `end_time` AS endTime
 	FROM
-	  `worktime_detail` 
+	  `worktime_range` 
 	WHERE `worktime_uuid` = #{worktimeUuid}
-	ORDER BY `work_start`
+	ORDER BY `start_time`
 	</select>
 	
 	<select id="getWorktimeDateList" resultType="java.lang.String">
 	SELECT 
-	  DISTINCT `work_date`
+	  DISTINCT `date`
 	FROM
-	  `worktime_detail` 
+	  `worktime_range` 
 	WHERE `worktime_uuid` = #{worktimeUuid} 
-	AND `work_year` = #{workYear}
-	ORDER BY `work_date`
+	AND `year` = #{year}
+	ORDER BY `date`
 	</select>
 
-	<select id="getRecentWorktimeDetail" resultType="codedriver.module.process.dto.WorktimeDetailVo">
+	<select id="getRecentWorktimeRange" resultType="codedriver.module.process.dto.WorktimeRangeVo">
 	SELECT 
-	  `work_year` AS workYear,
-	  `work_date` AS workDate,
+	  `year`,
+	  `date`,
 	  `worktime_uuid` AS `worktimeUuid`,
-	  `work_start` AS workStart,
-	  `work_end` AS workEnd
+	  `start` AS startTime,
+	  `end` AS endTime
 	FROM
-	  `worktime_detail` 
+	  `worktime_range` 
 	WHERE `worktime_uuid` = #{worktimeUuid} 
-	AND `work_end` > #{workStart}
-	ORDER BY `work_start`
+	AND `end_time` > #{startTime}
+	ORDER BY `start_time`
 	limit 0,1
 	</select>
 	
 	<select id="calculateCostTime" resultType="long">
 	SELECT 
-	  SUM(IF(wtd.`work_end` > #{workEnd}, #{workEnd}, wtd.`work_end`) - IF(wtd.`work_start` &lt; #{workStart}, #{workStart}, wtd.`work_start`))
-	FROM `worktime_detail` wtd
+	  SUM(IF(wtd.`end_time` > #{endTime}, #{endTime}, wtd.`end_time`) - IF(wtd.`start_time` &lt; #{startTime}, #{startTime}, wtd.`start_time`))
+	FROM `worktime_range` wtd
 	WHERE wtd.`worktime_uuid` = #{worktimeUuid}
-	AND wtd.`work_end` >= #{workStart} 
-	AND wtd.`work_start` &lt;= #{workEnd}
+	AND wtd.`end_time` >= #{startTime} 
+	AND wtd.`start_time` &lt;= #{endTime}
 	</select>
 	
 	<insert id="insertWorktime">
-	INSERT INTO `worktime` ( `uuid`, `name`, `is_active`, `lcu`, `lcd` ) 
-	VALUES ( #{uuid}, #{name}, #{isActive}, #{lcu}, now())
+	INSERT INTO `worktime` ( `uuid`, `name`, `is_active`, `lcu`, `lcd`, `config` ) 
+	VALUES ( #{uuid}, #{name}, #{isActive}, #{lcu}, now(), #{config})
 	</insert>
 
-	<insert id="insertBatchWorktimeDefine">
-	INSERT INTO `worktime_define` ( `worktime_uuid`, `weekday`, `start_time`, `end_time` ) 
-	VALUES 
-	<foreach collection="list" item="worktimeDefine" separator=",">
-	(#{worktimeDefine.worktimeUuid}, #{worktimeDefine.weekday}, #{worktimeDefine.startTime}, #{worktimeDefine.endTime})
-	</foreach>
-	</insert>
-
-	<insert id="insertBatchWorktimeDetail">
-	INSERT INTO `worktime_detail` ( `work_year`, `work_date`, `worktime_uuid`, `work_start`, `work_end` ) 
+	<insert id="insertBatchWorktimeRange">
+	INSERT INTO `worktime_range` ( `year`, `date`, `worktime_uuid`, `start_time`, `end_time` ) 
 	VALUES
-	<foreach collection="list" item="worktimeDetail" separator=",">
-	(#{worktimeDetail.workYear}, #{worktimeDetail.workDate}, #{worktimeDetail.worktimeUuid}, #{worktimeDetail.workStart}, #{worktimeDetail.workEnd})
+	<foreach collection="list" item="item" separator=",">
+	(#{item.year}, #{item.date}, #{item.worktimeUuid}, #{item.startTime}, #{item.endTime})
 	</foreach>
 	</insert>
 
@@ -139,15 +122,11 @@
 	DELETE FROM `worktime` WHERE `uuid`=#{uuid}
 	</delete>
 
-	<delete id="deleteWorktimeDefineByWorktimeUuid">
-	DELETE FROM `worktime_define` WHERE `worktime_uuid` = #{worktimeUuid}
-	</delete>
-
-	<delete id="deleteWorktimeDetail">
-	delete from `worktime_detail` 
+	<delete id="deleteWorktimeRange">
+	delete from `worktime_range` 
 	where `worktime_uuid` = #{worktimeUuid}
-	<if test="workYear != null">
-	AND `work_year` = #{workYear}
+	<if test="year != null">
+	AND `year` = #{year}
 	</if>
 	</delete>
 </mapper>

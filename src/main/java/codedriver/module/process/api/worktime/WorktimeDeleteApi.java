@@ -13,7 +13,7 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.WorktimeDetailVo;
+import codedriver.module.process.dto.WorktimeRangeVo;
 
 @Service
 @Transactional
@@ -47,11 +47,11 @@ public class WorktimeDeleteApi extends ApiComponentBase {
 		if(worktimeMapper.checkWorktimeIsExists(uuid) == 0) {
 			throw new WorktimeNotFoundException(uuid);
 		}
+		
 		worktimeMapper.deleteWorktimeByUuid(uuid);
-		worktimeMapper.deleteWorktimeDefineByWorktimeUuid(uuid);
-		WorktimeDetailVo worktimeDetailVo = new WorktimeDetailVo();
-		worktimeDetailVo.setWorktimeUuid(uuid);
-		worktimeMapper.deleteWorktimeDetail(worktimeDetailVo);
+		WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
+		worktimeRangeVo.setWorktimeUuid(uuid);
+		worktimeMapper.deleteWorktimeRange(worktimeRangeVo);
 		return null;
 	}
 

@@ -4,15 +4,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
@@ -23,8 +22,7 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.WorktimeDefineVo;
-import codedriver.module.process.dto.WorktimeDetailVo;
+import codedriver.module.process.dto.WorktimeRangeVo;
 import codedriver.module.process.dto.WorktimeVo;
 @Service
 @Transactional
@@ -50,39 +48,29 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作时间窗口uuid"),
-		@Param(name = "workYear", type = ApiParamType.INTEGER, isRequired = true, desc = "年份"),
-		@Param(name = "workDateList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工作日历列表")
+		@Param(name = "year", type = ApiParamType.INTEGER, isRequired = true, desc = "年份"),
+		@Param(name = "dateList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工作日历列表")
 	})
 	@Description(desc = "工作日历信息保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {	
-		WorktimeDetailVo worktimeDetailVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<WorktimeDetailVo>() {});
-		String worktimeUuid = worktimeDetailVo.getWorktimeUuid();
+		WorktimeRangeVo worktimeRangeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<WorktimeRangeVo>() {});
+		String worktimeUuid = worktimeRangeVo.getWorktimeUuid();
 		WorktimeVo worktimeVo = worktimeMapper.getWorktimeByUuid(worktimeUuid);
 		if(worktimeVo == null) {
 			throw new WorktimeNotFoundException(worktimeUuid);
 		}
-		Map<Integer, List<WorktimeDefineVo>> weekdayDefineMap = new HashMap<>();
-		List<WorktimeDefineVo> defineList = null;	
-		List<WorktimeDefineVo> worktimeDefineList = worktimeVo.getWorktimeDefineList();
-		for(WorktimeDefineVo worktimeDefine : worktimeDefineList) {
-			Integer weekday = worktimeDefine.getWeekday();			
-			defineList = weekdayDefineMap.get(weekday);
-			if(defineList == null) {
-				defineList = new ArrayList<>();
-				weekdayDefineMap.put(weekday, defineList);
-			}
-			defineList.add(worktimeDefine);
-		}
-		
-		worktimeMapper.deleteWorktimeDetail(worktimeDetailVo);
+
+		JSONObject config = JSON.parseObject(worktimeVo.getConfig());
+		worktimeMapper.deleteWorktimeRange(worktimeRangeVo);
 		
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 		Calendar calendar = Calendar.getInstance();
-		WorktimeDetailVo worktimeDetail = null;
-		List<WorktimeDetailVo> worktimeDetailList = new ArrayList<>();
-		List<String> workDateList = worktimeDetailVo.getWorkDateList();
-		for(String workDate : workDateList) {
+		WorktimeRangeVo worktimeRange = null;
+		JSONArray defineList = null;
+		List<WorktimeRangeVo> worktimeRangeList = new ArrayList<>();
+		List<String> dateList = worktimeRangeVo.getDateList();
+		for(String workDate : dateList) {
 			simpleDateFormat.applyPattern("yyyy-MM-dd");
 			Date date = simpleDateFormat.parse(workDate);
 			calendar.setTime(date);
@@ -92,26 +80,27 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 			}else {
 				weekday -= 1;
 			}
-			defineList = weekdayDefineMap.get(weekday);
+			defineList = config.getJSONArray(String.valueOf(weekday));
 			if(defineList == null) {
 				continue;
 			}
 			simpleDateFormat.applyPattern("yyyy-MM-dd HH:mm");
-			for(WorktimeDefineVo worktimeDefine : defineList) {
-				worktimeDetail = new WorktimeDetailVo();
-				worktimeDetail.setWorktimeUuid(worktimeUuid);
-				worktimeDetail.setWorkYear(worktimeDetailVo.getWorkYear());
-				worktimeDetail.setWorkDate(workDate);			
-				worktimeDetail.setWorkStart(simpleDateFormat.parse(workDate + " " + worktimeDefine.getStartTime()).getTime());
-				worktimeDetail.setWorkEnd(simpleDateFormat.parse(workDate + " " + worktimeDefine.getEndTime()).getTime());
-				worktimeDetailList.add(worktimeDetail);
-				if(worktimeDetailList.size() > 1000) {
-					worktimeMapper.insertBatchWorktimeDetail(worktimeDetailList);
-					worktimeDetailList.clear();
+			for(int i = 0; i < defineList.size(); i++) {
+				JSONObject define = defineList.getJSONObject(i);
+				worktimeRange = new WorktimeRangeVo();
+				worktimeRange.setWorktimeUuid(worktimeUuid);
+				worktimeRange.setYear(worktimeRangeVo.getYear());
+				worktimeRange.setDate(workDate);			
+				worktimeRange.setStartTime(simpleDateFormat.parse(workDate + " " + define.getString("startTime")).getTime());
+				worktimeRange.setEndTime(simpleDateFormat.parse(workDate + " " + define.getString("endTime")).getTime());
+				worktimeRangeList.add(worktimeRange);
+				if(worktimeRangeList.size() > 1000) {
+					worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
+					worktimeRangeList.clear();
 				}
 			}	
 		}
-		worktimeMapper.insertBatchWorktimeDetail(worktimeDetailList);
+		worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
 		return null;
 	}
 

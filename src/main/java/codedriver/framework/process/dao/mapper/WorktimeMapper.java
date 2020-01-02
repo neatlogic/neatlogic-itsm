@@ -2,8 +2,7 @@ package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
 
-import codedriver.module.process.dto.WorktimeDefineVo;
-import codedriver.module.process.dto.WorktimeDetailVo;
+import codedriver.module.process.dto.WorktimeRangeVo;
 import codedriver.module.process.dto.WorktimeVo;
 
 public interface WorktimeMapper {
@@ -16,25 +15,21 @@ public interface WorktimeMapper {
 	
 	List<WorktimeVo> searchWorktimeList(WorktimeVo worktimeVo);
 	
-	List<WorktimeDetailVo> getWorktimeDetailListByWorktimeUuid(String worktimeUuid);
+	List<WorktimeRangeVo> getWorktimeRangeListByWorktimeUuid(String worktimeUuid);
 	
-	List<String> getWorktimeDateList(WorktimeDetailVo worktimeDetailVo);
+	List<String> getWorktimeDateList(WorktimeRangeVo worktimeRangeVo);
 	
-	WorktimeDetailVo getRecentWorktimeDetail(WorktimeDetailVo worktimeDetailVo);
+	WorktimeRangeVo getRecentWorktimeRange(WorktimeRangeVo worktimeRangeVo);
 	
-	long calculateCostTime(WorktimeDetailVo worktimeDetailVo);
+	long calculateCostTime(WorktimeRangeVo worktimeRangeVo);
 	
 	int insertWorktime(WorktimeVo worktimeVo);
 	
-	int insertBatchWorktimeDefine(List<WorktimeDefineVo> worktimeDefineList);
-	
-	int insertBatchWorktimeDetail(List<WorktimeDetailVo> worktimeDetailList);
+	int insertBatchWorktimeRange(List<WorktimeRangeVo> worktimeRangeList);
 	
 	int updateWorktime(WorktimeVo worktimeVo);
 	
 	int deleteWorktimeByUuid(String uuid);
 	
-	int deleteWorktimeDefineByWorktimeUuid(String worktimeUuid);
-	
-	int deleteWorktimeDetail(WorktimeDetailVo worktimeDetailVo);
+	int deleteWorktimeRange(WorktimeRangeVo worktimeRangeVo);
 }
