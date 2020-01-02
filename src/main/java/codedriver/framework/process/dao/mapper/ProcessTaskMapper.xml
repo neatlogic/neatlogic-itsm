@@ -774,7 +774,8 @@
 		`status`,
 		`type`,
 		`handler`,
-		`is_active`
+		`is_active`,
+		`config_hash`
 		)
 		VALUES
 		(
@@ -784,7 +785,8 @@
 		#{status},
 		#{type},
 		#{handler},
-		#{isActive}
+		#{isActive},
+		#{configHash}
 		)
 	</insert>
 
@@ -795,7 +797,7 @@
 		INSERT INTO `processtask` (
 		`title`,
 		`process_uuid`,
-		`process_md`,
+		`config_hash`,
 		`status`,
 		`config`,
 		`start_time`,
@@ -807,7 +809,7 @@
 		(
 		#{title,typeHandler=XssHandler},
 		#{processUuid},
-		#{processMd},
+		#{configHash},
 		#{status},
 		#{config},
 		NOW(3),
@@ -908,10 +910,10 @@
 		)
 	</insert>
 
-	<insert id="insertProcessTaskStepConfig">
-		INSERT INTO `processtask_step_config` (`processtask_step_id`, `config`)
+	<insert id="replaceProcessTaskStepConfig" parameterType="codedriver.module.process.dto.ProcessTaskStepConfigVo">
+		REPLACE INTO `processtask_step_config` (`hash`, `config`)
 		VALUES
-		(#{processTaskStepId}, #{config})
+		(#{hash}, #{config})
 	</insert>
 
 	<insert id="insertProcessTaskStepFormAttribute" parameterType="codedriver.module.process.dto.ProcessTaskStepFormAttributeVo">
@@ -1003,7 +1005,7 @@
 		AND `attribute_uuid` = #{attributeUuid}
 	</delete>
 
-	<delete id="deleteProcessTaskStepWorker" parameterType="codedriver.module.process.dto.ProcessTaskStepWorkerVo">
+	<delete id="deleteProcessTaskStepWorker">
 		DELETE
 		FROM
 		`processtask_step_worker`

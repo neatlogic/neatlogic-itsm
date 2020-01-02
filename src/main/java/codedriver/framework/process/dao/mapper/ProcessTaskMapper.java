@@ -14,6 +14,7 @@ import codedriver.module.process.dto.ProcessTaskConvergeVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
 import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditAttributeDataVo;
+import codedriver.module.process.dto.ProcessTaskStepConfigVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
 import codedriver.module.process.dto.ProcessTaskStepTeamVo;
@@ -117,7 +118,7 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTaskStepTimeoutPolicy(ProcessTaskStepTimeoutPolicyVo processTaskStepTimeoutPolicy);
 
-	public int insertProcessTaskStepConfig(@Param("processTaskStepId") Long processTaskStepId, @Param("config") String config);
+	public int replaceProcessTaskStepConfig(ProcessTaskStepConfigVo processTaskStepConfigVo);
 
 	public int insertProcessTaskStepFormAttribute(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
 
@@ -141,7 +142,7 @@ public interface ProcessTaskMapper {
 
 	public int deleteProcessTaskFormAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId") Long processTaskId, @Param("attributeUuid") String attributeUuid);
 
-	public int deleteProcessTaskStepWorker(ProcessTaskStepWorkerVo processTaskStepWorkerVo);
+	public int deleteProcessTaskStepWorker(@Param("processTaskStepId")Long processTaskStepId, @Param("userId")String userId);
 	
 	public int deleteProcessTaskStepOtherWorker(@Param("processTaskStepId") Long processTaskStepId,@Param("userId") String userId,@Param("action") String action);
 	

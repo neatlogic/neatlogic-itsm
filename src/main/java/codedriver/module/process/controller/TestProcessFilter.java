@@ -43,7 +43,7 @@ public class TestProcessFilter extends OncePerRequestFilter {
 		
 		tenantContext.setTenantUuid("techsure");
 		tenantContext.setUseDefaultDatasource(false);
-		filterChain.doFilter(request, response);
+		
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("userid", "lvzk");
 		jsonObj.put("username", "lvzk");
@@ -53,6 +53,7 @@ public class TestProcessFilter extends OncePerRequestFilter {
 		jsonObj.put("rolelist",roleList);
 		UserContext.init(jsonObj,request,response);
 		System.out.println(UserContext.get().getUserId());
+		filterChain.doFilter(request, response);
 	}
 
 	/**

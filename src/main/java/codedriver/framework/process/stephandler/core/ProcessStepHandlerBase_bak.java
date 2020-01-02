@@ -504,7 +504,7 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 		processTaskMajorUser.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
 		processTaskMapper.updateProcessTaskStepUserStatus(processTaskMajorUser);
 		/** 删除所有worker **/
-		processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo());
+		processTaskMapper.deleteProcessTaskStepWorker(currentProcessTaskStepVo.getId(),null);
 		/** 处理历史记录 **/
 		saveProcessTaskStepAudit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
 		/** 流转到下一步 **/
@@ -607,7 +607,7 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 		/** 删除主处理用户 **/
 		processTaskMapper.deleteProcessTaskStepUser(currentProcessTaskStepVo.getId(), ProcessTaskStepUserType.MAJOR.getValue());
 		/** 更新待处理用户or team **/
-		processTaskMapper.deleteProcessTaskStepWorker(new ProcessTaskStepWorkerVo());
+		processTaskMapper.deleteProcessTaskStepWorker(currentProcessTaskStepVo.getId(),null);
 		if (toUserList != null && toUserList.size() > 0) {
 			for (Object userId : toUserList) {
 				processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), userId.toString(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
@@ -729,7 +729,7 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 				ptStepVo.setProcessTaskId(processTaskVo.getId());
 				processTaskMapper.insertProcessTaskStep(ptStepVo);
 				if (StringUtils.isNotBlank(ptStepVo.getConfig())) {
-					processTaskMapper.insertProcessTaskStepConfig(ptStepVo.getId(), ptStepVo.getConfig());
+					//processTaskMapper.insertProcessTaskStepConfig(ptStepVo.getId(), ptStepVo.getConfig());
 				}
 				stepIdMap.put(ptStepVo.getProcessStepUuid(), ptStepVo.getId());
 
