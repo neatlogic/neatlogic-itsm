@@ -62,17 +62,15 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
-		List<CatalogVo> catalogList = catalogMapper.getCatalogList(null);
-		List<ChannelVo> channelList = channelMapper.searchChannelList(null);
-		List<ITree> treeList = new ArrayList<>(catalogList.size() + channelList.size());
-		treeList.addAll(catalogList);
-		treeList.addAll(channelList);
+		
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
 		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
 		List<ITree> children = null;
 		String parentUuid = null;
-		if(treeList != null && treeList.size() > 0) {
-			for(ITree tree : treeList) {
+		
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(null);
+		if(catalogList != null && catalogList.size() > 0) {
+			for(ITree tree : catalogList) {
 				uuidKeyMap.put(tree.getUuid(), tree);
 				parentUuid = tree.getParentUuid();
 				children = parentUuidKeyMap.get(parentUuid);
@@ -81,6 +79,20 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 					parentUuidKeyMap.put(parentUuid, children);
 				}
 				children.add(tree);				
+			}
+		}
+		
+		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
+		if(channelList != null && channelList.size() > 0) {
+			for(ITree tree : channelList) {
+				uuidKeyMap.put(tree.getUuid(), tree);
+				parentUuid = tree.getParentUuid();
+				children = parentUuidKeyMap.get(parentUuid);
+				if(children == null) {
+					children = new ArrayList<>();
+					parentUuidKeyMap.put(parentUuid, children);
+				}
+				children.add(tree);
 			}
 		}
 		
