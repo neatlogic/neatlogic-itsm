@@ -31,13 +31,14 @@
 	SELECT COUNT(`uuid`) FROM `worktime` WHERE `uuid` = #{uuid}
 	</select>
 
-	<select id="searchWorktimeList" resultType="codedriver.module.process.dto.WorktimeVo">
+	<select id="searchWorktimeList" resultMap="worktimeMap">
 	SELECT 
 	  wt.`uuid`,
 	  wt.`name`,
-	  wt.`is_active` AS isActive,
+	  wt.`is_active`,
 	  wt.`lcu`,
-	  wt.`lcd`
+	  wt.`lcd`,
+	  wt.`config`
 	FROM `worktime` wt
 	WHERE 1 = 1
 	<if test="isActive != null">
@@ -46,13 +47,20 @@
 	ORDER BY wt.`lcd`
 	</select>
 
-	<select id="getWorktimeRangeListByWorktimeUuid" resultType="codedriver.module.process.dto.WorktimeRangeVo">
+	<resultMap type="codedriver.module.process.dto.WorktimeRangeVo" id="worktimeRangeMap">
+		<result column="year" property="year"/>
+		<result column="date" property="date"/>
+		<result column="worktime_uuid" property="worktimeUuid"/>
+		<result column="start_time" property="startTime"/>
+		<result column="end_time" property="endTime"/>
+	</resultMap>
+	<select id="getWorktimeRangeListByWorktimeUuid" resultMap="worktimeRangeMap">
 	SELECT 
 	  `year`,
 	  `date`,
-	  `worktime_uuid` AS `worktimeUuid`,
-	  `start_time` AS startTime,
-	  `end_time` AS endTime
+	  `worktime_uuid`,
+	  `start_time`,
+	  `end_time`
 	FROM
 	  `worktime_range` 
 	WHERE `worktime_uuid` = #{worktimeUuid}
@@ -69,13 +77,13 @@
 	ORDER BY `date`
 	</select>
 
-	<select id="getRecentWorktimeRange" resultType="codedriver.module.process.dto.WorktimeRangeVo">
+	<select id="getRecentWorktimeRange" resultMap="worktimeRangeMap">
 	SELECT 
 	  `year`,
 	  `date`,
-	  `worktime_uuid` AS `worktimeUuid`,
-	  `start` AS startTime,
-	  `end` AS endTime
+	  `worktime_uuid`,
+	  `start_time`,
+	  `end_time`
 	FROM
 	  `worktime_range` 
 	WHERE `worktime_uuid` = #{worktimeUuid} 
