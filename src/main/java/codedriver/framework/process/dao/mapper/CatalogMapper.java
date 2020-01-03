@@ -21,6 +21,8 @@ public interface CatalogMapper {
 	List<String> getHasActiveChannelCatalogUuidList();
 
 	int checkCatalogIsDuplicateName(CatalogVo catalogVo);
+
+	List<CatalogVo> getCatalogListForTree(Integer isActive);
 	
 	int replaceCatalog(CatalogVo catalogVo);
 
@@ -34,5 +36,4 @@ public interface CatalogMapper {
 
 	int deleteCatalogRoleByUuid(String uuid);
 
-	
 }
