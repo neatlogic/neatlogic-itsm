@@ -72,7 +72,7 @@
 	SELECT 
 	  `uuid`,
 	  `name`,
-	  `parent_uuid` AS `parentUuid`
+	  `parent_uuid`
 	FROM `catalog` 
 	 <if test="isActive != null">
 	 WHERE `is_active` = #{isActive}
