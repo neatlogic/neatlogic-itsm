@@ -50,7 +50,7 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired= true, desc = "已选中的服务目录uuid")
+		@Param(name = "catalogUuid", type = ApiParamType.STRING, desc = "已选中的服务目录uuid")
 		})
 	@Output({
 		@Param(name="Return",explode=CatalogVo[].class,desc="服务目录及通道树")
@@ -58,10 +58,13 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 	@Description(desc = "服务目录及通道树查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String catalogUuid = jsonObj.getString("catalogUuid");
-		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
-			throw new CatalogNotFoundException(catalogUuid);
-		}
+		String catalogUuid = null;
+		if(jsonObj.containsKey("catalogUuid")) {
+			catalogUuid = jsonObj.getString("catalogUuid");
+			if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
+				throw new CatalogNotFoundException(catalogUuid);
+			}
+		}				
 		
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
 		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
