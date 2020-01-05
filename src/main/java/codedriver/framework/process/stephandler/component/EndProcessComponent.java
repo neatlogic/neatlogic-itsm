@@ -4,13 +4,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.process.exception.ProcessTaskAbortException;
 import codedriver.framework.process.exception.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
+import codedriver.module.process.constvalue.ProcessStepMode;
+import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.module.process.dto.ProcessTaskVo;
 
 @Service
 public class EndProcessComponent extends ProcessStepHandlerBase {
@@ -18,6 +20,11 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public String getType() {
 		return ProcessStepHandler.END.getType();
+	}
+	
+	@Override
+	public ProcessStepMode getMode() {
+		return ProcessStepMode.AT;
 	}
 
 	@Override
@@ -74,67 +81,60 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public boolean isAsync() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException, ProcessTaskAbortException {
-		// TODO Auto-generated method stub
+	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}
 
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
+		ProcessTaskVo processTaskVo = new ProcessTaskVo();
+		processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+		processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskMapper.updateProcessTaskStatus(processTaskVo);
 		return 0;
 	}
 
 	@Override
 	protected int myRetreat(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myAbort(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int mySave(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myComment(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
