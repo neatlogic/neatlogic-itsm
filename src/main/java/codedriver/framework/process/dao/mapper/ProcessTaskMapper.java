@@ -30,7 +30,7 @@ public interface ProcessTaskMapper {
 
 	public List<ProcessTaskAttributeDataVo> getProcessTaskAttributeDataByProcessTaskId(Long processTaskId);
 
-	public String getProcessTaskStepConfigByStepId(Long processTaskStepId);
+	public String getProcessTaskStepConfigByHash(String hash);
 
 	public ProcessTaskFormVo getProcessTaskFormByProcessTaskId(Long processTaskId);
 
@@ -144,9 +144,7 @@ public interface ProcessTaskMapper {
 
 	public int deleteProcessTaskStepWorker(@Param("processTaskStepId")Long processTaskStepId, @Param("userId")String userId);
 	
-	public int deleteProcessTaskStepOtherWorker(@Param("processTaskStepId") Long processTaskStepId,@Param("userId") String userId,@Param("action") String action);
-	
-	public int deleteProcessTaskStepUser(@Param("processtaskStepId") Long processtaskStepId, @Param("userType")String userType);
+	public int deleteProcessTaskStepUser(@Param("processTaskStepId") Long processTaskStepId, @Param("userType")String userType);
 	
 	public int deleteProcessTaskConvergeByStepId(Long processTaskStepId);
 

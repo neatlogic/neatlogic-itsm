@@ -12,14 +12,16 @@
 	var JOBSTATUS_TIMMER = null;
 	var PREDICTION_TIMMER = null;
 	$(function() {
-		
-		$("#completeBtn").on('click', function(e){
+
+		$("#completeBtn").on('click', function(e) {
 			var submitData = {};
-			
+
 			var stepId = $("#completestepId").val();
+			var nextStepId = $('#nextStepId').val();
 			submitData['stepId'] = stepId;
+			submitData['nextStepId'] = nextStepId;
 			$.ajax({
-				url :  "${pageContext.request.contextPath}/module/process/processtask/processtaskstep/"+stepId+"/complete",
+				url : "${pageContext.request.contextPath}/module/process/processtask/processtaskstep/" + stepId + "/complete",
 				dataType : 'json',
 				type : 'POST',
 				data : JSON.stringify(submitData, null, 2),
@@ -29,13 +31,15 @@
 				}
 			});
 		})
-		$("#startBtn").on('click', function(e){
+		$("#startBtn").on('click', function(e) {
 			var submitData = {};
-			
+
 			var stepId = $("#completestepId").val();
+			var nextStepId = $('#nextStepId').val();
 			submitData['stepId'] = stepId;
+			submitData['nextStepId'] = nextStepId;
 			$.ajax({
-				url :  "${pageContext.request.contextPath}/module/process/processtask/processtaskstep/"+stepId+"/start",
+				url : "${pageContext.request.contextPath}/module/process/processtask/processtaskstep/" + stepId + "/start",
 				dataType : 'json',
 				type : 'POST',
 				data : JSON.stringify(submitData, null, 2),
@@ -103,7 +107,7 @@
 				}
 			}
 		});
-		
+
 		$("#flowTab").click();
 
 		$(window).on('resize', function() {
@@ -119,7 +123,6 @@
 		$("#divPaper").css('height', height + 'px');
 	}
 
-	
 	function getFlowJobStatus() {
 		if (JOBSTATUS_TIMMER) {
 			clearTimeout(JOBSTATUS_TIMMER);
@@ -702,16 +705,6 @@
 			}
 		});
 	}
-
-
-
-
-
-	
-
-	
-
-	
 </script>
 <style type="text/css">
 .divSort {
@@ -899,31 +892,39 @@ td.trlead {
 			<li role="presentation" class="active">
 				<a href="#tabMain" aria-controls="home" role="tab" data-toggle="tab">作业信息</a>
 			</li>
-			<li role="presentation" >
+			<li role="presentation">
 				<a href="#tabFlow" id="flowTab" aria-controls="profile" role="tab" data-toggle="tab">流程图</a>
 			</li>
 		</ul>
 		<div class="tab-content">
 			<div role="tabpanel" class="tab-pane active" id="tabMain">
-		
+
 
 				<div id="scrollDiv">
-					<br><br><br>
-					完成步骤ID:<input type="text" name="aa" id="completestepId">
-					<br><br><br>
-					<input type="button" id="startBtn" class="btn btn-primary" value="开始"/>
-				
-					<input type="button" id="completeBtn" class="btn btn-success" value="完成"/>
-				</div> 
+					<br>
+					<br>
+					<br> 完成步骤ID:
+					<input type="text" name="aa" id="completestepId">
+					<br>
+					<br>
+					<br> 下一步:
+					<input type="text" name="aa" id="nextStepId">
+					<br>
+					<br>
+					<br>
+					<input type="button" id="startBtn" class="btn btn-primary" value="开始" />
+
+					<input type="button" id="completeBtn" class="btn btn-success" value="完成" />
+				</div>
 			</div>
 			<div role="tabpanel" class="tab-pane" id="tabFlow">
-			
-				<div id="divPaper"></div>   
+
+				<div id="divPaper"></div>
 			</div>
 		</div>
-	</div> 
+	</div>
 </body>
-</html>  
+</html>
 
 
 
