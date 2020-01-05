@@ -245,10 +245,19 @@
 		<result column="belong" property="belong"/>
 		<collection property="attributeList" ofType="codedriver.module.process.dto.ProcessAttributeVo">
 			<id column="attributeUuid" property="attributeUuid" />
+			<result column="attributeHelp" property="help" />
+			<result column="attributeName" property="name" />
 			<result column="attributeLabel" property="label" />
+			<result column="attributeSort" property="sort" />
+			<result column="attributeWidth" property="width" />
 			<result column="attributeConfig" property="config" />
+			<result column="dataCubeTextField" property="dataCubeTextField" />
+			<result column="dataCubeUuid" property="dataCubeUuid" />
+			<result column="dataCubeValueField" property="dataCubeValueField" />
+			<result column="attributeDescription" property="description" />
 			<result column="attributeHandler" property="handler" />
 			<result column="attributeType" property="type" />
+			<result column="attributeUnit" property="unit" />
 		</collection>
 	</resultMap>
 
@@ -260,16 +269,27 @@
 		a.`is_active` AS isActive,
 		a.`config`,
 		a.`belong`,
-		b.`uuid` AS attributeUuid,
+		b.`name` AS attributeName,
+		b.`attribute_uuid` AS attributeUuid,
+		b.`group` AS attributeGroup,
+		b.`help` AS attributeHelp,
 		b.`label` AS attributeLabel,
-		b.`config` AS attributeConfig,
-		b.`handler` AS attributeHandler,
-		b.`type` AS attributeType,
+		b.`sort` AS attributeSort,
+		b.`width` AS attributeWidth,
+		c.`config` AS attributeConfig,
+		c.`datacube_textfield` AS dataCubeTextField,
+		c.`datacube_uuid` AS dataCubeUuid,
+		c.`datacube_valuefield` AS dataCubeValueField,
+		c.`description` AS attributeDescription,
+		c.`handler` AS attributeHandler,
+		c.`type` AS attributeType,
+		c.`unit` AS attributeUnit,
 		d.`form_uuid` AS formUuid
 		FROM
 		`process` a
-		LEFT JOIN `process_from` d ON a.`uuid` = d.`process_uuid`
-		LEFT JOIN `form_attribute` b ON d.form_uuid = b.`form_uuid`
+		LEFT JOIN `process_attribute` b ON a.`uuid` = b.`process_uuid`
+		LEFT JOIN `attribute` c ON b.`attribute_uuid` = c.`uuid` AND c.`is_active` = 1
+		LEFT JOIN `process_form` d ON a.`uuid` = d.`process_uuid`
 		WHERE
 		a.uuid = #{value}
 	</select>
@@ -355,6 +375,30 @@
 		#{isActive},
 		#{config},
 		#{belong}
+		)
+	</insert>
+
+	<insert id="insertProcessAttribute" parameterType="codedriver.module.process.dto.ProcessAttributeVo">
+		INSERT INTO `process_attribute` (
+		`attribute_uuid`,
+		`process_uuid`,
+		`name`,
+		`label`,
+		`sort`,
+		`width`,
+		`help`,
+		`group`
+		)
+		VALUES
+		(
+		#{attributeUuid},
+		#{processUuid},
+		#{name},
+		#{label},
+		#{sort},
+		#{width},
+		#{help},
+		#{group}
 		)
 	</insert>
 
@@ -501,6 +545,16 @@
 		VALUES
 		(#{processUuid}, #{formUuid})
 	</insert>
+	
+	
+
+	<delete id="deleteProcessAttributeByProcessUuid" parameterType="java.lang.String">
+		DELETE
+		FROM
+		`process_attribute`
+		WHERE
+		`process_uuid` = #{value}
+	</delete>
 
 	<delete id="deleteProcessStepByProcessUuid" parameterType="java.lang.String">
 		DELETE

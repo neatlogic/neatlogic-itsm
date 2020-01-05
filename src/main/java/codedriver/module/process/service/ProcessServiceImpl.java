@@ -74,7 +74,7 @@ public class ProcessServiceImpl implements ProcessService {
 			throw new ProcessNameRepeatException(processVo.getName());
 		}
 		if (processMapper.checkProcessIsExists(processVo.getUuid()) > 0) {
-			processMapper.deleteProcessAttributeByProcessUuid(processVo.getUuid());
+//			processMapper.deleteProcessAttributeByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessStepWorkerPolicyByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessStepByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
@@ -86,11 +86,11 @@ public class ProcessServiceImpl implements ProcessService {
 		if (StringUtils.isNotBlank(processVo.getFormUuid())) {
 			processMapper.replaceProcessForm(processVo.getUuid(), processVo.getFormUuid());
 		}
-		if (processVo.getAttributeList() != null && processVo.getAttributeList().size() > 0) {
+		/*if (processVo.getAttributeList() != null && processVo.getAttributeList().size() > 0) {
 			for (ProcessAttributeVo processAttributeVo : processVo.getAttributeList()) {
 				processMapper.insertProcessAttribute(processAttributeVo);
 			}
-		}
+		}*/
 
 		if (processVo.getStepList() != null && processVo.getStepList().size() > 0) {
 			for (ProcessStepVo stepVo : processVo.getStepList()) {

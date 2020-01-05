@@ -130,8 +130,6 @@ public class ProcessVo implements Serializable {
 						processAttributeVo.setProcessUuid(this.getUuid());
 						processAttributeVo.setAttributeUuid(attributeObj.getString("uuid"));
 						processAttributeVo.setLabel(attributeObj.getString("label"));
-						processAttributeVo.setGroup(attributeObj.getString("group"));
-						processAttributeVo.setSort(i);
 						this.attributeList.add(processAttributeVo);
 					}
 				}
@@ -293,7 +291,6 @@ public class ProcessVo implements Serializable {
 
 	public List<ProcessAttributeVo> getAttributeList() {
 		if (attributeList != null && attributeList.size() > 0 && !this.isAttributeListSorted) {
-			Collections.sort(attributeList);
 			this.isAttributeListSorted = true;
 		}
 		return attributeList;
@@ -309,11 +306,7 @@ public class ProcessVo implements Serializable {
 			for (ProcessAttributeVo attributeVo : this.attributeList) {
 				JSONObject jsonObj = new JSONObject();
 				jsonObj.put("uuid", attributeVo.getAttributeUuid());
-				jsonObj.put("name", attributeVo.getName());
 				jsonObj.put("label", attributeVo.getLabel());
-				jsonObj.put("width", attributeVo.getWidth());
-				jsonObj.put("group", attributeVo.getGroup());
-				jsonObj.put("sort", attributeVo.getSort());
 				jsonObj.put("typeName", attributeVo.getTypeName());
 				jsonObj.put("handlerName", attributeVo.getHandlerName());
 				this.attributeObjList.add(jsonObj);

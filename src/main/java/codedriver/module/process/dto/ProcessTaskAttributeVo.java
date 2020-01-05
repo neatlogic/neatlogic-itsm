@@ -29,16 +29,8 @@ public class ProcessTaskAttributeVo implements Serializable, Comparable<ProcessT
 	public ProcessTaskAttributeVo(ProcessAttributeVo processAttributeVo) {
 		this.setAttributeUuid(processAttributeVo.getAttributeUuid());
 		this.setHandler(processAttributeVo.getHandler());
-		this.setUnit(processAttributeVo.getUnit());
-		this.setName(processAttributeVo.getName());
 		this.setLabel(processAttributeVo.getLabel());
-		this.setHelp(processAttributeVo.getHelp());
-		this.setSort(processAttributeVo.getSort());
-		this.setWidth(processAttributeVo.getWidth());
 		this.setConfig(processAttributeVo.getConfig());
-		this.setDataCubeUuid(processAttributeVo.getDataCubeUuid());
-		this.setDataCubeValueField(processAttributeVo.getDataCubeValueField());
-		this.setDataCubeTextField(processAttributeVo.getDataCubeTextField());
 	}
 
 	public Long getProcessTaskId() {

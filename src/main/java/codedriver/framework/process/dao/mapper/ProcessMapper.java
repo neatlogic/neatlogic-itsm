@@ -45,8 +45,6 @@ public interface ProcessMapper {
 
 	public int insertProcessStep(ProcessStepVo processStepVo);
 
-	public int insertProcessAttribute(ProcessAttributeVo processAttributeVo);
-
 	public int insertProcessStepFormAttribute(ProcessStepFormAttributeVo processStepFormAttributeVo);
 
 	public int insertProcessStepRel(ProcessStepRelVo processStepRelVo);
@@ -70,8 +68,6 @@ public interface ProcessMapper {
 	public int deleteProcessStepRelByProcessUuid(String processUuid);
 
 	public int deleteProcessStepUserByProcessUuid(String processUuid);
-
-	public int deleteProcessAttributeByProcessUuid(String processUuid);
 
 	public int deleteProcessStepTeamByProcessUuid(String processUuid);
 
