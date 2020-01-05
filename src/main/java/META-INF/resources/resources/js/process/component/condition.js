@@ -33,7 +33,7 @@ window.flowChartNode.condition = {
 		}
 		json.nextPathIds = nextPathIds;
 		json.nextNodeIds = nextNodeIds;
-		var html = xdoT.render('octopus.flow.condition.configcondition', json);
+		var html = xdoT.render('process.component.condition.configcondition', json);
 		createSlideDialog({
 			title : '编辑条件判断节点',
 			content : html,
