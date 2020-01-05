@@ -56,17 +56,15 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
-		CatalogVo catalogVo = new CatalogVo();
-		catalogVo.setIsActive(1);
-		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
-		
-		List<ITree> treeList = new ArrayList<>(catalogList);
+				
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
 		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
 		List<ITree> children = null;
 		String parentUuid = null;
-		if(treeList != null && treeList.size() > 0) {
-			for(ITree tree : treeList) {
+		
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
+		if(catalogList != null && catalogList.size() > 0) {
+			for(ITree tree : catalogList) {
 				uuidKeyMap.put(tree.getUuid(), tree);
 				parentUuid = tree.getParentUuid();
 				children = parentUuidKeyMap.get(parentUuid);

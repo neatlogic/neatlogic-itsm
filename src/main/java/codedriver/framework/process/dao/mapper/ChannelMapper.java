@@ -29,6 +29,8 @@ public interface ChannelMapper {
 	int checkChannelIsExists(String channelUuid);
 
 	int checkCatalogIsDuplicateName(ChannelVo channelVo);
+
+	List<ChannelVo> getChannelListForTree(Integer isActive);
 	
 	int replaceChannelUser(@Param("userId")String userId, @Param("channelUuid")String channelUuid);	
 
@@ -61,5 +63,5 @@ public interface ChannelMapper {
 	int deleteChannelRoleByChannelUuid(String channelUuid);
 
 	int deleteChannelUserByChannelUuid(String channelUuid);
-
+	
 }

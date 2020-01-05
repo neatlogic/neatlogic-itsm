@@ -97,8 +97,6 @@
 	</if>
 	</select>
 	
-	
-	
 	<resultMap type="codedriver.module.process.dto.ChannelRoleVo" id="channelRoleMap">
 		<id column="role_name" property="roleName"/>
 		<result column="roleDesc" property="roleDesc"/>
@@ -159,6 +157,24 @@
 	
 	<select id="checkCatalogIsDuplicateName" resultType="int">
 	SELECT COUNT(1) FROM `channel` where name=#{name} AND `uuid`!=#{uuid}
+	</select>
+	
+	<resultMap type="codedriver.module.process.dto.ChannelVo" id="channelMap">
+		<id column="uuid" property="uuid"/>
+		<result column="name" property="name"/>
+		<result column="parent_uuid" property="parentUuid"/>
+	</resultMap>
+	<select id="getChannelListForTree" resultMap="channelMap">
+	SELECT 
+	  c.`uuid`,
+	  c.`name`,
+	  c.`parent_uuid`
+	FROM
+	  `channel` c 
+	<if test="isActive != null">
+	WHERE c.`is_active` = #{isActive}
+	</if>
+	ORDER BY c.`parent_uuid`, c.`sort`
 	</select>
 	
 	<insert id="replaceChannel">
@@ -244,4 +260,5 @@
 	<delete id="deleteChannelUserByChannelUuid">
 	DELETE FROM `channel_user` WHERE `channel_uuid` = #{channelUuid}
 	</delete>
+
 </mapper>

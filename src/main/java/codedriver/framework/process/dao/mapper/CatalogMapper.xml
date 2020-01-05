@@ -62,6 +62,24 @@
 	SELECT COUNT(1) FROM `catalog` where `name`=#{name} AND `uuid`!=#{uuid}
 	</select>
 	
+	<resultMap type="codedriver.module.process.dto.CatalogVo" id="catalogMap">
+		<id column="uuid" property="uuid"/>
+		<result column="name" property="name"/>
+		<result column="parent_uuid" property="parentUuid"/>
+	</resultMap>
+	
+	<select id="getCatalogListForTree" resultMap="catalogMap">
+	SELECT 
+	  `uuid`,
+	  `name`,
+	  `parent_uuid`
+	FROM `catalog` 
+	 <if test="isActive != null">
+	 WHERE `is_active` = #{isActive}
+	 </if>
+	 ORDER BY `sort`
+	</select>
+	
 	<insert id="replaceCatalog">
 	REPLACE INTO `catalog`(`uuid`, `name`, `parent_uuid`, `is_active`, `icon`, `color`, `desc`, `sort`) 
 	VALUES(#{uuid}, #{name}, #{parentUuid}, #{isActive}, #{icon}, #{color}, #{desc}, #{sort})
@@ -86,4 +104,5 @@
 	<delete id="deleteCatalogRoleByUuid">
 	DELETE FROM `catalog_role` WHERE `catalog_uuid` = #{catalogUuid}
 	</delete>
+	
 </mapper>
