@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.exception.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
+import codedriver.module.process.constvalue.ProcessStepMode;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
@@ -38,6 +39,11 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 	@Override
 	public String getIcon() {
 		return "<i  class=\"ts-shunt text-assist\"></i>";
+	}
+
+	@Override
+	public ProcessStepMode getMode() {
+		return ProcessStepMode.AT;
 	}
 
 	@Override
@@ -84,7 +90,9 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 				if (stepAndKey.indexOf(".") > -1 && stepAndKey.split("\\.").length == 2) {
 					String stepUid = stepAndKey.split("\\.")[0];
 					String key = stepAndKey.split("\\.")[1];
-					List<String> valueList = new ArrayList<>();//flowJobMapper.getFlowJobStepNodeParamValueByFlowJobIdUidKey(flowJobId, stepUid, key);
+					List<String> valueList = new ArrayList<>();// flowJobMapper.getFlowJobStepNodeParamValueByFlowJobIdUidKey(flowJobId,
+																// stepUid,
+																// key);
 					if (valueList.size() > 0) {
 						if (valueList.size() > 1) {
 							script.append("map[\"" + stepUid + "." + key + "\"] = [");
@@ -144,7 +152,9 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 				if (stepAndKey.indexOf(".") > -1 && stepAndKey.split("\\.").length == 2) {
 					String stepUid = stepAndKey.split("\\.")[0];
 					String key = stepAndKey.split("\\.")[1];
-					List<String> valueList =new ArrayList<>();// flowJobMapper.getFlowJobStepNodeParamValueByFlowJobIdUidKey(flowJobId, stepUid, key);
+					List<String> valueList = new ArrayList<>();// flowJobMapper.getFlowJobStepNodeParamValueByFlowJobIdUidKey(flowJobId,
+																// stepUid,
+																// key);
 					JSONObject valueObj = new JSONObject();
 					if (valueList.size() > 0) {
 						if (valueList.size() > 1) {
@@ -158,7 +168,7 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 							jsonObj.put(stepUid, valueObj);
 						} else {
 							JSONObject tmpV = jsonObj.getJSONObject(stepUid);
-							//tmpV.accumulate(key, valueObj.get(key));
+							// tmpV.accumulate(key, valueObj.get(key));
 							jsonObj.put(stepUid, tmpV);
 						}
 					}
@@ -194,7 +204,7 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 								this.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 								this.setId(relVo.getToProcessTaskStepId());
 								this.setType(relVo.getToProcessStepHandler());
-								//this.setTimeWindow(relVo.getToTimeWindow());
+								// this.setTimeWindow(relVo.getToTimeWindow());
 							}
 						});
 					}
@@ -209,7 +219,6 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 		return 1;
 	}
 
-	
 	public void makeupFlowJobStepVo(ProcessTaskStepVo flowJobStepVo) {
 		if (flowJobStepVo.getRelList() != null && flowJobStepVo.getRelList().size() > 0) {
 			for (ProcessTaskStepRelVo relVo : flowJobStepVo.getRelList()) {
@@ -239,7 +248,9 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 								String key = stepAndKey.split("\\.")[1];
 								RelExpressionVo relExpressionVo = new RelExpressionVo();
 								relExpressionVo.setExpression("${" + stepUid + "." + key + "}");
-								List<String> valueList = new ArrayList<>(); //flowJobMapper.getFlowJobStepNodeParamValueByFlowJobIdUidKey(flowJobStepVo.getFlowJobId(), stepUid, key);
+								List<String> valueList = new ArrayList<>(); // flowJobMapper.getFlowJobStepNodeParamValueByFlowJobIdUidKey(flowJobStepVo.getFlowJobId(),
+																			// stepUid,
+																			// key);
 								if (valueList.size() > 0) {
 									if (valueList.size() > 1) {
 										script.append("map[\"" + stepUid + "." + key + "\"] = [");
@@ -284,7 +295,6 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 		}
 	}
 
-	
 	public void makeupFlowStepVo(ProcessStepVo flowStepVo) {
 		// TODO Auto-generated method stub
 
@@ -315,8 +325,7 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList,
-			List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
+	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -374,4 +383,5 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
 }
