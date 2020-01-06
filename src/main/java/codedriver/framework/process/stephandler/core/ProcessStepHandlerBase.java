@@ -184,8 +184,19 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 					}
 				}
 				if (this.getMode().equals(ProcessStepMode.MT)) {
-					/** 分配处理人 **/
-					assign(currentProcessTaskStepVo);
+					/** 如果已经存在过处理人，则继续使用旧处理人，否则启用分派 **/
+					List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessTaskStepUserType.MAJOR.getValue());
+					if (oldUserList.size() > 0) {
+						processTaskMapper.deleteProcessTaskStepWorker(currentProcessTaskStepVo.getId(), null);
+						for (ProcessTaskStepUserVo oldUserVo : oldUserList) {
+							oldUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
+							processTaskMapper.updateProcessTaskStepUserStatus(oldUserVo);
+							processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), oldUserVo.getUserId()));
+						}
+					} else {
+						/** 分配处理人 **/
+						assign(currentProcessTaskStepVo);
+					}
 				} else if (this.getMode().equals(ProcessStepMode.AT)) {
 					/** 自动处理 **/
 					IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getType());
