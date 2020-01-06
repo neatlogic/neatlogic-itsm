@@ -134,13 +134,6 @@
 		<result column="formUuid" property="formUuid" />
 		<result column="config" property="config" />
 		<result column="belong" property="belong"/>
-		<collection property="attributeList" ofType="codedriver.module.process.dto.ProcessAttributeVo">
-			<id column="attributeUuid" property="attributeUuid" />
-			<result column="attributeLabel" property="label" />
-			<result column="attributeConfig" property="config" />
-			<result column="attributeHandler" property="handler" />
-			<result column="attributeType" property="type" />
-		</collection>
 	</resultMap>
 
 	<select id="getProcessByUuid" parameterType="java.lang.String" resultMap="processDetailMap">
@@ -151,16 +144,10 @@
 		a.`is_active` AS isActive,
 		a.`config`,
 		a.`belong`,
-		b.`uuid` AS attributeUuid,
-		b.`label` AS attributeLabel,
-		b.`config` AS attributeConfig,
-		b.`handler` AS attributeHandler,
-		b.`type` AS attributeType,
 		d.`form_uuid` AS formUuid
 		FROM
 		`process` a
-		LEFT JOIN `process_from` d ON a.`uuid` = d.`process_uuid`
-		LEFT JOIN `form_attribute` b ON d.form_uuid = b.`form_uuid`
+		LEFT JOIN `process_form` d ON a.`uuid` = d.`process_uuid`
 		WHERE
 		a.uuid = #{value}
 	</select>
