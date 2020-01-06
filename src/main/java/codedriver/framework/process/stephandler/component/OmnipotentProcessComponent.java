@@ -23,9 +23,7 @@ import codedriver.module.process.constvalue.ProcessStepMode;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
-import codedriver.module.process.dto.ProcessTaskAttributeValueVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
-import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -262,7 +260,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 								// 放进去方便基类记录日志
 								attribute.setAttributeData(attributeData);
 
-								List<String> valueList = new ArrayList<>();
+								/*List<String> valueList = new ArrayList<>();
 								if (attrObj.containsKey("value")) {
 									if (attrObj.get("value") instanceof JSONArray) {
 										for (int v = 0; v < attrObj.getJSONArray("value").size(); v++) {
@@ -282,7 +280,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 											processTaskMapper.insertProcessTaskFormAttributeValue(attributeValue);
 										}
 									}
-								}
+								}*/
 								break;
 							}
 						}

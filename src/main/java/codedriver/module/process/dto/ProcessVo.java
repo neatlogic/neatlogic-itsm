@@ -2,7 +2,6 @@ package codedriver.module.process.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,15 +46,12 @@ public class ProcessVo implements Serializable {
 	private String belong;
 
 	private JSONObject configObj;
-	private JSONArray attributeObjList;
 	// @EntityField(name = "流程表单uuid", type = ApiParamType.STRING)
 	private String formUuid;
 	private List<ProcessStepVo> stepList;
 
 	// @EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
-	private List<ProcessAttributeVo> attributeList;
 	private List<ProcessStepRelVo> stepRelList;
-	private boolean isAttributeListSorted = false;
 
 	public synchronized String getUuid() {
 		if (StringUtils.isBlank(uuid)) {
@@ -124,21 +120,9 @@ public class ProcessVo implements Serializable {
 	}
 
 	public void makeupFromConfigObj() {
-		if (this.attributeList == null && this.getConfigObj() != null) {
+		if ( this.getConfigObj() != null) {
 			if (this.getConfigObj().containsKey("userData")) {
 				JSONObject userData = this.getConfigObj().getJSONObject("userData");
-				if (userData.containsKey("attributeList")) {
-					this.attributeList = new ArrayList<>();
-					JSONArray attributeObjList = userData.getJSONArray("attributeList");
-					for (int i = 0; i < attributeObjList.size(); i++) {
-						JSONObject attributeObj = attributeObjList.getJSONObject(i);
-						ProcessAttributeVo processAttributeVo = new ProcessAttributeVo();
-						processAttributeVo.setProcessUuid(this.getUuid());
-						processAttributeVo.setAttributeUuid(attributeObj.getString("uuid"));
-						processAttributeVo.setLabel(attributeObj.getString("label"));
-						this.attributeList.add(processAttributeVo);
-					}
-				}
 				if (userData.containsKey("formId")) {
 					this.setFormUuid(userData.getString("formId"));
 				}
@@ -271,37 +255,6 @@ public class ProcessVo implements Serializable {
 
 	public void setStepList(List<ProcessStepVo> stepList) {
 		this.stepList = stepList;
-	}
-
-	public List<ProcessAttributeVo> getAttributeList() {
-		if (attributeList != null && attributeList.size() > 0 && !this.isAttributeListSorted) {
-			this.isAttributeListSorted = true;
-		}
-		return attributeList;
-	}
-
-	public void setAttributeList(List<ProcessAttributeVo> attributeList) {
-		this.attributeList = attributeList;
-	}
-
-	public JSONArray getAttributeObjList() {
-		if (this.attributeList != null && this.attributeList.size() > 0) {
-			this.attributeObjList = new JSONArray();
-			for (ProcessAttributeVo attributeVo : this.attributeList) {
-				JSONObject jsonObj = new JSONObject();
-				jsonObj.put("uuid", attributeVo.getAttributeUuid());
-				jsonObj.put("label", attributeVo.getLabel());
-				jsonObj.put("typeName", attributeVo.getTypeName());
-				jsonObj.put("handlerName", attributeVo.getHandlerName());
-				this.attributeObjList.add(jsonObj);
-
-			}
-		}
-		return attributeObjList;
-	}
-
-	public void setAttributeObjList(JSONArray attributeObjList) {
-		this.attributeObjList = attributeObjList;
 	}
 
 	public String getBelong() {
