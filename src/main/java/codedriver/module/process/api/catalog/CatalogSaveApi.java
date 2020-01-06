@@ -66,7 +66,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
 		}
-		if(catalogMapper.checkCatalogIsDuplicateName(catalogVo) > 0) {
+		if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
 			throw new CatalogNameRepeatException(catalogVo.getName());
 		}
 		int sort;

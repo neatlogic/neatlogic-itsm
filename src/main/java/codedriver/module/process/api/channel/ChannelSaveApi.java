@@ -81,7 +81,7 @@ public class ChannelSaveApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
 		}
-		if(channelMapper.checkCatalogIsDuplicateName(channelVo) > 0) {
+		if(channelMapper.checkChannelNameIsRepeat(channelVo) > 0) {
 			throw new ChannelNameRepeatException(channelVo.getName());
 		}
 		int sort;

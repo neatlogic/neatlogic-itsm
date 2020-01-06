@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 import codedriver.module.process.dto.ProcessAttributeVo;
-import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessFormVo;
 import codedriver.module.process.dto.ProcessStepAttributeVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
@@ -39,7 +38,11 @@ public interface ProcessMapper {
 
 	public List<ProcessTypeVo> getAllProcessType();
 
-	public int checkProcessIsDuplicateName(ProcessVo processVo);
+	public int checkProcessNameIsRepeat(ProcessVo processVo);
+
+	public int searchProcessCount(ProcessVo processVo);
+
+	public List<ProcessVo> searchProcessList(ProcessVo processVo);
 
 	public int replaceProcess(ProcessVo processVo);
 

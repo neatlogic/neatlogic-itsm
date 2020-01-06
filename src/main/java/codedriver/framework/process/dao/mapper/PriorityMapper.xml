@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.process.dao.mapper.PriorityMapper">
+
+	<select id="searchPriorityCount" resultType="int">
+	SELECT 
+	COUNT(`uuid`) 
+	FROM `priority`
+	WHERE 1=1
+	<if test="keyword != null">
+	AND `name` LIKE CONCAT('%', #{keyword}, '%')
+	</if>
+	<if test="isActive != null">
+	AND `is_active` = #{isActive}
+	</if>
+	</select>
+
+	<select id="searchPriorityList" resultType="codedriver.module.process.dto.PriorityVo">
+	SELECT 
+	`uuid`,
+	`name`,
+	`is_active` as isActive,
+	`desc`,
+	`icon`,
+	`color` 
+	FROM `priority`
+	WHERE 1=1
+	<if test="keyword != null">
+	AND `name` LIKE CONCAT('%', #{keyword}, '%')
+	</if>
+	<if test="isActive != null">
+	AND `is_active` = #{isActive}
+	</if>
+	<if test="needPage">
+	limit #{startNum}, #{pageSize}
+	</if>
+	</select>
+</mapper>

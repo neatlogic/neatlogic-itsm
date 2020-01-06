@@ -10,7 +10,6 @@ import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.exception.ProcessNameRepeatException;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.dto.ProcessAttributeVo;
-import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessFormVo;
 import codedriver.module.process.dto.ProcessStepAttributeVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
@@ -70,7 +69,7 @@ public class ProcessServiceImpl implements ProcessService {
 
 	@Override
 	public int saveProcess(ProcessVo processVo) {
-		if(processMapper.checkProcessIsDuplicateName(processVo) > 0) {
+		if(processMapper.checkProcessNameIsRepeat(processVo) > 0) {
 			throw new ProcessNameRepeatException(processVo.getName());
 		}
 		if (processMapper.checkProcessIsExists(processVo.getUuid()) > 0) {

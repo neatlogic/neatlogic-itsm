@@ -28,7 +28,7 @@ public interface ChannelMapper {
 	
 	int checkChannelIsExists(String channelUuid);
 
-	int checkCatalogIsDuplicateName(ChannelVo channelVo);
+	int checkChannelNameIsRepeat(ChannelVo channelVo);
 
 	List<ChannelVo> getChannelListForTree(Integer isActive);
 	
