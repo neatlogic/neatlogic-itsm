@@ -66,24 +66,13 @@ public class ProcessController {
 		if (attributeList.size() == 1) {
 			ProcessStepFormAttributeVo attributeVo = attributeList.get(0);
 			returnObj.put("label", attributeVo.getLabel());
-			returnObj.put("inputPage", attributeVo.getInputPage());
-			returnObj.put("configPage", attributeVo.getConfigPage());
-			;
-			returnObj.put("viewPage", attributeVo.getViewPage());
 			returnObj.put("attributeUuid", attributeVo.getAttributeUuid());
-			returnObj.put("description", attributeVo.getDescription());
-			returnObj.put("dataCubeTextField", attributeVo.getDataCubeTextField());
-			returnObj.put("dataCubeValueField", attributeVo.getDataCubeValueField());
-			returnObj.put("dataCubeUuid", attributeVo.getDataCubeUuid());
 			returnObj.put("typeName", attributeVo.getTypeName());
 			returnObj.put("handler", attributeVo.getHandler());
 			returnObj.put("handlerName", attributeVo.getHandlerName());
 			returnObj.put("config", attributeVo.getConfig());
 			returnObj.put("data", attributeVo.getData());
 			returnObj.put("isEditable", attributeVo.getIsEditable());
-			returnObj.put("editTemplate", attributeVo.getEditTemplate());
-			returnObj.put("configTemplate", attributeVo.getConfigTemplate());
-			returnObj.put("viewTemplate", attributeVo.getViewTemplate());
 		}
 		return returnObj;
 	}
@@ -98,17 +87,6 @@ public class ProcessController {
 			// 设为激活页面才能进入可处理状态
 			returnStep.setIsActive(1);
 			return returnStep;
-		} else {
-			return null;
-		}
-	}
-
-	@RequestMapping(value = "/processstep/{processStepUuid}/attribute/{attributeUuid}")
-	@ResponseBody
-	public ProcessStepAttributeVo getProcessStepAttribute(@PathVariable("processStepUuid") String processStepUuid, @PathVariable("attributeUuid") String attributeUuid) {
-		List<ProcessStepAttributeVo> attributeList = processService.getProcessStepAttributeByStepUuid(new ProcessStepAttributeVo(processStepUuid, attributeUuid));
-		if (attributeList != null && attributeList.size() > 0) {
-			return attributeList.get(0);
 		} else {
 			return null;
 		}

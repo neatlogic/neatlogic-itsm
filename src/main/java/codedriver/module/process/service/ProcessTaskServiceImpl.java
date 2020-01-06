@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.module.process.dto.ProcessTaskFormVo;
-import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 
@@ -25,7 +24,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	@Override
 	public ProcessTaskStepVo getProcessTaskStepDetailById(Long processTaskStepId) {
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		processTaskStepVo.setAttributeList(processTaskMapper.getProcessTaskStepAttributeByStepId(new ProcessTaskStepAttributeVo(processTaskStepId)));
 		ProcessTaskFormVo form = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskStepVo.getProcessTaskId());
 		if (form != null) {
 			processTaskStepVo.setFormUuid(form.getFormUuid());
@@ -36,11 +34,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	@Override
 	public ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId) {
 		return processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-	}
-
-	@Override
-	public List<ProcessTaskStepAttributeVo> getProcessTaskStepAttributeByStepId(ProcessTaskStepAttributeVo processTaskStepAttributeVo) {
-		return processTaskMapper.getProcessTaskStepAttributeByStepId(processTaskStepAttributeVo);
 	}
 
 	@Override

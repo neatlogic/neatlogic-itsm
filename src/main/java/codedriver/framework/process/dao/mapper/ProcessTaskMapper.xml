@@ -2,27 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskMapper">
 
-	<select id="getProcessTaskAttributeValueByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskAttributeValueVo">
-		SELECT
-		`processtask_id` AS processTaskId,
-		`attribute_uuid` AS attributeUuid,
-		`value`
-		FROM
-		`processtask_attribute_value`
-		WHERE
-		`processtask_id` = #{value}
-	</select>
-
-	<select id="getProcessTaskAttributeDataByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskAttributeDataVo">
-		SELECT
-		`processtask_id` AS processTaskId,
-		`attribute_uuid` AS attributeUuid,
-		`data`
-		FROM
-		`processtask_attribute_data`
-		WHERE processtask_id = #{value}
-	</select>
-
 	<select id="getProcessTaskStepConfigByHash" parameterType="java.lang.String" resultType="java.lang.String">
 		SELECT
 		`config`
@@ -52,20 +31,6 @@
 		FROM
 		`processtask_step_formattribute` a JOIN `attribute` b ON a.`attribute_uuid` = b.`uuid` AND b.`is_active` = 1
 		JOIN `processtask_formattribute_data` c ON a.`attribute_uuid` = c.`attribute_uuid` AND a.`processtask_id` = c.`processtask_id`
-		WHERE
-		a.`processtask_step_id` = #{value}
-	</select>
-
-	<select id="getProcessTaskStepAttributeDataByStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskAttributeDataVo">
-		SELECT
-		a.`processtask_id` AS processTaskId,
-		a.`processtask_step_id` AS processTaskStepId,
-		a.`attribute_uuid` AS attributeUuid,
-		c.`data`
-		FROM
-		`processtask_step_attribute` a JOIN `attribute` b ON a.`attribute_uuid` = b.`uuid` AND b.`is_active` = 1
-		JOIN `processtask_attribute` d ON a.`attribute_uuid` = d.`attribute_uuid` AND a.`processtask_id` = d.`processtask_id`
-		JOIN `processtask_attribute_data` c ON a.`attribute_uuid` = c.`attribute_uuid` AND a.`processtask_id` = c.`processtask_id`
 		WHERE
 		a.`processtask_step_id` = #{value}
 	</select>
@@ -139,19 +104,6 @@
 		WHERE
 		to_step_id = #{value}
 		ORDER BY assign_time
-	</select>
-
-	<select id="getProcessTaskAttributeValue" resultType="codedriver.module.process.dto.ProcessTaskAttributeValueVo">
-		SELECT
-		`processtask_id` AS processTaskId,
-		`attribute_uuid` AS attributeUuid,
-		`value`
-		FROM
-		`processtask_attribute_value`
-		WHERE
-		processtask_id = #{processTaskId}
-		AND
-		attribute_uuid = #{attributeUuid}
 	</select>
 
 	<select id="getProcessTaskStepTimeoutPolicyByProcessTaskStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepTimeoutPolicyVo">
@@ -380,94 +332,15 @@
 		WHERE id = #{value}
 	</select>
 
-	<resultMap id="processTaskStepAttributeResultMap" type="codedriver.module.process.dto.ProcessTaskStepAttributeVo">
-		<id column="processTaskStepId" property="processTaskStepId" />
-		<id column="attributeUuid" property="attributeUuid" />
-		<id column="processTaskId" property="processTaskId" />
-		<result column="isEditable" property="isEditable" />
-		<result column="isRequired" property="isRequired" />
-		<result column="label" property="label" />
-		<result column="handler" property="handler" />
-		<result column="config" property="config" />
-		<result column="dataCubeTextField" property="dataCubeTextField" />
-		<result column="dataCubeUuid" property="dataCubeUuid" />
-		<result column="dataCubeValueField" property="dataCubeValueField" />
-		<result column="help" property="help" />
-		<result column="sort" property="sort" />
-		<result column="unit" property="unit" />
-		<result column="editTemplate" property="editTemplate" />
-		<result column="viewTemplate" property="viewTemplate" />
-		<result column="configTemplate" property="configTemplate" />
-		<result column="data" property="data" />
-		<collection property="valueList" ofType="java.lang.String">
-			<result column="value" />
-		</collection>
-	</resultMap>
-
-	<select id="getProcessTaskStepAttributeByStepId" parameterType="codedriver.module.process.dto.ProcessTaskStepAttributeVo" resultMap="processTaskStepAttributeResultMap">
-		SELECT
-		a.`processtask_step_id` AS processTaskStepId,
-		a.`attribute_uuid` AS attributeUuid,
-		a.`processtask_id` AS processTaskId,
-		a.`is_editable` AS isEditable,
-		a.`is_required` AS isRequired,
-		b.`label`,
-		f.`handler`,
-		a.`config`,
-		f.`datacube_textfield` AS dataCubeTextField,
-		f.`datacube_uuid` AS dataCubeUuid,
-		f.`datacube_valuefield` AS dataCubeValueField,
-		b.`help`,
-		b.`processtask_id` AS processTaskId,
-		b.`sort`,
-		f.`unit`,
-		d.`value`,
-		d.`attribute_uuid` AS valueAttributeUuid,
-		d.`processtask_id` AS valueProcessTaskId,
-		e.`data`,
-		e.`attribute_uuid` AS dataAttributeUuid,
-		e.`processtask_id` AS dataProcessTaskId,
-		f.`edit_template` AS editTemplate,
-		f.`view_template` AS viewTemplate,
-		f.`config_template` AS configTemplate
-		FROM
-		`processtask_step_attribute` a
-		JOIN `processtask_attribute` b ON a.`processtask_id` = b.`processtask_id` AND a.`attribute_uuid` = b.`attribute_uuid`
-		LEFT JOIN `processtask_attribute_value` d ON a.`processtask_id` = d.`processtask_id` AND a.`attribute_uuid` = d.`attribute_uuid`
-		LEFT JOIN
-		`processtask_attribute_data` e ON
-		a.`processtask_id` = e.`processtask_id` AND a.`attribute_uuid` = e.`attribute_uuid`
-		JOIN `attribute` f ON a.`attribute_uuid` = f.`uuid`
-		WHERE
-		a.`processtask_step_id` = #{processTaskStepId}
-		<if test="attributeUuid != null and attributeUuid != ''">
-			AND
-			a.attribute_uuid = #{attributeUuid}
-		</if>
-	</select>
-
 	<resultMap id="processTaskStepFormAttributeResultMap" type="codedriver.module.process.dto.ProcessTaskStepFormAttributeVo">
 		<id column="processTaskStepId" property="processTaskStepId" />
 		<id column="attributeUuid" property="attributeUuid" />
 		<id column="processTaskId" property="processTaskId" />
 		<result column="isEditable" property="isEditable" />
-		<result column="isRequired" property="isRequired" />
 		<result column="label" property="label" />
 		<result column="handler" property="handler" />
 		<result column="config" property="config" />
-		<result column="dataCubeTextField" property="dataCubeTextField" />
-		<result column="dataCubeUuid" property="dataCubeUuid" />
-		<result column="dataCubeValueField" property="dataCubeValueField" />
-		<result column="sort" property="sort" />
-		<result column="unit" property="unit" />
-		<result column="editTemplate" property="editTemplate" />
-		<result column="viewTemplate" property="viewTemplate" />
-		<result column="configTemplate" property="configTemplate" />
-		<result column="description" property="description" />
 		<result column="data" property="data" />
-		<collection property="valueList" ofType="java.lang.String">
-			<result column="value" />
-		</collection>
 	</resultMap>
 
 	<select id="getProcessTaskStepFormAttributeByStepId" parameterType="codedriver.module.process.dto.ProcessTaskStepFormAttributeVo" resultMap="processTaskStepFormAttributeResultMap">
@@ -476,30 +349,16 @@
 		a.`attribute_uuid` AS attributeUuid,
 		a.`processtask_id` AS processTaskId,
 		a.`is_editable` AS isEditable,
-		a.`is_required` AS isRequired,
 		a.`config`,
 		f.`label`,
 		f.`handler`,
-		f.`datacube_textfield` AS dataCubeTextField,
-		f.`datacube_uuid` AS dataCubeUuid,
-		f.`datacube_valuefield` AS dataCubeValueField,
-		f.`unit`,
-		f.`edit_template` AS editTemplate,
-		f.`view_template` AS viewTemplate,
-		f.`config_template` AS configTemplate,
-		f.`description`,
-		d.`value`,
-		d.`attribute_uuid` AS valueAttributeUuid,
-		d.`processtask_id` AS valueProcessTaskId,
 		e.`data`,
 		e.`attribute_uuid` AS dataAttributeUuid,
 		e.`processtask_id` AS dataProcessTaskId
 		FROM
 		`processtask_step_formattribute` a
-		LEFT JOIN `processtask_formattribute_value` d ON a.`processtask_id` = d.`processtask_id` AND a.`attribute_uuid` = d.`attribute_uuid`
 		LEFT JOIN `processtask_formattribute_data` e ON a.`processtask_id` = e.`processtask_id` AND a.`attribute_uuid` = e.`attribute_uuid`
-		JOIN `attribute` f ON a.`attribute_uuid` =
-		f.`uuid`
+		JOIN `form_attribute` f ON a.`attribute_uuid` = f.`uuid`
 		WHERE
 		a.`processtask_step_id` = #{processTaskStepId}
 		<if test="attributeUuid != null and attributeUuid != ''">
@@ -607,20 +466,6 @@
 		)
 	</insert>
 
-	<insert id="insertProcessTaskAttributeValue" parameterType="codedriver.module.process.dto.ProcessTaskAttributeValueVo">
-		INSERT INTO `processtask_attribute_value` (
-		`processtask_id`,
-		`attribute_uuid`,
-		`value`
-		)
-		VALUES
-		(
-		#{processTaskId},
-		#{attributeUuid},
-		#{value}
-		)
-	</insert>
-
 	<insert id="insertProcessTaskFormAttributeValue" parameterType="codedriver.module.process.dto.ProcessTaskAttributeValueVo">
 		INSERT INTO `processtask_formattribute_value` (
 		`processtask_id`,
@@ -632,20 +477,6 @@
 		#{processTaskId},
 		#{attributeUuid},
 		#{value}
-		)
-	</insert>
-
-	<insert id="replaceProcessTaskAttributeData" parameterType="codedriver.module.process.dto.ProcessTaskAttributeDataVo">
-		REPLACE INTO `processtask_attribute_data` (
-		`processtask_id`,
-		`attribute_uuid`,
-		`data`
-		)
-		VALUES
-		(
-		#{processTaskId},
-		#{attributeUuid},
-		#{data}
 		)
 	</insert>
 
@@ -718,44 +549,6 @@
 		#{condition},
 		#{isHit},
 		#{processStepRelUuid}
-		)
-	</insert>
-
-	<insert id="insertProcessTaskStepAttribute" parameterType="codedriver.module.process.dto.ProcessTaskStepAttributeVo">
-		INSERT INTO `processtask_step_attribute` (
-		`processtask_id`,
-		`processtask_step_id`,
-		`attribute_uuid`,
-		`is_editable`,
-		`is_required`,
-		`config`
-		)
-		VALUES
-		(
-		#{processTaskId},
-		#{processTaskStepId},
-		#{attributeUuid},
-		#{isEditable},
-		#{isRequired},
-		#{config}
-		)
-	</insert>
-
-	<insert id="insertProcessTaskAttribute" parameterType="codedriver.module.process.dto.ProcessTaskAttributeVo">
-		INSERT INTO `processtask_attribute` (
-		`processtask_id`,
-		`attribute_uuid`,
-		`help`,
-		`label`,
-		`sort`
-		)
-		VALUES
-		(
-		#{processTaskId},
-		#{attributeUuid},
-		#{help,typeHandler=XssHandler},
-		#{label,typeHandler=XssHandler},
-		#{sort}
 		)
 	</insert>
 
@@ -862,22 +655,6 @@
 		)
 	</insert>
 
-	<insert id="insertProcessTaskStepAuditAttributeData" parameterType="codedriver.module.process.dto.ProcessTaskStepAuditAttributeDataVo">
-		INSERT INTO `processtask_step_audit_attribute_data` (
-		`audit_id`,
-		`processtask_step_id`,
-		`attribute_uuid`,
-		`data`
-		)
-		VALUES
-		(
-		#{auditId},
-		#{processTaskStepId},
-		#{attributeUuid},
-		#{data}
-		)
-	</insert>
-
 	<insert id="insertProcessTaskStepAuditFormAttributeData" parameterType="codedriver.module.process.dto.ProcessTaskStepAuditFormAttributeDataVo">
 		INSERT INTO `processtask_step_audit_formattribute_data` (
 		`audit_id`,
@@ -932,7 +709,6 @@
 		`processtask_step_id`,
 		`attribute_uuid`,
 		`is_editable`,
-		`is_required`,
 		`config`
 		)
 		VALUES
@@ -941,7 +717,6 @@
 		#{processTaskStepId},
 		#{attributeUuid},
 		#{isEditable},
-		#{isRequired},
 		#{config}
 		)
 	</insert>
@@ -991,14 +766,6 @@
 		`processtask_converge`
 		WHERE
 		`processtask_step_id` = #{value}
-	</delete>
-
-	<delete id="deleteProcessTaskAttributeValueByProcessTaskIdAndAttributeUuid">
-		DELETE
-		FROM
-		`processtask_attribute_value`
-		WHERE `processtask_id` = #{processTaskId}
-		AND `attribute_uuid` = #{attributeUuid}
 	</delete>
 
 	<delete id="deleteProcessTaskFormAttributeValueByProcessTaskIdAndAttributeUuid">

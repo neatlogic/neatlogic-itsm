@@ -136,8 +136,6 @@ public class ProcessVo implements Serializable {
 						processAttributeVo.setProcessUuid(this.getUuid());
 						processAttributeVo.setAttributeUuid(attributeObj.getString("uuid"));
 						processAttributeVo.setLabel(attributeObj.getString("label"));
-						processAttributeVo.setGroup(attributeObj.getString("group"));
-						processAttributeVo.setSort(i);
 						this.attributeList.add(processAttributeVo);
 					}
 				}
@@ -164,13 +162,6 @@ public class ProcessVo implements Serializable {
 							processStepVo.setHandler(elementObj.getString("type"));
 							processStepVo.setDescription(userData.getString("description"));
 							userData.remove("description");
-							if (StringUtils.isNotBlank(userData.getString("editPage"))) {
-								processStepVo.setEditPage(userData.getString("editPage"));
-							}
-							userData.remove("editPage");
-							if (StringUtils.isNotBlank(userData.getString("viewPage"))) {
-								processStepVo.setViewPage(userData.getString("viewPage"));
-							}
 							userData.remove("viewPage");
 							if (elementObj.getString("type").equals("end")) {
 								processStepVo.setType(ProcessStepType.END.getValue());
@@ -184,25 +175,6 @@ public class ProcessVo implements Serializable {
 								// }else {
 								// processStepVo.setType(ProcessStepType.CONDITION.getValue());
 								// }
-							}
-							/** 组装自定义属性信息 **/
-							if (userData.containsKey("attributeList")) {
-								JSONArray attributeObjList = userData.getJSONArray("attributeList");
-								List<ProcessStepAttributeVo> processStepAttributeList = new ArrayList<>();
-								for (int j = 0; j < attributeObjList.size(); j++) {
-									JSONObject attributeObj = attributeObjList.getJSONObject(j);
-									ProcessStepAttributeVo processStepAttributeVo = new ProcessStepAttributeVo();
-									processStepAttributeVo.setProcessUuid(this.getUuid());
-									processStepAttributeVo.setProcessStepUuid(processStepVo.getUuid());
-									processStepAttributeVo.setAttributeUuid(attributeObj.getString("uuid"));
-									processStepAttributeVo.setConfig(attributeObj.getString("config"));
-									processStepAttributeVo.setData(attributeObj.getString("data"));
-									processStepAttributeVo.setIsEditable(attributeObj.getInteger("isEditable"));
-									// processStepAttributeVo.setIsRequired(attributeObj.optInt("isRequired"));
-
-									processStepAttributeList.add(processStepAttributeVo);
-								}
-								processStepVo.setAttributeList(processStepAttributeList);
 							}
 							userData.remove("attributeList");
 							/** 组装表单属性 **/
@@ -303,7 +275,6 @@ public class ProcessVo implements Serializable {
 
 	public List<ProcessAttributeVo> getAttributeList() {
 		if (attributeList != null && attributeList.size() > 0 && !this.isAttributeListSorted) {
-			Collections.sort(attributeList);
 			this.isAttributeListSorted = true;
 		}
 		return attributeList;
@@ -319,11 +290,7 @@ public class ProcessVo implements Serializable {
 			for (ProcessAttributeVo attributeVo : this.attributeList) {
 				JSONObject jsonObj = new JSONObject();
 				jsonObj.put("uuid", attributeVo.getAttributeUuid());
-				jsonObj.put("name", attributeVo.getName());
 				jsonObj.put("label", attributeVo.getLabel());
-				jsonObj.put("width", attributeVo.getWidth());
-				jsonObj.put("group", attributeVo.getGroup());
-				jsonObj.put("sort", attributeVo.getSort());
 				jsonObj.put("typeName", attributeVo.getTypeName());
 				jsonObj.put("handlerName", attributeVo.getHandlerName());
 				this.attributeObjList.add(jsonObj);

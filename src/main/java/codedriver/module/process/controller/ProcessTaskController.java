@@ -27,7 +27,6 @@ import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.dto.FormVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
-import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -56,23 +55,13 @@ public class ProcessTaskController {
 		if (attributeList.size() == 1) {
 			ProcessTaskStepFormAttributeVo attributeVo = attributeList.get(0);
 			returnObj.put("label", attributeVo.getLabel());
-			returnObj.put("inputPage", attributeVo.getInputPage());
-			returnObj.put("configPage", attributeVo.getConfigPage());
-			returnObj.put("viewPage", attributeVo.getViewPage());
 			returnObj.put("attributeUuid", attributeVo.getAttributeUuid());
-			returnObj.put("description", attributeVo.getDescription());
-			returnObj.put("dataCubeTextField", attributeVo.getDataCubeTextField());
-			returnObj.put("dataCubeValueField", attributeVo.getDataCubeValueField());
-			returnObj.put("dataCubeUuid", attributeVo.getDataCubeUuid());
 			returnObj.put("typeName", attributeVo.getTypeName());
 			returnObj.put("handler", attributeVo.getHandler());
 			returnObj.put("handlerName", attributeVo.getHandlerName());
 			returnObj.put("config", attributeVo.getConfig());
 			returnObj.put("data", attributeVo.getData());
 			returnObj.put("isEditable", attributeVo.getIsEditable());
-			returnObj.put("editTemplate", attributeVo.getEditTemplate());
-			returnObj.put("viewTemplate", attributeVo.getViewTemplate());
-			returnObj.put("configTemplate", attributeVo.getConfigTemplate());
 		}
 		return returnObj;
 	}
@@ -128,21 +117,6 @@ public class ProcessTaskController {
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 			ReturnJson.error(ex.getMessage(), response);
-		}
-	}
-
-	@RequestMapping(value = "/processtaskstep/{processTaskStepId}/attribute/{uuid}")
-	@ResponseBody
-	public ProcessTaskStepAttributeVo getProcessTaskStepAttributeByUuid(@PathVariable("processTaskStepId") Long processTaskStepId, @PathVariable("uuid") String uuid) {
-		/** 为了和流程执行时一致，创建流程时同样返回ProcessTaskStepVo类型 **/
-		ProcessTaskStepAttributeVo processTaskStepAttributeVo = new ProcessTaskStepAttributeVo();
-		processTaskStepAttributeVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepAttributeVo.setAttributeUuid(uuid);
-		List<ProcessTaskStepAttributeVo> attributeList = processTaskService.getProcessTaskStepAttributeByStepId(processTaskStepAttributeVo);
-		if (attributeList != null && attributeList.size() > 0) {
-			return attributeList.get(0);
-		} else {
-			return null;
 		}
 	}
 
