@@ -6,14 +6,10 @@ import org.apache.ibatis.annotations.Param;
 
 import codedriver.module.process.dto.ProcessTaskAssignUserVo;
 import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
-import codedriver.module.process.dto.ProcessTaskAttributeValueVo;
-import codedriver.module.process.dto.ProcessTaskAttributeVo;
 import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskConvergeVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
-import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
-import codedriver.module.process.dto.ProcessTaskStepAuditAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskStepConfigVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
@@ -107,8 +103,6 @@ public interface ProcessTaskMapper {
 	public int insertProcessTaskStepWorker(ProcessTaskStepWorkerVo processTaskStepWorkerVo);
 
 	public int insertProcessTaskConverge(ProcessTaskConvergeVo processTaskConvergeVo);
-
-	public int insertProcessTaskFormAttributeValue(ProcessTaskAttributeValueVo processTaskAttributeValueVo);
 
 	public int insertProcessTaskStepTimeoutPolicy(ProcessTaskStepTimeoutPolicyVo processTaskStepTimeoutPolicy);
 

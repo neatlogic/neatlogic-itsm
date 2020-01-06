@@ -2,8 +2,6 @@ package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
 
-import codedriver.module.process.dto.ProcessAttributeVo;
-import codedriver.module.process.dto.ProcessStepAttributeVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
 import codedriver.module.process.dto.ProcessStepTeamVo;
 import codedriver.module.process.dto.ProcessStepUserVo;
@@ -18,8 +16,6 @@ public interface ProcessEventMapper {
 
 	public List<ProcessStepVo> getProcessStepDetailByProcessUuid(String processUuid);
 
-	public List<ProcessStepAttributeVo> getProcessStepAttributeByStepUuid(String processStepUuid);
-
 	public ProcessVo getProcessByUuid(String processUuid);
 
 	public ProcessVo getProcessBaseInfoByUuid(String processUuid);
@@ -30,8 +26,6 @@ public interface ProcessEventMapper {
 
 	public int insertProcessStep(ProcessStepVo processStepVo);
 
-	public int insertProcessAttribute(ProcessAttributeVo processAttributeVo);
-
 	public int insertProcessStepRel(ProcessStepRelVo processStepRelVo);
 
 	public int insertProcessStepUser(ProcessStepUserVo processStepUserVo);
@@ -39,8 +33,6 @@ public interface ProcessEventMapper {
 	public int insertProcessStepTeam(ProcessStepTeamVo processStepTeamVo);
 
 	public int insertProcessStepWorkerPolicy(ProcessStepWorkerPolicyVo processStepWorkerPolicyVo);
-
-	public int insertProcessStepAttribute(ProcessStepAttributeVo processStepAttributeVo);
 
 	public int deleteProcessStepByProcessUuid(String processUuid);
 

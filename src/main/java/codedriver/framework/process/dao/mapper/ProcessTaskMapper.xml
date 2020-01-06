@@ -467,20 +467,6 @@
 		)
 	</insert>
 
-	<insert id="insertProcessTaskFormAttributeValue" parameterType="codedriver.module.process.dto.ProcessTaskAttributeValueVo">
-		INSERT INTO `processtask_formattribute_value` (
-		`processtask_id`,
-		`attribute_uuid`,
-		`value`
-		)
-		VALUES
-		(
-		#{processTaskId},
-		#{attributeUuid},
-		#{value}
-		)
-	</insert>
-
 	<insert id="replaceProcessTaskFormAttributeData" parameterType="codedriver.module.process.dto.ProcessTaskAttributeDataVo">
 		REPLACE INTO `processtask_formattribute_data` (
 		`processtask_id`,

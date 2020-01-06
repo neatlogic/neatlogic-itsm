@@ -22,7 +22,6 @@ public class ProcessTaskStepFormAttributeVo {
 	private String handlerName;
 	private String type;
 	private String typeName;
-	private ProcessTaskAttributeVo attributeVo;
 	private ProcessTaskAttributeDataVo attributeData;
 	private JSONObject configObj;
 
@@ -71,14 +70,6 @@ public class ProcessTaskStepFormAttributeVo {
 
 	public void setIsRequired(Integer isRequired) {
 		this.isRequired = isRequired;
-	}
-
-	public ProcessTaskAttributeVo getAttributeVo() {
-		return attributeVo;
-	}
-
-	public void setAttributeVo(ProcessTaskAttributeVo attributeVo) {
-		this.attributeVo = attributeVo;
 	}
 
 	public String getProcessStepUuid() {
