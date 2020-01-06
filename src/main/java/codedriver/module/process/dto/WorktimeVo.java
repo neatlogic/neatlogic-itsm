@@ -10,6 +10,17 @@ public class WorktimeVo {
 	private Integer isActive;
 	private String lcu;
 	private Date lcd;
+	/**
+	 * {
+	 * 		"monday":[{"startTime":"9:00","endTime":"12:00"},{"startTime":"14:00","endTime":"18:00"}],
+	 *		"tuesday":[{"startTime":"9:00","endTime":"12:00"},{"startTime":"14:00","endTime":"18:00"}],
+	 *		"wednesday":[{"startTime":"9:00","endTime":"12:00"},{"startTime":"14:00","endTime":"18:00"}],
+	 *		"thursday":[{"startTime":"9:00","endTime":"12:00"},{"startTime":"14:00","endTime":"18:00"}],
+	 *		"friday":[{"startTime":"9:00","endTime":"12:00"},{"startTime":"14:00","endTime":"18:00"}],
+	 *		"saturday":[{"startTime":"9:00","endTime":"12:00"},{"startTime":"14:00","endTime":"18:00"}],
+	 *		"sunday":[{"startTime":"9:00","endTime":"12:00"},{"startTime":"14:00","endTime":"18:00"}]
+	 * }
+	 */
 	private String config;
 	
 	public synchronized String getUuid() {

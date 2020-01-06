@@ -1,9 +1,10 @@
 package codedriver.module.process.api.worktime;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,35 +65,32 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 		JSONObject config = JSON.parseObject(worktimeVo.getConfig());
 		worktimeMapper.deleteWorktimeRange(worktimeRangeVo);
 		
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
-		Calendar calendar = Calendar.getInstance();
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd H:mm");
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
 		WorktimeRangeVo worktimeRange = null;
 		JSONArray defineList = null;
 		List<WorktimeRangeVo> worktimeRangeList = new ArrayList<>();
 		List<String> dateList = worktimeRangeVo.getDateList();
 		for(String workDate : dateList) {
-			simpleDateFormat.applyPattern("yyyy-MM-dd");
-			Date date = simpleDateFormat.parse(workDate);
-			calendar.setTime(date);
-			int weekday = calendar.get(Calendar.DAY_OF_WEEK);
-			if(weekday == 1) {
-				weekday = 7;
-			}else {
-				weekday -= 1;
-			}
-			defineList = config.getJSONArray(String.valueOf(weekday));
+			LocalDate localDate= LocalDate.from(dateFormatter.parse(workDate));
+			defineList = config.getJSONArray(localDate.getDayOfWeek().name().toLowerCase());
 			if(defineList == null) {
 				continue;
 			}
-			simpleDateFormat.applyPattern("yyyy-MM-dd HH:mm");
+
 			for(int i = 0; i < defineList.size(); i++) {
 				JSONObject define = defineList.getJSONObject(i);
 				worktimeRange = new WorktimeRangeVo();
 				worktimeRange.setWorktimeUuid(worktimeUuid);
 				worktimeRange.setYear(worktimeRangeVo.getYear());
-				worktimeRange.setDate(workDate);			
-				worktimeRange.setStartTime(simpleDateFormat.parse(workDate + " " + define.getString("startTime")).getTime());
-				worktimeRange.setEndTime(simpleDateFormat.parse(workDate + " " + define.getString("endTime")).getTime());
+				worktimeRange.setDate(workDate);
+				LocalDateTime startLocalDateTime = LocalDateTime.from(dateTimeFormatter.parse(workDate + " " + define.getString("startTime")));
+				LocalDateTime endLocalDateTime = LocalDateTime.from(dateTimeFormatter.parse(workDate + " " + define.getString("endTime")));
+				long startTime = startLocalDateTime.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli();
+				long endTime = endLocalDateTime.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli();
+				worktimeRange.setStartTime(startTime);
+				worktimeRange.setEndTime(endTime);
 				worktimeRangeList.add(worktimeRange);
 				if(worktimeRangeList.size() > 1000) {
 					worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
@@ -103,5 +101,4 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 		worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
 		return null;
 	}
-
 }
