@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.process.exception.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
-import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -28,8 +28,8 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.RelExpressionVo;
 
 @Service
-public class ConditionComponent extends ProcessStepHandlerBase {
-	static Logger logger = LoggerFactory.getLogger(ConditionComponent.class);
+public class ConditionProcessComponent extends ProcessStepHandlerBase {
+	static Logger logger = LoggerFactory.getLogger(ConditionProcessComponent.class);
 
 	@Override
 	public String getName() {
@@ -57,13 +57,14 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myActive(ProcessTaskStepVo processTaskStepVo) {
+	protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 0;
 	}
 
 	@Override
-	protected int myHandle(ProcessTaskStepVo processTaskStepVo) {
-		processTaskStepVo.setIsAllDone(true);
+	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) {
+		/**设置已完成标记位**/
+		currentProcessTaskStepVo.setIsAllDone(true);
 		return 0;
 	}
 
@@ -295,92 +296,74 @@ public class ConditionComponent extends ProcessStepHandlerBase {
 		}
 	}
 
-	public void makeupFlowStepVo(ProcessStepVo flowStepVo) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public int getSort() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public Boolean isAllowStart() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getEditPage() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getViewPage() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myStart(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myRetreat(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myAbort(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myComment(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int mySave(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	protected int myInit(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
-		// TODO Auto-generated method stub
+	protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}
 

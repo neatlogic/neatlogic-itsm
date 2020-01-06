@@ -74,7 +74,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myInit(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
+	protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
 		
 		return 1;
 	}
@@ -86,6 +86,8 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+		/**设置已完成标记位**/
+		currentProcessTaskStepVo.setIsAllDone(true);
 		return 0;
 	}
 

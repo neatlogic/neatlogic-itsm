@@ -311,14 +311,15 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
 		// 获取当前节点基本信息
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-
+		// 修改当前步骤状态为运行中
+		currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+		processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
 		if (!this.isAsync()) {// 同步模式
-			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getType());
-
 			try {
 				myHandle(currentProcessTaskStepVo);
 				/** 如果步骤被标记为全部完成，则触发完成 **/
 				if (currentProcessTaskStepVo.getIsAllDone()) {
+					IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getType());
 					doNext(new ProcessStepThread(currentProcessTaskStepVo) {
 						@Override
 						public void execute() {
@@ -746,8 +747,8 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				if (!processTaskStepRelVo.getIsHit().equals(0)) {
 					ProcessTaskStepVo fromProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepRelVo.getFromProcessTaskStepId());
 					if (fromProcessTaskStepVo != null) {
-						// 如果是汇聚型节点，则再次调用back查找上一个处理节点
-						if (fromProcessTaskStepVo.getType().equals(ProcessStepType.CONVERGE.getValue())) {
+						// 如果是分流节点或条件节点，则再次调用back查找上一个处理节点
+						if (fromProcessTaskStepVo.getHandler().equals(ProcessStepHandler.DISTRIBUTARY.getType()) || fromProcessTaskStepVo.getHandler().equals(ProcessStepHandler.CONDITION.getType())) {
 							// 如果是处理节点，则重新激活
 							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromProcessTaskStepVo.getHandler());
 							if (handler != null) {
@@ -759,7 +760,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 									}
 								});
 							}
-						} else if (fromProcessTaskStepVo.getType().equals(ProcessStepType.PROCESS.getValue()) || fromProcessTaskStepVo.getType().equals(ProcessStepType.START.getValue())) {
+						} else {
 							// 如果是处理节点，则重新激活
 							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromProcessTaskStepVo.getHandler());
 							if (handler != null) {
@@ -959,8 +960,8 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		}
 
 		try {
-			myInit(currentProcessTaskStepVo);
-			currentProcessTaskStepVo.setIsActive(0);
+			myStartProcess(currentProcessTaskStepVo);
+			currentProcessTaskStepVo.setIsActive(2);
 			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
 		} catch (ProcessTaskException ex) {
 			logger.error(ex.getMessage(), ex);
@@ -1024,7 +1025,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		return 1;
 	}
 
-	protected abstract int myInit(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException;
+	protected abstract int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException;
 
 	@Override
 	public final List<ProcessTaskStepVo> getNext(ProcessTaskStepVo currentProcessTaskStepVo) {
@@ -1060,6 +1061,9 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			}
 		}
 		/** 更新路径isHit=1，在active方法里需要根据isHit状态判断路径是否经通过 **/
+		if (nextStepList == null) {
+			nextStepList = new ArrayList<>();
+		}
 		for (ProcessTaskStepVo stepVo : nextStepList) {
 			processTaskMapper.updateProcessTaskStepRelIsHit(currentProcessTaskStepVo.getId(), stepVo.getId(), 1);
 		}

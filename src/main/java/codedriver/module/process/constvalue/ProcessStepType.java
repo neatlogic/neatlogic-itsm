@@ -3,9 +3,7 @@ package codedriver.module.process.constvalue;
 public enum ProcessStepType {
 	START("start", "开始"),
 	PROCESS("process", "处理节点"),
-	END("end", "结束"),
-	CONVERGE("converge", "汇聚型节点"),
-	CONDITION("condition", "条件分流节点");
+	END("end", "结束");
 
 	private String type;
 	private String name;

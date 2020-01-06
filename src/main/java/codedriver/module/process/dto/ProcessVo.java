@@ -169,15 +169,15 @@ public class ProcessVo implements Serializable {
 							if (elementObj.getString("type").equals("end")) {
 								processStepVo.setType(ProcessStepType.END.getValue());
 							} else {
-								if(!userData.containsKey("condition")) {
+								//if(!userData.containsKey("condition")) {
 									if (userData.getString("isStartNode").equals("1")) {
 										processStepVo.setType(ProcessStepType.START.getValue());
 									} else if(!userData.containsKey("condition")){
 										processStepVo.setType(ProcessStepType.PROCESS.getValue());
 									}
-								}else {
-									processStepVo.setType(ProcessStepType.CONDITION.getValue());
-								}
+								//}else {
+								//	processStepVo.setType(ProcessStepType.CONDITION.getValue());
+								//}
 							}
 							/** 组装自定义属性信息 **/
 							if (userData.containsKey("attributeList")) {

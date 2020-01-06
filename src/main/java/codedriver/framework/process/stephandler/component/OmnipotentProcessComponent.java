@@ -175,7 +175,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myInit(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		/** 写入当前步骤的自定义属性值 **/
 		ProcessTaskStepAttributeVo attributeVo = new ProcessTaskStepAttributeVo();
