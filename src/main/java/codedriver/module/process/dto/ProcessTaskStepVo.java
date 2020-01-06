@@ -109,6 +109,38 @@ public class ProcessTaskStepVo extends BasePageVo {
 		}
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		if (this == other)
+			return true;
+		if (other == null)
+			return false;
+		if (!(other instanceof ProcessTaskStepVo))
+			return false;
+
+		final ProcessTaskStepVo step = (ProcessTaskStepVo) other;
+		try {
+			if (getId() != null && getId().equals(step.getId())) {
+				return true;
+			}
+		} catch (Exception ex) {
+			return false;
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = 0;
+		if (getId() != null) {
+			result += getId().hashCode() * 7;
+		}
+		if (getProcessStepUuid() != null) {
+			result += getProcessStepUuid().hashCode() * 11;
+		}
+		return result;
+	}
+
 	public Long getId() {
 		return id;
 	}

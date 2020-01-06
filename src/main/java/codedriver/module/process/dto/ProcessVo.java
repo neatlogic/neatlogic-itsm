@@ -19,34 +19,40 @@ import codedriver.module.process.constvalue.ProcessStepType;
 
 public class ProcessVo implements Serializable {
 	private static final long serialVersionUID = 4684015408674741157L;
-	
-	@EntityField(name = "流程uuid", type = ApiParamType.STRING)
+
+	@EntityField(name = "流程uuid",
+			type = ApiParamType.STRING)
 	private String uuid;
-	
-	@EntityField(name = "流程名称", type = ApiParamType.STRING)
+
+	@EntityField(name = "流程名称",
+			type = ApiParamType.STRING)
 	private String name;
-	
-	@EntityField(name = "流程类型id", type = ApiParamType.LONG)
+
+	@EntityField(name = "流程类型id",
+			type = ApiParamType.LONG)
 	private Long type;
-	
-	@EntityField(name = "流程类型名称", type = ApiParamType.STRING)
+
+	@EntityField(name = "流程类型名称",
+			type = ApiParamType.STRING)
 	private String typeName;
-	
-	@EntityField(name = "是否激活", type = ApiParamType.STRING)
+
+	@EntityField(name = "是否激活",
+			type = ApiParamType.STRING)
 	private Integer isActive = 1;
-	
-	@EntityField(name = "流程图配置", type = ApiParamType.STRING)
+
+	@EntityField(name = "流程图配置",
+			type = ApiParamType.STRING)
 	private String config;
-	
+
 	private String belong;
-	
+
 	private JSONObject configObj;
 	private JSONArray attributeObjList;
-//	@EntityField(name = "流程表单uuid", type = ApiParamType.STRING)
+	// @EntityField(name = "流程表单uuid", type = ApiParamType.STRING)
 	private String formUuid;
 	private List<ProcessStepVo> stepList;
-	
-//	@EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
+
+	// @EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessAttributeVo> attributeList;
 	private List<ProcessStepRelVo> stepRelList;
 	private boolean isAttributeListSorted = false;
@@ -160,15 +166,15 @@ public class ProcessVo implements Serializable {
 							if (elementObj.getString("type").equals("end")) {
 								processStepVo.setType(ProcessStepType.END.getValue());
 							} else {
-								//if(!userData.containsKey("condition")) {
-									if (userData.getString("isStartNode").equals("1")) {
-										processStepVo.setType(ProcessStepType.START.getValue());
-									} else if(!userData.containsKey("condition")){
-										processStepVo.setType(ProcessStepType.PROCESS.getValue());
-									}
-								//}else {
-								//	processStepVo.setType(ProcessStepType.CONDITION.getValue());
-								//}
+								// if(!userData.containsKey("condition")) {
+								if (userData.containsKey("isStartNode") && userData.getString("isStartNode").equals("1")) {
+									processStepVo.setType(ProcessStepType.START.getValue());
+								} else {
+									processStepVo.setType(ProcessStepType.PROCESS.getValue());
+								}
+								// }else {
+								// processStepVo.setType(ProcessStepType.CONDITION.getValue());
+								// }
 							}
 							userData.remove("attributeList");
 							/** 组装表单属性 **/

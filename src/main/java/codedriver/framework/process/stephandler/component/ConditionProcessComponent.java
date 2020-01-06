@@ -204,8 +204,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 							{
 								this.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 								this.setId(relVo.getToProcessTaskStepId());
-								this.setType(relVo.getToProcessStepHandler());
-								// this.setTimeWindow(relVo.getToTimeWindow());
+								this.setHandler(relVo.getToProcessStepHandler());
 							}
 						});
 					}

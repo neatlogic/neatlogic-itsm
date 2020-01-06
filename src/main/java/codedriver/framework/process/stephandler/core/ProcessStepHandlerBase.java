@@ -149,7 +149,7 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 					if (nextTaskStepRelVo != null && nextTaskStepRelVo.getIsHit().equals(1)) {
 						ProcessTaskStepVo nextProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(nextTaskStepRelVo.getToProcessTaskStepId());
 						if (nextProcessTaskStepVo != null) {
-							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(nextProcessTaskStepVo.getType());
+							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(nextProcessTaskStepVo.getHandler());
 							// 标记挂起操作来源步骤
 							nextProcessTaskStepVo.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
 							// 标记挂起操作的发起步骤，避免出现死循环
@@ -198,16 +198,16 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 					});
 				}
 				currentProcessTaskStepVo.setIsActive(1);
+				processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
 			}
 		} catch (ProcessTaskException e) {
 			logger.error(e.getMessage(), e);
 			currentProcessTaskStepVo.setIsActive(0);
 			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
 			currentProcessTaskStepVo.setError(e.getMessage());
+			processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
 		} finally {
-			if (currentProcessTaskStepVo.getIsActive().equals(1)) {
-				processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
-			} else {
+			if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.FAILED.getValue())) {
 				/**
 				 * 发生异常不能激活当前步骤，执行当前步骤的回退操作
 				 */
@@ -289,6 +289,8 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 						}
 					}
 				}
+				/** 重置路径状态 **/
+				processTaskMapper.updateProcessTaskStepRelIsHit(currentProcessTaskStepVo.getId(), processTaskStepRelVo.getToProcessTaskStepId(), 0);
 			}
 
 			currentProcessTaskStepVo.setIsActive(0);
@@ -750,7 +752,6 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 					if (fromProcessTaskStepVo != null) {
 						// 如果是分流节点或条件节点，则再次调用back查找上一个处理节点
 						if (fromProcessTaskStepVo.getHandler().equals(ProcessStepHandler.DISTRIBUTARY.getType()) || fromProcessTaskStepVo.getHandler().equals(ProcessStepHandler.CONDITION.getType())) {
-							// 如果是处理节点，则重新激活
 							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromProcessTaskStepVo.getHandler());
 							if (handler != null) {
 								fromProcessTaskStepVo.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
@@ -1107,15 +1108,19 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			routeStepList.add(processTaskStepId);
 			List<Long> tmpRouteStepList = new ArrayList<>(routeStepList);
 			if (!processTaskStepId.equals(endStepVo.getId())) {
+				List<ProcessTaskStepVo> convergeStepList = processTaskMapper.getProcessTaskStepByConvergeId(processTaskStepId);
 				List<ProcessTaskStepVo> toProcessTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
 				for (int i = 0; i < toProcessTaskStepList.size(); i++) {
 					ProcessTaskStepVo toProcessTaskStepVo = toProcessTaskStepList.get(i);
-					if (i > 0) {
-						List<Long> newRouteStepList = new ArrayList<>(tmpRouteStepList);
-						routeList.add(newRouteStepList);
-						getAllRouteList(toProcessTaskStepVo.getId(), routeList, newRouteStepList, endStepVo);
-					} else {
-						getAllRouteList(toProcessTaskStepVo.getId(), routeList, routeStepList, endStepVo);
+					/** 当前节点不是别人的汇聚节点时，才记录进路由，这是为了避免因为出现打回路径而产生错误的汇聚数据 **/
+					if (!convergeStepList.contains(toProcessTaskStepVo)) {
+						if (i > 0) {
+							List<Long> newRouteStepList = new ArrayList<>(tmpRouteStepList);
+							routeList.add(newRouteStepList);
+							getAllRouteList(toProcessTaskStepVo.getId(), routeList, newRouteStepList, endStepVo);
+						} else {
+							getAllRouteList(toProcessTaskStepVo.getId(), routeList, routeStepList, endStepVo);
+						}
 					}
 				}
 			}
