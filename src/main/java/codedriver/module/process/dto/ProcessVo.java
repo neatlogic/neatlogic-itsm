@@ -156,13 +156,6 @@ public class ProcessVo implements Serializable {
 							processStepVo.setHandler(elementObj.getString("type"));
 							processStepVo.setDescription(userData.getString("description"));
 							userData.remove("description");
-							if (StringUtils.isNotBlank(userData.getString("editPage"))) {
-								processStepVo.setEditPage(userData.getString("editPage"));
-							}
-							userData.remove("editPage");
-							if (StringUtils.isNotBlank(userData.getString("viewPage"))) {
-								processStepVo.setViewPage(userData.getString("viewPage"));
-							}
 							userData.remove("viewPage");
 							if (elementObj.getString("type").equals("end")) {
 								processStepVo.setType(ProcessStepType.END.getValue());
@@ -176,25 +169,6 @@ public class ProcessVo implements Serializable {
 								//}else {
 								//	processStepVo.setType(ProcessStepType.CONDITION.getValue());
 								//}
-							}
-							/** 组装自定义属性信息 **/
-							if (userData.containsKey("attributeList")) {
-								JSONArray attributeObjList = userData.getJSONArray("attributeList");
-								List<ProcessStepAttributeVo> processStepAttributeList = new ArrayList<>();
-								for (int j = 0; j < attributeObjList.size(); j++) {
-									JSONObject attributeObj = attributeObjList.getJSONObject(j);
-									ProcessStepAttributeVo processStepAttributeVo = new ProcessStepAttributeVo();
-									processStepAttributeVo.setProcessUuid(this.getUuid());
-									processStepAttributeVo.setProcessStepUuid(processStepVo.getUuid());
-									processStepAttributeVo.setAttributeUuid(attributeObj.getString("uuid"));
-									processStepAttributeVo.setConfig(attributeObj.getString("config"));
-									processStepAttributeVo.setData(attributeObj.getString("data"));
-									processStepAttributeVo.setIsEditable(attributeObj.getInteger("isEditable"));
-									// processStepAttributeVo.setIsRequired(attributeObj.optInt("isRequired"));
-
-									processStepAttributeList.add(processStepAttributeVo);
-								}
-								processStepVo.setAttributeList(processStepAttributeList);
 							}
 							userData.remove("attributeList");
 							/** 组装表单属性 **/

@@ -47,7 +47,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private List<ProcessTaskStepUserVo> userList;
 	private List<ProcessTaskStepTeamVo> teamList;
 	private List<ProcessTaskStepRelVo> relList;
-	private List<ProcessTaskStepAttributeVo> attributeList;
 	private List<ProcessTaskStepWorkerPolicyVo> workerPolicyList;
 	private List<ProcessTaskStepTimeoutPolicyVo> timeoutPolicyList;
 	private List<ProcessTaskStepFormAttributeVo> formAttributeList;
@@ -63,8 +62,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 		this.setName(processStepVo.getName());
 		this.setHandler(processStepVo.getHandler());
 		this.setType(processStepVo.getType());
-		this.setEditPage(processStepVo.getEditPage());
-		this.setViewPage(processStepVo.getViewPage());
 		this.setConfig(processStepVo.getConfig());
 		this.setFormUuid(processStepVo.getFormUuid());
 		if (processStepVo.getUserList() != null && processStepVo.getUserList().size() > 0) {
@@ -83,16 +80,7 @@ public class ProcessTaskStepVo extends BasePageVo {
 			}
 			this.setTeamList(teamList);
 		}
-		if (processStepVo.getAttributeList() != null && processStepVo.getAttributeList().size() > 0) {
-			List<ProcessTaskStepAttributeVo> attributeList = new ArrayList<>();
-			for (ProcessStepAttributeVo attributeVo : processStepVo.getAttributeList()) {
-				attributeVo.setProcessStepUuid(processStepVo.getUuid());
-				ProcessTaskStepAttributeVo processTaskStepAttributeVo = new ProcessTaskStepAttributeVo(attributeVo);
-				attributeList.add(processTaskStepAttributeVo);
-			}
-			this.setAttributeList(attributeList);
-		}
-		if (processStepVo.getFormAttributeList() != null && processStepVo.getAttributeList().size() > 0) {
+		if (processStepVo.getFormAttributeList() != null && processStepVo.getFormAttributeList().size() > 0) {
 			List<ProcessTaskStepFormAttributeVo> attributeList = new ArrayList<>();
 			for (ProcessStepFormAttributeVo attributeVo : processStepVo.getFormAttributeList()) {
 				attributeVo.setProcessStepUuid(processStepVo.getUuid());
@@ -253,18 +241,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setViewPage(String viewPage) {
 		this.viewPage = viewPage;
-	}
-
-	public List<ProcessTaskStepAttributeVo> getAttributeList() {
-		if (!isAttributeListSorted && this.attributeList != null && this.attributeList.size() > 0) {
-			Collections.sort(this.attributeList);
-			isAttributeListSorted = true;
-		}
-		return attributeList;
-	}
-
-	public void setAttributeList(List<ProcessTaskStepAttributeVo> attributeList) {
-		this.attributeList = attributeList;
 	}
 
 	public String getProcessStepUuid() {

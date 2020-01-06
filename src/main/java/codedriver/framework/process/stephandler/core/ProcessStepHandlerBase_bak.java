@@ -48,6 +48,7 @@ import codedriver.module.process.dto.ProcessTaskConvergeVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
 import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditAttributeDataVo;
+import codedriver.module.process.dto.ProcessTaskStepAuditFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
@@ -698,7 +699,7 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 		}
 
 		/** 写入流程属性 **/
-		if (processVo.getAttributeList() != null && processVo.getAttributeList().size() > 0) {
+		/*if (processVo.getAttributeList() != null && processVo.getAttributeList().size() > 0) {
 			// List<ProcessTaskAttributeVo> processTaskAttributeList = new
 			// ArrayList<>();
 			for (ProcessAttributeVo attributeVo : processVo.getAttributeList()) {
@@ -706,7 +707,7 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 				processTaskAttributeVo.setProcessTaskId(processTaskVo.getId());
 				processTaskMapper.insertProcessTaskAttribute(processTaskAttributeVo);
 			}
-		}
+		}*/
 
 		/** 写入表单信息 **/
 		if (StringUtils.isNotBlank(processVo.getFormUuid())) {
@@ -735,13 +736,13 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 				stepIdMap.put(ptStepVo.getProcessStepUuid(), ptStepVo.getId());
 
 				/** 写入步骤自定义属性 **/
-				if (ptStepVo.getAttributeList() != null && ptStepVo.getAttributeList().size() > 0) {
+				/*if (ptStepVo.getAttributeList() != null && ptStepVo.getAttributeList().size() > 0) {
 					for (ProcessTaskStepAttributeVo processTaskStepAttributeVo : ptStepVo.getAttributeList()) {
 						processTaskStepAttributeVo.setProcessTaskId(processTaskVo.getId());
 						processTaskStepAttributeVo.setProcessTaskStepId(ptStepVo.getId());
 						processTaskMapper.insertProcessTaskStepAttribute(processTaskStepAttributeVo);
 					}
-				}
+				}*/
 
 				/** 写入步骤表单属性 **/
 				if (ptStepVo.getFormAttributeList() != null && ptStepVo.getFormAttributeList().size() > 0) {
@@ -843,18 +844,18 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 		processTaskStepAuditVo.setAction(action.getValue());
 		processTaskAuditMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
 
-		List<ProcessTaskAttributeDataVo> attrList = processTaskMapper.getProcessTaskStepAttributeDataByStepId(currentProcessTaskStepVo.getId());
+		/*List<ProcessTaskAttributeDataVo> attrList = processTaskMapper.getProcessTaskStepAttributeDataByStepId(currentProcessTaskStepVo.getId());
 		for (ProcessTaskAttributeDataVo attributeData : attrList) {
 			ProcessTaskStepAuditAttributeDataVo processTaskStepAuditAttributeDataVo = new ProcessTaskStepAuditAttributeDataVo(attributeData);
 			processTaskStepAuditAttributeDataVo.setAuditId(processTaskStepAuditVo.getId());
 			processTaskMapper.insertProcessTaskStepAuditAttributeData(processTaskStepAuditAttributeDataVo);
-		}
+		}*/
 
 		List<ProcessTaskAttributeDataVo> formAttrList = processTaskMapper.getProcessTaskStepFormAttributeDataByStepId(currentProcessTaskStepVo.getId());
 		for (ProcessTaskAttributeDataVo attributeData : formAttrList) {
-			ProcessTaskStepAuditAttributeDataVo processTaskStepAuditAttributeDataVo = new ProcessTaskStepAuditAttributeDataVo(attributeData);
-			processTaskStepAuditAttributeDataVo.setAuditId(processTaskStepAuditVo.getId());
-			processTaskMapper.insertProcessTaskStepAuditAttributeData(processTaskStepAuditAttributeDataVo);
+			ProcessTaskStepAuditFormAttributeDataVo processTaskStepAuditFormAttributeDataVo = new ProcessTaskStepAuditFormAttributeDataVo(attributeData);
+			processTaskStepAuditFormAttributeDataVo.setAuditId(processTaskStepAuditVo.getId());
+			processTaskMapper.insertProcessTaskStepAuditFormAttributeData(processTaskStepAuditFormAttributeDataVo);
 		}
 
 		return 1;

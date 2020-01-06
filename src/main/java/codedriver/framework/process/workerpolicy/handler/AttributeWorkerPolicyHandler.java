@@ -48,7 +48,7 @@ public class AttributeWorkerPolicyHandler implements IWorkerPolicyHandler {
 	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
 		if (workerPolicyVo.getConfigObjList() != null) {
-			List<ProcessTaskAttributeValueVo> attributeValueList = processTaskMapper.getProcessTaskAttributeValueByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+			/*List<ProcessTaskAttributeValueVo> attributeValueList = processTaskMapper.getProcessTaskAttributeValueByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 			if (attributeValueList != null && attributeValueList.size() > 0) {
 				for (int i = 0; i < workerPolicyVo.getConfigObjList().size(); i++) {
 					String attributeUuid = workerPolicyVo.getConfigObjList().getString(i);
@@ -88,7 +88,7 @@ public class AttributeWorkerPolicyHandler implements IWorkerPolicyHandler {
 						}
 					}
 				}
-			}
+			}*/
 		}
 		return workerList;
 	}

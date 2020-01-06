@@ -27,8 +27,6 @@ public interface ProcessMapper {
 
 	public List<ProcessStepVo> getProcessStepDetailByProcessUuid(String processUuid);
 
-	public List<ProcessStepAttributeVo> getProcessStepAttributeByStepUuid(ProcessStepAttributeVo processStepAttributeVo);
-
 	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo);
 
 	public ProcessVo getProcessByUuid(String processUuid);
@@ -57,8 +55,6 @@ public interface ProcessMapper {
 
 	public int insertProcessStepWorkerPolicy(ProcessStepWorkerPolicyVo processStepWorkerPolicyVo);
 
-	public int insertProcessStepAttribute(ProcessStepAttributeVo processStepAttributeVo);
-
 	public int replaceProcessForm(@Param("processUuid")
 	String processUuid, @Param("formUuid")
 	String formUuid);
@@ -72,8 +68,6 @@ public interface ProcessMapper {
 	public int deleteProcessStepTeamByProcessUuid(String processUuid);
 
 	public int deleteProcessStepWorkerPolicyByProcessUuid(String processUuid);
-
-	public int deleteProcessStepAttributeByProcessUuid(String processUuid);
 
 	public int deleteProcessStepTimeoutPolicyByProcessUuid(String processUuid);
 

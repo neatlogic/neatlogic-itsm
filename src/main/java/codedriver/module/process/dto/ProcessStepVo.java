@@ -9,9 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
-
 public class ProcessStepVo implements Serializable {
 	private static final long serialVersionUID = -1211661404097123528L;
 
@@ -23,8 +20,6 @@ public class ProcessStepVo implements Serializable {
 	private String typeName;
 	private String handler;
 	private String config;
-	private String editPage;
-	private String viewPage;
 	private String formUuid;
 	private String description;
 	private JSONObject configObj;
@@ -34,7 +29,6 @@ public class ProcessStepVo implements Serializable {
 	private List<ProcessStepUserVo> userList;
 	private List<ProcessStepRelVo> relList;
 	private List<ProcessStepTeamVo> teamList;
-	private List<ProcessStepAttributeVo> attributeList;
 	private List<ProcessStepWorkerPolicyVo> workerPolicyList;
 	private List<ProcessStepTimeoutPolicyVo> timeoutPolicyList;
 	private List<ProcessStepFormAttributeVo> formAttributeList;
@@ -154,46 +148,6 @@ public class ProcessStepVo implements Serializable {
 
 	public void setTeamList(List<ProcessStepTeamVo> teamList) {
 		this.teamList = teamList;
-	}
-
-	public String getViewPage() {
-		if (StringUtils.isBlank(viewPage) && StringUtils.isNotBlank(handler)) {
-			IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(handler);
-			if (processStepHandler != null) {
-				viewPage = processStepHandler.getViewPage();
-			}
-		}
-		return viewPage;
-	}
-
-	public void setViewPage(String viewPage) {
-		this.viewPage = viewPage;
-	}
-
-	public List<ProcessStepAttributeVo> getAttributeList() {
-		if (!isAttributeListSorted && attributeList != null && attributeList.size() > 0) {
-			Collections.sort(attributeList);
-			isAttributeListSorted = true;
-		}
-		return attributeList;
-	}
-
-	public void setAttributeList(List<ProcessStepAttributeVo> attributeList) {
-		this.attributeList = attributeList;
-	}
-
-	public String getEditPage() {
-		if (StringUtils.isBlank(editPage) && StringUtils.isNotBlank(handler)) {
-			IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(handler);
-			if (processStepHandler != null) {
-				editPage = processStepHandler.getEditPage();
-			}
-		}
-		return editPage;
-	}
-
-	public void setEditPage(String editPage) {
-		this.editPage = editPage;
 	}
 
 	public List<ProcessStepWorkerPolicyVo> getWorkerPolicyList() {

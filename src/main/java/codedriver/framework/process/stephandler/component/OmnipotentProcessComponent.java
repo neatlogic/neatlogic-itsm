@@ -178,7 +178,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		/** 写入当前步骤的自定义属性值 **/
-		ProcessTaskStepAttributeVo attributeVo = new ProcessTaskStepAttributeVo();
+		/*ProcessTaskStepAttributeVo attributeVo = new ProcessTaskStepAttributeVo();
 		attributeVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		List<ProcessTaskStepAttributeVo> attributeList = processTaskMapper.getProcessTaskStepAttributeByStepId(attributeVo);
 		currentProcessTaskStepVo.setAttributeList(attributeList);
@@ -236,7 +236,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 					}
 				}
 			}
-		}
+		}*/
 
 		/** 写入当前步骤的表单属性值 **/
 		ProcessTaskStepFormAttributeVo formAttributeVo = new ProcessTaskStepFormAttributeVo();
