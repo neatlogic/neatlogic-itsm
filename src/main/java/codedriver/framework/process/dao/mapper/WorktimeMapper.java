@@ -13,6 +13,8 @@ public interface WorktimeMapper {
 	
 	int checkWorktimeIsExists(String uuid);
 	
+	int searchWorktimeCount(WorktimeVo worktimeVo);
+	
 	List<WorktimeVo> searchWorktimeList(WorktimeVo worktimeVo);
 	
 	List<WorktimeRangeVo> getWorktimeRangeListByWorktimeUuid(String worktimeUuid);

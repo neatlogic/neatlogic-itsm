@@ -31,20 +31,38 @@
 	SELECT COUNT(`uuid`) FROM `worktime` WHERE `uuid` = #{uuid}
 	</select>
 
+	<select id="searchWorktimeCount" resultType="int">
+	SELECT 
+	  COUNT(`uuid`)
+	FROM `worktime` wt
+	WHERE 1 = 1
+	<if test="keyword != null">
+	AND wt.`name` LIKE CONCAT('%', #{keyword}, '%')
+	</if>
+	<if test="isActive != null">
+	AND wt.`is_active` = #{isActive}
+	</if>
+	</select>
+	
 	<select id="searchWorktimeList" resultMap="worktimeMap">
 	SELECT 
 	  wt.`uuid`,
 	  wt.`name`,
 	  wt.`is_active`,
 	  wt.`lcu`,
-	  wt.`lcd`,
-	  wt.`config`
+	  wt.`lcd`
 	FROM `worktime` wt
 	WHERE 1 = 1
+	<if test="keyword != null">
+	AND wt.`name` LIKE CONCAT('%', #{keyword}, '%')
+	</if>
 	<if test="isActive != null">
 	AND wt.`is_active` = #{isActive}
 	</if>
 	ORDER BY wt.`lcd`
+	<if test="needPage">
+	limit #{startNum}, #{pageSize}
+	</if>
 	</select>
 
 	<resultMap type="codedriver.module.process.dto.WorktimeRangeVo" id="worktimeRangeMap">
