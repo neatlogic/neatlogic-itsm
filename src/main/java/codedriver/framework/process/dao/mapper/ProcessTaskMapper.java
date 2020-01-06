@@ -27,8 +27,6 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskMapper {
-	
-	public List<Long> getProcessTaskStepIdByConvergeId(Long convergeId);
 
 	public String getProcessTaskStepConfigByHash(String hash);
 
