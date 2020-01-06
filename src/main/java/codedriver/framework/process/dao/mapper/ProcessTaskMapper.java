@@ -26,6 +26,8 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskMapper {
+	public List<Long> getProcessTaskStepIdByConvergeId(Long convergeId);
+
 	public List<ProcessTaskAttributeValueVo> getProcessTaskAttributeValueByProcessTaskId(Long processTaskId);
 
 	public List<ProcessTaskAttributeDataVo> getProcessTaskAttributeDataByProcessTaskId(Long processTaskId);
@@ -40,7 +42,9 @@ public interface ProcessTaskMapper {
 
 	public Long getProcessTaskStepContentIdByProcessTaskStepId(Long processTaskStepId);
 
-	public List<ProcessTaskStepUserVo> getProcessTaskStepUserByStepId(@Param("processTaskStepId") Long processTaskStepId, @Param("userType") String userType);
+	public List<ProcessTaskStepUserVo> getProcessTaskStepUserByStepId(@Param("processTaskStepId")
+	Long processTaskStepId, @Param("userType")
+	String userType);
 
 	public List<ProcessTaskStepVo> searchProcessTaskStep(ProcessTaskStepVo processTaskStepVo);
 
@@ -48,7 +52,9 @@ public interface ProcessTaskMapper {
 
 	public int checkProcessTaskStepUserIsExists(ProcessTaskStepUserVo processTaskStepUserVo);
 
-	public List<ProcessTaskAttributeValueVo> getProcessTaskAttributeValue(@Param("processTaskId") Long processTaskId, @Param("attributeUuid") String attributeUuid);
+	public List<ProcessTaskAttributeValueVo> getProcessTaskAttributeValue(@Param("processTaskId")
+	Long processTaskId, @Param("attributeUuid")
+	String attributeUuid);
 
 	public List<ProcessTaskStepTimeoutPolicyVo> getProcessTaskStepTimeoutPolicyByProcessTaskStepId(Long processTaskStepId);
 
@@ -57,7 +63,7 @@ public interface ProcessTaskMapper {
 	public List<ProcessTaskStepWorkerVo> getProcessTaskStepWorkerByProcessTaskStepId(Long processTaskStepId);
 
 	public Long getProcessTaskLockById(Long processTaskId);
-	
+
 	public ProcessTaskStepVo getProcessTaskStepLockById(Long processTaskStepId);
 
 	public int checkProcessTaskConvergeIsExists(ProcessTaskConvergeVo processTaskStepConvergeVo);
@@ -72,22 +78,24 @@ public interface ProcessTaskMapper {
 
 	public List<ProcessTaskStepRelVo> getProcessTaskStepRelByToId(Long toProcessTaskStepId);
 
-	public List<ProcessTaskStepVo> getProcessTaskStepByProcessTaskIdAndType(@Param("processTaskId") Long processTaskId, @Param("type") String type);
+	public List<ProcessTaskStepVo> getProcessTaskStepByProcessTaskIdAndType(@Param("processTaskId")
+	Long processTaskId, @Param("type")
+	String type);
 
 	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
 
 	public List<ProcessTaskStepAttributeVo> getProcessTaskStepAttributeByStepId(ProcessTaskStepAttributeVo processTaskStepAttributeVo);
 
 	public ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId);
-	
+
 	public int replaceProcessTaskConfig(ProcessTaskConfigVo processTaskConfigVo);
 
 	public int insertProcessTaskForm(ProcessTaskFormVo processTaskFormVo);
 
 	public int insertProcessTask(ProcessTaskVo processTaskVo);
-	
+
 	public int insertProcessTaskChannel(ProcessTaskVo processTaskVo);
-	
+
 	public int insertProcessTaskContent(ProcessTaskContentVo processTaskContentVo);
 
 	public int insertProcessTaskStep(ProcessTaskStepVo processTaskStepVo);
@@ -104,7 +112,9 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTaskStepAttribute(ProcessTaskStepAttributeVo processTaskStepAttributeVo);
 
-	public int insertProcessTaskStepContent(@Param("processTaskStepId") Long processTaskStepId, @Param("contentId") Long contentId);
+	public int insertProcessTaskStepContent(@Param("processTaskStepId")
+	Long processTaskStepId, @Param("contentId")
+	Long contentId);
 
 	public int insertProcessTaskStepAuditAttributeData(ProcessTaskStepAuditAttributeDataVo processTaskStepAuditAttributeDataVo);
 
@@ -131,21 +141,35 @@ public interface ProcessTaskMapper {
 	public int updateProcessTaskStepStatus(ProcessTaskStepVo processTaskStepVo);
 
 	public int updateProcessTaskStatus(ProcessTaskVo processTaskVo);
-	
-	public int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId") Long fromProcessTaskStepId, @Param("toProcessTaskStepId") Long toProcessTaskStepId, @Param("isHit") Integer isHit);
 
-	public int updateProcessTaskStepConvergeIsCheck(@Param("isCheck") Integer isCheck, @Param("convergeId") Long convergeId, @Param("processTaskStepId") Long processTaskStepId);
+	public int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId")
+	Long fromProcessTaskStepId, @Param("toProcessTaskStepId")
+	Long toProcessTaskStepId, @Param("isHit")
+	Integer isHit);
+
+	public int updateProcessTaskStepConvergeIsCheck(@Param("isCheck")
+	Integer isCheck, @Param("convergeId")
+	Long convergeId, @Param("processTaskStepId")
+	Long processTaskStepId);
 
 	public int updateProcessTaskStepUserStatus(ProcessTaskStepUserVo processTaskStepUserVo);
-	
-	public int deleteProcessTaskAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId") Long processTaskId, @Param("attributeUuid") String attributeUuid);
 
-	public int deleteProcessTaskFormAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId") Long processTaskId, @Param("attributeUuid") String attributeUuid);
+	public int deleteProcessTaskAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId")
+	Long processTaskId, @Param("attributeUuid")
+	String attributeUuid);
 
-	public int deleteProcessTaskStepWorker(@Param("processTaskStepId")Long processTaskStepId, @Param("userId")String userId);
-	
-	public int deleteProcessTaskStepUser(@Param("processTaskStepId") Long processTaskStepId, @Param("userType")String userType);
-	
+	public int deleteProcessTaskFormAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId")
+	Long processTaskId, @Param("attributeUuid")
+	String attributeUuid);
+
+	public int deleteProcessTaskStepWorker(@Param("processTaskStepId")
+	Long processTaskStepId, @Param("userId")
+	String userId);
+
+	public int deleteProcessTaskStepUser(@Param("processTaskStepId")
+	Long processTaskStepId, @Param("userType")
+	String userType);
+
 	public int deleteProcessTaskConvergeByStepId(Long processTaskStepId);
 
 }

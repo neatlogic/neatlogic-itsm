@@ -242,6 +242,15 @@
 		WHERE
 		a.`converge_id` = #{value}
 	</select>
+	
+	<select id="getProcessTaskStepIdByConvergeId" parameterType="java.lang.Long" resultType="java.lang.Long">
+		SELECT
+		a.`processtask_step_id`
+		FROM
+		`processtask_converge` a 
+		WHERE
+		a.`converge_id` = #{value}
+	</select>
 
 	<select id="getProcessTaskLockById" parameterType="java.lang.Long" resultType="java.lang.Long">
 		SELECT id FROM processtask WHERE id = #{value} FOR UPDATE

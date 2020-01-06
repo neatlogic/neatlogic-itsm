@@ -49,7 +49,7 @@
 				}
 			});
 		});
-		$('#acceptBtn').on('click',function(){
+		$('#acceptBtn').on('click', function() {
 			var submitData = {};
 
 			var stepId = $("#completestepId").val();
@@ -58,6 +58,24 @@
 			submitData['nextStepId'] = nextStepId;
 			$.ajax({
 				url : "${pageContext.request.contextPath}/module/process/processtask/processtaskstep/" + stepId + "/accept",
+				dataType : 'json',
+				type : 'POST',
+				data : JSON.stringify(submitData, null, 2),
+				contentType : "application/json",
+				success : function(data) {
+					showPopMsg.success('操作成功 ');
+				}
+			});
+		});
+
+		$('#backBtn').on('click', function() {
+			var submitData = {};
+			var stepId = $("#completestepId").val();
+			var nextStepId = $('#nextStepId').val();
+			submitData['stepId'] = stepId;
+			submitData['nextStepId'] = nextStepId;
+			$.ajax({
+				url : "${pageContext.request.contextPath}/module/process/processtask/processtaskstep/" + stepId + "/back",
 				dataType : 'json',
 				type : 'POST',
 				data : JSON.stringify(submitData, null, 2),
@@ -171,330 +189,11 @@
 	var STEPSTATUS_RETRY_TIME = 0;
 
 	var BTN_MAP = function(nodeType, status) {
-		if (status == 'pending') {
-			if (nodeType == 'node') {
-				return [ {
-					icon : '\ue86c',
-					title : '锁定',
-					iconsize : 14,
-					iconcolor : '#555',
-					iconfamily : 'ts',
-					bgfill : '#ffffff',
-					bgfillopacity : 0,
-					segmentation : '#969696',
-					onclick : function(node) {
-						var flowJobId = node.getSvg().getData('flowJobId');
-						var uid = node.getId();
-						createModalDialog({
-							msgtitle : '锁定确认',
-							msgcontent : '是否确认锁定当前步骤？',
-							successFuc : function() {
-								$.post('${pageContext.request.contextPath}/module/octopus/flowjob/' + flowJobId + '/step/' + uid + '/lock', function(data) {
-									if (data.Status == 'OK') {
-										showPopMsg.success();
-										//node.setStatusBtn(BTN_MAP(nodeType, 'locked'));
-										//node.setStyle(STYLE_MAP['locked']);
-										getFlowJobStepStatus();
-										getFlowJobStatus();
-										getFlowJobPrediction();
-									} else {
-										showPopMsg.error(data);
-									}
-								}, 'json');
-							}
-						});
-					}
-				} ];
-			} else {
-				return [];
-			}
-		} else if (status == 'running') {
-			if (nodeType == 'node') {
-				return [ {
-					icon : '\ue84d',
-					title : '终止',
-					iconsize : 14,
-					iconcolor : '#00C1DE',
-					iconfamily : 'ts',
-					bgfill : '#fff',
-					bgfillopacity : 1,
-					segmentation : '#00C1DE',
-					onclick : function(node) {
-						var flowJobId = node.getSvg().getData('flowJobId');
-						var uid = node.getId();
-						createModalDialog({
-							msgtitle : '终止确认',
-							msgcontent : '是否确认终止当前步骤？',
-							successFuc : function() {
-								$.post('${pageContext.request.contextPath}/module/octopus/flowjob/' + flowJobId + '/step/' + uid + '/abort', function(data) {
-									if (data.Status == 'OK') {
-										showPopMsg.success();
-										//node.setProgress({
-										//	enable : false
-										//});
-										//node.setStatusBtn(BTN_MAP(nodeType, 'aborted'));
-										//node.setStyle(STYLE_MAP['aborted']);
-										getFlowJobStepStatus();
-										getFlowJobStatus();
-										getFlowJobPrediction();
-									} else {
-										showPopMsg.error(data);
-									}
-								}, 'json');
-							}
-						});
-					}
-				} ];
-			} else {
-				return [];
-			}
-		} else if (status == 'waitconfirm') {
-			return [ {
-				icon : '\ueaac',
-				title : '确认',
-				iconsize : 14,
-				iconcolor : '#87B2EC',
-				iconfamily : 'ts',
-				bgfill : '#ffffff',
-				bgstroke : '#87B2EC',
-				bgfillopacity : 1,
-				segmentation : '#87B2EC',
-				onclick : function(node) {
-					var flowJobId = node.getSvg().getData('flowJobId');
-					var uid = node.getId();
-					createModalDialog({
-						msgtitle : '确认提示',
-						msgcontent : '是否确认当前步骤执行成功？',
-						successFuc : function() {
-							$.post('${pageContext.request.contextPath}/module/octopus/flowjob/' + flowJobId + '/step/' + uid + '/confirm', function(data) {
-								if (data.Status == 'OK') {
-									showPopMsg.success('操作成功');
-									getFlowJobStepStatus();
-									getFlowJobStatus();
-									getFlowJobPrediction();
-								} else {
-									showPopMsg.error(data);
-								}
-							}, 'json');
-						}
-					});
-				}
-			} ];
-		} else if (status == 'locked') {
-			return [ {
-				icon : '\ue8d6',
-				title : '解锁',
-				iconsize : 14,
-				iconcolor : '#555',
-				iconfamily : 'ts',
-				bgfill : '#fff',
-				bgstroke : 'transparent',
-				bgfillopacity : 1,
-				segmentation : '#969696',
-				onclick : function(node) {
-					var flowJobId = node.getSvg().getData('flowJobId');
-					var uid = node.getId();
-					createModalDialog({
-						msgtitle : '锁定确认',
-						msgcontent : '是否确认解除当前步骤锁定？',
-						successFuc : function() {
-							$.post('${pageContext.request.contextPath}/module/octopus/flowjob/' + flowJobId + '/step/' + uid + '/unlock', function(data) {
-								if (data.Status == 'OK') {
-									showPopMsg.success();
-									getFlowJobStepStatus();
-									getFlowJobStatus();
-									getFlowJobPrediction();
-								} else {
-									showPopMsg.error(data);
-								}
-							}, 'json');
-						}
-					});
-				}
-			} ];
-		} else if (status == 'aborted' || status == 'failed') {
-			var color = '';
-			if (status == 'aborted') {
-				color = '#F7B538';
-			} else {
-				color = '#DE5045';
-			}
-			return [ {
-				icon : '\uea89',
-				title : '重做',
-				iconsize : 14,
-				iconcolor : color,
-				iconfamily : 'ts',
-				bgfill : '#fff',
-				bgstroke : 'transparent',
-				bgfillopacity : 1,
-				segmentation : color,
-				onclick : function(node) {
-					var flowJobId = node.getSvg().getData('flowJobId');
-					var uid = node.getId();
-					createModalDialog({
-						msgtitle : '执行确认',
-						msgcontent : '是否确认重新执行当前步骤？',
-						successFuc : function() {
-							$.post('${pageContext.request.contextPath}/module/octopus/flowjob/' + flowJobId + '/step/' + uid + '/run', function(data) {
-								if (data.Status == 'OK') {
-									showPopMsg.success();
-									getFlowJobStepStatus();
-									getFlowJobStatus();
-									getFlowJobPrediction();
-								} else {
-									showPopMsg.error(data);
-								}
-							});
-						}
-					});
-				}
-			}, {
-				icon : '\ue855',
-				title : '忽略',
-				iconsize : 14,
-				iconcolor : color,
-				iconfamily : 'ts',
-				bgfill : '#fff',
-				bgstroke : 'transparent',
-				bgfillopacity : 1,
-				segmentation : color,
-				onclick : function(node) {
-					var flowJobId = node.getSvg().getData('flowJobId');
-					var uid = node.getId();
-					$.getJSON('${pageContext.request.contextPath}/module/octopus/flowjob/' + flowJobId + '/step/' + uid + '/nextsteplist', function(data) {
-						var html = xdoT.render('octopus.flowjob.listnextflowjobstep', data);
-						createModalDialog({
-							msgtitle : '忽略确认',
-							msgcontent : html,
-							msgwidth : 600,
-							successFuc : function() {
-								var hasCheck = false;
-								var flowJobStepIdList = new Array();
-								$('.chkFlowJobStep').each(function() {
-									if ($(this).prop('checked')) {
-										flowJobStepIdList.push($(this).val());
-									}
-								});
-								if (flowJobStepIdList.length > 0) {
-									$.post('${pageContext.request.contextPath}/module/octopus/flowjob/' + flowJobId + '/step/' + uid + '/ignore', {
-										nextStepIdList : flowJobStepIdList
-									}, function(data) {
-										if (data.Status == 'OK') {
-											getFlowJobStepStatus();
-											getFlowJobStatus();
-											getFlowJobPrediction();
-											showPopMsg.success();
-										} else {
-											showPopMsg.error(data);
-										}
-									});
-								} else {
-									showPopMsg.info('请选择需要流转的路径');
-								}
-							}
-						});
-					});
-				}
-			} ];
-		} else if (status == 'doing') {
-			return [ {
-				icon : '\ue85f',
-				title : '处理',
-				iconsize : 14,
-				iconcolor : '#0BC4E0',
-				iconfamily : 'ts',
-				bgfill : '#ffffff',
-				bgstroke : '#0BC4E0',
-				bgfillopacity : 1,
-				segmentation : '#0BC4E0',
-				onclick : function(node) {
-					var flowJobId = node.getSvg().getData('flowJobId');
-					var uid = node.getId();
-					$.getJSON('${pageContext.request.contextPath}/module/octopus/flowjob/' + flowJobId + '/step/' + uid, function(data) {
-						var btnList = new Array();
-						var editor = null;
-						var slideDialog = null;
-						var submitFuc = function(action) {
-							$('#hidAction').val(action);
-							if (editor) {
-								$('#txtContent').val(editor.getData());
-							}
-							if ($('#formVerify').valid()) {
-								$.ajax({
-									url : '${pageContext.request.contextPath}/module/octopus/flowjob/step/' + data.id + '/solve',
-									dataType : 'json',
-									type : 'POST',
-									data : JSON.stringify($('#formVerify').toJson()),
-									contentType : "application/json",
-									success : function(d) {
-										if (d.Status == 'OK') {
-											if (slideDialog) {
-												slideDialog.hide();
-											}
-											showPopMsg.success();
-											getFlowJobStepStatus();
-											getFlowJobStatus();
-											getFlowJobPrediction();
-										} else {
-											showPopMsg.error(d);
-										}
-									}
-								});
-							}
-							return false;
-						};
-						var config = JSON.parse(data.paramConfig);
-						data.config = config;
-						btnList.push({
-							classname : 'btn-primary',
-							text : '同意',
-							click : function() {
-								submitFuc('agree');
-							}
-						});
-						btnList.push({
-							classname : 'btn-danger',
-							text : '不同意',
-							click : function() {
-								submitFuc('disagree');
-							}
-						});
-						var html = xdoT.render('octopus.flowjobstep.verify.handlestep', data);
-						slideDialog = createSlideDialog({
-							title : data.name,
-							content : html,
-							width : '85%',
-							showclose : false,
-							blurclose : true,
-							customButtons : btnList,
-							shownFuc : function() {
-								editor = CKEDITOR.replace('txtContent', {
-									extraPlugins : '',
-									height : 500
-								});
-							}
-						});
-					});
-				}
-			} ];
-		} else {
-			return [];
-		}
+		return [];
 	};
 
 	var STYLE_MAP = {
 		'succeed' : {
-			fill : '#70BC82',
-			stroke : '#009688',
-			fillopacity : 1,
-			fontcolor : '#ffffff',
-			fontsize : 12,
-			iconcolor : '#ffffff',
-			strokewidth : 1,
-			strokedasharray : 0
-		},
-		'done' : {
 			fill : '#70BC82',
 			stroke : '#009688',
 			fillopacity : 1,
@@ -524,8 +223,8 @@
 			strokewidth : 1,
 			strokedasharray : "3 3"
 		},
-		'timing' : {
-			fill : '#ffffff',
+		'hang' : {
+			fill : '#eeeeee',
 			stroke : '#999999',
 			fillopacity : 1,
 			fontcolor : '#999999',
@@ -534,7 +233,7 @@
 			strokewidth : 1,
 			strokedasharray : 0
 		},
-		'aborted' : {
+		'back' : {
 			fill : '#F7B538',
 			stroke : '#F7B538',
 			fillopacity : 1,
@@ -555,16 +254,6 @@
 			strokedasharray : 0
 		},
 		'running' : {
-			fill : '#E5F9FC',
-			stroke : '#00C1DE',
-			fillopacity : 1,
-			fontcolor : '#00C1DE',
-			iconcolor : '#00C1DE',
-			fontsize : 12,
-			strokewidth : 1,
-			strokedasharray : 0
-		},
-		'doing' : {
 			fill : '#E5F9FC',
 			stroke : '#00C1DE',
 			fillopacity : 1,
@@ -658,53 +347,12 @@
 		var flowJobId = $('#hidJobId').val();
 		$.getJSON('${pageContext.request.contextPath}/module/process/processtask/' + flowJobId + '/stepstatus', function(data) {
 			var hasRunning = false;
-			/* if ($.trim($('#divFlowJobStep').html()) == '') {
-				var html = xdoT.render('octopus.flowjob.listflowjobstep', data);
-				$('#divFlowJobStep').empty().html(html);
-				for (var s = 0; s < data.stepList.length; s++) {
-					var stepData = data.stepList[s];
-					var btnhtml = xdoT.render('octopus.flowjob.listflowjobstepbtn', stepData);
-					$('#divFlowJobStep').find('.tdStepBtn' + stepData.id).empty().html(btnhtml);
-				}
-			} else {
-				for (var s = 0; s < data.stepList.length; s++) {
-					var stepData = data.stepList[s];
-					var tdBtn = $('#divFlowJobStep').find('.tdStepBtn' + stepData.id);
-					var tdStepTimeCost = $('#divFlowJobStep').find('.tdStepTimeCost' + stepData.id);
-					var tdStepStatus = $('#divFlowJobStep').find('.tdStepStatus' + stepData.id);
-					var tdStepProcess = $('#divFlowJobStep').find('.tdStepProcess' + stepData.id);
-					var tdStartTime = $('#divFlowJobStep').find('.tdStartTime' + stepData.id);
-					var tdEndTime = $('#divFlowJobStep').find('.tdEndTime' + stepData.id);
-					var tdChildFlow = $('#divFlowJobStep').find('.tdChildFlow' + stepData.id);
-					tdEndTime.text(stepData.endTime || '-');
-					tdStartTime.text(stepData.startTime || '-');
-					var timehtml = xdoT.render('octopus.flowjob.listflowjobsteptimecost', stepData);
-					tdStepTimeCost.empty().html(timehtml);
-					var processhtml = xdoT.render('octopus.flowjob.listflowjobstepprocess', stepData);
-					tdStepProcess.empty().html(processhtml);
-					if (tdChildFlow.data('status') != stepData.status) {
-						var childhtml = xdoT.render('octopus.flowjob.listflowjobchildflow', stepData);
-						tdChildFlow.empty().html(childhtml);
-						tdChildFlow.data('status', stepData.status);
-					}
-					if (tdBtn.data('status') != stepData.status) {
-						var btnhtml = xdoT.render('octopus.flowjob.listflowjobstepbtn', stepData);
-						tdBtn.empty().html(btnhtml);
-						tdBtn.data('status', stepData.status);
-					}
-					if (tdStepStatus.data('status') != stepData.status) {
-						var statushtml = xdoT.render('octopus.flowjob.listflowjobstepstatus', stepData);
-						tdStepStatus.empty().html(statushtml);
-						tdStepStatus.data('status', stepData.status);
-					}
 
-				}
-			} */
 			updateFlowJobChartStatus($('#divPaper').data('paper'), data);
 			if (data.stepList && data.stepList.length > 0) {
 				for (var i = 0; i < data.stepList.length; i++) {
 					var step = data.stepList[i];
-					if (step['status'] == 'running' || step['status'] == 'doing' || step['status'] == 'timing') {
+					if (step['status'] == 'running') {
 						hasRunning = true;
 					}
 				}
@@ -926,6 +574,7 @@ td.trlead {
 					<br> <br> <br>
 					<input type="button" id="startBtn" class="btn btn-primary" value="开始" />
 					<input type="button" id="acceptBtn" class="btn btn-primary" value="接管" />
+					<input type="button" id="backBtn" class="btn btn-danger" value="回退" />
 					<input type="button" id="completeBtn" class="btn btn-success" value="完成" />
 				</div>
 			</div>
