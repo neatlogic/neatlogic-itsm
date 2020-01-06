@@ -10,4 +10,6 @@ public interface PriorityMapper {
 
 	public List<PriorityVo> searchPriorityList(PriorityVo priorityVo);
 
+	public int checkPriorityIsExists(String uuid);
+
 }

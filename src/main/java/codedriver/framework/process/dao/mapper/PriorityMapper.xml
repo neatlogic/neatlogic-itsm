@@ -35,4 +35,8 @@
 	limit #{startNum}, #{pageSize}
 	</if>
 	</select>
+	
+	<select id="checkPriorityIsExists" resultType="int">
+	SELECT COUNT(`uuid`) FROM `priority` WHERE `uuid`=#{uuid}
+	</select>
 </mapper>
