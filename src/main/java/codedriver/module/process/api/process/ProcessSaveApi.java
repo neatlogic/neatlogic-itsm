@@ -44,10 +44,11 @@ public class ProcessSaveApi extends ApiComponentBase {
 			@Param(name = "name", type = ApiParamType.STRING, desc = "流程名称", isRequired = true, length = 30, xss = true),
 			@Param(name = "type", type = ApiParamType.INTEGER, desc = "流程类型", isRequired = true),
 			@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1", isRequired = true),
-			@Param(name = "config", type = ApiParamType.STRING, desc = "流程配置内容", isRequired = true),
-			@Param(name = "belong", type = ApiParamType.ENUM, desc = "流程归属", rule = "bug,itsm,request,task")})
+			@Param(name = "config", type = ApiParamType.STRING, desc = "流程配置内容", isRequired = true)
+		})
 	@Output({
-			@Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid") })
+			@Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid") 
+			})
 	@Description(desc = "流程保存接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessVo processVo = JSON.toJavaObject(jsonObj, ProcessVo.class);

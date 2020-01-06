@@ -44,7 +44,6 @@ public class ProcessSearchApi extends ApiComponentBase {
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
 		@Param(name = "type", type = ApiParamType.INTEGER, desc = "流程类型id"),
-		@Param(name = "belong", type = ApiParamType.ENUM, desc = "流程归属", rule = "bug,itsm,request,task"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
