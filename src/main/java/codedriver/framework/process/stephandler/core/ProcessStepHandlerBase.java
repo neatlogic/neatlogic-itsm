@@ -131,6 +131,9 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				if (!hasDoingStep) {
 					canFire = true;
 				}
+				/** 场景三：没有前置节点，证明是开始节点 **/
+			} else {
+				canFire = true;
 			}
 
 			if (canFire) {
@@ -598,8 +601,9 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 
 	@Override
 	public final int abort(ProcessTaskStepVo currentProcessTaskStepVo) {
-		/** 获得工单步骤行锁 **/
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepLockById(currentProcessTaskStepVo.getId());
+		// 锁定当前流程
+		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		/** 检查步骤是否 “已激活” **/
 		if (!processTaskStepVo.getIsActive().equals(1)) {
 			throw new ProcessTaskRuntimeException("流程步骤未激活");
@@ -685,8 +689,9 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 
 	@Override
 	public final int transfer(ProcessTaskStepVo currentProcessTaskStepVo) {
-		/** 获得工单步骤行锁 **/
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepLockById(currentProcessTaskStepVo.getId());
+		// 锁定当前流程
+		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		/** 检查步骤是否 “已激活” **/
 		if (!processTaskStepVo.getIsActive().equals(1)) {
 			throw new ProcessTaskRuntimeException("流程步骤未激活");
@@ -860,15 +865,17 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		}
 
 		/** 写入流程属性 **/
-		/*if (processVo.getAttributeList() != null && processVo.getAttributeList().size() > 0) {
-			// List<ProcessTaskAttributeVo> processTaskAttributeList = new
-			// ArrayList<>();
-			for (ProcessAttributeVo attributeVo : processVo.getAttributeList()) {
-				ProcessTaskAttributeVo processTaskAttributeVo = new ProcessTaskAttributeVo(attributeVo);
-				processTaskAttributeVo.setProcessTaskId(processTaskVo.getId());
-				processTaskMapper.insertProcessTaskAttribute(processTaskAttributeVo);
-			}
-		}*/
+		/*
+		 * if (processVo.getAttributeList() != null &&
+		 * processVo.getAttributeList().size() > 0) { //
+		 * List<ProcessTaskAttributeVo> processTaskAttributeList = new //
+		 * ArrayList<>(); for (ProcessAttributeVo attributeVo :
+		 * processVo.getAttributeList()) { ProcessTaskAttributeVo
+		 * processTaskAttributeVo = new ProcessTaskAttributeVo(attributeVo);
+		 * processTaskAttributeVo.setProcessTaskId(processTaskVo.getId());
+		 * processTaskMapper.insertProcessTaskAttribute(processTaskAttributeVo);
+		 * } }
+		 */
 
 		/** 写入表单信息 **/
 		if (StringUtils.isNotBlank(processVo.getFormUuid())) {
@@ -901,13 +908,17 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				stepIdMap.put(ptStepVo.getProcessStepUuid(), ptStepVo.getId());
 
 				/** 写入步骤自定义属性 **/
-				/*if (ptStepVo.getAttributeList() != null && ptStepVo.getAttributeList().size() > 0) {
-					for (ProcessTaskStepAttributeVo processTaskStepAttributeVo : ptStepVo.getAttributeList()) {
-						processTaskStepAttributeVo.setProcessTaskId(processTaskVo.getId());
-						processTaskStepAttributeVo.setProcessTaskStepId(ptStepVo.getId());
-						processTaskMapper.insertProcessTaskStepAttribute(processTaskStepAttributeVo);
-					}
-				}*/
+				/*
+				 * if (ptStepVo.getAttributeList() != null &&
+				 * ptStepVo.getAttributeList().size() > 0) { for
+				 * (ProcessTaskStepAttributeVo processTaskStepAttributeVo :
+				 * ptStepVo.getAttributeList()) {
+				 * processTaskStepAttributeVo.setProcessTaskId(processTaskVo.
+				 * getId());
+				 * processTaskStepAttributeVo.setProcessTaskStepId(ptStepVo.
+				 * getId()); processTaskMapper.insertProcessTaskStepAttribute(
+				 * processTaskStepAttributeVo); } }
+				 */
 
 				/** 写入步骤表单属性 **/
 				if (ptStepVo.getFormAttributeList() != null && ptStepVo.getFormAttributeList().size() > 0) {

@@ -2,6 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskMapper">
 
+	<select id="getProcessTaskBaseInfoById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskVo">
+		SELECT
+		`id`,
+		`title`,
+		`process_uuid` AS processUuid,
+		`config_hash` AS configHash,
+		`status`,
+		`config`,
+		DATE_FORMAT(`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
+		DATE_FORMAT(`end_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
+		`owner`,
+		`reporter`,
+		DATE_FORMAT(`expire_time`,'%Y-%m-%d %H:%i:%s') AS expireTime,
+		`error`
+		FROM
+		`processtask`
+		WHERE
+		id = #{value}
+	</select>
+
 	<select id="getProcessTaskStepConfigByHash" parameterType="java.lang.String" resultType="java.lang.String">
 		SELECT
 		`config`
@@ -194,37 +214,18 @@
 		WHERE
 		a.`converge_id` = #{value}
 	</select>
-	
+
 	<select id="getProcessTaskStepIdByConvergeId" parameterType="java.lang.Long" resultType="java.lang.Long">
 		SELECT
 		a.`processtask_step_id`
 		FROM
-		`processtask_converge` a 
+		`processtask_converge` a
 		WHERE
 		a.`converge_id` = #{value}
 	</select>
 
 	<select id="getProcessTaskLockById" parameterType="java.lang.Long" resultType="java.lang.Long">
 		SELECT id FROM processtask WHERE id = #{value} FOR UPDATE
-	</select>
-
-	<select id="getProcessTaskStepLockById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
-		SELECT
-		`id`,
-		`processtask_id` AS processTaskId,
-		`name`,
-		`process_step_uuid` AS processStepUuid,
-		`status`,
-		`result`,
-		`type`,
-		`handler`,
-		`is_active` AS isActive,
-		`start_time`,
-		`end_time`,
-		`error`
-		FROM
-		`processtask_step`
-		WHERE id = #{value} for update
 	</select>
 
 	<select id="getToProcessTaskStepByFromId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepVo">

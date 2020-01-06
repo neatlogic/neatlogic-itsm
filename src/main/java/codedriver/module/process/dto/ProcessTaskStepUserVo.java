@@ -28,17 +28,10 @@ public class ProcessTaskStepUserVo {
 		this.setUserId(_userId);
 	}
 
-	public ProcessTaskStepUserVo(Long _processTaskStepId, String _userId, String _status) {
-		this.setProcessTaskStepId(_processTaskStepId);
-		this.setUserId(_userId);
-		this.setStatus(_status);
-	}
-
-	public ProcessTaskStepUserVo(Long _processTaskId, Long _processTaskStepId, String _userId, String _status) {
+	public ProcessTaskStepUserVo(Long _processTaskId, Long _processTaskStepId, String _userId) {
 		this.setProcessTaskId(_processTaskId);
 		this.setProcessTaskStepId(_processTaskStepId);
 		this.setUserId(_userId);
-		this.setStatus(_status);
 	}
 
 	public ProcessTaskStepUserVo(ProcessStepUserVo processStepUserVo) {
