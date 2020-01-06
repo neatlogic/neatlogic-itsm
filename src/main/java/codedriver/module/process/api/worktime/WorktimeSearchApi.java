@@ -20,7 +20,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.WorktimeVo;
 
 @Service
-public class WorktimeSearch extends ApiComponentBase {
+public class WorktimeSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private WorktimeMapper worktimeMapper;
