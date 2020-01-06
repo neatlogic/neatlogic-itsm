@@ -1,5 +1,7 @@
 package codedriver.module.process.dto;
 
+import java.util.List;
+
 public class ProcessTaskStepRelVo {
 	private Long processTaskId;
 	private Long fromProcessTaskStepId;
@@ -10,6 +12,9 @@ public class ProcessTaskStepRelVo {
 	private String condition;
 	private String toProcessStepHandler;
 	private Integer isHit = 0;
+	private String scriptResult;
+	private String error;
+	private List<RelExpressionVo> relExpressionList;
 
 	public ProcessTaskStepRelVo() {
 
@@ -92,6 +97,30 @@ public class ProcessTaskStepRelVo {
 
 	public void setToProcessStepHandler(String toProcessStepHandler) {
 		this.toProcessStepHandler = toProcessStepHandler;
+	}
+
+	public String getScriptResult() {
+		return scriptResult;
+	}
+
+	public void setScriptResult(String scriptResult) {
+		this.scriptResult = scriptResult;
+	}
+
+	public List<RelExpressionVo> getRelExpressionList() {
+		return relExpressionList;
+	}
+
+	public void setRelExpressionList(List<RelExpressionVo> relExpressionList) {
+		this.relExpressionList = relExpressionList;
+	}
+
+	public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
 	}
 
 }

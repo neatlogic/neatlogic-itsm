@@ -96,7 +96,8 @@ public abstract class ProcessStepHandlerBase_bak implements IProcessStepHandler 
 		List<ProcessTaskStepVo> stepList = processTaskMapper.getProcessTaskStepByConvergeId(currentProcessTaskStepVo.getId());
 		List<ProcessTaskStepVo> fromStepList = processTaskMapper.getFromProcessTaskStepByToId(currentProcessTaskStepVo.getId());
 		List<ProcessTaskStepRelVo> fromStepRelList = processTaskMapper.getProcessTaskStepRelByToId(currentProcessTaskStepVo.getId());
-		String stepConfig = processTaskMapper.getProcessTaskStepConfigByStepId(currentProcessTaskStepVo.getId());
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 		JSONObject stepConfigObj = null;
 		if (StringUtils.isNotBlank(stepConfig)) {
 			try {

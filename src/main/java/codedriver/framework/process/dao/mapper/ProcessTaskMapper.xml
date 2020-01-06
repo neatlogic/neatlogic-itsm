@@ -23,12 +23,12 @@
 		WHERE processtask_id = #{value}
 	</select>
 
-	<select id="getProcessTaskStepConfigByStepId" parameterType="java.lang.Long" resultType="java.lang.String">
+	<select id="getProcessTaskStepConfigByHash" parameterType="java.lang.String" resultType="java.lang.String">
 		SELECT
 		`config`
 		FROM
 		`processtask_step_config`
-		WHERE `processtask_step_id` = #{value}
+		WHERE `hash` = #{value}
 	</select>
 
 	<select id="getProcessTaskFormByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskFormVo">
@@ -362,6 +362,7 @@
 		`type`,
 		`handler`,
 		`is_active` AS isActive,
+		`config_hash` AS configHash,
 		`start_time`,
 		`end_time`,
 		`error`
@@ -519,15 +520,15 @@
 		`processtask_step`
 		SET
 		`status` = #{status},
-		`result` = #{result, typeHandler=XssHandler},
+		`result` = #{result},
 		`is_active` = #{isActive},
 		<if test="isActive == 1">
 			`start_time` = NOW(3),
 		</if>
-		<if test="isActive == 0">
+		<if test="isActive == 2">
 			`end_time` = NOW(3),
 		</if>
-		`error` = #{error, typeHandler=XssHandler}
+		`error` = #{error}
 		WHERE `id` = #{id}
 	</update>
 
@@ -946,20 +947,14 @@
 		UPDATE
 		`processtask_step_user`
 		SET
-		`status` = #{status},
-		`action` = #{action}
+		`status` = #{status}
 		<choose>
-			<when test="status == 'running'">
+			<when test="status == 'doing'">
 				,`start_time` = NOW(3),
 				`end_time` = null
 			</when>
-			<when test="status == 'succeed' or status == 'failed' or status == 'aborted'">
+			<when test="status == 'done'">
 				,`end_time` = NOW(3)
-			</when>
-			<when test="status == 'pending'">
-				,`active_time` = NOW(3),
-				`start_time` = null,
-				`end_time` = null
 			</when>
 		</choose>
 		WHERE
@@ -1015,26 +1010,13 @@
 		</if>
 	</delete>
 
-	<delete id="deleteProcessTaskStepOtherWorker">
-		DELETE
-		FROM
-		`processtask_step_worker`
-		WHERE `processtask_step_id` = #{processTaskStepId}
-		<if test="userId != null and userId != ''">
-			AND `user_id` != #{userId}
-		</if>
-		<if test="action != null and action != ''">
-			AND `action` != #{action}
-		</if>
-	</delete>
-
 	<delete id="deleteProcessTaskStepUser">
 		DELETE
 		FROM
 		`processtask_step_user`
 		WHERE `processtask_step_id` = #{processTaskStepId}
 		<if test="userType != null and userType != ''">
-			AND `user_type` != #{userType}
+			AND `user_type` = #{userType}
 		</if>
 	</delete>
 </mapper>

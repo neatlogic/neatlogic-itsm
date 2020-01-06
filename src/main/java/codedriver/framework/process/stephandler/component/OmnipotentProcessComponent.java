@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -11,25 +13,37 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.attribute.core.AttributeHandlerFactory;
 import codedriver.framework.attribute.core.IAttributeHandler;
-import codedriver.framework.process.exception.ProcessTaskAbortException;
 import codedriver.framework.process.exception.ProcessTaskException;
 import codedriver.framework.process.exception.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
+import codedriver.framework.process.workerpolicy.handler.IWorkerPolicyHandler;
+import codedriver.framework.process.workerpolicy.handler.WorkerPolicyHandlerFactory;
 import codedriver.module.process.constvalue.ProcessStepHandler;
+import codedriver.module.process.constvalue.ProcessStepMode;
+import codedriver.module.process.constvalue.ProcessTaskStatus;
+import codedriver.module.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskAttributeValueVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
-import codedriver.module.process.dto.ProcessTaskStepRelVo;
+import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerPolicyVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 
 @Service
 public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
+	static Logger logger = LoggerFactory.getLogger(OmnipotentProcessComponent.class);
 
 	@Override
 	public String getType() {
 		return ProcessStepHandler.OMNIPOTENT.getType();
+	}
+	
+	@Override
+	public ProcessStepMode getMode() {
+		return ProcessStepMode.MT;
 	}
 
 	@Override
@@ -48,8 +62,73 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myActive(ProcessTaskStepVo processTaskStepVo) {
+	protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+		
 		return 0;
+	}
+
+	protected  int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException{
+		/** 分配处理人 **/
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+
+		JSONObject stepConfigObj = null;
+		if (StringUtils.isNotBlank(stepConfig)) {
+			try {
+				stepConfigObj = JSONObject.parseObject(stepConfig);
+				currentProcessTaskStepVo.setParamObj(stepConfigObj);
+			} catch (Exception ex) {
+				logger.error("转换步骤设置配置失败，" + ex.getMessage(), ex);
+			}
+		}
+		if (stepConfigObj != null) {
+			if (stepConfigObj.containsKey("assignPolicy")) {
+				/** 顺序分配处理人 **/
+				if ("serial".equals(stepConfigObj.getString("assignPolicy"))) {
+					List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
+					if (workerPolicyList != null && workerPolicyList.size() > 0) {
+						for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
+							IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
+							if (workerPolicyHandler != null) {
+								workerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
+								if (workerList.size() > 0) {
+									// 找到处理人，则退出
+									break;
+								}
+							}
+						}
+					}
+				} else if ("parallel".equals(stepConfigObj.getString("assignPolicy"))) {
+					List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
+					if (workerPolicyList != null && workerPolicyList.size() > 0) {
+						for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
+							IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
+							if (workerPolicyHandler != null) {
+								List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
+								// 去重取并集
+								tmpWorkerList.removeAll(workerList);
+								workerList.addAll(tmpWorkerList);
+							}
+						}
+					}
+				}
+			}
+
+			if (stepConfigObj.containsKey("isAutoStart") && stepConfigObj.getString("isAutoStart").equals("1") && workerList.size() == 1) {
+				/** 设置当前步骤状态为处理中 **/
+				if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
+					ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
+					userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+					userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+					userVo.setUserId(workerList.get(0).getUserId());
+					userVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
+					userList.add(userVo);
+					currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+				}
+			}
+		}
+
+		return 1;
 	}
 
 	@Override
@@ -73,30 +152,26 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
-		List<ProcessTaskStepVo> nextStepList = new ArrayList<>();
-		if (currentProcessTaskStepVo.getRelList() != null && currentProcessTaskStepVo.getRelList().size() > 0) {
-			for (ProcessTaskStepRelVo relVo : currentProcessTaskStepVo.getRelList()) {
-				if (relVo.getCondition() == null || relVo.getCondition().equals("") || relVo.getCondition().equals("always")) {
-					nextStepList.add(new ProcessTaskStepVo() {
-						{
-							this.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-							this.setId(relVo.getToProcessTaskStepId());
-							this.setHandler(relVo.getToProcessStepHandler());
-						}
-					});
-				} else if (relVo.getCondition().equalsIgnoreCase(currentProcessTaskStepVo.getStatus())) {
-					nextStepList.add(new ProcessTaskStepVo() {
-						{
-							this.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-							this.setId(relVo.getToProcessTaskStepId());
-							this.setHandler(relVo.getToProcessStepHandler());
-						}
-					});
+	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
+		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromId(currentProcessTaskStepVo.getId());
+		if (nextStepList.size() == 1) {
+			return nextStepList;
+		} else if (nextStepList.size() > 1) {
+			JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+			if (paramObj != null && paramObj.containsKey("nextStepId")) {
+				Long nextStepId = paramObj.getLong("nextStepId");
+				for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
+					if (processTaskStepVo.getId().equals(nextStepId)) {
+						returnNextStepList.add(processTaskStepVo);
+						break;
+					}
 				}
+			} else {
+				throw new ProcessTaskException("找到多个后续节点");
 			}
 		}
-		return nextStepList;
+		return returnNextStepList;
 	}
 
 	@Override
@@ -240,7 +315,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException, ProcessTaskAbortException {
+	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -292,5 +367,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	
 
 }
