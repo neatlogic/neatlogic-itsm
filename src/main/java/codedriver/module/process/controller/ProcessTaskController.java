@@ -175,6 +175,21 @@ public class ProcessTaskController {
 		}
 
 	}
+	
+	@RequestMapping(value = "/processtaskstep/{id}/accept")
+	public void accept(@PathVariable("id") Long processTaskStepId, @RequestBody JSONObject paramObj, HttpServletResponse response, HttpServletRequest request) {
+		ProcessTaskStepVo processTaskStepVo = processTaskService.getProcessTaskStepBaseInfoById(processTaskStepId);
+		if (processTaskStepVo != null) {
+			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+			if (handler != null) {
+				processTaskStepVo.setParamObj(paramObj);
+				handler.accept(processTaskStepVo);
+			}
+		} else {
+			throw new RuntimeException("流程步骤不存在");
+		}
+
+	}
 
 	@RequestMapping(value = "/flowjobconfig/{flowJobId}")
 	public void getFlowJobConfigById(@PathVariable("flowJobId") Long processTaskId, HttpServletResponse response) throws IOException {

@@ -7,12 +7,21 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import codedriver.framework.process.exception.ProcessTaskException;
+import codedriver.module.process.constvalue.ProcessStepMode;
 import codedriver.module.process.dto.ProcessTaskStepVo;
-import codedriver.module.process.dto.ProcessTaskVo;
 
 //需要把事务隔离级别调低，避免并发insert时因为gap lock导致deadlock
 public interface IProcessStepHandler {
 	public String getType();
+	
+	/**
+	* @Author: chenqiwei
+	* @Time:Jan 5, 2020
+	* @Description: 自动模式还是手动模式，自动模式引擎会自动触发handle动作 
+	* @param @return 
+	* @return String
+	 */
+	public ProcessStepMode getMode();
 
 	public String getIcon();
 

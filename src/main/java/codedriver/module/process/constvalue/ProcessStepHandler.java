@@ -1,7 +1,12 @@
 package codedriver.module.process.constvalue;
 
 public enum ProcessStepHandler {
-	START("start", "开始"), OMNIPOTENT("omnipotent", "通用节点"), END("end", "结束");
+	START("start", "开始"),
+	OMNIPOTENT("omnipotent", "通用节点"),
+	END("end", "结束"),
+	CONDITION("condition", "条件"),
+	DISTRIBUTARY("distributary", "分流");
+
 	private String type;
 	private String name;
 

@@ -13,13 +13,13 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.attribute.core.AttributeHandlerFactory;
 import codedriver.framework.attribute.core.IAttributeHandler;
-import codedriver.framework.process.exception.ProcessTaskAbortException;
 import codedriver.framework.process.exception.ProcessTaskException;
 import codedriver.framework.process.exception.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.process.workerpolicy.handler.IWorkerPolicyHandler;
 import codedriver.framework.process.workerpolicy.handler.WorkerPolicyHandlerFactory;
 import codedriver.module.process.constvalue.ProcessStepHandler;
+import codedriver.module.process.constvalue.ProcessStepMode;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
@@ -39,6 +39,11 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public String getType() {
 		return ProcessStepHandler.OMNIPOTENT.getType();
+	}
+	
+	@Override
+	public ProcessStepMode getMode() {
+		return ProcessStepMode.MT;
 	}
 
 	@Override
@@ -170,7 +175,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myInit(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		/** 写入当前步骤的自定义属性值 **/
 		ProcessTaskStepAttributeVo attributeVo = new ProcessTaskStepAttributeVo();
@@ -310,7 +315,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException, ProcessTaskAbortException {
+	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -362,5 +367,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	
 
 }
