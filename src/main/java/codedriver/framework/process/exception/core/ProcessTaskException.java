@@ -1,6 +1,8 @@
-package codedriver.framework.process.exception;
+package codedriver.framework.process.exception.core;
 
-public class ProcessTaskException extends Exception {
+import codedriver.framework.exception.core.ApiException;
+
+public class ProcessTaskException extends ApiException {
 
 	private static final long serialVersionUID = 4314481891500443152L;
 

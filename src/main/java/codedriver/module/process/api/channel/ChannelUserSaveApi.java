@@ -9,7 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.exception.ChannelNotFoundException;
+import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;

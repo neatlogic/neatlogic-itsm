@@ -85,6 +85,37 @@
 				}
 			});
 		});
+		$('#abortBtn').on('click', function() {
+			var submitData = {};
+			var processTaskId = $("#hidJobId").val();
+			submitData['processTaskId'] = processTaskId;
+			$.ajax({
+				url : "${pageContext.request.contextPath}/module/process/processtask/" + processTaskId + "/abort",
+				dataType : 'json',
+				type : 'POST',
+				data : JSON.stringify(submitData, null, 2),
+				contentType : "application/json",
+				success : function(data) {
+					showPopMsg.success('操作成功 ');
+				}
+			});
+		});
+		$('#recoverBtn').on('click', function() {
+			var submitData = {};
+			var processTaskId = $("#hidJobId").val();
+			submitData['processTaskId'] = processTaskId;
+			$.ajax({
+				url : "${pageContext.request.contextPath}/module/process/processtask/" + processTaskId + "/recover",
+				dataType : 'json',
+				type : 'POST',
+				data : JSON.stringify(submitData, null, 2),
+				contentType : "application/json",
+				success : function(data) {
+					showPopMsg.success('操作成功 ');
+				}
+			});
+		});
+		
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
 			if (e.target.toString().indexOf('tabFlow') > -1) {
 				resetFlowDivHeight();
@@ -575,6 +606,8 @@ td.trlead {
 					<input type="button" id="startBtn" class="btn btn-primary" value="开始" />
 					<input type="button" id="acceptBtn" class="btn btn-primary" value="接管" />
 					<input type="button" id="backBtn" class="btn btn-danger" value="回退" />
+					<input type="button" id="abortBtn" class="btn btn-danger" value="终止" />
+					<input type="button" id="recoverBtn" class="btn btn-danger" value="恢复" />
 					<input type="button" id="completeBtn" class="btn btn-success" value="完成" />
 				</div>
 			</div>

@@ -1,6 +1,8 @@
-package codedriver.framework.process.exception;
+package codedriver.framework.process.exception.core;
 
-public class ProcessTaskRuntimeException extends RuntimeException {
+import codedriver.framework.exception.core.ApiRuntimeException;
+
+public class ProcessTaskRuntimeException extends ApiRuntimeException {
 	private static final long serialVersionUID = 3270869999551703568L;
 
 	public ProcessTaskRuntimeException() {

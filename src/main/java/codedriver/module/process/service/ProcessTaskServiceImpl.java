@@ -9,6 +9,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.module.process.dto.ProcessTaskFormVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskVo;
 
 @Service
 public class ProcessTaskServiceImpl implements ProcessTaskService {
@@ -39,5 +40,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	@Override
 	public ProcessTaskFormVo getProcessTaskFormByProcessTaskId(Long processTaskId) {
 		return processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+	}
+
+	@Override
+	public ProcessTaskVo getProcessTaskBaseInfoById(Long processTaskId) {
+		return processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
 	}
 }
