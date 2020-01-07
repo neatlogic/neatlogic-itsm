@@ -42,39 +42,38 @@
 		ON a.`attribute_uuid` = c.`uuid` AND c.`is_active` = 1
 	</select>
 
-	<select id="searchForm" parameterType="codedriver.module.process.dto.FormVo" resultType="codedriver.module.process.dto.FormVo">
+	<select id="searchFormList" parameterType="codedriver.module.process.dto.FormVo" resultType="codedriver.module.process.dto.FormVo">
 		SELECT
-		`uuid`,
-		`name`,
-		`is_active`,
-		`description`
-		FROM
-		`form`
-		WHERE
-		1=1
+		f.`uuid`,
+		f.`name`,
+		f.`is_active`,
+		fv.`version`
+		FROM `form` f
+		JOIN `form_version` fv ON fv.`form_uuid`=f.`uuid` AND fv.`is_active` = 1
+		WHERE 1=1
 		<if test="isActive != null">
-			AND is_active = #{isActive}
+			AND f.`is_active` = #{isActive}
 		</if>
-		<if test="name != null and name != ''">
-			AND (name LIKE CONCAT('%', #{name},'%') OR uuid = #{name})
+		<if test="keyword != null and keyword != ''">
+			AND f.`name` LIKE CONCAT('%', #{keyword},'%') 
 		</if>
-		<if test="needPage == true">
+		<if test="needPage">
 			LIMIT #{startNum}, #{pageSize}
 		</if>
 	</select>
 
 	<select id="searchFormCount" parameterType="codedriver.module.process.dto.FormVo" resultType="int">
 		SELECT
-		COUNT(1)
+		COUNT(f.`uuid`)
 		FROM
-		`form`
-		WHERE
-		1=1
+		`form` f
+		JOIN `form_version` fv ON fv.`form_uuid`=f.`uuid` AND fv.`is_active` = 1
+		WHERE 1=1
 		<if test="isActive != null">
-			AND is_active = #{isActive}
+			AND f.`is_active` = #{isActive}
 		</if>
-		<if test="name != null and name != ''">
-			AND (name LIKE CONCAT('%', #{name},'%') OR uuid = #{name})
+		<if test="keyword != null and keyword != ''">
+			AND f.`name` LIKE CONCAT('%', #{keyword},'%') 
 		</if>
 	</select>
 
@@ -127,6 +126,14 @@
 		form_uuid = #{value}
 	</select>
 
+	<select id="getFormReferenceList" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessVo">
+	SELECT 
+	p.`uuid`,
+	p.`name` 
+	FROM `process` p 
+	JOIN `process_form` pf ON pf.`process_uuid` = p.`uuid` AND pf.`form_uuid` = #{fromUuid}
+	</select>
+	
 	<update id="updateFormVersion" parameterType="codedriver.module.process.dto.FormVersionVo">
 		UPDATE
 		`form_version`
@@ -144,6 +151,18 @@
 		`is_active` = 0
 		WHERE
 		form_uuid = #{value}
+	</update>
+	
+	<update id="updateForm" parameterType="codedriver.module.process.dto.FormVo">
+	UPDATE `form` SET 
+	<if test="name != null and name != ''">
+	`name`=#{name}, 
+	</if>
+	<if test="isActive != null">
+	is_active = #{isActive}, 
+	</if>
+	`uuid` = #{uuid} 
+	WHERE `uuid` = #{uuid};
 	</update>
 
 	<insert id="replaceForm" parameterType="codedriver.module.process.dto.FormVo">
@@ -205,5 +224,17 @@
 		FROM
 		`form_attribute`
 		WHERE `form_uuid` = #{value}
+	</delete>
+
+	<delete id="deleteFormByUuid" parameterType="java.lang.String">
+	DELETE FROM `form` WHERE `uuid` = #{uuid}
+	</delete>
+
+	<delete id="deleteFormVersionByFormUuid" parameterType="java.lang.String">
+	DELETE FROM `form_version` WHERE `form_uuid` = #{formUuid}
+	</delete>
+
+	<delete id="deleteProcessFormByFormUuid" parameterType="java.lang.String">
+	DELETE FROM `process_form` WHERE `form_uuid` = #{formUuid}
 	</delete>
 </mapper>

@@ -8,6 +8,7 @@ import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.module.process.dto.FormAttributeVo;
 import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.FormVo;
+import codedriver.module.process.dto.ProcessVo;
 
 @Component("processFormMapper")
 public interface FormMapper {
@@ -15,7 +16,7 @@ public interface FormMapper {
 
 	public List<AttributeVo> getAttributeByFormUuid(String formUuid);
 
-	public List<FormVo> searchForm(FormVo formVo);
+	public List<FormVo> searchFormList(FormVo formVo);
 
 	public int searchFormCount(FormVo formVo);
 
@@ -25,6 +26,8 @@ public interface FormMapper {
 
 	public List<FormVersionVo> getFormVersionByFormUuid(String formUuid);
 
+	public List<ProcessVo> getFormReferenceList(String formUuid);
+
 	public Integer getMaxVersionByFormUuid(String formUuid);
 
 	public int replaceForm(FormVo formVo);
@@ -33,9 +36,17 @@ public interface FormMapper {
 
 	public int updateFormVersion(FormVersionVo formVersionVo);
 
+	public void updateForm(FormVo formVo);
+
 	public int insertFormVersion(FormVersionVo formVersionVo);
 
 	public int insertFormAttribute(FormAttributeVo formAttributeVo);
 
 	public int deleteFormAttributeByFormUuid(String formUuid);
+
+	public int deleteFormByUuid(String uuid);
+
+	public int deleteFormVersionByFormUuid(String formUuid);
+
+	public int deleteProcessFormByFormUuid(String formUuid);
 }
