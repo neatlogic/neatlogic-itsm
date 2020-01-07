@@ -13,6 +13,7 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.exception.CatalogNotFoundException;
 import codedriver.framework.process.exception.ChannelNameRepeatException;
@@ -37,6 +38,9 @@ public class ChannelSaveApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessMapper processMapper;
+	
+	@Autowired
+	private PriorityMapper priorityMapper;
 	
 	@Override
 	public String getToken() {
@@ -81,7 +85,7 @@ public class ChannelSaveApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
 		}
-		if(channelMapper.checkCatalogIsDuplicateName(channelVo) > 0) {
+		if(channelMapper.checkChannelNameIsRepeat(channelVo) > 0) {
 			throw new ChannelNameRepeatException(channelVo.getName());
 		}
 		int sort;
@@ -106,7 +110,9 @@ public class ChannelSaveApi extends ApiComponentBase {
 		String defaultPriorityUuid = channelVo.getDefaultPriorityUuid();
 		List<String> priorityUuidList = channelVo.getPriorityUuidList();
 		for(String priorityUuid : priorityUuidList) {
-			//TODO linbq判断优先级是否存在
+			if(priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
+				throw new ChannelIllegalParameterException("优先级：'" + priorityUuid + "'不存在");
+			}
 			ChannelPriorityVo channelPriority = new ChannelPriorityVo();
 			channelPriority.setChannelUuid(uuid);
 			channelPriority.setPriorityUuid(priorityUuid);

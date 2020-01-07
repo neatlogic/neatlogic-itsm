@@ -1,14 +1,10 @@
 package codedriver.framework.process.timeoutpolicy.handler;
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.module.process.constvalue.TimeoutPolicy;
-import codedriver.module.process.dto.ProcessTaskAttributeValueVo;
 import codedriver.module.process.dto.ProcessTaskStepTimeoutPolicyVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 
@@ -29,7 +25,7 @@ public class SimpleTimeoutPolicyHandler implements ITimeoutPolicyHandler {
 		if (timeoutPolicyVo.getConfigObj() != null) {
 			String uuid = timeoutPolicyVo.getConfigObj().getString("uuid");
 			String targetValue = timeoutPolicyVo.getConfigObj().getString("targetvalue");
-			if (StringUtils.isNotBlank(uuid)) {
+			/*if (StringUtils.isNotBlank(uuid)) {
 				List<ProcessTaskAttributeValueVo> valueList = processTaskMapper.getProcessTaskAttributeValue(currentProcessTaskStepVo.getProcessTaskId(), uuid);
 				if (valueList != null && valueList.size() > 0) {
 					for (ProcessTaskAttributeValueVo valueVo : valueList) {
@@ -39,7 +35,7 @@ public class SimpleTimeoutPolicyHandler implements ITimeoutPolicyHandler {
 						}
 					}
 				}
-			}
+			}*/
 		}
 		return false;
 	}

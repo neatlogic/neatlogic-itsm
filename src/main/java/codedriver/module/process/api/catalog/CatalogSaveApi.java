@@ -11,9 +11,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.exception.CatalogNameRepeatException;
 import codedriver.framework.process.exception.CatalogNotFoundException;
+import codedriver.framework.process.exception.ChannelIllegalParameterException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -27,6 +29,9 @@ public class CatalogSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
+	
+	@Autowired
+	private RoleMapper roleMapper;
 	
 	@Override
 	public String getToken() {
@@ -66,7 +71,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
 		}
-		if(catalogMapper.checkCatalogIsDuplicateName(catalogVo) > 0) {
+		if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
 			throw new CatalogNameRepeatException(catalogVo.getName());
 		}
 		int sort;
@@ -84,7 +89,9 @@ public class CatalogSaveApi extends ApiComponentBase {
 		List<String> roleNameList = catalogVo.getRoleNameList();
 		if(roleNameList != null && roleNameList.size() > 0) {
 			for(String roleName : roleNameList) {
-				//TODO linbq判断角色是否存在
+				if(roleMapper.getRoleByRoleName(roleName) == null) {
+					throw new ChannelIllegalParameterException("角色：'" + roleName + "'不存在");
+				}
 				catalogMapper.insertCatalogRole(uuid, roleName);
 			}
 		}

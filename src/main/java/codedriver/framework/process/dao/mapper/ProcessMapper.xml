@@ -42,39 +42,13 @@
 		<result column="type" property="type" />
 		<result column="name" property="name" />
 		<result column="handler" property="handler" />
-		<result column="editPage" property="editPage" />
-		<result column="viewPage" property="viewPage" />
 		<result column="stepConfig" property="config" />
-		<collection property="attributeList" ofType="codedriver.module.process.dto.ProcessStepAttributeVo">
-			<id column="attributeUuid" property="attributeUuid" />
-			<result column="attributeHandler" property="handler" />
-			<result column="dataCubeTextField" property="dataCubeTextField" />
-			<result column="dataCubeUuid" property="dataCubeUuid" />
-			<result column="dataCubeValueField" property="dataCubeValueField" />
-			<result column="attributeDescription" property="description" />
-			<result column="attributeLabel" property="label" />
-			<result column="attributeType" property="type" />
-			<result column="attributeUnit" property="unit" />
-			<result column="attributeGroup" property="group" />
-			<result column="attributeHelp" property="help" />
-			<result column="attributeName" property="name" />
-			<result column="attributeSort" property="sort" />
-			<result column="isDisplay" property="isDisplay" />
-			<result column="isEditable" property="isEditable" />
-			<result column="isRequired" property="isRequired" />
-			<result column="attributeConfig" property="config" />
-		</collection>
 		<collection property="formAttributeList" ofType="codedriver.module.process.dto.ProcessStepFormAttributeVo">
 			<id column="formAttributeUuid" property="attributeUuid" />
 			<result column="formUuid" property="formUuid" />
 			<result column="formAttributeHandler" property="handler" />
-			<result column="formDataCubeTextField" property="dataCubeTextField" />
-			<result column="formDataCubeUuid" property="dataCubeUuid" />
-			<result column="formDataCubeValueField" property="dataCubeValueField" />
-			<result column="formAttributeDescription" property="description" />
 			<result column="formAttributeLabel" property="label" />
 			<result column="formAttributeType" property="type" />
-			<result column="formAttributeUnit" property="unit" />
 			<result column="formAttributeIsEditable" property="isEditable" />
 			<result column="formAttributeData" property="data" />
 			<result column="formAttributeConfig" property="config" />
@@ -103,40 +77,14 @@
 		a.`name`,
 		a.`type`,
 		a.`handler`,
-		a.`edit_page` AS editPage,
-		a.`view_page` AS viewPage,
 		a.`config` AS stepConfig,
-		c.`attribute_uuid` AS attributeUuid,
-		c.`config` AS attributeConfig,
-		c.`is_editable` AS isEditable,
-		c.`config` AS attributeConfig,
-		f.`handler` AS attributeHandler,
-		f.`datacube_textfield` AS dataCubeTextField,
-		f.`datacube_uuid` AS dataCubeUuid,
-		f.`datacube_valuefield` AS dataCubeValueField,
-		f.`description` AS attributeDescription,
-		f.`type` AS attributeType,
-		f.`unit` AS attributeUnit,
-		d.`form_uuid` AS formUuid,
-		d.`attribute_uuid` AS formAttributeUuid,
-		d.`is_editable` AS formAttributeIsEditable,
-		d.`config` AS formAttributeConfig,
-		d.`data` AS formAttributeData,
-		e.`label` AS formAttributeLabel,
-		e.`handler` AS formAttributeHandler,
-		e.`datacube_textfield` AS formDataCubeTextField,
-		e.`datacube_uuid` AS formDataCubeUuid,
-		e.`datacube_valuefield` AS
-		formDataCubeValueField,
-		e.`description` AS formAttributeDescription,
-		e.`type` AS formAttributeType,
-		e.`unit` AS formAttributeUnit,
-		g.`label` AS attributeLabel,
-		g.`group` AS attributeGroup,
-		g.`help` AS attributeHelp,
-		g.`name` AS attributeName,
-		g.`sort` AS attributeSort,
-		g.`width` AS attributeWidth,
+		b.`form_uuid` AS formUuid,
+		b.`attribute_uuid` AS formAttributeUuid,
+		b.`config` AS formAttributeConfig,
+		b.`data` AS formAttributeData,
+		c.`handler` AS formAttributeHandler,
+		c.`type` AS formAttributeType,
+		c.`label` AS attributeLabel,
 		h.`policy` AS workerPolicy,
 		h.`sort` AS workerPolicySort,
 		h.`config` AS workerPolicyConfig,
@@ -150,57 +98,11 @@
 		i.`process_step_uuid` AS timeoutPolicyProcessStepUuid
 		FROM
 		`process_step` a
-		LEFT JOIN `process_step_attribute` c ON a.`uuid` = c.`process_step_uuid`
-		LEFT JOIN `process_step_formattribute` d ON a.`uuid` = d.`process_step_uuid`
-		LEFT JOIN `attribute` e ON d.`attribute_uuid` = e.`uuid` AND e.is_active = 1
-		LEFT JOIN `attribute` f ON
-		c.`attribute_uuid` = f.`uuid`
-		AND f.is_active = 1
-		LEFT JOIN `process_attribute` g ON a.`process_uuid` = g.`process_uuid` AND f.`uuid` =
-		g.`attribute_uuid`
+		LEFT JOIN `process_step_formattribute` b ON a.`uuid` = b.`process_step_uuid`
+		LEFT JOIN `form_attribute` c ON b.`attribute_uuid` = c.`uuid`
 		LEFT JOIN `process_step_worker_policy` h ON a.`uuid` = h.`process_step_uuid`
 		LEFT JOIN `process_step_timeout_policy` i ON a.`uuid` = i.`process_step_uuid`
 		WHERE a.`process_uuid` = #{value}
-	</select>
-
-	<select id="getProcessStepAttributeByStepUuid" parameterType="codedriver.module.process.dto.ProcessStepAttributeVo" resultType="codedriver.module.process.dto.ProcessStepAttributeVo">
-		SELECT
-		a.`process_uuid` AS processUuid,
-		a.`process_step_uuid` AS processStepUuid,
-		a.`attribute_uuid` AS attributeUuid,
-		a.`is_display` AS isDisplay,
-		a.`is_editable` AS isEditable,
-		a.`is_required` AS isRequired,
-		a.`config`,
-		a.`data`,
-		b.`group`,
-		b.`help`,
-		b.`name`,
-		b.`sort`,
-		b.`width`,
-		c.`handler`,
-		c.`type`,
-		c.`unit`,
-		b.`label`,
-		c.`datacube_textfield` AS dataCubeTextField,
-		c.`datacube_uuid` AS dataCubeUuid,
-		c.`datacube_valuefield` AS dataCubeValueField,
-		c.`is_active` AS isActive,
-		c.`edit_template` AS editTemplate,
-		c.`view_template` AS viewTemplate,
-		c.`config_template` AS configTemplate
-		FROM
-		`process_step_attribute` a JOIN `process_attribute` b
-		ON a.`attribute_uuid` = b.`attribute_uuid` JOIN `attribute` c ON a.`attribute_uuid` = c.`uuid`
-		WHERE
-		c.`is_active` = 1
-		AND
-		a.`process_step_uuid` = #{processStepUuid}
-		<if test="attributeUuid != null and attributeUuid != ''">
-			AND
-			a.attribute_uuid = #{attributeUuid}
-		</if>
-		ORDER BY b.sort
 	</select>
 
 	<select id="getProcessStepFormAttributeByStepUuid" parameterType="codedriver.module.process.dto.ProcessStepFormAttributeVo" resultType="codedriver.module.process.dto.ProcessStepFormAttributeVo">
@@ -213,21 +115,10 @@
 		a.`config`,
 		a.`data`,
 		c.`handler`,
-		c.`type`,
-		c.`unit`,
-		c.`description`,
-		c.`datacube_textfield` AS dataCubeTextField,
-		c.`datacube_uuid` AS dataCubeUuid,
-		c.`datacube_valuefield` AS dataCubeValueField,
-		c.`is_active` AS isActive,
-		c.`edit_template` AS editTemplate,
-		c.`view_template` AS viewTemplate,
-		c.`config_template` AS configTemplate
+		c.`type`
 		FROM
-		`process_step_formattribute` a JOIN `attribute` c ON a.`attribute_uuid` = c.`uuid`
+		`process_step_formattribute` a JOIN `form_attribute` c ON a.`attribute_uuid` = c.`uuid`
 		WHERE
-		c.`is_active` = 1
-		AND
 		a.`process_step_uuid` = #{processStepUuid}
 		<if test="attributeUuid != null and attributeUuid != ''">
 			AND
@@ -243,22 +134,6 @@
 		<result column="formUuid" property="formUuid" />
 		<result column="config" property="config" />
 		<result column="belong" property="belong"/>
-		<collection property="attributeList" ofType="codedriver.module.process.dto.ProcessAttributeVo">
-			<id column="attributeUuid" property="attributeUuid" />
-			<result column="attributeHelp" property="help" />
-			<result column="attributeName" property="name" />
-			<result column="attributeLabel" property="label" />
-			<result column="attributeSort" property="sort" />
-			<result column="attributeWidth" property="width" />
-			<result column="attributeConfig" property="config" />
-			<result column="dataCubeTextField" property="dataCubeTextField" />
-			<result column="dataCubeUuid" property="dataCubeUuid" />
-			<result column="dataCubeValueField" property="dataCubeValueField" />
-			<result column="attributeDescription" property="description" />
-			<result column="attributeHandler" property="handler" />
-			<result column="attributeType" property="type" />
-			<result column="attributeUnit" property="unit" />
-		</collection>
 	</resultMap>
 
 	<select id="getProcessByUuid" parameterType="java.lang.String" resultMap="processDetailMap">
@@ -269,26 +144,9 @@
 		a.`is_active` AS isActive,
 		a.`config`,
 		a.`belong`,
-		b.`name` AS attributeName,
-		b.`attribute_uuid` AS attributeUuid,
-		b.`group` AS attributeGroup,
-		b.`help` AS attributeHelp,
-		b.`label` AS attributeLabel,
-		b.`sort` AS attributeSort,
-		b.`width` AS attributeWidth,
-		c.`config` AS attributeConfig,
-		c.`datacube_textfield` AS dataCubeTextField,
-		c.`datacube_uuid` AS dataCubeUuid,
-		c.`datacube_valuefield` AS dataCubeValueField,
-		c.`description` AS attributeDescription,
-		c.`handler` AS attributeHandler,
-		c.`type` AS attributeType,
-		c.`unit` AS attributeUnit,
 		d.`form_uuid` AS formUuid
 		FROM
 		`process` a
-		LEFT JOIN `process_attribute` b ON a.`uuid` = b.`process_uuid`
-		LEFT JOIN `attribute` c ON b.`attribute_uuid` = c.`uuid` AND c.`is_active` = 1
 		LEFT JOIN `process_form` d ON a.`uuid` = d.`process_uuid`
 		WHERE
 		a.uuid = #{value}
@@ -334,8 +192,51 @@
 		SELECT `id`, `name` FROM `process_type`
 	</select>
 	
-	<select id="checkProcessIsDuplicateName" resultType="int">
+	<select id="checkProcessNameIsRepeat" resultType="int">
 	SELECT count(1) FROM `process` WHERE name=#{name} AND uuid != #{uuid}
+	</select>
+
+	<select id="searchProcessCount" resultType="int">
+	SELECT 
+	COUNT(`uuid`) 
+	FROM `process` 
+	WHERE 1=1
+	<if test="keyword != null">
+	AND `name` LIKE CONCAT('%', #{keyword}, '%')
+	</if>
+	<if test="type != null">
+	AND `type` = #{type}
+	</if>
+	<if test="belong != null">
+	AND `belong` = #{belong}
+	</if>
+	<if test="isActive != null">
+	AND `is_Active` = #{isActive}
+	</if>
+	</select>
+	
+	<select id="searchProcessList" resultType="codedriver.module.process.dto.ProcessVo">
+	SELECT 
+	`uuid`,
+	`name`,
+	`type`,
+	`is_active` AS isActive,
+	`config`,
+	`belong`
+	FROM `process` 
+	WHERE 1=1
+	<if test="keyword != null">
+	AND `name` LIKE CONCAT('%', #{keyword}, '%')
+	</if>
+	<if test="type != null">
+	AND `type` = #{type}
+	</if>
+	<if test="isActive != null">
+	AND `is_Active` = #{isActive}
+	</if>
+	<if test="needPage">
+	limit #{startNum}, #{pageSize}
+	</if>
 	</select>
 	
 	<insert id="insertProcessStepTimeoutPolicy" parameterType="codedriver.module.process.dto.ProcessStepTimeoutPolicyVo">
@@ -375,30 +276,6 @@
 		#{isActive},
 		#{config},
 		#{belong}
-		)
-	</insert>
-
-	<insert id="insertProcessAttribute" parameterType="codedriver.module.process.dto.ProcessAttributeVo">
-		INSERT INTO `process_attribute` (
-		`attribute_uuid`,
-		`process_uuid`,
-		`name`,
-		`label`,
-		`sort`,
-		`width`,
-		`help`,
-		`group`
-		)
-		VALUES
-		(
-		#{attributeUuid},
-		#{processUuid},
-		#{name},
-		#{label},
-		#{sort},
-		#{width},
-		#{help},
-		#{group}
 		)
 	</insert>
 
@@ -443,28 +320,6 @@
 		#{policy},
 		#{sort},
 		#{config}
-		)
-	</insert>
-
-	<insert id="insertProcessStepAttribute" parameterType="codedriver.module.process.dto.ProcessStepAttributeVo">
-		INSERT INTO `process_step_attribute` (
-		`process_uuid`,
-		`process_step_uuid`,
-		`attribute_uuid`,
-		`is_editable`,
-		`is_required`,
-		`config`,
-		`data`
-		)
-		VALUES
-		(
-		#{processUuid},
-		#{processStepUuid},
-		#{attributeUuid},
-		#{isEditable},
-		#{isRequired},
-		#{config},
-		#{data}
 		)
 	</insert>
 
@@ -545,16 +400,6 @@
 		VALUES
 		(#{processUuid}, #{formUuid})
 	</insert>
-	
-	
-
-	<delete id="deleteProcessAttributeByProcessUuid" parameterType="java.lang.String">
-		DELETE
-		FROM
-		`process_attribute`
-		WHERE
-		`process_uuid` = #{value}
-	</delete>
 
 	<delete id="deleteProcessStepByProcessUuid" parameterType="java.lang.String">
 		DELETE
@@ -589,13 +434,6 @@
 		FROM
 		`process_step_worker_policy`
 		WHERE process_uuid = #{value}
-	</delete>
-
-	<delete id="deleteProcessStepAttributeByProcessUuid" parameterType="java.lang.String">
-		DELETE
-		FROM
-		`process_step_attribute`
-		WHERE `process_uuid` = #{value}
 	</delete>
 
 	<delete id="deleteProcessStepTimeoutPolicyByProcessUuid" parameterType="java.lang.String">

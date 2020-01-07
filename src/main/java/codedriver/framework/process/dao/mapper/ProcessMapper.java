@@ -3,11 +3,7 @@ package codedriver.framework.process.dao.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
-
-import codedriver.module.process.dto.ProcessAttributeVo;
-import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessFormVo;
-import codedriver.module.process.dto.ProcessStepAttributeVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
 import codedriver.module.process.dto.ProcessStepTeamVo;
@@ -27,8 +23,6 @@ public interface ProcessMapper {
 
 	public List<ProcessStepVo> getProcessStepDetailByProcessUuid(String processUuid);
 
-	public List<ProcessStepAttributeVo> getProcessStepAttributeByStepUuid(ProcessStepAttributeVo processStepAttributeVo);
-
 	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo);
 
 	public ProcessVo getProcessByUuid(String processUuid);
@@ -39,13 +33,15 @@ public interface ProcessMapper {
 
 	public List<ProcessTypeVo> getAllProcessType();
 
-	public int checkProcessIsDuplicateName(ProcessVo processVo);
+	public int checkProcessNameIsRepeat(ProcessVo processVo);
+
+	public int searchProcessCount(ProcessVo processVo);
+
+	public List<ProcessVo> searchProcessList(ProcessVo processVo);
 
 	public int replaceProcess(ProcessVo processVo);
 
 	public int insertProcessStep(ProcessStepVo processStepVo);
-
-	public int insertProcessAttribute(ProcessAttributeVo processAttributeVo);
 
 	public int insertProcessStepFormAttribute(ProcessStepFormAttributeVo processStepFormAttributeVo);
 
@@ -59,8 +55,6 @@ public interface ProcessMapper {
 
 	public int insertProcessStepWorkerPolicy(ProcessStepWorkerPolicyVo processStepWorkerPolicyVo);
 
-	public int insertProcessStepAttribute(ProcessStepAttributeVo processStepAttributeVo);
-
 	public int replaceProcessForm(@Param("processUuid")
 	String processUuid, @Param("formUuid")
 	String formUuid);
@@ -71,13 +65,9 @@ public interface ProcessMapper {
 
 	public int deleteProcessStepUserByProcessUuid(String processUuid);
 
-	public int deleteProcessAttributeByProcessUuid(String processUuid);
-
 	public int deleteProcessStepTeamByProcessUuid(String processUuid);
 
 	public int deleteProcessStepWorkerPolicyByProcessUuid(String processUuid);
-
-	public int deleteProcessStepAttributeByProcessUuid(String processUuid);
 
 	public int deleteProcessStepTimeoutPolicyByProcessUuid(String processUuid);
 
