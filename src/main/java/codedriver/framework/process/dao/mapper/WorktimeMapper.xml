@@ -36,7 +36,7 @@
 	  COUNT(`uuid`)
 	FROM `worktime` wt
 	WHERE 1 = 1
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	AND wt.`name` LIKE CONCAT('%', #{keyword}, '%')
 	</if>
 	<if test="isActive != null">
