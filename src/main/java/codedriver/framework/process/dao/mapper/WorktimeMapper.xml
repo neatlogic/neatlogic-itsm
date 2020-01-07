@@ -92,7 +92,6 @@
 	  `worktime_range` 
 	WHERE `worktime_uuid` = #{worktimeUuid} 
 	AND `year` = #{year}
-	ORDER BY `date`
 	</select>
 
 	<select id="getRecentWorktimeRange" parameterType="codedriver.module.process.dto.WorktimeRangeVo" resultMap="worktimeRangeMap">
