@@ -20,7 +20,7 @@ public interface CatalogMapper {
 
 	List<String> getHasActiveChannelCatalogUuidList();
 
-	int checkCatalogIsDuplicateName(CatalogVo catalogVo);
+	int checkCatalogNameIsRepeat(CatalogVo catalogVo);
 
 	List<CatalogVo> getCatalogListForTree(Integer isActive);
 	

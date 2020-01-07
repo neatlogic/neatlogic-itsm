@@ -2,7 +2,9 @@ package codedriver.module.process.dto;
 
 import java.util.UUID;
 
-public class PriorityVo {
+import codedriver.framework.common.dto.BasePageVo;
+
+public class PriorityVo extends BasePageVo {
 	
 	private String uuid;
 	
@@ -16,6 +18,8 @@ public class PriorityVo {
 	
 	private String desc;
 
+	private transient String keyword;
+	
 	public String getUuid() {
 		if(uuid == null) {
 			uuid = UUID.randomUUID().toString().replace("-", "");
@@ -65,6 +69,14 @@ public class PriorityVo {
 
 	public void setDesc(String desc) {
 		this.desc = desc;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
 
 }

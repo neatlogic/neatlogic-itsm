@@ -11,12 +11,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.EntityField;
 import codedriver.module.process.constvalue.ProcessStepType;
 
-public class ProcessVo implements Serializable {
+public class ProcessVo extends BasePageVo implements Serializable {
 	private static final long serialVersionUID = 4684015408674741157L;
 
 	@EntityField(name = "流程uuid",
@@ -53,6 +54,8 @@ public class ProcessVo implements Serializable {
 	// @EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessStepRelVo> stepRelList;
 
+	private transient String keyword;
+	
 	public synchronized String getUuid() {
 		if (StringUtils.isBlank(uuid)) {
 			uuid = UUID.randomUUID().toString().replace("-", "");
@@ -279,5 +282,13 @@ public class ProcessVo implements Serializable {
 
 	public void setFormUuid(String formUuid) {
 		this.formUuid = formUuid;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
 }

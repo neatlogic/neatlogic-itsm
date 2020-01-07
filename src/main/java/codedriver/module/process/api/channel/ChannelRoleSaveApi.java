@@ -11,7 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.exception.ChannelIllegalParameterException;
 import codedriver.framework.process.exception.ChannelNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -25,6 +27,8 @@ public class ChannelRoleSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private ChannelMapper channelMapper;
+	@Autowired
+	private RoleMapper roleMapper;
 	
 	@Override
 	public String getToken() {
@@ -57,7 +61,9 @@ public class ChannelRoleSaveApi extends ApiComponentBase {
 		List<String> roleNameList = channelRole.getRoleNameList();
 		if(roleNameList != null && roleNameList.size() > 0) {
 			for(String roleName : roleNameList) {
-				// TODO linbq判断角色是否存在
+				if(roleMapper.getRoleByRoleName(roleName) == null) {
+					throw new ChannelIllegalParameterException("角色：'" + roleName + "'不存在");
+				}
 				channelRole.setRoleName(roleName);
 				if(action == 1) {					
 					channelMapper.replaceChannelRole(channelRole);

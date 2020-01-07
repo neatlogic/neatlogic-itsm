@@ -58,7 +58,7 @@
 	WHERE ca.`is_active` = 1
 	</select>
 	
-	<select id="checkCatalogIsDuplicateName" resultType="int">
+	<select id="checkCatalogNameIsRepeat" resultType="int">
 	SELECT COUNT(1) FROM `catalog` where `name`=#{name} AND `uuid`!=#{uuid}
 	</select>
 	
