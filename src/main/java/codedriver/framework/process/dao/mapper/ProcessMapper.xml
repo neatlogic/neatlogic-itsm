@@ -192,8 +192,51 @@
 		SELECT `id`, `name` FROM `process_type`
 	</select>
 	
-	<select id="checkProcessIsDuplicateName" resultType="int">
+	<select id="checkProcessNameIsRepeat" resultType="int">
 	SELECT count(1) FROM `process` WHERE name=#{name} AND uuid != #{uuid}
+	</select>
+
+	<select id="searchProcessCount" resultType="int">
+	SELECT 
+	COUNT(`uuid`) 
+	FROM `process` 
+	WHERE 1=1
+	<if test="keyword != null">
+	AND `name` LIKE CONCAT('%', #{keyword}, '%')
+	</if>
+	<if test="type != null">
+	AND `type` = #{type}
+	</if>
+	<if test="belong != null">
+	AND `belong` = #{belong}
+	</if>
+	<if test="isActive != null">
+	AND `is_Active` = #{isActive}
+	</if>
+	</select>
+	
+	<select id="searchProcessList" resultType="codedriver.module.process.dto.ProcessVo">
+	SELECT 
+	`uuid`,
+	`name`,
+	`type`,
+	`is_active` AS isActive,
+	`config`,
+	`belong`
+	FROM `process` 
+	WHERE 1=1
+	<if test="keyword != null">
+	AND `name` LIKE CONCAT('%', #{keyword}, '%')
+	</if>
+	<if test="type != null">
+	AND `type` = #{type}
+	</if>
+	<if test="isActive != null">
+	AND `is_Active` = #{isActive}
+	</if>
+	<if test="needPage">
+	limit #{startNum}, #{pageSize}
+	</if>
 	</select>
 	
 	<insert id="insertProcessStepTimeoutPolicy" parameterType="codedriver.module.process.dto.ProcessStepTimeoutPolicyVo">

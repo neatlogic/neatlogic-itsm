@@ -66,7 +66,7 @@ public class ProcessServiceImpl implements ProcessService {
 
 	@Override
 	public int saveProcess(ProcessVo processVo) {
-		if(processMapper.checkProcessIsDuplicateName(processVo) > 0) {
+		if(processMapper.checkProcessNameIsRepeat(processVo) > 0) {
 			throw new ProcessNameRepeatException(processVo.getName());
 		}
 		if (processMapper.checkProcessIsExists(processVo.getUuid()) > 0) {
