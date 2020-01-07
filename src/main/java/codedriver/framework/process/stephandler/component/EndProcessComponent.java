@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.process.exception.ProcessTaskException;
+import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
@@ -50,16 +50,6 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myStart(ProcessTaskStepVo processTaskStepVo) {
 		return 0;
-	}
-
-	@Override
-	public String getEditPage() {
-		return "process.step.handler.end.edit";
-	}
-
-	@Override
-	public String getViewPage() {
-		return "process.step.handler.end.view";
 	}
 
 	@Override
@@ -131,12 +121,17 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
+	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 0;
 	}
 
 	@Override
 	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
+		return 0;
+	}
+
+	@Override
+	protected int myRecover(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 0;
 	}
 

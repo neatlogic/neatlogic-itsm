@@ -4,13 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 
 public class ProcessTaskStepVo extends BasePageVo {
 	private Long id;
@@ -25,8 +21,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private String handler;
 	private String type;
 	private String formUuid;
-	private String editPage;
-	private String viewPage;
 	private Integer isActive = 0;
 	private Integer isCheck;
 	private String startTime;
@@ -251,28 +245,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setHandler(String handler) {
 		this.handler = handler;
-	}
-
-	public String getEditPage() {
-		if (StringUtils.isBlank(editPage) && StringUtils.isNotBlank(handler)) {
-			IProcessStepHandler stepHandler = ProcessStepHandlerFactory.getHandler(handler);
-			if (stepHandler != null) {
-				editPage = stepHandler.getEditPage();
-			}
-		}
-		return editPage;
-	}
-
-	public void setEditPage(String editPage) {
-		this.editPage = editPage;
-	}
-
-	public String getViewPage() {
-		return viewPage;
-	}
-
-	public void setViewPage(String viewPage) {
-		this.viewPage = viewPage;
 	}
 
 	public String getProcessStepUuid() {

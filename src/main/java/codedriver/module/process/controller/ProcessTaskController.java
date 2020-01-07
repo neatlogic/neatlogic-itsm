@@ -179,6 +179,33 @@ public class ProcessTaskController {
 		}
 
 	}
+	
+	@RequestMapping(value = "/{id}/abort")
+	public void abortProcessTask(@PathVariable("id") Long processTaskId, @RequestBody JSONObject paramObj, HttpServletResponse response, HttpServletRequest request) {
+		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskBaseInfoById(processTaskId);
+		if (processTaskVo != null) {
+			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
+			if (handler != null) {
+				handler.abortProcessTask(processTaskVo);
+			}
+		} else {
+			throw new RuntimeException("流程不存在");
+		}
+	}
+	
+	@RequestMapping(value = "/{id}/recover")
+	public void recoverProcessTask(@PathVariable("id") Long processTaskId, @RequestBody JSONObject paramObj, HttpServletResponse response, HttpServletRequest request) {
+		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskBaseInfoById(processTaskId);
+		if (processTaskVo != null) {
+			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
+			if (handler != null) {
+				handler.recoverProcessTask(processTaskVo);
+			}
+		} else {
+			throw new RuntimeException("流程不存在");
+		}
+
+	}
 
 	@RequestMapping(value = "/flowjobconfig/{flowJobId}")
 	public void getFlowJobConfigById(@PathVariable("flowJobId") Long processTaskId, HttpServletResponse response) throws IOException {

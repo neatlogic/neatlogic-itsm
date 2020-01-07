@@ -333,6 +333,26 @@
 		WHERE id = #{value}
 	</select>
 
+	<select id="getProcessTaskStepBaseInfoByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
+		SELECT
+		`id`,
+		`processtask_id` AS processTaskId,
+		`name`,
+		`process_step_uuid` AS processStepUuid,
+		`status`,
+		`result`,
+		`type`,
+		`handler`,
+		`is_active` AS isActive,
+		`config_hash` AS configHash,
+		`start_time`,
+		`end_time`,
+		`error`
+		FROM
+		`processtask_step`
+		WHERE `processtask_id` = #{value}
+	</select>
+
 	<resultMap id="processTaskStepFormAttributeResultMap" type="codedriver.module.process.dto.ProcessTaskStepFormAttributeVo">
 		<id column="processTaskStepId" property="processTaskStepId" />
 		<id column="attributeUuid" property="attributeUuid" />
@@ -746,6 +766,13 @@
 		WHERE
 		`id` = #{id}
 	</update>
+
+	<delete id="deleteProcessTaskStepWorkerByProcessTaskId" parameterType="java.lang.Long">
+		DELETE
+		FROM
+		`processtask_step_worker`
+		WHERE `processtask_id` = #{value}
+	</delete>
 
 	<delete id="deleteProcessTaskConvergeByStepId" parameterType="java.lang.Long">
 		DELETE

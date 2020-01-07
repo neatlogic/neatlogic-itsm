@@ -6,20 +6,21 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import codedriver.framework.process.exception.ProcessTaskException;
+import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.module.process.constvalue.ProcessStepMode;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskVo;
 
 //需要把事务隔离级别调低，避免并发insert时因为gap lock导致deadlock
 public interface IProcessStepHandler {
 	public String getType();
-	
+
 	/**
-	* @Author: chenqiwei
-	* @Time:Jan 5, 2020
-	* @Description: 自动模式还是手动模式，自动模式引擎会自动触发handle动作 
-	* @param @return 
-	* @return String
+	 * @Author: chenqiwei
+	 * @Time:Jan 5, 2020
+	 * @Description: 自动模式还是手动模式，自动模式引擎会自动触发handle动作
+	 * @param @return
+	 * @return String
 	 */
 	public ProcessStepMode getMode();
 
@@ -47,23 +48,6 @@ public interface IProcessStepHandler {
 	 */
 	public Boolean isAllowStart();
 
-	/**
-	 * @Author: chenqiwei
-	 * @Time:Aug 6, 2019
-	 * @Description: 获取处理页面
-	 * @param @return
-	 * @return String
-	 */
-	public String getEditPage();
-
-	/**
-	 * @Author: chenqiwei
-	 * @Time:Aug 6, 2019
-	 * @Description: 获取只读页面
-	 * @param @return
-	 * @return String
-	 */
-	public String getViewPage();
 
 	/**
 	 * 
@@ -77,7 +61,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int active(ProcessTaskStepVo processTaskStepVo);
+	public int active(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * 
@@ -91,7 +75,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int assign(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException;
+	public int assign(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException;
 
 	/**
 	 * 
@@ -105,7 +89,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int hang(ProcessTaskStepVo processTaskStepVo);
+	public int hang(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * 
@@ -119,7 +103,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int start(ProcessTaskStepVo processTaskStepVo);
+	public int start(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * @Author: chenqiwei
@@ -132,7 +116,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int handle(ProcessTaskStepVo processtaskStepVo);
+	public int handle(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * @Author: chenqiwei
@@ -145,7 +129,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int accept(ProcessTaskStepVo processTaskStepVo);
+	public int accept(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * @Author: chenqiwei
@@ -158,7 +142,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int transfer(ProcessTaskStepVo processTaskStepVo);
+	public int transfer(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * @Author: chenqiwei
@@ -171,7 +155,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int save(ProcessTaskStepVo processTaskStepVo);
+	public int save(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * 
@@ -185,7 +169,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int complete(ProcessTaskStepVo processTaskStepVo);
+	public int complete(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * @Author: chenqiwei
@@ -198,21 +182,58 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int retreat(ProcessTaskStepVo processTaskStepVo);
+	public int retreat(ProcessTaskStepVo currentProcessTaskStepVo);
 
-	/**
-	 * 
+	/***
 	 * @Author: chenqiwei
-	 * @Time:Jun 19, 2019
-	 * @Description: 处理人终止流程步骤
+	 * @Time:Jan 7, 2020
+	 * @Description: 终止流程
 	 * @param @param
-	 *            workflowTaskStepUserVo
+	 *            processTaskStepVo
 	 * @param @return
 	 * @return int
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int abort(ProcessTaskStepVo processTaskStepVo);
+	public int abortProcessTask(ProcessTaskVo currentProcessTaskVo);
+
+	/***
+	 * @Author: chenqiwei
+	 * @Time:Jan 7, 2020
+	 * @Description: 终止流程步骤
+	 * @param @param
+	 *            processTaskStepVo
+	 * @param @return
+	 * @return int
+	 */
+	@Transactional(propagation = Propagation.REQUIRED,
+			isolation = Isolation.READ_COMMITTED)
+	public int abort(ProcessTaskStepVo currentProcessTaskStepVo);
+
+	/***
+	 * @Author: chenqiwei
+	 * @Time:Jan 7, 2020
+	 * @Description: 恢复已终止流程
+	 * @param @param
+	 *            currentProcessTaskVo
+	 * @param @return
+	 * @return int
+	 */
+	@Transactional(propagation = Propagation.REQUIRED,
+			isolation = Isolation.READ_COMMITTED)
+	public int recoverProcessTask(ProcessTaskVo currentProcessTaskVo);
+	
+	/***
+	* @Author: chenqiwei
+	* @Time:Jan 7, 2020
+	* @Description: 恢复终止流程步骤 
+	* @param @param processTaskStepVo
+	* @param @return 
+	* @return int
+	 */
+	@Transactional(propagation = Propagation.REQUIRED,
+			isolation = Isolation.READ_COMMITTED)
+	public int recover(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * 
@@ -222,7 +243,7 @@ public interface IProcessStepHandler {
 	 * @param @return
 	 * @return List<ProcessTaskStepVo>
 	 */
-	public List<ProcessTaskStepVo> getNext(ProcessTaskStepVo processTaskStepVo);
+	public List<ProcessTaskStepVo> getNext(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * @Author: chenqiwei
@@ -233,7 +254,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int startProcess(ProcessTaskStepVo processTaskStepVo);
+	public int startProcess(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * @Author:
@@ -246,7 +267,7 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int back(ProcessTaskStepVo processTaskStepVo);
+	public int back(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * @Author:
@@ -259,6 +280,6 @@ public interface IProcessStepHandler {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int comment(ProcessTaskStepVo processTaskStepVo);
+	public int comment(ProcessTaskStepVo currentProcessTaskStepVo);
 
 }

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.exception.ProcessTaskException;
+import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
@@ -63,7 +63,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) {
-		/**设置已完成标记位**/
+		/** 设置已完成标记位 **/
 		currentProcessTaskStepVo.setIsAllDone(true);
 		return 0;
 	}
@@ -295,7 +295,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 		}
 	}
 
-
 	@Override
 	public int getSort() {
 		return 0;
@@ -307,22 +306,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public String getEditPage() {
-		return null;
-	}
-
-	@Override
-	public String getViewPage() {
-		return null;
-	}
-
-	@Override
 	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		return 0;
 	}
 
 	@Override
-	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
+	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 0;
 	}
 
@@ -347,7 +336,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
+	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}
 
@@ -363,6 +352,11 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
+		return 0;
+	}
+
+	@Override
+	protected int myRecover(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 0;
 	}
 

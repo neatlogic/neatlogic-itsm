@@ -13,8 +13,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.attribute.core.AttributeHandlerFactory;
 import codedriver.framework.attribute.core.IAttributeHandler;
-import codedriver.framework.process.exception.ProcessTaskException;
-import codedriver.framework.process.exception.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.core.ProcessTaskException;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.process.workerpolicy.handler.IWorkerPolicyHandler;
 import codedriver.framework.process.workerpolicy.handler.WorkerPolicyHandlerFactory;
@@ -22,7 +22,6 @@ import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
-import codedriver.module.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
@@ -140,15 +139,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-	@Override
-	public String getEditPage() {
-		return "process.step.handler.omnipotent.edit";
-	}
-
-	@Override
-	public String getViewPage() {
-		return "process.step.handler.omnipotent.view";
-	}
 
 	@Override
 	public Boolean isAllowStart() {
@@ -255,27 +245,29 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 								// 放进去方便基类记录日志
 								attribute.setAttributeData(attributeData);
 
-								/*List<String> valueList = new ArrayList<>();
-								if (attrObj.containsKey("value")) {
-									if (attrObj.get("value") instanceof JSONArray) {
-										for (int v = 0; v < attrObj.getJSONArray("value").size(); v++) {
-											valueList.add(attrObj.getJSONArray("value").getString(v));
-										}
-									} else {
-										valueList.add(attrObj.getString("value"));
-									}
-								}
-								if (valueList != null && valueList.size() > 0) {
-									for (String value : valueList) {
-										if (StringUtils.isNotBlank(value)) {
-											ProcessTaskAttributeValueVo attributeValue = new ProcessTaskAttributeValueVo();
-											attributeValue.setValue(value);
-											attributeValue.setAttributeUuid(attribute.getAttributeUuid());
-											attributeValue.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-											processTaskMapper.insertProcessTaskFormAttributeValue(attributeValue);
-										}
-									}
-								}*/
+								/*
+								 * List<String> valueList = new ArrayList<>();
+								 * if (attrObj.containsKey("value")) { if
+								 * (attrObj.get("value") instanceof JSONArray) {
+								 * for (int v = 0; v <
+								 * attrObj.getJSONArray("value").size(); v++) {
+								 * valueList.add(attrObj.getJSONArray("value").
+								 * getString(v)); } } else {
+								 * valueList.add(attrObj.getString("value")); }
+								 * } if (valueList != null && valueList.size() >
+								 * 0) { for (String value : valueList) { if
+								 * (StringUtils.isNotBlank(value)) {
+								 * ProcessTaskAttributeValueVo attributeValue =
+								 * new ProcessTaskAttributeValueVo();
+								 * attributeValue.setValue(value);
+								 * attributeValue.setAttributeUuid(attribute.
+								 * getAttributeUuid());
+								 * attributeValue.setProcessTaskId(
+								 * currentProcessTaskStepVo.getProcessTaskId());
+								 * processTaskMapper.
+								 * insertProcessTaskFormAttributeValue(
+								 * attributeValue); } } }
+								 */
 								break;
 							}
 						}
@@ -309,55 +301,51 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myRetreat(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myAbort(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int mySave(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
-		// TODO Auto-generated method stub
+	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}
 
 	@Override
 	protected int myComment(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
-		// TODO Auto-generated method stub
+	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
+		return 0;
+	}
+
+	@Override
+	protected int myRecover(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 0;
 	}
 

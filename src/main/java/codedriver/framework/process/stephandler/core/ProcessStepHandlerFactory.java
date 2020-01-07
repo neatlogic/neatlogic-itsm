@@ -14,7 +14,7 @@ import org.springframework.core.annotation.Order;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.RootComponent;
 import codedriver.framework.dto.ModuleVo;
-import codedriver.framework.process.exception.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.module.process.dto.ProcessStepHandlerVo;
 
 @RootComponent
@@ -35,13 +35,18 @@ public class ProcessStepHandlerFactory implements ApplicationListener<ContextRef
 		return componentMap.get(handler);
 	}
 
+	public static IProcessStepHandler getHandler() {
+		/** 随便返回一个handler，主要用来处理作业级操作 **/
+		return componentMap.values().iterator().next();
+	}
+
 	public static List<ProcessStepHandlerVo> getActiveProcessStepHandler() {
 		TenantContext tenantContext = TenantContext.get();
-		List<ModuleVo> moduleList =tenantContext.getActiveModuleList();
+		List<ModuleVo> moduleList = tenantContext.getActiveModuleList();
 		List<ProcessStepHandlerVo> returnProcessStepHandlerList = new ArrayList<>();
 		for (ProcessStepHandlerVo processStepHandler : processStepHandlerList) {
-			for(ModuleVo moduleVo : moduleList) {
-				if(moduleVo.getId().equalsIgnoreCase(processStepHandler.getModuleId())) {
+			for (ModuleVo moduleVo : moduleList) {
+				if (moduleVo.getId().equalsIgnoreCase(processStepHandler.getModuleId())) {
 					returnProcessStepHandlerList.add(processStepHandler);
 					break;
 				}

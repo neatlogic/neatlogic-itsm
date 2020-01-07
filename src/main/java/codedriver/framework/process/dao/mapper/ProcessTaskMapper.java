@@ -26,6 +26,8 @@ public interface ProcessTaskMapper {
 
 	public ProcessTaskVo getProcessTaskBaseInfoById(Long processTaskId);
 
+	public List<ProcessTaskStepVo> getProcessTaskStepBaseInfoByProcessTaskId(Long processTaskId);
+
 	public List<Long> getProcessTaskStepIdByConvergeId(Long convergeId);
 
 	public String getProcessTaskStepConfigByHash(String hash);
@@ -143,5 +145,7 @@ public interface ProcessTaskMapper {
 	String userType);
 
 	public int deleteProcessTaskConvergeByStepId(Long processTaskStepId);
+
+	public int deleteProcessTaskStepWorkerByProcessTaskId(Long processTaskId);
 
 }

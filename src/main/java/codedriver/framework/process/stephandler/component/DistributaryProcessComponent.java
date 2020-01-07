@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.process.exception.ProcessTaskException;
+import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
@@ -76,22 +76,12 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public String getEditPage() {
-		return null;
-	}
-
-	@Override
-	public String getViewPage() {
-		return null;
-	}
-
-	@Override
 	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		return 0;
 	}
 
 	@Override
-	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
+	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo){
 		return 0;
 	}
 
@@ -116,7 +106,7 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
+	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}
 
@@ -132,6 +122,11 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
+		return 0;
+	}
+
+	@Override
+	protected int myRecover(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 0;
 	}
 
