@@ -41,7 +41,7 @@ public class WorktimeSearchApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "模糊搜索"),
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "模糊搜索", xss = true),
 		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
