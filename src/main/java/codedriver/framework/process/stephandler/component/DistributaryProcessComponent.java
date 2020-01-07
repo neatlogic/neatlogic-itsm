@@ -100,10 +100,6 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-	@Override
-	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo) {
-		return 0;
-	}
 
 	@Override
 	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
@@ -127,6 +123,11 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myRecover(ProcessTaskStepVo currentProcessTaskStepVo) {
+		return 0;
+	}
+
+	@Override
+	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		return 0;
 	}
 
