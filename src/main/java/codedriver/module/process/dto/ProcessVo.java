@@ -2,7 +2,6 @@ package codedriver.module.process.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,37 +19,40 @@ import codedriver.module.process.constvalue.ProcessStepType;
 
 public class ProcessVo extends BasePageVo implements Serializable {
 	private static final long serialVersionUID = 4684015408674741157L;
-	
-	@EntityField(name = "流程uuid", type = ApiParamType.STRING)
+
+	@EntityField(name = "流程uuid",
+			type = ApiParamType.STRING)
 	private String uuid;
-	
-	@EntityField(name = "流程名称", type = ApiParamType.STRING)
+
+	@EntityField(name = "流程名称",
+			type = ApiParamType.STRING)
 	private String name;
-	
-	@EntityField(name = "流程类型id", type = ApiParamType.LONG)
+
+	@EntityField(name = "流程类型id",
+			type = ApiParamType.LONG)
 	private Long type;
-	
-	@EntityField(name = "流程类型名称", type = ApiParamType.STRING)
+
+	@EntityField(name = "流程类型名称",
+			type = ApiParamType.STRING)
 	private String typeName;
-	
-	@EntityField(name = "是否激活", type = ApiParamType.STRING)
+
+	@EntityField(name = "是否激活",
+			type = ApiParamType.STRING)
 	private Integer isActive = 1;
-	
-	@EntityField(name = "流程图配置", type = ApiParamType.STRING)
+
+	@EntityField(name = "流程图配置",
+			type = ApiParamType.STRING)
 	private String config;
-	
+
 	private String belong;
-	
+
 	private JSONObject configObj;
-	private JSONArray attributeObjList;
-//	@EntityField(name = "流程表单uuid", type = ApiParamType.STRING)
+	// @EntityField(name = "流程表单uuid", type = ApiParamType.STRING)
 	private String formUuid;
 	private List<ProcessStepVo> stepList;
-	
-//	@EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
-	private List<ProcessAttributeVo> attributeList;
+
+	// @EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessStepRelVo> stepRelList;
-	private boolean isAttributeListSorted = false;
 
 	private transient String keyword;
 	
@@ -121,23 +123,9 @@ public class ProcessVo extends BasePageVo implements Serializable {
 	}
 
 	public void makeupFromConfigObj() {
-		if (this.attributeList == null && this.getConfigObj() != null) {
+		if ( this.getConfigObj() != null) {
 			if (this.getConfigObj().containsKey("userData")) {
 				JSONObject userData = this.getConfigObj().getJSONObject("userData");
-				if (userData.containsKey("attributeList")) {
-					this.attributeList = new ArrayList<>();
-					JSONArray attributeObjList = userData.getJSONArray("attributeList");
-					for (int i = 0; i < attributeObjList.size(); i++) {
-						JSONObject attributeObj = attributeObjList.getJSONObject(i);
-						ProcessAttributeVo processAttributeVo = new ProcessAttributeVo();
-						processAttributeVo.setProcessUuid(this.getUuid());
-						processAttributeVo.setAttributeUuid(attributeObj.getString("uuid"));
-						processAttributeVo.setLabel(attributeObj.getString("label"));
-						processAttributeVo.setGroup(attributeObj.getString("group"));
-						processAttributeVo.setSort(i);
-						this.attributeList.add(processAttributeVo);
-					}
-				}
 				if (userData.containsKey("formId")) {
 					this.setFormUuid(userData.getString("formId"));
 				}
@@ -161,45 +149,19 @@ public class ProcessVo extends BasePageVo implements Serializable {
 							processStepVo.setHandler(elementObj.getString("type"));
 							processStepVo.setDescription(userData.getString("description"));
 							userData.remove("description");
-							if (StringUtils.isNotBlank(userData.getString("editPage"))) {
-								processStepVo.setEditPage(userData.getString("editPage"));
-							}
-							userData.remove("editPage");
-							if (StringUtils.isNotBlank(userData.getString("viewPage"))) {
-								processStepVo.setViewPage(userData.getString("viewPage"));
-							}
 							userData.remove("viewPage");
 							if (elementObj.getString("type").equals("end")) {
 								processStepVo.setType(ProcessStepType.END.getValue());
 							} else {
-								//if(!userData.containsKey("condition")) {
-									if (userData.getString("isStartNode").equals("1")) {
-										processStepVo.setType(ProcessStepType.START.getValue());
-									} else if(!userData.containsKey("condition")){
-										processStepVo.setType(ProcessStepType.PROCESS.getValue());
-									}
-								//}else {
-								//	processStepVo.setType(ProcessStepType.CONDITION.getValue());
-								//}
-							}
-							/** 组装自定义属性信息 **/
-							if (userData.containsKey("attributeList")) {
-								JSONArray attributeObjList = userData.getJSONArray("attributeList");
-								List<ProcessStepAttributeVo> processStepAttributeList = new ArrayList<>();
-								for (int j = 0; j < attributeObjList.size(); j++) {
-									JSONObject attributeObj = attributeObjList.getJSONObject(j);
-									ProcessStepAttributeVo processStepAttributeVo = new ProcessStepAttributeVo();
-									processStepAttributeVo.setProcessUuid(this.getUuid());
-									processStepAttributeVo.setProcessStepUuid(processStepVo.getUuid());
-									processStepAttributeVo.setAttributeUuid(attributeObj.getString("uuid"));
-									processStepAttributeVo.setConfig(attributeObj.getString("config"));
-									processStepAttributeVo.setData(attributeObj.getString("data"));
-									processStepAttributeVo.setIsEditable(attributeObj.getInteger("isEditable"));
-									// processStepAttributeVo.setIsRequired(attributeObj.optInt("isRequired"));
-
-									processStepAttributeList.add(processStepAttributeVo);
+								// if(!userData.containsKey("condition")) {
+								if (userData.containsKey("isStartNode") && userData.getString("isStartNode").equals("1")) {
+									processStepVo.setType(ProcessStepType.START.getValue());
+								} else {
+									processStepVo.setType(ProcessStepType.PROCESS.getValue());
 								}
-								processStepVo.setAttributeList(processStepAttributeList);
+								// }else {
+								// processStepVo.setType(ProcessStepType.CONDITION.getValue());
+								// }
 							}
 							userData.remove("attributeList");
 							/** 组装表单属性 **/
@@ -296,42 +258,6 @@ public class ProcessVo extends BasePageVo implements Serializable {
 
 	public void setStepList(List<ProcessStepVo> stepList) {
 		this.stepList = stepList;
-	}
-
-	public List<ProcessAttributeVo> getAttributeList() {
-		if (attributeList != null && attributeList.size() > 0 && !this.isAttributeListSorted) {
-			Collections.sort(attributeList);
-			this.isAttributeListSorted = true;
-		}
-		return attributeList;
-	}
-
-	public void setAttributeList(List<ProcessAttributeVo> attributeList) {
-		this.attributeList = attributeList;
-	}
-
-	public JSONArray getAttributeObjList() {
-		if (this.attributeList != null && this.attributeList.size() > 0) {
-			this.attributeObjList = new JSONArray();
-			for (ProcessAttributeVo attributeVo : this.attributeList) {
-				JSONObject jsonObj = new JSONObject();
-				jsonObj.put("uuid", attributeVo.getAttributeUuid());
-				jsonObj.put("name", attributeVo.getName());
-				jsonObj.put("label", attributeVo.getLabel());
-				jsonObj.put("width", attributeVo.getWidth());
-				jsonObj.put("group", attributeVo.getGroup());
-				jsonObj.put("sort", attributeVo.getSort());
-				jsonObj.put("typeName", attributeVo.getTypeName());
-				jsonObj.put("handlerName", attributeVo.getHandlerName());
-				this.attributeObjList.add(jsonObj);
-
-			}
-		}
-		return attributeObjList;
-	}
-
-	public void setAttributeObjList(JSONArray attributeObjList) {
-		this.attributeObjList = attributeObjList;
 	}
 
 	public String getBelong() {

@@ -20,17 +20,17 @@ import codedriver.framework.process.workerpolicy.handler.IWorkerPolicyHandler;
 import codedriver.framework.process.workerpolicy.handler.WorkerPolicyHandlerFactory;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
+import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
-import codedriver.module.process.dto.ProcessTaskAttributeValueVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
-import codedriver.module.process.dto.ProcessTaskStepAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.module.process.dto.ProcessTaskVo;
 
 @Service
 public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
@@ -40,7 +40,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	public String getType() {
 		return ProcessStepHandler.OMNIPOTENT.getType();
 	}
-	
+
 	@Override
 	public ProcessStepMode getMode() {
 		return ProcessStepMode.MT;
@@ -63,71 +63,75 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		
+
 		return 0;
 	}
 
-	protected  int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException{
+	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		/** 分配处理人 **/
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-
-		JSONObject stepConfigObj = null;
-		if (StringUtils.isNotBlank(stepConfig)) {
-			try {
-				stepConfigObj = JSONObject.parseObject(stepConfig);
-				currentProcessTaskStepVo.setParamObj(stepConfigObj);
-			} catch (Exception ex) {
-				logger.error("转换步骤设置配置失败，" + ex.getMessage(), ex);
+		/** 如果是开始节点，则处理人为上报人或代报人 **/
+		if (processTaskStepVo.getType().equals(ProcessStepType.START.getValue())) {
+			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), processTaskVo.getReporter()));
+			userList.add(new ProcessTaskStepUserVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), processTaskVo.getReporter()));
+		} else if (processTaskStepVo.getType().equals(ProcessStepType.PROCESS.getValue())) {
+			JSONObject stepConfigObj = null;
+			if (StringUtils.isNotBlank(stepConfig)) {
+				try {
+					stepConfigObj = JSONObject.parseObject(stepConfig);
+					currentProcessTaskStepVo.setParamObj(stepConfigObj);
+				} catch (Exception ex) {
+					logger.error("转换步骤设置配置失败，" + ex.getMessage(), ex);
+				}
 			}
-		}
-		if (stepConfigObj != null) {
-			if (stepConfigObj.containsKey("assignPolicy")) {
-				/** 顺序分配处理人 **/
-				if ("serial".equals(stepConfigObj.getString("assignPolicy"))) {
-					List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
-					if (workerPolicyList != null && workerPolicyList.size() > 0) {
-						for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
-							IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
-							if (workerPolicyHandler != null) {
-								workerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
-								if (workerList.size() > 0) {
-									// 找到处理人，则退出
-									break;
+			if (stepConfigObj != null) {
+				if (stepConfigObj.containsKey("assignPolicy")) {
+					/** 顺序分配处理人 **/
+					if ("serial".equals(stepConfigObj.getString("assignPolicy"))) {
+						List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
+						if (workerPolicyList != null && workerPolicyList.size() > 0) {
+							for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
+								IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
+								if (workerPolicyHandler != null) {
+									workerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
+									if (workerList.size() > 0) {
+										// 找到处理人，则退出
+										break;
+									}
+								}
+							}
+						}
+					} else if ("parallel".equals(stepConfigObj.getString("assignPolicy"))) {
+						List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
+						if (workerPolicyList != null && workerPolicyList.size() > 0) {
+							for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
+								IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
+								if (workerPolicyHandler != null) {
+									List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
+									// 去重取并集
+									tmpWorkerList.removeAll(workerList);
+									workerList.addAll(tmpWorkerList);
 								}
 							}
 						}
 					}
-				} else if ("parallel".equals(stepConfigObj.getString("assignPolicy"))) {
-					List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
-					if (workerPolicyList != null && workerPolicyList.size() > 0) {
-						for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
-							IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
-							if (workerPolicyHandler != null) {
-								List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
-								// 去重取并集
-								tmpWorkerList.removeAll(workerList);
-								workerList.addAll(tmpWorkerList);
-							}
-						}
+				}
+
+				if (stepConfigObj.containsKey("isAutoStart") && stepConfigObj.getString("isAutoStart").equals("1") && workerList.size() == 1) {
+					/** 设置当前步骤状态为处理中 **/
+					if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
+						ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
+						userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+						userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+						userVo.setUserId(workerList.get(0).getUserId());
+						userList.add(userVo);
+						currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 					}
 				}
 			}
-
-			if (stepConfigObj.containsKey("isAutoStart") && stepConfigObj.getString("isAutoStart").equals("1") && workerList.size() == 1) {
-				/** 设置当前步骤状态为处理中 **/
-				if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
-					ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
-					userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-					userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-					userVo.setUserId(workerList.get(0).getUserId());
-					userVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
-					userList.add(userVo);
-					currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-				}
-			}
 		}
-
 		return 1;
 	}
 
@@ -178,65 +182,54 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		/** 写入当前步骤的自定义属性值 **/
-		ProcessTaskStepAttributeVo attributeVo = new ProcessTaskStepAttributeVo();
-		attributeVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		List<ProcessTaskStepAttributeVo> attributeList = processTaskMapper.getProcessTaskStepAttributeByStepId(attributeVo);
-		currentProcessTaskStepVo.setAttributeList(attributeList);
-		if (attributeList != null && attributeList.size() > 0) {
-			JSONArray attributeObjList = null;
-			if (paramObj != null && paramObj.containsKey("attributeValueList") && paramObj.get("attributeValueList") instanceof JSONArray) {
-				attributeObjList = paramObj.getJSONArray("attributeValueList");
-			}
-			for (ProcessTaskStepAttributeVo attribute : attributeList) {
-				if (attribute.getIsEditable().equals(1)) {
-					if (attributeObjList != null && attributeObjList.size() > 0) {
-						for (int i = 0; i < attributeObjList.size(); i++) {
-							JSONObject attrObj = attributeObjList.getJSONObject(i);
-							if (attrObj.getString("uuid").equals(attribute.getAttributeUuid())) {
-								ProcessTaskAttributeDataVo attributeData = new ProcessTaskAttributeDataVo();
-								attributeData.setData(attrObj.getString("data"));
-								attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-								attributeData.setAttributeUuid(attribute.getAttributeUuid());
-								// 放进去方便基类记录日志
-								attribute.setAttributeData(attributeData);
-
-								processTaskMapper.replaceProcessTaskAttributeData(attributeData);
-								List<String> valueList = new ArrayList<>();
-								if (attrObj.containsKey("value")) {
-									if (attrObj.get("value") instanceof JSONArray) {
-										for (int v = 0; v < attrObj.getJSONArray("value").size(); v++) {
-											valueList.add(attrObj.getJSONArray("value").getString(v));
-										}
-									} else {
-										valueList.add(attrObj.getString("value"));
-									}
-								}
-								if (valueList != null && valueList.size() > 0) {
-									for (String value : valueList) {
-										if (StringUtils.isNotBlank(value)) {
-											ProcessTaskAttributeValueVo attributeValue = new ProcessTaskAttributeValueVo();
-											attributeValue.setValue(value);
-											attributeValue.setAttributeUuid(attribute.getAttributeUuid());
-											attributeValue.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-											processTaskMapper.insertProcessTaskAttributeValue(attributeValue);
-										}
-									}
-								}
-								break;
-							}
-						}
-					}
-					IAttributeHandler attributeHandler = AttributeHandlerFactory.getHandler(attribute.getHandler());
-					if (attributeHandler != null) {
-						try {
-							attributeHandler.valid(attribute.getAttributeData(), attribute.getConfigObj());
-						} catch (Exception ex) {
-							throw new ProcessTaskRuntimeException(ex);
-						}
-					}
-				}
-			}
-		}
+		/*
+		 * ProcessTaskStepAttributeVo attributeVo = new
+		 * ProcessTaskStepAttributeVo();
+		 * attributeVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+		 * List<ProcessTaskStepAttributeVo> attributeList =
+		 * processTaskMapper.getProcessTaskStepAttributeByStepId(attributeVo);
+		 * currentProcessTaskStepVo.setAttributeList(attributeList); if
+		 * (attributeList != null && attributeList.size() > 0) { JSONArray
+		 * attributeObjList = null; if (paramObj != null &&
+		 * paramObj.containsKey("attributeValueList") &&
+		 * paramObj.get("attributeValueList") instanceof JSONArray) {
+		 * attributeObjList = paramObj.getJSONArray("attributeValueList"); } for
+		 * (ProcessTaskStepAttributeVo attribute : attributeList) { if
+		 * (attribute.getIsEditable().equals(1)) { if (attributeObjList != null
+		 * && attributeObjList.size() > 0) { for (int i = 0; i <
+		 * attributeObjList.size(); i++) { JSONObject attrObj =
+		 * attributeObjList.getJSONObject(i); if
+		 * (attrObj.getString("uuid").equals(attribute.getAttributeUuid())) {
+		 * ProcessTaskAttributeDataVo attributeData = new
+		 * ProcessTaskAttributeDataVo();
+		 * attributeData.setData(attrObj.getString("data"));
+		 * attributeData.setProcessTaskId(currentProcessTaskStepVo.
+		 * getProcessTaskId());
+		 * attributeData.setAttributeUuid(attribute.getAttributeUuid()); //
+		 * 放进去方便基类记录日志 attribute.setAttributeData(attributeData);
+		 * 
+		 * processTaskMapper.replaceProcessTaskAttributeData(attributeData);
+		 * List<String> valueList = new ArrayList<>(); if
+		 * (attrObj.containsKey("value")) { if (attrObj.get("value") instanceof
+		 * JSONArray) { for (int v = 0; v <
+		 * attrObj.getJSONArray("value").size(); v++) {
+		 * valueList.add(attrObj.getJSONArray("value").getString(v)); } } else {
+		 * valueList.add(attrObj.getString("value")); } } if (valueList != null
+		 * && valueList.size() > 0) { for (String value : valueList) { if
+		 * (StringUtils.isNotBlank(value)) { ProcessTaskAttributeValueVo
+		 * attributeValue = new ProcessTaskAttributeValueVo();
+		 * attributeValue.setValue(value);
+		 * attributeValue.setAttributeUuid(attribute.getAttributeUuid());
+		 * attributeValue.setProcessTaskId(currentProcessTaskStepVo.
+		 * getProcessTaskId());
+		 * processTaskMapper.insertProcessTaskAttributeValue(attributeValue); }
+		 * } } break; } } } IAttributeHandler attributeHandler =
+		 * AttributeHandlerFactory.getHandler(attribute.getHandler()); if
+		 * (attributeHandler != null) { try {
+		 * attributeHandler.valid(attribute.getAttributeData(),
+		 * attribute.getConfigObj()); } catch (Exception ex) { throw new
+		 * ProcessTaskRuntimeException(ex); } } } } }
+		 */
 
 		/** 写入当前步骤的表单属性值 **/
 		ProcessTaskStepFormAttributeVo formAttributeVo = new ProcessTaskStepFormAttributeVo();
@@ -262,7 +255,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 								// 放进去方便基类记录日志
 								attribute.setAttributeData(attributeData);
 
-								List<String> valueList = new ArrayList<>();
+								/*List<String> valueList = new ArrayList<>();
 								if (attrObj.containsKey("value")) {
 									if (attrObj.get("value") instanceof JSONArray) {
 										for (int v = 0; v < attrObj.getJSONArray("value").size(); v++) {
@@ -282,7 +275,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 											processTaskMapper.insertProcessTaskFormAttributeValue(attributeValue);
 										}
 									}
-								}
+								}*/
 								break;
 							}
 						}
@@ -367,7 +360,5 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	
 
 }

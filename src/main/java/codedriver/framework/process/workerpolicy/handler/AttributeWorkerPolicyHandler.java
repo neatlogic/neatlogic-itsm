@@ -3,18 +3,14 @@ package codedriver.framework.process.workerpolicy.handler;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.attribute.constvalue.AttributeHandler;
 import codedriver.framework.attribute.dao.mapper.AttributeMapper;
-import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.module.process.constvalue.WorkerPolicy;
-import codedriver.module.process.dto.ProcessTaskAttributeValueVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
@@ -48,7 +44,7 @@ public class AttributeWorkerPolicyHandler implements IWorkerPolicyHandler {
 	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
 		if (workerPolicyVo.getConfigObjList() != null) {
-			List<ProcessTaskAttributeValueVo> attributeValueList = processTaskMapper.getProcessTaskAttributeValueByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+			/*List<ProcessTaskAttributeValueVo> attributeValueList = processTaskMapper.getProcessTaskAttributeValueByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 			if (attributeValueList != null && attributeValueList.size() > 0) {
 				for (int i = 0; i < workerPolicyVo.getConfigObjList().size(); i++) {
 					String attributeUuid = workerPolicyVo.getConfigObjList().getString(i);
@@ -88,7 +84,7 @@ public class AttributeWorkerPolicyHandler implements IWorkerPolicyHandler {
 						}
 					}
 				}
-			}
+			}*/
 		}
 		return workerList;
 	}

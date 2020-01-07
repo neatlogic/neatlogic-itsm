@@ -1,7 +1,5 @@
 package codedriver.module.process.dto;
 
-import java.io.Serializable;
-
 public class ProcessTaskFormVo {
 	private Long processTaskId;
 	private String formUuid;
