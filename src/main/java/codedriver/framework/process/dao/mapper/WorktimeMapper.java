@@ -7,31 +7,31 @@ import codedriver.module.process.dto.WorktimeVo;
 
 public interface WorktimeMapper {
 	
-	WorktimeVo getWorktimeByUuid(String uuid);
+	public WorktimeVo getWorktimeByUuid(String uuid);
 
-	int checkWorktimeNameIsRepeat(WorktimeVo worktimeVo);
+	public int checkWorktimeNameIsRepeat(WorktimeVo worktimeVo);
 	
-	int checkWorktimeIsExists(String uuid);
+	public int checkWorktimeIsExists(String uuid);
 	
-	int searchWorktimeCount(WorktimeVo worktimeVo);
+	public int searchWorktimeCount(WorktimeVo worktimeVo);
 	
-	List<WorktimeVo> searchWorktimeList(WorktimeVo worktimeVo);
+	public List<WorktimeVo> searchWorktimeList(WorktimeVo worktimeVo);
 	
-	List<WorktimeRangeVo> getWorktimeRangeListByWorktimeUuid(String worktimeUuid);
+	public List<WorktimeRangeVo> getWorktimeRangeListByWorktimeUuid(String worktimeUuid);
 	
-	List<String> getWorktimeDateList(WorktimeRangeVo worktimeRangeVo);
+	public List<String> getWorktimeDateList(WorktimeRangeVo worktimeRangeVo);
 	
-	WorktimeRangeVo getRecentWorktimeRange(WorktimeRangeVo worktimeRangeVo);
+	public WorktimeRangeVo getRecentWorktimeRange(WorktimeRangeVo worktimeRangeVo);
 	
-	long calculateCostTime(WorktimeRangeVo worktimeRangeVo);
+	public long calculateCostTime(WorktimeRangeVo worktimeRangeVo);
 	
-	int insertWorktime(WorktimeVo worktimeVo);
+	public int insertWorktime(WorktimeVo worktimeVo);
 	
-	int insertBatchWorktimeRange(List<WorktimeRangeVo> worktimeRangeList);
+	public int insertBatchWorktimeRange(List<WorktimeRangeVo> worktimeRangeList);
 	
-	int updateWorktime(WorktimeVo worktimeVo);
+	public int updateWorktime(WorktimeVo worktimeVo);
 	
-	int deleteWorktimeByUuid(String uuid);
+	public int deleteWorktimeByUuid(String uuid);
 	
-	int deleteWorktimeRange(WorktimeRangeVo worktimeRangeVo);
+	public int deleteWorktimeRange(WorktimeRangeVo worktimeRangeVo);
 }

@@ -22,7 +22,7 @@ public class WorktimeGetApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "process/worktime/get";
+		return "worktime/get";
 	}
 
 	@Override

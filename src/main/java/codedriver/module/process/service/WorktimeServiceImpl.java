@@ -41,7 +41,7 @@ public class WorktimeServiceImpl implements WorktimeService{
 				activeTime = startTime;
 			}
 			duration = endTime - activeTime;
-			if(duration > timeLimit) {
+			if(duration >= timeLimit) {
 				return activeTime + timeLimit;
 			}else {
 				timeLimit -= duration;

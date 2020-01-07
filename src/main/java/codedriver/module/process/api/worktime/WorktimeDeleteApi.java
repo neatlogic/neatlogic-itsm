@@ -24,7 +24,7 @@ public class WorktimeDeleteApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "process/worktime/delete";
+		return "worktime/delete";
 	}
 
 	@Override

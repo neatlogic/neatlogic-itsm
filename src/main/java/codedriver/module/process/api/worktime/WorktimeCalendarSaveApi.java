@@ -34,7 +34,7 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "process/worktime/calendar/save";
+		return "worktime/calendar/save";
 	}
 
 	@Override
@@ -98,7 +98,9 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 				}
 			}	
 		}
-		worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
+		if(worktimeRangeList.size() > 0) {
+			worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
+		}
 		return null;
 	}
 }

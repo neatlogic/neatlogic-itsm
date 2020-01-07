@@ -37,7 +37,7 @@ public class WorktimeSaveApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "process/worktime/save";
+		return "worktime/save";
 	}
 
 	@Override
