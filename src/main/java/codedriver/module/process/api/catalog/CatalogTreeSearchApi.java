@@ -1,9 +1,11 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,28 +58,72 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
-				
-		Map<String, ITree> uuidKeyMap = new HashMap<>();
-		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
-		List<ITree> children = null;
-		String parentUuid = null;
+		//查出有激活通道的服务目录uuid
+		Set<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList();
 		
+		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
+		String parentUuid = null;
+		CatalogVo parent = null;
+		//
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
 		if(catalogList != null && catalogList.size() > 0) {
-			for(ITree tree : catalogList) {
-				uuidKeyMap.put(tree.getUuid(), tree);
-				parentUuid = tree.getParentUuid();
-				children = parentUuidKeyMap.get(parentUuid);
-				if(children == null) {
-					children = new ArrayList<>();
-					parentUuidKeyMap.put(parentUuid, children);
+			for(CatalogVo catalogVo : catalogList) {
+				if(hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
+					catalogVo.setChildrenCount(1);
 				}
-				children.add(tree);				
+				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 			}
+			
+			for(CatalogVo catalogVo : catalogList) {
+				parentUuid = catalogVo.getParentUuid();
+				parent = uuidKeyMap.get(parentUuid);
+				if(parent != null) {
+					catalogVo.setParent(parent);
+				}				
+			}
+			
+			Collections.sort(catalogList, new Comparator<CatalogVo>() {
+
+				@Override
+				public int compare(CatalogVo o1, CatalogVo o2) {
+					List<Integer> sortList1 = o1.getSortList();
+					List<Integer> sortList2 = o2.getSortList();
+					int size1 = sortList1.size();
+					int size2 = sortList2.size();
+					int minIndex = 0;
+					int resultDefault = 0;
+					if(size1 > size2) {
+						minIndex = size2;
+						resultDefault = 1;
+					}else {
+						minIndex = size1;
+						resultDefault = -1;
+					}
+					for(int i = 0; i < minIndex; i++) {
+						if(sortList1.get(i).equals(sortList2.get(i))) {
+							continue;
+						}else {
+							return sortList1.get(i) - sortList2.get(i);
+						}
+					}
+					return resultDefault;
+				}}
+			);
+			
+			for(int index = catalogList.size() - 1; index >= 0; index--) {
+				CatalogVo catalogVo = catalogList.get(index);
+				if(catalogVo.getChildrenCount() == 0) {
+					System.out.println(catalogVo);
+					ITree parentCatalog = catalogVo.getParent();
+					if(parentCatalog != null) {
+						((CatalogVo)parentCatalog).removeChild(catalogVo);
+					}
+				}
+			}
+			
 		}
 		
 		ITree root = uuidKeyMap.get(ITree.ROOT_UUID);
-		buildTree(root, parentUuidKeyMap, catalogUuid);
 		
 		List<ITree> resultChildren = root.getChildren();
 		root.setChildren(null);
@@ -90,25 +136,4 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		return resultChildren;
 	}
 
-	/**
-	 * 
-	* @Description: 组装成树结构
-	* @param @param parent
-	* @param @param parentUuidKeyMap parentUuid为key的map
-	* @param @param selectedId 选中的uuid
-	* @return void
-	 */
-	public static void buildTree(ITree parent, Map<String, List<ITree>> parentUuidKeyMap, String selectedUuid) {
-		List<ITree> children = parentUuidKeyMap.get(parent.getUuid());
-		if(children != null && children.size() > 0) {
-			parent.setChildren(children);
-			for(ITree child : children) {
-				child.setParent(parent);
-				if(child.getUuid().equals(selectedUuid)) {
-					child.setSelectedCascade(true);
-				}
-				buildTree(child, parentUuidKeyMap, selectedUuid);				
-			}
-		}		
-	}
 }

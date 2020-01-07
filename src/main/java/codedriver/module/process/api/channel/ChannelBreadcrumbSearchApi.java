@@ -1,4 +1,4 @@
-package codedriver.module.process.api.catalog;
+package codedriver.module.process.api.channel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,45 +8,48 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
-import codedriver.framework.process.exception.CatalogNotFoundException;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.CatalogVo;
+import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ITree;
 @Service
-@Transactional
-public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
+public class ChannelBreadcrumbSearchApi extends ApiComponentBase {
 
+	@Autowired
+	private ChannelMapper channelMapper;
+	
 	@Autowired
 	private CatalogMapper catalogMapper;
 	
 	@Override
 	public String getToken() {
-		return "process/calalog/breadcrumb/search";
+		return "process/channel/breadcrumb/search";
 	}
 
 	@Override
 	public String getName() {
-		return "获取某个服务目录下的所有服务目录路径接口";
+		return "服务通道搜索接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-
 	@Input({
-		@Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务目录uuid"),
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
@@ -56,67 +59,73 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="breadcrumbList", type=ApiParamType.JSONARRAY, desc="服务目录路径列表"),
-		@Param(name="breadcrumbList[0].uuid", type=ApiParamType.STRING, desc="服务目录uuid"),
-		@Param(name="breadcrumbList[0].path", type=ApiParamType.STRING, desc="服务目录路径")
+		@Param(name="channelList",explode=ChannelVo[].class,desc="服务通道列表")
 	})
-	@Description(desc = "获取某个服务目录下的所有服务目录路径接口")
+	@Description(desc = "服务通道搜索接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String catalogUuid = jsonObj.getString("catalogUuid");
-		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
-			throw new CatalogNotFoundException(catalogUuid);
+		JSONObject resultObj = new JSONObject();
+		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
+		boolean needPage = channelVo.getNeedPage();
+		if(needPage) {
+			resultObj.put("currentPage", channelVo.getCurrentPage());
+			resultObj.put("pageSize", channelVo.getPageSize());
+			resultObj.put("pageCount", 0);
+			resultObj.put("rowNum", 0);
 		}
-		CatalogVo catalogVo = new CatalogVo();
-		catalogVo.setIsActive(1);
-		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
-		Set<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList();
-
-		Map<String, ITree> uuidKeyMap = new HashMap<>();
+		channelVo.setNeedPage(false);	
+		channelVo.setIsFavorite(0);
+		channelVo.setIsActive(1);
+		List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);
+		if(channelList == null || channelList.isEmpty()) {
+			return resultObj;
+		}
+		
 		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
 		List<ITree> children = null;
 		String parentUuid = null;
+		
+		for(ITree tree : channelList) {
+			parentUuid = tree.getParentUuid();
+			children = parentUuidKeyMap.get(parentUuid);
+			if(children == null) {
+				children = new ArrayList<>();
+				parentUuidKeyMap.put(parentUuid, children);
+			}
+			children.add(tree);
+		}
+		
+		Set<String> filterUuidSet = parentUuidKeyMap.keySet();
+		
+		CatalogVo catalogVo = new CatalogVo();
+		catalogVo.setIsActive(1);
+		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
+		
+		Map<String, ITree> uuidKeyMap = new HashMap<>();
+		Map<String, List<ITree>> catalogParentUuidKeyMap = new HashMap<>();
+		List<ITree> catalogChildren = null;
+		String catalogParentUuid = null;
 		if(catalogList != null && catalogList.size() > 0) {
 			for(ITree tree : catalogList) {
 				uuidKeyMap.put(tree.getUuid(), tree);
-				parentUuid = tree.getParentUuid();
-				children = parentUuidKeyMap.get(parentUuid);
-				if(children == null) {
-					children = new ArrayList<>();
-					parentUuidKeyMap.put(parentUuid, children);
+				catalogParentUuid = tree.getParentUuid();
+				catalogChildren = catalogParentUuidKeyMap.get(catalogParentUuid);
+				if(catalogChildren == null) {
+					catalogChildren = new ArrayList<>();
+					catalogParentUuidKeyMap.put(catalogParentUuid, catalogChildren);
 				}
-				children.add(tree);				
+				catalogChildren.add(tree);				
 			}
 		}
-		ITree parent = null;
+		ITree parent = new CatalogVo(CatalogVo.ROOT_UUID);
 		String catatlogPath = "";
-		List<Map<String, String>> calalogBreadcrumbList = new ArrayList<>();
-		if(!CatalogVo.ROOT_UUID.equals(catalogUuid)) {
-			parent = uuidKeyMap.get(catalogUuid);
-			catatlogPath = parent.getName();
-			Map<String, String> catalogPathMap = new HashMap<>();
-			catalogPathMap.put("uuid", catalogUuid);
-			catalogPathMap.put("path", catatlogPath);
-			calalogBreadcrumbList.add(catalogPathMap);
-		}else {
-			parent = new CatalogVo(catalogUuid);
-		}					
-		collectBreadcrumb(parent, parentUuidKeyMap, calalogBreadcrumbList, catatlogPath, hasActiveChannelCatalogUuidList);
+		List<Map<String, Object>> calalogBreadcrumbList = new ArrayList<>();
 		
-		JSONObject resultObj = new JSONObject();
-		boolean needPage = true;
-		if(jsonObj.containsKey("needPage")) {
-			needPage = jsonObj.getBooleanValue("needPage");
-		}
+		collectBreadcrumb(parent, catalogParentUuidKeyMap, calalogBreadcrumbList, catatlogPath, filterUuidSet, parentUuidKeyMap);
+		
 		if(needPage) {
-			int currentPage = 1;
-			if(jsonObj.containsKey("currentPage")) {
-				currentPage = jsonObj.getIntValue("currentPage");
-			}
-			int pageSize = 10;
-			if(jsonObj.containsKey("pageSize")) {
-				pageSize = jsonObj.getIntValue("pageSize");
-			}
+			int currentPage = channelVo.getCurrentPage();
+			int pageSize = channelVo.getPageSize();
 			int rowNum = calalogBreadcrumbList.size();
 			int pageCount = PageUtil.getPageCount(rowNum, pageSize);
 			int startNum = Math.max((currentPage - 1) * pageSize, 0);
@@ -136,15 +145,16 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 	
 	private void collectBreadcrumb(
 			ITree parent, 
-			Map<String, List<ITree>> parentUuidKeyMap, 
-			List<Map<String, String>> treePathList, 
+			Map<String, List<ITree>> catalogParentUuidKeyMap, 
+			List<Map<String, Object>> treePathList, 
 			String parentTreePath, 
-			Set<String> hasActiveChannelCatalogUuidList
+			Set<String> filterUuidSet,
+			Map<String, List<ITree>> parentUuidKeyMap
 			) {
 		String uuid = parent.getUuid();
-		List<ITree> children = parentUuidKeyMap.get(uuid);
+		List<ITree> children = catalogParentUuidKeyMap.get(uuid);
 		if(children != null && children.size() > 0) {
-			Map<String, String> treePathMap = null;
+			Map<String, Object> treePathMap = null;
 			StringBuilder treePathBuilder = null;
 			String treePath = null;
 			for(ITree child : children) {				
@@ -154,15 +164,15 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 				}
 				treePathBuilder.append(child.getName());
 				treePath = treePathBuilder.toString();
-				if(hasActiveChannelCatalogUuidList.contains(child.getUuid())) {
+				if(filterUuidSet.contains(child.getUuid())) {
 					treePathMap = new HashMap<>();
 					treePathMap.put("uuid", child.getUuid());
 					treePathMap.put("path", treePath);
+					treePathMap.put("channelList", parentUuidKeyMap.get(child.getUuid()));
 					treePathList.add(treePathMap);
 				}				
-				collectBreadcrumb(child, parentUuidKeyMap, treePathList, treePath, hasActiveChannelCatalogUuidList);
+				collectBreadcrumb(child, catalogParentUuidKeyMap, treePathList, treePath, filterUuidSet, parentUuidKeyMap);
 			}
 		}
 	}
-
 }

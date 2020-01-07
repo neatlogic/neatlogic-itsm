@@ -1,5 +1,7 @@
 package codedriver.module.process.dto;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,6 +49,10 @@ public class CatalogVo extends BasePageVo implements ITree{
 	private transient ITree parent;
 	
 	private transient Integer sort;
+	
+	private transient int childrenCount = 0;
+	
+	private transient List<Integer> sortList;
 	
 	public CatalogVo() {
 	}
@@ -137,6 +143,35 @@ public class CatalogVo extends BasePageVo implements ITree{
 	public void setChildren(List<ITree> children) {
 		this.children = children;
 	}
+	
+	public boolean addChild(ITree child) {
+		if(children == null) {
+			children = new ArrayList<>();
+		}
+		if(children.add(child)) {
+			childrenCount++;
+			return true;
+		}else {
+			return false;
+		}		
+	}
+	
+	public boolean removeChild(ITree child) {
+		if(children == null || children.isEmpty()) {
+			return false;
+		}
+		Iterator<ITree> iterator = children.iterator();
+		while(iterator.hasNext()) {
+			ITree iTree = iterator.next();
+			if(iTree.getUuid().equals(child.getUuid())) {
+				iterator.remove();
+				childrenCount--;
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	@Override
 	public ITree getParent() {
 		return parent;
@@ -144,6 +179,9 @@ public class CatalogVo extends BasePageVo implements ITree{
 	@Override
 	public void setParent(ITree parent) {
 		this.parent = parent;
+		if(parent instanceof CatalogVo) {
+			((CatalogVo)parent).addChild(this);
+		}
 	}
 	@Override
 	public void setOpenCascade(boolean open) {
@@ -181,6 +219,36 @@ public class CatalogVo extends BasePageVo implements ITree{
 
 	public void setRoleNameList(List<String> roleNameList) {
 		this.roleNameList = roleNameList;
+	}
+
+	public int getChildrenCount() {
+		return childrenCount;
+	}
+
+	public void setChildrenCount(int childrenCount) {
+		this.childrenCount = childrenCount;
+	}
+
+	public List<Integer> getSortList() {
+		if(sortList != null) {
+			return sortList;
+		}
+		if(parent != null && parent instanceof CatalogVo) {
+			sortList = new ArrayList<>(((CatalogVo)parent).getSortList());			
+		}else {
+			sortList = new ArrayList<>();
+		}		
+		sortList.add(sort);
+		return sortList;
+	}
+
+	public void setSortList(List<Integer> sortList) {
+		this.sortList = sortList;
+	}
+
+	@Override
+	public String toString() {
+		return "CatalogVo [uuid=" + uuid + ", name=" + name + ", parentUuid=" + parentUuid + ", sort=" + sort + ", sortList=" + sortList + "]";
 	}
 
 }
