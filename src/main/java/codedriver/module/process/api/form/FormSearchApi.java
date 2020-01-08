@@ -27,7 +27,7 @@ public class FormSearchApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "form/search";
+		return "process/form/search";
 	}
 
 	@Override

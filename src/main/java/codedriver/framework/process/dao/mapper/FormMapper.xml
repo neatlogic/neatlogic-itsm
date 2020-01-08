@@ -46,8 +46,8 @@
 		SELECT
 		f.`uuid`,
 		f.`name`,
-		f.`is_active`,
-		fv.`version`
+		f.`is_active` AS isActive,
+		fv.`version` AS activeVersion
 		FROM `form` f
 		JOIN `form_version` fv ON fv.`form_uuid`=f.`uuid` AND fv.`is_active` = 1
 		WHERE 1=1
@@ -126,12 +126,22 @@
 		form_uuid = #{value}
 	</select>
 
-	<select id="getFormReferenceList" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessVo">
+	<select id="getFormReferenceCount" parameterType="codedriver.module.process.dto.ProcessFormVo" resultType="int">
+	SELECT 
+	count(p.`uuid`)
+	FROM `process` p 
+	JOIN `process_form` pf ON pf.`process_uuid` = p.`uuid` AND pf.`form_uuid` = #{formUuid}
+	</select>
+	
+	<select id="getFormReferenceList" parameterType="codedriver.module.process.dto.ProcessFormVo" resultType="codedriver.module.process.dto.ProcessVo">
 	SELECT 
 	p.`uuid`,
 	p.`name` 
 	FROM `process` p 
-	JOIN `process_form` pf ON pf.`process_uuid` = p.`uuid` AND pf.`form_uuid` = #{fromUuid}
+	JOIN `process_form` pf ON pf.`process_uuid` = p.`uuid` AND pf.`form_uuid` = #{formUuid}
+	<if test="needPage">
+	LIMIT #{startNum}, #{pageSize}
+	</if>
 	</select>
 	
 	<update id="updateFormVersion" parameterType="codedriver.module.process.dto.FormVersionVo">

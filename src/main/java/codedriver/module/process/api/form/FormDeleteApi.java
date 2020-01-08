@@ -10,10 +10,8 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ProcessVo;
 
 @Service
 @Transactional
@@ -24,7 +22,7 @@ public class FormDeleteApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "form/delete";
+		return "process/form/delete";
 	}
 
 	@Override

@@ -23,7 +23,7 @@ public class FormUpdateApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "form/update";
+		return "process/form/update";
 	}
 
 	@Override
