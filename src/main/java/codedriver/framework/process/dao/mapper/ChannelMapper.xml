@@ -15,7 +15,7 @@
 	<if test="parentUuid != null">
 	 AND c.`parent_uuid` = #{parentUuid}
 	</if>
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if> 
 	<if test="isActive != null">
@@ -44,7 +44,7 @@
 	<if test="parentUuid != null">
 	 AND c.`parent_uuid` = #{parentUuid}
 	</if>
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if> 
 	<if test="isActive != null">
@@ -69,7 +69,7 @@
 	FROM
 	  `channel` c 	
 	WHERE 1=1
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if> 
 	<if test="isActive != null">
@@ -105,7 +105,7 @@
 	FROM `role` r
 	LEFT JOIN `channel_role` cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid}
 	WHERE 1=1 
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	AND r.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if>
 	<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
@@ -135,7 +135,7 @@
 	FROM role r
 	LEFT JOIN channel_role cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid}
 	WHERE 1=1 
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	AND r.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if>
 	<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
