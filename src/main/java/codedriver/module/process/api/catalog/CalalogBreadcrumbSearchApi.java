@@ -9,13 +9,13 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -23,14 +23,15 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.CatalogVo;
+import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ITree;
 @Service
-@Transactional
 public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
-	
+	@Autowired
+	private ChannelMapper channelMapper;
 	@Override
 	public String getToken() {
 		return "process/calalog/breadcrumb/search";
@@ -48,6 +49,7 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "catalogUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务目录uuid"),
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称", xss = true),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
@@ -68,7 +70,18 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
-		
+		String keyword = null;
+		Set<String> channelParentUuidList = null;
+		if(jsonObj.containsKey("keyword")) {
+			keyword = jsonObj.getString("keyword");
+			ChannelVo channelVo = new ChannelVo();
+			channelVo.setIsActive(1);
+			channelVo.setKeyword(keyword);
+			channelParentUuidList = channelMapper.searchChannelParentUuidList(channelVo);
+			if(channelParentUuidList == null || channelParentUuidList.isEmpty()) {
+				return null;
+			}
+		}
 		List<Map<String, Object>> calalogBreadcrumbList = new ArrayList<>();
 		Map<String, Object> treePathMap = null;
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
@@ -90,17 +103,35 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 			}
 			//排序
 			Collections.sort(catalogList);
-			//查出有激活通道的服务目录uuid
-			Set<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList();
 			
+			Set<String> hasActiveChannelCatalogUuidList = null;
+			if(keyword == null) {
+				//查出有激活通道的服务目录uuid
+				hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList();
+			}
+						
 			for(CatalogVo catalogVo : catalogList) {
-				System.out.println(catalogVo);
-				if(hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid()) && !ITree.ROOT_UUID.equals(catalogVo.getUuid()) && catalogVo.isAncestorOrSelf(catalogUuid)) {
-					treePathMap = new HashMap<>();
-					treePathMap.put("uuid", catalogVo.getUuid());
-					treePathMap.put("path", catalogVo.getNameList());
-					calalogBreadcrumbList.add(treePathMap);
+				if(ITree.ROOT_UUID.equals(catalogVo.getUuid())) {
+					continue;
 				}
+				if(keyword == null) {
+					if(!hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
+						continue;
+					}			
+					if(!catalogVo.isAncestorOrSelf(catalogUuid)) {
+						continue;
+					}
+				}else {
+					if(!channelParentUuidList.contains(catalogVo.getUuid())) {
+						continue;
+					}
+				}
+							
+				treePathMap = new HashMap<>();
+				treePathMap.put("uuid", catalogVo.getUuid());
+				treePathMap.put("path", catalogVo.getNameList());
+				treePathMap.put("keyword", keyword);
+				calalogBreadcrumbList.add(treePathMap);
 			}
 		}
 		

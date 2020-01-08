@@ -59,6 +59,12 @@ public class ChannelVo extends BasePageVo implements ITree{
 	
 	private String defaultPriorityUuid;
 	
+	private Integer allowDesc;
+	
+	private String help;
+	
+	private Integer isActiveHelp;
+	
 	private transient int childrenCount = 0;
 	
 	private transient List<Integer> sortList;
@@ -230,9 +236,27 @@ public class ChannelVo extends BasePageVo implements ITree{
 	public void setDefaultPriorityUuid(String defaultPriorityUuid) {
 		this.defaultPriorityUuid = defaultPriorityUuid;
 	}
+	public Integer getAllowDesc() {
+		return allowDesc;
+	}
+	public void setAllowDesc(Integer allowDesc) {
+		this.allowDesc = allowDesc;
+	}
+	public String getHelp() {
+		return help;
+	}
+	public void setHelp(String help) {
+		this.help = help;
+	}
+	public Integer getIsActiveHelp() {
+		return isActiveHelp;
+	}
+	public void setIsActiveHelp(Integer isActiveHelp) {
+		this.isActiveHelp = isActiveHelp;
+	}
 	@Override
 	public int getChildrenCount() {
-		return 0;
+		return childrenCount;
 	}
 	@Override
 	public void setChildrenCount(int count) {

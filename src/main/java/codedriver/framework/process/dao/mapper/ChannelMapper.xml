@@ -81,14 +81,17 @@
 	SELECT 
 	  c.`uuid`,
 	  c.`name`,
-	  c.`parent_uuid` as parentUuid,
-	  c.`is_active` as isActive,
+	  c.`parent_uuid` AS parentUuid,
+	  c.`is_active` AS isActive,
 	  c.`icon`,
 	  c.`color`,
 	  c.`desc`,
 	  c.`sort`,
-	  cp.`process_uuid` as processUuid,
-	  cw.`worktime_uuid` as worktimeUuid
+	  c.`allow_desc` AS allowDesc,
+	  c.`help`,
+	  c.`is_active_help` AS isActiveHelp,
+	  cp.`process_uuid` AS processUuid,
+	  cw.`worktime_uuid` AS worktimeUuid
 	FROM
 	  `channel` c
 	JOIN `channel_process` cp ON cp.channel_uuid = c.uuid
@@ -206,7 +209,10 @@
 	  `icon`,
 	  `color`,
 	  `desc`,
-	  `sort`
+	  `sort`,
+	  `allow_desc`,
+	  `help`,
+	  `is_active_help`
 	) 
 	VALUES
 	  (
@@ -217,7 +223,10 @@
 	    #{icon},
 	    #{color},
 	    #{desc},
-	    #{sort}
+	    #{sort},
+	    #{allowDesc},
+	  	#{help},
+	  	#{isActiveHelp}
 	  )
 	</insert>
 	
