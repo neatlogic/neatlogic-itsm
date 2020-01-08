@@ -1,10 +1,12 @@
 package codedriver.module.process.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.process.exception.channel.ChannelUnsupportedOperationException;
 import codedriver.framework.restful.annotation.EntityField;
 
 public class ChannelVo extends BasePageVo implements ITree{
@@ -56,6 +58,18 @@ public class ChannelVo extends BasePageVo implements ITree{
 	private List<String> priorityUuidList;
 	
 	private String defaultPriorityUuid;
+	
+	private Integer allowDesc;
+	
+	private String help;
+	
+	private Integer isActiveHelp;
+	
+	private transient int childrenCount = 0;
+	
+	private transient List<Integer> sortList;
+	
+	private transient List<String> nameList;
 	
 	@Override
 	public String getUuid() {
@@ -164,7 +178,7 @@ public class ChannelVo extends BasePageVo implements ITree{
 	}
 	@Override
 	public void setChildren(List<ITree> children) {
-		
+		throw new ChannelUnsupportedOperationException(this.uuid, "设置子节点");
 	}
 	@Override
 	public ITree getParent() {
@@ -172,7 +186,8 @@ public class ChannelVo extends BasePageVo implements ITree{
 	}
 	@Override
 	public void setParent(ITree parent) {
-		this.parent = parent;		
+		this.parent = parent;
+		parent.addChild(this);
 	}
 	@Override
 	public void setOpenCascade(boolean open) {
@@ -220,5 +235,85 @@ public class ChannelVo extends BasePageVo implements ITree{
 	}
 	public void setDefaultPriorityUuid(String defaultPriorityUuid) {
 		this.defaultPriorityUuid = defaultPriorityUuid;
+	}
+	public Integer getAllowDesc() {
+		return allowDesc;
+	}
+	public void setAllowDesc(Integer allowDesc) {
+		this.allowDesc = allowDesc;
+	}
+	public String getHelp() {
+		return help;
+	}
+	public void setHelp(String help) {
+		this.help = help;
+	}
+	public Integer getIsActiveHelp() {
+		return isActiveHelp;
+	}
+	public void setIsActiveHelp(Integer isActiveHelp) {
+		this.isActiveHelp = isActiveHelp;
+	}
+	@Override
+	public int getChildrenCount() {
+		return childrenCount;
+	}
+	@Override
+	public void setChildrenCount(int count) {
+		throw new ChannelUnsupportedOperationException(this.uuid, "设置子节点个数");
+	}
+	@Override
+	public List<Integer> getSortList() {
+		if(sortList != null) {
+			return sortList;
+		}
+		if(parent != null) {
+			sortList = new ArrayList<>(parent.getSortList());			
+		}else {
+			sortList = new ArrayList<>();
+		}		
+		sortList.add(sort);
+		return sortList;
+	}
+	@Override
+	public void setSortList(List<Integer> sortList) {
+		this.sortList = sortList;
+		
+	}
+	@Override
+	public boolean addChild(ITree child) {
+		throw new ChannelUnsupportedOperationException(this.uuid, "添加子节点");
+	}
+	@Override
+	public boolean removeChild(ITree child) {
+		throw new ChannelUnsupportedOperationException(this.uuid, "删除子节点");
+	}
+	@Override
+	public List<String> getNameList() {
+		if(nameList != null) {
+			return nameList;
+		}
+		if(parent != null && !ITree.ROOT_UUID.equals(parent.getUuid())) {
+			nameList = new ArrayList<>(parent.getNameList());
+		}else {
+			nameList = new ArrayList<>();
+		}
+		nameList.add(name);
+		return nameList;
+	}
+
+	@Override
+	public void setNameList(List<String> nameList) {
+		this.nameList = nameList;		
+	}
+	@Override
+	public boolean isAncestorOrSelf(String uuid) {
+		if(this.uuid.equals(uuid)) {
+			return true;
+		}
+		if(parent == null) {
+			return false;
+		}	
+		return parent.isAncestorOrSelf(uuid);
 	}	
 }

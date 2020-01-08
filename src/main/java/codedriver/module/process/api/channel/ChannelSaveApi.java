@@ -15,6 +15,7 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelIllegalParameterException;
 import codedriver.framework.process.exception.channel.ChannelNameRepeatException;
@@ -25,6 +26,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.ChannelPriorityVo;
 import codedriver.module.process.dto.ChannelVo;
+import codedriver.module.process.dto.ITree;
 
 @Service
 @Transactional
@@ -41,6 +43,9 @@ public class ChannelSaveApi extends ApiComponentBase {
 	
 	@Autowired
 	private PriorityMapper priorityMapper;
+	
+	@Autowired
+	private WorktimeMapper worktimeMapper;
 	
 	@Override
 	public String getToken() {
@@ -68,7 +73,9 @@ public class ChannelSaveApi extends ApiComponentBase {
 		@Param(name = "desc", type = ApiParamType.STRING, desc = "通道说明", length = 200, xss = true),
 		@Param(name = "icon", type = ApiParamType.STRING, desc = "图标"),
 		@Param(name = "color", type = ApiParamType.STRING, desc = "颜色"),
-		@Param(name = "allow_desc", type = ApiParamType.ENUM, isRequired = true, desc = "是否显示上报页描述", rule = "0,1"),
+		@Param(name = "allowDesc", type = ApiParamType.ENUM, isRequired = true, desc = "是否显示上报页描述", rule = "0,1"),
+		@Param(name = "isActiveHelp", type = ApiParamType.ENUM, desc = "是否激活描述", rule = "0,1"),
+		@Param(name = "help", type = ApiParamType.STRING, desc = "描述帮助"),
 		@Param(name = "defaultPriorityUuid", type = ApiParamType.STRING, isRequired = true, desc = "默认优先级uuid"),
 		@Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "关联优先级列表"),
 		@Param(name = "priorityUuidList[0]", type = ApiParamType.STRING, isRequired = false, desc = "优先级uuid")
@@ -82,6 +89,9 @@ public class ChannelSaveApi extends ApiComponentBase {
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
 		//获取父级信息
 		String parentUuid = channelVo.getParentUuid();
+		if(ITree.ROOT_UUID.equals(parentUuid)) {
+			throw new ChannelIllegalParameterException("不能在根目录下创建通道，parentUuid=" + parentUuid);
+		}
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
 		}
@@ -93,6 +103,7 @@ public class ChannelSaveApi extends ApiComponentBase {
 		ChannelVo existedChannel = channelMapper.getChannelByUuid(uuid);
 		if(existedChannel == null) {//新增
 			channelVo.setUuid(null);
+			uuid = channelVo.getUuid();
 			sort = channelMapper.getMaxSortByParentUuid(parentUuid) + 1;
 		}else {//修改
 			channelMapper.deleteChannelPriorityByChannelUuid(uuid);
@@ -104,7 +115,10 @@ public class ChannelSaveApi extends ApiComponentBase {
 			throw new ChannelIllegalParameterException("流程图：'" + channelVo.getProcessUuid() + "'不存在");
 		}
 		channelMapper.replaceChannelProcess(uuid, channelVo.getProcessUuid());
-		//TODO linbq判断工作时间窗口是否存在
+
+		if(worktimeMapper.checkWorktimeIsExists(channelVo.getWorktimeUuid()) == 0) {
+			throw new ChannelIllegalParameterException("工作时间窗口：'" + channelVo.getWorktimeUuid() + "'不存在");
+		}
 		channelMapper.replaceChannelWorktime(uuid, channelVo.getWorktimeUuid());
 		
 		String defaultPriorityUuid = channelVo.getDefaultPriorityUuid();

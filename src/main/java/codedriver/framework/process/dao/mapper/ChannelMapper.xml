@@ -15,9 +15,12 @@
 	<if test="parentUuid != null">
 	 AND c.`parent_uuid` = #{parentUuid}
 	</if>
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if> 
+	<if test="isActive != null">
+	AND c.`is_active` = #{isActive}
+	</if>
 	</select>
 	
 	<select id="searchChannelList" resultType="codedriver.module.process.dto.ChannelVo">
@@ -41,9 +44,12 @@
 	<if test="parentUuid != null">
 	 AND c.`parent_uuid` = #{parentUuid}
 	</if>
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if> 
+	<if test="isActive != null">
+	AND c.`is_active` = #{isActive}
+	</if>
 	<choose>
 		<when test="isFavorite == 1">
 		ORDER BY cu.`insert_time` DESC
@@ -57,18 +63,35 @@
 	</if>
 	</select>
 
+	<select id="searchChannelParentUuidList" parameterType="codedriver.module.process.dto.ChannelVo" resultType="java.lang.String">
+	SELECT 
+	  c.`parent_uuid` 
+	FROM
+	  `channel` c 	
+	WHERE 1=1
+	<if test="keyword != null and keyword != ''">
+	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
+	</if> 
+	<if test="isActive != null">
+	AND c.`is_active` = #{isActive}
+	</if>
+	</select>
+	
 	<select id="getChannelByUuid" resultType="codedriver.module.process.dto.ChannelVo">
 	SELECT 
 	  c.`uuid`,
 	  c.`name`,
-	  c.`parent_uuid` as parentUuid,
-	  c.`is_active` as isActive,
+	  c.`parent_uuid` AS parentUuid,
+	  c.`is_active` AS isActive,
 	  c.`icon`,
 	  c.`color`,
 	  c.`desc`,
 	  c.`sort`,
-	  cp.`process_uuid` as processUuid,
-	  cw.`worktime_uuid` as worktimeUuid
+	  c.`allow_desc` AS allowDesc,
+	  c.`help`,
+	  c.`is_active_help` AS isActiveHelp,
+	  cp.`process_uuid` AS processUuid,
+	  cw.`worktime_uuid` AS worktimeUuid
 	FROM
 	  `channel` c
 	JOIN `channel_process` cp ON cp.channel_uuid = c.uuid
@@ -82,7 +105,7 @@
 	FROM `role` r
 	LEFT JOIN `channel_role` cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid}
 	WHERE 1=1 
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	AND r.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if>
 	<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
@@ -112,7 +135,7 @@
 	FROM role r
 	LEFT JOIN channel_role cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid}
 	WHERE 1=1 
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	AND r.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if>
 	<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
@@ -186,7 +209,10 @@
 	  `icon`,
 	  `color`,
 	  `desc`,
-	  `sort`
+	  `sort`,
+	  `allow_desc`,
+	  `help`,
+	  `is_active_help`
 	) 
 	VALUES
 	  (
@@ -197,7 +223,10 @@
 	    #{icon},
 	    #{color},
 	    #{desc},
-	    #{sort}
+	    #{sort},
+	    #{allowDesc},
+	  	#{help},
+	  	#{isActiveHelp}
 	  )
 	</insert>
 	

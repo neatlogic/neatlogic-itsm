@@ -52,7 +52,7 @@
 	
 	<select id="getHasActiveChannelCatalogUuidList" resultType="java.lang.String">
 	SELECT 
-	ca.`uuid` 
+	DISTINCT ca.`uuid` 
 	FROM catalog ca
 	JOIN channel ch ON ch.`parent_uuid`=ca.`uuid` AND ch.`is_active` = 1
 	WHERE ca.`is_active` = 1
@@ -66,18 +66,20 @@
 		<id column="uuid" property="uuid"/>
 		<result column="name" property="name"/>
 		<result column="parent_uuid" property="parentUuid"/>
+		<result column="sort" property="sort"/>
 	</resultMap>
 	
 	<select id="getCatalogListForTree" resultMap="catalogMap">
 	SELECT 
 	  `uuid`,
 	  `name`,
-	  `parent_uuid`
+	  `parent_uuid`,
+	  `sort`
 	FROM `catalog` 
 	 <if test="isActive != null">
 	 WHERE `is_active` = #{isActive}
 	 </if>
-	 ORDER BY `sort`
+	 ORDER BY `parent_uuid`, `sort`
 	</select>
 	
 	<insert id="replaceCatalog">
