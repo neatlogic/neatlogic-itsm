@@ -45,7 +45,7 @@ public class FormServiceImpl implements FormService {
 			formVo.setRowNum(rowNum);
 			formVo.setPageCount(PageUtil.getPageCount(rowNum, formVo.getPageSize()));
 		}
-		return formMapper.searchForm(formVo);
+		return formMapper.searchFormList(formVo);
 	}
 
 	@Override

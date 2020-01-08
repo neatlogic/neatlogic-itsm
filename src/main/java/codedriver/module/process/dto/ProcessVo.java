@@ -37,8 +37,8 @@ public class ProcessVo extends BasePageVo implements Serializable {
 	private String typeName;
 
 	@EntityField(name = "是否激活",
-			type = ApiParamType.STRING)
-	private Integer isActive = 1;
+			type = ApiParamType.INTEGER)
+	private Integer isActive;
 
 	@EntityField(name = "流程图配置",
 			type = ApiParamType.STRING)
