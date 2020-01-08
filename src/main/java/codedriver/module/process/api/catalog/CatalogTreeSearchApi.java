@@ -82,9 +82,6 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 			}
 			//排序
 			Collections.sort(catalogList);
-//			for(CatalogVo catalogVo : catalogList) {
-//				System.out.println(catalogVo);
-//			}
 			
 			for(int index = catalogList.size() - 1; index >= 0; index--) {
 				CatalogVo catalogVo = catalogList.get(index);
@@ -92,7 +89,6 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 					catalogVo.setSelectedCascade(true);
 				}
 				if(catalogVo.getChildrenCount() == 0) {
-//					System.out.println(catalogVo);
 					ITree parentCatalog = catalogVo.getParent();
 					if(parentCatalog != null) {
 						((CatalogVo)parentCatalog).removeChild(catalogVo);

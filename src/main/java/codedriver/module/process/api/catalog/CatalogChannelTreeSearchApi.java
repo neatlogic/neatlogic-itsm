@@ -1,6 +1,5 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -68,21 +66,12 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		}				
 		
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
-//		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
-//		List<ITree> children = null;
 		String parentUuid = null;
 		ITree parent = null;
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(null);
 		if(catalogList != null && catalogList.size() > 0) {
 			for(CatalogVo catalogVo : catalogList) {
-				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);
-//				parentUuid = tree.getParentUuid();
-//				children = parentUuidKeyMap.get(parentUuid);
-//				if(children == null) {
-//					children = new ArrayList<>();
-//					parentUuidKeyMap.put(parentUuid, children);
-//				}
-//				children.add(tree);				
+				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);			
 			}
 			for(CatalogVo catalogVo : catalogList) {
 				parentUuid = catalogVo.getParentUuid();
@@ -105,44 +94,11 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 						channelVo.setOpenCascade(true);
 					}
 				}
-//				uuidKeyMap.put(channelVo.getUuid(), channelVo);
-//				parentUuid = tree.getParentUuid();
-//				children = parentUuidKeyMap.get(parentUuid);
-//				if(children == null) {
-//					children = new ArrayList<>();
-//					parentUuidKeyMap.put(parentUuid, children);
-//				}
-//				children.add(tree);
 			}
 		}
 		
-		ITree root = uuidKeyMap.get(ITree.ROOT_UUID);
-//		buildTree(root, parentUuidKeyMap, catalogUuid);
-		
+		ITree root = uuidKeyMap.get(ITree.ROOT_UUID);		
 		List<ITree> resultChildren = root.getChildren();
 		return resultChildren;
 	}
-
-	/**
-	 * 
-	* @Description: 组装成树结构
-	* @param @param parent
-	* @param @param parentUuidKeyMap parentUuid为key的map
-	* @param @param selectedId 选中的uuid
-	* @return void
-	 */
-//	public static void buildTree(ITree parent, Map<String, List<ITree>> parentUuidKeyMap, String selectedUuid) {
-//		List<ITree> children = parentUuidKeyMap.get(parent.getUuid());
-//		if(children != null && children.size() > 0) {
-//			parent.setChildren(children);
-//			for(ITree child : children) {
-//				child.setParent(parent);
-//				if(child.getUuid().equals(selectedUuid)) {
-//					child.setSelected(true);
-//					child.setOpenCascade(true);
-//				}
-//				buildTree(child, parentUuidKeyMap, selectedUuid);				
-//			}
-//		}		
-//	}
 }

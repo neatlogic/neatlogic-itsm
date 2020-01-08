@@ -60,7 +60,9 @@ public class ChannelBreadcrumbSearchApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="channelList",explode=ChannelVo[].class,desc="服务通道列表")
+		@Param(name="breadcrumbList", type=ApiParamType.JSONARRAY, desc="服务目录路径列表"),
+		@Param(name="breadcrumbList[0].uuid", type=ApiParamType.STRING, desc="服务目录uuid"),
+		@Param(name="breadcrumbList[0].path", type=ApiParamType.JSONARRAY, desc="服务目录路径")
 	})
 	@Description(desc = "服务通道搜索接口")
 	@Override
@@ -74,35 +76,13 @@ public class ChannelBreadcrumbSearchApi extends ApiComponentBase {
 			resultObj.put("pageCount", 0);
 			resultObj.put("rowNum", 0);
 		}
-//		channelVo.setNeedPage(false);
-		
-		channelVo.setIsFavorite(0);
 		channelVo.setIsActive(1);
-//		List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);
+
 		Set<String> channelParentUuidList = channelMapper.searchChannelParentUuidList(channelVo);
 		if(channelParentUuidList == null || channelParentUuidList.isEmpty()) {
 			return resultObj;
 		}
 		
-//		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
-//		List<ITree> children = null;
-//		String parentUuid = null;
-//		
-//		for(ITree tree : channelList) {
-//			parentUuid = tree.getParentUuid();
-//			children = parentUuidKeyMap.get(parentUuid);
-//			if(children == null) {
-//				children = new ArrayList<>();
-//				parentUuidKeyMap.put(parentUuid, children);
-//			}
-//			children.add(tree);
-//		}
-//		
-//		Set<String> filterUuidSet = parentUuidKeyMap.keySet();
-		
-//		CatalogVo catalogVo = new CatalogVo();
-//		catalogVo.setIsActive(1);
-//		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
 		List<Map<String, Object>> calalogBreadcrumbList = new ArrayList<>();
 		Map<String, Object> treePathMap = null;
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
@@ -136,28 +116,6 @@ public class ChannelBreadcrumbSearchApi extends ApiComponentBase {
 			}
 		}
 		
-//		Map<String, ITree> uuidKeyMap = new HashMap<>();
-//		Map<String, List<ITree>> catalogParentUuidKeyMap = new HashMap<>();
-//		List<ITree> catalogChildren = null;
-//		String catalogParentUuid = null;
-//		if(catalogList != null && catalogList.size() > 0) {
-//			for(ITree tree : catalogList) {
-//				uuidKeyMap.put(tree.getUuid(), tree);
-//				catalogParentUuid = tree.getParentUuid();
-//				catalogChildren = catalogParentUuidKeyMap.get(catalogParentUuid);
-//				if(catalogChildren == null) {
-//					catalogChildren = new ArrayList<>();
-//					catalogParentUuidKeyMap.put(catalogParentUuid, catalogChildren);
-//				}
-//				catalogChildren.add(tree);				
-//			}
-//		}
-//		parent = new CatalogVo(CatalogVo.ROOT_UUID);
-//		String catatlogPath = "";
-		
-		
-//		collectBreadcrumb(parent, catalogParentUuidKeyMap, calalogBreadcrumbList, catatlogPath, filterUuidSet, parentUuidKeyMap);
-		
 		if(needPage) {
 			int currentPage = channelVo.getCurrentPage();
 			int pageSize = channelVo.getPageSize();
@@ -178,36 +136,4 @@ public class ChannelBreadcrumbSearchApi extends ApiComponentBase {
 		return resultObj;
 	}
 	
-//	private void collectBreadcrumb(
-//			ITree parent, 
-//			Map<String, List<ITree>> catalogParentUuidKeyMap, 
-//			List<Map<String, Object>> treePathList, 
-//			String parentTreePath, 
-//			Set<String> filterUuidSet,
-//			Map<String, List<ITree>> parentUuidKeyMap
-//			) {
-//		String uuid = parent.getUuid();
-//		List<ITree> children = catalogParentUuidKeyMap.get(uuid);
-//		if(children != null && children.size() > 0) {
-//			Map<String, Object> treePathMap = null;
-//			StringBuilder treePathBuilder = null;
-//			String treePath = null;
-//			for(ITree child : children) {				
-//				treePathBuilder = new StringBuilder(parentTreePath);
-//				if(!ITree.ROOT_UUID.equals(uuid)) {
-//					treePathBuilder.append("->");
-//				}
-//				treePathBuilder.append(child.getName());
-//				treePath = treePathBuilder.toString();
-//				if(filterUuidSet.contains(child.getUuid())) {
-//					treePathMap = new HashMap<>();
-//					treePathMap.put("uuid", child.getUuid());
-//					treePathMap.put("path", treePath);
-//					treePathMap.put("channelList", parentUuidKeyMap.get(child.getUuid()));
-//					treePathList.add(treePathMap);
-//				}				
-//				collectBreadcrumb(child, catalogParentUuidKeyMap, treePathList, treePath, filterUuidSet, parentUuidKeyMap);
-//			}
-//		}
-//	}
 }

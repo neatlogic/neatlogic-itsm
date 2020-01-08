@@ -15,6 +15,7 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelIllegalParameterException;
 import codedriver.framework.process.exception.channel.ChannelNameRepeatException;
@@ -42,6 +43,9 @@ public class ChannelSaveApi extends ApiComponentBase {
 	
 	@Autowired
 	private PriorityMapper priorityMapper;
+	
+	@Autowired
+	private WorktimeMapper worktimeMapper;
 	
 	@Override
 	public String getToken() {
@@ -108,7 +112,10 @@ public class ChannelSaveApi extends ApiComponentBase {
 			throw new ChannelIllegalParameterException("流程图：'" + channelVo.getProcessUuid() + "'不存在");
 		}
 		channelMapper.replaceChannelProcess(uuid, channelVo.getProcessUuid());
-		//TODO linbq判断工作时间窗口是否存在
+
+		if(worktimeMapper.checkWorktimeIsExists(channelVo.getWorktimeUuid()) == 0) {
+			throw new ChannelIllegalParameterException("工作时间窗口：'" + channelVo.getWorktimeUuid() + "'不存在");
+		}
 		channelMapper.replaceChannelWorktime(uuid, channelVo.getWorktimeUuid());
 		
 		String defaultPriorityUuid = channelVo.getDefaultPriorityUuid();
