@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.module.process.constvalue.ProcessStepMode;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 //需要把事务隔离级别调低，避免并发insert时因为gap lock导致deadlock
@@ -47,7 +48,6 @@ public interface IProcessStepHandler {
 	 * @return Boolean
 	 */
 	public Boolean isAllowStart();
-
 
 	/**
 	 * 
@@ -132,17 +132,17 @@ public interface IProcessStepHandler {
 	public int accept(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
-	 * @Author: chenqiwei
-	 * @Time:Aug 7, 2019
-	 * @Description: 转移流程步骤
-	 * @param @param
-	 *            processTaskStepVo
-	 * @param @return
-	 * @return int
+	* @Author: chenqiwei
+	* @Time:Jan 7, 2020
+	* @Description: 转交步骤处理人 
+	* @param @param currentProcessTaskStepVo
+	* @param @param workerList
+	* @param @return 
+	* @return int
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
-	public int transfer(ProcessTaskStepVo currentProcessTaskStepVo);
+	public int transfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList);
 
 	/**
 	 * @Author: chenqiwei
@@ -222,14 +222,15 @@ public interface IProcessStepHandler {
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
 	public int recoverProcessTask(ProcessTaskVo currentProcessTaskVo);
-	
+
 	/***
-	* @Author: chenqiwei
-	* @Time:Jan 7, 2020
-	* @Description: 恢复终止流程步骤 
-	* @param @param processTaskStepVo
-	* @param @return 
-	* @return int
+	 * @Author: chenqiwei
+	 * @Time:Jan 7, 2020
+	 * @Description: 恢复终止流程步骤
+	 * @param @param
+	 *            processTaskStepVo
+	 * @param @return
+	 * @return int
 	 */
 	@Transactional(propagation = Propagation.REQUIRED,
 			isolation = Isolation.READ_COMMITTED)
