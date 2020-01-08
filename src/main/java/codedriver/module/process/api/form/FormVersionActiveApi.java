@@ -2,6 +2,7 @@ package codedriver.module.process.api.form;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -15,6 +16,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.FormVersionVo;
 @Service
+@Transactional
 public class FormVersionActiveApi extends ApiComponentBase {
 
 	@Autowired
