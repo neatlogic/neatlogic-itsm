@@ -2,6 +2,7 @@ package codedriver.module.process.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +23,7 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 	private Integer isActive;
 	private String content;
 	private String editor;
-	private String editTime;
+	private Date editTime;
 	private List<FormAttributeVo> formAttributeList;
 
 	public String getUuid() {
@@ -71,11 +72,11 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 		this.editor = editor;
 	}
 
-	public String getEditTime() {
+	public Date getEditTime() {
 		return editTime;
 	}
 
-	public void setEditTime(String editTime) {
+	public void setEditTime(Date editTime) {
 		this.editTime = editTime;
 	}
 
@@ -99,12 +100,46 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 						JSONObject obj = cellObj.getJSONObject(key);
 						if (obj.containsKey("data")) {
 							JSONObject dataObj = obj.getJSONObject("data");
-							if (dataObj.containsKey("uuid") && StringUtils.isNotBlank(dataObj.getString("uuid"))) {
-								if (formAttributeList == null) {
-									formAttributeList = new ArrayList<>();
+							String uuid = null;
+							if (dataObj.containsKey("uuid")) {
+								uuid = dataObj.getString("uuid");
+								if(StringUtils.isBlank(uuid)) {
+									continue;
 								}
-								formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), dataObj.getString("uuid"), dataObj.toString()));
+							}else {
+								continue;
 							}
+							String label = null;
+							if (dataObj.containsKey("label")) {
+								label = dataObj.getString("label");
+								if(StringUtils.isBlank(label)) {
+									continue;
+								}
+							}else {
+								continue;
+							}
+							String type = null;
+							if (dataObj.containsKey("type")) {
+								type = dataObj.getString("type");
+								if(StringUtils.isBlank(type)) {
+									continue;
+								}
+							}else {
+								continue;
+							}
+							String handler = null;
+							if (dataObj.containsKey("handler")) {
+								handler = dataObj.getString("handler");
+								if(StringUtils.isBlank(handler)) {
+									continue;
+								}
+							}else {
+								continue;
+							}
+							if (formAttributeList == null) {
+								formAttributeList = new ArrayList<>();
+							}
+							formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), uuid, label, type, handler, dataObj.toString()));
 						}
 					}
 				}

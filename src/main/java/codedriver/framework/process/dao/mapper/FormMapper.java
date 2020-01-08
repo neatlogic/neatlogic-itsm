@@ -33,6 +33,12 @@ public interface FormMapper {
 
 	public Integer getMaxVersionByFormUuid(String formUuid);
 
+	public int checkFormIsExists(String uuid);
+
+	public int checkFormNameIsRepeat(FormVo formVo);
+
+	public int checkFormVersionIsExists(String uuid);
+
 	public int replaceForm(FormVo formVo);
 
 	public int resetFormVersionIsActiveByFormUuid(String formUuid);
@@ -52,4 +58,6 @@ public interface FormMapper {
 	public int deleteFormVersionByFormUuid(String formUuid);
 
 	public int deleteProcessFormByFormUuid(String formUuid);
+
+	public void deleteFormVersionByUuid(String uuid);
 }
