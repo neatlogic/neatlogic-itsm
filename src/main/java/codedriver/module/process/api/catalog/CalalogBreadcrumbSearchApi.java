@@ -1,6 +1,7 @@
 package codedriver.module.process.api.catalog;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,41 +68,77 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
-		CatalogVo catalogVo = new CatalogVo();
-		catalogVo.setIsActive(1);
-		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
-		Set<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList();
+		
+//		CatalogVo catalogVo = new CatalogVo();
+//		catalogVo.setIsActive(1);
+//		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
+		
 
+//		Map<String, ITree> uuidKeyMap = new HashMap<>();
+//		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
+//		List<ITree> children = null;
+//		String parentUuid = null;
+//		if(catalogList != null && catalogList.size() > 0) {
+//			for(ITree tree : catalogList) {
+//				uuidKeyMap.put(tree.getUuid(), tree);
+//				parentUuid = tree.getParentUuid();
+//				children = parentUuidKeyMap.get(parentUuid);
+//				if(children == null) {
+//					children = new ArrayList<>();
+//					parentUuidKeyMap.put(parentUuid, children);
+//				}
+//				children.add(tree);				
+//			}
+//		}
+//		ITree parent = null;
+//		String catatlogPath = "";
+//		List<Map<String, String>> calalogBreadcrumbList = new ArrayList<>();
+//		if(!CatalogVo.ROOT_UUID.equals(catalogUuid)) {
+//			parent = uuidKeyMap.get(catalogUuid);
+//			catatlogPath = parent.getName();
+//			Map<String, String> catalogPathMap = new HashMap<>();
+//			catalogPathMap.put("uuid", catalogUuid);
+//			catalogPathMap.put("path", catatlogPath);
+//			calalogBreadcrumbList.add(catalogPathMap);
+//		}else {
+//			parent = new CatalogVo(catalogUuid);
+//		}					
+//		collectBreadcrumb(parent, parentUuidKeyMap, calalogBreadcrumbList, catatlogPath, hasActiveChannelCatalogUuidList);
+		
+		List<Map<String, Object>> calalogBreadcrumbList = new ArrayList<>();
+		Map<String, Object> treePathMap = null;
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
-		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
-		List<ITree> children = null;
 		String parentUuid = null;
+		ITree parent = null;
+		//
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
 		if(catalogList != null && catalogList.size() > 0) {
-			for(ITree tree : catalogList) {
-				uuidKeyMap.put(tree.getUuid(), tree);
-				parentUuid = tree.getParentUuid();
-				children = parentUuidKeyMap.get(parentUuid);
-				if(children == null) {
-					children = new ArrayList<>();
-					parentUuidKeyMap.put(parentUuid, children);
+			for(CatalogVo catalogVo : catalogList) {
+				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
+			}
+			//设置父级
+			for(CatalogVo catalogVo : catalogList) {
+				parentUuid = catalogVo.getParentUuid();
+				parent = uuidKeyMap.get(parentUuid);
+				if(parent != null) {
+					catalogVo.setParent(parent);
+				}				
+			}
+			//排序
+			Collections.sort(catalogList);
+			//查出有激活通道的服务目录uuid
+			Set<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList();
+			
+			for(CatalogVo catalogVo : catalogList) {
+				System.out.println(catalogVo);
+				if(hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid()) && !ITree.ROOT_UUID.equals(catalogVo.getUuid()) && catalogVo.isAncestorOrSelf(catalogUuid)) {
+					treePathMap = new HashMap<>();
+					treePathMap.put("uuid", catalogVo.getUuid());
+					treePathMap.put("path", catalogVo.getNameList());
+					calalogBreadcrumbList.add(treePathMap);
 				}
-				children.add(tree);				
 			}
 		}
-		ITree parent = null;
-		String catatlogPath = "";
-		List<Map<String, String>> calalogBreadcrumbList = new ArrayList<>();
-		if(!CatalogVo.ROOT_UUID.equals(catalogUuid)) {
-			parent = uuidKeyMap.get(catalogUuid);
-			catatlogPath = parent.getName();
-			Map<String, String> catalogPathMap = new HashMap<>();
-			catalogPathMap.put("uuid", catalogUuid);
-			catalogPathMap.put("path", catatlogPath);
-			calalogBreadcrumbList.add(catalogPathMap);
-		}else {
-			parent = new CatalogVo(catalogUuid);
-		}					
-		collectBreadcrumb(parent, parentUuidKeyMap, calalogBreadcrumbList, catatlogPath, hasActiveChannelCatalogUuidList);
 		
 		JSONObject resultObj = new JSONObject();
 		boolean needPage = true;
@@ -134,35 +171,35 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		return resultObj;
 	}
 	
-	private void collectBreadcrumb(
-			ITree parent, 
-			Map<String, List<ITree>> parentUuidKeyMap, 
-			List<Map<String, String>> treePathList, 
-			String parentTreePath, 
-			Set<String> hasActiveChannelCatalogUuidList
-			) {
-		String uuid = parent.getUuid();
-		List<ITree> children = parentUuidKeyMap.get(uuid);
-		if(children != null && children.size() > 0) {
-			Map<String, String> treePathMap = null;
-			StringBuilder treePathBuilder = null;
-			String treePath = null;
-			for(ITree child : children) {				
-				treePathBuilder = new StringBuilder(parentTreePath);
-				if(!ITree.ROOT_UUID.equals(uuid)) {
-					treePathBuilder.append("->");
-				}
-				treePathBuilder.append(child.getName());
-				treePath = treePathBuilder.toString();
-				if(hasActiveChannelCatalogUuidList.contains(child.getUuid())) {
-					treePathMap = new HashMap<>();
-					treePathMap.put("uuid", child.getUuid());
-					treePathMap.put("path", treePath);
-					treePathList.add(treePathMap);
-				}				
-				collectBreadcrumb(child, parentUuidKeyMap, treePathList, treePath, hasActiveChannelCatalogUuidList);
-			}
-		}
-	}
+//	private void collectBreadcrumb(
+//			ITree parent, 
+//			Map<String, List<ITree>> parentUuidKeyMap, 
+//			List<Map<String, String>> treePathList, 
+//			String parentTreePath, 
+//			Set<String> hasActiveChannelCatalogUuidList
+//			) {
+//		String uuid = parent.getUuid();
+//		List<ITree> children = parentUuidKeyMap.get(uuid);
+//		if(children != null && children.size() > 0) {
+//			Map<String, String> treePathMap = null;
+//			StringBuilder treePathBuilder = null;
+//			String treePath = null;
+//			for(ITree child : children) {				
+//				treePathBuilder = new StringBuilder(parentTreePath);
+//				if(!ITree.ROOT_UUID.equals(uuid)) {
+//					treePathBuilder.append("->");
+//				}
+//				treePathBuilder.append(child.getName());
+//				treePath = treePathBuilder.toString();
+//				if(hasActiveChannelCatalogUuidList.contains(child.getUuid())) {
+//					treePathMap = new HashMap<>();
+//					treePathMap.put("uuid", child.getUuid());
+//					treePathMap.put("path", treePath);
+//					treePathList.add(treePathMap);
+//				}				
+//				collectBreadcrumb(child, parentUuidKeyMap, treePathList, treePath, hasActiveChannelCatalogUuidList);
+//			}
+//		}
+//	}
 
 }

@@ -54,6 +54,8 @@ public class CatalogVo extends BasePageVo implements ITree{
 	
 	private transient List<Integer> sortList;
 	
+	private transient List<String> nameList;
+	
 	public CatalogVo() {
 	}
 	
@@ -143,7 +145,7 @@ public class CatalogVo extends BasePageVo implements ITree{
 	public void setChildren(List<ITree> children) {
 		this.children = children;
 	}
-	
+	@Override
 	public boolean addChild(ITree child) {
 		if(children == null) {
 			children = new ArrayList<>();
@@ -155,7 +157,7 @@ public class CatalogVo extends BasePageVo implements ITree{
 			return false;
 		}		
 	}
-	
+	@Override
 	public boolean removeChild(ITree child) {
 		if(children == null || children.isEmpty()) {
 			return false;
@@ -179,10 +181,9 @@ public class CatalogVo extends BasePageVo implements ITree{
 	@Override
 	public void setParent(ITree parent) {
 		this.parent = parent;
-		if(parent instanceof CatalogVo) {
-			((CatalogVo)parent).addChild(this);
-		}
+		parent.addChild(this);
 	}
+	
 	@Override
 	public void setOpenCascade(boolean open) {
 		this.open = open;
@@ -220,28 +221,28 @@ public class CatalogVo extends BasePageVo implements ITree{
 	public void setRoleNameList(List<String> roleNameList) {
 		this.roleNameList = roleNameList;
 	}
-
+	@Override
 	public int getChildrenCount() {
 		return childrenCount;
 	}
-
+	@Override
 	public void setChildrenCount(int childrenCount) {
 		this.childrenCount = childrenCount;
 	}
-
+	@Override
 	public List<Integer> getSortList() {
 		if(sortList != null) {
 			return sortList;
 		}
-		if(parent != null && parent instanceof CatalogVo) {
-			sortList = new ArrayList<>(((CatalogVo)parent).getSortList());			
+		if(parent != null) {
+			sortList = new ArrayList<>(parent.getSortList());			
 		}else {
 			sortList = new ArrayList<>();
 		}		
 		sortList.add(sort);
 		return sortList;
 	}
-
+	@Override
 	public void setSortList(List<Integer> sortList) {
 		this.sortList = sortList;
 	}
@@ -250,5 +251,37 @@ public class CatalogVo extends BasePageVo implements ITree{
 	public String toString() {
 		return "CatalogVo [uuid=" + uuid + ", name=" + name + ", parentUuid=" + parentUuid + ", sort=" + sort + ", sortList=" + sortList + "]";
 	}
+
+	@Override
+	public List<String> getNameList() {
+		if(nameList != null) {
+			return nameList;
+		}
+		if(parent != null && !ITree.ROOT_UUID.equals(parent.getUuid())) {
+			nameList = new ArrayList<>(parent.getNameList());
+		}else {
+			nameList = new ArrayList<>();
+		}
+		nameList.add(name);
+		return nameList;
+	}
+
+	@Override
+	public void setNameList(List<String> nameList) {
+		this.nameList = nameList;		
+	}
+
+	@Override
+	public boolean isAncestorOrSelf(String uuid) {
+		if(this.uuid.equals(uuid)) {
+			return true;
+		}
+		if(parent == null) {
+			return false;
+		}	
+		return parent.isAncestorOrSelf(uuid);
+	}
+
+	
 
 }

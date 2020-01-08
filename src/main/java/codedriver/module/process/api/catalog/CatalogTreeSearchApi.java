@@ -1,7 +1,6 @@
 package codedriver.module.process.api.catalog;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,39 +80,19 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 					catalogVo.setParent(parent);
 				}				
 			}
-			
-			Collections.sort(catalogList, new Comparator<CatalogVo>() {
-
-				@Override
-				public int compare(CatalogVo o1, CatalogVo o2) {
-					List<Integer> sortList1 = o1.getSortList();
-					List<Integer> sortList2 = o2.getSortList();
-					int size1 = sortList1.size();
-					int size2 = sortList2.size();
-					int minIndex = 0;
-					int resultDefault = 0;
-					if(size1 > size2) {
-						minIndex = size2;
-						resultDefault = 1;
-					}else {
-						minIndex = size1;
-						resultDefault = -1;
-					}
-					for(int i = 0; i < minIndex; i++) {
-						if(sortList1.get(i).equals(sortList2.get(i))) {
-							continue;
-						}else {
-							return sortList1.get(i) - sortList2.get(i);
-						}
-					}
-					return resultDefault;
-				}}
-			);
+			//排序
+			Collections.sort(catalogList);
+//			for(CatalogVo catalogVo : catalogList) {
+//				System.out.println(catalogVo);
+//			}
 			
 			for(int index = catalogList.size() - 1; index >= 0; index--) {
 				CatalogVo catalogVo = catalogList.get(index);
+				if(catalogVo.getUuid().equals(catalogUuid)) {
+					catalogVo.setSelectedCascade(true);
+				}
 				if(catalogVo.getChildrenCount() == 0) {
-					System.out.println(catalogVo);
+//					System.out.println(catalogVo);
 					ITree parentCatalog = catalogVo.getParent();
 					if(parentCatalog != null) {
 						((CatalogVo)parentCatalog).removeChild(catalogVo);

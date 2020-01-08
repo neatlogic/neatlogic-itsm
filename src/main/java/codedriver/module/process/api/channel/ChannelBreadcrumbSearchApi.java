@@ -1,6 +1,7 @@
 package codedriver.module.process.api.channel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,55 +74,89 @@ public class ChannelBreadcrumbSearchApi extends ApiComponentBase {
 			resultObj.put("pageCount", 0);
 			resultObj.put("rowNum", 0);
 		}
-		channelVo.setNeedPage(false);	
+//		channelVo.setNeedPage(false);
+		
 		channelVo.setIsFavorite(0);
 		channelVo.setIsActive(1);
-		List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);
-		if(channelList == null || channelList.isEmpty()) {
+//		List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);
+		Set<String> channelParentUuidList = channelMapper.searchChannelParentUuidList(channelVo);
+		if(channelParentUuidList == null || channelParentUuidList.isEmpty()) {
 			return resultObj;
 		}
 		
-		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
-		List<ITree> children = null;
-		String parentUuid = null;
+//		Map<String, List<ITree>> parentUuidKeyMap = new HashMap<>();
+//		List<ITree> children = null;
+//		String parentUuid = null;
+//		
+//		for(ITree tree : channelList) {
+//			parentUuid = tree.getParentUuid();
+//			children = parentUuidKeyMap.get(parentUuid);
+//			if(children == null) {
+//				children = new ArrayList<>();
+//				parentUuidKeyMap.put(parentUuid, children);
+//			}
+//			children.add(tree);
+//		}
+//		
+//		Set<String> filterUuidSet = parentUuidKeyMap.keySet();
 		
-		for(ITree tree : channelList) {
-			parentUuid = tree.getParentUuid();
-			children = parentUuidKeyMap.get(parentUuid);
-			if(children == null) {
-				children = new ArrayList<>();
-				parentUuidKeyMap.put(parentUuid, children);
-			}
-			children.add(tree);
-		}
-		
-		Set<String> filterUuidSet = parentUuidKeyMap.keySet();
-		
-		CatalogVo catalogVo = new CatalogVo();
-		catalogVo.setIsActive(1);
-		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
-		
-		Map<String, ITree> uuidKeyMap = new HashMap<>();
-		Map<String, List<ITree>> catalogParentUuidKeyMap = new HashMap<>();
-		List<ITree> catalogChildren = null;
-		String catalogParentUuid = null;
-		if(catalogList != null && catalogList.size() > 0) {
-			for(ITree tree : catalogList) {
-				uuidKeyMap.put(tree.getUuid(), tree);
-				catalogParentUuid = tree.getParentUuid();
-				catalogChildren = catalogParentUuidKeyMap.get(catalogParentUuid);
-				if(catalogChildren == null) {
-					catalogChildren = new ArrayList<>();
-					catalogParentUuidKeyMap.put(catalogParentUuid, catalogChildren);
-				}
-				catalogChildren.add(tree);				
-			}
-		}
-		ITree parent = new CatalogVo(CatalogVo.ROOT_UUID);
-		String catatlogPath = "";
+//		CatalogVo catalogVo = new CatalogVo();
+//		catalogVo.setIsActive(1);
+//		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
 		List<Map<String, Object>> calalogBreadcrumbList = new ArrayList<>();
+		Map<String, Object> treePathMap = null;
+		Map<String, ITree> uuidKeyMap = new HashMap<>();
+		String parentUuid = null;
+		ITree parent = null;
+		//
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
+		if(catalogList != null && catalogList.size() > 0) {
+			for(CatalogVo catalogVo : catalogList) {
+				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
+			}
+			//设置父级
+			for(CatalogVo catalogVo : catalogList) {
+				parentUuid = catalogVo.getParentUuid();
+				parent = uuidKeyMap.get(parentUuid);
+				if(parent != null) {
+					catalogVo.setParent(parent);
+				}				
+			}
+			//排序
+			Collections.sort(catalogList);
+			
+			for(CatalogVo catalogVo : catalogList) {
+				if(channelParentUuidList.contains(catalogVo.getUuid())) {
+					treePathMap = new HashMap<>();
+					treePathMap.put("uuid", catalogVo.getUuid());
+					treePathMap.put("path", catalogVo.getNameList());
+					treePathMap.put("keyword", channelVo.getKeyword());
+					calalogBreadcrumbList.add(treePathMap);
+				}
+			}
+		}
 		
-		collectBreadcrumb(parent, catalogParentUuidKeyMap, calalogBreadcrumbList, catatlogPath, filterUuidSet, parentUuidKeyMap);
+//		Map<String, ITree> uuidKeyMap = new HashMap<>();
+//		Map<String, List<ITree>> catalogParentUuidKeyMap = new HashMap<>();
+//		List<ITree> catalogChildren = null;
+//		String catalogParentUuid = null;
+//		if(catalogList != null && catalogList.size() > 0) {
+//			for(ITree tree : catalogList) {
+//				uuidKeyMap.put(tree.getUuid(), tree);
+//				catalogParentUuid = tree.getParentUuid();
+//				catalogChildren = catalogParentUuidKeyMap.get(catalogParentUuid);
+//				if(catalogChildren == null) {
+//					catalogChildren = new ArrayList<>();
+//					catalogParentUuidKeyMap.put(catalogParentUuid, catalogChildren);
+//				}
+//				catalogChildren.add(tree);				
+//			}
+//		}
+//		parent = new CatalogVo(CatalogVo.ROOT_UUID);
+//		String catatlogPath = "";
+		
+		
+//		collectBreadcrumb(parent, catalogParentUuidKeyMap, calalogBreadcrumbList, catatlogPath, filterUuidSet, parentUuidKeyMap);
 		
 		if(needPage) {
 			int currentPage = channelVo.getCurrentPage();
@@ -143,36 +178,36 @@ public class ChannelBreadcrumbSearchApi extends ApiComponentBase {
 		return resultObj;
 	}
 	
-	private void collectBreadcrumb(
-			ITree parent, 
-			Map<String, List<ITree>> catalogParentUuidKeyMap, 
-			List<Map<String, Object>> treePathList, 
-			String parentTreePath, 
-			Set<String> filterUuidSet,
-			Map<String, List<ITree>> parentUuidKeyMap
-			) {
-		String uuid = parent.getUuid();
-		List<ITree> children = catalogParentUuidKeyMap.get(uuid);
-		if(children != null && children.size() > 0) {
-			Map<String, Object> treePathMap = null;
-			StringBuilder treePathBuilder = null;
-			String treePath = null;
-			for(ITree child : children) {				
-				treePathBuilder = new StringBuilder(parentTreePath);
-				if(!ITree.ROOT_UUID.equals(uuid)) {
-					treePathBuilder.append("->");
-				}
-				treePathBuilder.append(child.getName());
-				treePath = treePathBuilder.toString();
-				if(filterUuidSet.contains(child.getUuid())) {
-					treePathMap = new HashMap<>();
-					treePathMap.put("uuid", child.getUuid());
-					treePathMap.put("path", treePath);
-					treePathMap.put("channelList", parentUuidKeyMap.get(child.getUuid()));
-					treePathList.add(treePathMap);
-				}				
-				collectBreadcrumb(child, catalogParentUuidKeyMap, treePathList, treePath, filterUuidSet, parentUuidKeyMap);
-			}
-		}
-	}
+//	private void collectBreadcrumb(
+//			ITree parent, 
+//			Map<String, List<ITree>> catalogParentUuidKeyMap, 
+//			List<Map<String, Object>> treePathList, 
+//			String parentTreePath, 
+//			Set<String> filterUuidSet,
+//			Map<String, List<ITree>> parentUuidKeyMap
+//			) {
+//		String uuid = parent.getUuid();
+//		List<ITree> children = catalogParentUuidKeyMap.get(uuid);
+//		if(children != null && children.size() > 0) {
+//			Map<String, Object> treePathMap = null;
+//			StringBuilder treePathBuilder = null;
+//			String treePath = null;
+//			for(ITree child : children) {				
+//				treePathBuilder = new StringBuilder(parentTreePath);
+//				if(!ITree.ROOT_UUID.equals(uuid)) {
+//					treePathBuilder.append("->");
+//				}
+//				treePathBuilder.append(child.getName());
+//				treePath = treePathBuilder.toString();
+//				if(filterUuidSet.contains(child.getUuid())) {
+//					treePathMap = new HashMap<>();
+//					treePathMap.put("uuid", child.getUuid());
+//					treePathMap.put("path", treePath);
+//					treePathMap.put("channelList", parentUuidKeyMap.get(child.getUuid()));
+//					treePathList.add(treePathMap);
+//				}				
+//				collectBreadcrumb(child, catalogParentUuidKeyMap, treePathList, treePath, filterUuidSet, parentUuidKeyMap);
+//			}
+//		}
+//	}
 }

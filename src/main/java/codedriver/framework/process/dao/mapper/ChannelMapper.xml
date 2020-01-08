@@ -18,6 +18,9 @@
 	<if test="keyword != null">
 	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
 	</if> 
+	<if test="isActive != null">
+	AND c.`is_active` = #{isActive}
+	</if>
 	</select>
 	
 	<select id="searchChannelList" resultType="codedriver.module.process.dto.ChannelVo">
@@ -60,6 +63,20 @@
 	</if>
 	</select>
 
+	<select id="searchChannelParentUuidList" parameterType="codedriver.module.process.dto.ChannelVo" resultType="java.lang.String">
+	SELECT 
+	  c.`parent_uuid` 
+	FROM
+	  `channel` c 	
+	WHERE 1=1
+	<if test="keyword != null">
+	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
+	</if> 
+	<if test="isActive != null">
+	AND c.`is_active` = #{isActive}
+	</if>
+	</select>
+	
 	<select id="getChannelByUuid" resultType="codedriver.module.process.dto.ChannelVo">
 	SELECT 
 	  c.`uuid`,

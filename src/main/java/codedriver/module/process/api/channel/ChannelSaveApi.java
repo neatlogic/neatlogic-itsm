@@ -25,6 +25,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.ChannelPriorityVo;
 import codedriver.module.process.dto.ChannelVo;
+import codedriver.module.process.dto.ITree;
 
 @Service
 @Transactional
@@ -82,6 +83,9 @@ public class ChannelSaveApi extends ApiComponentBase {
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
 		//获取父级信息
 		String parentUuid = channelVo.getParentUuid();
+		if(ITree.ROOT_UUID.equals(parentUuid)) {
+			throw new ChannelIllegalParameterException("不能在根目录下创建通道，parentUuid=" + parentUuid);
+		}
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
 		}
