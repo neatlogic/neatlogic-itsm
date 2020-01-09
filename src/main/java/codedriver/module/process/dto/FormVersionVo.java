@@ -24,7 +24,7 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 	private String content;
 	private String editor;
 	private Date editTime;
-	private List<FormAttributeVo> formAttributeList;
+	private transient List<FormAttributeVo> formAttributeList;
 
 	public String getUuid() {
 		if (StringUtils.isBlank(uuid)) {
@@ -160,6 +160,11 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 
 	public void setFormName(String formName) {
 		this.formName = formName;
+	}
+
+	@Override
+	public String toString() {
+		return "FormVersionVo [uuid=" + uuid + ", formName=" + formName + ", formUuid=" + formUuid + ", version=" + version + ", isActive=" + isActive + ", content=" + content + ", editor=" + editor + ", editTime=" + editTime + "]";
 	}
 
 }

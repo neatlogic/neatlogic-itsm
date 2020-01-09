@@ -47,7 +47,8 @@
 		f.`uuid`,
 		f.`name`,
 		f.`is_active` AS isActive,
-		fv.`version` AS activeVersion
+		fv.`version` AS activeVersion,
+		fv.`uuid` AS activeVersionUuid
 		FROM `form` f
 		JOIN `form_version` fv ON fv.`form_uuid`=f.`uuid` AND fv.`is_active` = 1
 		WHERE 1=1

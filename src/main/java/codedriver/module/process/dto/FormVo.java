@@ -27,6 +27,9 @@ public class FormVo extends BasePageVo implements Serializable {
 	@EntityField(name = "表单内容（表单编辑器使用）", type = ApiParamType.STRING)
 	private String content;
 	
+	@EntityField(name = "引用数量", type = ApiParamType.INTEGER)
+	private int referenceCount;
+	
 	private List<FormVersionVo> versionList;
 	private transient String keyword;
 	
@@ -95,6 +98,14 @@ public class FormVo extends BasePageVo implements Serializable {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public int getReferenceCount() {
+		return referenceCount;
+	}
+
+	public void setReferenceCount(int referenceCount) {
+		this.referenceCount = referenceCount;
 	}
 
 }

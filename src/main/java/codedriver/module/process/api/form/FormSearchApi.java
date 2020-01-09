@@ -69,6 +69,11 @@ public class FormSearchApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}
 		List<FormVo> formList = formMapper.searchFormList(formVo);
+		int count = 0;
+		for(FormVo form : formList) {
+			count = formMapper.getFormReferenceCount(form.getUuid());
+			form.setReferenceCount(count);
+		}
 		resultObj.put("formList", formList);
 		return resultObj;
 	}

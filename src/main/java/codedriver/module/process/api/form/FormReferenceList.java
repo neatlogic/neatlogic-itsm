@@ -64,7 +64,7 @@ public class FormReferenceList extends ApiComponentBase {
 		}
 		JSONObject resultObj = new JSONObject();
 		if(processFormVo.getNeedPage()) {
-			int rowNum = formMapper.getFormReferenceCount(processFormVo);
+			int rowNum = formMapper.getFormReferenceCount(processFormVo.getFormUuid());
 			int pageCount = PageUtil.getPageCount(rowNum,processFormVo.getPageSize());
 			processFormVo.setPageCount(pageCount);
 			processFormVo.setRowNum(rowNum);

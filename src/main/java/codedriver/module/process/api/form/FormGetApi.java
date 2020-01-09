@@ -80,7 +80,8 @@ public class FormGetApi extends ApiComponentBase {
 			}
 			formVo.setVersionList(formVersionList);
 		}
-		
+		int count = formMapper.getFormReferenceCount(uuid);
+		formVo.setReferenceCount(count);
 		return formVo;
 	}
 
