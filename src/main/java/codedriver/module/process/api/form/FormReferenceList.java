@@ -59,6 +59,7 @@ public class FormReferenceList extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessFormVo processFormVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessFormVo>() {});
+		//判断表单是否存在
 		if(formMapper.checkFormIsExists(processFormVo.getFormUuid()) == 0) {
 			throw new FormNotFoundException(processFormVo.getFormUuid());
 		}

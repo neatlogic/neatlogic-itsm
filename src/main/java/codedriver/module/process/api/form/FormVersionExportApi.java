@@ -55,21 +55,19 @@ public class FormVersionExportApi extends BinaryStreamApiComponentBase {
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String uuid = paramObj.getString("uuid");
 		FormVo formVo = formMapper.getFormByUuid(uuid);
+		//判断表单是否存在
 		if(formVo == null) {
 			throw new FormNotFoundException(uuid);
 		}
 		
 		String formVersionUuid = paramObj.getString("formVersionUuid");
+		//判断要导出的表单版本是否存在
 		FormVersionVo formVersion = formMapper.getFormVersionByUuid(formVersionUuid);
 		if(formVersion == null) {
 			throw new FormVersionNotFoundException(uuid);
 		}
 		formVersion.setFormName(formVo.getName());
-		
-		ServletOutputStream os = null;
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(baos);
-		oos.writeObject(formVersion);
+		//设置导出文件名, 表单名称_版本号.formversion
 		String fileNameEncode = formVersion.getFormName() + "_" + formVersion.getVersion()+".formversion";
 		Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
 		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
@@ -80,6 +78,11 @@ public class FormVersionExportApi extends BinaryStreamApiComponentBase {
 
 		response.setContentType("aplication/x-msdownload");
 		response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+		//获取序列化字节数组		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject(formVersion);
+		ServletOutputStream os = null;
 		os = response.getOutputStream();
 		IOUtils.write(baos.toByteArray(), os);
 		if (os != null) {

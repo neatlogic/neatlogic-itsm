@@ -120,6 +120,7 @@
 		`form_version`
 		WHERE
 		form_uuid = #{value}
+		ORDER BY `version`
 	</select>
 
 	<select id="getFormReferenceCount" parameterType="codedriver.module.process.dto.ProcessFormVo" resultType="int">

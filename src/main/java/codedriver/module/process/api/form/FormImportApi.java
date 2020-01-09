@@ -51,16 +51,19 @@ public class FormImportApi extends BinaryStreamApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+		//获取所有导入文件
 		Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
-		ObjectInputStream ois = null;
-		Object obj = null;
-		MultipartFile multipartFile = null;
+		//如果没有导入文件, 抛异常
 		if(multipartFileMap == null || multipartFileMap.isEmpty()) {
 			throw new FormImportException("没有导入文件");
 		}
+		ObjectInputStream ois = null;
+		Object obj = null;
+		MultipartFile multipartFile = null;
+		//遍历导入文件, 目前只获取第一个文件内容, 其余的放弃
 		for(Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
 			multipartFile = entry.getValue();
-			
+			//反序列化获取对象
 			try {
 				ois = new ObjectInputStream(multipartFile.getInputStream());
 				obj = ois.readObject();
@@ -71,34 +74,37 @@ public class FormImportApi extends BinaryStreamApiComponentBase {
 					ois.close();
 				}
 			}
-				
+			//判断对象是否是表单对象, 不是就抛异常	
 			if(obj instanceof FormVo) {
 				List<String> resultList = new ArrayList<>();
 				FormVo formVo = (FormVo) obj;
 				int index = 0;
 				String oldName = formVo.getName();
+				//如果导入的表单名称已存在就重命名
 				while(formMapper.checkFormNameIsRepeat(formVo) > 0) {
 					index ++;
 					formVo.setName(oldName + "_" + index);
 				}
-				List<FormVersionVo> formVersionList = formVo.getVersionList(); 
+				List<FormVersionVo> formVersionList = formVo.getVersionList();
+				//判断表单是否存在，不存在就新增，存在就更新
 				if(formMapper.checkFormIsExists(formVo.getUuid()) == 0) {
-					formVo.setUuid(null);					
+//					formVo.setUuid(null);					
 					formMapper.replaceForm(formVo);
 					resultList.add("新增表单：" + formVo.getName());
-					int version = 1;
+//					int version = 1;
 					for(FormVersionVo formVersion : formVersionList) {
 						formVersion.setFormUuid(formVo.getUuid());
-						formVersion.setUuid(null);
-						formVersion.setVersion(version);
+//						formVersion.setUuid(null);
+//						formVersion.setVersion(version);
 						formMapper.insertFormVersion(formVersion);
-						resultList.add("新增版本" + version);
-						version ++;
+						resultList.add("新增版本" + formVersion.getVersion());
+//						version ++;
 					}
 				}else {
 					resultList.add("更新表单：" + formVo.getName());
 					for(FormVersionVo formVersion : formVersionList) {
 						FormVersionVo existsFormVersionVo = formMapper.getFormVersionByUuid(formVersion.getUuid());
+						//如果导入的表单版本已存在, 且表单uuid相同, 则覆盖，反之，新增一个版本
 						if(existsFormVersionVo != null && existsFormVersionVo.getFormUuid().equals(formVo.getUuid())) {
 							formMapper.updateFormVersion(formVersion);
 							resultList.add("版本" + existsFormVersionVo.getVersion() + "被覆盖");

@@ -44,16 +44,21 @@ public class FormVersionActiveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
+		//判断表单是否存在
 		if(formMapper.checkFormIsExists(uuid) == 0) {
 			throw new FormNotFoundException(uuid);
 		}
+		
 		String versionUuid = jsonObj.getString("versionUuid");
+		//判断被激活的表单版本是否存在
 		if(formMapper.checkFormVersionIsExists(versionUuid) == 0) {
 			throw new FormVersionNotFoundException(versionUuid);
 		}
+		//将所有版本设置为非激活状态
 		formMapper.resetFormVersionIsActiveByFormUuid(uuid);
 		FormVersionVo formVersionVo = new FormVersionVo();
 		formVersionVo.setUuid(versionUuid);
+		//将当前版本设置为激活版本
 		formVersionVo.setIsActive(1);
 		formMapper.updateFormVersion(formVersionVo);
 		return null;
