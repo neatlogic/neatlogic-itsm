@@ -12,6 +12,7 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -58,9 +59,12 @@ public class FormReferenceList extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessFormVo processFormVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessFormVo>() {});
+		if(formMapper.checkFormIsExists(processFormVo.getFormUuid()) == 0) {
+			throw new FormNotFoundException(processFormVo.getFormUuid());
+		}
 		JSONObject resultObj = new JSONObject();
 		if(processFormVo.getNeedPage()) {
-			int rowNum = formMapper.getFormReferenceCount(processFormVo);
+			int rowNum = formMapper.getFormReferenceCount(processFormVo.getFormUuid());
 			int pageCount = PageUtil.getPageCount(rowNum,processFormVo.getPageSize());
 			processFormVo.setPageCount(pageCount);
 			processFormVo.setRowNum(rowNum);

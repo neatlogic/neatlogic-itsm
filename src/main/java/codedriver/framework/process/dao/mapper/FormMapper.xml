@@ -47,7 +47,8 @@
 		f.`uuid`,
 		f.`name`,
 		f.`is_active` AS isActive,
-		fv.`version` AS activeVersion
+		fv.`version` AS activeVersion,
+		fv.`uuid` AS activeVersionUuid
 		FROM `form` f
 		JOIN `form_version` fv ON fv.`form_uuid`=f.`uuid` AND fv.`is_active` = 1
 		WHERE 1=1
@@ -88,10 +89,8 @@
 		`is_active` AS isActive,
 		`form_uuid` AS formUuid,
 		`content`,
-		DATE_FORMAT(`fcd`,'%Y-%m-%d %H:%i:%s') AS fcd,
-		`fcu`,
-		DATE_FORMAT(`lcd`,'%Y-%m-%d %H:%i:%s') AS lcd,
-		`lcu`
+		`lcu` AS editor,
+		`lcd` AS editTime
 		FROM
 		`form_version`
 		WHERE
@@ -102,8 +101,7 @@
 		SELECT
 		`uuid`,
 		`name`,
-		`is_active` AS isActive,
-		`description`
+		`is_active` AS isActive
 		FROM
 		`form`
 		WHERE `uuid` = #{value}
@@ -116,10 +114,8 @@
 		`is_active` AS isActive,
 		`form_uuid` AS formUuid,
 		`content`,
-		DATE_FORMAT(`fcd`,'%Y-%m-%d %H:%i:%s') AS fcd,
-		`fcu`,
-		DATE_FORMAT(`lcd`,'%Y-%m-%d %H:%i:%s') AS lcd,
-		`lcu`
+		`lcu` AS editor,
+		`lcd` AS editTime
 		FROM
 		`form_version`
 		WHERE
@@ -144,12 +140,28 @@
 	</if>
 	</select>
 	
+	<select id="checkFormIsExists" parameterType="java.lang.String" resultType="int">
+	SELECT COUNT(`uuid`) FROM `form` WHERE `uuid` = #{uuid}
+	</select>
+	
+	<select id="checkFormNameIsRepeat" parameterType="codedriver.module.process.dto.FormVo" resultType="int">
+	SELECT COUNT(`uuid`) FROM `form` WHERE `name` = #{name} and `uuid` != #{uuid}
+	</select>
+	
+	<select id="checkFormVersionIsExists" parameterType="java.lang.String" resultType="int">
+	SELECT COUNT(`uuid`) FROM `form_version` WHERE `uuid` = #{uuid}
+	</select>
+	
 	<update id="updateFormVersion" parameterType="codedriver.module.process.dto.FormVersionVo">
 		UPDATE
 		`form_version`
 		SET
+		<if test="isActive != null">
 		`is_active` = #{isActive},
+		</if>
+		<if test="content != null and content != ''">
 		`content` = #{content},
+		</if>
 		`lcd` = NOW(),
 		`lcu` = #{editor}
 		WHERE `uuid` = #{uuid}
@@ -179,15 +191,13 @@
 		REPLACE INTO `form` (
 		`uuid`,
 		`name`,
-		`is_active`,
-		`description`
+		`is_active`
 		)
 		VALUES
 		(
 		#{uuid},
 		#{name},
-		#{isActive},
-		#{description}
+		#{isActive}
 		)
 	</insert>
 
@@ -246,5 +256,9 @@
 
 	<delete id="deleteProcessFormByFormUuid" parameterType="java.lang.String">
 	DELETE FROM `process_form` WHERE `form_uuid` = #{formUuid}
+	</delete>
+	
+	<delete id="deleteFormVersionByUuid" parameterType="java.lang.String">
+	DELETE FROM `form_version` WHERE `uuid` = #{uuid}
 	</delete>
 </mapper>

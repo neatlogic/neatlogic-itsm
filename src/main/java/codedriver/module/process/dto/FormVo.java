@@ -11,21 +11,26 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.restful.annotation.EntityField;
 
 public class FormVo extends BasePageVo implements Serializable {
+	
 	private static final long serialVersionUID = -2319081254327257337L;
+	
 	@EntityField(name = "表单uuid", type = ApiParamType.STRING)
 	private String uuid;
 	@EntityField(name = "表单名称", type = ApiParamType.STRING)
 	private String name;
 	@EntityField(name = "是否激活", type = ApiParamType.INTEGER)
 	private Integer isActive;
-	@EntityField(name = "激活版本", type = ApiParamType.STRING)
-	private String activeVersion;
-	@EntityField(name = "表单内容（表单编辑器使用）", type = ApiParamType.STRING)
-	private String content;
-	private List<FormVersionVo> versionList;
+	@EntityField(name = "激活版本", type = ApiParamType.INTEGER)
+	private Integer activeVersion;
 	@EntityField(name = "激活版本uuid", type = ApiParamType.STRING)
 	private String activeVersionUuid;
-
+	@EntityField(name = "表单内容（表单编辑器使用）", type = ApiParamType.STRING)
+	private String content;
+	
+	@EntityField(name = "引用数量", type = ApiParamType.INTEGER)
+	private int referenceCount;
+	
+	private List<FormVersionVo> versionList;
 	private transient String keyword;
 	
 	public String getUuid() {
@@ -79,11 +84,11 @@ public class FormVo extends BasePageVo implements Serializable {
 		this.activeVersionUuid = activeVersionUuid;
 	}
 
-	public String getActiveVersion() {
+	public Integer getActiveVersion() {
 		return activeVersion;
 	}
 
-	public void setActiveVersion(String activeVersion) {
+	public void setActiveVersion(Integer activeVersion) {
 		this.activeVersion = activeVersion;
 	}
 
@@ -93,6 +98,14 @@ public class FormVo extends BasePageVo implements Serializable {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public int getReferenceCount() {
+		return referenceCount;
+	}
+
+	public void setReferenceCount(int referenceCount) {
+		this.referenceCount = referenceCount;
 	}
 
 }
