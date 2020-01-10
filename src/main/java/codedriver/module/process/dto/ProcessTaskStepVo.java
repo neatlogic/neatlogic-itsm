@@ -27,7 +27,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private String endTime;
 	private String expireTime;
 	private String config;
-	private Long contentId;
 	private Long expireTimeLong;
 	private String error;
 	private String result;
@@ -271,13 +270,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 		this.processUuid = processUuid;
 	}
 
-	public Long getContentId() {
-		return contentId;
-	}
-
-	public void setContentId(Long contentId) {
-		this.contentId = contentId;
-	}
 
 	public String getError() {
 		return error;

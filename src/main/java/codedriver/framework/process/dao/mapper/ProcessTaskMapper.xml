@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskMapper">
+	<select id="getProcessTaskStepAuditDetail" resultType="codedriver.module.process.dto.ProcessTaskStepAuditDetailVo">
+		SELECT
+		b.`audit_id` AS auditId,
+		b.`old_content` AS oldContent,
+		b.`new_content` AS newContent,
+		b.`type` AS `type`
+		FROM
+		`processtask_step_audit` a JOIN `processtask_step_audit_detail` b ON a.`id` = b.`audit_id` AND b.`type` = #{type}
+		WHERE a.`processtask_id` = #{processTaskId}
+		ORDER BY auditId DESC
+		LIMIT 1
+	</select>
 
 	<select id="getProcessTaskBaseInfoById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskVo">
 		SELECT
@@ -32,32 +44,59 @@
 
 	<select id="getProcessTaskFormByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskFormVo">
 		SELECT
-		`processtask_id` as processTaskId,
-		`form_uuid` as formUuid,
-		`form_name` as formName,
-		`form_content` as formContent
+		a.`processtask_id` as processTaskId,
+		a.`form_uuid` as formUuid,
+		a.`form_name` as formName,
+		a.`form_content_hash` as formContentHash,
+		b.`content` as formContent
 		FROM
-		`processtask_form`
+		`processtask_form` a JOIN `processtask_form_content` b ON a.`form_content_hash` = b.`hash`
 		WHERE
 		`processtask_id` = #{value}
 	</select>
 
-	<select id="getProcessTaskStepFormAttributeDataByStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskAttributeDataVo">
+	<select id="getProcessTaskStepFormAttributeDataByProcessTaskStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskFormAttributeDataVo">
 		SELECT
 		a.`processtask_id` AS processTaskId,
 		a.`processtask_step_id` AS processTaskStepId,
 		a.`attribute_uuid` AS attributeUuid,
-		c.`data`
+		b.`data`
 		FROM
-		`processtask_step_formattribute` a JOIN `attribute` b ON a.`attribute_uuid` = b.`uuid` AND b.`is_active` = 1
-		JOIN `processtask_formattribute_data` c ON a.`attribute_uuid` = c.`attribute_uuid` AND a.`processtask_id` = c.`processtask_id`
+		`processtask_step_formattribute` a
+		JOIN `processtask_formattribute_data` b ON a.`attribute_uuid` = b.`attribute_uuid` AND a.`processtask_id` = b.`processtask_id`
 		WHERE
 		a.`processtask_step_id` = #{value}
 	</select>
 
-	<select id="getProcessTaskStepContentIdByProcessTaskStepId" parameterType="java.lang.Long" resultType="java.lang.Long">
+	<select id="getProcessTaskStepFormAttributeDataByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskFormAttributeDataVo">
 		SELECT
-		`content_id`
+		`processtask_id` AS processTaskId,
+		`attribute_uuid` AS attributeUuid,
+		`data`
+		FROM
+		`processtask_formattribute_data`
+		WHERE `processtask_id` = #{value}
+	</select>
+
+	<select id="getProcessTaskContentByHash" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessTaskContentVo">
+		SELECT
+		`hash`,
+		`content`
+		FROM
+		`processtask_content`
+		WHERE
+		`hash` = #{value}
+	</select>
+
+	<select id="getProcessTaskStepContentProcessTaskStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepContentVo">
+		SELECT
+		`id`,
+		`processtask_step_id` AS processTaskStepId,
+		`content_hash` AS contentHash,
+		`fcd`,
+		`fcu`,
+		`lcd`,
+		`lcu`
 		FROM
 		`processtask_step_content`
 		WHERE
@@ -429,20 +468,63 @@
 		WHERE `id` = #{id}
 	</update>
 
+	<insert id="insertProcessTaskStepAuditDetail" parameterType="codedriver.module.process.dto.ProcessTaskStepAuditDetailVo">
+		INSERT INTO `processtask_step_audit_detail` (
+		`audit_id`,
+		`type`,
+		`old_content`,
+		`new_content`
+		)
+		VALUES
+		(
+		#{auditId},
+		#{type},
+		#{oldContent},
+		#{newContent}
+		)
+	</insert>
+
+	<insert id="insertProcessTaskStepAudit" parameterType="codedriver.module.process.dto.ProcessTaskStepAuditVo">
+		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO `processtask_step_audit` (
+		`processtask_id`,
+		`processtask_step_id`,
+		`user_id`,
+		`action_time`,
+		`action`
+		)
+		VALUES
+		(
+		#{processTaskId},
+		#{processTaskStepId},
+		#{userId},
+		NOW(3),
+		#{action}
+		)
+	</insert>
+
 	<insert id="insertProcessTaskForm" parameterType="codedriver.module.process.dto.ProcessTaskFormVo">
 		INSERT INTO `processtask_form` (
 		`processtask_id`,
 		`form_uuid`,
 		`form_name`,
-		`form_content`
+		`form_content_hash`
 		)
 		VALUES
 		(
 		#{processTaskId},
 		#{formUuid},
 		#{formName},
-		#{formContent}
+		#{formContentHash}
 		)
+	</insert>
+
+	<insert id="replaceProcessTaskFormContent" parameterType="codedriver.module.process.dto.ProcessTaskFormVo">
+		REPLACE INTO `processtask_form_content` (`hash`, `content`)
+		VALUES
+		(#{formContentHash}, #{formContent});
 	</insert>
 
 	<insert id="insertProcessTaskStepTimeoutPolicy" parameterType="codedriver.module.process.dto.ProcessTaskStepTimeoutPolicyVo">
@@ -487,7 +569,7 @@
 		)
 	</insert>
 
-	<insert id="replaceProcessTaskFormAttributeData" parameterType="codedriver.module.process.dto.ProcessTaskAttributeDataVo">
+	<insert id="replaceProcessTaskFormAttributeData" parameterType="codedriver.module.process.dto.ProcessTaskFormAttributeDataVo">
 		REPLACE INTO `processtask_formattribute_data` (
 		`processtask_id`,
 		`attribute_uuid`,
@@ -641,24 +723,25 @@
 		)
 	</insert>
 
-	<insert id="insertProcessTaskContent" parameterType="codedriver.module.process.dto.ProcessTaskContentVo">
-		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
-			select LAST_INSERT_ID() as id
-		</selectKey>
-		INSERT INTO `processtask_content` (`content`, fcd, fcu)
+	<insert id="replaceProcessTaskContent" parameterType="codedriver.module.process.dto.ProcessTaskContentVo">
+		REPLACE INTO `processtask_content` (`content`,`hash`)
 		VALUES
-		(#{content,typeHandler=XssHandler}, NOW(3), #{editor})
+		(#{content}, #{hash})
 	</insert>
 
-	<insert id="insertProcessTaskStepContent">
+	<insert id="insertProcessTaskStepContent" parameterType="codedriver.module.process.dto.ProcessTaskStepContentVo">
 		INSERT INTO `processtask_step_content` (
 		`processtask_step_id`,
-		`content_id`
+		`content_hash`,
+		`fcd`,
+		`fcu`
 		)
 		VALUES
 		(
 		#{processTaskStepId},
-		#{contentId}
+		#{contentHash},
+		NOW(3),
+		#{fcu}
 		)
 	</insert>
 

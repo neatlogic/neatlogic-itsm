@@ -1,13 +1,13 @@
 package codedriver.module.process.dto;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.DigestUtils;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 
 public class ProcessTaskContentVo {
-	private Long id;
+	private String hash;
 	private String content;
-	private String editor;
 
 	public ProcessTaskContentVo() {
 
@@ -15,14 +15,6 @@ public class ProcessTaskContentVo {
 
 	public ProcessTaskContentVo(String content) {
 		this.content = content;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getContent() {
@@ -33,15 +25,15 @@ public class ProcessTaskContentVo {
 		this.content = content;
 	}
 
-	public String getEditor() {
-		if (StringUtils.isBlank(editor)) {
-			editor = UserContext.get().getUserId();
+	public String getHash() {
+		if (StringUtils.isBlank(hash) && StringUtils.isNotBlank(content)) {
+			hash = DigestUtils.md5DigestAsHex(content.getBytes());
 		}
-		return editor;
+		return hash;
 	}
 
-	public void setEditor(String editor) {
-		this.editor = editor;
+	public void setHash(String hash) {
+		this.hash = hash;
 	}
 
 }

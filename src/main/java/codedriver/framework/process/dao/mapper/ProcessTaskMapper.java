@@ -5,13 +5,16 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 import codedriver.module.process.dto.ProcessTaskAssignUserVo;
-import codedriver.module.process.dto.ProcessTaskAttributeDataVo;
+import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskConvergeVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
+import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditFormAttributeDataVo;
+import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepConfigVo;
+import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
 import codedriver.module.process.dto.ProcessTaskStepTeamVo;
@@ -23,6 +26,9 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskMapper {
+	public ProcessTaskStepAuditDetailVo getProcessTaskStepAuditDetail(@Param("processTaskId")
+	Long processTaskId, @Param("type")
+	String type);
 
 	public ProcessTaskVo getProcessTaskBaseInfoById(Long processTaskId);
 
@@ -34,9 +40,13 @@ public interface ProcessTaskMapper {
 
 	public ProcessTaskFormVo getProcessTaskFormByProcessTaskId(Long processTaskId);
 
-	public List<ProcessTaskAttributeDataVo> getProcessTaskStepFormAttributeDataByStepId(Long processTaskStepId);
+	public List<ProcessTaskFormAttributeDataVo> getProcessTaskStepFormAttributeDataByProcessTaskId(Long processTaskId);
 
-	public Long getProcessTaskStepContentIdByProcessTaskStepId(Long processTaskStepId);
+	public List<ProcessTaskFormAttributeDataVo> getProcessTaskStepFormAttributeDataByProcessTaskStepId(Long processTaskStepId);
+
+	public List<ProcessTaskStepContentVo> getProcessTaskStepContentProcessTaskStepId(Long processTaskStepId);
+
+	public ProcessTaskContentVo getProcessTaskContentByHash(String hash);
 
 	public List<ProcessTaskStepUserVo> getProcessTaskStepUserByStepId(@Param("processTaskStepId")
 	Long processTaskStepId, @Param("userType")
@@ -80,11 +90,13 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTaskForm(ProcessTaskFormVo processTaskFormVo);
 
+	public int replaceProcessTaskFormContent(ProcessTaskFormVo processTaskFormVo);
+
 	public int insertProcessTask(ProcessTaskVo processTaskVo);
 
 	public int insertProcessTaskChannel(ProcessTaskVo processTaskVo);
 
-	public int insertProcessTaskContent(ProcessTaskContentVo processTaskContentVo);
+	public int replaceProcessTaskContent(ProcessTaskContentVo processTaskContentVo);
 
 	public int insertProcessTaskStep(ProcessTaskStepVo processTaskStepVo);
 
@@ -96,9 +108,11 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTaskStepRel(ProcessTaskStepRelVo processTaskStepRelVo);
 
-	public int insertProcessTaskStepContent(@Param("processTaskStepId")
-	Long processTaskStepId, @Param("contentId")
-	Long contentId);
+	public int insertProcessTaskStepContent(ProcessTaskStepContentVo processTaskStepContentVo);
+
+	public int insertProcessTaskStepAudit(ProcessTaskStepAuditVo processTaskStepAuditVo);
+
+	public int insertProcessTaskStepAuditDetail(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo);
 
 	public int insertProcessTaskStepAuditFormAttributeData(ProcessTaskStepAuditFormAttributeDataVo processTaskStepAuditFormAttributeDataVo);
 
@@ -112,7 +126,7 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTaskStepFormAttribute(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
 
-	public int replaceProcessTaskFormAttributeData(ProcessTaskAttributeDataVo processTaskAttributeDataVo);
+	public int replaceProcessTaskFormAttributeData(ProcessTaskFormAttributeDataVo processTaskFromAttributeDataVo);
 
 	public int updateProcessTaskStepExpireTime(ProcessTaskStepVo processTaskStepVo);
 

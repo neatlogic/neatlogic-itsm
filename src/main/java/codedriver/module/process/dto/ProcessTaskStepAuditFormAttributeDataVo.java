@@ -12,7 +12,7 @@ public class ProcessTaskStepAuditFormAttributeDataVo {
 
 	}
 
-	public ProcessTaskStepAuditFormAttributeDataVo(ProcessTaskAttributeDataVo data) {
+	public ProcessTaskStepAuditFormAttributeDataVo(ProcessTaskFormAttributeDataVo data) {
 		this.processTaskId = data.getProcessTaskId();
 		this.processTaskStepId = data.getProcessTaskStepId();
 		this.attributeUuid = data.getAttributeUuid();

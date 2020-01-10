@@ -1,5 +1,9 @@
 package codedriver.module.process.dto;
 
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 
 public class ProcessTaskStepAuditVo {
@@ -10,20 +14,7 @@ public class ProcessTaskStepAuditVo {
 	private String userName;
 	private String actionTime;
 	private String action;
-	private String contentJson;
-	private String content;
-	private Long contentId;
-
-	public ProcessTaskStepAuditVo() {
-
-	}
-
-	public ProcessTaskStepAuditVo(ProcessTaskStepVo processTaskStepVo) {
-		this.setProcessTaskId(processTaskStepVo.getProcessTaskId());
-		this.setProcessTaskStepId(processTaskStepVo.getId());
-		this.setContentId(processTaskStepVo.getContentId());
-		this.setUserId(UserContext.get().getUserId());
-	}
+	private List<ProcessTaskStepAuditDetailVo> auditDetailList;
 
 	public Long getId() {
 		return id;
@@ -50,6 +41,9 @@ public class ProcessTaskStepAuditVo {
 	}
 
 	public String getUserId() {
+		if (StringUtils.isBlank(userId)) {
+			userId = UserContext.get().getUserId();
+		}
 		return userId;
 	}
 
@@ -81,21 +75,12 @@ public class ProcessTaskStepAuditVo {
 		this.action = action;
 	}
 
-	public String getContent() {
-
-		return content;
+	public List<ProcessTaskStepAuditDetailVo> getAuditDetailList() {
+		return auditDetailList;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public Long getContentId() {
-		return contentId;
-	}
-
-	public void setContentId(Long contentId) {
-		this.contentId = contentId;
+	public void setAuditDetailList(List<ProcessTaskStepAuditDetailVo> auditDetailList) {
+		this.auditDetailList = auditDetailList;
 	}
 
 }
