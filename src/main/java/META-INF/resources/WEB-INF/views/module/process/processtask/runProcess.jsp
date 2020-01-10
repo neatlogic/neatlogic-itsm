@@ -64,7 +64,7 @@
 			<label>标题：</label>
 		</div>
 		<input type="text" id="txtTitle" class="input-xxlarge">
-		<div id="divAttribute"></div>
+		<textarea name="content"></textarea>
 		<button type="button" id="btnSave">提交</button>
 		<h1></h1>
 	</form>

@@ -238,10 +238,30 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				if (formAudit == null || diff.hasChanges()) {
 					processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), formAudit.getType(), formAudit.getNewContent(), newFormObj.toJSONString()));
 				}
+
+			} catch (Exception ex) {
+				logger.error(ex.getMessage(), ex);
 			} finally {
 				Thread.currentThread().setName(oldName);
 			}
 		}
+	}
+	
+	public static void main(String[] argv) {
+		AuditHandler runer = new AuditHandler(null,null) {
+
+			@Override
+			public void execute() {
+				try {
+					Thread.sleep(10000L);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("aa");
+			}
+		};
+		CommonThreadPool.execute(runer);
 	}
 
 	private int updateProcessTaskStatus(Long processTaskId) {

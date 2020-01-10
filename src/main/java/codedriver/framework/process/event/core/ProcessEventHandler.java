@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.process.dao.mapper.ProcessEventMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -21,7 +22,7 @@ import codedriver.module.process.dto.ProcessTaskStepVo;
 public class ProcessEventHandler {
 	static Logger logger = LoggerFactory.getLogger(ProcessEventHandler.class);
 
-	private static final ThreadLocal<List<Runnable>> RUNNABLES = new ThreadLocal<List<Runnable>>();
+	private static final ThreadLocal<List<CodeDriverThread>> RUNNABLES = new ThreadLocal<>();
 
 	private static ProcessEventMapper processEventMapper;
 
@@ -43,16 +44,16 @@ public class ProcessEventHandler {
 			CommonThreadPool.execute(runner);
 			return;
 		}
-		List<Runnable> runableActionList = RUNNABLES.get();
+		List<CodeDriverThread> runableActionList = RUNNABLES.get();
 		if (runableActionList == null) {
-			runableActionList = new ArrayList<Runnable>();
+			runableActionList = new ArrayList<>();
 			RUNNABLES.set(runableActionList);
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCommit() {
-					List<Runnable> runableActionList = RUNNABLES.get();
+					List<CodeDriverThread> runableActionList = RUNNABLES.get();
 					for (int i = 0; i < runableActionList.size(); i++) {
-						Runnable runnable = runableActionList.get(i);
+						CodeDriverThread runnable = runableActionList.get(i);
 						CommonThreadPool.execute(runnable);
 					}
 				}
@@ -67,7 +68,7 @@ public class ProcessEventHandler {
 
 	}
 
-	static class EventRunner implements Runnable {
+	static class EventRunner extends CodeDriverThread {
 		private Long processTaskStepId;
 		private ProcessTaskEvent event;
 
@@ -77,7 +78,7 @@ public class ProcessEventHandler {
 		}
 
 		@Override
-		public void run() {
+		public void execute() {
 			String oldName = Thread.currentThread().getName();
 			Thread.currentThread().setName("PROCESSTASK-EVENTHANDLER-" + processTaskStepId);
 			try {
