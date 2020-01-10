@@ -54,6 +54,11 @@ public class ChannelMoveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
+		//目标节点uuid
+		String targetUuid = jsonObj.getString("targetUuid");
+		if(uuid.equals(targetUuid)) {
+			throw new ChannelIllegalParameterException("被移动通道uuid与目标通道targetUuid不能相同");
+		}
 		ChannelVo moveChannel = channelMapper.getChannelByUuid(uuid);
 		//判断被移动的服务通道是否存在
 		if(moveChannel == null) {
@@ -65,16 +70,19 @@ public class ChannelMoveApi extends ApiComponentBase {
 			throw new CatalogNotFoundException(parentUuid);
 		}
 		Integer oldSort = moveChannel.getSort();
+		Integer targetSort;
 		Integer newSort;
 		//通道只能移动到通道前面，不能移动到目录前面
 		//通道只能移动到通道后面，不能移动到目录后面
 		//通道只能移进目录里面，不能移进通道里面
 		//所以目标节点可能是目录或通道
-		//目标节点uuid
-		String targetUuid = jsonObj.getString("targetUuid");
+		
 		if(parentUuid.equals(targetUuid)) {
+			if(parentUuid.equals(moveChannel.getParentUuid())) {
+				throw new ChannelIllegalParameterException("服务通道：'" + uuid + "'已经是服务目录：'" + parentUuid + "'的子通道，不能进行移入操作");
+			}
 			//移进目标节点里面
-			newSort = catalogMapper.getMaxSortByParentUuid(parentUuid) + 1;
+			targetSort = channelMapper.getMaxSortByParentUuid(parentUuid);
 		}else {
 			//移动到目标节点后面
 			ChannelVo targetChannel = channelMapper.getChannelByUuid(targetUuid);
@@ -85,19 +93,22 @@ public class ChannelMoveApi extends ApiComponentBase {
 			if(!parentUuid.equals(targetChannel.getParentUuid())) {
 				throw new ChannelIllegalParameterException("服务通道：'" + targetUuid + "'不是服务目录：'" + parentUuid + "'的子通道");
 			}
-			newSort = targetChannel.getSort();
+			targetSort = targetChannel.getSort();
 		}
 		
 		//判断是否是在相同目录下移动
 		if(parentUuid.equals(moveChannel.getParentUuid())) {
 			//相同目录下移动
-			if(oldSort.compareTo(newSort) == 1) {//往前移动, 移动前后两个位置直接的服务目录序号加一
-				channelMapper.updateSortIncrement(parentUuid, newSort, oldSort - 1);
-			}else if(oldSort.compareTo(newSort) == -1) {//往后移动, 移动前后两个位置直接的服务目录序号减一
+			if(oldSort.compareTo(targetSort) == -1) {//往后移动, 移动前后两个位置直接的服务通道序号减一
+				newSort = targetSort;
 				channelMapper.updateSortDecrement(parentUuid, oldSort + 1, newSort);
+			}else {//往前移动, 移动前后两个位置直接的服务通道序号加一
+				newSort = targetSort + 1;
+				channelMapper.updateSortIncrement(parentUuid, newSort, oldSort - 1);
 			}
 		}else {
 			//不同同目录下移动
+			newSort = targetSort + 1;
 			//旧目录，被移动目录后面的兄弟节点序号减一
 			channelMapper.updateSortDecrement(moveChannel.getParentUuid(), oldSort + 1, null);
 			//新目录，目标目录后面的兄弟节点序号加一
