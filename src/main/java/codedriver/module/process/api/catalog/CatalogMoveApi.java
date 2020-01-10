@@ -64,46 +64,40 @@ public class CatalogMoveApi extends ApiComponentBase {
 		//所以目标节点只能是目录
 		//目标节点uuid
 		String targetUuid = jsonObj.getString("targetUuid");
-		CatalogVo targetCatalog = catalogMapper.getCatalogByUuid(targetUuid);
-		//判断目标节点服务目录是否存在
-		if(targetCatalog == null) {
-			throw new CatalogNotFoundException(targetUuid);
-		}
-		if(!parentUuid.equals(targetCatalog.getParentUuid())) {
-			throw new CatalogIllegalParameterException("服务目录：'" + targetUuid + "'不是服务目录：'" + parentUuid + "'的子目录");
-		}
+		
+		Integer targetSort;
 		Integer newSort;
-		//移动操作类型
-//		String movetype = jsonObj.getString("movetype");	
-//		if("prev".equals(movetype)) {
-//			//移动到目标节点前面
-//			newSort = targetCatalog.getSort();
-//		}else if("next".equals(movetype)){
-//			//移动到目标节点后面
-//			newSort = targetCatalog.getSort() + 1;
-//		}else {
-//			//移进目标节点里面
-//			newSort = catalogMapper.getMaxSortByParentUuid(parentUuid) + 1;
-//		}
+
 		if(parentUuid.equals(targetUuid)) {
 			//移进目标节点里面
-			newSort = catalogMapper.getMaxSortByParentUuid(parentUuid) + 1;
+			targetSort = catalogMapper.getMaxSortByParentUuid(parentUuid);
 		}else {
 			//移动到目标节点后面
-			newSort = targetCatalog.getSort();
+			CatalogVo targetCatalog = catalogMapper.getCatalogByUuid(targetUuid);
+			//判断目标节点服务目录是否存在
+			if(targetCatalog == null) {
+				throw new CatalogNotFoundException(targetUuid);
+			}
+			if(!parentUuid.equals(targetCatalog.getParentUuid())) {
+				throw new CatalogIllegalParameterException("服务目录：'" + targetUuid + "'不是服务目录：'" + parentUuid + "'的子目录");
+			}
+			targetSort = targetCatalog.getSort();
 		}
 		Integer oldSort = moveCatalog.getSort();
 		
 		//判断是否是在相同目录下移动
 		if(parentUuid.equals(moveCatalog.getParentUuid())) {
 			//相同目录下移动
-			if(oldSort.compareTo(newSort) == 1) {//往前移动, 移动前后两个位置直接的服务目录序号加一
-				catalogMapper.updateSortIncrement(parentUuid, newSort, oldSort - 1);
-			}else if(oldSort.compareTo(newSort) == -1) {//往后移动, 移动前后两个位置直接的服务目录序号减一
+			if(oldSort.compareTo(targetSort) == -1) {//往后移动, 移动前后两个位置直接的服务目录序号减一
+				newSort = targetSort;
 				catalogMapper.updateSortDecrement(parentUuid, oldSort + 1, newSort);
+			}else {//往前移动, 移动前后两个位置直接的服务目录序号加一
+				newSort = targetSort + 1;
+				catalogMapper.updateSortIncrement(parentUuid, newSort, oldSort - 1);
 			}
 		}else {
 			//不同同目录下移动
+			newSort = targetSort + 1;
 			//旧目录，被移动目录后面的兄弟节点序号减一
 			catalogMapper.updateSortDecrement(moveCatalog.getParentUuid(), oldSort + 1, null);
 			//新目录，目标目录后面的兄弟节点序号加一
