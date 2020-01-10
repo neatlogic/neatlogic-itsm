@@ -182,9 +182,11 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			}
 		}
 
-		private void saveAuditDetail(ProcessTaskStepAuditVo processTaskStepAuditVo, ProcessTaskStepAuditDetailVo oldAudit, String newValue) {
-			if (oldAudit == null || !oldAudit.getNewContent().equals(newValue)) {
-				processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), oldAudit.getType(), oldAudit.getNewContent(), newValue));
+		private void saveAuditDetail(ProcessTaskStepAuditVo processTaskStepAuditVo, ProcessTaskStepAuditDetailVo oldAudit, ProcessTaskAuditDetailType detailType, String newValue) {
+			if (oldAudit == null) {
+				processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), detailType.getValue(), null, newValue));
+			} else if (!oldAudit.getNewContent().equals(newValue)) {
+				processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), detailType.getValue(), oldAudit.getNewContent(), newValue));
 			}
 		}
 
@@ -213,30 +215,35 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 				}
 				/** 标题修改审计 **/
 				ProcessTaskStepAuditDetailVo titleAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.TITLE.getValue());
-				saveAuditDetail(processTaskStepAuditVo, titleAudit, processTaskVo.getTitle());
+				saveAuditDetail(processTaskStepAuditVo, titleAudit, ProcessTaskAuditDetailType.TITLE, processTaskVo.getTitle());
 
 				/** 内容修改审计 **/
 				if (startContentVo != null) {
 					ProcessTaskStepAuditDetailVo contentAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.CONTENT.getValue());
-					saveAuditDetail(processTaskStepAuditVo, contentAudit, startContentVo.getHash());
+					saveAuditDetail(processTaskStepAuditVo, contentAudit, ProcessTaskAuditDetailType.CONTENT, startContentVo.getHash());
 				}
 				/** 优先级修改审计 **/
 				ProcessTaskStepAuditDetailVo urgencyAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.URGENCY.getValue());
-				saveAuditDetail(processTaskStepAuditVo, urgencyAudit, processTaskVo.getUrgency());
+				saveAuditDetail(processTaskStepAuditVo, urgencyAudit, ProcessTaskAuditDetailType.CONTENT, processTaskVo.getUrgency());
 
 				/** 表单修改审计 **/
 				ProcessTaskStepAuditDetailVo formAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.FORM.getValue());
-				JSONObject oldFormObj = JSONObject.parseObject(formAudit.getNewContent());
+
 				List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				JSONObject newFormObj = new JSONObject();
 				for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
 					newFormObj.put(attributeData.getAttributeUuid(), attributeData.getData());
 				}
-				Javers javers = JaversBuilder.javers().build();
 
-				Diff diff = javers.compare(newFormObj, oldFormObj);
-				if (formAudit == null || diff.hasChanges()) {
-					processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), formAudit.getType(), formAudit.getNewContent(), newFormObj.toJSONString()));
+				if (formAudit == null) {
+					processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.FORM.getValue(), null, newFormObj.toJSONString()));
+				} else {
+					Javers javers = JaversBuilder.javers().build();
+					JSONObject oldFormObj = JSONObject.parseObject(formAudit.getNewContent());
+					Diff diff = javers.compare(newFormObj, oldFormObj);
+					if (diff.hasChanges()) {
+						processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.FORM.getValue(), formAudit.getNewContent(), newFormObj.toJSONString()));
+					}
 				}
 
 			} catch (Exception ex) {
@@ -246,9 +253,9 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 			}
 		}
 	}
-	
+
 	public static void main(String[] argv) {
-		AuditHandler runer = new AuditHandler(null,null) {
+		AuditHandler runer = new AuditHandler(null, null) {
 
 			@Override
 			public void execute() {
@@ -1138,7 +1145,8 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 
 				/** 找到开始节点 **/
 				if (stepVo.getType().equals(ProcessStepType.START.getValue())) {
-					currentProcessTaskStepVo = ptStepVo;
+					currentProcessTaskStepVo.setId(ptStepVo.getId());
+					currentProcessTaskStepVo.setHandler(ptStepVo.getHandler());
 					if (paramObj.containsKey("step") && paramObj.get("step") instanceof JSONObject) {
 						currentProcessTaskStepVo.setParamObj(paramObj.getJSONObject("step"));
 					}
