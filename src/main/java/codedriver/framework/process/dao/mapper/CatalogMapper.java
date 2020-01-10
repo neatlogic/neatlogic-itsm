@@ -1,6 +1,7 @@
 package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -18,7 +19,7 @@ public interface CatalogMapper {
 	
 	int checkCatalogIsExists(String catalogUuid);
 
-	List<String> getHasActiveChannelCatalogUuidList();
+	Set<String> getHasActiveChannelCatalogUuidList();
 
 	int checkCatalogNameIsRepeat(CatalogVo catalogVo);
 

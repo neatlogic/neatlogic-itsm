@@ -2,7 +2,9 @@ package codedriver.module.process.dto;
 
 import java.io.Serializable;
 
-public class ProcessFormVo implements Serializable {
+import codedriver.framework.common.dto.BasePageVo;
+
+public class ProcessFormVo extends BasePageVo implements Serializable {
 	/** 
 	* @Fields serialVersionUID : TODO 
 	*/

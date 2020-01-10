@@ -1,6 +1,7 @@
 package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -13,6 +14,8 @@ public interface ChannelMapper {
 	int searchChannelCount(ChannelVo channelVo);
 
 	List<ChannelVo> searchChannelList(ChannelVo channelVo);
+
+	Set<String> searchChannelParentUuidList(ChannelVo channelVo);
 
 	ChannelVo getChannelByUuid(String channelUuid);
 

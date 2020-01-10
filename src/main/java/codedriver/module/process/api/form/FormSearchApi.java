@@ -1,40 +1,38 @@
-package codedriver.module.process.api.channel;
+package codedriver.module.process.api.form;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ChannelVo;
+import codedriver.module.process.dto.FormVo;
+
 @Service
-@Transactional
-public class ChannelSearchApi extends ApiComponentBase {
-	
+public class FormSearchApi extends ApiComponentBase {
+
 	@Autowired
-	private ChannelMapper channelMapper;
+	private FormMapper formMapper;
 	
 	@Override
 	public String getToken() {
-		return "process/channel/search";
+		return "process/form/search";
 	}
 
 	@Override
 	public String getName() {
-		return "服务通道搜索接口";
+		return "表单列表搜索接口";
 	}
 
 	@Override
@@ -43,9 +41,7 @@ public class ChannelSearchApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-		@Param(name = "parentUuid", type = ApiParamType.STRING, desc = "服务目录uuid"),
-		@Param(name = "isFavorite", type = ApiParamType.ENUM, desc = "是否只查询已收藏的数据，1：已收藏，0：全部", rule = "0,1"),
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称", xss = true),
 		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
@@ -56,27 +52,29 @@ public class ChannelSearchApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="channelList",explode=ChannelVo[].class,desc="服务通道列表")
+		@Param(name="formList",explode=FormVo[].class,desc="表单列表")
 	})
-	@Description(desc = "服务通道搜索接口")
+	@Description(desc = "表单列表搜索接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		FormVo formVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<FormVo>() {});
 		JSONObject resultObj = new JSONObject();
-		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
-		channelVo.setUserId(UserContext.get().getUserId());
-
-		if(channelVo.getNeedPage()) {
-			int rowNum = channelMapper.searchChannelCount(channelVo);
-			int pageCount = PageUtil.getPageCount(rowNum,channelVo.getPageSize());
-			channelVo.setPageCount(pageCount);
-			channelVo.setRowNum(rowNum);
-			resultObj.put("currentPage",channelVo.getCurrentPage());
-			resultObj.put("pageSize",channelVo.getPageSize());
+		if(formVo.getNeedPage()) {
+			int rowNum = formMapper.searchFormCount(formVo);
+			int pageCount = PageUtil.getPageCount(rowNum, formVo.getPageSize());
+			formVo.setPageCount(pageCount);
+			resultObj.put("currentPage", formVo.getCurrentPage());
+			resultObj.put("pageSize", formVo.getPageSize());
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
-		}			
-		List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);		
-		resultObj.put("channelList", channelList);
+		}
+		List<FormVo> formList = formMapper.searchFormList(formVo);
+		int count = 0;
+		for(FormVo form : formList) {
+			count = formMapper.getFormReferenceCount(form.getUuid());
+			form.setReferenceCount(count);
+		}
+		resultObj.put("formList", formList);
 		return resultObj;
 	}
 
