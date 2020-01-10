@@ -255,10 +255,6 @@
 	REPLACE INTO `channel_worktime`(`channel_uuid`, `worktime_uuid`) VALUES(#{channelUuid}, #{worktimeUuid})
 	</insert>
 	
-	<update id="updateAllNextChannelSortForMove">
-	UPDATE `channel` SET `sort` = `sort` + 1 WHERE `parent_uuid` = #{parentUuid} AND `sort` >= #{sort}
-	</update>
-	
 	<update id="updateChannelForMove">
 	UPDATE `channel` SET `parent_uuid` = #{parentUuid}, `sort` = #{sort} WHERE `uuid` = #{uuid}
 	</update>

@@ -28,8 +28,6 @@ public interface CatalogMapper {
 	int replaceCatalog(CatalogVo catalogVo);
 
 	int insertCatalogRole(@Param("catalogUuid")String catalogUuid, @Param("roleName")String roleName);
-	
-	int updateAllNextCatalogSortForMove1(@Param("sort")Integer sort, @Param("parentUuid")String parentUuid);
 
 	int updateCatalogForMove(CatalogVo catalogVo);
 
