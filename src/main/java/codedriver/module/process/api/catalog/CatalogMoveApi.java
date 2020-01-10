@@ -110,14 +110,6 @@ public class CatalogMoveApi extends ApiComponentBase {
 			catalogMapper.updateSortIncrement(parentUuid, newSort, null);
 		}
 		
-//		if(oldSort.compareTo(newSort) == 1) {//往前移动, 移动前后两个位置直接的服务目录序号加一
-//			catalogMapper.updateSortIncrement(newSort, oldSort - 1);
-//			channelMapper.updateSortIncrement(newSort, oldSort - 1);
-//		}else if(oldSort.compareTo(newSort) == -1) {//往后移动, 移动前后两个位置直接的服务目录序号减一
-//			catalogMapper.updateSortDecrement(oldSort + 1, newSort);
-//			channelMapper.updateSortDecrement(oldSort + 1, newSort);
-//		}
-		
 		moveCatalog.setSort(newSort);
 		moveCatalog.setParentUuid(parentUuid);
 		catalogMapper.updateCatalogForMove(moveCatalog);
