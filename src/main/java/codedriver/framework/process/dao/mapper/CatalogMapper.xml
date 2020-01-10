@@ -98,6 +98,24 @@
 	<update id="updateCatalogForMove">
 	UPDATE `catalog` SET `parent_uuid` = #{parentUuid}, `sort` = #{sort} WHERE `uuid` = #{uuid}
 	</update>
+
+	<update id="updateSortIncrement" parameterType="java.util.HashMap">
+	UPDATE `catalog` SET `sort` = `sort` + 1 
+	WHERE `parent_uuid` = #{parentUuid} 
+	AND `sort` &gt;= #{fromSort} 
+	<if test="toSort != null">
+	AND `sort` &lt;= #{toSort}
+	</if>
+	</update>
+
+	<update id="updateSortDecrement" parameterType="java.util.HashMap">
+	UPDATE `catalog` SET `sort` = `sort` - 1 
+	WHERE `parent_uuid` = #{parentUuid} 
+	AND `sort` &gt;= #{fromSort} 
+	<if test="toSort != null">
+	AND `sort` &lt;= #{toSort}
+	</if>
+	</update>
 	
 	<delete id="deleteCatalogByUuid">
 	DELETE FROM `catalog` WHERE `uuid` = #{uuid}

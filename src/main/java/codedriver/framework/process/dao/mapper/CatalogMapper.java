@@ -29,9 +29,13 @@ public interface CatalogMapper {
 
 	int insertCatalogRole(@Param("catalogUuid")String catalogUuid, @Param("roleName")String roleName);
 	
-	int updateAllNextCatalogSortForMove(@Param("sort")Integer sort, @Param("parentUuid")String parentUuid);
+	int updateAllNextCatalogSortForMove1(@Param("sort")Integer sort, @Param("parentUuid")String parentUuid);
 
 	int updateCatalogForMove(CatalogVo catalogVo);
+
+	int updateSortIncrement(@Param("parentUuid")String parentUuid, @Param("fromSort")Integer fromSort, @Param("toSort")Integer toSort);
+
+	int updateSortDecrement(@Param("parentUuid")String parentUuid, @Param("fromSort")Integer fromSort, @Param("toSort")Integer toSort);
 	
 	int deleteCatalogByUuid(String uuid);
 

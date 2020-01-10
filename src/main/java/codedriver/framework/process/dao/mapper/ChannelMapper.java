@@ -47,9 +47,13 @@ public interface ChannelMapper {
 
 	int replaceChannelWorktime(@Param("channelUuid")String channelUuid, @Param("worktimeUuid")String worktimeUuid);
 	
-	int updateAllNextChannelSortForMove(@Param("sort")Integer sort, @Param("parentUuid")String parentUuid);
+	int updateAllNextChannelSortForMove1(@Param("sort")Integer sort, @Param("parentUuid")String parentUuid);
 
 	int updateChannelForMove(ChannelVo channelVo);
+
+	int updateSortIncrement(@Param("parentUuid")String parentUuid, @Param("fromSort")Integer fromSort, @Param("toSort")Integer toSort);
+
+	int updateSortDecrement(@Param("parentUuid")String parentUuid, @Param("fromSort")Integer fromSort, @Param("toSort")Integer toSort);
 
 	int deleteChannelUser(@Param("userId")String userId, @Param("channelUuid")String channelUuid);
 	
