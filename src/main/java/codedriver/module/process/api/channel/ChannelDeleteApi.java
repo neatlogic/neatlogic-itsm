@@ -13,6 +13,7 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.dto.ChannelVo;
 
 @Service
 @Transactional
@@ -43,7 +44,8 @@ public class ChannelDeleteApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		if(channelMapper.checkChannelIsExists(uuid) == 0) {
+		ChannelVo existsChannel = channelMapper.getChannelByUuid(uuid);
+		if(existsChannel == null) {
 			throw new ChannelNotFoundException(uuid);
 		}
 		channelMapper.deleteChannelByUuid(uuid);
@@ -52,6 +54,8 @@ public class ChannelDeleteApi extends ApiComponentBase {
 		channelMapper.deleteChannelRoleByChannelUuid(uuid);
 		channelMapper.deleteChannelUserByChannelUuid(uuid);
 		channelMapper.deleteChannelPriorityByChannelUuid(uuid);
+		
+		channelMapper.updateSortDecrement(existsChannel.getParentUuid(), existsChannel.getSort(), null);
 		return null;
 	}
 

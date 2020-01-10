@@ -52,7 +52,8 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		if(catalogMapper.checkCatalogIsExists(uuid) == 0) {
+		CatalogVo existsCatalog = catalogMapper.getCatalogByUuid(uuid);
+		if(existsCatalog == null) {
 			throw new CatalogNotFoundException(uuid);
 		}
 		
@@ -71,6 +72,8 @@ public class CatalogDeteleApi extends ApiComponentBase {
 		}
 		catalogMapper.deleteCatalogByUuid(uuid);
 		catalogMapper.deleteCatalogRoleByUuid(uuid);
+		catalogMapper.updateSortDecrement(existsCatalog.getParentUuid(), existsCatalog.getSort(), null);
+//		channelMapper.updateSortDecrement(existsCatalog.getSort(), null);
 		return null;
 	}
 

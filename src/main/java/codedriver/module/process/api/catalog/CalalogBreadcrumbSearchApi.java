@@ -114,13 +114,13 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 				if(ITree.ROOT_UUID.equals(catalogVo.getUuid())) {
 					continue;
 				}
+				if(!catalogVo.isAncestorOrSelf(catalogUuid)) {
+					continue;
+				}
 				if(keyword == null) {
 					if(!hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
 						continue;
-					}			
-					if(!catalogVo.isAncestorOrSelf(catalogUuid)) {
-						continue;
-					}
+					}								
 				}else {
 					if(!channelParentUuidList.contains(catalogVo.getUuid())) {
 						continue;

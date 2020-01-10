@@ -87,6 +87,7 @@
 	  c.`color`,
 	  c.`desc`,
 	  c.`sort`,
+	  c.`sla`,
 	  c.`allow_desc` AS allowDesc,
 	  c.`help`,
 	  c.`is_active_help` AS isActiveHelp,
@@ -186,12 +187,14 @@
 		<id column="uuid" property="uuid"/>
 		<result column="name" property="name"/>
 		<result column="parent_uuid" property="parentUuid"/>
+		<result column="sort" property="sort"/>
 	</resultMap>
 	<select id="getChannelListForTree" resultMap="channelMap">
 	SELECT 
 	  c.`uuid`,
 	  c.`name`,
-	  c.`parent_uuid`
+	  c.`parent_uuid`,
+	  c.`sort`
 	FROM
 	  `channel` c 
 	<if test="isActive != null">
@@ -210,6 +213,7 @@
 	  `color`,
 	  `desc`,
 	  `sort`,
+	  `sla`,
 	  `allow_desc`,
 	  `help`,
 	  `is_active_help`
@@ -224,6 +228,7 @@
 	    #{color},
 	    #{desc},
 	    #{sort},
+	    #{sla},
 	    #{allowDesc},
 	  	#{help},
 	  	#{isActiveHelp}
@@ -250,12 +255,26 @@
 	REPLACE INTO `channel_worktime`(`channel_uuid`, `worktime_uuid`) VALUES(#{channelUuid}, #{worktimeUuid})
 	</insert>
 	
-	<update id="updateAllNextChannelSortForMove">
-	UPDATE `channel` SET `sort` = `sort` + 1 WHERE `parent_uuid` = #{parentUuid} AND `sort` >= #{sort}
-	</update>
-	
 	<update id="updateChannelForMove">
 	UPDATE `channel` SET `parent_uuid` = #{parentUuid}, `sort` = #{sort} WHERE `uuid` = #{uuid}
+	</update>
+
+	<update id="updateSortIncrement" parameterType="java.util.HashMap">
+	UPDATE `channel` SET `sort` = `sort` + 1 
+	WHERE `parent_uuid` = #{parentUuid} 
+	AND `sort` &gt;= #{fromSort} 
+	<if test="toSort != null">
+	AND `sort` &lt;= #{toSort}
+	</if>
+	</update>
+
+	<update id="updateSortDecrement" parameterType="java.util.HashMap">
+	UPDATE `channel` SET `sort` = `sort` - 1 
+	WHERE `parent_uuid` = #{parentUuid} 
+	AND `sort` &gt;= #{fromSort} 
+	<if test="toSort != null">
+	AND `sort` &lt;= #{toSort}
+	</if>
 	</update>
 	
 	<delete id="deleteChannelUser">
