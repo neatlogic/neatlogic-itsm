@@ -1,11 +1,15 @@
 package codedriver.module.process.api.worktime;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
@@ -70,6 +74,37 @@ public class WorktimeSearchApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}
 		List<WorktimeVo> worktimeList = worktimeMapper.searchWorktimeList(worktimeVo);
+		String startTime = null;
+		String endTime = null;
+		JSONObject jsonObject = null;
+		JSONArray jsonArray = null;
+		Object value = null;
+		JSONObject config = null;
+		Set<String> workingHoursSet = null;
+		for(WorktimeVo worktime : worktimeList) {
+			workingHoursSet = new HashSet<>();
+			config = JSON.parseObject(worktime.getConfig());
+			for(Entry<String, Object> entry : config.entrySet()) {
+				value = entry.getValue();
+				if(value instanceof JSONArray) {
+					jsonArray = (JSONArray) value;
+					for(int i = 0; i < jsonArray.size(); i++) {
+						jsonObject = jsonArray.getJSONObject(i);
+						startTime = "undefine";
+						endTime = "undefine";
+						if(jsonObject.containsKey("startTime")) {
+							startTime = jsonObject.getString("startTime");
+						}
+						if(jsonObject.containsKey("endTime")) {
+							endTime = jsonObject.getString("endTime");
+						}						
+						workingHoursSet.add(startTime + " ~ " + endTime);
+					}
+				}
+			}
+			worktime.setWorkingHoursSet(workingHoursSet);
+			worktime.setConfig(null);
+		}
 		resultObj.put("worktimeList", worktimeList);
 		return resultObj;
 	}
