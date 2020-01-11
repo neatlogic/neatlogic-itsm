@@ -2,16 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.WorktimeMapper">
 
-	<resultMap id="worktimeMap" type="codedriver.module.process.dto.WorktimeVo">
-		<id column="uuid" property="uuid"/>
-		<result column="name" property="name"/>
-		<result column="is_active" property="isActive"/>
-		<result column="lcu" property="lcu"/>
-		<result column="lcd" property="lcd"/>
-		<result column="config" property="config"/>
-	</resultMap>
-
-	<select id="getWorktimeByUuid" parameterType="java.lang.String" resultMap="worktimeMap">
+	<select id="getWorktimeByUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.WorktimeVo">
 	SELECT 
 	  wt.`uuid`,
 	  wt.`name`,
@@ -44,14 +35,25 @@
 	</if>
 	</select>
 	
+	<resultMap id="worktimeMap" type="codedriver.module.process.dto.WorktimeVo">
+		<id column="uuid" property="uuid"/>
+		<result column="name" property="name"/>
+		<result column="is_active" property="isActive"/>
+		<result column="config" property="config"/>
+		<collection property="yearList" ofType="java.lang.Integer">
+			<id column="year"/>
+		</collection>
+	</resultMap>
+	
 	<select id="searchWorktimeList" parameterType="codedriver.module.process.dto.WorktimeVo" resultMap="worktimeMap">
 	SELECT 
 	  wt.`uuid`,
 	  wt.`name`,
 	  wt.`is_active`,
-	  wt.`lcu`,
-	  wt.`lcd`
+	  wt.`config`,
+	  wtr.`year`
 	FROM `worktime` wt
+	LEFT JOIN `worktime_range` wtr ON wtr.`worktime_uuid` = wt.`uuid`
 	WHERE 1 = 1
 	<if test="keyword != null and keyword != ''">
 	AND wt.`name` LIKE CONCAT('%', #{keyword}, '%')
@@ -59,6 +61,7 @@
 	<if test="isActive != null">
 	AND wt.`is_active` = #{isActive}
 	</if>
+	GROUP BY wt.`uuid`, wtr.`year`
 	ORDER BY wt.`lcd`
 	<if test="needPage">
 	limit #{startNum}, #{pageSize}

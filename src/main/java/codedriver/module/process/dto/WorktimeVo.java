@@ -1,6 +1,8 @@
 package codedriver.module.process.dto;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -32,6 +34,12 @@ public class WorktimeVo extends BasePageVo {
 	 */
 	@EntityField(name = "每周工作时段的定义", type = ApiParamType.STRING)
 	private String config;
+	
+	@EntityField(name = "年份列表", type = ApiParamType.JSONARRAY)
+	private List<Integer> yearList;
+	
+	@EntityField(name = "工作时段列表", type = ApiParamType.JSONARRAY)
+	private Set<String> workingHoursSet;
 	
 	private transient String keyword;
 	
@@ -79,6 +87,18 @@ public class WorktimeVo extends BasePageVo {
 	}
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+	public List<Integer> getYearList() {
+		return yearList;
+	}
+	public void setYearList(List<Integer> yearList) {
+		this.yearList = yearList;
+	}
+	public Set<String> getWorkingHoursSet() {
+		return workingHoursSet;
+	}
+	public void setWorkingHoursSet(Set<String> workingHoursSet) {
+		this.workingHoursSet = workingHoursSet;
 	}
 
 }
