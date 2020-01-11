@@ -6,6 +6,7 @@ public enum ProcessTaskStepAction {
 	COMPLETE("complete", "完成"),
 	ACCEPT("accept", "接受"),
 	ABORT("abort", "终止"),
+	RECOVER("recover", "恢复"),
 	TRANSFER("transfer", "转交"),
 	BACK("back", "回退");
 
