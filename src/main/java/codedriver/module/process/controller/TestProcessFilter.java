@@ -28,7 +28,7 @@ public class TestProcessFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		
+
 		TenantContext tenantContext = TenantContext.init();
 		List<ModuleVo> activeModuleList = new ArrayList<ModuleVo>();
 		ModuleVo module1 = new ModuleVo();
@@ -40,18 +40,18 @@ public class TestProcessFilter extends OncePerRequestFilter {
 		activeModuleList.add(module1);
 		activeModuleList.add(module2);
 		tenantContext.setActiveModuleList(activeModuleList);
-		
+
 		tenantContext.setTenantUuid("techsure");
 		tenantContext.setUseDefaultDatasource(false);
-		
+
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("userid", "lvzk");
 		jsonObj.put("username", "lvzk");
 		jsonObj.put("tenant", "techsure");
 		JSONArray roleList = new JSONArray();
 		roleList.add("R_ADMIN");
-		jsonObj.put("rolelist",roleList);
-		UserContext.init(jsonObj,request,response);
+		jsonObj.put("rolelist", roleList);
+		UserContext.init(jsonObj, "+8:00", request, response);
 		System.out.println(UserContext.get().getUserId());
 		filterChain.doFilter(request, response);
 	}
