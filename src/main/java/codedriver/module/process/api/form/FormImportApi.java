@@ -18,9 +18,12 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.exception.form.FormImportException;
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.FormVo;
@@ -47,6 +50,9 @@ public class FormImportApi extends BinaryStreamApiComponentBase {
 		return null;
 	}
 	
+	@Output({
+		@Param(name = "Return", type = ApiParamType.JSONARRAY, desc = "导入结果")
+	})
 	@Description(desc = "表单导入接口")
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {

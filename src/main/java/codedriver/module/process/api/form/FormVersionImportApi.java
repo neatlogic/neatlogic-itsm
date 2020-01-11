@@ -22,6 +22,7 @@ import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormImportException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.process.dto.FormVersionVo;
@@ -51,6 +52,9 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true)
 		})
+	@Output({
+		@Param(name = "Return", type = ApiParamType.JSONARRAY, desc = "导入结果")
+	})
 	@Description(desc = "表单版本导入接口")
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
