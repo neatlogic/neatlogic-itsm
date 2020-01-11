@@ -24,6 +24,8 @@ public class ProcessTaskVo {
 	private String expireTime;
 	private String channelUuid;
 	private String configHash;
+	private String urgency;
+	private String urgencyText;
 	private List<ProcessTaskStepVo> stepList;
 
 	public ProcessTaskVo() {
@@ -197,6 +199,22 @@ public class ProcessTaskVo {
 
 	public void setConfigHash(String configHash) {
 		this.configHash = configHash;
+	}
+
+	public String getUrgency() {
+		return urgency;
+	}
+
+	public void setUrgency(String urgency) {
+		this.urgency = urgency;
+	}
+
+	public String getUrgencyText() {
+		return urgencyText;
+	}
+
+	public void setUrgencyText(String urgencyText) {
+		this.urgencyText = urgencyText;
 	}
 
 }

@@ -26,6 +26,7 @@
 				});
 
 				submitData['title'] = $('#txtTitle').val();
+				submitData['content'] = $('#txtContent').val();
 				$.ajax({
 					url : '${pageContext.request.contextPath}/module/process/processtask/' + processId + '/startnewtask',
 					dataType : 'json',
@@ -34,8 +35,8 @@
 					contentType : "application/json",
 					success : function(data) {
 						if (data.Status == 'OK') {
-							showPopMsg.success('操作成功 '+data.processTaskId, function() {
-								$("#btnSave").next().html("上报成功，工单号："+data.processTaskId);
+							showPopMsg.success('操作成功 ' + data.processTaskId, function() {
+								$("#btnSave").next().html("上报成功，工单号：" + data.processTaskId);
 							});
 						} else {
 							showPopMsg.error('操作失败，异常：<br>' + data.Message);
@@ -64,7 +65,7 @@
 			<label>标题：</label>
 		</div>
 		<input type="text" id="txtTitle" class="input-xxlarge">
-		<div id="divAttribute"></div>
+		<textarea name="content" id="txtContent"></textarea>
 		<button type="button" id="btnSave">提交</button>
 		<h1></h1>
 	</form>

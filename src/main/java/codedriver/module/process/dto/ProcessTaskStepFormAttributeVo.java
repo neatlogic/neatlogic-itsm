@@ -22,7 +22,7 @@ public class ProcessTaskStepFormAttributeVo {
 	private String handlerName;
 	private String type;
 	private String typeName;
-	private ProcessTaskAttributeDataVo attributeData;
+	private ProcessTaskFormAttributeDataVo attributeData;
 	private JSONObject configObj;
 
 	public ProcessTaskStepFormAttributeVo() {
@@ -170,11 +170,11 @@ public class ProcessTaskStepFormAttributeVo {
 		this.typeName = typeName;
 	}
 
-	public ProcessTaskAttributeDataVo getAttributeData() {
+	public ProcessTaskFormAttributeDataVo getAttributeData() {
 		return attributeData;
 	}
 
-	public void setAttributeData(ProcessTaskAttributeDataVo attributeData) {
+	public void setAttributeData(ProcessTaskFormAttributeDataVo attributeData) {
 		this.attributeData = attributeData;
 	}
 

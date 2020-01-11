@@ -23,20 +23,20 @@ public class XdotTemplateController {
 		return "/templates/global";
 	}
 
-	/*@RequestMapping(value = "/get", method = RequestMethod.GET)
-	public String getTemplate(String templatename, HttpServletRequest request, HttpServletResponse response) throws IOException {
-		if (templatename != null && !templatename.equals("")) {
-			
-			response.setHeader("Cache-control", "private");
-			//return templatename;
-			request.setAttribute("templatePath", templatename);
-			return "/xdottemplate/xdotTemplateFrame";
-		} else {
-			throw new RuntimeException(Translator.translate("模板名称不能为空", ""));
-		}
-	}*/
-	
-	@RequestMapping(value = "/get", method = RequestMethod.GET)
+	/*
+	 * @RequestMapping(value = "/get", method = RequestMethod.GET) public String
+	 * getTemplate(String templatename, HttpServletRequest request,
+	 * HttpServletResponse response) throws IOException { if (templatename !=
+	 * null && !templatename.equals("")) {
+	 * 
+	 * response.setHeader("Cache-control", "private"); //return templatename;
+	 * request.setAttribute("templatePath", templatename); return
+	 * "/xdottemplate/xdotTemplateFrame"; } else { throw new
+	 * RuntimeException(Translator.translate("模板名称不能为空", "")); } }
+	 */
+
+	@RequestMapping(value = "/get",
+			method = RequestMethod.GET)
 	public String getTemplate(String templatename, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		if (templatename != null && !templatename.equals("")) {
 			templatename = "/templates/" + templatename.replace(".", "/");
@@ -46,8 +46,9 @@ public class XdotTemplateController {
 			throw new RuntimeException("模板名称不能为空");
 		}
 	}
-	
-	@RequestMapping(value = "/getcontent", method = RequestMethod.GET)
+
+	@RequestMapping(value = "/getcontent",
+			method = RequestMethod.GET)
 	public String getTemplateContent(String templatepath, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		if (templatepath != null && !templatepath.equals("")) {
 			templatepath = "/templates/" + templatepath.replace(".", "/");
@@ -57,5 +58,6 @@ public class XdotTemplateController {
 			throw new RuntimeException("模板名称不能为空");
 		}
 	}
+
 
 }

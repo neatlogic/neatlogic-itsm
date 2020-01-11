@@ -20,7 +20,7 @@ public class ChannelVo extends BasePageVo implements ITree{
 	@EntityField(name = "是否启用，0：禁用，1：启用", type = ApiParamType.INTEGER)
 	private Integer isActive;
 	
-	@EntityField(name = "描述", type = ApiParamType.STRING)
+	@EntityField(name = "服务说明", type = ApiParamType.STRING)
 	private String desc;
 	
 	@EntityField(name = "图标", type = ApiParamType.STRING)
@@ -41,6 +41,30 @@ public class ChannelVo extends BasePageVo implements ITree{
 	@EntityField(name = "类型", type = ApiParamType.STRING)
 	private String type = "channel";
 	
+	@EntityField(name = "工作流uuid", type = ApiParamType.STRING)
+	private String processUuid;
+	
+	@EntityField(name = "服务窗口uuid", type = ApiParamType.STRING)
+	private String worktimeUuid;
+	
+	@EntityField(name = "时效(单位：小时)", type = ApiParamType.STRING)
+	private Integer sla;
+	
+	@EntityField(name = "优先级列表", type = ApiParamType.JSONARRAY)
+	private List<String> priorityUuidList;
+	
+	@EntityField(name = "默认优先级", type = ApiParamType.STRING)
+	private String defaultPriorityUuid;
+	
+	@EntityField(name = "是否显示上报页描述", type = ApiParamType.INTEGER)
+	private Integer allowDesc;
+	
+	@EntityField(name = "描述帮助", type = ApiParamType.STRING)
+	private String help;
+	
+	@EntityField(name = "是否激活描述帮助", type = ApiParamType.INTEGER)
+	private Integer isActiveHelp;
+	
 	private transient ITree parent;
 	
 	private transient Integer sort;
@@ -48,22 +72,6 @@ public class ChannelVo extends BasePageVo implements ITree{
 	private transient String keyword;
 	
 	private transient String userId;
-	
-	private String processUuid;
-	
-	private String worktimeUuid;
-	
-	private Long time;
-	
-	private List<String> priorityUuidList;
-	
-	private String defaultPriorityUuid;
-	
-	private Integer allowDesc;
-	
-	private String help;
-	
-	private Integer isActiveHelp;
 	
 	private transient int childrenCount = 0;
 	
@@ -217,12 +225,12 @@ public class ChannelVo extends BasePageVo implements ITree{
 	}
 	public void setWorktimeUuid(String worktimeUuid) {
 		this.worktimeUuid = worktimeUuid;
+	}	
+	public Integer getSla() {
+		return sla;
 	}
-	public Long getTime() {
-		return time;
-	}
-	public void setTime(Long time) {
-		this.time = time;
+	public void setSla(Integer sla) {
+		this.sla = sla;
 	}
 	public List<String> getPriorityUuidList() {
 		return priorityUuidList;
