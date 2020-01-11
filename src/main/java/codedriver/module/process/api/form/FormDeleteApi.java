@@ -43,6 +43,7 @@ public class FormDeleteApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
+		//判断表单是否存在
 		if(formMapper.checkFormIsExists(uuid) == 0) {
 			throw new FormNotFoundException(uuid);
 		}

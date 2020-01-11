@@ -30,6 +30,7 @@ public class FormVo extends BasePageVo implements Serializable {
 	@EntityField(name = "引用数量", type = ApiParamType.INTEGER)
 	private int referenceCount;
 	
+	@EntityField(name = "版本信息列表", type = ApiParamType.JSONARRAY)
 	private List<FormVersionVo> versionList;
 	private transient String keyword;
 	
