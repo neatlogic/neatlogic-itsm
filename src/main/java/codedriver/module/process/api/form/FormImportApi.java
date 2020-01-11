@@ -87,18 +87,13 @@ public class FormImportApi extends BinaryStreamApiComponentBase {
 				}
 				List<FormVersionVo> formVersionList = formVo.getVersionList();
 				//判断表单是否存在，不存在就新增，存在就更新
-				if(formMapper.checkFormIsExists(formVo.getUuid()) == 0) {
-//					formVo.setUuid(null);					
+				if(formMapper.checkFormIsExists(formVo.getUuid()) == 0) {				
 					formMapper.replaceForm(formVo);
 					resultList.add("新增表单：" + formVo.getName());
-//					int version = 1;
 					for(FormVersionVo formVersion : formVersionList) {
 						formVersion.setFormUuid(formVo.getUuid());
-//						formVersion.setUuid(null);
-//						formVersion.setVersion(version);
 						formMapper.insertFormVersion(formVersion);
 						resultList.add("新增版本" + formVersion.getVersion());
-//						version ++;
 					}
 				}else {
 					resultList.add("更新表单：" + formVo.getName());
