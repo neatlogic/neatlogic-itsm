@@ -659,7 +659,6 @@ public abstract class ProcessStepHandlerBase implements IProcessStepHandler {
 		if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
 			throw new ProcessTaskRuntimeException("请先开始步骤");
 		}
-
 		boolean canComplete = false;
 		ProcessTaskStepUserVo processTaskMajorUser = null;
 		if (this.getMode().equals(ProcessStepMode.MT)) {
