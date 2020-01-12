@@ -47,9 +47,11 @@ public class FormUpdateApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		FormVo formVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<FormVo>() {});
+		//判断表单是否存在
 		if(formMapper.checkFormIsExists(formVo.getUuid()) == 0) {
 			throw new FormNotFoundException(formVo.getUuid());
 		}
+		//判断名称是否重复
 		if(formVo.getName() != null && formMapper.checkFormNameIsRepeat(formVo) > 0) {
 			throw new FormNameRepeatException(formVo.getName());
 		}

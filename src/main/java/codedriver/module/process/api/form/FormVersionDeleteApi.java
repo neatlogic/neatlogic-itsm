@@ -42,11 +42,13 @@ public class FormVersionDeleteApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
 		FormVersionVo formVersion = formMapper.getFormVersionByUuid(uuid);
+		//判断被删除的表单版本是否存在
 		if(formVersion == null) {
 			throw new FormVersionNotFoundException(uuid);
-		}else if(formVersion.getIsActive().intValue() == 1){
+		}else if(formVersion.getIsActive().intValue() == 1){//当前激活版本不能删除
 			throw new FormActiveVersionCannotBeDeletedException(uuid);
 		}
+		//删除表单版本
 		formMapper.deleteFormVersionByUuid(uuid);
 		return null;
 	}

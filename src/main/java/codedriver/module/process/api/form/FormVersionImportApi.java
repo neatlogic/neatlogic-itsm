@@ -22,6 +22,7 @@ import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormImportException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.process.dto.FormVersionVo;
@@ -51,25 +52,31 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true)
 		})
+	@Output({
+		@Param(name = "Return", type = ApiParamType.JSONARRAY, desc = "导入结果")
+	})
 	@Description(desc = "表单版本导入接口")
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String uuid = paramObj.getString("uuid");
+		//判断表单是否存在
 		if(formMapper.checkFormIsExists(uuid) == 0) {
 			throw new FormNotFoundException(uuid);
 		}
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-		Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
-		ObjectInputStream ois = null;
-		Object obj = null;
-		MultipartFile multipartFile = null;
+		//获取所有导入文件
+		Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();		
+		//如果没有导入文件, 抛异常
 		if(multipartFileMap == null || multipartFileMap.isEmpty()) {
 			throw new FormImportException("没有导入文件");
 		}
-		
+		ObjectInputStream ois = null;
+		Object obj = null;
+		MultipartFile multipartFile = null;
+		//遍历导入文件, 目前只获取第一个文件内容, 其余的放弃
 		for(Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
 			multipartFile = entry.getValue();
-			
+			//反序列化获取对象
 			try {
 				ois = new ObjectInputStream(multipartFile.getInputStream());
 				obj = ois.readObject();
@@ -80,12 +87,15 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 					ois.close();
 				}
 			}
-				
+			//判断对象是否是表单版本对象, 不是就抛异常	
 			if(obj instanceof FormVersionVo) {
 				FormVersionVo formVersionVo = (FormVersionVo) obj;
 				formVersionVo.setFormUuid(uuid);
+				//将导入版本设置为激活版本
+				formMapper.resetFormVersionIsActiveByFormUuid(uuid);
 				formVersionVo.setIsActive(1);
 				FormVersionVo existsFormVersionVo = formMapper.getFormVersionByUuid(formVersionVo.getUuid());
+				//如果导入的表单版本已存在, 且表单uuid相同, 则覆盖，反之，新增一个版本
 				if(existsFormVersionVo != null && existsFormVersionVo.getFormUuid().equals(uuid)) {
 					formMapper.updateFormVersion(formVersionVo);
 					return "版本" + existsFormVersionVo.getVersion() + "被覆盖";

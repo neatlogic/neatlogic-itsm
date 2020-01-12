@@ -64,6 +64,7 @@ public class FormSaveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {		
 		if(jsonObj.containsKey("uuid")) {
 			String uuid = jsonObj.getString("uuid");
+			//判断表单是否存在
 			if(formMapper.checkFormIsExists(uuid) == 0) {
 				throw new FormNotFoundException(uuid);
 			}

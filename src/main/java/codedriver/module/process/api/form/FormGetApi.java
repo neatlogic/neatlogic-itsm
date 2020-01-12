@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.exception.form.FormNotFoundException;
+import codedriver.framework.process.exception.form.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -49,26 +50,27 @@ public class FormGetApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
 		FormVo formVo = formMapper.getFormByUuid(uuid);
+		//判断表单是否存在
 		if (formVo == null) {
 			throw new FormNotFoundException(uuid);
 		}
-		String selectVersionUuid = null;
+		FormVersionVo formVersion = null;
 		if(jsonObj.containsKey("selectVersionUuid")) {
-			selectVersionUuid = jsonObj.getString("selectVersionUuid");
+			String selectVersionUuid = jsonObj.getString("selectVersionUuid");			
+			formVersion = formMapper.getFormVersionByUuid(selectVersionUuid);
+			//判断表单版本是否存在
+			if(formVersion == null) {
+				throw new FormVersionNotFoundException(uuid);
+			}
+		}else {//获取激活版本
+			formVersion = formMapper.getActionFormVersionByFormUuid(uuid);
 		}
-		List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
-		
+		//表单内容
+		formVo.setContent(formVersion.getContent());
+		//表单版本列表
+		List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);		
 		if (formVersionList != null && formVersionList.size() > 0) {
 			for (FormVersionVo version : formVersionList) {
-				if(selectVersionUuid != null) {
-					if (selectVersionUuid.equals(version.getUuid())) {
-						formVo.setContent(version.getContent());
-					}
-				}else {
-					if (version.getIsActive().equals(1)) {
-						formVo.setContent(version.getContent());
-					}
-				}
 				if (version.getIsActive().equals(1)) {
 					formVo.setActiveVersionUuid(version.getUuid());
 				}
@@ -80,6 +82,7 @@ public class FormGetApi extends ApiComponentBase {
 			}
 			formVo.setVersionList(formVersionList);
 		}
+		//引用数量
 		int count = formMapper.getFormReferenceCount(uuid);
 		formVo.setReferenceCount(count);
 		return formVo;
