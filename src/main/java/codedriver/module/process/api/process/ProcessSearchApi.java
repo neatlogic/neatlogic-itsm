@@ -17,7 +17,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ProcessVo;
 @Service
 public class ProcessSearchApi extends ApiComponentBase {
@@ -53,7 +52,7 @@ public class ProcessSearchApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="processList",explode=ChannelVo[].class,desc="流程列表")
+		@Param(name="processList",explode=ProcessVo[].class,desc="流程列表")
 	})
 	@Description(desc = "流程列表搜索接口")
 	@Override
@@ -72,6 +71,12 @@ public class ProcessSearchApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}
 		List<ProcessVo> processList = processMapper.searchProcessList(processVo);
+		
+//		if(processList != null && !processList.isEmpty()) {
+//			for(ProcessVo process : processList) {
+////				processMapper.
+//			}
+//		}
 		resultObj.put("processList", processList);
 		return resultObj;
 	}

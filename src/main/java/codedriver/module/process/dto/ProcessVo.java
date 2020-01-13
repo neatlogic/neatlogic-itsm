@@ -20,30 +20,27 @@ import codedriver.module.process.constvalue.ProcessStepType;
 public class ProcessVo extends BasePageVo implements Serializable {
 	private static final long serialVersionUID = 4684015408674741157L;
 
-	@EntityField(name = "流程uuid",
-			type = ApiParamType.STRING)
+	@EntityField(name = "流程uuid", type = ApiParamType.STRING)
 	private String uuid;
 
-	@EntityField(name = "流程名称",
-			type = ApiParamType.STRING)
+	@EntityField(name = "流程名称", type = ApiParamType.STRING)
 	private String name;
 
-	@EntityField(name = "流程类型id",
-			type = ApiParamType.LONG)
+	@EntityField(name = "流程类型id", type = ApiParamType.LONG)
 	private Long type;
 
-	@EntityField(name = "流程类型名称",
-			type = ApiParamType.STRING)
+	@EntityField(name = "流程类型名称", type = ApiParamType.STRING)
 	private String typeName;
 
-	@EntityField(name = "是否激活",
-			type = ApiParamType.INTEGER)
+	@EntityField(name = "是否激活", type = ApiParamType.INTEGER)
 	private Integer isActive;
 
-	@EntityField(name = "流程图配置",
-			type = ApiParamType.STRING)
+	@EntityField(name = "流程图配置", type = ApiParamType.STRING)
 	private String config;
 
+	@EntityField(name = "引用数量", type = ApiParamType.INTEGER)
+	private int referenceCount;
+	
 	private String belong;
 
 	private JSONObject configObj;
@@ -290,5 +287,13 @@ public class ProcessVo extends BasePageVo implements Serializable {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public int getReferenceCount() {
+		return referenceCount;
+	}
+
+	public void setReferenceCount(int referenceCount) {
+		this.referenceCount = referenceCount;
 	}
 }

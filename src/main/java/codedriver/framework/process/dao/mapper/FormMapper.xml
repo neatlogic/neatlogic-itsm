@@ -47,8 +47,8 @@
 		f.`uuid`,
 		f.`name`,
 		f.`is_active` AS isActive,
-		fv.`version` AS activeVersion,
-		fv.`uuid` AS activeVersionUuid
+		fv.`version` AS currentVersion,
+		fv.`uuid` AS currentVersionUuid
 		FROM `form` f
 		JOIN `form_version` fv ON fv.`form_uuid`=f.`uuid` AND fv.`is_active` = 1
 		WHERE 1=1
@@ -58,6 +58,7 @@
 		<if test="keyword != null and keyword != ''">
 			AND f.`name` LIKE CONCAT('%', #{keyword},'%') 
 		</if>
+		ORDER BY f.`insert_time` DESC
 		<if test="needPage">
 			LIMIT #{startNum}, #{pageSize}
 		</if>
@@ -192,13 +193,15 @@
 		REPLACE INTO `form` (
 		`uuid`,
 		`name`,
-		`is_active`
+		`is_active`,
+		`insert_time`
 		)
 		VALUES
 		(
 		#{uuid},
 		#{name},
-		#{isActive}
+		#{isActive},
+		now()
 		)
 	</insert>
 
