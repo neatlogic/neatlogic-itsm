@@ -20,10 +20,10 @@ public class FormVo extends BasePageVo implements Serializable {
 	private String name;
 	@EntityField(name = "是否激活", type = ApiParamType.INTEGER)
 	private Integer isActive;
-	@EntityField(name = "激活版本", type = ApiParamType.INTEGER)
-	private Integer activeVersion;
-	@EntityField(name = "激活版本uuid", type = ApiParamType.STRING)
-	private String activeVersionUuid;
+	@EntityField(name = "当前版本", type = ApiParamType.INTEGER)
+	private Integer currentVersion;
+	@EntityField(name = "当前版本uuid", type = ApiParamType.STRING)
+	private String currentVersionUuid;
 	@EntityField(name = "表单内容（表单编辑器使用）", type = ApiParamType.STRING)
 	private String content;
 	
@@ -75,22 +75,22 @@ public class FormVo extends BasePageVo implements Serializable {
 
 	public void setContent(String content) {
 		this.content = content;
+	}	
+
+	public Integer getCurrentVersion() {
+		return currentVersion;
 	}
 
-	public String getActiveVersionUuid() {
-		return activeVersionUuid;
+	public void setCurrentVersion(Integer currentVersion) {
+		this.currentVersion = currentVersion;
 	}
 
-	public void setActiveVersionUuid(String activeVersionUuid) {
-		this.activeVersionUuid = activeVersionUuid;
+	public String getCurrentVersionUuid() {
+		return currentVersionUuid;
 	}
 
-	public Integer getActiveVersion() {
-		return activeVersion;
-	}
-
-	public void setActiveVersion(Integer activeVersion) {
-		this.activeVersion = activeVersion;
+	public void setCurrentVersionUuid(String currentVersionUuid) {
+		this.currentVersionUuid = currentVersionUuid;
 	}
 
 	public String getKeyword() {
