@@ -51,6 +51,7 @@ public class ProcessVo extends BasePageVo implements Serializable {
 	// @EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessStepRelVo> stepRelList;
 
+	private transient String fcu;
 	private transient String keyword;
 	
 	public synchronized String getUuid() {
@@ -295,5 +296,13 @@ public class ProcessVo extends BasePageVo implements Serializable {
 
 	public void setReferenceCount(int referenceCount) {
 		this.referenceCount = referenceCount;
+	}
+
+	public String getFcu() {
+		return fcu;
+	}
+
+	public void setFcu(String fcu) {
+		this.fcu = fcu;
 	}
 }

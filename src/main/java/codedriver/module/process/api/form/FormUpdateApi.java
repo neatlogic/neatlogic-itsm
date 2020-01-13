@@ -13,6 +13,7 @@ import codedriver.framework.process.exception.form.FormNameRepeatException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.FormVo;
@@ -43,6 +44,9 @@ public class FormUpdateApi extends ApiComponentBase {
 		@Param(name = "name", type = ApiParamType.STRING, xss = true, length = 30, desc = "表单名称"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1",desc = "是否激活")
 	})
+	@Output({
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid")
+	})
 	@Description(desc = "表单基本信息更新接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -56,7 +60,7 @@ public class FormUpdateApi extends ApiComponentBase {
 			throw new FormNameRepeatException(formVo.getName());
 		}
 		formMapper.updateForm(formVo);
-		return null;
+		return formVo.getUuid();
 	}
 
 }

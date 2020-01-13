@@ -10,29 +10,30 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.exception.type.CurrentPageNumberOutOfBoundsException;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ProcessVo;
+import codedriver.module.process.dto.ChannelProcessVo;
+import codedriver.module.process.dto.ChannelVo;
 @Service
-public class ProcessSearchApi extends ApiComponentBase {
+public class ProcessReferenceListApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessMapper processMapper;
 	
 	@Override
 	public String getToken() {
-		return "process/search";
+		return "process/reference/list";
 	}
 
 	@Override
 	public String getName() {
-		return "流程列表搜索接口";
+		return "流程引用列表接口";
 	}
 
 	@Override
@@ -41,47 +42,38 @@ public class ProcessSearchApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
-		@Param(name = "type", type = ApiParamType.INTEGER, desc = "流程类型id"),
-		@Param(name = "isICreated", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否只查询我创建的"),
+		@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
-		})
+	})
 	@Output({
 		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="processList",explode=ProcessVo[].class,desc="流程列表")
+		@Param(name = "channelList", explode = ChannelVo[].class, desc = "流程引用列表")
 	})
-	@Description(desc = "流程列表搜索接口")
+	@Description(desc = "流程引用列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		ProcessVo processVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessVo>() {});
-		int isICreated = jsonObj.getIntValue("isICreated");
-		if(isICreated == 0) {
-			processVo.setFcu(UserContext.get().getUserId());
-		}
 		JSONObject resultObj = new JSONObject();
-		if(processVo.getNeedPage()) {
-			int rowNum = processMapper.searchProcessCount(processVo);
-			int pageCount = PageUtil.getPageCount(rowNum, processVo.getPageSize());
-			processVo.setPageCount(pageCount);
-			processVo.setRowNum(rowNum);
-			resultObj.put("currentPage", processVo.getCurrentPage());
-			resultObj.put("pageSize", processVo.getPageSize());
-			resultObj.put("pageCount", pageCount);
+		ChannelProcessVo channelProcessVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelProcessVo>() {});
+		if(channelProcessVo.getNeedPage()) {
+			int rowNum = processMapper.getProcessReferenceCount(channelProcessVo.getProcessUuid());
+			int pageCount = PageUtil.getPageCount(rowNum, channelProcessVo.getPageSize());
+			int currentPage = channelProcessVo.getCurrentPage();
+			if(pageCount < currentPage) {
+				throw new CurrentPageNumberOutOfBoundsException(currentPage, pageCount);
+			}
 			resultObj.put("rowNum", rowNum);
+			resultObj.put("pageCount", pageCount);
+			resultObj.put("currentPage", currentPage);
+			resultObj.put("pageSize", channelProcessVo.getPageSize());		
 		}
-		List<ProcessVo> processList = processMapper.searchProcessList(processVo);
-		int count = 0;
-		for(ProcessVo process : processList) {
-			count = processMapper.getProcessReferenceCount(process.getUuid());
-			process.setReferenceCount(count);
-		}	
-		resultObj.put("processList", processList);
+		
+		List<ChannelVo> channelList = processMapper.getProcessReferenceList(channelProcessVo);
+		resultObj.put("channelList", channelList);
 		return resultObj;
 	}
 

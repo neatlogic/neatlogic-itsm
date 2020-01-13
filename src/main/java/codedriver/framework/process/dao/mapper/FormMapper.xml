@@ -58,7 +58,7 @@
 		<if test="keyword != null and keyword != ''">
 			AND f.`name` LIKE CONCAT('%', #{keyword},'%') 
 		</if>
-		ORDER BY f.`insert_time` DESC
+		ORDER BY f.`fcd` DESC
 		<if test="needPage">
 			LIMIT #{startNum}, #{pageSize}
 		</if>
@@ -124,7 +124,7 @@
 		ORDER BY `version`
 	</select>
 
-	<select id="getFormReferenceCount" parameterType="codedriver.module.process.dto.ProcessFormVo" resultType="int">
+	<select id="getFormReferenceCount" parameterType="java.lang.String" resultType="int">
 	SELECT 
 	count(p.`uuid`)
 	FROM `process` p 
@@ -189,12 +189,12 @@
 	WHERE `uuid` = #{uuid};
 	</update>
 
-	<insert id="replaceForm" parameterType="codedriver.module.process.dto.FormVo">
-		REPLACE INTO `form` (
+	<insert id="insertForm" parameterType="codedriver.module.process.dto.FormVo">
+		INSERT INTO `form` (
 		`uuid`,
 		`name`,
 		`is_active`,
-		`insert_time`
+		`fcd`
 		)
 		VALUES
 		(
