@@ -108,8 +108,8 @@ public class FormSaveApi extends ApiComponentBase {
 		}
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("uuid", formVo.getUuid());
-		resultObj.put("formVersionUuid", formVersionVo.getUuid());
-		return formVo.getUuid();
+		resultObj.put("currentVersionUuid", formVersionVo.getUuid());
+		return resultObj;
 	}
 
 }

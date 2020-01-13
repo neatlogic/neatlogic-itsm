@@ -65,7 +65,7 @@ public class FormGetApi extends ApiComponentBase {
 			formVo.setCurrentVersionUuid(currentVersionUuid);
 		}else {//获取激活版本
 			formVersion = formMapper.getActionFormVersionByFormUuid(uuid);
-			formVo.setUuid(formVersion.getUuid());
+			formVo.setCurrentVersionUuid(formVersion.getUuid());
 		}
 		//表单内容
 		formVo.setContent(formVersion.getContent());
