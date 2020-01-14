@@ -41,7 +41,7 @@ public class ProcessSaveApi extends ApiComponentBase {
 	@Override
 	@Input({
 			@Param(name = "uuid", type = ApiParamType.STRING, desc = "流程uuid，为空表示创建流程", isRequired = false),
-			@Param(name = "name", type = ApiParamType.STRING, desc = "流程名称", isRequired = true, length = 30, xss = true),
+			@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]*$", isRequired= true, length = 50, desc = "流程名称"),
 			@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1", isRequired = true),
 			@Param(name = "config", type = ApiParamType.STRING, desc = "流程配置内容", isRequired = true)
 		})

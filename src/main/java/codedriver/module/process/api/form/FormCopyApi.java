@@ -46,7 +46,7 @@ public class FormCopyApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "表单uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, desc = "表单名称", isRequired = true, xss = true, length = 30),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]*$", isRequired= true, length = 50, desc = "表单名称"),
 		@Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "要复制的版本uuid,空表示复制所有版本")
 	})
 	@Output({

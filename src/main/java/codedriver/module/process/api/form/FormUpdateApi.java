@@ -41,7 +41,7 @@ public class FormUpdateApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "表单uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, xss = true, length = 30, desc = "表单名称"),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]*$", isRequired= true, length = 50, desc = "表单名称"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1",desc = "是否激活")
 	})
 	@Output({
