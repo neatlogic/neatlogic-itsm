@@ -52,7 +52,7 @@ public class WorktimeSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "工作时间窗口uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "工作时间窗口名称", xss = true, length = 30),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]*$", isRequired= true, length = 50, desc = "工作时间窗口名称"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活", rule = "0,1"),
 		@Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "每周工作时段的定义")
 	})

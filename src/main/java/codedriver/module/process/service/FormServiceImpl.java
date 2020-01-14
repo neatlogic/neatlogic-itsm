@@ -50,7 +50,7 @@ public class FormServiceImpl implements FormService {
 
 	@Override
 	public int saveForm(FormVo formVo) {
-		formMapper.replaceForm(formVo);
+		formMapper.insertForm(formVo);
 		FormVersionVo formVersionVo = new FormVersionVo();
 		formVersionVo.setContent(formVo.getContent());
 		formVersionVo.setFormUuid(formVo.getUuid());

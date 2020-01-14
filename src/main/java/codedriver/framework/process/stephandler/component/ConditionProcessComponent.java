@@ -38,7 +38,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getIcon() {
-		return "<i  class=\"ts-shunt text-assist\"></i>";
+		return "ts-shunt";
 	}
 
 	@Override

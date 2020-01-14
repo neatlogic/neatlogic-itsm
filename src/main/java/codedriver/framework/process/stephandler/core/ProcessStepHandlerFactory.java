@@ -15,6 +15,7 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.RootComponent;
 import codedriver.framework.dto.ModuleVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.dto.ProcessStepHandlerVo;
 
 @RootComponent
@@ -45,6 +46,10 @@ public class ProcessStepHandlerFactory implements ApplicationListener<ContextRef
 		List<ModuleVo> moduleList = tenantContext.getActiveModuleList();
 		List<ProcessStepHandlerVo> returnProcessStepHandlerList = new ArrayList<>();
 		for (ProcessStepHandlerVo processStepHandler : processStepHandlerList) {
+			//结束组件不用返回给前端
+			if(processStepHandler.getType().equals(ProcessStepHandler.END.getType())) {
+				continue;
+			}
 			for (ModuleVo moduleVo : moduleList) {
 				if (moduleVo.getId().equalsIgnoreCase(processStepHandler.getModuleId())) {
 					returnProcessStepHandlerList.add(processStepHandler);

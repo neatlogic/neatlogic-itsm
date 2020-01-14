@@ -20,31 +20,23 @@ import codedriver.module.process.constvalue.ProcessStepType;
 public class ProcessVo extends BasePageVo implements Serializable {
 	private static final long serialVersionUID = 4684015408674741157L;
 
-	@EntityField(name = "流程uuid",
-			type = ApiParamType.STRING)
+	@EntityField(name = "流程uuid", type = ApiParamType.STRING)
 	private String uuid;
 
-	@EntityField(name = "流程名称",
-			type = ApiParamType.STRING)
+	@EntityField(name = "流程名称", type = ApiParamType.STRING)
 	private String name;
 
-	@EntityField(name = "流程类型id",
-			type = ApiParamType.LONG)
-	private Long type;
-
-	@EntityField(name = "流程类型名称",
-			type = ApiParamType.STRING)
+	@EntityField(name = "流程类型名称", type = ApiParamType.STRING)
 	private String typeName;
 
-	@EntityField(name = "是否激活",
-			type = ApiParamType.INTEGER)
+	@EntityField(name = "是否激活", type = ApiParamType.INTEGER)
 	private Integer isActive;
 
-	@EntityField(name = "流程图配置",
-			type = ApiParamType.STRING)
+	@EntityField(name = "流程图配置", type = ApiParamType.STRING)
 	private String config;
 
-	private String belong;
+	@EntityField(name = "引用数量", type = ApiParamType.INTEGER)
+	private int referenceCount;
 
 	private JSONObject configObj;
 	// @EntityField(name = "流程表单uuid", type = ApiParamType.STRING)
@@ -54,6 +46,7 @@ public class ProcessVo extends BasePageVo implements Serializable {
 	// @EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessStepRelVo> stepRelList;
 
+	private transient String fcu;
 	private transient String keyword;
 	
 	public synchronized String getUuid() {
@@ -73,14 +66,6 @@ public class ProcessVo extends BasePageVo implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Long getType() {
-		return type;
-	}
-
-	public void setType(Long type) {
-		this.type = type;
 	}
 
 	public String getTypeName() {
@@ -260,14 +245,6 @@ public class ProcessVo extends BasePageVo implements Serializable {
 		this.stepList = stepList;
 	}
 
-	public String getBelong() {
-		return belong;
-	}
-
-	public void setBelong(String belong) {
-		this.belong = belong;
-	}
-
 	public List<ProcessStepRelVo> getStepRelList() {
 		return stepRelList;
 	}
@@ -290,5 +267,21 @@ public class ProcessVo extends BasePageVo implements Serializable {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public int getReferenceCount() {
+		return referenceCount;
+	}
+
+	public void setReferenceCount(int referenceCount) {
+		this.referenceCount = referenceCount;
+	}
+
+	public String getFcu() {
+		return fcu;
+	}
+
+	public void setFcu(String fcu) {
+		this.fcu = fcu;
 	}
 }

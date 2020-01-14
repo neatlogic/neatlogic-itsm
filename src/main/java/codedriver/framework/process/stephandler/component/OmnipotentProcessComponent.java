@@ -48,7 +48,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getIcon() {
-		return null;
+		return "ts-round-s";
 	}
 
 	@Override
