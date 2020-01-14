@@ -26,9 +26,6 @@ public class ProcessVo extends BasePageVo implements Serializable {
 	@EntityField(name = "流程名称", type = ApiParamType.STRING)
 	private String name;
 
-	@EntityField(name = "流程类型id", type = ApiParamType.LONG)
-	private Long type;
-
 	@EntityField(name = "流程类型名称", type = ApiParamType.STRING)
 	private String typeName;
 
@@ -40,8 +37,6 @@ public class ProcessVo extends BasePageVo implements Serializable {
 
 	@EntityField(name = "引用数量", type = ApiParamType.INTEGER)
 	private int referenceCount;
-	
-	private String belong;
 
 	private JSONObject configObj;
 	// @EntityField(name = "流程表单uuid", type = ApiParamType.STRING)
@@ -71,14 +66,6 @@ public class ProcessVo extends BasePageVo implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Long getType() {
-		return type;
-	}
-
-	public void setType(Long type) {
-		this.type = type;
 	}
 
 	public String getTypeName() {
@@ -256,14 +243,6 @@ public class ProcessVo extends BasePageVo implements Serializable {
 
 	public void setStepList(List<ProcessStepVo> stepList) {
 		this.stepList = stepList;
-	}
-
-	public String getBelong() {
-		return belong;
-	}
-
-	public void setBelong(String belong) {
-		this.belong = belong;
 	}
 
 	public List<ProcessStepRelVo> getStepRelList() {

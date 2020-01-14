@@ -129,21 +129,17 @@
 	<resultMap id="processDetailMap" type="codedriver.module.process.dto.ProcessVo">
 		<id column="uuid" property="uuid" />
 		<result column="name" property="name" />
-		<result column="type" property="type" />
 		<result column="isActive" property="isActive" />
 		<result column="formUuid" property="formUuid" />
 		<result column="config" property="config" />
-		<result column="belong" property="belong"/>
 	</resultMap>
 
 	<select id="getProcessByUuid" parameterType="java.lang.String" resultMap="processDetailMap">
 		SELECT
 		a.`uuid`,
 		a.`name`,
-		a.`type`,
 		a.`is_active` AS isActive,
 		a.`config`,
-		a.`belong`,
 		d.`form_uuid` AS formUuid
 		FROM
 		`process` a
@@ -156,10 +152,8 @@
 		SELECT
 		`uuid`,
 		`name`,
-		`type`,
 		`is_active` AS isActive,
-		`config`,
-		`belong`
+		`config`
 		FROM
 		`process`
 		WHERE
@@ -201,16 +195,13 @@
 	COUNT(`uuid`) 
 	FROM `process` 
 	WHERE 1=1
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	AND `name` LIKE CONCAT('%', #{keyword}, '%')
-	</if>
-	<if test="type != null">
-	AND `type` = #{type}
 	</if>
 	<if test="isActive != null">
 	AND `is_Active` = #{isActive}
 	</if>
-	<if test="fcu != null">
+	<if test="fcu != null and fcu != ''">
 	AND `fcu` = #{fcu}
 	</if>
 	</select>
@@ -225,11 +216,8 @@
 	`belong`
 	FROM `process` 
 	WHERE 1=1
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	AND `name` LIKE CONCAT('%', #{keyword}, '%')
-	</if>
-	<if test="type != null">
-	AND `type` = #{type}
 	</if>
 	<if test="isActive != null">
 	AND `is_Active` = #{isActive}
@@ -284,7 +272,6 @@
 		INSERT INTO `process` (
 		`uuid`,
 		`name`,
-		`type`,
 		`is_active`,
 		`config`,
 		`fcd`,
@@ -294,7 +281,6 @@
 		(
 		#{uuid},
 		#{name},
-		#{type},
 		#{isActive},
 		#{config},
 		now(),
@@ -425,9 +411,6 @@
 	<if test="name != null and name != ''">
 	`name` = #{name},
 	</if>
-	<if test="type != null">
-	`type` = #{type},
-	</if> 
 	<if test="isActive != null">
 	`is_active` = #{isActive},
 	</if>
