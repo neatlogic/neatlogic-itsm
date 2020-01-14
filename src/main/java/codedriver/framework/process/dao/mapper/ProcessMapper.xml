@@ -129,21 +129,17 @@
 	<resultMap id="processDetailMap" type="codedriver.module.process.dto.ProcessVo">
 		<id column="uuid" property="uuid" />
 		<result column="name" property="name" />
-		<result column="type" property="type" />
 		<result column="isActive" property="isActive" />
 		<result column="formUuid" property="formUuid" />
 		<result column="config" property="config" />
-		<result column="belong" property="belong"/>
 	</resultMap>
 
 	<select id="getProcessByUuid" parameterType="java.lang.String" resultMap="processDetailMap">
 		SELECT
 		a.`uuid`,
 		a.`name`,
-		a.`type`,
 		a.`is_active` AS isActive,
 		a.`config`,
-		a.`belong`,
 		d.`form_uuid` AS formUuid
 		FROM
 		`process` a
@@ -156,10 +152,8 @@
 		SELECT
 		`uuid`,
 		`name`,
-		`type`,
 		`is_active` AS isActive,
-		`config`,
-		`belong`
+		`config`
 		FROM
 		`process`
 		WHERE
@@ -201,17 +195,14 @@
 	COUNT(`uuid`) 
 	FROM `process` 
 	WHERE 1=1
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	AND `name` LIKE CONCAT('%', #{keyword}, '%')
-	</if>
-	<if test="type != null">
-	AND `type` = #{type}
-	</if>
-	<if test="belong != null">
-	AND `belong` = #{belong}
 	</if>
 	<if test="isActive != null">
 	AND `is_Active` = #{isActive}
+	</if>
+	<if test="fcu != null and fcu != ''">
+	AND `fcu` = #{fcu}
 	</if>
 	</select>
 	
@@ -225,15 +216,33 @@
 	`belong`
 	FROM `process` 
 	WHERE 1=1
-	<if test="keyword != null">
+	<if test="keyword != null and keyword != ''">
 	AND `name` LIKE CONCAT('%', #{keyword}, '%')
-	</if>
-	<if test="type != null">
-	AND `type` = #{type}
 	</if>
 	<if test="isActive != null">
 	AND `is_Active` = #{isActive}
 	</if>
+	<if test="fcu != null">
+	AND `fcu` = #{fcu}
+	</if>
+	<if test="needPage">
+	limit #{startNum}, #{pageSize}
+	</if>
+	</select>
+
+	<select id="getProcessReferenceCount" parameterType="java.lang.String" resultType="int">
+	SELECT COUNT(c.`uuid`)
+	FROM `channel` c
+	JOIN `channel_process` cp ON cp.`channel_uuid` = c.`uuid` AND cp.`process_uuid` = #{processUuid}
+	</select>
+
+	<select id="getProcessReferenceList" parameterType="codedriver.module.process.dto.ChannelProcessVo" resultType="codedriver.module.process.dto.ChannelVo">
+	SELECT 
+	c.`uuid`, 
+	c.`name`
+	FROM `channel` c
+	JOIN `channel_process` cp ON cp.`channel_uuid` = c.`uuid` AND cp.`process_uuid` = #{processUuid}
+	ORDER BY c.`parent_uuid`, c.`sort`
 	<if test="needPage">
 	limit #{startNum}, #{pageSize}
 	</if>
@@ -259,23 +268,23 @@
 		)
 	</insert>
 
-	<insert id="replaceProcess" parameterType="codedriver.module.process.dto.ProcessVo">
-		REPLACE INTO `process` (
+	<insert id="insertProcess" parameterType="codedriver.module.process.dto.ProcessVo">
+		INSERT INTO `process` (
 		`uuid`,
 		`name`,
-		`type`,
 		`is_active`,
 		`config`,
-		`belong`
+		`fcd`,
+		`fcu`
 		)
 		VALUES
 		(
 		#{uuid},
 		#{name},
-		#{type},
 		#{isActive},
 		#{config},
-		#{belong}
+		now(),
+		#{fcu}
 		)
 	</insert>
 
@@ -396,6 +405,21 @@
 		VALUES
 		(#{processUuid}, #{formUuid})
 	</insert>
+	
+	<update id="updateProcess" parameterType="codedriver.module.process.dto.ProcessVo">
+	UPDATE `process` SET 
+	<if test="name != null and name != ''">
+	`name` = #{name},
+	</if>
+	<if test="isActive != null">
+	`is_active` = #{isActive},
+	</if>
+	<if test="config != null">
+	`config` = #{config},
+	</if>
+	`uuid` = #{uuid}
+	WHERE `uuid` = #{uuid}
+	</update>
 
 	<delete id="deleteProcessStepByProcessUuid" parameterType="java.lang.String">
 		DELETE
@@ -444,5 +468,9 @@
 		FROM
 		`process_step_formattribute`
 		WHERE `process_uuid` = #{value}
+	</delete>
+	
+	<delete id="deleteProcessByUuid" parameterType="java.lang.String">
+		DELETE FROM `process` WHERE `uuid` = #{uuid}
 	</delete>
 </mapper>

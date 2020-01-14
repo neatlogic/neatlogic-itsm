@@ -50,13 +50,13 @@ public class FormServiceImpl implements FormService {
 
 	@Override
 	public int saveForm(FormVo formVo) {
-		formMapper.replaceForm(formVo);
+		formMapper.insertForm(formVo);
 		FormVersionVo formVersionVo = new FormVersionVo();
 		formVersionVo.setContent(formVo.getContent());
 		formVersionVo.setFormUuid(formVo.getUuid());
 		formMapper.resetFormVersionIsActiveByFormUuid(formVo.getUuid());
 		formVersionVo.setIsActive(1);
-		if (StringUtils.isBlank(formVo.getActiveVersionUuid())) {
+		if (StringUtils.isBlank(formVo.getCurrentVersionUuid())) {
 			Integer version = formMapper.getMaxVersionByFormUuid(formVo.getUuid());
 			if (version == null) {
 				version = 1;
@@ -66,7 +66,7 @@ public class FormServiceImpl implements FormService {
 			formVersionVo.setVersion(version);
 			formMapper.insertFormVersion(formVersionVo);
 		} else {
-			formVersionVo.setUuid(formVo.getActiveVersionUuid());
+			formVersionVo.setUuid(formVo.getCurrentVersionUuid());
 			formMapper.updateFormVersion(formVersionVo);
 		}
 		formMapper.deleteFormAttributeByFormUuid(formVo.getUuid());

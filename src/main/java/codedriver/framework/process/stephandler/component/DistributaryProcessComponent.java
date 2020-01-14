@@ -25,7 +25,7 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getIcon() {
-		return "<i  class=\"ts-shunt text-assist\"></i>";
+		return "ts-branch";
 	}
 
 	@Override

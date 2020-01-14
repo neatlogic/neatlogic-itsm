@@ -3,6 +3,9 @@ package codedriver.framework.process.dao.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
+
+import codedriver.module.process.dto.ChannelProcessVo;
+import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ProcessFormVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
@@ -39,7 +42,11 @@ public interface ProcessMapper {
 
 	public List<ProcessVo> searchProcessList(ProcessVo processVo);
 
-	public int replaceProcess(ProcessVo processVo);
+	public int getProcessReferenceCount(String processUuid);
+
+	public List<ChannelVo> getProcessReferenceList(ChannelProcessVo channelProcessVo);
+
+	public int insertProcess(ProcessVo processVo);
 
 	public int insertProcessStep(ProcessStepVo processStepVo);
 
@@ -59,6 +66,8 @@ public interface ProcessMapper {
 	String processUuid, @Param("formUuid")
 	String formUuid);
 
+	public int updateProcess(ProcessVo processVo);
+
 	public int deleteProcessStepByProcessUuid(String processUuid);
 
 	public int deleteProcessStepRelByProcessUuid(String processUuid);
@@ -72,5 +81,7 @@ public interface ProcessMapper {
 	public int deleteProcessStepTimeoutPolicyByProcessUuid(String processUuid);
 
 	public int deleteProcessStepFormAttributeByProcessUuid(String processUuid);
+
+	public int deleteProcessByUuid(String uuid);
 
 }

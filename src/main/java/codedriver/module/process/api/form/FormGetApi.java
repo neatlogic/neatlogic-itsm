@@ -43,7 +43,7 @@ public class FormGetApi extends ApiComponentBase {
 	@Override
 	@Input({
 			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true), 
-			@Param(name = "selectVersionUuid", type = ApiParamType.STRING, desc = "选择表单版本uuid"), 
+			@Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "选择表单版本uuid"), 
 			})
 	@Output({ @Param(explode = FormVo.class) })
 	@Description(desc = "单个表单查询接口")
@@ -55,15 +55,17 @@ public class FormGetApi extends ApiComponentBase {
 			throw new FormNotFoundException(uuid);
 		}
 		FormVersionVo formVersion = null;
-		if(jsonObj.containsKey("selectVersionUuid")) {
-			String selectVersionUuid = jsonObj.getString("selectVersionUuid");			
-			formVersion = formMapper.getFormVersionByUuid(selectVersionUuid);
+		if(jsonObj.containsKey("currentVersionUuid")) {
+			String currentVersionUuid = jsonObj.getString("currentVersionUuid");			
+			formVersion = formMapper.getFormVersionByUuid(currentVersionUuid);
 			//判断表单版本是否存在
 			if(formVersion == null) {
 				throw new FormVersionNotFoundException(uuid);
 			}
+			formVo.setCurrentVersionUuid(currentVersionUuid);
 		}else {//获取激活版本
 			formVersion = formMapper.getActionFormVersionByFormUuid(uuid);
+			formVo.setCurrentVersionUuid(formVersion.getUuid());
 		}
 		//表单内容
 		formVo.setContent(formVersion.getContent());
@@ -71,9 +73,6 @@ public class FormGetApi extends ApiComponentBase {
 		List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);		
 		if (formVersionList != null && formVersionList.size() > 0) {
 			for (FormVersionVo version : formVersionList) {
-				if (version.getIsActive().equals(1)) {
-					formVo.setActiveVersionUuid(version.getUuid());
-				}
 				version.setContent(null);
 				version.setEditTime(null);
 				version.setFormAttributeList(null);

@@ -52,36 +52,41 @@ public class FormSaveApi extends ApiComponentBase {
 	@Override
 	@Input({
 			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid，为空表示创建表单", isRequired = false),
-			@Param(name = "name", type = ApiParamType.STRING, desc = "表单名称", isRequired = true, xss = true, length = 30),
-			@Param(name = "isActive", type = ApiParamType.INTEGER, desc = "是否激活", isRequired = true),
-			@Param(name = "activeVersionUuid", type = ApiParamType.STRING, desc = "激活版本的uuid，为空代表创建一个新版本", isRequired = false),
+			@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]*$", isRequired= true, length = 50, desc = "表单名称"),
+			@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活", isRequired = true),
+			@Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "当前版本的uuid，为空代表创建一个新版本", isRequired = false),
 			@Param(name = "content", type = ApiParamType.JSONOBJECT, desc = "表单控件生成的json内容", isRequired = true) 
 			})
 	@Output({
-			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid") 
+			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid"),
+			@Param(name = "formVersionUuid", type = ApiParamType.STRING, desc = "表单版本uuid")
 			})
 	@Description(desc = "表单保存接口")
-	public Object myDoService(JSONObject jsonObj) throws Exception {		
+	public Object myDoService(JSONObject jsonObj) throws Exception {
+		FormVo formVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<FormVo>() {});
+		if(formMapper.checkFormNameIsRepeat(formVo) > 0) {
+			throw new FormNameRepeatException(formVo.getName());
+		}
 		if(jsonObj.containsKey("uuid")) {
 			String uuid = jsonObj.getString("uuid");
 			//判断表单是否存在
 			if(formMapper.checkFormIsExists(uuid) == 0) {
 				throw new FormNotFoundException(uuid);
 			}
+			//更新表单信息
+			formMapper.updateForm(formVo);
+		}else {
+			//插入表单信息
+			formMapper.insertForm(formVo);
 		}
-		FormVo formVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<FormVo>() {});
-		if(formMapper.checkFormNameIsRepeat(formVo) > 0) {
-			throw new FormNameRepeatException(formVo.getName());
-		}
-		//替换表单信息
-		formMapper.replaceForm(formVo);
+				
 		//插入表单版本信息
 		FormVersionVo formVersionVo = new FormVersionVo();
 		formVersionVo.setContent(formVo.getContent());
 		formVersionVo.setFormUuid(formVo.getUuid());
 		formMapper.resetFormVersionIsActiveByFormUuid(formVo.getUuid());
 		formVersionVo.setIsActive(1);
-		if (StringUtils.isBlank(formVo.getActiveVersionUuid())) {
+		if (StringUtils.isBlank(formVo.getCurrentVersionUuid())) {
 			Integer version = formMapper.getMaxVersionByFormUuid(formVo.getUuid());
 			if (version == null) {
 				version = 1;
@@ -91,10 +96,10 @@ public class FormSaveApi extends ApiComponentBase {
 			formVersionVo.setVersion(version);
 			formMapper.insertFormVersion(formVersionVo);
 		} else {
-			if(formMapper.checkFormVersionIsExists(formVo.getActiveVersionUuid()) == 0) {
-				throw new FormVersionNotFoundException(formVo.getActiveVersionUuid());
+			if(formMapper.checkFormVersionIsExists(formVo.getCurrentVersionUuid()) == 0) {
+				throw new FormVersionNotFoundException(formVo.getCurrentVersionUuid());
 			}
-			formVersionVo.setUuid(formVo.getActiveVersionUuid());
+			formVersionVo.setUuid(formVo.getCurrentVersionUuid());
 			formMapper.updateFormVersion(formVersionVo);
 		}
 		//更新表单属性信息
@@ -105,8 +110,11 @@ public class FormSaveApi extends ApiComponentBase {
 				formMapper.insertFormAttribute(formAttributeVo);
 			}
 		}
-		
-		return formVo.getUuid();
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("uuid", formVo.getUuid());
+		resultObj.put("currentVersionUuid", formVersionVo.getUuid());
+		resultObj.put("currentVersion", formVersionVo.getVersion());
+		return resultObj;
 	}
 
 }

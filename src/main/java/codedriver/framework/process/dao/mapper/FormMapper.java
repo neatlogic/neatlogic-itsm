@@ -39,7 +39,7 @@ public interface FormMapper {
 
 	public int checkFormVersionIsExists(String uuid);
 
-	public int replaceForm(FormVo formVo);
+	public int insertForm(FormVo formVo);
 
 	public int resetFormVersionIsActiveByFormUuid(String formUuid);
 
