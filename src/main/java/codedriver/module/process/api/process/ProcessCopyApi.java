@@ -63,7 +63,6 @@ public class ProcessCopyApi extends ApiComponentBase {
 		if(processMapper.checkProcessNameIsRepeat(processVo) > 0) {
 			throw new ProcessNameRepeatException(name);
 		}
-		//TODO linbq等流程图config字段格式确定后，再解析config数据保存到对应的表钟
 		processService.saveProcess(processVo);
 		processVo.setConfig(null);
 		return processVo;
