@@ -11,7 +11,6 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.exception.type.CurrentPageNumberOutOfBoundsException;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -63,9 +62,6 @@ public class ProcessReferenceListApi extends ApiComponentBase {
 			int rowNum = processMapper.getProcessReferenceCount(channelProcessVo.getProcessUuid());
 			int pageCount = PageUtil.getPageCount(rowNum, channelProcessVo.getPageSize());
 			int currentPage = channelProcessVo.getCurrentPage();
-			if(pageCount < currentPage) {
-				throw new CurrentPageNumberOutOfBoundsException(currentPage, pageCount);
-			}
 			resultObj.put("rowNum", rowNum);
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("currentPage", currentPage);
