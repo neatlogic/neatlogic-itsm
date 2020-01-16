@@ -123,6 +123,18 @@
 		ORDER BY `version`
 	</select>
 
+	<select id="getFormVersionSimpleByFormUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.FormVersionVo">
+	SELECT
+		`uuid`,
+		`version`,
+		`is_active` AS isActive
+		FROM
+		`form_version`
+		WHERE
+		form_uuid = #{value}
+		ORDER BY `version`
+	</select>
+	
 	<select id="getFormReferenceCount" parameterType="java.lang.String" resultType="int">
 	SELECT 
 	count(p.`uuid`)

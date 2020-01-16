@@ -78,17 +78,8 @@ public class FormGetApi extends ApiComponentBase {
 		//表单内容
 		formVo.setContent(formVersion.getContent());
 		//表单版本列表
-		List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);		
-		if (formVersionList != null && formVersionList.size() > 0) {
-			for (FormVersionVo version : formVersionList) {
-				version.setContent(null);
-				version.setEditTime(null);
-				version.setFormAttributeList(null);
-				version.setFormName(null);
-				version.setFormUuid(null);
-			}
-			formVo.setVersionList(formVersionList);
-		}
+		List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);
+		formVo.setVersionList(formVersionList);
 		//引用数量
 		int count = formMapper.getFormReferenceCount(uuid);
 		formVo.setReferenceCount(count);

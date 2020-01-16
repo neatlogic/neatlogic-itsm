@@ -27,6 +27,8 @@ public interface FormMapper {
 
 	public List<FormVersionVo> getFormVersionByFormUuid(String formUuid);
 	
+	public List<FormVersionVo> getFormVersionSimpleByFormUuid(String formUuid);
+	
 	public int getFormReferenceCount(String formUuid);
 	
 	public List<ProcessVo> getFormReferenceList(ProcessFormVo processFormVo);
