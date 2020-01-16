@@ -106,15 +106,6 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-	@Override
-	protected int myComment(ProcessTaskStepVo currentProcessTaskStepVo) {
-		return 0;
-	}
-
-	@Override
-	protected int mySave(ProcessTaskStepVo currentProcessTaskStepVo) {
-		return 0;
-	}
 
 	@Override
 	protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {

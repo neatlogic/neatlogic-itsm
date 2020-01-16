@@ -144,18 +144,6 @@ public interface IProcessStepHandler {
 			isolation = Isolation.READ_COMMITTED)
 	public int transfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList);
 
-	/**
-	 * @Author: chenqiwei
-	 * @Time:Oct 9, 2019
-	 * @Description: 暂存步骤信息
-	 * @param @param
-	 *            processTaskStepVo
-	 * @param @return
-	 * @return int
-	 */
-	@Transactional(propagation = Propagation.REQUIRED,
-			isolation = Isolation.READ_COMMITTED)
-	public int save(ProcessTaskStepVo currentProcessTaskStepVo);
 
 	/**
 	 * 
@@ -270,17 +258,5 @@ public interface IProcessStepHandler {
 			isolation = Isolation.READ_COMMITTED)
 	public int back(ProcessTaskStepVo currentProcessTaskStepVo);
 
-	/**
-	 * @Author:
-	 * @Time:
-	 * @Description: 回复
-	 * @param @param
-	 *            processTaskStepVo
-	 * @param @return
-	 * @return int
-	 */
-	@Transactional(propagation = Propagation.REQUIRED,
-			isolation = Isolation.READ_COMMITTED)
-	public int comment(ProcessTaskStepVo currentProcessTaskStepVo);
 
 }

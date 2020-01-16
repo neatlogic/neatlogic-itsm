@@ -337,16 +337,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myComment(ProcessTaskStepVo currentProcessTaskStepVo) {
-		return 0;
-	}
-
-	@Override
-	protected int mySave(ProcessTaskStepVo currentProcessTaskStepVo) {
-		return 0;
-	}
-
-	@Override
 	protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}

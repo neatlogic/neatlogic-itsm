@@ -100,10 +100,6 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-	@Override
-	protected int mySave(ProcessTaskStepVo currentProcessTaskStepVo) {
-		return 0;
-	}
 
 
 	@Override
@@ -111,10 +107,6 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-	@Override
-	protected int myComment(ProcessTaskStepVo currentProcessTaskStepVo) {
-		return 0;
-	}
 
 	@Override
 	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {

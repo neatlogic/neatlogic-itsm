@@ -52,7 +52,7 @@ public class TestProcessFilter extends OncePerRequestFilter {
 		roleList.add("R_ADMIN");
 		jsonObj.put("rolelist", roleList);
 		UserContext.init(jsonObj, "+8:00", request, response);
-		System.out.println(UserContext.get().getUserId());
+		// System.out.println(UserContext.get().getUserId());
 		filterChain.doFilter(request, response);
 	}
 

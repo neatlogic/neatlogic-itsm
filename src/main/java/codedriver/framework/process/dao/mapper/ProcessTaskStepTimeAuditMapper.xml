@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskStepTimeAuditMapper">
+	<select id="getLastProcessTaskStepTimeAuditByStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepTimeAuditVo">
+		SELECT
+		`id`,
+		`processtask_step_id` AS processTaskStepId,
+		DATE_FORMAT(`active_time`,'%Y-%m-%d %H:%i:%s') AS activeTime,
+		DATE_FORMAT(`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
+		DATE_FORMAT(`abort_time`,'%Y-%m-%d %H:%i:%s') AS abortTime,
+		DATE_FORMAT(`success_time`,'%Y-%m-%d %H:%i:%s') AS successTime,
+		DATE_FORMAT(`failed_time`,'%Y-%m-%d %H:%i:%s') AS failedTime,
+		DATE_FORMAT(`back_time`,'%Y-%m-%d %H:%i:%s') AS backTime
+		FROM
+		`processtask_step_timeaudit`
+		WHERE
+		processtask_step_id = #{value}
+		ORDER BY id DESC LIMIT 1
+	</select>
+
+	<insert id="insertProcessTaskStepTimeAudit" parameterType="codedriver.module.process.dto.ProcessTaskStepTimeAuditVo">
+		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO `processtask_step_timeaudit` (
+		`processtask_step_id`
+		<choose>
+			<when test="activeTime != null and activeTime == 'now'">,`active_time`</when>
+			<when test="startTime != null and startTime == 'now'">,`start_time`</when>
+			<when test="abortTime != null and abortTime == 'now'">,`abort_time`</when>
+			<when test="successTime != null and successTime == 'now'">,`success_time`</when>
+			<when test="failedTime != null and failedTime == 'now'">,`failed_time`</when>
+			<when test="backTime != null and backTime == 'now'">,`back_time`</when>
+		</choose>
+		)
+		VALUES
+		(
+		#{processTaskStepId}
+		<choose>
+			<when test="activeTime != null and activeTime == 'now'">,NOW(3)</when>
+			<when test="startTime != null and startTime == 'now'">,NOW(3)</when>
+			<when test="abortTime != null and abortTime == 'now'">,NOW(3)</when>
+			<when test="successTime != null and successTime == 'now'">,NOW(3)</when>
+			<when test="failedTime != null and failedTime == 'now'">,NOW(3)</when>
+			<when test="backTime != null and backTime == 'now'">,NOW(3)</when>
+		</choose>
+		)
+	</insert>
+
+	<update id="updateProcessTaskStepTimeAudit" parameterType="codedriver.module.process.dto.ProcessTaskStepTimeAuditVo">
+		UPDATE
+		`processtask_step_timeaudit`
+		SET
+		`processtask_step_id` = #{processTaskStepId}
+		<choose>
+			<when test="activeTime != null and activeTime == 'now'">,`active_time` = NOW(3)</when>
+			<when test="startTime != null and startTime == 'now'">,`start_time` = NOW(3)</when>
+			<when test="abortTime != null and abortTime == 'now'">,`abort_time` = NOW(3)</when>
+			<when test="successTime != null and successTime == 'now'">,`success_time` = NOW(3)</when>
+			<when test="failedTime != null and failedTime == 'now'">,`failed_time` = NOW(3)</when>
+			<when test="backTime != null and backTime == 'now'">,`back_time` = NOW(3)</when>
+		</choose>
+		WHERE `id` = #{id}
+	</update>
+</mapper>
