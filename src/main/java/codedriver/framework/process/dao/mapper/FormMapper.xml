@@ -14,7 +14,6 @@
 		`form_version` a
 		JOIN `form` b
 		ON a.`form_uuid` = b.`uuid`
-		AND b.`is_active` = 1
 		WHERE a.`form_uuid` = #{value}
 		AND a.`is_active` = 1
 	</select>
