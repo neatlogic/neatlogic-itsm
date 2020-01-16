@@ -60,7 +60,7 @@ public class ProcessSearchApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessVo processVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessVo>() {});
 		int isICreated = jsonObj.getIntValue("isICreated");
-		if(isICreated == 0) {
+		if(isICreated == 1) {
 			processVo.setFcu(UserContext.get().getUserId());
 		}
 		JSONObject resultObj = new JSONObject();
@@ -79,6 +79,7 @@ public class ProcessSearchApi extends ApiComponentBase {
 		for(ProcessVo process : processList) {
 			count = processMapper.getProcessReferenceCount(process.getUuid());
 			process.setReferenceCount(count);
+			process.setConfig(null);
 		}	
 		resultObj.put("processList", processList);
 		return resultObj;

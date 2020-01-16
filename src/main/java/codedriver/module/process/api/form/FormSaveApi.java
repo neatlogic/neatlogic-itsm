@@ -14,6 +14,7 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNameRepeatException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
@@ -52,7 +53,7 @@ public class FormSaveApi extends ApiComponentBase {
 	@Override
 	@Input({
 			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid，为空表示创建表单", isRequired = false),
-			@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]*$", isRequired= true, length = 50, desc = "表单名称"),
+			@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, length = 50, desc = "表单名称"),
 			@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活", isRequired = true),
 			@Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "当前版本的uuid，为空代表创建一个新版本", isRequired = false),
 			@Param(name = "content", type = ApiParamType.JSONOBJECT, desc = "表单控件生成的json内容", isRequired = true) 
@@ -96,8 +97,12 @@ public class FormSaveApi extends ApiComponentBase {
 			formVersionVo.setVersion(version);
 			formMapper.insertFormVersion(formVersionVo);
 		} else {
-			if(formMapper.checkFormVersionIsExists(formVo.getCurrentVersionUuid()) == 0) {
+			FormVersionVo formVersion = formMapper.getFormVersionByUuid(formVo.getCurrentVersionUuid());
+			if(formVersion == null) {
 				throw new FormVersionNotFoundException(formVo.getCurrentVersionUuid());
+			}
+			if(!formVo.getUuid().equals(formVersion.getFormUuid())) {
+				throw new FormIllegalParameterException("表单版本：'" + formVo.getCurrentVersionUuid() + "'不属于表单：'" + formVo.getUuid() + "'的版本");
 			}
 			formVersionVo.setUuid(formVo.getCurrentVersionUuid());
 			formMapper.updateFormVersion(formVersionVo);

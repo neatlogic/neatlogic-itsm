@@ -9,6 +9,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
+import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -62,9 +64,15 @@ public class FormGetApi extends ApiComponentBase {
 			if(formVersion == null) {
 				throw new FormVersionNotFoundException(uuid);
 			}
+			if(!uuid.equals(formVersion.getFormUuid())) {
+				throw new FormIllegalParameterException("表单版本：'" + currentVersionUuid + "'不属于表单：'" + uuid + "'的版本");
+			}
 			formVo.setCurrentVersionUuid(currentVersionUuid);
 		}else {//获取激活版本
 			formVersion = formMapper.getActionFormVersionByFormUuid(uuid);
+			if(formVersion == null) {
+				throw new FormActiveVersionNotFoundExcepiton(uuid);
+			}
 			formVo.setCurrentVersionUuid(formVersion.getUuid());
 		}
 		//表单内容

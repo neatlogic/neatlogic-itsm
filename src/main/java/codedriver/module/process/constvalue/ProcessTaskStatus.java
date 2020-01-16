@@ -1,5 +1,10 @@
 package codedriver.module.process.constvalue;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import codedriver.module.process.dto.ProcessTaskStatusVo;
+
 public enum ProcessTaskStatus {
 	RUNNING("running", "处理中"),
 	ABORTED("aborted", "已终止"),
@@ -13,6 +18,7 @@ public enum ProcessTaskStatus {
 	private String status;
 	private String text;
 
+	private static List<ProcessTaskStatusVo> processTaskStatusList;
 	private ProcessTaskStatus(String _status, String _text) {
 		this.status = _status;
 		this.text = _text;
@@ -44,4 +50,13 @@ public enum ProcessTaskStatus {
 		return "";
 	}
 
+	public static List<ProcessTaskStatusVo> getProcessTaskStatusList(){
+		if(processTaskStatusList == null) {
+			processTaskStatusList = new ArrayList<>();
+			for (ProcessTaskStatus s : ProcessTaskStatus.values()) {
+				processTaskStatusList.add(new ProcessTaskStatusVo(s.getValue(), s.getText()));
+			}
+		}
+		return processTaskStatusList;
+	}
 }

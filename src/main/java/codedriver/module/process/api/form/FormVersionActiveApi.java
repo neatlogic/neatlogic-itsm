@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -51,8 +52,12 @@ public class FormVersionActiveApi extends ApiComponentBase {
 		
 		String versionUuid = jsonObj.getString("versionUuid");
 		//判断被激活的表单版本是否存在
-		if(formMapper.checkFormVersionIsExists(versionUuid) == 0) {
+		FormVersionVo formVersion = formMapper.getFormVersionByUuid(versionUuid);
+		if(formVersion == null) {
 			throw new FormVersionNotFoundException(versionUuid);
+		}
+		if(!uuid.equals(formVersion.getFormUuid())) {
+			throw new FormIllegalParameterException("表单版本：'" + versionUuid + "'不属于表单：'" + uuid + "'的版本");
 		}
 		//将所有版本设置为非激活状态
 		formMapper.resetFormVersionIsActiveByFormUuid(uuid);

@@ -18,7 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.exception.form.FormImportException;
+import codedriver.framework.process.exception.process.ProcessImportException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.process.dto.ProcessVo;
@@ -56,7 +56,7 @@ public class ProcessImportApi extends BinaryStreamApiComponentBase {
 		Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
 		//如果没有导入文件, 抛异常
 		if(multipartFileMap == null || multipartFileMap.isEmpty()) {
-			throw new FormImportException("没有导入文件");
+			throw new ProcessImportException("没有导入文件");
 		}
 		ObjectInputStream ois = null;
 		Object obj = null;
@@ -70,7 +70,7 @@ public class ProcessImportApi extends BinaryStreamApiComponentBase {
 				ois = new ObjectInputStream(multipartFile.getInputStream());
 				obj = ois.readObject();
 			}catch(IOException e) {
-				throw new FormImportException(multipartFile.getOriginalFilename() + "文件格式不正确");
+				throw new ProcessImportException(multipartFile.getOriginalFilename() + "文件格式不正确");
 			}finally {
 				if(ois != null) {
 					ois.close();
@@ -87,15 +87,18 @@ public class ProcessImportApi extends BinaryStreamApiComponentBase {
 					processVo.setName(oldName + "_" + index);
 				}
 				if(processMapper.checkProcessIsExists(processVo.getUuid()) == 0) {
-					result = "新建流程：'" + processVo.getUuid() +"'";
+					result = "新建流程：'" + processVo.getName() +"'";
 				}else {
-					result = "更新流程：'" + processVo.getUuid() +"'";
+					result = "更新流程：'" + processVo.getName() +"'";
 				}
 				processVo.setFcu(UserContext.get().getUserId());
 				processService.saveProcess(processVo);
+				return result;
+			}else {
+				throw new ProcessImportException(multipartFile.getOriginalFilename() + "文件格式不正确");
 			}
 		}
-		return result;
+		return null;
 	}
 
 }
