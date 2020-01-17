@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskStepTimeAuditMapper">
+	<select id="getProcessTaskStepTimeAuditBySlaId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepTimeAuditVo">
+		SELECT
+		UNIX_TIMESTAMP(a.`active_time`) * 1000 as activeTimeLong,
+		UNIX_TIMESTAMP(a.`start_time`) * 1000 as startTimeLong,
+		UNIX_TIMESTAMP(a.`success_time`) * 1000 as successTimeLong,
+		UNIX_TIMESTAMP(a.`abort_time`) * 1000 as abortTimeLong,
+		UNIX_TIMESTAMP(a.`back_time`) * 1000 as backTimeLong,
+		UNIX_TIMESTAMP(a.`failed_time`) * 1000 as failedTimeLong
+		FROM
+		`processtask_step_timeaudit` a
+		JOIN `processtask_step_sla` b
+		ON a.`processtask_step_id` = b.`processtask_step_id`
+		WHERE b.`sla_id` = #{value}
+	</select>
+
 	<select id="getLastProcessTaskStepTimeAuditByStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepTimeAuditVo">
 		SELECT
 		`id`,

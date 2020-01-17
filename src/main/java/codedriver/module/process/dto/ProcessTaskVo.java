@@ -8,6 +8,7 @@ public class ProcessTaskVo {
 	private Long id;
 	private String title;
 	private String processUuid;
+	private String channelUuid;
 	private String config;
 	private String configPath;
 	private JSONObject configObj;
@@ -22,7 +23,6 @@ public class ProcessTaskVo {
 	private Long timeCost;
 	private String timeCostStr;
 	private String expireTime;
-	private String channelUuid;
 	private String configHash;
 	private String urgency;
 	private String urgencyText;

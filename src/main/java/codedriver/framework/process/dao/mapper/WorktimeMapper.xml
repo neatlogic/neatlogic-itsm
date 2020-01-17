@@ -112,7 +112,7 @@
 	limit 0,1
 	</select>
 	
-	<select id="calculateCostTime" parameterType="codedriver.module.process.dto.WorktimeRangeVo" resultType="long">
+	<select id="calculateCostTime" resultType="long">
 	SELECT 
 	  SUM(IF(wtd.`end_time` &gt; #{endTime}, #{endTime}, wtd.`end_time`) - IF(wtd.`start_time` &lt; #{startTime}, #{startTime}, wtd.`start_time`))
 	FROM `worktime_range` wtd

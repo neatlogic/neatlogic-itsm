@@ -3,310 +3,310 @@
 <mapper namespace="codedriver.framework.process.dao.mapper.ChannelMapper">
 
 	<select id="searchChannelCount" resultType="int">
-	SELECT 
-	  count(c.`uuid`) 
-	FROM
-	  `channel` c
-	<if test="isFavorite != 1">
-	LEFT 
-	</if>
-	JOIN `channel_user` cu ON cu.`channel_uuid` = c.`uuid` AND cu.user_id = #{userId} 	
-	WHERE 1=1
-	<if test="parentUuid != null">
-	 AND c.`parent_uuid` = #{parentUuid}
-	</if>
-	<if test="keyword != null and keyword != ''">
-	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
-	</if> 
-	<if test="isActive != null">
-	AND c.`is_active` = #{isActive}
-	</if>
+		SELECT
+		count(c.`uuid`)
+		FROM
+		`channel` c
+		<if test="isFavorite != 1">
+			LEFT
+		</if>
+		JOIN `channel_user` cu ON cu.`channel_uuid` = c.`uuid` AND cu.user_id = #{userId}
+		WHERE 1=1
+		<if test="parentUuid != null">
+			AND c.`parent_uuid` = #{parentUuid}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND c.`name` LIKE CONCAT('%',#{keyword},'%')
+		</if>
+		<if test="isActive != null">
+			AND c.`is_active` = #{isActive}
+		</if>
 	</select>
-	
+
 	<select id="searchChannelList" resultType="codedriver.module.process.dto.ChannelVo">
-	SELECT 
-	  c.`uuid`,
-	  c.`name`,
-	  c.`parent_uuid` as parentUuid,
-	  c.`is_active` as isActive,
-	  c.`icon`,
-	  c.`color`,
-	  c.`desc`,
-	  CASE WHEN cu.user_id IS NULL THEN 0 ELSE 1 END AS `isFavorite`,
-	  c.`sort` 
-	FROM
-	  `channel` c 
-	<if test="isFavorite != 1">
-	LEFT  
-	</if>
- 	JOIN `channel_user` cu ON cu.`channel_uuid` = c.`uuid` AND cu.user_id = #{userId}
-	WHERE 1=1
-	<if test="parentUuid != null">
-	 AND c.`parent_uuid` = #{parentUuid}
-	</if>
-	<if test="keyword != null and keyword != ''">
-	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
-	</if> 
-	<if test="isActive != null">
-	AND c.`is_active` = #{isActive}
-	</if>
-	<choose>
-		<when test="isFavorite == 1">
-		ORDER BY cu.`insert_time` DESC
-		</when>
-		<otherwise>
-		ORDER BY c.`parent_uuid`, c.`sort`
-		</otherwise>
-	</choose>	
-	<if test="needPage">
-	limit #{startNum}, #{pageSize}
-	</if>
+		SELECT
+		c.`uuid`,
+		c.`name`,
+		c.`parent_uuid` as parentUuid,
+		c.`is_active` as isActive,
+		c.`icon`,
+		c.`color`,
+		c.`desc`,
+		CASE WHEN cu.user_id IS NULL THEN 0 ELSE 1 END AS `isFavorite`,
+		c.`sort`
+		FROM
+		`channel` c
+		<if test="isFavorite != 1">
+			LEFT
+		</if>
+		JOIN `channel_user` cu ON cu.`channel_uuid` = c.`uuid` AND cu.user_id = #{userId}
+		WHERE 1=1
+		<if test="parentUuid != null">
+			AND c.`parent_uuid` = #{parentUuid}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND c.`name` LIKE CONCAT('%',#{keyword},'%')
+		</if>
+		<if test="isActive != null">
+			AND c.`is_active` = #{isActive}
+		</if>
+		<choose>
+			<when test="isFavorite == 1">
+				ORDER BY cu.`insert_time` DESC
+			</when>
+			<otherwise>
+				ORDER BY c.`parent_uuid`, c.`sort`
+			</otherwise>
+		</choose>
+		<if test="needPage">
+			limit #{startNum}, #{pageSize}
+		</if>
 	</select>
 
 	<select id="searchChannelParentUuidList" parameterType="codedriver.module.process.dto.ChannelVo" resultType="java.lang.String">
-	SELECT 
-	  c.`parent_uuid` 
-	FROM
-	  `channel` c 	
-	WHERE 1=1
-	<if test="keyword != null and keyword != ''">
-	 AND c.`name` LIKE CONCAT('%',#{keyword},'%')
-	</if> 
-	<if test="isActive != null">
-	AND c.`is_active` = #{isActive}
-	</if>
-	</select>
-	
-	<select id="getChannelByUuid" resultType="codedriver.module.process.dto.ChannelVo">
-	SELECT 
-	  c.`uuid`,
-	  c.`name`,
-	  c.`parent_uuid` AS parentUuid,
-	  c.`is_active` AS isActive,
-	  c.`icon`,
-	  c.`color`,
-	  c.`desc`,
-	  c.`sort`,
-	  c.`sla`,
-	  c.`allow_desc` AS allowDesc,
-	  c.`help`,
-	  c.`is_active_help` AS isActiveHelp,
-	  cp.`process_uuid` AS processUuid,
-	  cw.`worktime_uuid` AS worktimeUuid
-	FROM
-	  `channel` c
-	JOIN `channel_process` cp ON cp.channel_uuid = c.uuid
-	JOIN `channel_worktime` cw ON cw.channel_uuid = c.uuid
-	WHERE `uuid` = #{uuid}
-	</select>
-	
-	<select id="searchChannelRoleCount" resultType="int">
-	SELECT 
-	count(DISTINCT r.`name`) 
-	FROM `role` r
-	LEFT JOIN `channel_role` cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid}
-	WHERE 1=1 
-	<if test="keyword != null and keyword != ''">
-	AND r.`name` LIKE CONCAT('%',#{keyword},'%')
-	</if>
-	<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
-	AND r.`name` 
-		<if test="isSelect == 0">
-		NOT
+		SELECT
+		c.`parent_uuid`
+		FROM
+		`channel` c
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+			AND c.`name` LIKE CONCAT('%',#{keyword},'%')
 		</if>
-	IN 
-		<foreach collection="roleNameList" item="roleName" open="(" close=")" separator=",">
-		#{roleName}
-		</foreach>
-	</if>
+		<if test="isActive != null">
+			AND c.`is_active` = #{isActive}
+		</if>
 	</select>
-	
+
+	<select id="getChannelByUuid" resultType="codedriver.module.process.dto.ChannelVo">
+		SELECT
+		c.`uuid`,
+		c.`name`,
+		c.`parent_uuid` AS parentUuid,
+		c.`is_active` AS isActive,
+		c.`icon`,
+		c.`color`,
+		c.`desc`,
+		c.`sort`,
+		c.`sla`,
+		c.`allow_desc` AS allowDesc,
+		c.`help`,
+		c.`is_active_help` AS isActiveHelp,
+		cp.`process_uuid` AS processUuid,
+		cw.`worktime_uuid` AS worktimeUuid
+		FROM
+		`channel` c
+		JOIN `channel_process` cp ON cp.channel_uuid = c.uuid
+		JOIN `channel_worktime` cw ON cw.channel_uuid = c.uuid
+		WHERE `uuid` = #{uuid}
+	</select>
+
+	<select id="searchChannelRoleCount" resultType="int">
+		SELECT
+		count(DISTINCT r.`name`)
+		FROM `role` r
+		LEFT JOIN `channel_role` cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid}
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+			AND r.`name` LIKE CONCAT('%',#{keyword},'%')
+		</if>
+		<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
+			AND r.`name`
+			<if test="isSelect == 0">
+				NOT
+			</if>
+			IN
+			<foreach collection="roleNameList" item="roleName" open="(" close=")" separator=",">
+				#{roleName}
+			</foreach>
+		</if>
+	</select>
+
 	<resultMap type="codedriver.module.process.dto.ChannelRoleVo" id="channelRoleMap">
-		<id column="role_name" property="roleName"/>
-		<result column="roleDesc" property="roleDesc"/>
+		<id column="role_name" property="roleName" />
+		<result column="roleDesc" property="roleDesc" />
 		<collection property="typeList" ofType="java.lang.String">
-			<id column="type"/>
+			<id column="type" />
 		</collection>
 	</resultMap>
 	<select id="searchChannelRoleList" resultMap="channelRoleMap">
-	SELECT 
-	r.`name` AS role_name, 
-	r.`description` AS roleDesc,
-	cr.`type`
-	FROM role r
-	LEFT JOIN channel_role cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid}
-	WHERE 1=1 
-	<if test="keyword != null and keyword != ''">
-	AND r.`name` LIKE CONCAT('%',#{keyword},'%')
-	</if>
-	<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
-	AND r.`name` 
-		<if test="isSelect == 0">
-		NOT
+		SELECT
+		r.`name` AS role_name,
+		r.`description` AS roleDesc,
+		cr.`type`
+		FROM role r
+		LEFT JOIN channel_role cr ON cr.`role_name`=r.`name` AND cr.`channel_uuid`=#{channelUuid}
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+			AND r.`name` LIKE CONCAT('%',#{keyword},'%')
 		</if>
-	IN 
-		<foreach collection="roleNameList" item="roleName" open="(" close=")" separator=",">
-		#{roleName}
-		</foreach>
-	</if>
-	<if test="needPage">
-	limit #{startNum}, #{pageSize}
-	</if>
+		<if test="isSelect != null  and roleNameList != null and roleNameList.size() > 0">
+			AND r.`name`
+			<if test="isSelect == 0">
+				NOT
+			</if>
+			IN
+			<foreach collection="roleNameList" item="roleName" open="(" close=")" separator=",">
+				#{roleName}
+			</foreach>
+		</if>
+		<if test="needPage">
+			limit #{startNum}, #{pageSize}
+		</if>
 	</select>
-	
+
 	<select id="getChannelRoleListByChannelUuid" resultMap="channelRoleMap">
-	SELECT 
-	cr.`role_name`,
-	cr.`type`  
-	FROM channel_role cr  
-	WHERE cr.`channel_uuid`=#{channelUuid}		
+		SELECT
+		cr.`role_name`,
+		cr.`type`
+		FROM channel_role cr
+		WHERE cr.`channel_uuid`=#{channelUuid}
 	</select>
-	
+
 	<select id="getMaxSortByParentUuid" resultType="int">
-	SELECT IFNULL(MAX(`sort`), 0) FROM `channel` WHERE `parent_uuid` = #{parentUuid}
+		SELECT IFNULL(MAX(`sort`), 0) FROM `channel` WHERE `parent_uuid` = #{parentUuid}
 	</select>
-	
+
 	<select id="getChannelPriorityListByChannelUuid" resultType="codedriver.module.process.dto.ChannelPriorityVo">
-	SELECT 
-	`channel_uuid` AS channelUuid,
-	`priority_uuid` AS priorityUuid,
-	`is_default` AS isDefault
-	 FROM `channel_priority` 
-	 WHERE channel_uuid = #{channelUuid}
+		SELECT
+		`channel_uuid` AS channelUuid,
+		`priority_uuid` AS priorityUuid,
+		`is_default` AS isDefault
+		FROM `channel_priority`
+		WHERE channel_uuid = #{channelUuid}
 	</select>
-	
+
 	<select id="checkChannelIsExists" resultType="int">
-	SELECT COUNT(`uuid`) FROM `channel` where `uuid`=#{uuid}
+		SELECT COUNT(`uuid`) FROM `channel` where `uuid`=#{uuid}
 	</select>
-	
+
 	<select id="checkChannelNameIsRepeat" resultType="int">
-	SELECT COUNT(1) FROM `channel` where name=#{name} AND `uuid`!=#{uuid}
+		SELECT COUNT(1) FROM `channel` where name=#{name} AND `uuid`!=#{uuid}
 	</select>
-	
+
 	<resultMap type="codedriver.module.process.dto.ChannelVo" id="channelMap">
-		<id column="uuid" property="uuid"/>
-		<result column="name" property="name"/>
-		<result column="parent_uuid" property="parentUuid"/>
-		<result column="sort" property="sort"/>
+		<id column="uuid" property="uuid" />
+		<result column="name" property="name" />
+		<result column="parent_uuid" property="parentUuid" />
+		<result column="sort" property="sort" />
 	</resultMap>
 	<select id="getChannelListForTree" resultMap="channelMap">
-	SELECT 
-	  c.`uuid`,
-	  c.`name`,
-	  c.`parent_uuid`,
-	  c.`sort`
-	FROM
-	  `channel` c 
-	<if test="isActive != null">
-	WHERE c.`is_active` = #{isActive}
-	</if>
-	ORDER BY c.`parent_uuid`, c.`sort`
+		SELECT
+		c.`uuid`,
+		c.`name`,
+		c.`parent_uuid`,
+		c.`sort`
+		FROM
+		`channel` c
+		<if test="isActive != null">
+			WHERE c.`is_active` = #{isActive}
+		</if>
+		ORDER BY c.`parent_uuid`, c.`sort`
 	</select>
-	
+
 	<insert id="replaceChannel">
-	REPLACE INTO `channel` (
-	  `uuid`,
-	  `name`,
-	  `parent_uuid`,
-	  `is_active`,
-	  `icon`,
-	  `color`,
-	  `desc`,
-	  `sort`,
-	  `sla`,
-	  `allow_desc`,
-	  `help`,
-	  `is_active_help`
-	) 
-	VALUES
-	  (
-	    #{uuid},
-	    #{name},
-	    #{parentUuid},
-	    #{isActive},
-	    #{icon},
-	    #{color},
-	    #{desc},
-	    #{sort},
-	    #{sla},
-	    #{allowDesc},
-	  	#{help},
-	  	#{isActiveHelp}
-	  )
+		REPLACE INTO `channel` (
+		`uuid`,
+		`name`,
+		`parent_uuid`,
+		`is_active`,
+		`icon`,
+		`color`,
+		`desc`,
+		`sort`,
+		`sla`,
+		`allow_desc`,
+		`help`,
+		`is_active_help`
+		)
+		VALUES
+		(
+		#{uuid},
+		#{name},
+		#{parentUuid},
+		#{isActive},
+		#{icon},
+		#{color},
+		#{desc},
+		#{sort},
+		#{sla},
+		#{allowDesc},
+		#{help},
+		#{isActiveHelp}
+		)
 	</insert>
-	
+
 	<insert id="replaceChannelUser">
-	REPLACE INTO `channel_user`(`user_id`, `channel_uuid`, `insert_time`) VALUES(#{userId}, #{channelUuid}, now())
+		REPLACE INTO `channel_user`(`user_id`, `channel_uuid`, `insert_time`) VALUES(#{userId}, #{channelUuid}, now())
 	</insert>
 
 	<insert id="replaceChannelRole">
-	REPLACE INTO `channel_role`(`channel_uuid`, `role_name`, `type`) VALUES(#{channelUuid}, #{roleName}, #{type})
+		REPLACE INTO `channel_role`(`channel_uuid`, `role_name`, `type`) VALUES(#{channelUuid}, #{roleName}, #{type})
 	</insert>
-	
+
 	<insert id="insertChannelPriority">
-	INSERT INTO `channel_priority`(`channel_uuid`, `priority_uuid`, `is_default`) VALUES(#{channelUuid}, #{priorityUuid}, #{isDefault})
+		INSERT INTO `channel_priority`(`channel_uuid`, `priority_uuid`, `is_default`) VALUES(#{channelUuid}, #{priorityUuid}, #{isDefault})
 	</insert>
-	
+
 	<insert id="replaceChannelProcess">
-	REPLACE INTO `channel_process`(`channel_uuid`, `process_uuid`) VALUES(#{channelUuid}, #{processUuid})
+		REPLACE INTO `channel_process`(`channel_uuid`, `process_uuid`) VALUES(#{channelUuid}, #{processUuid})
 	</insert>
-	
+
 	<insert id="replaceChannelWorktime">
-	REPLACE INTO `channel_worktime`(`channel_uuid`, `worktime_uuid`) VALUES(#{channelUuid}, #{worktimeUuid})
+		REPLACE INTO `channel_worktime`(`channel_uuid`, `worktime_uuid`) VALUES(#{channelUuid}, #{worktimeUuid})
 	</insert>
-	
+
 	<update id="updateChannelForMove">
-	UPDATE `channel` SET `parent_uuid` = #{parentUuid}, `sort` = #{sort} WHERE `uuid` = #{uuid}
+		UPDATE `channel` SET `parent_uuid` = #{parentUuid}, `sort` = #{sort} WHERE `uuid` = #{uuid}
 	</update>
 
 	<update id="updateSortIncrement" parameterType="java.util.HashMap">
-	UPDATE `channel` SET `sort` = `sort` + 1 
-	WHERE `parent_uuid` = #{parentUuid} 
-	AND `sort` &gt;= #{fromSort} 
-	<if test="toSort != null">
-	AND `sort` &lt;= #{toSort}
-	</if>
+		UPDATE `channel` SET `sort` = `sort` + 1
+		WHERE `parent_uuid` = #{parentUuid}
+		AND `sort` &gt;= #{fromSort}
+		<if test="toSort != null">
+			AND `sort` &lt;= #{toSort}
+		</if>
 	</update>
 
 	<update id="updateSortDecrement" parameterType="java.util.HashMap">
-	UPDATE `channel` SET `sort` = `sort` - 1 
-	WHERE `parent_uuid` = #{parentUuid} 
-	AND `sort` &gt;= #{fromSort} 
-	<if test="toSort != null">
-	AND `sort` &lt;= #{toSort}
-	</if>
+		UPDATE `channel` SET `sort` = `sort` - 1
+		WHERE `parent_uuid` = #{parentUuid}
+		AND `sort` &gt;= #{fromSort}
+		<if test="toSort != null">
+			AND `sort` &lt;= #{toSort}
+		</if>
 	</update>
-	
+
 	<delete id="deleteChannelUser">
-	DELETE FROM `channel_user` WHERE `user_id` = #{userId} AND `channel_uuid` = #{channelUuid}
+		DELETE FROM `channel_user` WHERE `user_id` = #{userId} AND `channel_uuid` = #{channelUuid}
 	</delete>
-	
+
 	<delete id="deleteChannelByUuid">
-	DELETE FROM `channel` WHERE `uuid` = #{uuid}
+		DELETE FROM `channel` WHERE `uuid` = #{uuid}
 	</delete>
-	
+
 	<delete id="deleteChannelRole">
-	DELETE FROM `channel_role` WHERE `channel_uuid` = #{channelUuid} AND `role_name` = #{roleName} AND `type` = #{type}
+		DELETE FROM `channel_role` WHERE `channel_uuid` = #{channelUuid} AND `role_name` = #{roleName} AND `type` = #{type}
 	</delete>
-	
+
 	<delete id="deleteChannelPriorityByChannelUuid">
-	DELETE FROM `channel_priority` WHERE `channel_uuid` = #{channelUuid}
+		DELETE FROM `channel_priority` WHERE `channel_uuid` = #{channelUuid}
 	</delete>
 
 	<delete id="deleteChannelProcessByChannelUuid">
-	DELETE FROM `channel_process` WHERE `channel_uuid` = #{channelUuid}
+		DELETE FROM `channel_process` WHERE `channel_uuid` = #{channelUuid}
 	</delete>
 
 	<delete id="deleteChannelWorktimeByChannelUuid">
-	DELETE FROM `channel_worktime` WHERE `channel_uuid` = #{channelUuid}
+		DELETE FROM `channel_worktime` WHERE `channel_uuid` = #{channelUuid}
 	</delete>
 
 	<delete id="deleteChannelRoleByChannelUuid">
-	DELETE FROM `channel_role` WHERE `channel_uuid` = #{channelUuid}
+		DELETE FROM `channel_role` WHERE `channel_uuid` = #{channelUuid}
 	</delete>
 
 	<delete id="deleteChannelUserByChannelUuid">
-	DELETE FROM `channel_user` WHERE `channel_uuid` = #{channelUuid}
+		DELETE FROM `channel_user` WHERE `channel_uuid` = #{channelUuid}
 	</delete>
 
 </mapper>

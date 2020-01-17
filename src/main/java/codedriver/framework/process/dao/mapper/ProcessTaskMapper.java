@@ -5,11 +5,12 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 import codedriver.module.process.dto.ProcessTaskAssignUserVo;
-import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskConvergeVo;
+import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
+import codedriver.module.process.dto.ProcessTaskSlaVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
@@ -18,6 +19,7 @@ import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
 import codedriver.module.process.dto.ProcessTaskStepTeamVo;
+import codedriver.module.process.dto.ProcessTaskStepTimeAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepTimeoutPolicyVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -26,6 +28,8 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskMapper {
+	public List<ProcessTaskSlaVo> getProcessTaskSlaByProcessTaskStepId(Long processTaskStepId);
+
 	public ProcessTaskStepAuditDetailVo getProcessTaskStepAuditDetail(@Param("processTaskId")
 	Long processTaskId, @Param("type")
 	String type);
@@ -133,6 +137,8 @@ public interface ProcessTaskMapper {
 	public int updateProcessTaskStepStatus(ProcessTaskStepVo processTaskStepVo);
 
 	public int updateProcessTaskStatus(ProcessTaskVo processTaskVo);
+
+	public int updateProcessTaskSlaTime(ProcessTaskSlaVo processTaskSlaVo);
 
 	public int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId")
 	Long fromProcessTaskStepId, @Param("toProcessTaskStepId")
