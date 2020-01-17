@@ -202,7 +202,7 @@ public abstract class ProcessStepHandlerUtilBase {
 
 			long sum = 0;
 			for (Map<String, Long> timeMap : newTimeList) {
-				sum += worktimeMapper.calculateCostTime(worktimeUuid, timeMap.get("s"), timeMap.get("e"));
+				sum += worktimeMapper.calculateCostTime(worktimeUuid,timeMap.get("s"), timeMap.get("e"));
 			}
 			return sum;
 		}
