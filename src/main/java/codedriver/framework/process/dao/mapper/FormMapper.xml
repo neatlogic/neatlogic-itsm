@@ -14,7 +14,6 @@
 		`form_version` a
 		JOIN `form` b
 		ON a.`form_uuid` = b.`uuid`
-		AND b.`is_active` = 1
 		WHERE a.`form_uuid` = #{value}
 		AND a.`is_active` = 1
 	</select>
@@ -124,6 +123,18 @@
 		ORDER BY `version`
 	</select>
 
+	<select id="getFormVersionSimpleByFormUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.FormVersionVo">
+	SELECT
+		`uuid`,
+		`version`,
+		`is_active` AS isActive
+		FROM
+		`form_version`
+		WHERE
+		form_uuid = #{value}
+		ORDER BY `version`
+	</select>
+	
 	<select id="getFormReferenceCount" parameterType="java.lang.String" resultType="int">
 	SELECT 
 	count(p.`uuid`)

@@ -210,10 +210,8 @@
 	SELECT 
 	`uuid`,
 	`name`,
-	`type`,
 	`is_active` AS isActive,
-	`config`,
-	`belong`
+	`config`
 	FROM `process` 
 	WHERE 1=1
 	<if test="keyword != null and keyword != ''">
@@ -225,6 +223,7 @@
 	<if test="fcu != null">
 	AND `fcu` = #{fcu}
 	</if>
+	ORDER BY `fcd` DESC
 	<if test="needPage">
 	limit #{startNum}, #{pageSize}
 	</if>

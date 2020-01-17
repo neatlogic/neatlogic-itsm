@@ -66,6 +66,7 @@ public class ProcessServiceImpl implements ProcessService {
 
 	@Override
 	public int saveProcess(ProcessVo processVo) {
+		//TODO linbq等流程图config字段格式确定后，再解析config数据保存到对应的表中
 		if(processMapper.checkProcessNameIsRepeat(processVo) > 0) {
 			throw new ProcessNameRepeatException(processVo.getName());
 		}

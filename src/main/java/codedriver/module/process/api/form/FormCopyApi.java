@@ -12,6 +12,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
+import codedriver.framework.process.exception.form.FormNameRepeatException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -46,7 +47,7 @@ public class FormCopyApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "表单uuid"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]*$", isRequired= true, length = 50, desc = "表单名称"),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, length = 50, desc = "表单名称"),
 		@Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "要复制的版本uuid,空表示复制所有版本")
 	})
 	@Output({
@@ -63,6 +64,10 @@ public class FormCopyApi extends ApiComponentBase {
 		String name = jsonObj.getString("name");
 		formVo.setUuid(null);
 		formVo.setName(name);
+		//如果表单名称已存在
+		if(formMapper.checkFormNameIsRepeat(formVo) > 0) {
+			throw new FormNameRepeatException(name);
+		}
 		formMapper.insertForm(formVo);
 		String currentVersionUuid = null;
 		if(jsonObj.containsKey("currentVersionUuid")) {
@@ -71,7 +76,7 @@ public class FormCopyApi extends ApiComponentBase {
 			if(formVersion == null) {
 				throw new FormVersionNotFoundException(currentVersionUuid);
 			}
-			if(!formVersion.getFormUuid().equals(uuid)) {
+			if(!uuid.equals(formVersion.getFormUuid())) {
 				throw new FormIllegalParameterException("表单版本：'" + currentVersionUuid + "'不属于表单：'" + uuid + "'的版本");
 			}
 			FormVersionVo formVersionVo = new FormVersionVo();

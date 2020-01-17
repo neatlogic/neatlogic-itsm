@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -64,7 +65,10 @@ public class FormVersionExportApi extends BinaryStreamApiComponentBase {
 		//判断要导出的表单版本是否存在
 		FormVersionVo formVersion = formMapper.getFormVersionByUuid(formVersionUuid);
 		if(formVersion == null) {
-			throw new FormVersionNotFoundException(uuid);
+			throw new FormVersionNotFoundException(formVersionUuid);
+		}
+		if(!uuid.equals(formVersion.getFormUuid())) {
+			throw new FormIllegalParameterException("表单版本：'" + formVersionUuid + "'不属于表单：'" + uuid + "'的版本");
 		}
 		formVersion.setFormName(formVo.getName());
 		//设置导出文件名, 表单名称_版本号.formversion
