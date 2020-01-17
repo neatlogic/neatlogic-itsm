@@ -9,6 +9,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
+import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -62,25 +64,22 @@ public class FormGetApi extends ApiComponentBase {
 			if(formVersion == null) {
 				throw new FormVersionNotFoundException(uuid);
 			}
+			if(!uuid.equals(formVersion.getFormUuid())) {
+				throw new FormIllegalParameterException("表单版本：'" + currentVersionUuid + "'不属于表单：'" + uuid + "'的版本");
+			}
 			formVo.setCurrentVersionUuid(currentVersionUuid);
 		}else {//获取激活版本
 			formVersion = formMapper.getActionFormVersionByFormUuid(uuid);
+			if(formVersion == null) {
+				throw new FormActiveVersionNotFoundExcepiton(uuid);
+			}
 			formVo.setCurrentVersionUuid(formVersion.getUuid());
 		}
 		//表单内容
 		formVo.setContent(formVersion.getContent());
 		//表单版本列表
-		List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);		
-		if (formVersionList != null && formVersionList.size() > 0) {
-			for (FormVersionVo version : formVersionList) {
-				version.setContent(null);
-				version.setEditTime(null);
-				version.setFormAttributeList(null);
-				version.setFormName(null);
-				version.setFormUuid(null);
-			}
-			formVo.setVersionList(formVersionList);
-		}
+		List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);
+		formVo.setVersionList(formVersionList);
 		//引用数量
 		int count = formMapper.getFormReferenceCount(uuid);
 		formVo.setReferenceCount(count);
