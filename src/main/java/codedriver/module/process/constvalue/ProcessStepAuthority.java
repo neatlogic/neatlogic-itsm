@@ -3,9 +3,9 @@ package codedriver.module.process.constvalue;
 import java.util.ArrayList;
 import java.util.List;
 
-import codedriver.module.process.dto.ProcessStepAuthVo;
+import codedriver.module.process.dto.ProcessStepAuthorityVo;
 
-public enum ProcessStepAuth {
+public enum ProcessStepAuthority {
 
 	VIEW("view", "查看"),
 	ABORT("abort", "终止流程"),
@@ -16,9 +16,9 @@ public enum ProcessStepAuth {
 	private String value;
 	private String name;
 	
-	private static List<ProcessStepAuthVo> processStepAuthTypeList;
+	private static List<ProcessStepAuthorityVo> processStepAuthTypeList;
 	
-	private ProcessStepAuth(String value, String name) {
+	private ProcessStepAuthority(String value, String name) {
 		this.value = value;
 		this.name = name;
 	}
@@ -32,7 +32,7 @@ public enum ProcessStepAuth {
 	}
 	
 	public static String getValue(String value) {
-		for(ProcessStepAuth authType : ProcessStepAuth.values()) {
+		for(ProcessStepAuthority authType : ProcessStepAuthority.values()) {
 			if(authType.getValue().equals(value)) {
 				return authType.getValue();
 			}
@@ -41,7 +41,7 @@ public enum ProcessStepAuth {
 	}
 	
 	public static String getName(String value) {
-		for(ProcessStepAuth auth : ProcessStepAuth.values()) {
+		for(ProcessStepAuthority auth : ProcessStepAuthority.values()) {
 			if(auth.getValue().equals(value)) {
 				return auth.getName();
 			}
@@ -49,11 +49,11 @@ public enum ProcessStepAuth {
 		return "";
 	}
 	
-	public static List<ProcessStepAuthVo> getProcessStepAuthList(){
+	public static List<ProcessStepAuthorityVo> getProcessStepAuthList(){
 		if(processStepAuthTypeList == null) {
 			processStepAuthTypeList = new ArrayList<>();
-			for(ProcessStepAuth auth : ProcessStepAuth.values()) {
-				processStepAuthTypeList.add(new ProcessStepAuthVo(auth.getValue(), auth.getName()));
+			for(ProcessStepAuthority auth : ProcessStepAuthority.values()) {
+				processStepAuthTypeList.add(new ProcessStepAuthorityVo(auth.getValue(), auth.getName()));
 			}			
 		}
 		return processStepAuthTypeList;

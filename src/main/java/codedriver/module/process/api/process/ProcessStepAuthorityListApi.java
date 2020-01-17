@@ -6,10 +6,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.constvalue.ProcessStepAuth;
+import codedriver.module.process.constvalue.ProcessStepAuthority;
 
 @Service
-public class ProcessStepAuthListApi extends ApiComponentBase {
+public class ProcessStepAuthorityListApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
@@ -29,7 +29,7 @@ public class ProcessStepAuthListApi extends ApiComponentBase {
 	@Description(desc = "流程步骤权限列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return ProcessStepAuth.getProcessStepAuthList();
+		return ProcessStepAuthority.getProcessStepAuthList();
 	}
 
 }

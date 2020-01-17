@@ -1,12 +1,12 @@
 package codedriver.module.process.dto;
 
-public class ProcessStepAuthVo {
+public class ProcessStepAuthorityVo {
 
 	private String value;
 	private String name;
-	public ProcessStepAuthVo() {
+	public ProcessStepAuthorityVo() {
 	}
-	public ProcessStepAuthVo(String value, String name) {
+	public ProcessStepAuthorityVo(String value, String name) {
 		this.value = value;
 		this.name = name;
 	}

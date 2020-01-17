@@ -1,12 +1,16 @@
 package codedriver.module.process.api.process;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.constvalue.ProcessInformPointcut;
+import codedriver.module.process.constvalue.ProcessTaskStepAction;
+import codedriver.module.process.dto.ProcessInformPointcutVo;
 
 @Service
 public class ProcessInformPointcutListApi extends ApiComponentBase {
@@ -28,7 +32,11 @@ public class ProcessInformPointcutListApi extends ApiComponentBase {
 	@Description(desc = "通知触发点列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return ProcessInformPointcut.getProcessInformPointcutList();
+		List<ProcessInformPointcutVo> processInformPointcutList = new ArrayList<>();;
+		for(ProcessTaskStepAction processTaskStepAction : ProcessTaskStepAction.values()) {
+			processInformPointcutList.add(new ProcessInformPointcutVo(processTaskStepAction.getValue(), processTaskStepAction.getText()));
+		}
+		return processInformPointcutList;
 	}
 
 }
