@@ -432,6 +432,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 			/** 写入时间审计 **/
 			TimeAuditHandler.start(currentProcessTaskStepVo);
+
+			/** 计算SLA **/
+			SlaHandler.calculate(currentProcessTaskStepVo);
 		} catch (ProcessTaskException ex) {
 			logger.error(ex.getMessage(), ex);
 			currentProcessTaskStepVo.setError(ex.getMessage());
@@ -515,6 +518,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 				/** 写入时间审计 **/
 				TimeAuditHandler.success(currentProcessTaskStepVo);
+
 			} catch (ProcessTaskException ex) {
 				logger.error(ex.getMessage(), ex);
 				currentProcessTaskStepVo.setError(ex.getMessage());
@@ -528,6 +532,8 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			if (this.getMode().equals(ProcessStepMode.MT)) {
 				/** 处理历史记录 **/
 				AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
+				/** 计算SLA **/
+				SlaHandler.calculate(currentProcessTaskStepVo);
 			}
 		}
 
@@ -586,6 +592,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 		/** 写入时间审计 **/
 		TimeAuditHandler.abort(currentProcessTaskStepVo);
+
+		/** 计算SLA **/
+		SlaHandler.calculate(currentProcessTaskStepVo);
 		return 1;
 	}
 
@@ -619,32 +628,44 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 	@Override
 	public int recover(ProcessTaskStepVo currentProcessTaskStepVo) {
-		/** 组件完成动作 **/
-		myRecover(currentProcessTaskStepVo);
-		currentProcessTaskStepVo.setIsActive(1);
-		/** 如果已经存在过处理人，则继续使用旧处理人，否则重新分派 **/
-		List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessTaskStepUserType.MAJOR.getValue());
-		if (oldUserList.size() > 0) {
-			for (ProcessTaskStepUserVo oldUserVo : oldUserList) {
-				processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), oldUserVo.getUserId()));
+		// 锁定当前流程
+		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
+		// 获取步骤基本信息
+		currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+		if (currentProcessTaskStepVo.getIsActive().equals(-1)) {
+			/** 组件完成动作 **/
+			myRecover(currentProcessTaskStepVo);
+			currentProcessTaskStepVo.setIsActive(1);
+			/** 如果已经存在过处理人，则继续使用旧处理人，否则重新分派 **/
+			List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessTaskStepUserType.MAJOR.getValue());
+			if (oldUserList.size() > 0) {
+				for (ProcessTaskStepUserVo oldUserVo : oldUserList) {
+					processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), oldUserVo.getUserId()));
+				}
+			} else {
+				/** 分配处理人 **/
+				try {
+					assign(currentProcessTaskStepVo);
+				} catch (ProcessTaskException e) {
+					logger.error(e.getMessage(), e);
+					currentProcessTaskStepVo.setIsActive(-1);
+					currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
+					currentProcessTaskStepVo.setError(e.getMessage());
+				}
 			}
-		} else {
-			/** 分配处理人 **/
-			try {
-				assign(currentProcessTaskStepVo);
-			} catch (ProcessTaskException e) {
-				logger.error(e.getMessage(), e);
-				currentProcessTaskStepVo.setIsActive(-1);
-				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
-				currentProcessTaskStepVo.setError(e.getMessage());
-			}
+
+			/** 修改步骤状态 **/
+			processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
+
+			/** 处理历史记录 **/
+			AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.RECOVER);
+
+			/** 写入时间审计 **/
+			TimeAuditHandler.recover(currentProcessTaskStepVo);
+
+			/** 计算SLA **/
+			SlaHandler.calculate(currentProcessTaskStepVo);
 		}
-
-		/** 修改步骤状态 **/
-		processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
-
-		/** 处理历史记录 **/
-		AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.RECOVER);
 		return 1;
 	}
 
@@ -831,6 +852,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
 			/** 处理时间审计 **/
 			TimeAuditHandler.back(currentProcessTaskStepVo);
+			
 		} catch (ProcessTaskException e) {
 			logger.error(e.getMessage(), e);
 			currentProcessTaskStepVo.setError(e.getMessage());
@@ -839,6 +861,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		}
 		/** 处理历史记录 **/
 		AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.BACK);
+		
+		/** 计算SLA **/
+		SlaHandler.calculate(currentProcessTaskStepVo);
 		return 1;
 	}
 

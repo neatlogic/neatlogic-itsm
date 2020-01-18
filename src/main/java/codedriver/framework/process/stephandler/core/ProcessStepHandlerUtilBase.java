@@ -36,6 +36,7 @@ import codedriver.framework.process.exception.WorktimeNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.ProcessTaskStepUserType;
 import codedriver.module.process.dto.ChannelVo;
@@ -55,6 +56,7 @@ public abstract class ProcessStepHandlerUtilBase {
 	static Logger logger = LoggerFactory.getLogger(ProcessStepHandlerUtilBase.class);
 
 	private static final ThreadLocal<List<AuditHandler>> AUDIT_HANDLERS = new ThreadLocal<>();
+	private static final ThreadLocal<List<SlaHandler>> SLA_HANDLERS = new ThreadLocal<>();
 	protected static ProcessMapper processMapper;
 	protected static ProcessTaskMapper processTaskMapper;
 	protected static ProcessTaskAuditMapper processTaskAuditMapper;
@@ -104,7 +106,13 @@ public abstract class ProcessStepHandlerUtilBase {
 		channelMapper = _channelMapper;
 	}
 
-	protected static class SlaHandler {
+	protected static class SlaHandler extends CodeDriverThread {
+		private ProcessTaskStepVo currentProcessTaskStepVo;
+
+		public SlaHandler(ProcessTaskStepVo _currentProcessTaskStepVo) {
+			currentProcessTaskStepVo = _currentProcessTaskStepVo;
+		}
+
 		private static long calculateExpireTime(long activeTime, long timeLimit, String worktimeUuid) {
 			if (worktimeMapper.checkWorktimeIsExists(worktimeUuid) == 0) {
 				throw new WorktimeNotFoundException(worktimeUuid);
@@ -202,7 +210,7 @@ public abstract class ProcessStepHandlerUtilBase {
 
 			long sum = 0;
 			for (Map<String, Long> timeMap : newTimeList) {
-				sum += worktimeMapper.calculateCostTime(worktimeUuid,timeMap.get("s"), timeMap.get("e"));
+				sum += worktimeMapper.calculateCostTime(worktimeUuid, timeMap.get("s"), timeMap.get("e"));
 			}
 			return sum;
 		}
@@ -271,49 +279,86 @@ public abstract class ProcessStepHandlerUtilBase {
 			return timeCost;
 		}
 
-		protected static void start(ProcessTaskStepVo currentProcessTaskStepVo) {
-			List<ProcessTaskSlaVo> slaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(currentProcessTaskStepVo.getId());
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			long now = System.currentTimeMillis();
-			String worktimeUuid = null;
-			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
-			if (processTaskVo != null && StringUtils.isNotBlank(processTaskVo.getChannelUuid())) {
-				ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-				if (channelVo != null && StringUtils.isNotBlank(channelVo.getWorktimeUuid())) {
-					worktimeUuid = channelVo.getWorktimeUuid();
+		protected static void calculate(ProcessTaskStepVo currentProcessTaskStepVo) {
+			if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+				SlaHandler handler = new SlaHandler(currentProcessTaskStepVo);
+				CommonThreadPool.execute(handler);
+			} else {
+				List<SlaHandler> handlerList = SLA_HANDLERS.get();
+				if (handlerList == null) {
+					handlerList = new ArrayList<>();
+					SLA_HANDLERS.set(handlerList);
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+						@Override
+						public void afterCommit() {
+							List<SlaHandler> handlerList = SLA_HANDLERS.get();
+							for (SlaHandler handler : handlerList) {
+								CommonThreadPool.execute(handler);
+							}
+						}
+
+						@Override
+						public void afterCompletion(int status) {
+							AUDIT_HANDLERS.remove();
+						}
+					});
 				}
+				handlerList.add(new SlaHandler(currentProcessTaskStepVo));
 			}
+		}
 
-			for (ProcessTaskSlaVo slaVo : slaList) {
-				/** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
-				if (slaVo.getTimeSum() == null) {
-					// 这里要通过rule计算出来
-					long timecost = 1000L;
-
-					slaVo.setTimeSum(timecost);
-					slaVo.setRealTimeLeft(timecost);
-					slaVo.setTimeLeft(timecost);
-				} else {
-					// 非第一次进入，进行时间扣减
-					List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList = processTaskStepTimeAuditMapper.getProcessTaskStepTimeAuditBySlaId(slaVo.getId());
-					long realTimeCost = getRealTimeCost(processTaskStepTimeAuditList);
-					long timeCost = realTimeCost;
-					if (StringUtils.isNotBlank(worktimeUuid)) {// 如果有工作时间，则计算实际消耗的工作时间
-						timeCost = getTimeCost(processTaskStepTimeAuditList, worktimeUuid);
+		@Override
+		protected void execute() {
+			String oldName = Thread.currentThread().getName();
+			try {
+				Thread.currentThread().setName("PROCESSTASK-SLA-" + currentProcessTaskStepVo.getId());
+				List<ProcessTaskSlaVo> slaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(currentProcessTaskStepVo.getId());
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				long now = System.currentTimeMillis();
+				String worktimeUuid = null;
+				ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+				if (processTaskVo != null && StringUtils.isNotBlank(processTaskVo.getChannelUuid())) {
+					ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+					if (channelVo != null && StringUtils.isNotBlank(channelVo.getWorktimeUuid())) {
+						worktimeUuid = channelVo.getWorktimeUuid();
 					}
-					slaVo.setRealTimeLeft(slaVo.getRealTimeLeft() - realTimeCost);
-					slaVo.setTimeLeft(slaVo.getTimeLeft() - timeCost);
+				}
 
+				for (ProcessTaskSlaVo slaVo : slaList) {
+					/** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
+					if (slaVo.getTimeSum() == null) {
+						// 这里要通过rule计算出来
+						long timecost = 1000L;
+
+						slaVo.setTimeSum(timecost);
+						slaVo.setRealTimeLeft(timecost);
+						slaVo.setTimeLeft(timecost);
+					} else {
+						// 非第一次进入，进行时间扣减
+						List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList = processTaskStepTimeAuditMapper.getProcessTaskStepTimeAuditBySlaId(slaVo.getId());
+						long realTimeCost = getRealTimeCost(processTaskStepTimeAuditList);
+						long timeCost = realTimeCost;
+						if (StringUtils.isNotBlank(worktimeUuid)) {// 如果有工作时间，则计算实际消耗的工作时间
+							timeCost = getTimeCost(processTaskStepTimeAuditList, worktimeUuid);
+						}
+						slaVo.setRealTimeLeft(slaVo.getRealTimeLeft() - realTimeCost);
+						slaVo.setTimeLeft(slaVo.getTimeLeft() - timeCost);
+
+					}
+					// 修正最终超时日期
+					slaVo.setRealExpireTime(sdf.format(new Date(now + slaVo.getRealTimeLeft())));
+					if (StringUtils.isNotBlank(worktimeUuid)) {
+						long expireTime = calculateExpireTime(now, slaVo.getTimeLeft(), worktimeUuid);
+						slaVo.setExpireTime(sdf.format(new Date(expireTime)));
+					} else {
+						slaVo.setExpireTime(sdf.format(new Date(now + slaVo.getTimeLeft())));
+					}
+					processTaskMapper.updateProcessTaskSlaTime(slaVo);
 				}
-				// 修正最终超时日期
-				slaVo.setRealExpireTime(sdf.format(new Date(now + slaVo.getRealTimeLeft())));
-				if (StringUtils.isNotBlank(worktimeUuid)) {
-					long expireTime = calculateExpireTime(now, slaVo.getTimeLeft(), worktimeUuid);
-					slaVo.setExpireTime(sdf.format(new Date(expireTime)));
-				} else {
-					slaVo.setExpireTime(sdf.format(new Date(now + slaVo.getTimeLeft())));
-				}
-				processTaskMapper.updateProcessTaskSlaTime(slaVo);
+			} catch (Exception ex) {
+				logger.error(ex.getMessage(), ex);
+			} finally {
+				Thread.currentThread().setName(oldName);
 			}
 		}
 	}
@@ -398,6 +443,14 @@ public abstract class ProcessStepHandlerUtilBase {
 			} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getBackTime())) {// 如果backtime为空，则更新backtime
 				processTaskStepTimeAuditVo.setBackTime("now");
 				processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
+			}
+		}
+
+		protected static void recover(ProcessTaskStepVo currentProcessTaskStepVo) {
+			if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
+				active(currentProcessTaskStepVo);
+			} else if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
+				start(currentProcessTaskStepVo);
 			}
 		}
 	}
