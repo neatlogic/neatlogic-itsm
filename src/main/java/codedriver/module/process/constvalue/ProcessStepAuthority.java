@@ -3,7 +3,7 @@ package codedriver.module.process.constvalue;
 import java.util.ArrayList;
 import java.util.List;
 
-import codedriver.module.process.dto.ProcessStepAuthorityVo;
+import codedriver.framework.common.dto.ValueTextVo;
 
 public enum ProcessStepAuthority {
 
@@ -16,7 +16,7 @@ public enum ProcessStepAuthority {
 	private String value;
 	private String name;
 	
-	private static List<ProcessStepAuthorityVo> processStepAuthTypeList;
+	private static List<ValueTextVo> processStepAuthTypeList;
 	
 	private ProcessStepAuthority(String value, String name) {
 		this.value = value;
@@ -49,11 +49,11 @@ public enum ProcessStepAuthority {
 		return "";
 	}
 	
-	public static List<ProcessStepAuthorityVo> getProcessStepAuthList(){
+	public static List<ValueTextVo> getProcessStepAuthList(){
 		if(processStepAuthTypeList == null) {
 			processStepAuthTypeList = new ArrayList<>();
 			for(ProcessStepAuthority auth : ProcessStepAuthority.values()) {
-				processStepAuthTypeList.add(new ProcessStepAuthorityVo(auth.getValue(), auth.getName()));
+				processStepAuthTypeList.add(new ValueTextVo(auth.getValue(), auth.getName()));
 			}			
 		}
 		return processStepAuthTypeList;
