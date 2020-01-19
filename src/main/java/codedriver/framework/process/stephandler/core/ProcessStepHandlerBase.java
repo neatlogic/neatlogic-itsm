@@ -205,6 +205,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
 					TimeAuditHandler.start(currentProcessTaskStepVo);
 				}
+				
+				/** 计算SLA **/
+				SlaHandler.calculate(currentProcessTaskStepVo);
 			}
 		} catch (ProcessTaskException e) {
 			logger.error(e.getMessage(), e);

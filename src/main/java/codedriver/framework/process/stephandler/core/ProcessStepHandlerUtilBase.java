@@ -128,7 +128,7 @@ public abstract class ProcessStepHandlerUtilBase {
 			if (worktimeMapper.checkWorktimeIsExists(worktimeUuid) == 0) {
 				throw new WorktimeNotFoundException(worktimeUuid);
 			}
-			if (timeLimit == 0) {
+			if (timeLimit <= 0) {
 				return activeTime;
 			}
 			WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
@@ -280,7 +280,7 @@ public abstract class ProcessStepHandlerUtilBase {
 						if (!timeStack.isEmpty()) {
 							Long currentStartTimeLong = timeStack.pop();
 							if (timeStack.isEmpty()) {
-								Long tmp = (timeMap.get("e") - currentStartTimeLong) / 1000;
+								Long tmp = timeMap.get("e") - currentStartTimeLong;
 								timeCost += tmp.intValue();
 							}
 						}
@@ -309,7 +309,7 @@ public abstract class ProcessStepHandlerUtilBase {
 
 						@Override
 						public void afterCompletion(int status) {
-							AUDIT_HANDLERS.remove();
+							SLA_HANDLERS.remove();
 						}
 					});
 				}
@@ -368,19 +368,32 @@ public abstract class ProcessStepHandlerUtilBase {
 			return false;
 		}
 
+		private static long getRealtime(int time, String unit) {
+			if ("hour".equals(unit)) {
+				return time * 60 * 60 * 1000;
+			} else if ("day".equals(unit)) {
+				return time * 24 * 60 * 60 * 1000;
+			} else {
+				return time * 60 * 1000;
+			}
+		}
+
 		@Override
 		protected void execute() {
 			List<ProcessTaskSlaVo> slaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(currentProcessTaskStepVo.getId());
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			long now = System.currentTimeMillis();
-			String worktimeUuid = null;
-			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
-			if (processTaskVo != null && StringUtils.isNotBlank(processTaskVo.getChannelUuid())) {
-				ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-				if (channelVo != null && StringUtils.isNotBlank(channelVo.getWorktimeUuid())) {
-					worktimeUuid = channelVo.getWorktimeUuid();
+			if (slaList != null && slaList.size() > 0) {
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				long now = System.currentTimeMillis();
+				String worktimeUuid = null;
+				ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+				if (processTaskVo != null) {
+					if (StringUtils.isNotBlank(processTaskVo.getChannelUuid())) {
+						ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+						if (channelVo != null && StringUtils.isNotBlank(channelVo.getWorktimeUuid())) {
+							worktimeUuid = channelVo.getWorktimeUuid();
+						}
+					}
 				}
-
 				for (ProcessTaskSlaVo slaVo : slaList) {
 					/** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
 					if (slaVo.getTimeSum() == null) {
@@ -388,7 +401,7 @@ public abstract class ProcessStepHandlerUtilBase {
 							// 这里要通过rule计算出来
 							JSONArray policyList = slaVo.getRuleObj().getJSONArray("policyList");
 							if (policyList != null && policyList.size() > 0) {
-								for (int i = 0; i < policyList.size(); i++) {
+								POLICY: for (int i = 0; i < policyList.size(); i++) {
 									JSONObject policyObj = policyList.getJSONObject(i);
 									String connectionType = policyObj.getString("connectType");
 									int enablePriority = policyObj.getIntValue("enablePriority");
@@ -396,16 +409,33 @@ public abstract class ProcessStepHandlerUtilBase {
 									String unit = policyObj.getString("unit");
 									JSONArray priorityList = policyObj.getJSONArray("priorityList");
 									JSONArray ruleList = policyObj.getJSONArray("ruleList");
+									boolean isHit = false;
 									if (ruleList != null && ruleList.size() > 0) {
-										if (validateRule(ruleList, connectionType)) {
-											long timecost = 1000L;
-
+										isHit = validateRule(ruleList, connectionType);
+									} else {// 如果没有规则，则无需判断
+										isHit = true;
+									}
+									if (isHit) {
+										if (enablePriority == 0) {
+											long timecost = getRealtime(time, unit);
 											slaVo.setTimeSum(timecost);
 											slaVo.setRealTimeLeft(timecost);
 											slaVo.setTimeLeft(timecost);
-
-											break;
+										} else {
+											if (priorityList != null && priorityList.size() > 0) {
+												for (int p = 0; p < priorityList.size(); p++) {
+													JSONObject priorityObj = priorityList.getJSONObject(p);
+													if (priorityObj.getString("priority").equals(processTaskVo.getPriorityUuid())) {
+														long timecost = getRealtime(priorityObj.getIntValue("time"), priorityObj.getString("unit"));
+														slaVo.setTimeSum(timecost);
+														slaVo.setRealTimeLeft(timecost);
+														slaVo.setTimeLeft(timecost);
+														break POLICY;
+													}
+												}
+											}
 										}
+										break;
 									}
 								}
 							}
@@ -433,7 +463,6 @@ public abstract class ProcessStepHandlerUtilBase {
 					processTaskMapper.updateProcessTaskSlaTime(slaVo);
 				}
 			}
-
 		}
 	}
 
