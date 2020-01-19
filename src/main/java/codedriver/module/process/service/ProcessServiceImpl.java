@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.module.process.constvalue.ProcessStepType;
@@ -78,6 +79,7 @@ public class ProcessServiceImpl implements ProcessService {
 			processMapper.deleteProcessStepTimeoutPolicyByProcessUuid(processVo.getUuid());
 			processMapper.updateProcess(processVo);
 		}else {
+			processVo.setFcu(UserContext.get().getUserId());
 			processMapper.insertProcess(processVo);
 		}
 		
