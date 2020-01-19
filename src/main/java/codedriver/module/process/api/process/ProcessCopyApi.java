@@ -63,6 +63,7 @@ public class ProcessCopyApi extends ApiComponentBase {
 		if(processMapper.checkProcessNameIsRepeat(processVo) > 0) {
 			throw new ProcessNameRepeatException(name);
 		}
+		processVo.makeupFromConfigObj();
 		processService.saveProcess(processVo);
 		processVo.setConfig(null);
 		return processVo;
