@@ -28,6 +28,8 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskMapper {
+	public ProcessTaskConfigVo getProcessTaskConfigByHash(String hash);
+
 	public List<ProcessTaskSlaVo> getProcessTaskSlaByProcessTaskStepId(Long processTaskStepId);
 
 	public ProcessTaskStepAuditDetailVo getProcessTaskStepAuditDetail(@Param("processTaskId")

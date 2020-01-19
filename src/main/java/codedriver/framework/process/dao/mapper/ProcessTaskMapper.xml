@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskMapper">
+	<select id="getProcessTaskConfigByHash" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessTaskConfigVo">
+		SELECT
+		`hash`,
+		`config`
+		FROM
+		`processtask_config`
+		WHERE
+		`hash` = #{value}
+	</select>
+
 	<select id="getProcessTaskSlaByProcessTaskStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskSlaVo">
 		SELECT
 		`processtask_id` as processTaskId,
@@ -39,8 +49,8 @@
 		`process_uuid` AS processUuid,
 		`channel_uuid` AS channelUuid,
 		`config_hash` AS configHash,
+		`priority_uuid` AS priorityUuid,
 		`status`,
-		`config`,
 		DATE_FORMAT(`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
 		DATE_FORMAT(`end_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
 		`owner`,

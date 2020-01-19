@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.javers.core.Javers;
 import org.javers.core.JaversBuilder;
@@ -19,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
@@ -52,6 +57,8 @@ import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 import codedriver.module.process.dto.WorktimeRangeVo;
+import codedriver.module.process.formattribute.core.FormAttributeHandlerFactory;
+import codedriver.module.process.formattribute.core.IFormAttributeHandler;
 
 public abstract class ProcessStepHandlerUtilBase {
 	static Logger logger = LoggerFactory.getLogger(ProcessStepHandlerUtilBase.class);
@@ -310,9 +317,59 @@ public abstract class ProcessStepHandlerUtilBase {
 			}
 		}
 
+		private static final ScriptEngineManager sem = new ScriptEngineManager();
+
+		private boolean validateRule(JSONArray ruleList, String connectionType) {
+			if (ruleList != null && ruleList.size() > 0) {
+				ScriptEngine se = sem.getEngineByName("nashorn");
+
+				JSONObject paramObj = new JSONObject();
+				List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+				String script = "";
+				for (int i = 0; i < ruleList.size(); i++) {
+					JSONObject ruleObj = ruleList.getJSONObject(i);
+					String key = ruleObj.getString("key");
+					String value = null;
+					String compareValue = ruleObj.getString("value");
+					String expression = ruleObj.getString("expression");
+					if (key.startsWith("form.")) {
+						for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
+							if (attributeData.getAttributeUuid().equals(key.substring(5))) {
+								IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeData.getType());
+								if (handler != null) {
+									value = handler.getValue(attributeData);
+								}
+								break;
+							}
+						}
+					}
+					if (StringUtils.isNotBlank(value)) {
+						paramObj.put(key, value);
+					} else {
+						paramObj.put(key, "");
+					}
+					if (StringUtils.isNotBlank(script)) {
+						if (connectionType.equalsIgnoreCase("and")) {
+							script += " && ";
+						} else {
+							script += " || ";
+						}
+					}
+					script += "json['" + key + "']' " + expression + " '" + compareValue + "'";
+				}
+				se.put("json", paramObj);
+				try {
+					return Boolean.parseBoolean(se.eval("return " + script + ";").toString());
+				} catch (ScriptException e) {
+					logger.error(e.getMessage(), e);
+					return false;
+				}
+			}
+			return false;
+		}
+
 		@Override
 		protected void execute() {
-
 			List<ProcessTaskSlaVo> slaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(currentProcessTaskStepVo.getId());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			long now = System.currentTimeMillis();
@@ -323,39 +380,60 @@ public abstract class ProcessStepHandlerUtilBase {
 				if (channelVo != null && StringUtils.isNotBlank(channelVo.getWorktimeUuid())) {
 					worktimeUuid = channelVo.getWorktimeUuid();
 				}
-			}
 
-			for (ProcessTaskSlaVo slaVo : slaList) {
-				/** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
-				if (slaVo.getTimeSum() == null) {
-					// 这里要通过rule计算出来
-					long timecost = 1000L;
+				for (ProcessTaskSlaVo slaVo : slaList) {
+					/** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
+					if (slaVo.getTimeSum() == null) {
+						if (slaVo.getRuleObj() != null) {
+							// 这里要通过rule计算出来
+							JSONArray policyList = slaVo.getRuleObj().getJSONArray("policyList");
+							if (policyList != null && policyList.size() > 0) {
+								for (int i = 0; i < policyList.size(); i++) {
+									JSONObject policyObj = policyList.getJSONObject(i);
+									String connectionType = policyObj.getString("connectType");
+									int enablePriority = policyObj.getIntValue("enablePriority");
+									int time = policyObj.getIntValue("time");
+									String unit = policyObj.getString("unit");
+									JSONArray priorityList = policyObj.getJSONArray("priorityList");
+									JSONArray ruleList = policyObj.getJSONArray("ruleList");
+									if (ruleList != null && ruleList.size() > 0) {
+										if (validateRule(ruleList, connectionType)) {
+											long timecost = 1000L;
 
-					slaVo.setTimeSum(timecost);
-					slaVo.setRealTimeLeft(timecost);
-					slaVo.setTimeLeft(timecost);
-				} else {
-					// 非第一次进入，进行时间扣减
-					List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList = processTaskStepTimeAuditMapper.getProcessTaskStepTimeAuditBySlaId(slaVo.getId());
-					long realTimeCost = getRealTimeCost(processTaskStepTimeAuditList);
-					long timeCost = realTimeCost;
-					if (StringUtils.isNotBlank(worktimeUuid)) {// 如果有工作时间，则计算实际消耗的工作时间
-						timeCost = getTimeCost(processTaskStepTimeAuditList, worktimeUuid);
+											slaVo.setTimeSum(timecost);
+											slaVo.setRealTimeLeft(timecost);
+											slaVo.setTimeLeft(timecost);
+
+											break;
+										}
+									}
+								}
+							}
+						}
+					} else {
+						// 非第一次进入，进行时间扣减
+						List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList = processTaskStepTimeAuditMapper.getProcessTaskStepTimeAuditBySlaId(slaVo.getId());
+						long realTimeCost = getRealTimeCost(processTaskStepTimeAuditList);
+						long timeCost = realTimeCost;
+						if (StringUtils.isNotBlank(worktimeUuid)) {// 如果有工作时间，则计算实际消耗的工作时间
+							timeCost = getTimeCost(processTaskStepTimeAuditList, worktimeUuid);
+						}
+						slaVo.setRealTimeLeft(slaVo.getRealTimeLeft() - realTimeCost);
+						slaVo.setTimeLeft(slaVo.getTimeLeft() - timeCost);
+
 					}
-					slaVo.setRealTimeLeft(slaVo.getRealTimeLeft() - realTimeCost);
-					slaVo.setTimeLeft(slaVo.getTimeLeft() - timeCost);
-
+					// 修正最终超时日期
+					slaVo.setRealExpireTime(sdf.format(new Date(now + slaVo.getRealTimeLeft())));
+					if (StringUtils.isNotBlank(worktimeUuid)) {
+						long expireTime = calculateExpireTime(now, slaVo.getTimeLeft(), worktimeUuid);
+						slaVo.setExpireTime(sdf.format(new Date(expireTime)));
+					} else {
+						slaVo.setExpireTime(sdf.format(new Date(now + slaVo.getTimeLeft())));
+					}
+					processTaskMapper.updateProcessTaskSlaTime(slaVo);
 				}
-				// 修正最终超时日期
-				slaVo.setRealExpireTime(sdf.format(new Date(now + slaVo.getRealTimeLeft())));
-				if (StringUtils.isNotBlank(worktimeUuid)) {
-					long expireTime = calculateExpireTime(now, slaVo.getTimeLeft(), worktimeUuid);
-					slaVo.setExpireTime(sdf.format(new Date(expireTime)));
-				} else {
-					slaVo.setExpireTime(sdf.format(new Date(now + slaVo.getTimeLeft())));
-				}
-				processTaskMapper.updateProcessTaskSlaTime(slaVo);
 			}
+
 		}
 	}
 

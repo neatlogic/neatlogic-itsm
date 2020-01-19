@@ -2,9 +2,10 @@ package codedriver.module.process.dto;
 
 import codedriver.framework.attribute.dto.AttributeDataVo;
 
-public class ProcessTaskFormAttributeDataVo  extends AttributeDataVo{
+public class ProcessTaskFormAttributeDataVo extends AttributeDataVo {
 	private Long processTaskId;
 	private Long processTaskStepId;
+	private String type;
 	private String formUuid;
 
 	public Long getProcessTaskId() {
@@ -31,5 +32,12 @@ public class ProcessTaskFormAttributeDataVo  extends AttributeDataVo{
 		this.formUuid = formUuid;
 	}
 
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 }

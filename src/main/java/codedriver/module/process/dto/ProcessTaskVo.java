@@ -9,6 +9,8 @@ public class ProcessTaskVo {
 	private String title;
 	private String processUuid;
 	private String channelUuid;
+	private String priorityUuid;
+	private String priority;
 	private String config;
 	private String configPath;
 	private JSONObject configObj;
@@ -215,6 +217,22 @@ public class ProcessTaskVo {
 
 	public void setUrgencyText(String urgencyText) {
 		this.urgencyText = urgencyText;
+	}
+
+	public String getPriorityUuid() {
+		return priorityUuid;
+	}
+
+	public void setPriorityUuid(String priorityUuid) {
+		this.priorityUuid = priorityUuid;
+	}
+
+	public String getPriority() {
+		return priority;
+	}
+
+	public void setPriority(String priority) {
+		this.priority = priority;
 	}
 
 }
