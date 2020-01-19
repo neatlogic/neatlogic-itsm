@@ -19,6 +19,7 @@ import org.springframework.util.DigestUtils;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -852,7 +853,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
 			/** 处理时间审计 **/
 			TimeAuditHandler.back(currentProcessTaskStepVo);
-			
+
 		} catch (ProcessTaskException e) {
 			logger.error(e.getMessage(), e);
 			currentProcessTaskStepVo.setError(e.getMessage());
@@ -861,7 +862,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		}
 		/** 处理历史记录 **/
 		AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.BACK);
-		
+
 		/** 计算SLA **/
 		SlaHandler.calculate(currentProcessTaskStepVo);
 		return 1;
@@ -1140,14 +1141,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 	protected synchronized static void doNext(ProcessStepThread thread) {
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-			Thread t = new Thread(thread);
-			if (thread.getProcessTaskStepVo() != null) {
-				t.setName("PROCESSTASK-STEP-HANDLER-" + thread.getProcessTaskStepVo().getId());
-			} else {
-				t.setName("PROCESSTASK-STEP-HANDLERS");
-			}
-			t.setDaemon(true);
-			t.start();
+			CachedThreadPool.execute(thread);
 		} else {
 			List<ProcessStepThread> runableActionList = PROCESS_STEP_RUNNABLES.get();
 			if (runableActionList == null) {
@@ -1159,14 +1153,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 						List<ProcessStepThread> runableActionList = PROCESS_STEP_RUNNABLES.get();
 						for (int i = 0; i < runableActionList.size(); i++) {
 							ProcessStepThread runnable = runableActionList.get(i);
-							Thread t = new Thread(runnable);
-							if (runnable.getProcessTaskStepVo() != null) {
-								t.setName("PROCESSTASK-STEP-HANDLER-" + runnable.getProcessTaskStepVo().getId());
-							} else {
-								t.setName("PROCESSTASK-STEP-HANDLERS");
-							}
-							t.setDaemon(true);
-							t.start();
+							CachedThreadPool.execute(runnable);
 						}
 					}
 

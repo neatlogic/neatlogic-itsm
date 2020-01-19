@@ -23,6 +23,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -111,6 +112,9 @@ public abstract class ProcessStepHandlerUtilBase {
 
 		public SlaHandler(ProcessTaskStepVo _currentProcessTaskStepVo) {
 			currentProcessTaskStepVo = _currentProcessTaskStepVo;
+			if (_currentProcessTaskStepVo != null) {
+				this.setThreadName("PROCESSTASK-SLA-" + _currentProcessTaskStepVo.getId());
+			}
 		}
 
 		private static long calculateExpireTime(long activeTime, long timeLimit, String worktimeUuid) {
@@ -281,8 +285,7 @@ public abstract class ProcessStepHandlerUtilBase {
 
 		protected static void calculate(ProcessTaskStepVo currentProcessTaskStepVo) {
 			if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-				SlaHandler handler = new SlaHandler(currentProcessTaskStepVo);
-				CommonThreadPool.execute(handler);
+				CachedThreadPool.execute(new SlaHandler(currentProcessTaskStepVo));
 			} else {
 				List<SlaHandler> handlerList = SLA_HANDLERS.get();
 				if (handlerList == null) {
@@ -293,7 +296,7 @@ public abstract class ProcessStepHandlerUtilBase {
 						public void afterCommit() {
 							List<SlaHandler> handlerList = SLA_HANDLERS.get();
 							for (SlaHandler handler : handlerList) {
-								CommonThreadPool.execute(handler);
+								CachedThreadPool.execute(handler);
 							}
 						}
 
@@ -309,56 +312,49 @@ public abstract class ProcessStepHandlerUtilBase {
 
 		@Override
 		protected void execute() {
-			String oldName = Thread.currentThread().getName();
-			try {
-				Thread.currentThread().setName("PROCESSTASK-SLA-" + currentProcessTaskStepVo.getId());
-				List<ProcessTaskSlaVo> slaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(currentProcessTaskStepVo.getId());
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				long now = System.currentTimeMillis();
-				String worktimeUuid = null;
-				ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
-				if (processTaskVo != null && StringUtils.isNotBlank(processTaskVo.getChannelUuid())) {
-					ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-					if (channelVo != null && StringUtils.isNotBlank(channelVo.getWorktimeUuid())) {
-						worktimeUuid = channelVo.getWorktimeUuid();
-					}
+
+			List<ProcessTaskSlaVo> slaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(currentProcessTaskStepVo.getId());
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			long now = System.currentTimeMillis();
+			String worktimeUuid = null;
+			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+			if (processTaskVo != null && StringUtils.isNotBlank(processTaskVo.getChannelUuid())) {
+				ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+				if (channelVo != null && StringUtils.isNotBlank(channelVo.getWorktimeUuid())) {
+					worktimeUuid = channelVo.getWorktimeUuid();
 				}
+			}
 
-				for (ProcessTaskSlaVo slaVo : slaList) {
-					/** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
-					if (slaVo.getTimeSum() == null) {
-						// 这里要通过rule计算出来
-						long timecost = 1000L;
+			for (ProcessTaskSlaVo slaVo : slaList) {
+				/** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
+				if (slaVo.getTimeSum() == null) {
+					// 这里要通过rule计算出来
+					long timecost = 1000L;
 
-						slaVo.setTimeSum(timecost);
-						slaVo.setRealTimeLeft(timecost);
-						slaVo.setTimeLeft(timecost);
-					} else {
-						// 非第一次进入，进行时间扣减
-						List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList = processTaskStepTimeAuditMapper.getProcessTaskStepTimeAuditBySlaId(slaVo.getId());
-						long realTimeCost = getRealTimeCost(processTaskStepTimeAuditList);
-						long timeCost = realTimeCost;
-						if (StringUtils.isNotBlank(worktimeUuid)) {// 如果有工作时间，则计算实际消耗的工作时间
-							timeCost = getTimeCost(processTaskStepTimeAuditList, worktimeUuid);
-						}
-						slaVo.setRealTimeLeft(slaVo.getRealTimeLeft() - realTimeCost);
-						slaVo.setTimeLeft(slaVo.getTimeLeft() - timeCost);
-
+					slaVo.setTimeSum(timecost);
+					slaVo.setRealTimeLeft(timecost);
+					slaVo.setTimeLeft(timecost);
+				} else {
+					// 非第一次进入，进行时间扣减
+					List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList = processTaskStepTimeAuditMapper.getProcessTaskStepTimeAuditBySlaId(slaVo.getId());
+					long realTimeCost = getRealTimeCost(processTaskStepTimeAuditList);
+					long timeCost = realTimeCost;
+					if (StringUtils.isNotBlank(worktimeUuid)) {// 如果有工作时间，则计算实际消耗的工作时间
+						timeCost = getTimeCost(processTaskStepTimeAuditList, worktimeUuid);
 					}
-					// 修正最终超时日期
-					slaVo.setRealExpireTime(sdf.format(new Date(now + slaVo.getRealTimeLeft())));
-					if (StringUtils.isNotBlank(worktimeUuid)) {
-						long expireTime = calculateExpireTime(now, slaVo.getTimeLeft(), worktimeUuid);
-						slaVo.setExpireTime(sdf.format(new Date(expireTime)));
-					} else {
-						slaVo.setExpireTime(sdf.format(new Date(now + slaVo.getTimeLeft())));
-					}
-					processTaskMapper.updateProcessTaskSlaTime(slaVo);
+					slaVo.setRealTimeLeft(slaVo.getRealTimeLeft() - realTimeCost);
+					slaVo.setTimeLeft(slaVo.getTimeLeft() - timeCost);
+
 				}
-			} catch (Exception ex) {
-				logger.error(ex.getMessage(), ex);
-			} finally {
-				Thread.currentThread().setName(oldName);
+				// 修正最终超时日期
+				slaVo.setRealExpireTime(sdf.format(new Date(now + slaVo.getRealTimeLeft())));
+				if (StringUtils.isNotBlank(worktimeUuid)) {
+					long expireTime = calculateExpireTime(now, slaVo.getTimeLeft(), worktimeUuid);
+					slaVo.setExpireTime(sdf.format(new Date(expireTime)));
+				} else {
+					slaVo.setExpireTime(sdf.format(new Date(now + slaVo.getTimeLeft())));
+				}
+				processTaskMapper.updateProcessTaskSlaTime(slaVo);
 			}
 		}
 	}

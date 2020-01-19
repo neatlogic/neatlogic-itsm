@@ -16,5 +16,8 @@ public abstract class ProcessStepThread extends CodeDriverThread {
 
 	public ProcessStepThread(ProcessTaskStepVo _processTaskStepVo) {
 		this.processTaskStepVo = _processTaskStepVo;
+		if (_processTaskStepVo != null) {
+			this.setThreadName("PROCESSTASK-STEP-HANDLER-" + _processTaskStepVo.getId());
+		}
 	}
 }
