@@ -72,47 +72,47 @@ public class ProcessServiceImpl implements ProcessService {
 			throw new ProcessNameRepeatException(processVo.getName());
 		}
 		if (processMapper.checkProcessIsExists(processVo.getUuid()) > 0) {
-			processMapper.deleteProcessStepWorkerPolicyByProcessUuid(processVo.getUuid());
-			processMapper.deleteProcessStepByProcessUuid(processVo.getUuid());
-			processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
-			processMapper.deleteProcessStepFormAttributeByProcessUuid(processVo.getUuid());
-			processMapper.deleteProcessStepTimeoutPolicyByProcessUuid(processVo.getUuid());
+//			processMapper.deleteProcessStepWorkerPolicyByProcessUuid(processVo.getUuid());
+//			processMapper.deleteProcessStepByProcessUuid(processVo.getUuid());
+//			processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
+//			processMapper.deleteProcessStepFormAttributeByProcessUuid(processVo.getUuid());
+//			processMapper.deleteProcessStepTimeoutPolicyByProcessUuid(processVo.getUuid());
 			processMapper.updateProcess(processVo);
 		}else {
 			processVo.setFcu(UserContext.get().getUserId());
 			processMapper.insertProcess(processVo);
 		}
 		
-		if (StringUtils.isNotBlank(processVo.getFormUuid())) {
-			processMapper.replaceProcessForm(processVo.getUuid(), processVo.getFormUuid());
-		}
-
-		if (processVo.getStepList() != null && processVo.getStepList().size() > 0) {
-			for (ProcessStepVo stepVo : processVo.getStepList()) {
-				processMapper.insertProcessStep(stepVo);
-				if (stepVo.getFormAttributeList() != null && stepVo.getFormAttributeList().size() > 0) {
-					for (ProcessStepFormAttributeVo processStepAttributeVo : stepVo.getFormAttributeList()) {
-						processMapper.insertProcessStepFormAttribute(processStepAttributeVo);
-					}
-				}
-				if (stepVo.getWorkerPolicyList() != null && stepVo.getWorkerPolicyList().size() > 0) {
-					for (ProcessStepWorkerPolicyVo processStepWorkerPolicyVo : stepVo.getWorkerPolicyList()) {
-						processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
-					}
-				}
-				if (stepVo.getTimeoutPolicyList() != null && stepVo.getTimeoutPolicyList().size() > 0) {
-					for (ProcessStepTimeoutPolicyVo processStepTimeoutPolicyVo : stepVo.getTimeoutPolicyList()) {
-						processMapper.insertProcessStepTimeoutPolicy(processStepTimeoutPolicyVo);
-					}
-				}
-			}
-		}
-
-		if (processVo.getStepRelList() != null && processVo.getStepRelList().size() > 0) {
-			for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
-				processMapper.insertProcessStepRel(stepRelVo);
-			}
-		}
+//		if (StringUtils.isNotBlank(processVo.getFormUuid())) {
+//			processMapper.replaceProcessForm(processVo.getUuid(), processVo.getFormUuid());
+//		}
+//
+//		if (processVo.getStepList() != null && processVo.getStepList().size() > 0) {
+//			for (ProcessStepVo stepVo : processVo.getStepList()) {
+//				processMapper.insertProcessStep(stepVo);
+//				if (stepVo.getFormAttributeList() != null && stepVo.getFormAttributeList().size() > 0) {
+//					for (ProcessStepFormAttributeVo processStepAttributeVo : stepVo.getFormAttributeList()) {
+//						processMapper.insertProcessStepFormAttribute(processStepAttributeVo);
+//					}
+//				}
+//				if (stepVo.getWorkerPolicyList() != null && stepVo.getWorkerPolicyList().size() > 0) {
+//					for (ProcessStepWorkerPolicyVo processStepWorkerPolicyVo : stepVo.getWorkerPolicyList()) {
+//						processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
+//					}
+//				}
+//				if (stepVo.getTimeoutPolicyList() != null && stepVo.getTimeoutPolicyList().size() > 0) {
+//					for (ProcessStepTimeoutPolicyVo processStepTimeoutPolicyVo : stepVo.getTimeoutPolicyList()) {
+//						processMapper.insertProcessStepTimeoutPolicy(processStepTimeoutPolicyVo);
+//					}
+//				}
+//			}
+//		}
+//
+//		if (processVo.getStepRelList() != null && processVo.getStepRelList().size() > 0) {
+//			for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
+//				processMapper.insertProcessStepRel(stepRelVo);
+//			}
+//		}
 
 		return 1;
 	}
