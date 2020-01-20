@@ -114,6 +114,23 @@ public abstract class ProcessStepHandlerUtilBase {
 		channelMapper = _channelMapper;
 	}
 
+	public static void main(String[] atr) {
+		ScriptEngineManager sem = new ScriptEngineManager();
+
+		ScriptEngine se = sem.getEngineByName("nashorn");
+		JSONObject paramObj = new JSONObject();
+		paramObj.put("form.name", "chenqw");
+		paramObj.put("form.age", "37");
+		se.put("json", paramObj);
+		String script = "json['form.name'] == 'chen2qw' && json['form.age'] == '37'";
+		try {
+			System.out.println(Boolean.parseBoolean(se.eval(script).toString()));
+		} catch (ScriptException e) {
+			logger.error(e.getMessage(), e);
+		}
+
+	}
+
 	protected static class SlaHandler extends CodeDriverThread {
 		private ProcessTaskStepVo currentProcessTaskStepVo;
 
@@ -355,11 +372,11 @@ public abstract class ProcessStepHandlerUtilBase {
 							script += " || ";
 						}
 					}
-					script += "json['" + key + "']' " + expression + " '" + compareValue + "'";
+					script += "json['" + key + "'] " + expression + " '" + compareValue + "'";
 				}
 				se.put("json", paramObj);
 				try {
-					return Boolean.parseBoolean(se.eval("return " + script + ";").toString());
+					return Boolean.parseBoolean(se.eval(script).toString());
 				} catch (ScriptException e) {
 					logger.error(e.getMessage(), e);
 					return false;
@@ -453,12 +470,24 @@ public abstract class ProcessStepHandlerUtilBase {
 
 					}
 					// 修正最终超时日期
-					slaVo.setRealExpireTime(sdf.format(new Date(now + slaVo.getRealTimeLeft())));
-					if (StringUtils.isNotBlank(worktimeUuid)) {
-						long expireTime = calculateExpireTime(now, slaVo.getTimeLeft(), worktimeUuid);
-						slaVo.setExpireTime(sdf.format(new Date(expireTime)));
+					if (slaVo.getRealTimeLeft() != null) {
+						slaVo.setRealExpireTime(sdf.format(new Date(now + slaVo.getRealTimeLeft())));
 					} else {
-						slaVo.setExpireTime(sdf.format(new Date(now + slaVo.getTimeLeft())));
+						throw new RuntimeException("计算实际剩余时间失败");
+					}
+					if (StringUtils.isNotBlank(worktimeUuid)) {
+						if (slaVo.getTimeLeft() != null) {
+							long expireTime = calculateExpireTime(now, slaVo.getTimeLeft(), worktimeUuid);
+							slaVo.setExpireTime(sdf.format(new Date(expireTime)));
+						} else {
+							throw new RuntimeException("计算剩余时间失败");
+						}
+					} else {
+						if (slaVo.getTimeLeft() != null) {
+							slaVo.setExpireTime(sdf.format(new Date(now + slaVo.getTimeLeft())));
+						} else {
+							throw new RuntimeException("计算剩余时间失败");
+						}
 					}
 					processTaskMapper.updateProcessTaskSlaTime(slaVo);
 				}

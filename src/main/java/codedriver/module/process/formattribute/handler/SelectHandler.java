@@ -9,11 +9,11 @@ import codedriver.framework.attribute.exception.AttributeValidException;
 import codedriver.module.process.formattribute.core.IFormAttributeHandler;
 
 @Component
-public class TextHandler implements IFormAttributeHandler {
+public class SelectHandler implements IFormAttributeHandler {
 
 	@Override
 	public String getType() {
-		return "text";
+		return "select";
 	}
 
 	@Override

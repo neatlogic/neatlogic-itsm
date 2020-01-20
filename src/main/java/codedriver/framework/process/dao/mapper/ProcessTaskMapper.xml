@@ -89,7 +89,8 @@
 		a.`processtask_id` AS processTaskId,
 		a.`processtask_step_id` AS processTaskStepId,
 		a.`attribute_uuid` AS attributeUuid,
-		b.`data`
+		b.`data`,
+		b.`type`
 		FROM
 		`processtask_step_formattribute` a
 		JOIN `processtask_formattribute_data` b ON a.`attribute_uuid` = b.`attribute_uuid` AND a.`processtask_id` = b.`processtask_id`
@@ -101,6 +102,7 @@
 		SELECT
 		`processtask_id` AS processTaskId,
 		`attribute_uuid` AS attributeUuid,
+		`type` AS type,
 		`data`
 		FROM
 		`processtask_formattribute_data`
@@ -602,13 +604,15 @@
 		REPLACE INTO `processtask_formattribute_data` (
 		`processtask_id`,
 		`attribute_uuid`,
-		`data`
+		`data`,
+		`type`
 		)
 		VALUES
 		(
 		#{processTaskId},
 		#{attributeUuid},
-		#{data}
+		#{data},
+		#{type}
 		)
 	</insert>
 
