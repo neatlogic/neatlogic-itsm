@@ -9,6 +9,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 
@@ -29,6 +31,10 @@ public class ProcessInformPointcutListApi extends ApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
+	
+	@Output({
+		@Param(name="Return", explode=ValueTextVo[].class, desc = "通知触发点列表")
+	})
 	@Description(desc = "通知触发点列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
