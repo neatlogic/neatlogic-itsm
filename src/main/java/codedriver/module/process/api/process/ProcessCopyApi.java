@@ -63,6 +63,8 @@ public class ProcessCopyApi extends ApiComponentBase {
 		if(processMapper.checkProcessNameIsRepeat(processVo) > 0) {
 			throw new ProcessNameRepeatException(name);
 		}
+		//TODO linbq暂时去掉config参数验证
+//		processVo.makeupFromConfigObj();
 		processService.saveProcess(processVo);
 		processVo.setConfig(null);
 		return processVo;

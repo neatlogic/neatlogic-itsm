@@ -6,7 +6,7 @@ import codedriver.module.process.dto.WorktimeRangeVo;
 
 public interface WorktimeService {
 
-	Long calculateTimeoutPoint(long startTime, long timeLimit, String worktimeUuid);
+	long calculateTimeoutPoint(long startTime, long timeLimit, String worktimeUuid);
 	
-	Long calculateCostTime(List<WorktimeRangeVo> worktimeRangeList);
+	long calculateCostTime(List<WorktimeRangeVo> worktimeRangeList);
 }
