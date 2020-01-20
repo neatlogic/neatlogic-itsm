@@ -189,7 +189,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 					}
 				} else if (this.getMode().equals(ProcessStepMode.AT)) {
 					/** 自动处理 **/
-					IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getType());
+					IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getHandler());
 					doNext(new ProcessStepThread(currentProcessTaskStepVo) {
 						@Override
 						public void execute() {
@@ -220,7 +220,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				/**
 				 * 发生异常不能激活当前步骤，执行当前步骤的回退操作
 				 */
-				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getType());
+				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getHandler());
 				doNext(new ProcessStepThread(currentProcessTaskStepVo) {
 					@Override
 					public void execute() {
@@ -333,7 +333,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				myHandle(currentProcessTaskStepVo);
 				/** 如果步骤被标记为全部完成，则触发完成 **/
 				if (currentProcessTaskStepVo.getIsAllDone()) {
-					IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getType());
+					IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getHandler());
 					doNext(new ProcessStepThread(currentProcessTaskStepVo) {
 						@Override
 						public void execute() {
@@ -352,11 +352,11 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 			}
 		} else {// 异步模式
-			String type = this.getType();
+			String handlerType = this.getHandler();
 			ProcessStepThread thread = new ProcessStepThread(currentProcessTaskStepVo) {
 				@Override
 				public void execute() {
-					IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(type);
+					IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(handlerType);
 					try {
 						// 这里不会有事务控制
 						myHandle(currentProcessTaskStepVo);
@@ -516,7 +516,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 							}
 						});
 					}
-				} else if (nextStepList.size() == 0 && !processTaskStepVo.getHandler().equals(ProcessStepHandler.END.getType())) {
+				} else if (nextStepList.size() == 0 && !processTaskStepVo.getHandler().equals(ProcessStepHandler.END.getHandler())) {
 					throw new ProcessTaskException("找不到可流转路径");
 				}
 
@@ -824,7 +824,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 					ProcessTaskStepVo fromProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepRelVo.getFromProcessTaskStepId());
 					if (fromProcessTaskStepVo != null) {
 						// 如果是分流节点或条件节点，则再次调用back查找上一个处理节点
-						if (fromProcessTaskStepVo.getHandler().equals(ProcessStepHandler.DISTRIBUTARY.getType()) || fromProcessTaskStepVo.getHandler().equals(ProcessStepHandler.CONDITION.getType())) {
+						if (fromProcessTaskStepVo.getHandler().equals(ProcessStepHandler.DISTRIBUTARY.getHandler()) || fromProcessTaskStepVo.getHandler().equals(ProcessStepHandler.CONDITION.getHandler())) {
 							IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromProcessTaskStepVo.getHandler());
 							if (handler != null) {
 								fromProcessTaskStepVo.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());

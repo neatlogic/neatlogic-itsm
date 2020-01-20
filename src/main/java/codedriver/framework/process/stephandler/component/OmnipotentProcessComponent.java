@@ -37,8 +37,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	static Logger logger = LoggerFactory.getLogger(OmnipotentProcessComponent.class);
 
 	@Override
-	public String getType() {
-		return ProcessStepHandler.OMNIPOTENT.getType();
+	public String getHandler() {
+		return ProcessStepHandler.OMNIPOTENT.getHandler();
 	}
 
 	@Override

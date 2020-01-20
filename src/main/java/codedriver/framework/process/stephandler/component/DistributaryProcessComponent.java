@@ -39,8 +39,8 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public String getType() {
-		return ProcessStepHandler.DISTRIBUTARY.getType();
+	public String getHandler() {
+		return ProcessStepHandler.DISTRIBUTARY.getHandler();
 	}
 
 	@Override

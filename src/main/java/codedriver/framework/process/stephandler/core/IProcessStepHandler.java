@@ -14,7 +14,14 @@ import codedriver.module.process.dto.ProcessTaskVo;
 
 //需要把事务隔离级别调低，避免并发insert时因为gap lock导致deadlock
 public interface IProcessStepHandler {
-	public String getType();
+	/**
+	* @Author: chenqiwei
+	* @Time:Jan 20, 2020
+	* @Description: 返回控件类型 
+	* @param @return 
+	* @return String
+	 */
+	public String getHandler();
 
 	/**
 	 * @Author: chenqiwei

@@ -233,7 +233,7 @@ public class ProcessTaskController {
 		JSONObject returnObj = new JSONObject();
 
 		for (ProcessTaskStepVo stepVo : stepList) {
-			if (!stepVo.getType().equals(ProcessStepHandler.START.getType()) && !stepVo.getType().equals(ProcessStepHandler.END.getType())) {
+			if (!stepVo.getType().equals(ProcessStepHandler.START.getHandler()) && !stepVo.getType().equals(ProcessStepHandler.END.getHandler())) {
 				JSONObject jsonObj = new JSONObject();
 				jsonObj.put("id", stepVo.getId());
 				jsonObj.put("name", stepVo.getName());

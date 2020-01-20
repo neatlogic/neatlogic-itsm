@@ -52,8 +52,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public String getType() {
-		return ProcessStepHandler.CONDITION.getType();
+	public String getHandler() {
+		return ProcessStepHandler.CONDITION.getHandler();
 	}
 
 	@Override

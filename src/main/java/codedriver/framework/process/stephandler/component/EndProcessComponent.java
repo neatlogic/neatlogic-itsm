@@ -18,8 +18,8 @@ import codedriver.module.process.dto.ProcessTaskVo;
 public class EndProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
-	public String getType() {
-		return ProcessStepHandler.END.getType();
+	public String getHandler() {
+		return ProcessStepHandler.END.getHandler();
 	}
 	
 	@Override

@@ -270,7 +270,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 		this.processUuid = processUuid;
 	}
 
-
 	public String getError() {
 		return error;
 	}
