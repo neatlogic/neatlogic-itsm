@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskMapper">
+	<select id="getProcessTaskStepRelByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepRelVo">
+		SELECT
+		`processtask_id` AS processTaskId,
+		`from_process_step_uuid` AS fromProcessStepUuid,
+		`to_process_step_uuid` AS toProcessStepUuid,
+		`from_processtask_step_id` AS fromProcessTaskStepId,
+		`to_processtask_step_id` AS toProcessTaskStepId,
+		(SELECT xx.`handler` FROM `processtask_step` xx WHERE xx.id = `to_processtask_step_id`) AS toProcessStepHandler,
+		`condition`,
+		`uuid` as processStepRelUuid,
+		`is_hit` AS isHit
+		FROM
+		`processtask_step_rel`
+		WHERE processtask_id = #{value}
+	</select>
+
 	<select id="getProcessTaskConfigByHash" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessTaskConfigVo">
 		SELECT
 		`hash`,

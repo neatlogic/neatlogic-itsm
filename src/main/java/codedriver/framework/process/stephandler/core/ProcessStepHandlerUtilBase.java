@@ -1,5 +1,8 @@
 package codedriver.framework.process.stephandler.core;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,6 +34,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -40,6 +44,11 @@ import codedriver.framework.process.dao.mapper.ProcessTaskStepTimeAuditMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.exception.WorktimeNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.notify.NotifyHandlerNotFoundException;
+import codedriver.framework.process.exception.notify.NotifyTemplateNotFoundException;
+import codedriver.framework.process.notify.core.INotifyHandler;
+import codedriver.framework.process.notify.core.NotifyHandlerFactory;
+import codedriver.framework.process.notify.dao.mapper.NotifyMapper;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
@@ -55,16 +64,24 @@ import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepTimeAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 import codedriver.module.process.dto.WorktimeRangeVo;
 import codedriver.module.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.module.process.formattribute.core.IFormAttributeHandler;
+import codedriver.module.process.notify.dto.NotifyTemplateVo;
+import codedriver.module.process.notify.dto.NotifyVo;
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
 public abstract class ProcessStepHandlerUtilBase {
 	static Logger logger = LoggerFactory.getLogger(ProcessStepHandlerUtilBase.class);
 
 	private static final ThreadLocal<List<AuditHandler>> AUDIT_HANDLERS = new ThreadLocal<>();
 	private static final ThreadLocal<List<SlaHandler>> SLA_HANDLERS = new ThreadLocal<>();
+	private static final ThreadLocal<List<NotifyHandler>> NOTIFY_HANDLERS = new ThreadLocal<>();
 	protected static ProcessMapper processMapper;
 	protected static ProcessTaskMapper processTaskMapper;
 	protected static ProcessTaskAuditMapper processTaskAuditMapper;
@@ -73,6 +90,7 @@ public abstract class ProcessStepHandlerUtilBase {
 	protected static ProcessTaskStepTimeAuditMapper processTaskStepTimeAuditMapper;
 	private static WorktimeMapper worktimeMapper;
 	private static ChannelMapper channelMapper;
+	private static NotifyMapper notifyMapper;
 
 	@Autowired
 	public void setProcessMapper(ProcessMapper _processMapper) {
@@ -114,21 +132,166 @@ public abstract class ProcessStepHandlerUtilBase {
 		channelMapper = _channelMapper;
 	}
 
-	public static void main(String[] atr) {
-		ScriptEngineManager sem = new ScriptEngineManager();
+	@Autowired
+	public void setNotifyMapper(NotifyMapper _notifyMapper) {
+		notifyMapper = _notifyMapper;
+	}
 
-		ScriptEngine se = sem.getEngineByName("nashorn");
-		JSONObject paramObj = new JSONObject();
-		paramObj.put("form.name", "chenqw");
-		paramObj.put("form.age", "37");
-		se.put("json", paramObj);
-		String script = "json['form.name'] == 'chen2qw' && json['form.age'] == '37'";
-		try {
-			System.out.println(Boolean.parseBoolean(se.eval(script).toString()));
-		} catch (ScriptException e) {
-			logger.error(e.getMessage(), e);
+	/*
+	 * public static void main(String[] atr) { ScriptEngineManager sem = new
+	 * ScriptEngineManager();
+	 * 
+	 * ScriptEngine se = sem.getEngineByName("nashorn"); JSONObject paramObj =
+	 * new JSONObject(); paramObj.put("form.name", "chenqw");
+	 * paramObj.put("form.age", "37"); se.put("json", paramObj); String script =
+	 * "json['form.name'] == 'chen2qw' && json['form.age'] == '37'"; try {
+	 * System.out.println(Boolean.parseBoolean(se.eval(script).toString())); }
+	 * catch (ScriptException e) { logger.error(e.getMessage(), e); }
+	 * 
+	 * }
+	 */
+
+	protected static class NotifyHandler extends CodeDriverThread {
+		private ProcessTaskStepVo currentProcessTaskStepVo;
+		private String event;
+
+		public NotifyHandler(ProcessTaskStepVo _currentProcessTaskStepVo, String _event) {
+			currentProcessTaskStepVo = _currentProcessTaskStepVo;
+			event = _event;
+			if (_currentProcessTaskStepVo != null) {
+				this.setThreadName("PROCESSTASK-NOTIFY-" + _currentProcessTaskStepVo.getId());
+			}
 		}
 
+		protected static void notify(ProcessTaskStepVo currentProcessTaskStepVo, String event) {
+			if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+				CommonThreadPool.execute(new NotifyHandler(currentProcessTaskStepVo, event));
+			} else {
+				List<NotifyHandler> handlerList = NOTIFY_HANDLERS.get();
+				if (handlerList == null) {
+					handlerList = new ArrayList<>();
+					NOTIFY_HANDLERS.set(handlerList);
+					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+						@Override
+						public void afterCommit() {
+							List<NotifyHandler> handlerList = NOTIFY_HANDLERS.get();
+							for (NotifyHandler handler : handlerList) {
+								CommonThreadPool.execute(handler);
+							}
+						}
+
+						@Override
+						public void afterCompletion(int status) {
+							NOTIFY_HANDLERS.remove();
+						}
+					});
+				}
+				handlerList.add(new NotifyHandler(currentProcessTaskStepVo, event));
+			}
+		}
+
+		private String getFreemarkerContent(NotifyVo notifyVo, String content) {
+			String resultStr = "";
+			if (content != null) {
+				Configuration cfg = new Configuration();
+				cfg.setNumberFormat("0.##");
+				cfg.setClassicCompatible(true);
+				StringTemplateLoader stringLoader = new StringTemplateLoader();
+				stringLoader.putTemplate("template", content);
+				cfg.setTemplateLoader(stringLoader);
+				Template temp;
+				Writer out = null;
+				try {
+					temp = cfg.getTemplate("template", "utf-8");
+					out = new StringWriter();
+					temp.process(notifyVo, out);
+					resultStr = out.toString();
+					out.flush();
+				} catch (IOException e) {
+					logger.error(e.getMessage(), e);
+				} catch (TemplateException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+			return resultStr;
+		}
+
+		@Override
+		protected void execute() {
+			ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+			ProcessTaskVo processTaskVo = null;
+			List<ProcessTaskStepWorkerVo> workerList = null;
+			if (StringUtils.isNotBlank(stepVo.getConfigHash())) {
+				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
+				JSONObject stepConfigObj = null;
+				try {
+					stepConfigObj = JSONObject.parseObject(stepConfig);
+				} catch (Exception ex) {
+
+				}
+				if (stepConfigObj != null && stepConfigObj.containsKey("notifyList")) {
+					JSONArray notifyList = stepConfigObj.getJSONArray("notifyList");
+					for (int i = 0; i < notifyList.size(); i++) {
+						JSONObject notifyObj = notifyList.getJSONObject(i);
+						String trigger = notifyObj.getString("trigger");
+						String type = notifyObj.getString("type");
+						String templateUuid = notifyObj.getString("template");
+						JSONArray receiverList = notifyObj.getJSONArray("receiverList");
+						if (StringUtils.isNotBlank(templateUuid) && receiverList != null && receiverList.size() > 0 && event.equalsIgnoreCase(trigger)) {
+							NotifyTemplateVo notifyTemplateVo = notifyMapper.getNotifyTemplateByUuid(templateUuid);
+							if (notifyTemplateVo == null) {
+								throw new NotifyTemplateNotFoundException(templateUuid);
+							}
+							INotifyHandler handler = NotifyHandlerFactory.getHandler(type);
+							if (handler != null) {
+								NotifyVo notifyVo = new NotifyVo();
+								if (StringUtils.isNotBlank(notifyTemplateVo.getTitle())) {
+									notifyVo.setTitle(getFreemarkerContent(notifyVo, notifyTemplateVo.getTitle()));
+								}
+								if (StringUtils.isNotBlank(notifyTemplateVo.getContent())) {
+									notifyVo.setContent(getFreemarkerContent(notifyVo, notifyTemplateVo.getContent()));
+								}
+								for (int u = 0; u < receiverList.size(); u++) {
+									String worker = receiverList.getString(u);
+									if (worker.startsWith("default.")) {
+										worker = worker.substring(8);
+										if (processTaskVo == null) {
+											processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+										}
+										if (workerList == null) {
+											workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(currentProcessTaskStepVo.getId());
+										}
+										if (worker.equalsIgnoreCase("reporter")) {
+											notifyVo.addUserId(processTaskVo.getReporter());
+										} else if (worker.equalsIgnoreCase("owner")) {
+											notifyVo.addUserId(processTaskVo.getOwner());
+										} else if (worker.equalsIgnoreCase("worker")) {
+											for (ProcessTaskStepWorkerVo workerVo : workerList) {
+												notifyVo.addUserId(workerVo.getUserId());
+											}
+										}
+									} else if (worker.startsWith("user.")) {
+										worker = worker.substring(5);
+										notifyVo.addUserId(worker);
+									} else if (worker.startsWith("team.")) {
+										worker = worker.substring(5);
+										List<UserVo> teamUserIdList = userMapper.getActiveUserByTeamId(worker);
+										for (UserVo userVo : teamUserIdList) {
+											notifyVo.addUserId(userVo.getUserId());
+										}
+									}
+								}
+
+								handler.execute(notifyVo);
+							} else {
+								throw new NotifyHandlerNotFoundException(type);
+							}
+						}
+					}
+				}
+			}
+			// TODO Auto-generated method stub
+		}
 	}
 
 	protected static class SlaHandler extends CodeDriverThread {

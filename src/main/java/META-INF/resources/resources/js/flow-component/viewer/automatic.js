@@ -1,1 +1,0 @@
-draw2d.shape.node.FlowStateAutomatic = draw2d.shape.node.FlowBaseImage.extend({});

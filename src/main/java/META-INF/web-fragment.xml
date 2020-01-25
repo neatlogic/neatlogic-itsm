@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<web-fragment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:webfragment="http://java.sun.com/xml/ns/javaee/web-fragment_3_0.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-fragment_3_0.xsd" id="WebFragment_ID" version="3.0">
-  <display-name>balantflow-process-component</display-name>
-  <name>balantflow_process_component</name>
-</web-fragment>

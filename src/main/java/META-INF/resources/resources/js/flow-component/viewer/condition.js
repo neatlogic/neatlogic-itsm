@@ -1,1 +1,0 @@
-draw2d.shape.node.FlowCondition = draw2d.shape.node.FlowBaseImage.extend({});

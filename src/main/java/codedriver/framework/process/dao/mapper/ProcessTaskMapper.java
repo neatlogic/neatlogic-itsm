@@ -28,6 +28,7 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskMapper {
+
 	public ProcessTaskConfigVo getProcessTaskConfigByHash(String hash);
 
 	public List<ProcessTaskSlaVo> getProcessTaskSlaByProcessTaskStepId(Long processTaskStepId);
@@ -83,6 +84,8 @@ public interface ProcessTaskMapper {
 	public List<ProcessTaskStepRelVo> getProcessTaskStepRelByFromId(Long fromProcessTaskStepId);
 
 	public List<ProcessTaskStepRelVo> getProcessTaskStepRelByToId(Long toProcessTaskStepId);
+
+	public List<ProcessTaskStepRelVo> getProcessTaskStepRelByProcessTaskId(Long processTaskId);
 
 	public List<ProcessTaskStepVo> getProcessTaskStepByProcessTaskIdAndType(@Param("processTaskId")
 	Long processTaskId, @Param("type")

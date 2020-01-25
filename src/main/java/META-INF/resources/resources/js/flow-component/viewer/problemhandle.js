@@ -1,1 +1,0 @@
-draw2d.shape.node.FlowStateProblemHandle = draw2d.shape.node.FlowBaseImage.extend({});

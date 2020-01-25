@@ -1,6 +1,0 @@
-<select id="custom_{{=it.propid}}" plugin-inputselect data-root="{{=it.config.rootpath||''}}" data-url="{{=it.config.url||''}}" {{?it.config.ismultiple}}multiple="multiple"{{?}} name="custom_{{=it.propid}}" {{? it.propneed == 1}}check-type="required" class="mustinput"{{?}}>
-{{?it.defaultvalue}}
-<option selected value="{{=it.defaultvalue}}">{{=it.defaultvalue}}</option>
-{{?}}
-</select>
-{{?it.propneed == 1}}<span style="color: red;">&nbsp*</span>{{?}}
