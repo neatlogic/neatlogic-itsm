@@ -190,7 +190,7 @@ public abstract class ProcessStepHandlerUtilBase {
 			}
 		}
 
-		private String getFreemarkerContent(NotifyVo notifyVo, String content) {
+		private static String getFreemarkerContent(NotifyVo notifyVo, String content) {
 			String resultStr = "";
 			if (content != null) {
 				Configuration cfg = new Configuration();
@@ -214,6 +214,17 @@ public abstract class ProcessStepHandlerUtilBase {
 				}
 			}
 			return resultStr;
+		}
+
+		public static void main(String[] argv) {
+			NotifyVo notifyVo = new NotifyVo();
+			JSONObject jsonObj = new JSONObject();
+			ProcessTaskVo processTaskVo = new ProcessTaskVo();
+			processTaskVo.setTitle("标题");
+			notifyVo.addData("name", "陈其炜");
+			notifyVo.addData("processTask", processTaskVo);
+			String content = "abc${data.name}abc${data.processTask.title}";
+			System.out.println(getFreemarkerContent(notifyVo, content));
 		}
 
 		@Override
@@ -245,6 +256,13 @@ public abstract class ProcessStepHandlerUtilBase {
 							INotifyHandler handler = NotifyHandlerFactory.getHandler(type);
 							if (handler != null) {
 								NotifyVo notifyVo = new NotifyVo();
+								/** 注入流程作业信息 **/
+								notifyVo.addData("title", processTaskVo.getTitle());
+								notifyVo.addData("reporter", processTaskVo.getReporter());
+								notifyVo.addData("reporterName", processTaskVo.getReporterName());
+								notifyVo.addData("stepName", stepVo.getName());
+								//notifyVo.addData(key, value);
+
 								if (StringUtils.isNotBlank(notifyTemplateVo.getTitle())) {
 									notifyVo.setTitle(getFreemarkerContent(notifyVo, notifyTemplateVo.getTitle()));
 								}

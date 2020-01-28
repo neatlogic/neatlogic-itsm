@@ -7,24 +7,29 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.notify.core.INotifyHandler;
 import codedriver.framework.process.notify.core.NotifyHandlerFactory;
 
-/**
- * @program: codedriver
- * @description: 通知类
- * @create: 2019-12-09 09:54
- **/
 public class NotifyVo {
 	private String title;
 	private String content;
 	private String handler;
+	private List<UserVo> toUserList;
 	private List<String> toUserIdList;
-	//private List<String> toTeamIdList;
 	private String fromUser;
-	private JSONObject paramObj;
+	private JSONObject data = new JSONObject();
 	private String templateContent;
 	private String templateTitle;
+
+	public void addUser(UserVo userVo) {
+		if (toUserList == null) {
+			toUserList = new ArrayList<>();
+		}
+		if (!toUserList.contains(userVo)) {
+			toUserList.add(userVo);
+		}
+	}
 
 	public void addUserId(String userId) {
 		if (toUserIdList == null) {
@@ -34,7 +39,6 @@ public class NotifyVo {
 			toUserIdList.add(userId);
 		}
 	}
-	
 
 	public String getTitle() {
 		return title;
@@ -52,15 +56,6 @@ public class NotifyVo {
 		this.content = content;
 	}
 
-	public List<String> getToUserIdList() {
-		return toUserIdList;
-	}
-
-	public void setToUserIdList(List<String> toUserIdList) {
-		this.toUserIdList = toUserIdList;
-	}
-
-
 	public String getFromUser() {
 		return fromUser;
 	}
@@ -69,12 +64,8 @@ public class NotifyVo {
 		this.fromUser = fromUser;
 	}
 
-	public JSONObject getParamObj() {
-		return paramObj;
-	}
-
-	public void setParamObj(JSONObject paramObj) {
-		this.paramObj = paramObj;
+	public void addData(String key, Object value) {
+		data.put(key, value);
 	}
 
 	public String getTemplateContent() {
@@ -107,5 +98,25 @@ public class NotifyVo {
 
 	public void setHandler(String handler) {
 		this.handler = handler;
+	}
+
+	public List<UserVo> getToUserList() {
+		return toUserList;
+	}
+
+	public void setToUserList(List<UserVo> toUserList) {
+		this.toUserList = toUserList;
+	}
+
+	public List<String> getToUserIdList() {
+		return toUserIdList;
+	}
+
+	public void setToUserIdList(List<String> toUserIdList) {
+		this.toUserIdList = toUserIdList;
+	}
+
+	public JSONObject getData() {
+		return data;
 	}
 }
