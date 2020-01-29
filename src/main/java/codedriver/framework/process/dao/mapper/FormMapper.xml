@@ -174,12 +174,9 @@
 	 a.`type`,
 	 a.`handler`,
 	 a.`config` 
-	FROM
-	`form_attribute` a
-	JOIN `form_version` b
-	ON a.`formversion_uuid` = b.`uuid`
-	AND b.`is_active` = 1
-	AND a.`form_uuid` = #{value}
+	FROM `form_attribute` a
+	JOIN `form_version` b ON b.`uuid`=a.`formversion_uuid` AND b.`is_active` = 1
+	WHERE a.`form_uuid` = #{value}
 	</select>
 	
 	<update id="updateFormVersion" parameterType="codedriver.module.process.dto.FormVersionVo">
