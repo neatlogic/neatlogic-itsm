@@ -26,6 +26,7 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepUnActivedException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepUserIsExistsException;
+import codedriver.framework.process.notify.core.NotifyTriggerType;
 import codedriver.framework.process.timeoutpolicy.handler.ITimeoutPolicyHandler;
 import codedriver.framework.process.timeoutpolicy.handler.TimeoutPolicyHandlerFactory;
 import codedriver.module.process.constvalue.ProcessStepHandler;
@@ -205,9 +206,12 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
 					TimeAuditHandler.start(currentProcessTaskStepVo);
 				}
-				
+
 				/** 计算SLA **/
 				SlaHandler.calculate(currentProcessTaskStepVo);
+
+				/** 触发通知 **/
+				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.ACTIVE);
 			}
 		} catch (ProcessTaskException e) {
 			logger.error(e.getMessage(), e);

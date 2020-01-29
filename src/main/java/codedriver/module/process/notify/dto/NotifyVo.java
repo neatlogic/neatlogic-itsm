@@ -18,6 +18,7 @@ public class NotifyVo {
 	private List<UserVo> toUserList;
 	private List<String> toUserIdList;
 	private String fromUser;
+	private String fromUserEmail;
 	private JSONObject data = new JSONObject();
 	private String templateContent;
 	private String templateTitle;
@@ -118,5 +119,13 @@ public class NotifyVo {
 
 	public JSONObject getData() {
 		return data;
+	}
+
+	public String getFromUserEmail() {
+		return fromUserEmail;
+	}
+
+	public void setFromUserEmail(String fromUserEmail) {
+		this.fromUserEmail = fromUserEmail;
 	}
 }

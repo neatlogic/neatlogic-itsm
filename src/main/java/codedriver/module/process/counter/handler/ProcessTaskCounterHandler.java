@@ -1,4 +1,4 @@
-package codedriver.module.process.plugin;
+package codedriver.module.process.counter.handler;
 
 import codedriver.framework.counter.core.GlobalCounterBase;
 import com.alibaba.fastjson.JSONObject;
@@ -11,7 +11,7 @@ import org.springframework.util.ClassUtils;
  * @create: 2019-12-12 11:01
  **/
 @Service
-public class CounterProcessPlugin extends GlobalCounterBase {
+public class ProcessTaskCounterHandler extends GlobalCounterBase {
     @Override
     public String getName() {
        return  "工作流引擎";

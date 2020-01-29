@@ -1,5 +1,6 @@
 package codedriver.framework.process.notify.core;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import codedriver.framework.dao.mapper.UserMapper;
@@ -17,6 +18,12 @@ public abstract class NotifyHandlerBase implements INotifyHandler {
 				if (userVo != null) {
 					notifyVo.addUser(userVo);
 				}
+			}
+		}
+		if (StringUtils.isNotBlank(notifyVo.getFromUser())) {
+			UserVo userVo = userMapper.getUserBaseInfoByUserId(notifyVo.getFromUser());
+			if(userVo!=null && StringUtils.isNotBlank(userVo.getEmail())) {
+				notifyVo.setFromUserEmail(userVo.getEmail());
 			}
 		}
 		myExecute(notifyVo);

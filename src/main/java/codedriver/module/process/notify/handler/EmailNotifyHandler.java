@@ -59,10 +59,12 @@ public class EmailNotifyHandler extends NotifyHandlerBase {
 					if (StringUtils.isNotBlank(mailServerVo.getUserName()) && StringUtils.isNotBlank(mailServerVo.getPassword())) {
 						se.setAuthentication(mailServerVo.getUserName(), mailServerVo.getPassword());
 					}
-					if (StringUtils.isNotBlank(notifyVo.getFromUser())) {
-						se.setFrom(notifyVo.getFromUser());
+					if (StringUtils.isNotBlank(notifyVo.getFromUserEmail())) {
+						se.setFrom(notifyVo.getFromUserEmail(), notifyVo.getFromUser());
 					} else {
-						se.setFrom(mailServerVo.getFromAddress(), mailServerVo.getName());
+						if (StringUtils.isNotBlank(mailServerVo.getFromAddress())) {
+							se.setFrom(mailServerVo.getFromAddress(), mailServerVo.getName());
+						}
 					}
 
 					se.setSubject(clearStringHTML(notifyVo.getTitle()));

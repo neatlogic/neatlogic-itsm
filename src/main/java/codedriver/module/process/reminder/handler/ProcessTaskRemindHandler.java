@@ -1,4 +1,4 @@
-package codedriver.module.process.plugin;
+package codedriver.module.process.reminder.handler;
 
 import codedriver.framework.reminder.core.GlobalReminderBase;
 import codedriver.framework.reminder.dto.param.GlobalReminderParamVo;
@@ -14,7 +14,7 @@ import java.util.List;
  * @create: 2019-12-12 10:55
  **/
 @Service
-public class ReminderProcessPlugin extends GlobalReminderBase {
+public class ProcessTaskRemindHandler extends GlobalReminderBase {
 
     @Override
     public String getName() {
