@@ -51,7 +51,7 @@ public class ProcessSaveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessVo processVo = JSON.toJavaObject(jsonObj, ProcessVo.class);
 		//TODO linbq暂时去掉config参数验证
-//		processVo.makeupFromConfigObj();
+		processVo.makeupFromConfigObj();
 		processService.saveProcess(processVo);
 		return processVo.getUuid();
 	}

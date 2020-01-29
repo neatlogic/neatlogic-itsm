@@ -62,7 +62,7 @@ public interface ProcessMapper {
 
 	public int insertProcessStepWorkerPolicy(ProcessStepWorkerPolicyVo processStepWorkerPolicyVo);
 
-	public int replaceProcessForm(@Param("processUuid")
+	public int insertProcessForm(@Param("processUuid")
 	String processUuid, @Param("formUuid")
 	String formUuid);
 
@@ -83,5 +83,7 @@ public interface ProcessMapper {
 	public int deleteProcessStepFormAttributeByProcessUuid(String processUuid);
 
 	public int deleteProcessByUuid(String uuid);
+
+	public int deleteProcessFormByProcessUuid(String processUuid);
 
 }

@@ -111,7 +111,7 @@
 		a.`process_step_uuid` AS processStepUuid,
 		a.`attribute_uuid` AS attributeUuid,
 		a.`form_uuid` AS formUuid,
-		a.`is_editable` AS isEditable,
+		a.`action` AS action,
 		a.`config`,
 		a.`data`,
 		c.`handler`,
@@ -333,7 +333,7 @@
 		`process_step_uuid`,
 		`form_uuid`,
 		`attribute_uuid`,
-		`is_editable`,
+		`action`,
 		`config`,
 		`data`
 		)
@@ -343,7 +343,7 @@
 		#{processStepUuid},
 		#{formUuid},
 		#{attributeUuid},
-		#{isEditable},
+		#{action},
 		#{config},
 		#{data}
 		)
@@ -399,8 +399,8 @@
 		)
 	</insert>
 
-	<insert id="replaceProcessForm">
-		REPLACE INTO `process_form` (`process_uuid`, `form_uuid`)
+	<insert id="insertProcessForm">
+		INSERT INTO `process_form` (`process_uuid`, `form_uuid`)
 		VALUES
 		(#{processUuid}, #{formUuid})
 	</insert>
@@ -471,5 +471,9 @@
 	
 	<delete id="deleteProcessByUuid" parameterType="java.lang.String">
 		DELETE FROM `process` WHERE `uuid` = #{uuid}
+	</delete>
+	
+	<delete id="deleteProcessFormByProcessUuid" parameterType="java.lang.String">
+		DELETE FROM `process_form` WHERE `process_uuid` = #{processUuid}
 	</delete>
 </mapper>
