@@ -399,10 +399,9 @@
 		)
 	</insert>
 
-	<insert id="insertProcessForm">
+	<insert id="insertProcessForm" parameterType="codedriver.module.process.dto.ProcessFormVo">
 		INSERT INTO `process_form` (`process_uuid`, `form_uuid`)
-		VALUES
-		(#{processUuid}, #{formUuid})
+		VALUES (#{processUuid}, #{formUuid})
 	</insert>
 	
 	<update id="updateProcess" parameterType="codedriver.module.process.dto.ProcessVo">

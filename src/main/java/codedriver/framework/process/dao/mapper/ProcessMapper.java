@@ -2,8 +2,6 @@ package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
-
 import codedriver.module.process.dto.ChannelProcessVo;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ProcessFormVo;
@@ -62,9 +60,7 @@ public interface ProcessMapper {
 
 	public int insertProcessStepWorkerPolicy(ProcessStepWorkerPolicyVo processStepWorkerPolicyVo);
 
-	public int insertProcessForm(@Param("processUuid")
-	String processUuid, @Param("formUuid")
-	String formUuid);
+	public int insertProcessForm(ProcessFormVo processFormVo);
 
 	public int updateProcess(ProcessVo processVo);
 
