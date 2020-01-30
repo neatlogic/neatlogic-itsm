@@ -1,4 +1,4 @@
-package codedriver.module.process.plugin;
+package codedriver.module.process.counter.handler;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.reminder.core.GlobalReminderFactory;
@@ -8,6 +8,8 @@ import codedriver.framework.reminder.dto.ReminderMessageVo;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.reminder.handler.ProcessTaskRemindHandler;
+
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +59,7 @@ public class RemindItsmTestApi extends ApiComponentBase {
             message.setParamObj(jsonObj.getJSONObject("paramObj"));
         }
         message.setReceiverList(userIdList);
-        IGlobalReminder reminder = GlobalReminderFactory.getReminder(ReminderProcessPlugin.class.getName());
+        IGlobalReminder reminder = GlobalReminderFactory.getReminder(ProcessTaskRemindHandler.class.getName());
         reminder.send(message);
         return new JSONObject();
     }

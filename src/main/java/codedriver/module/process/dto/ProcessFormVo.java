@@ -12,6 +12,13 @@ public class ProcessFormVo extends BasePageVo implements Serializable {
 	private String processUuid;
 	private String formUuid;
 
+	public ProcessFormVo() {}
+
+	public ProcessFormVo(String processUuid, String formUuid) {
+		this.processUuid = processUuid;
+		this.formUuid = formUuid;
+	}
+
 	public String getProcessUuid() {
 		return processUuid;
 	}

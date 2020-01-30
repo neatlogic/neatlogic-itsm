@@ -15,6 +15,7 @@ public class ProcessStepFormAttributeVo implements Serializable {
 	private String processStepUuid;
 	private String formUuid;
 	private String attributeUuid;
+	private String action;
 	private Integer isEditable;
 	private Integer isRequired;
 	private String config;
@@ -187,6 +188,14 @@ public class ProcessStepFormAttributeVo implements Serializable {
 
 	public void setTypeName(String typeName) {
 		this.typeName = typeName;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
 	}
 
 }
