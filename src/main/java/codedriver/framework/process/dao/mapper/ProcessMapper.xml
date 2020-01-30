@@ -404,6 +404,11 @@
 		VALUES (#{processUuid}, #{formUuid})
 	</insert>
 	
+	<insert id="insertProcessStepNotifyTemplate" parameterType="codedriver.module.process.dto.ProcessStepNotifyTemplateVo">
+	INSERT INTO `process_step_notifytemplate` ( `process_uuid`, `process_step_uuid`, `template_uuid` ) 
+	VALUES ( #{processUuid}, #{processStepUuid}, #{templateUuid} ) 
+	</insert>
+	
 	<update id="updateProcess" parameterType="codedriver.module.process.dto.ProcessVo">
 	UPDATE `process` SET 
 	<if test="name != null and name != ''">
@@ -474,5 +479,9 @@
 	
 	<delete id="deleteProcessFormByProcessUuid" parameterType="java.lang.String">
 		DELETE FROM `process_form` WHERE `process_uuid` = #{processUuid}
+	</delete>
+	
+	<delete id="deleteProcessStepNotifyTemplateByProcessUuid"  parameterType="java.lang.String">
+		DELETE FROM `process_step_notifytemplate` WHERE `process_uuid` = #{processUuid}
 	</delete>
 </mapper>

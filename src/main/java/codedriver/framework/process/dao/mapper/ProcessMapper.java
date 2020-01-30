@@ -6,6 +6,7 @@ import codedriver.module.process.dto.ChannelProcessVo;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ProcessFormVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
+import codedriver.module.process.dto.ProcessStepNotifyTemplateVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
 import codedriver.module.process.dto.ProcessStepTeamVo;
 import codedriver.module.process.dto.ProcessStepTimeoutPolicyVo;
@@ -62,6 +63,8 @@ public interface ProcessMapper {
 
 	public int insertProcessForm(ProcessFormVo processFormVo);
 
+	public int insertProcessStepNotifyTemplate(ProcessStepNotifyTemplateVo processStepNotifyTemplateVo);
+
 	public int updateProcess(ProcessVo processVo);
 
 	public int deleteProcessStepByProcessUuid(String processUuid);
@@ -81,5 +84,7 @@ public interface ProcessMapper {
 	public int deleteProcessByUuid(String uuid);
 
 	public int deleteProcessFormByProcessUuid(String processUuid);
+
+	public int deleteProcessStepNotifyTemplateByProcessUuid(String processUuid);
 
 }

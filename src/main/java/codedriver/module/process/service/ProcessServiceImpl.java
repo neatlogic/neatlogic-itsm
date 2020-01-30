@@ -16,6 +16,7 @@ import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.dto.FormAttributeVo;
 import codedriver.module.process.dto.ProcessFormVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
+import codedriver.module.process.dto.ProcessStepNotifyTemplateVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.module.process.dto.ProcessVo;
@@ -79,6 +80,7 @@ public class ProcessServiceImpl implements ProcessService {
 		if (processMapper.checkProcessIsExists(processVo.getUuid()) > 0) {
 			processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
 			processMapper.deleteProcessStepByProcessUuid(uuid);
+			processMapper.deleteProcessStepNotifyTemplateByProcessUuid(uuid);
 //			processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
 //			processMapper.deleteProcessStepTimeoutPolicyByProcessUuid(processVo.getUuid());
@@ -116,6 +118,11 @@ public class ProcessServiceImpl implements ProcessService {
 				if (stepVo.getWorkerPolicyList() != null && stepVo.getWorkerPolicyList().size() > 0) {
 					for (ProcessStepWorkerPolicyVo processStepWorkerPolicyVo : stepVo.getWorkerPolicyList()) {
 						processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
+					}
+				}
+				if(stepVo.getTemplateUuidList() != null && stepVo.getTemplateUuidList().size() > 0) {
+					for(String templateUuid : stepVo.getTemplateUuidList()) {
+						processMapper.insertProcessStepNotifyTemplate(new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
 					}
 				}
 //				if (stepVo.getTimeoutPolicyList() != null && stepVo.getTimeoutPolicyList().size() > 0) {

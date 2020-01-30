@@ -115,9 +115,8 @@ public class ProcessVo extends BasePageVo implements Serializable {
 		Map<String, List<ProcessStepFormAttributeVo>> processStepFormAttributeMap = new HashMap<>();
 		if (this.getConfigObj().containsKey("formConfig")) {
 			JSONObject formConfig = this.getConfigObj().getJSONObject("formConfig");
-			String formUuid = null;
 			if (formConfig.containsKey("uuid")) {
-				formUuid = formConfig.getString("uuid");
+				String formUuid = formConfig.getString("uuid");
 				this.setFormUuid(formUuid);
 			}
 			if(formConfig.containsKey("authorityList")) {
@@ -165,8 +164,7 @@ public class ProcessVo extends BasePageVo implements Serializable {
 					processStepVo.setFormAttributeList(processStepFormAttributeMap.get(uuid));
 				}
 				if(stepObj.containsKey("name")) {
-					String name = stepObj.getString("name");
-					processStepVo.setName(name);
+					processStepVo.setName(stepObj.getString("name"));
 				}
 				if(stepObj.containsKey("type")) {
 					String handler = stepObj.getString("type");
