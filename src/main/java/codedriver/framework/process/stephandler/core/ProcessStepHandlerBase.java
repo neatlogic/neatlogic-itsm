@@ -259,7 +259,8 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				processTaskMapper.insertProcessTaskStepUser(userVo);
 			}
 		}
-
+		/** 触发通知 **/
+		NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.ASSIGN);
 		return 1;
 	}
 
@@ -309,6 +310,8 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			currentProcessTaskStepVo.setIsActive(0);
 			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.HANG.getValue());
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
+			/** 触发通知 **/
+			NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.HANG);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			currentProcessTaskStepVo.setIsActive(2);
@@ -443,6 +446,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 			/** 计算SLA **/
 			SlaHandler.calculate(currentProcessTaskStepVo);
+			
+			/** 触发通知 **/
+			NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.START);
 		} catch (ProcessTaskException ex) {
 			logger.error(ex.getMessage(), ex);
 			currentProcessTaskStepVo.setError(ex.getMessage());
@@ -450,7 +456,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
 		}
 		/** 处理历史记录 **/
-		AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.START);
+		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.START);
 		return 0;
 	}
 
@@ -527,6 +533,8 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				/** 写入时间审计 **/
 				TimeAuditHandler.success(currentProcessTaskStepVo);
 
+				/** 触发通知 **/
+				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.SUCCEED);
 			} catch (ProcessTaskException ex) {
 				logger.error(ex.getMessage(), ex);
 				currentProcessTaskStepVo.setError(ex.getMessage());
@@ -536,10 +544,13 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 				/** 写入时间审计 **/
 				TimeAuditHandler.failed(currentProcessTaskStepVo);
+				
+				/** 触发通知 **/
+				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.FAILED);
 			}
 			if (this.getMode().equals(ProcessStepMode.MT)) {
 				/** 处理历史记录 **/
-				AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
+				AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
 				/** 计算SLA **/
 				SlaHandler.calculate(currentProcessTaskStepVo);
 			}
@@ -596,13 +607,16 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
 
 		/** 处理历史记录 **/
-		AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.ABORT);
+		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORT);
 
 		/** 写入时间审计 **/
 		TimeAuditHandler.abort(currentProcessTaskStepVo);
 
 		/** 计算SLA **/
 		SlaHandler.calculate(currentProcessTaskStepVo);
+		
+		/** 触发通知 **/
+		NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.ABORT);
 		return 1;
 	}
 
@@ -666,13 +680,16 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
 
 			/** 处理历史记录 **/
-			AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.RECOVER);
+			AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.RECOVER);
 
 			/** 写入时间审计 **/
 			TimeAuditHandler.recover(currentProcessTaskStepVo);
 
 			/** 计算SLA **/
 			SlaHandler.calculate(currentProcessTaskStepVo);
+			
+			/** 触发通知 **/
+			NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.RECOVER);
 		}
 		return 1;
 	}
@@ -725,7 +742,10 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
 
 				/** 处理历史记录 **/
-				AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.ACCEPT);
+				AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ACCEPT);
+				
+				/** 触发通知 **/
+				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.ACCEPT);
 			}
 		} catch (ProcessTaskException ex) {
 			logger.error(ex.getMessage(), ex);
@@ -792,17 +812,18 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 			updateProcessTaskStepStatus(processTaskStepVo);
 
-			/** 处理历史记录 **/
-			AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.TRANSFER);
+			/** 触发通知 **/
+			NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.TRANSFER);
 		} catch (ProcessTaskException e) {
 			logger.error(e.getMessage(), e);
 			processTaskStepVo.setError(e.getMessage());
 			processTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
 			updateProcessTaskStepStatus(processTaskStepVo);
 		}
-
+		
 		/** 处理历史记录 **/
-		AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.TRANSFER);
+		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.TRANSFER);
+	
 		return 0;
 	}
 
@@ -861,6 +882,8 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			/** 处理时间审计 **/
 			TimeAuditHandler.back(currentProcessTaskStepVo);
 
+			/** 触发通知 **/
+			NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.TRANSFER);
 		} catch (ProcessTaskException e) {
 			logger.error(e.getMessage(), e);
 			currentProcessTaskStepVo.setError(e.getMessage());
@@ -868,7 +891,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
 		}
 		/** 处理历史记录 **/
-		AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.BACK);
+		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.BACK);
 
 		/** 计算SLA **/
 		SlaHandler.calculate(currentProcessTaskStepVo);
@@ -1019,7 +1042,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		}
 
 		/** 处理历史记录 **/
-		AuditHandler.save(currentProcessTaskStepVo, ProcessTaskStepAction.STARTPROCESS);
+		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.STARTPROCESS);
 
 		/** 流转到下一步 **/
 		List<ProcessTaskStepVo> nextStepList = getNext(currentProcessTaskStepVo);

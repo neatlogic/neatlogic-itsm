@@ -3,8 +3,14 @@ package codedriver.framework.process.notify.core;
 public enum NotifyTriggerType {
 	ACTIVE("active", "激活", "流程步骤已激活", "流程：${data.title}<br>步骤：${data.stepName}<br>上报人：${data.reporterName}"),
 	START("start", "开始", "流程步骤已开始", "流程步骤已开始"),
-	FAILED("failed", "已失败", "流程步骤已失败", "流程步骤已失败"),
-	SUCCEED("succeed", "已成功", "流程步骤已成功", "流程步骤已成功");
+	FAILED("failed", "失败", "流程步骤已失败", "流程步骤已失败"),
+	SUCCEED("succeed", "成功", "流程步骤已成功", "流程步骤已成功"),
+	HANG("hang", "挂起", "流程步骤已挂起", "流程步骤已挂起"),
+	ABORT("aborted", "终止", "流程步骤已终止", "流程步骤已终止"),
+	RECOVER("recover", "恢复", "流程步骤已恢复", "流程步骤已恢复"),
+	ACCEPT("accept", "接管", "流程步骤接管", "流程步骤接管"),
+	TRANSFER("transfer", "转交", "流程步骤已转交", "流程步骤已转交"),
+	ASSIGN("assign", "分配处理人", "流程步骤已分配", "流程步骤已分配");
 
 	private String trigger;
 	private String text;

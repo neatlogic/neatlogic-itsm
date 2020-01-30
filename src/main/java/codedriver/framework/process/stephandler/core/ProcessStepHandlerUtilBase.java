@@ -827,7 +827,7 @@ public abstract class ProcessStepHandlerUtilBase {
 			action = _action;
 		}
 
-		protected static synchronized void save(ProcessTaskStepVo currentProcessTaskStepVo, ProcessTaskStepAction action) {
+		protected static synchronized void audit(ProcessTaskStepVo currentProcessTaskStepVo, ProcessTaskStepAction action) {
 			if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 				AuditHandler handler = new AuditHandler(currentProcessTaskStepVo, action);
 				CommonThreadPool.execute(handler);
