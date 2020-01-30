@@ -41,6 +41,8 @@ public interface FormMapper {
 
 	public int checkFormVersionIsExists(String uuid);
 
+	public List<FormAttributeVo> getFormAttributeByFormUuid(String formUuid);
+
 	public int insertForm(FormVo formVo);
 
 	public int resetFormVersionIsActiveByFormUuid(String formUuid);
