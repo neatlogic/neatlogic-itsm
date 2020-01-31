@@ -20,20 +20,20 @@ import codedriver.module.process.dto.ProcessTaskStepVo;
 
 @Service
 @AuthAction(name = "PROCESS_MODIFY")
-public class ProcessTaskCompleteApi extends ApiComponentBase {
+public class ProcessTaskBackApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public String getToken() {
-		return "processtask/complete";
+		return "processtask/back";
 	}
 
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "工单完成接口";
+		return "工单回退接口";
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 			isRequired = true)
 	})
 	@Output({})
-	@Description(desc = "工单完成接口")
+	@Description(desc = "工单回退接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject result = new JSONObject();
 		Long processTaskStepId = jsonObj.getLong("processtaskStepId");
@@ -63,7 +63,7 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 			if (handler != null) {
 				processTaskStepVo.setParamObj(jsonObj);
-				handler.complete(processTaskStepVo);
+				handler.back(processTaskStepVo);
 			}
 		} else {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());

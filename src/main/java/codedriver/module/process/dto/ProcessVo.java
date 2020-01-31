@@ -2,7 +2,9 @@ package codedriver.module.process.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,10 +14,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.EntityField;
-import codedriver.module.process.constvalue.ProcessStepType;
+import codedriver.module.process.constvalue.ProcessStepHandler;
 
 public class ProcessVo extends BasePageVo implements Serializable {
 	private static final long serialVersionUID = 4684015408674741157L;
@@ -38,7 +38,7 @@ public class ProcessVo extends BasePageVo implements Serializable {
 	@EntityField(name = "引用数量", type = ApiParamType.INTEGER)
 	private int referenceCount;
 
-	private JSONObject configObj;
+	private transient JSONObject configObj;
 	// @EntityField(name = "流程表单uuid", type = ApiParamType.STRING)
 	private String formUuid;
 	private List<ProcessStepVo> stepList;
@@ -108,137 +108,104 @@ public class ProcessVo extends BasePageVo implements Serializable {
 	}
 
 	public void makeupFromConfigObj() {
-		if ( this.getConfigObj() != null) {
-			if (this.getConfigObj().containsKey("userData")) {
-				JSONObject userData = this.getConfigObj().getJSONObject("userData");
-				if (userData.containsKey("formId")) {
-					this.setFormUuid(userData.getString("formId"));
-				}
+		if ( this.getConfigObj() == null) {
+			return;
+		}	
+		/** 组装表单属性 **/
+		Map<String, List<ProcessStepFormAttributeVo>> processStepFormAttributeMap = new HashMap<>();
+		if (this.getConfigObj().containsKey("formConfig")) {
+			JSONObject formConfig = this.getConfigObj().getJSONObject("formConfig");
+			if (formConfig.containsKey("uuid")) {
+				String formUuid = formConfig.getString("uuid");
+				this.setFormUuid(formUuid);
 			}
-
-			if (this.getConfigObj().containsKey("elementList")) {
-				this.stepList = new ArrayList<>();
-				JSONArray elementList = this.getConfigObj().getJSONArray("elementList");
-				for (int i = 0; i < elementList.size(); i++) {
-					JSONObject elementObj = elementList.getJSONObject(i);
-					if (elementObj.containsKey("userData")) {
-						IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(elementObj.getString("type"));
-						if (handler != null) {
-							/** 组装步骤信息 **/
-							JSONObject userData = elementObj.getJSONObject("userData");
-							ProcessStepVo processStepVo = new ProcessStepVo();
-							processStepVo.setProcessUuid(this.getUuid());
-							processStepVo.setUuid(elementObj.getString("id"));
-							processStepVo.setName(userData.getString("name"));
-							userData.remove("name");
-							processStepVo.setHandler(elementObj.getString("type"));
-							processStepVo.setDescription(userData.getString("description"));
-							userData.remove("description");
-							userData.remove("viewPage");
-							if (elementObj.getString("type").equals("end")) {
-								processStepVo.setType(ProcessStepType.END.getValue());
-							} else {
-								// if(!userData.containsKey("condition")) {
-								if (userData.containsKey("isStartNode") && userData.getString("isStartNode").equals("1")) {
-									processStepVo.setType(ProcessStepType.START.getValue());
-								} else {
-									processStepVo.setType(ProcessStepType.PROCESS.getValue());
-								}
-								// }else {
-								// processStepVo.setType(ProcessStepType.CONDITION.getValue());
-								// }
+			if(formConfig.containsKey("authorityList")) {
+				JSONArray authorityList = formConfig.getJSONArray("authorityList");
+				for (int i = 0; i < authorityList.size(); i++) {
+					JSONObject authorityObj = authorityList.getJSONObject(i);
+					if(authorityObj.containsKey("processStepUuidList")) {
+						String attributeUuid = authorityObj.getString("attributeUuid");
+						String action = authorityObj.getString("action");
+						JSONArray processStepUuidList = authorityObj.getJSONArray("processStepUuidList");
+						for(int j = 0; j < processStepUuidList.size(); j++) {
+							String processStepUuid = processStepUuidList.getString(j);
+							ProcessStepFormAttributeVo processStepFormAttributeVo = new ProcessStepFormAttributeVo();
+							processStepFormAttributeVo.setProcessUuid(this.getUuid());
+							processStepFormAttributeVo.setFormUuid(this.getFormUuid());
+							processStepFormAttributeVo.setProcessStepUuid(processStepUuid);
+							processStepFormAttributeVo.setAttributeUuid(attributeUuid);
+							processStepFormAttributeVo.setAction(action);
+														
+							List<ProcessStepFormAttributeVo> processStepFormAttributeList = processStepFormAttributeMap.get(processStepUuid);
+							if(processStepFormAttributeList == null) {
+								processStepFormAttributeList = new ArrayList<>();
+								processStepFormAttributeMap.put(processStepUuid, processStepFormAttributeList);
 							}
-							userData.remove("attributeList");
-							/** 组装表单属性 **/
-							if (userData.containsKey("formAttributeList")) {
-								JSONArray attributeObjList = userData.getJSONArray("formAttributeList");
-								List<ProcessStepFormAttributeVo> processStepFormAttributeList = new ArrayList<>();
-								for (int j = 0; j < attributeObjList.size(); j++) {
-									JSONObject attributeObj = attributeObjList.getJSONObject(j);
-									ProcessStepFormAttributeVo processStepFormAttributeVo = new ProcessStepFormAttributeVo();
-									processStepFormAttributeVo.setProcessUuid(this.getUuid());
-									processStepFormAttributeVo.setFormUuid(this.getFormUuid());
-									processStepFormAttributeVo.setProcessStepUuid(processStepVo.getUuid());
-									processStepFormAttributeVo.setAttributeUuid(attributeObj.getString("uuid"));
-									processStepFormAttributeVo.setConfig(attributeObj.getString("config"));
-									processStepFormAttributeVo.setData(attributeObj.getString("data"));
-									processStepFormAttributeVo.setIsEditable(attributeObj.getInteger("isEditable"));
-									// processStepFormAttributeVo.setIsRequired(attributeObj.optInt("isRequired"));
-
-									processStepFormAttributeList.add(processStepFormAttributeVo);
-								}
-								processStepVo.setFormAttributeList(processStepFormAttributeList);
-							}
-							userData.remove("formAttributeList");
-							/** 组装分配策略 **/
-							if (userData.containsKey("workerPolicyList")) {
-								JSONArray workerPolicyObjList = userData.getJSONArray("workerPolicyList");
-								List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = new ArrayList<>();
-								for (int j = 0; j < workerPolicyObjList.size(); j++) {
-									JSONObject workerPolicyObj = workerPolicyObjList.getJSONObject(j);
-									ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
-									processStepWorkerPolicyVo.setProcessUuid(this.getUuid());
-									processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
-									processStepWorkerPolicyVo.setPolicy(workerPolicyObj.getString("policy"));
-									processStepWorkerPolicyVo.setSort(j);
-									processStepWorkerPolicyVo.setConfig(workerPolicyObj.getString("config"));
-									processStepWorkerPolicyList.add(processStepWorkerPolicyVo);
-								}
-								processStepVo.setWorkerPolicyList(processStepWorkerPolicyList);
-							}
-							userData.remove("workerPolicyList");
-							/** 装配超时策略 **/
-							if (userData.containsKey("timeoutPolicyList")) {
-								JSONArray timeoutPolicyObjList = userData.getJSONArray("timeoutPolicyList");
-								List<ProcessStepTimeoutPolicyVo> processStepTimeoutPolicyList = new ArrayList<>();
-								for (int j = 0; j < timeoutPolicyObjList.size(); j++) {
-									JSONObject timeoutPolicyObj = timeoutPolicyObjList.getJSONObject(j);
-									ProcessStepTimeoutPolicyVo processStepTimeoutPolicyVo = new ProcessStepTimeoutPolicyVo();
-									processStepTimeoutPolicyVo.setProcessUuid(this.getUuid());
-									processStepTimeoutPolicyVo.setProcessStepUuid(processStepVo.getUuid());
-									processStepTimeoutPolicyVo.setPolicy(timeoutPolicyObj.getString("policy"));
-									processStepTimeoutPolicyVo.setSort(j);
-									processStepTimeoutPolicyVo.setTime(timeoutPolicyObj.getInteger("time"));
-									processStepTimeoutPolicyVo.setConfig(timeoutPolicyObj.getString("config"));
-									processStepTimeoutPolicyList.add(processStepTimeoutPolicyVo);
-								}
-								processStepVo.setTimeoutPolicyList(processStepTimeoutPolicyList);
-
-							}
-							userData.remove("timeoutPolicyList");
-							processStepVo.setConfig(userData.toJSONString());
-							this.stepList.add(processStepVo);
-
+							processStepFormAttributeList.add(processStepFormAttributeVo);
 						}
 					}
-
 				}
 			}
-			if (this.getConfigObj().containsKey("connectionList")) {
-				this.stepRelList = new ArrayList<>();
-				JSONArray relList = this.getConfigObj().getJSONArray("connectionList");
-				for (int i = 0; i < relList.size(); i++) {
-					JSONObject relObj = relList.getJSONObject(i);
-					ProcessStepRelVo processStepRelVo = new ProcessStepRelVo();
-					processStepRelVo.setFromStepUuid(relObj.getString("from"));
-					processStepRelVo.setToStepUuid(relObj.getString("to"));
-					processStepRelVo.setUuid(relObj.getString("id"));
-					processStepRelVo.setProcessUuid(this.getUuid());
-					if (relObj.containsKey("condition")) {
-						processStepRelVo.setCondition(relObj.getString("condition"));
-					} else if (relObj.containsKey("userData")) {
-						if (relObj.get("userData") instanceof JSONObject) {
-							if (relObj.getJSONObject("userData").containsKey("value")) {
-								processStepRelVo.setCondition(relObj.getJSONObject("userData").getString("value"));
-							}
-						}
-					}
-					stepRelList.add(processStepRelVo);
-				}
-			}
-
 		}
 
+		if (this.getConfigObj().containsKey("stepList")) {
+			this.stepList = new ArrayList<>();
+			JSONArray stepList = this.getConfigObj().getJSONArray("stepList");
+			for (int i = 0; i < stepList.size(); i++) {
+				JSONObject stepObj = stepList.getJSONObject(i);
+				ProcessStepVo processStepVo = new ProcessStepVo();
+				this.stepList.add(processStepVo);
+				processStepVo.setProcessUuid(this.getUuid());
+				processStepVo.setConfig(stepObj.toJSONString());
+				
+				if(stepObj.containsKey("uuid")) {
+					String uuid = stepObj.getString("uuid");
+					processStepVo.setUuid(uuid);
+					processStepVo.setFormAttributeList(processStepFormAttributeMap.get(uuid));
+				}
+				if(stepObj.containsKey("name")) {
+					processStepVo.setName(stepObj.getString("name"));
+				}
+				if(stepObj.containsKey("type")) {
+					String handler = stepObj.getString("type");
+					processStepVo.setHandler(handler);
+					processStepVo.setType(ProcessStepHandler.getType(handler));
+				}
+				/** 组装通知模板 **/
+				if(stepObj.containsKey("notifyList")) {
+					JSONArray notifyList = stepObj.getJSONArray("notifyList");
+					List<String> templateUuidList = new ArrayList<>();
+					for(int j = 0; j < notifyList.size(); j++) {
+						JSONObject notifyObj = notifyList.getJSONObject(j);
+						if(notifyObj.containsKey("template")) {
+							templateUuidList.add(notifyObj.getString("template"));
+						}
+					}
+					processStepVo.setTemplateUuidList(templateUuidList);
+				}
+				/** 组装分配策略 **/
+				if(stepObj.containsKey("workerPolicyConfig")) {
+					JSONObject workerPolicyConfig = stepObj.getJSONObject("workerPolicyConfig");
+					if(workerPolicyConfig.containsKey("policyList")) {
+						JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
+						List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
+						for(int k = 0; k < policyList.size(); k++) {
+							JSONObject policyObj = policyList.getJSONObject(k);
+							ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
+							processStepWorkerPolicyVo.setProcessUuid(this.getUuid());
+							processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
+							processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
+							processStepWorkerPolicyVo.setSort(k);
+							processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
+							workerPolicyList.add(processStepWorkerPolicyVo);
+						}
+						processStepVo.setWorkerPolicyList(workerPolicyList);
+					}					
+				}
+			}
+		}
+		
+		//TODO linbq 解析chart
 	}
 
 	public void setStepList(List<ProcessStepVo> stepList) {

@@ -165,6 +165,20 @@
 	SELECT COUNT(`uuid`) FROM `form_version` WHERE `uuid` = #{uuid}
 	</select>
 	
+	<select id="getFormAttributeByFormUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.FormAttributeVo">
+	SELECT
+	 a.`form_uuid` AS formUuid,
+	 a.`formversion_uuid` as formversionUuid,
+	 a.`uuid`,
+	 a.`label`,
+	 a.`type`,
+	 a.`handler`,
+	 a.`config` 
+	FROM `form_attribute` a
+	JOIN `form_version` b ON b.`uuid`=a.`formversion_uuid` AND b.`is_active` = 1
+	WHERE a.`form_uuid` = #{value}
+	</select>
+	
 	<update id="updateFormVersion" parameterType="codedriver.module.process.dto.FormVersionVo">
 		UPDATE
 		`form_version`

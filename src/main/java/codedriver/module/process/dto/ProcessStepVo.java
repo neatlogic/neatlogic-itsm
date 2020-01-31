@@ -33,6 +33,16 @@ public class ProcessStepVo implements Serializable {
 	private List<ProcessStepTimeoutPolicyVo> timeoutPolicyList;
 	private List<ProcessStepFormAttributeVo> formAttributeList;
 
+	private List<String> templateUuidList;
+	
+	public List<String> getTemplateUuidList() {
+		return templateUuidList;
+	}
+
+	public void setTemplateUuidList(List<String> templateUuidList) {
+		this.templateUuidList = templateUuidList;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other)

@@ -1,5 +1,8 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,23 +20,24 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 
 @Service
 @AuthAction(name = "PROCESS_MODIFY")
-public class ProcessTaskCompleteApi extends ApiComponentBase {
+public class ProcessTaskTransferApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public String getToken() {
-		return "processtask/complete";
+		return "processtask/transfer";
 	}
 
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "工单完成接口";
+		return "工单转交接口";
 	}
 
 	@Override
@@ -54,7 +58,7 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 			isRequired = true)
 	})
 	@Output({})
-	@Description(desc = "工单完成接口")
+	@Description(desc = "工单转交接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject result = new JSONObject();
 		Long processTaskStepId = jsonObj.getLong("processtaskStepId");
@@ -63,7 +67,9 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 			if (handler != null) {
 				processTaskStepVo.setParamObj(jsonObj);
-				handler.complete(processTaskStepVo);
+				List<ProcessTaskStepWorkerVo> workerList =  new ArrayList<ProcessTaskStepWorkerVo>();
+				//TODO lvzk 待确定前端参数
+				handler.transfer(processTaskStepVo,workerList);
 			}
 		} else {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
