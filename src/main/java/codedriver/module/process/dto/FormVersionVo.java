@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -89,63 +90,39 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 	}
 
 	public List<FormAttributeVo> getFormAttributeList() {
-		if (StringUtils.isNotBlank(this.content)) {
-			try {
-				JSONObject contentObj = JSONObject.parseObject(this.content);
-				if (contentObj.containsKey("cells") && contentObj.get("cells") instanceof JSONObject) {
-					JSONObject cellObj = contentObj.getJSONObject("cells");
-					Iterator it = cellObj.keySet().iterator();
-					while (it.hasNext()) {
-						String key = it.next().toString();
-						JSONObject obj = cellObj.getJSONObject(key);
-						if (obj.containsKey("data")) {
-							JSONObject dataObj = obj.getJSONObject("data");
-							String uuid = null;
-							if (dataObj.containsKey("uuid")) {
-								uuid = dataObj.getString("uuid");
-								if(StringUtils.isBlank(uuid)) {
-									continue;
-								}
-							}else {
-								continue;
-							}
-							String label = null;
-							if (dataObj.containsKey("label")) {
-								label = dataObj.getString("label");
-								if(StringUtils.isBlank(label)) {
-									continue;
-								}
-							}else {
-								continue;
-							}
-							String type = null;
-							if (dataObj.containsKey("type")) {
-								type = dataObj.getString("type");
-								if(StringUtils.isBlank(type)) {
-									continue;
-								}
-							}else {
-								continue;
-							}
-							String handler = null;
-							if (dataObj.containsKey("handler")) {
-								handler = dataObj.getString("handler");
-								if(StringUtils.isBlank(handler)) {
-									continue;
-								}
-							}else {
-								continue;
-							}
-							if (formAttributeList == null) {
-								formAttributeList = new ArrayList<>();
-							}
-							formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), uuid, label, type, handler, dataObj.toString()));
-						}
-					}
-				}
-			} catch (Exception ex) {
-
+		if(formAttributeList != null) {
+			return formAttributeList;
+		}
+		if(StringUtils.isBlank(this.content)) {
+			return null;
+		}
+		JSONObject contentObj = JSONObject.parseObject(this.content);
+		if(contentObj == null || contentObj.isEmpty()) {
+			return null;
+		}
+		
+		if(!contentObj.containsKey("formConfig")) {
+			return null;
+		}
+		JSONObject formConfig = contentObj.getJSONObject("formConfig");
+		if(formConfig == null || !formConfig.containsKey("pluginList")) {
+			return null;
+		}
+		JSONArray pluginList = formConfig.getJSONArray("pluginList");
+		if(pluginList == null || pluginList.isEmpty()) {
+			return null;
+		}
+		formAttributeList = new ArrayList<>();
+		for(int i = 0; i < pluginList.size(); i++) {
+			JSONObject pluginObj = pluginList.getJSONObject(i);
+			if(!pluginObj.containsKey("config")) {
+				continue;
 			}
+			JSONObject config = pluginObj.getJSONObject("config");
+			if(config == null || config.isEmpty()) {
+				continue;
+			}
+			formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), uuid, config.getString("label"), "system", config.getString("type"), pluginObj.toJSONString()));
 		}
 		return formAttributeList;
 	}
