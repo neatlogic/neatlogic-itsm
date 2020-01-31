@@ -94,7 +94,7 @@ public class ProcessServiceImpl implements ProcessService {
 		String formUuid = processVo.getFormUuid();
 		if (StringUtils.isNotBlank(formUuid)) {
 			processMapper.insertProcessForm(new ProcessFormVo(uuid, formUuid));
-			List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeByFormUuid(formUuid);
+			List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttributeList) {
 				formAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
 			}

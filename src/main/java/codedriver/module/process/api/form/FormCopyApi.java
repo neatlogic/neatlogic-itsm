@@ -1,6 +1,7 @@
 package codedriver.module.process.api.form;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.dto.FormAttributeVo;
 import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.FormVo;
 
@@ -61,32 +63,28 @@ public class FormCopyApi extends ApiComponentBase {
 		if(formVo == null) {
 			throw new FormNotFoundException(uuid);
 		}
-		String name = jsonObj.getString("name");
 		formVo.setUuid(null);
+		String newFormUuid = formVo.getUuid();
+		
+		String oldName = formVo.getName();
+		String name = jsonObj.getString("name");		
 		formVo.setName(name);
 		//如果表单名称已存在
 		if(formMapper.checkFormNameIsRepeat(formVo) > 0) {
 			throw new FormNameRepeatException(name);
 		}
 		formMapper.insertForm(formVo);
-		String currentVersionUuid = null;
 		if(jsonObj.containsKey("currentVersionUuid")) {
-			currentVersionUuid = jsonObj.getString("currentVersionUuid");
-			FormVersionVo formVersion = formMapper.getFormVersionByUuid(currentVersionUuid);
-			if(formVersion == null) {
+			String currentVersionUuid = jsonObj.getString("currentVersionUuid");
+			FormVersionVo formVersionVo = formMapper.getFormVersionByUuid(currentVersionUuid);
+			if(formVersionVo == null) {
 				throw new FormVersionNotFoundException(currentVersionUuid);
 			}
-			if(!uuid.equals(formVersion.getFormUuid())) {
+			if(!uuid.equals(formVersionVo.getFormUuid())) {
 				throw new FormIllegalParameterException("表单版本：'" + currentVersionUuid + "'不属于表单：'" + uuid + "'的版本");
 			}
-			FormVersionVo formVersionVo = new FormVersionVo();
-			formVersionVo.setFormUuid(formVo.getUuid());
-			formVersionVo.setVersion(1);
-			formVersionVo.setIsActive(1);
-			formVersionVo.setContent(formVersion.getContent());
-			formVersionVo.setEditor(UserContext.get().getUserId());
-			formMapper.insertFormVersion(formVersionVo);
-			formVo.setCurrentVersion(formVersionVo.getVersion());
+			saveFormVersion(formVersionVo, newFormUuid, oldName, name);
+			formVo.setCurrentVersion(1);
 			formVo.setCurrentVersionUuid(formVersionVo.getUuid());
 		}else {
 			List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
@@ -94,9 +92,7 @@ public class FormCopyApi extends ApiComponentBase {
 				throw new FormIllegalParameterException("表单：'" + uuid + "'没有版本");
 			}
 			for(FormVersionVo formVersionVo : formVersionList) {
-				formVersionVo.setUuid(null);
-				formVersionVo.setFormUuid(formVo.getUuid());
-				formMapper.insertFormVersion(formVersionVo);
+				saveFormVersion(formVersionVo, newFormUuid, oldName, name);
 				if(formVersionVo.getIsActive().equals(1)) {
 					formVo.setCurrentVersion(formVersionVo.getVersion());
 					formVo.setCurrentVersionUuid(formVersionVo.getUuid());
@@ -106,4 +102,25 @@ public class FormCopyApi extends ApiComponentBase {
 		return formVo;
 	}
 
+	private void saveFormVersion(FormVersionVo formVersionVo, String newFormUuid, String oldName, String newName) {
+		String content = formVersionVo.getContent();
+		content = content.replace(formVersionVo.getFormUuid(), newFormUuid);
+		content = content.replace(oldName, newName);
+		List<FormAttributeVo> oldFormAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(newFormUuid, formVersionVo.getUuid()));
+		for(FormAttributeVo formAttributeVo : oldFormAttributeList) {
+			String newFormAttributeUuid = UUID.randomUUID().toString().replace("-", "");
+			content = content.replace(formAttributeVo.getUuid(), newFormAttributeUuid);
+		}
+		formVersionVo.setUuid(null);
+		formVersionVo.setFormUuid(newFormUuid);
+		formVersionVo.setContent(content);
+		formVersionVo.setEditor(UserContext.get().getUserId());
+		formMapper.insertFormVersion(formVersionVo);
+		List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+		if (formAttributeList != null && formAttributeList.size() > 0) {
+			for (FormAttributeVo formAttributeVo : formAttributeList) {
+				formMapper.insertFormAttribute(formAttributeVo);
+			}
+		}
+	}
 }

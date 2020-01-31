@@ -165,7 +165,7 @@
 	SELECT COUNT(`uuid`) FROM `form_version` WHERE `uuid` = #{uuid}
 	</select>
 	
-	<select id="getFormAttributeByFormUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.FormAttributeVo">
+	<select id="getFormAttributeList" parameterType="codedriver.module.process.dto.FormAttributeVo" resultType="codedriver.module.process.dto.FormAttributeVo">
 	SELECT
 	 a.`form_uuid` AS formUuid,
 	 a.`formversion_uuid` as formversionUuid,
@@ -176,7 +176,10 @@
 	 a.`config` 
 	FROM `form_attribute` a
 	JOIN `form_version` b ON b.`uuid`=a.`formversion_uuid` AND b.`is_active` = 1
-	WHERE a.`form_uuid` = #{value}
+	WHERE a.`form_uuid` = #{formUuid}
+	<if test="formVersionUuid != null">
+	AND a.`formversion_uuid` = #{formVersionUuid}
+	</if>
 	</select>
 	
 	<update id="updateFormVersion" parameterType="codedriver.module.process.dto.FormVersionVo">
