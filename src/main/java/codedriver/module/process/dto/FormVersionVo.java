@@ -122,7 +122,7 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 			if(config == null || config.isEmpty()) {
 				continue;
 			}
-			formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), uuid, config.getString("label"), "system", config.getString("type"), pluginObj.toJSONString()));
+			formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), uuid, config.getString("label"), "system", config.getString("type"), pluginObj.getString("config")));
 		}
 		return formAttributeList;
 	}
