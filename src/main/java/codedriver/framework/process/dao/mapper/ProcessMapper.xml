@@ -167,8 +167,6 @@
 		`name`,
 		`type`,
 		`handler`,
-		`edit_page` AS editPage,
-		`view_page` AS viewPage,
 		`config`
 		FROM
 		`process_step`

@@ -5,10 +5,9 @@
 		SELECT
 		UNIX_TIMESTAMP(a.`active_time`) * 1000 as activeTimeLong,
 		UNIX_TIMESTAMP(a.`start_time`) * 1000 as startTimeLong,
-		UNIX_TIMESTAMP(a.`success_time`) * 1000 as successTimeLong,
+		UNIX_TIMESTAMP(a.`complete_time`) * 1000 as completeTimeLong,
 		UNIX_TIMESTAMP(a.`abort_time`) * 1000 as abortTimeLong,
-		UNIX_TIMESTAMP(a.`back_time`) * 1000 as backTimeLong,
-		UNIX_TIMESTAMP(a.`failed_time`) * 1000 as failedTimeLong
+		UNIX_TIMESTAMP(a.`back_time`) * 1000 as backTimeLong
 		FROM
 		`processtask_step_timeaudit` a
 		JOIN `processtask_step_sla` b
@@ -23,8 +22,7 @@
 		DATE_FORMAT(`active_time`,'%Y-%m-%d %H:%i:%s') AS activeTime,
 		DATE_FORMAT(`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
 		DATE_FORMAT(`abort_time`,'%Y-%m-%d %H:%i:%s') AS abortTime,
-		DATE_FORMAT(`success_time`,'%Y-%m-%d %H:%i:%s') AS successTime,
-		DATE_FORMAT(`failed_time`,'%Y-%m-%d %H:%i:%s') AS failedTime,
+		DATE_FORMAT(`complete_time`,'%Y-%m-%d %H:%i:%s') AS completeTime,
 		DATE_FORMAT(`back_time`,'%Y-%m-%d %H:%i:%s') AS backTime
 		FROM
 		`processtask_step_timeaudit`
@@ -43,8 +41,7 @@
 			<when test="activeTime != null and activeTime == 'now'">,`active_time`</when>
 			<when test="startTime != null and startTime == 'now'">,`start_time`</when>
 			<when test="abortTime != null and abortTime == 'now'">,`abort_time`</when>
-			<when test="successTime != null and successTime == 'now'">,`success_time`</when>
-			<when test="failedTime != null and failedTime == 'now'">,`failed_time`</when>
+			<when test="completeTime != null and completeTime == 'now'">,`complete_time`</when>
 			<when test="backTime != null and backTime == 'now'">,`back_time`</when>
 		</choose>
 		)
@@ -55,8 +52,7 @@
 			<when test="activeTime != null and activeTime == 'now'">,NOW(3)</when>
 			<when test="startTime != null and startTime == 'now'">,NOW(3)</when>
 			<when test="abortTime != null and abortTime == 'now'">,NOW(3)</when>
-			<when test="successTime != null and successTime == 'now'">,NOW(3)</when>
-			<when test="failedTime != null and failedTime == 'now'">,NOW(3)</when>
+			<when test="completeTime != null and completeTime == 'now'">,NOW(3)</when>
 			<when test="backTime != null and backTime == 'now'">,NOW(3)</when>
 		</choose>
 		)
@@ -71,8 +67,7 @@
 			<when test="activeTime != null and activeTime == 'now'">,`active_time` = NOW(3)</when>
 			<when test="startTime != null and startTime == 'now'">,`start_time` = NOW(3)</when>
 			<when test="abortTime != null and abortTime == 'now'">,`abort_time` = NOW(3)</when>
-			<when test="successTime != null and successTime == 'now'">,`success_time` = NOW(3)</when>
-			<when test="failedTime != null and failedTime == 'now'">,`failed_time` = NOW(3)</when>
+			<when test="completeTime != null and completeTime == 'now'">,`complete_time` = NOW(3)</when>
 			<when test="backTime != null and backTime == 'now'">,`back_time` = NOW(3)</when>
 		</choose>
 		WHERE `id` = #{id}

@@ -6,14 +6,12 @@ public class ProcessTaskStepTimeAuditVo {
 	private String activeTime;
 	private String startTime;
 	private String abortTime;
-	private String successTime;
-	private String failedTime;
+	private String completeTime;
 	private String backTime;
 	private Long activeTimeLong;
 	private Long startTimeLong;
 	private Long abortTimeLong;
-	private Long successTimeLong;
-	private Long failedTimeLong;
+	private Long completeTimeLong;
 	private Long backTimeLong;
 
 	public Long getId() {
@@ -56,22 +54,6 @@ public class ProcessTaskStepTimeAuditVo {
 		this.abortTime = abortTime;
 	}
 
-	public String getSuccessTime() {
-		return successTime;
-	}
-
-	public void setSuccessTime(String successTime) {
-		this.successTime = successTime;
-	}
-
-	public String getFailedTime() {
-		return failedTime;
-	}
-
-	public void setFailedTime(String failedTime) {
-		this.failedTime = failedTime;
-	}
-
 	public String getBackTime() {
 		return backTime;
 	}
@@ -104,21 +86,6 @@ public class ProcessTaskStepTimeAuditVo {
 		this.abortTimeLong = abortTimeLong;
 	}
 
-	public Long getSuccessTimeLong() {
-		return successTimeLong;
-	}
-
-	public void setSuccessTimeLong(Long successTimeLong) {
-		this.successTimeLong = successTimeLong;
-	}
-
-	public Long getFailedTimeLong() {
-		return failedTimeLong;
-	}
-
-	public void setFailedTimeLong(Long failedTimeLong) {
-		this.failedTimeLong = failedTimeLong;
-	}
 
 	public Long getBackTimeLong() {
 		return backTimeLong;
@@ -126,6 +93,22 @@ public class ProcessTaskStepTimeAuditVo {
 
 	public void setBackTimeLong(Long backTimeLong) {
 		this.backTimeLong = backTimeLong;
+	}
+
+	public String getCompleteTime() {
+		return completeTime;
+	}
+
+	public void setCompleteTime(String completeTime) {
+		this.completeTime = completeTime;
+	}
+
+	public Long getCompleteTimeLong() {
+		return completeTimeLong;
+	}
+
+	public void setCompleteTimeLong(Long completeTimeLong) {
+		this.completeTimeLong = completeTimeLong;
 	}
 
 }

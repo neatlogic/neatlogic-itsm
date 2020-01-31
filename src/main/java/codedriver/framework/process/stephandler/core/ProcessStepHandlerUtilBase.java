@@ -372,12 +372,10 @@ public abstract class ProcessStepHandlerUtilBase {
 				if (auditVo.getActiveTimeLong() != null) {
 					startTime = auditVo.getActiveTimeLong();
 				}
-				if (auditVo.getSuccessTimeLong() != null) {
-					endTime = auditVo.getSuccessTimeLong();
-				} else if (auditVo.getFailedTimeLong() != null) {
-					endTime = auditVo.getFailedTimeLong();
+				if (auditVo.getCompleteTimeLong() != null) {
+					endTime = auditVo.getCompleteTimeLong();
 				} else if (auditVo.getAbortTimeLong() != null) {
-					endTime = auditVo.getFailedTimeLong();
+					endTime = auditVo.getAbortTimeLong();
 				} else if (auditVo.getBackTimeLong() != null) {
 					endTime = auditVo.getBackTimeLong();
 				}
@@ -442,12 +440,10 @@ public abstract class ProcessStepHandlerUtilBase {
 					if (auditVo.getActiveTimeLong() != null) {
 						startTime = auditVo.getActiveTimeLong();
 					}
-					if (auditVo.getSuccessTimeLong() != null) {
-						endTime = auditVo.getSuccessTimeLong();
-					} else if (auditVo.getFailedTimeLong() != null) {
-						endTime = auditVo.getFailedTimeLong();
+					if (auditVo.getCompleteTimeLong() != null) {
+						endTime = auditVo.getCompleteTimeLong();
 					} else if (auditVo.getAbortTimeLong() != null) {
-						endTime = auditVo.getFailedTimeLong();
+						endTime = auditVo.getAbortTimeLong();
 					} else if (auditVo.getBackTimeLong() != null) {
 						endTime = auditVo.getBackTimeLong();
 					}
@@ -686,93 +682,73 @@ public abstract class ProcessStepHandlerUtilBase {
 	}
 
 	protected static class TimeAuditHandler {
-
-		protected static void active(ProcessTaskStepVo currentProcessTaskStepVo) {
+		protected static void audit(ProcessTaskStepVo currentProcessTaskStepVo, ProcessTaskStepAction action) {
 			ProcessTaskStepTimeAuditVo processTaskStepTimeAuditVo = processTaskStepTimeAuditMapper.getLastProcessTaskStepTimeAuditByStepId(currentProcessTaskStepVo.getId());
-			/** 如果找不到审计记录并且activetime不为空，则新建审计记录 **/
-			if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getActiveTime())) {
-				processTaskStepTimeAuditVo = new ProcessTaskStepTimeAuditVo();
-				processTaskStepTimeAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				processTaskStepTimeAuditVo.setActiveTime("now");
-				processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			}
-		}
-
-		protected static void start(ProcessTaskStepVo currentProcessTaskStepVo) {
-			ProcessTaskStepTimeAuditVo processTaskStepTimeAuditVo = processTaskStepTimeAuditMapper.getLastProcessTaskStepTimeAuditByStepId(currentProcessTaskStepVo.getId());
-			/** 如果找不到审计记录并且starttime不为空，则新建审计记录 **/
-			if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getStartTime())) {
-				processTaskStepTimeAuditVo = new ProcessTaskStepTimeAuditVo();
-				processTaskStepTimeAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				processTaskStepTimeAuditVo.setStartTime("now");
-				processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getStartTime())) {// 如果starttime为空，则更新starttime
-				processTaskStepTimeAuditVo.setStartTime("now");
-				processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			}
-		}
-
-		protected static void success(ProcessTaskStepVo currentProcessTaskStepVo) {
-			ProcessTaskStepTimeAuditVo processTaskStepTimeAuditVo = processTaskStepTimeAuditMapper.getLastProcessTaskStepTimeAuditByStepId(currentProcessTaskStepVo.getId());
-			/** 如果找不到审计记录并且successtime不为空，则新建审计记录 **/
-			if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getSuccessTime())) {
-				processTaskStepTimeAuditVo = new ProcessTaskStepTimeAuditVo();
-				processTaskStepTimeAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				processTaskStepTimeAuditVo.setSuccessTime("now");
-				processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getSuccessTime())) {// 如果successtime为空，则更新successtime
-				processTaskStepTimeAuditVo.setSuccessTime("now");
-				processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			}
-		}
-
-		protected static void failed(ProcessTaskStepVo currentProcessTaskStepVo) {
-			ProcessTaskStepTimeAuditVo processTaskStepTimeAuditVo = processTaskStepTimeAuditMapper.getLastProcessTaskStepTimeAuditByStepId(currentProcessTaskStepVo.getId());
-			/** 如果找不到审计记录并且failedtime不为空，则新建审计记录 **/
-			if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getFailedTime())) {
-				processTaskStepTimeAuditVo = new ProcessTaskStepTimeAuditVo();
-				processTaskStepTimeAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				processTaskStepTimeAuditVo.setFailedTime("now");
-				processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getSuccessTime())) {// 如果failedtime为空，则更新failedtime
-				processTaskStepTimeAuditVo.setFailedTime("now");
-				processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			}
-		}
-
-		protected static void abort(ProcessTaskStepVo currentProcessTaskStepVo) {
-			ProcessTaskStepTimeAuditVo processTaskStepTimeAuditVo = processTaskStepTimeAuditMapper.getLastProcessTaskStepTimeAuditByStepId(currentProcessTaskStepVo.getId());
-			/** 如果找不到审计记录并且aborttime不为空，则新建审计记录 **/
-			if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getFailedTime())) {
-				processTaskStepTimeAuditVo = new ProcessTaskStepTimeAuditVo();
-				processTaskStepTimeAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				processTaskStepTimeAuditVo.setAbortTime("now");
-				processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getSuccessTime())) {// 如果aborttime为空，则更新aborttime
-				processTaskStepTimeAuditVo.setAbortTime("now");
-				processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			}
-		}
-
-		protected static void back(ProcessTaskStepVo currentProcessTaskStepVo) {
-			ProcessTaskStepTimeAuditVo processTaskStepTimeAuditVo = processTaskStepTimeAuditMapper.getLastProcessTaskStepTimeAuditByStepId(currentProcessTaskStepVo.getId());
-			/** 如果找不到审计记录并且backtime不为空，则新建审计记录 **/
-			if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getBackTime())) {
-				processTaskStepTimeAuditVo = new ProcessTaskStepTimeAuditVo();
-				processTaskStepTimeAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				processTaskStepTimeAuditVo.setBackTime("now");
-				processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getBackTime())) {// 如果backtime为空，则更新backtime
-				processTaskStepTimeAuditVo.setBackTime("now");
-				processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(processTaskStepTimeAuditVo);
-			}
-		}
-
-		protected static void recover(ProcessTaskStepVo currentProcessTaskStepVo) {
-			if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
-				active(currentProcessTaskStepVo);
-			} else if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
-				start(currentProcessTaskStepVo);
+			boolean needNewAuduit = false;
+			ProcessTaskStepTimeAuditVo newAuditVo = new ProcessTaskStepTimeAuditVo();
+			newAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+			switch (action) {
+			case ACTIVE:
+				newAuditVo.setActiveTime("now");
+				if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getActiveTime())) {
+					processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
+				}
+				break;
+			case START:
+				newAuditVo.setStartTime("now");
+				if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getStartTime())) {
+					processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
+				} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getStartTime())) {// 如果starttime为空，则更新starttime
+					newAuditVo.setId(processTaskStepTimeAuditVo.getId());
+					processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(newAuditVo);
+				}
+				break;
+			case COMPLETE:
+				/** 如果找不到审计记录并且completetime不为空，则新建审计记录 **/
+				newAuditVo.setCompleteTime("now");
+				if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getCompleteTime())) {
+					processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
+				} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getCompleteTime())) {// 如果completetime为空，则更新completetime
+					newAuditVo.setId(processTaskStepTimeAuditVo.getId());
+					processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(newAuditVo);
+				}
+				break;
+			case ABORT:
+				/** 如果找不到审计记录并且aborttime不为空，则新建审计记录 **/
+				newAuditVo.setAbortTime("now");
+				if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getAbortTime())) {
+					processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
+				} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getAbortTime())) {// 如果aborttime为空，则更新aborttime
+					newAuditVo.setId(processTaskStepTimeAuditVo.getId());
+					processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(newAuditVo);
+				}
+				break;
+			case BACK:
+				/** 如果找不到审计记录并且backtime不为空，则新建审计记录 **/
+				newAuditVo.setBackTime("now");
+				if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getBackTime())) {
+					processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
+				} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getBackTime())) {// 如果backtime为空，则更新backtime
+					newAuditVo.setId(processTaskStepTimeAuditVo.getId());
+					processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(newAuditVo);
+				}
+				break;
+			case RECOVER:
+				if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
+					newAuditVo.setActiveTime("now");
+					if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getActiveTime())) {
+						processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
+					}
+				} else if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
+					newAuditVo.setStartTime("now");
+					if (processTaskStepTimeAuditVo == null || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getStartTime())) {
+						processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
+					} else if (StringUtils.isBlank(processTaskStepTimeAuditVo.getStartTime())) {// 如果starttime为空，则更新starttime
+						newAuditVo.setId(processTaskStepTimeAuditVo.getId());
+						processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(newAuditVo);
+					}
+				}
+				break;
 			}
 		}
 	}

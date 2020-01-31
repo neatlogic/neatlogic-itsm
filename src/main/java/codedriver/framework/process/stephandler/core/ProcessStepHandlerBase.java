@@ -202,9 +202,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				updateProcessTaskStepStatus(currentProcessTaskStepVo);
 
 				/** 写入时间审计 **/
-				TimeAuditHandler.active(currentProcessTaskStepVo);
+				TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ACTIVE);
 				if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
-					TimeAuditHandler.start(currentProcessTaskStepVo);
+					TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.START);
 				}
 
 				/** 计算SLA **/
@@ -329,9 +329,6 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 	public final int handle(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
-		// 获取当前节点基本信息
-		// ProcessTaskStepVo processTaskStepVo =
-		// processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		// 修改当前步骤状态为运行中
 		currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		updateProcessTaskStepStatus(currentProcessTaskStepVo);
@@ -340,6 +337,8 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				myHandle(currentProcessTaskStepVo);
 				/** 如果步骤被标记为全部完成，则触发完成 **/
 				if (currentProcessTaskStepVo.getIsAllDone()) {
+					/** 记录时间审计 **/
+					TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
 					IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(this.getHandler());
 					doNext(new ProcessStepThread(currentProcessTaskStepVo) {
 						@Override
@@ -368,6 +367,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 						// 这里不会有事务控制
 						myHandle(currentProcessTaskStepVo);
 						if (currentProcessTaskStepVo.getIsAllDone()) {
+							/** 记录时间审计 **/
+							TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
+							
 							doNext(new ProcessStepThread(currentProcessTaskStepVo) {
 								@Override
 								public void execute() {
@@ -442,11 +444,11 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
 
 			/** 写入时间审计 **/
-			TimeAuditHandler.start(currentProcessTaskStepVo);
+			TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.START);
 
 			/** 计算SLA **/
 			SlaHandler.calculate(currentProcessTaskStepVo);
-			
+
 			/** 触发通知 **/
 			NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.START);
 		} catch (ProcessTaskException ex) {
@@ -529,10 +531,6 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				} else if (nextStepList.size() == 0 && !processTaskStepVo.getHandler().equals(ProcessStepHandler.END.getHandler())) {
 					throw new ProcessTaskException("找不到可流转路径");
 				}
-
-				/** 写入时间审计 **/
-				TimeAuditHandler.success(currentProcessTaskStepVo);
-
 				/** 触发通知 **/
 				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.SUCCEED);
 			} catch (ProcessTaskException ex) {
@@ -541,16 +539,14 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				currentProcessTaskStepVo.setIsActive(1);
 				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
 				updateProcessTaskStepStatus(currentProcessTaskStepVo);
-
-				/** 写入时间审计 **/
-				TimeAuditHandler.failed(currentProcessTaskStepVo);
-				
 				/** 触发通知 **/
 				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.FAILED);
 			}
 			if (this.getMode().equals(ProcessStepMode.MT)) {
 				/** 处理历史记录 **/
 				AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
+				/** 写入时间审计 **/
+				TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
 				/** 计算SLA **/
 				SlaHandler.calculate(currentProcessTaskStepVo);
 			}
@@ -610,11 +606,11 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORT);
 
 		/** 写入时间审计 **/
-		TimeAuditHandler.abort(currentProcessTaskStepVo);
+		TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORT);
 
 		/** 计算SLA **/
 		SlaHandler.calculate(currentProcessTaskStepVo);
-		
+
 		/** 触发通知 **/
 		NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.ABORT);
 		return 1;
@@ -683,11 +679,11 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.RECOVER);
 
 			/** 写入时间审计 **/
-			TimeAuditHandler.recover(currentProcessTaskStepVo);
+			TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.RECOVER);
 
 			/** 计算SLA **/
 			SlaHandler.calculate(currentProcessTaskStepVo);
-			
+
 			/** 触发通知 **/
 			NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.RECOVER);
 		}
@@ -743,7 +739,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 				/** 处理历史记录 **/
 				AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ACCEPT);
-				
+
 				/** 触发通知 **/
 				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.ACCEPT);
 			}
@@ -820,10 +816,10 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			processTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
 			updateProcessTaskStepStatus(processTaskStepVo);
 		}
-		
+
 		/** 处理历史记录 **/
 		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.TRANSFER);
-	
+
 		return 0;
 	}
 
@@ -880,7 +876,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			currentProcessTaskStepVo.setIsActive(0);
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
 			/** 处理时间审计 **/
-			TimeAuditHandler.back(currentProcessTaskStepVo);
+			TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.BACK);
 
 			/** 触发通知 **/
 			NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.TRANSFER);
