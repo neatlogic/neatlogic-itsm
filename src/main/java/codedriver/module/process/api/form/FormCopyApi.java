@@ -83,8 +83,9 @@ public class FormCopyApi extends ApiComponentBase {
 			if(!uuid.equals(formVersionVo.getFormUuid())) {
 				throw new FormIllegalParameterException("表单版本：'" + currentVersionUuid + "'不属于表单：'" + uuid + "'的版本");
 			}
+			formVersionVo.setVersion(1);
 			saveFormVersion(formVersionVo, newFormUuid, oldName, name);
-			formVo.setCurrentVersion(1);
+			formVo.setCurrentVersion(formVersionVo.getVersion());
 			formVo.setCurrentVersionUuid(formVersionVo.getUuid());
 		}else {
 			List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
