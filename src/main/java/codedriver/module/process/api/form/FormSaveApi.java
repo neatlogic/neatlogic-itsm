@@ -109,9 +109,9 @@ public class FormSaveApi extends ApiComponentBase {
 		}
 		//更新表单属性信息
 		formMapper.deleteFormAttributeByFormUuid(formVo.getUuid());
-		List<FormAttributeVo> attributeList = formVersionVo.getFormAttributeList();
-		if (attributeList != null && attributeList.size() > 0) {
-			for (FormAttributeVo formAttributeVo : attributeList) {
+		List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+		if (formAttributeList != null && formAttributeList.size() > 0) {
+			for (FormAttributeVo formAttributeVo : formAttributeList) {
 				formMapper.insertFormAttribute(formAttributeVo);
 			}
 		}
