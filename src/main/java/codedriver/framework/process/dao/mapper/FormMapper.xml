@@ -257,18 +257,24 @@
 
 	<insert id="insertFormAttribute" parameterType="codedriver.module.process.dto.FormAttributeVo">
 		INSERT INTO `form_attribute` (
-		`form_uuid`,
-		`attribute_uuid`,
-		`formversion_uuid`,
-		`config`
-		)
+		  `form_uuid`,
+		  `formversion_uuid`,
+		  `uuid`,
+		  `label`,
+		  `type`,
+		  `handler`,
+		  `config`
+		) 
 		VALUES
-		(
-		#{formUuid},
-		#{attributeUuid},
-		#{formVersionUuid},
-		#{config}
-		)
+		  (
+		    #{formUuid},
+		    #{formVersionUuid},
+		    #{uuid},
+		    #{label},
+		    #{type},
+		    #{handler},
+		    #{config}
+		  )
 	</insert>
 
 	<delete id="deleteFormAttributeByFormUuid" parameterType="java.lang.String">
