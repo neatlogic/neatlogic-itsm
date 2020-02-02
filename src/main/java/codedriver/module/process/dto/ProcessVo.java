@@ -195,7 +195,7 @@ public class ProcessVo extends BasePageVo implements Serializable {
 							processStepWorkerPolicyVo.setProcessUuid(this.getUuid());
 							processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
 							processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
-							processStepWorkerPolicyVo.setSort(k);
+							processStepWorkerPolicyVo.setSort(k + 1);
 							processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
 							workerPolicyList.add(processStepWorkerPolicyVo);
 						}
