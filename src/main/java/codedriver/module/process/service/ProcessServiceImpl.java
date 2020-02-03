@@ -90,14 +90,10 @@ public class ProcessServiceImpl implements ProcessService {
 			processVo.setFcu(UserContext.get().getUserId());
 			processMapper.insertProcess(processVo);
 		}
-		Map<String, FormAttributeVo> formAttributeMap = new HashMap<>();
+
 		String formUuid = processVo.getFormUuid();
 		if (StringUtils.isNotBlank(formUuid)) {
 			processMapper.insertProcessForm(new ProcessFormVo(uuid, formUuid));
-			List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
-			for(FormAttributeVo formAttributeVo : formAttributeList) {
-				formAttributeMap.put(formAttributeVo.getUuid(), formAttributeVo);
-			}
 		}
 
 		if (processVo.getStepList() != null && processVo.getStepList().size() > 0) {
@@ -106,12 +102,6 @@ public class ProcessServiceImpl implements ProcessService {
 				processMapper.insertProcessStep(stepVo);
 				if (stepVo.getFormAttributeList() != null && stepVo.getFormAttributeList().size() > 0) {
 					for (ProcessStepFormAttributeVo processStepAttributeVo : stepVo.getFormAttributeList()) {
-						FormAttributeVo formAttributeVo = formAttributeMap.get(processStepAttributeVo.getAttributeUuid());
-						if(formAttributeVo == null) {
-							continue;
-						}
-						processStepAttributeVo.setConfig(formAttributeVo.getConfig());
-						// TODO linbq processStepAttributeVo.setData(data);
 						processMapper.insertProcessStepFormAttribute(processStepAttributeVo);
 					}
 				}

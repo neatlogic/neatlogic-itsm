@@ -80,8 +80,6 @@
 		a.`config` AS stepConfig,
 		b.`form_uuid` AS formUuid,
 		b.`attribute_uuid` AS formAttributeUuid,
-		b.`config` AS formAttributeConfig,
-		b.`data` AS formAttributeData,
 		c.`handler` AS formAttributeHandler,
 		c.`type` AS formAttributeType,
 		c.`label` AS attributeLabel,
@@ -112,8 +110,6 @@
 		a.`attribute_uuid` AS attributeUuid,
 		a.`form_uuid` AS formUuid,
 		a.`action` AS action,
-		a.`config`,
-		a.`data`,
 		c.`handler`,
 		c.`type`
 		FROM
@@ -331,9 +327,7 @@
 		`process_step_uuid`,
 		`form_uuid`,
 		`attribute_uuid`,
-		`action`,
-		`config`,
-		`data`
+		`action`
 		)
 		VALUES
 		(
@@ -341,9 +335,7 @@
 		#{processStepUuid},
 		#{formUuid},
 		#{attributeUuid},
-		#{action},
-		#{config},
-		#{data}
+		#{action}
 		)
 	</insert>
 

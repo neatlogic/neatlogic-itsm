@@ -173,7 +173,8 @@
 	 a.`label`,
 	 a.`type`,
 	 a.`handler`,
-	 a.`config` 
+	 a.`config`,
+	 a.`data`
 	FROM `form_attribute` a
 	JOIN `form_version` b ON b.`uuid`=a.`formversion_uuid` AND b.`is_active` = 1
 	WHERE a.`form_uuid` = #{formUuid}
@@ -263,7 +264,8 @@
 		  `label`,
 		  `type`,
 		  `handler`,
-		  `config`
+		  `config`,
+		  `data`
 		) 
 		VALUES
 		  (
@@ -273,7 +275,8 @@
 		    #{label},
 		    #{type},
 		    #{handler},
-		    #{config}
+		    #{config},
+		    #{data}
 		  )
 	</insert>
 
