@@ -11,7 +11,8 @@ public class FormAttributeVo implements Serializable {
 	private String type;
 	private String handler;
 	private String config;
-
+	private String data;
+	
 	public FormAttributeVo() {
 
 	}
@@ -32,7 +33,7 @@ public class FormAttributeVo implements Serializable {
 		this.formVersionUuid = formVersionUuid;
 	}
 
-	public FormAttributeVo(String formUuid, String formVersionUuid, String uuid, String label, String type, String handler, String config) {
+	public FormAttributeVo(String formUuid, String formVersionUuid, String uuid, String label, String type, String handler, String config, String data) {
 		this.uuid = uuid;
 		this.formUuid = formUuid;
 		this.formVersionUuid = formVersionUuid;
@@ -40,6 +41,7 @@ public class FormAttributeVo implements Serializable {
 		this.type = type;
 		this.handler = handler;
 		this.config = config;
+		this.data = data;
 	}
 
 	public String getUuid() {
@@ -96,6 +98,14 @@ public class FormAttributeVo implements Serializable {
 
 	public void setConfig(String config) {
 		this.config = config;
+	}
+
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
 	}
 
 }
