@@ -52,7 +52,7 @@ public class FormServiceImpl implements FormService {
 	public int saveForm(FormVo formVo) {
 		formMapper.insertForm(formVo);
 		FormVersionVo formVersionVo = new FormVersionVo();
-		formVersionVo.setContent(formVo.getContent());
+		formVersionVo.setFormConfig(formVo.getFormConfig());
 		formVersionVo.setFormUuid(formVo.getUuid());
 		formMapper.resetFormVersionIsActiveByFormUuid(formVo.getUuid());
 		formVersionVo.setIsActive(1);

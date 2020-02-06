@@ -104,7 +104,7 @@ public class FormCopyApi extends ApiComponentBase {
 	}
 
 	private void saveFormVersion(FormVersionVo formVersionVo, String newFormUuid, String oldName, String newName) {
-		String content = formVersionVo.getContent();
+		String content = formVersionVo.getFormConfig();
 		content = content.replace(formVersionVo.getFormUuid(), newFormUuid);
 		content = content.replace(oldName, newName);
 		List<FormAttributeVo> oldFormAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(newFormUuid, formVersionVo.getUuid()));
@@ -114,7 +114,7 @@ public class FormCopyApi extends ApiComponentBase {
 		}
 		formVersionVo.setUuid(null);
 		formVersionVo.setFormUuid(newFormUuid);
-		formVersionVo.setContent(content);
+		formVersionVo.setFormConfig(content);
 		formVersionVo.setEditor(UserContext.get().getUserId());
 		formMapper.insertFormVersion(formVersionVo);
 		List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
