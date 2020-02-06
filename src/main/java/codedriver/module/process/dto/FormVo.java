@@ -25,7 +25,7 @@ public class FormVo extends BasePageVo implements Serializable {
 	@EntityField(name = "当前版本uuid", type = ApiParamType.STRING)
 	private String currentVersionUuid;
 	@EntityField(name = "表单内容（表单编辑器使用）", type = ApiParamType.STRING)
-	private String content;
+	private String formConfig;
 	
 	@EntityField(name = "引用数量", type = ApiParamType.INTEGER)
 	private int referenceCount;
@@ -69,12 +69,12 @@ public class FormVo extends BasePageVo implements Serializable {
 		this.versionList = versionList;
 	}
 
-	public String getContent() {
-		return content;
+	public String getFormConfig() {
+		return formConfig;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setFormConfig(String formConfig) {
+		this.formConfig = formConfig;
 	}	
 
 	public Integer getCurrentVersion() {

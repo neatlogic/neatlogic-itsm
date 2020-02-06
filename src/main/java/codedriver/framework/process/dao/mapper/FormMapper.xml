@@ -8,7 +8,7 @@
 		a.`version`,
 		a.`is_active` AS isActive,
 		a.`form_uuid` AS formUuid,
-		a.`content`,
+		a.`form_config` AS formConfig,
 		b.`name` AS formName
 		FROM
 		`form_version` a
@@ -88,7 +88,7 @@
 		`version`,
 		`is_active` AS isActive,
 		`form_uuid` AS formUuid,
-		`content`,
+		`form_config AS formConfig`,
 		`lcu` AS editor,
 		`lcd` AS editTime
 		FROM
@@ -113,7 +113,7 @@
 		`version`,
 		`is_active` AS isActive,
 		`form_uuid` AS formUuid,
-		`content`,
+		`form_config AS formConfig`,
 		`lcu` AS editor,
 		`lcd` AS editTime
 		FROM
@@ -190,8 +190,8 @@
 		<if test="isActive != null">
 		`is_active` = #{isActive},
 		</if>
-		<if test="content != null and content != ''">
-		`content` = #{content},
+		<if test="formConfig != null and formConfig != ''">
+		`form_config` = #{formConfig},
 		</if>
 		`lcd` = NOW(),
 		`lcu` = #{editor}
@@ -240,7 +240,7 @@
 		`version`,
 		`is_active`,
 		`form_uuid`,
-		`content`,
+		`form_config`,
 		`fcd`,
 		`fcu`
 		)
@@ -250,7 +250,7 @@
 		#{version},
 		#{isActive},
 		#{formUuid},
-		#{content},
+		#{formConfig},
 		NOW(),
 		#{editor}
 		)

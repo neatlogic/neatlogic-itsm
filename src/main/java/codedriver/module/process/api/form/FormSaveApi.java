@@ -56,7 +56,7 @@ public class FormSaveApi extends ApiComponentBase {
 			@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, length = 50, desc = "表单名称"),
 			@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活", isRequired = true),
 			@Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "当前版本的uuid，为空代表创建一个新版本", isRequired = false),
-			@Param(name = "content", type = ApiParamType.JSONOBJECT, desc = "表单控件生成的json内容", isRequired = true) 
+			@Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "表单控件生成的json内容", isRequired = true) 
 			})
 	@Output({
 			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid"),
@@ -83,7 +83,7 @@ public class FormSaveApi extends ApiComponentBase {
 				
 		//插入表单版本信息
 		FormVersionVo formVersionVo = new FormVersionVo();
-		formVersionVo.setContent(formVo.getContent());
+		formVersionVo.setFormConfig(formVo.getFormConfig());
 		formVersionVo.setFormUuid(formVo.getUuid());
 		formMapper.resetFormVersionIsActiveByFormUuid(formVo.getUuid());
 		formVersionVo.setIsActive(1);
