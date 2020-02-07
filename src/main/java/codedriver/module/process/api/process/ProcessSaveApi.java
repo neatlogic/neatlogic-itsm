@@ -2,6 +2,7 @@ package codedriver.module.process.api.process;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -10,6 +11,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActive;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -17,7 +19,9 @@ import codedriver.module.process.dto.ProcessVo;
 import codedriver.module.process.service.ProcessService;
 
 @Service
+@Transactional
 @AuthAction(name = "PROCESS_MODIFY")
+@IsActive
 public class ProcessSaveApi extends ApiComponentBase {
 
 	@Autowired
