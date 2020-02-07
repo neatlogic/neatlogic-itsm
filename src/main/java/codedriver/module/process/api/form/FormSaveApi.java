@@ -71,11 +71,11 @@ public class FormSaveApi extends ApiComponentBase {
 		}
 		//判断表单是否存在
 		if(formMapper.checkFormIsExists(formVo.getUuid()) == 0) {
+			//插入表单信息
+			formMapper.insertForm(formVo);		
+		}else {
 			//更新表单信息
 			formMapper.updateForm(formVo);
-		}else {
-			//插入表单信息
-			formMapper.insertForm(formVo);
 		}
 				
 		//插入表单版本信息
