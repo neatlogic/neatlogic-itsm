@@ -88,7 +88,7 @@
 		`version`,
 		`is_active` AS isActive,
 		`form_uuid` AS formUuid,
-		`form_config AS formConfig`,
+		`form_config` AS formConfig`,
 		`lcu` AS editor,
 		`lcd` AS editTime
 		FROM
@@ -113,7 +113,7 @@
 		`version`,
 		`is_active` AS isActive,
 		`form_uuid` AS formUuid,
-		`form_config AS formConfig`,
+		`form_config` AS formConfig`,
 		`lcu` AS editor,
 		`lcd` AS editTime
 		FROM
