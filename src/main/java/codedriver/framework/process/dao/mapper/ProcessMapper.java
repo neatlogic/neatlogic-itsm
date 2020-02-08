@@ -2,9 +2,12 @@ package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import codedriver.module.process.dto.ChannelProcessVo;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ProcessFormVo;
+import codedriver.module.process.dto.ProcessSlaVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessStepNotifyTemplateVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
@@ -25,7 +28,8 @@ public interface ProcessMapper {
 
 	public List<ProcessStepVo> getProcessStepDetailByProcessUuid(String processUuid);
 
-	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo);
+	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(
+			ProcessStepFormAttributeVo processStepFormAttributeVo);
 
 	public ProcessVo getProcessByUuid(String processUuid);
 
@@ -62,6 +66,10 @@ public interface ProcessMapper {
 	public int insertProcessStepWorkerPolicy(ProcessStepWorkerPolicyVo processStepWorkerPolicyVo);
 
 	public int insertProcessForm(ProcessFormVo processFormVo);
+
+	public int insertProcessStepSla(@Param("stepUuid") String stepUuid, @Param("slaUuid") String slaUuid);
+
+	public int insertProcessSla(ProcessSlaVo processSlaVo);
 
 	public int insertProcessStepNotifyTemplate(ProcessStepNotifyTemplateVo processStepNotifyTemplateVo);
 

@@ -207,8 +207,10 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 					TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.START);
 				}
 
-				/** 计算SLA **/
+				/** 计算SLA并触发超时警告 **/
 				SlaHandler.calculate(currentProcessTaskStepVo);
+
+				
 
 				/** 触发通知 **/
 				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.ACTIVE);
@@ -369,7 +371,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 						if (currentProcessTaskStepVo.getIsAllDone()) {
 							/** 记录时间审计 **/
 							TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
-							
+
 							doNext(new ProcessStepThread(currentProcessTaskStepVo) {
 								@Override
 								public void execute() {

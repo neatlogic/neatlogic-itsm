@@ -1,8 +1,6 @@
 package codedriver.module.process.service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +11,11 @@ import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.module.process.constvalue.ProcessStepType;
-import codedriver.module.process.dto.FormAttributeVo;
 import codedriver.module.process.dto.ProcessFormVo;
+import codedriver.module.process.dto.ProcessSlaVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessStepNotifyTemplateVo;
+import codedriver.module.process.dto.ProcessStepRelVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.module.process.dto.ProcessVo;
@@ -29,7 +28,7 @@ public class ProcessServiceImpl implements ProcessService {
 
 	@Autowired
 	private FormMapper formMapper;
-	
+
 	@Override
 	public ProcessVo getProcessByUuid(String processUuid) {
 		return processMapper.getProcessByUuid(processUuid);
@@ -41,7 +40,8 @@ public class ProcessServiceImpl implements ProcessService {
 	}
 
 	@Override
-	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo) {
+	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(
+			ProcessStepFormAttributeVo processStepFormAttributeVo) {
 		return processMapper.getProcessStepFormAttributeByStepUuid(processStepFormAttributeVo);
 	}
 
@@ -53,7 +53,8 @@ public class ProcessServiceImpl implements ProcessService {
 		List<ProcessStepVo> processStepList = processMapper.searchProcessStep(processStepVo);
 		if (processStepList != null && processStepList.size() == 1) {
 			ProcessStepVo startStep = processStepList.get(0);
-			startStep.setFormAttributeList(processMapper.getProcessStepFormAttributeByStepUuid(new ProcessStepFormAttributeVo(startStep.getUuid(), null)));
+			startStep.setFormAttributeList(processMapper
+					.getProcessStepFormAttributeByStepUuid(new ProcessStepFormAttributeVo(startStep.getUuid(), null)));
 			ProcessFormVo processFormVo = processMapper.getProcessFormByProcessUuid(processUuid);
 			if (processFormVo != null) {
 				startStep.setFormUuid(processFormVo.getFormUuid());
@@ -69,11 +70,10 @@ public class ProcessServiceImpl implements ProcessService {
 		return null;
 	}
 
-
 	@Override
 	public int saveProcess(ProcessVo processVo) {
-		//TODO linbq等流程图config字段格式确定后，再解析config数据保存到对应的表中
-		if(processMapper.checkProcessNameIsRepeat(processVo) > 0) {
+		// TODO linbq等流程图config字段格式确定后，再解析config数据保存到对应的表中
+		if (processMapper.checkProcessNameIsRepeat(processVo) > 0) {
 			throw new ProcessNameRepeatException(processVo.getName());
 		}
 		String uuid = processVo.getUuid();
@@ -81,12 +81,12 @@ public class ProcessServiceImpl implements ProcessService {
 			processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
 			processMapper.deleteProcessStepByProcessUuid(uuid);
 			processMapper.deleteProcessStepNotifyTemplateByProcessUuid(uuid);
-//			processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
+			processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
 //			processMapper.deleteProcessStepTimeoutPolicyByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessFormByProcessUuid(uuid);
 			processMapper.updateProcess(processVo);
-		}else {
+		} else {
 			processVo.setFcu(UserContext.get().getUserId());
 			processMapper.insertProcess(processVo);
 		}
@@ -96,8 +96,14 @@ public class ProcessServiceImpl implements ProcessService {
 			processMapper.insertProcessForm(new ProcessFormVo(uuid, formUuid));
 		}
 
+		if (processVo.getSlaList() != null && processVo.getSlaList().size() > 0) {
+			for (ProcessSlaVo slaVo : processVo.getSlaList()) {
+				processMapper.insertProcessSla(slaVo);
+			}
+		}
+
 		if (processVo.getStepList() != null && processVo.getStepList().size() > 0) {
-			
+
 			for (ProcessStepVo stepVo : processVo.getStepList()) {
 				processMapper.insertProcessStep(stepVo);
 				if (stepVo.getFormAttributeList() != null && stepVo.getFormAttributeList().size() > 0) {
@@ -110,24 +116,20 @@ public class ProcessServiceImpl implements ProcessService {
 						processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
 					}
 				}
-				if(stepVo.getTemplateUuidList() != null && stepVo.getTemplateUuidList().size() > 0) {
-					for(String templateUuid : stepVo.getTemplateUuidList()) {
-						processMapper.insertProcessStepNotifyTemplate(new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
+				if (stepVo.getTemplateUuidList() != null && stepVo.getTemplateUuidList().size() > 0) {
+					for (String templateUuid : stepVo.getTemplateUuidList()) {
+						processMapper.insertProcessStepNotifyTemplate(
+								new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
 					}
 				}
-//				if (stepVo.getTimeoutPolicyList() != null && stepVo.getTimeoutPolicyList().size() > 0) {
-//					for (ProcessStepTimeoutPolicyVo processStepTimeoutPolicyVo : stepVo.getTimeoutPolicyList()) {
-//						processMapper.insertProcessStepTimeoutPolicy(processStepTimeoutPolicyVo);
-//					}
-//				}
 			}
 		}
-//
-//		if (processVo.getStepRelList() != null && processVo.getStepRelList().size() > 0) {
-//			for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
-//				processMapper.insertProcessStepRel(stepRelVo);
-//			}
-//		}
+
+		if (processVo.getStepRelList() != null && processVo.getStepRelList().size() > 0) {
+			for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
+				processMapper.insertProcessStepRel(stepRelVo);
+			}
+		}
 
 		return 1;
 	}

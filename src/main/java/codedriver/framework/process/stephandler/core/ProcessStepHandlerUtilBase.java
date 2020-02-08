@@ -3,8 +3,10 @@ package codedriver.framework.process.stephandler.core;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +32,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
@@ -49,6 +52,10 @@ import codedriver.framework.process.notify.core.INotifyHandler;
 import codedriver.framework.process.notify.core.NotifyHandlerFactory;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 import codedriver.framework.process.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.process.notify.schedule.plugin.ProcessTaskStepNotifyJob;
+import codedriver.framework.scheduler.core.IJob;
+import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
@@ -91,6 +98,12 @@ public abstract class ProcessStepHandlerUtilBase {
 	private static WorktimeMapper worktimeMapper;
 	private static ChannelMapper channelMapper;
 	private static NotifyMapper notifyMapper;
+	private static SchedulerManager schedulerManager;
+
+	@Autowired
+	public void setSchedulerManager(SchedulerManager _schedulerManager) {
+		schedulerManager = _schedulerManager;
+	}
 
 	@Autowired
 	public void setProcessMapper(ProcessMapper _processMapper) {
@@ -601,8 +614,7 @@ public abstract class ProcessStepHandlerUtilBase {
 					/** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
 					if (slaVo.getTimeSum() == null) {
 						if (slaVo.getRuleObj() != null) {
-							// 这里要通过rule计算出来
-							JSONArray policyList = slaVo.getRuleObj().getJSONArray("policyList");
+							JSONArray policyList = slaVo.getRuleObj().getJSONArray("calculatePolicyList");
 							if (policyList != null && policyList.size() > 0) {
 								POLICY: for (int i = 0; i < policyList.size(); i++) {
 									JSONObject policyObj = policyList.getJSONObject(i);
@@ -676,6 +688,49 @@ public abstract class ProcessStepHandlerUtilBase {
 						}
 					}
 					processTaskMapper.updateProcessTaskSlaTime(slaVo);
+
+					// TODO 执行超时操作
+					if (StringUtils.isNotBlank(slaVo.getExpireTime()) && slaVo.getRuleObj() != null) {
+						JSONArray notifyPolicyList = slaVo.getRuleObj().getJSONArray("notifyPolicyList");
+						if (notifyPolicyList != null && notifyPolicyList.size() > 0) {
+							for (int i = 0; i < notifyPolicyList.size(); i++) {
+								JSONObject policyObj = notifyPolicyList.getJSONObject(i);
+								String expression = policyObj.getString("expression");
+								int time = policyObj.getIntValue("time");
+								String unit = policyObj.getString("unit");
+								JSONArray notifyPluginList = policyObj.getJSONArray("pluginList");
+								String executeType = policyObj.getString("executeType");
+								int intervalTime = policyObj.getIntValue("intervalTime");
+								String intervalUnit = policyObj.getString("intervalUnit");
+								String template = policyObj.getString("template");
+								JSONArray receiverList = policyObj.getJSONArray("receiverList");
+
+								if (StringUtils.isNotBlank(expression) && time > 0 && StringUtils.isNotBlank("unit") && notifyPluginList != null && notifyPluginList.size() > 0) {
+									try {
+										Date etdate = sdf.parse(slaVo.getExpireTime());
+										Calendar notifyDate = Calendar.getInstance();
+										notifyDate.setTime(etdate);
+										if (expression.equalsIgnoreCase("before")) {
+											time = -time;
+										}
+										if (unit.equalsIgnoreCase("day")) {
+											notifyDate.add(time, Calendar.DAY_OF_MONTH);
+										} else if (unit.equalsIgnoreCase("hour")) {
+											notifyDate.add(time, Calendar.HOUR);
+										} else {
+											notifyDate.add(time, Calendar.MINUTE);
+										}
+										IJob jobHandler = SchedulerManager.getHandler(ProcessTaskStepNotifyJob.class.getName());
+										JobObject jobObject = new JobObject.Builder(currentProcessTaskStepVo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()).withTriggerTime(notifyDate.getTime()).build();
+										schedulerManager.loadJob(jobObject);
+									} catch (ParseException e) {
+										logger.error(e.getMessage(), e);
+									}
+
+								}
+							}
+						}
+					}
 				}
 			}
 		}
