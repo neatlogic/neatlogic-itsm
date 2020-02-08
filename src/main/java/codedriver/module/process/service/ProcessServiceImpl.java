@@ -83,7 +83,7 @@ public class ProcessServiceImpl implements ProcessService {
 			processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
 			processMapper.deleteProcessStepByProcessUuid(uuid);
 			processMapper.deleteProcessStepNotifyTemplateByProcessUuid(uuid);
-//			processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
+			processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
 //			processMapper.deleteProcessStepTimeoutPolicyByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessFormByProcessUuid(uuid);
