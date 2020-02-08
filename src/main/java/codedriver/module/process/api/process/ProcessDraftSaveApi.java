@@ -18,6 +18,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.ProcessDraftVo;
+
 @Service
 @Transactional
 @IsActive
@@ -25,12 +26,12 @@ public class ProcessDraftSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessMapper processMapper;
-	
+
 	@Override
 	public String getToken() {
 		return "process/draft/save";
 	}
-	
+
 	@Override
 	public String getName() {
 		return "流程草稿保存接口";
@@ -40,35 +41,33 @@ public class ProcessDraftSaveApi extends ApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
-	
-	@Input({
-		@Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid", isRequired = true),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired= false, length = 50, desc = "流程名称"),
-		@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "流程配置内容", isRequired = true)
-	})
-	@Output({
-		@Param(name = "uuid", type = ApiParamType.STRING, desc = "草稿uuid") 
-	})
-	@Description(desc="流程草稿保存接口")
+
+
+	@Input({ @Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid", isRequired = true),
+			@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", xss = true, isRequired = true, length = 50, desc = "流程名称"),
+			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "流程配置内容", isRequired = true) })
+	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "草稿uuid") })
+	@Description(desc = "流程草稿保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		ProcessDraftVo processDraftVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessDraftVo>() {});
+		ProcessDraftVo processDraftVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessDraftVo>() {
+		});
 		processDraftVo.setFcu(UserContext.get().getUserId());
-		if(processMapper.checkProcessDraftIsExists(processDraftVo) > 0) {
+		if (processMapper.checkProcessDraftIsExists(processDraftVo) > 0) {
 			return null;
 		}
 		String earliestUuid = null;
-		if(processMapper.checkProcessIsExists(processDraftVo.getProcessUuid()) == 0) {
+		if (processMapper.checkProcessIsExists(processDraftVo.getProcessUuid()) == 0) {
 			ProcessDraftVo processDraft = new ProcessDraftVo();
 			processDraft.setFcu(UserContext.get().getUserId());
 			earliestUuid = processMapper.getEarliestProcessDraft(processDraft);
-		}else {
+		} else {
 			earliestUuid = processMapper.getEarliestProcessDraft(processDraftVo);
 		}
-		
-		if(earliestUuid != null) {
+
+		if (earliestUuid != null) {
 			processMapper.deleteProcessDraftByUuid(earliestUuid);
-		}	
+		}
 		processMapper.insertProcessDraft(processDraftVo);
 		return processDraftVo.getUuid();
 	}
