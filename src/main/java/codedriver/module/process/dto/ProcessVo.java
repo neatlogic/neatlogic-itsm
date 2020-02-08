@@ -222,6 +222,7 @@ public class ProcessVo extends BasePageVo implements Serializable {
 			}
 		}
 
+
 		if (this.getConfigObj().containsKey("connectionList")) {
 			this.stepRelList = new ArrayList<>();
 			JSONArray relList = this.getConfigObj().getJSONArray("connectionList");
