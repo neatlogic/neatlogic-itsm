@@ -10,6 +10,17 @@ public class ProcessStepRelVo implements Serializable {
 	private String toStepUuid;
 	private String condition;
 
+	public ProcessStepRelVo() {
+	}
+
+	public ProcessStepRelVo(String processUuid, String uuid, String fromStepUuid, String toStepUuid, String condition) {
+		this.processUuid = processUuid;
+		this.uuid = uuid;
+		this.fromStepUuid = fromStepUuid;
+		this.toStepUuid = toStepUuid;
+		this.condition = condition;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other)

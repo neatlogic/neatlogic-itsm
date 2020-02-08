@@ -18,6 +18,7 @@ import codedriver.module.process.dto.ProcessDraftVo;
 import codedriver.module.process.dto.ProcessFormVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessStepNotifyTemplateVo;
+import codedriver.module.process.dto.ProcessStepRelVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.module.process.dto.ProcessVo;
@@ -128,12 +129,12 @@ public class ProcessServiceImpl implements ProcessService {
 //				}
 			}
 		}
-//
-//		if (processVo.getStepRelList() != null && processVo.getStepRelList().size() > 0) {
-//			for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
-//				processMapper.insertProcessStepRel(stepRelVo);
-//			}
-//		}
+
+		if (processVo.getStepRelList() != null && processVo.getStepRelList().size() > 0) {
+			for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
+				processMapper.insertProcessStepRel(stepRelVo);
+			}
+		}
 
 		return 1;
 	}

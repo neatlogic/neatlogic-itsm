@@ -206,6 +206,23 @@ public class ProcessVo extends BasePageVo implements Serializable {
 		}
 		
 		//TODO linbq 解析chart
+		if (this.getConfigObj().containsKey("connectionList")) {		
+			JSONArray connectionList = this.getConfigObj().getJSONArray("connectionList");
+			if(connectionList != null && !connectionList.isEmpty()) {
+				stepRelList = new ArrayList<>();
+				for(int i = 0; i < connectionList.size(); i++) {
+					JSONObject connectionObj = connectionList.getJSONObject(i);
+					String uuid = connectionObj.getString("uuid");
+					String fromStepUuid = connectionObj.getString("fromStepUuid");
+					String toStepUuid = connectionObj.getString("toStepUuid");
+					String conditionConfig = null;
+					if(connectionObj.containsKey("conditionConfig")) {
+						conditionConfig = connectionObj.getString("conditionConfig");
+					}		
+					stepRelList.add(new ProcessStepRelVo(this.getUuid(), uuid, fromStepUuid, toStepUuid, conditionConfig));
+				}
+			}			
+		}
 	}
 
 	public void setStepList(List<ProcessStepVo> stepList) {
