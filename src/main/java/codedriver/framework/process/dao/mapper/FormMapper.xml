@@ -88,13 +88,13 @@
 		`version`,
 		`is_active` AS isActive,
 		`form_uuid` AS formUuid,
-		`form_config` AS formConfig`,
+		`form_config` AS formConfig,
 		`lcu` AS editor,
 		`lcd` AS editTime
 		FROM
 		`form_version`
 		WHERE
-		uuid = #{value}
+		`uuid` = #{value}
 	</select>
 
 	<select id="getFormByUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.FormVo">
@@ -113,7 +113,7 @@
 		`version`,
 		`is_active` AS isActive,
 		`form_uuid` AS formUuid,
-		`form_config` AS formConfig`,
+		`form_config` AS formConfig,
 		`lcu` AS editor,
 		`lcd` AS editTime
 		FROM
@@ -203,7 +203,7 @@
 		SET
 		`is_active` = 0
 		WHERE
-		form_uuid = #{value}
+		`form_uuid` = #{value}
 	</update>
 	
 	<update id="updateForm" parameterType="codedriver.module.process.dto.FormVo">
