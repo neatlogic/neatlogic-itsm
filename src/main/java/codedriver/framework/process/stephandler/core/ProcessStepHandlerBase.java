@@ -943,9 +943,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		/** 写入表单信息 **/
 		if (StringUtils.isNotBlank(processVo.getFormUuid())) {
 			FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());
-			if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getContent())) {
+			if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
 				ProcessTaskFormVo processTaskFormVo = new ProcessTaskFormVo();
-				processTaskFormVo.setFormContent(formVersionVo.getContent());
+				processTaskFormVo.setFormContent(formVersionVo.getFormConfig());
 				processTaskFormVo.setProcessTaskId(processTaskVo.getId());
 				processTaskFormVo.setFormUuid(formVersionVo.getFormUuid());
 				processTaskFormVo.setFormName(formVersionVo.getFormName());

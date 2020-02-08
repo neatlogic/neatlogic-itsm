@@ -16,10 +16,10 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNameRepeatException;
-import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActive;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -30,6 +30,7 @@ import codedriver.module.process.dto.FormVo;
 @Service
 @Transactional
 @AuthAction(name = "FORM_MODIFY")
+@IsActive
 public class FormSaveApi extends ApiComponentBase {
 
 	@Autowired
@@ -52,11 +53,11 @@ public class FormSaveApi extends ApiComponentBase {
 
 	@Override
 	@Input({
-			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid，为空表示创建表单", isRequired = false),
+			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true),
 			@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, length = 50, desc = "表单名称"),
 			@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活", isRequired = true),
 			@Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "当前版本的uuid，为空代表创建一个新版本", isRequired = false),
-			@Param(name = "content", type = ApiParamType.JSONOBJECT, desc = "表单控件生成的json内容", isRequired = true) 
+			@Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "表单控件生成的json内容", isRequired = true) 
 			})
 	@Output({
 			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid"),
@@ -68,22 +69,18 @@ public class FormSaveApi extends ApiComponentBase {
 		if(formMapper.checkFormNameIsRepeat(formVo) > 0) {
 			throw new FormNameRepeatException(formVo.getName());
 		}
-		if(jsonObj.containsKey("uuid")) {
-			String uuid = jsonObj.getString("uuid");
-			//判断表单是否存在
-			if(formMapper.checkFormIsExists(uuid) == 0) {
-				throw new FormNotFoundException(uuid);
-			}
+		//判断表单是否存在
+		if(formMapper.checkFormIsExists(formVo.getUuid()) == 0) {
+			//插入表单信息
+			formMapper.insertForm(formVo);		
+		}else {
 			//更新表单信息
 			formMapper.updateForm(formVo);
-		}else {
-			//插入表单信息
-			formMapper.insertForm(formVo);
 		}
 				
 		//插入表单版本信息
 		FormVersionVo formVersionVo = new FormVersionVo();
-		formVersionVo.setContent(formVo.getContent());
+		formVersionVo.setFormConfig(formVo.getFormConfig());
 		formVersionVo.setFormUuid(formVo.getUuid());
 		formMapper.resetFormVersionIsActiveByFormUuid(formVo.getUuid());
 		formVersionVo.setIsActive(1);

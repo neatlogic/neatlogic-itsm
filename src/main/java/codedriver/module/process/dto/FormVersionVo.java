@@ -3,7 +3,6 @@ package codedriver.module.process.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +21,7 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 	private String formUuid;
 	private Integer version;
 	private Integer isActive;
-	private String content;
+	private String formConfig;
 	private String editor;
 	private Date editTime;
 	private transient List<FormAttributeVo> formAttributeList;
@@ -54,12 +53,12 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 		this.formUuid = formUuid;
 	}
 
-	public String getContent() {
-		return content;
+	public String getFormConfig() {
+		return formConfig;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setFormConfig(String formConfig) {
+		this.formConfig = formConfig;
 	}
 
 	public String getEditor() {
@@ -93,36 +92,29 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 		if(formAttributeList != null) {
 			return formAttributeList;
 		}
-		if(StringUtils.isBlank(this.content)) {
+		if(StringUtils.isBlank(this.formConfig)) {
 			return null;
 		}
-		JSONObject contentObj = JSONObject.parseObject(this.content);
-		if(contentObj == null || contentObj.isEmpty()) {
+		JSONObject formConfig = JSONObject.parseObject(this.formConfig);
+		if(formConfig == null || !formConfig.containsKey("controllerList")) {
 			return null;
 		}
 		
-		if(!contentObj.containsKey("formConfig")) {
-			return null;
-		}
-		JSONObject formConfig = contentObj.getJSONObject("formConfig");
-		if(formConfig == null || !formConfig.containsKey("pluginList")) {
-			return null;
-		}
-		JSONArray pluginList = formConfig.getJSONArray("pluginList");
-		if(pluginList == null || pluginList.isEmpty()) {
+		JSONArray controllerList = formConfig.getJSONArray("controllerList");
+		if(controllerList == null || controllerList.isEmpty()) {
 			return null;
 		}
 		formAttributeList = new ArrayList<>();
-		for(int i = 0; i < pluginList.size(); i++) {
-			JSONObject pluginObj = pluginList.getJSONObject(i);
-			if(!pluginObj.containsKey("config")) {
+		for(int i = 0; i < controllerList.size(); i++) {
+			JSONObject controllerObj = controllerList.getJSONObject(i);
+			if(!controllerObj.containsKey("config")) {
 				continue;
 			}
-			JSONObject config = pluginObj.getJSONObject("config");
+			JSONObject config = controllerObj.getJSONObject("config");
 			if(config == null || config.isEmpty()) {
 				continue;
 			}
-			formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), config.getString("uuid"), config.getString("label"), "system", config.getString("handler"), pluginObj.getString("config"), config.getString("defaultValueList")));
+			formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), controllerObj.getString("uuid"), controllerObj.getString("label"), controllerObj.getString("type"), controllerObj.getString("handler"), controllerObj.getString("config"), config.getString("defaultValueList")));
 		}
 		return formAttributeList;
 	}
@@ -141,7 +133,7 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 
 	@Override
 	public String toString() {
-		return "FormVersionVo [uuid=" + uuid + ", formName=" + formName + ", formUuid=" + formUuid + ", version=" + version + ", isActive=" + isActive + ", content=" + content + ", editor=" + editor + ", editTime=" + editTime + "]";
+		return "FormVersionVo [uuid=" + uuid + ", formName=" + formName + ", formUuid=" + formUuid + ", version=" + version + ", isActive=" + isActive + ", formConfig=" + formConfig + ", editor=" + editor + ", editTime=" + editTime + "]";
 	}
 
 }

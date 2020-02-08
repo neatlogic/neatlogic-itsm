@@ -11,6 +11,7 @@ import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.module.process.constvalue.ProcessStepType;
+import codedriver.module.process.dto.ProcessDraftVo;
 import codedriver.module.process.dto.ProcessFormVo;
 import codedriver.module.process.dto.ProcessSlaVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
@@ -90,7 +91,12 @@ public class ProcessServiceImpl implements ProcessService {
 			processVo.setFcu(UserContext.get().getUserId());
 			processMapper.insertProcess(processVo);
 		}
-
+		//删除草稿
+		ProcessDraftVo processDraftVo = new ProcessDraftVo();
+		processDraftVo.setProcessUuid(uuid);
+		processDraftVo.setFcu(UserContext.get().getUserId());
+		processMapper.deleteProcessDraft(processDraftVo);
+		
 		String formUuid = processVo.getFormUuid();
 		if (StringUtils.isNotBlank(formUuid)) {
 			processMapper.insertProcessForm(new ProcessFormVo(uuid, formUuid));
