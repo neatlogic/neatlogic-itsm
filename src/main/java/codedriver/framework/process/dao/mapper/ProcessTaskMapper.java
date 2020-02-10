@@ -10,6 +10,7 @@ import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskConvergeVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
+import codedriver.module.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.module.process.dto.ProcessTaskSlaVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditFormAttributeDataVo;
@@ -19,7 +20,6 @@ import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
 import codedriver.module.process.dto.ProcessTaskStepTeamVo;
-import codedriver.module.process.dto.ProcessTaskStepTimeAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepTimeoutPolicyVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -33,9 +33,7 @@ public interface ProcessTaskMapper {
 
 	public List<ProcessTaskSlaVo> getProcessTaskSlaByProcessTaskStepId(Long processTaskStepId);
 
-	public ProcessTaskStepAuditDetailVo getProcessTaskStepAuditDetail(@Param("processTaskId")
-	Long processTaskId, @Param("type")
-	String type);
+	public ProcessTaskStepAuditDetailVo getProcessTaskStepAuditDetail(@Param("processTaskId") Long processTaskId, @Param("type") String type);
 
 	public ProcessTaskVo getProcessTaskBaseInfoById(Long processTaskId);
 
@@ -55,9 +53,7 @@ public interface ProcessTaskMapper {
 
 	public ProcessTaskContentVo getProcessTaskContentByHash(String hash);
 
-	public List<ProcessTaskStepUserVo> getProcessTaskStepUserByStepId(@Param("processTaskStepId")
-	Long processTaskStepId, @Param("userType")
-	String userType);
+	public List<ProcessTaskStepUserVo> getProcessTaskStepUserByStepId(@Param("processTaskStepId") Long processTaskStepId, @Param("userType") String userType);
 
 	public List<ProcessTaskStepVo> searchProcessTaskStep(ProcessTaskStepVo processTaskStepVo);
 
@@ -87,9 +83,7 @@ public interface ProcessTaskMapper {
 
 	public List<ProcessTaskStepRelVo> getProcessTaskStepRelByProcessTaskId(Long processTaskId);
 
-	public List<ProcessTaskStepVo> getProcessTaskStepByProcessTaskIdAndType(@Param("processTaskId")
-	Long processTaskId, @Param("type")
-	String type);
+	public List<ProcessTaskStepVo> getProcessTaskStepByProcessTaskIdAndType(@Param("processTaskId") Long processTaskId, @Param("type") String type);
 
 	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
 
@@ -135,6 +129,12 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTaskStepFormAttribute(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
 
+	public int insertProcessTaskSla(ProcessTaskSlaVo processTaskSlaVo);
+
+	public int insertProcessTaskSlaTime(ProcessTaskSlaTimeVo processTaskSlaTimeVo);
+
+	public int insertProcessTaskStepSla(@Param("processTaskStepId") Long processTaskStepId, @Param("slaId") Long slaId);
+
 	public int replaceProcessTaskFormAttributeData(ProcessTaskFormAttributeDataVo processTaskFromAttributeDataVo);
 
 	public int updateProcessTaskStepExpireTime(ProcessTaskStepVo processTaskStepVo);
@@ -143,31 +143,19 @@ public interface ProcessTaskMapper {
 
 	public int updateProcessTaskStatus(ProcessTaskVo processTaskVo);
 
-	public int updateProcessTaskSlaTime(ProcessTaskSlaVo processTaskSlaVo);
+	public int updateProcessTaskSlaTime(ProcessTaskSlaTimeVo processTaskSlaTimeVo);
 
-	public int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId")
-	Long fromProcessTaskStepId, @Param("toProcessTaskStepId")
-	Long toProcessTaskStepId, @Param("isHit")
-	Integer isHit);
+	public int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId") Long fromProcessTaskStepId, @Param("toProcessTaskStepId") Long toProcessTaskStepId, @Param("isHit") Integer isHit);
 
-	public int updateProcessTaskStepConvergeIsCheck(@Param("isCheck")
-	Integer isCheck, @Param("convergeId")
-	Long convergeId, @Param("processTaskStepId")
-	Long processTaskStepId);
+	public int updateProcessTaskStepConvergeIsCheck(@Param("isCheck") Integer isCheck, @Param("convergeId") Long convergeId, @Param("processTaskStepId") Long processTaskStepId);
 
 	public int updateProcessTaskStepUserStatus(ProcessTaskStepUserVo processTaskStepUserVo);
 
-	public int deleteProcessTaskFormAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId")
-	Long processTaskId, @Param("attributeUuid")
-	String attributeUuid);
+	public int deleteProcessTaskFormAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId") Long processTaskId, @Param("attributeUuid") String attributeUuid);
 
-	public int deleteProcessTaskStepWorker(@Param("processTaskStepId")
-	Long processTaskStepId, @Param("userId")
-	String userId);
+	public int deleteProcessTaskStepWorker(@Param("processTaskStepId") Long processTaskStepId, @Param("userId") String userId);
 
-	public int deleteProcessTaskStepUser(@Param("processTaskStepId")
-	Long processTaskStepId, @Param("userType")
-	String userType);
+	public int deleteProcessTaskStepUser(@Param("processTaskStepId") Long processTaskStepId, @Param("userType") String userType);
 
 	public int deleteProcessTaskConvergeByStepId(Long processTaskStepId);
 

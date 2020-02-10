@@ -41,8 +41,7 @@ public class ProcessServiceImpl implements ProcessService {
 	}
 
 	@Override
-	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(
-			ProcessStepFormAttributeVo processStepFormAttributeVo) {
+	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo) {
 		return processMapper.getProcessStepFormAttributeByStepUuid(processStepFormAttributeVo);
 	}
 
@@ -54,8 +53,7 @@ public class ProcessServiceImpl implements ProcessService {
 		List<ProcessStepVo> processStepList = processMapper.searchProcessStep(processStepVo);
 		if (processStepList != null && processStepList.size() == 1) {
 			ProcessStepVo startStep = processStepList.get(0);
-			startStep.setFormAttributeList(processMapper
-					.getProcessStepFormAttributeByStepUuid(new ProcessStepFormAttributeVo(startStep.getUuid(), null)));
+			startStep.setFormAttributeList(processMapper.getProcessStepFormAttributeByStepUuid(new ProcessStepFormAttributeVo(startStep.getUuid(), null)));
 			ProcessFormVo processFormVo = processMapper.getProcessFormByProcessUuid(processUuid);
 			if (processFormVo != null) {
 				startStep.setFormUuid(processFormVo.getFormUuid());
@@ -91,12 +89,12 @@ public class ProcessServiceImpl implements ProcessService {
 			processVo.setFcu(UserContext.get().getUserId());
 			processMapper.insertProcess(processVo);
 		}
-		//删除草稿
+		// 删除草稿
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();
 		processDraftVo.setProcessUuid(uuid);
 		processDraftVo.setFcu(UserContext.get().getUserId());
 		processMapper.deleteProcessDraft(processDraftVo);
-		
+
 		String formUuid = processVo.getFormUuid();
 		if (StringUtils.isNotBlank(formUuid)) {
 			processMapper.insertProcessForm(new ProcessFormVo(uuid, formUuid));
@@ -104,7 +102,12 @@ public class ProcessServiceImpl implements ProcessService {
 
 		if (processVo.getSlaList() != null && processVo.getSlaList().size() > 0) {
 			for (ProcessSlaVo slaVo : processVo.getSlaList()) {
-				processMapper.insertProcessSla(slaVo);
+				if (slaVo.getProcessStepUuidList().size() > 0) {
+					processMapper.insertProcessSla(slaVo);
+					for (String stepUuid : slaVo.getProcessStepUuidList()) {
+						processMapper.insertProcessStepSla(stepUuid, slaVo.getUuid());
+					}
+				}
 			}
 		}
 
@@ -124,8 +127,7 @@ public class ProcessServiceImpl implements ProcessService {
 				}
 				if (stepVo.getTemplateUuidList() != null && stepVo.getTemplateUuidList().size() > 0) {
 					for (String templateUuid : stepVo.getTemplateUuidList()) {
-						processMapper.insertProcessStepNotifyTemplate(
-								new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
+						processMapper.insertProcessStepNotifyTemplate(new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
 					}
 				}
 			}
