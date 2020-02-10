@@ -1,7 +1,6 @@
 package codedriver.module.process.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,8 +11,8 @@ public class ProcessSlaVo implements Serializable {
 	private String processUuid;
 	private String uuid;
 	private String name;
-	private String rule;
-	private JSONObject ruleObj;
+	private String config;
+	private JSONObject configObj;
 
 	public String getUuid() {
 		return uuid;
@@ -39,23 +38,23 @@ public class ProcessSlaVo implements Serializable {
 		this.processUuid = processUuid;
 	}
 
-	public String getRule() {
-		return rule;
+	public String getConfig() {
+		return config;
 	}
 
-	public void setRule(String rule) {
-		this.rule = rule;
+	public void setConfig(String config) {
+		this.config = config;
 	}
 
-	public JSONObject getRuleObj() {
-		if (ruleObj == null && StringUtils.isNotBlank(rule)) {
-			ruleObj = JSONObject.parseObject(rule);
+	public JSONObject getConfigObj() {
+		if (configObj == null && StringUtils.isNotBlank(config)) {
+			configObj = JSONObject.parseObject(config);
 		}
-		return ruleObj;
+		return configObj;
 	}
 
-	public void setRuleObj(JSONObject ruleObj) {
-		this.ruleObj = ruleObj;
+	public void setConfigObj(JSONObject configObj) {
+		this.configObj = configObj;
 	}
 
 }

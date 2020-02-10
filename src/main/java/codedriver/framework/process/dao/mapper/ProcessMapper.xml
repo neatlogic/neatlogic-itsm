@@ -32,9 +32,9 @@
 		WHERE
 		process_uuid = #{processUuid}
 	</select>
-	
-	
-	
+
+
+
 
 	<resultMap id="processStepDetailMap" type="codedriver.module.process.dto.ProcessStepVo">
 		<id column="processUuid" property="processUuid" />
@@ -179,68 +179,155 @@
 	<select id="getAllProcessType" resultType="codedriver.module.process.dto.ProcessTypeVo">
 		SELECT `id`, `name` FROM `process_type`
 	</select>
-	
+
 	<select id="checkProcessNameIsRepeat" resultType="int">
-	SELECT count(1) FROM `process` WHERE name=#{name} AND uuid != #{uuid}
+		SELECT count(1) FROM `process` WHERE name=#{name} AND uuid != #{uuid}
 	</select>
 
 	<select id="searchProcessCount" resultType="int">
-	SELECT 
-	COUNT(`uuid`) 
-	FROM `process` 
-	WHERE 1=1
-	<if test="keyword != null and keyword != ''">
-	AND `name` LIKE CONCAT('%', #{keyword}, '%')
-	</if>
-	<if test="isActive != null">
-	AND `is_Active` = #{isActive}
-	</if>
-	<if test="fcu != null and fcu != ''">
-	AND `fcu` = #{fcu}
-	</if>
+		SELECT
+		COUNT(`uuid`)
+		FROM `process`
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+			AND `name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="isActive != null">
+			AND `is_Active` = #{isActive}
+		</if>
+		<if test="fcu != null and fcu != ''">
+			AND `fcu` = #{fcu}
+		</if>
 	</select>
-	
+
 	<select id="searchProcessList" resultType="codedriver.module.process.dto.ProcessVo">
-	SELECT 
-	`uuid`,
-	`name`,
-	`is_active` AS isActive,
-	`config`
-	FROM `process` 
-	WHERE 1=1
-	<if test="keyword != null and keyword != ''">
-	AND `name` LIKE CONCAT('%', #{keyword}, '%')
-	</if>
-	<if test="isActive != null">
-	AND `is_Active` = #{isActive}
-	</if>
-	<if test="fcu != null">
-	AND `fcu` = #{fcu}
-	</if>
-	ORDER BY `fcd` DESC
-	<if test="needPage">
-	limit #{startNum}, #{pageSize}
-	</if>
+		SELECT
+		`uuid`,
+		`name`,
+		`is_active` AS isActive,
+		`config`
+		FROM `process`
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+			AND `name` LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="isActive != null">
+			AND `is_Active` = #{isActive}
+		</if>
+		<if test="fcu != null">
+			AND `fcu` = #{fcu}
+		</if>
+		ORDER BY `fcd` DESC
+		<if test="needPage">
+			limit #{startNum}, #{pageSize}
+		</if>
 	</select>
 
 	<select id="getProcessReferenceCount" parameterType="java.lang.String" resultType="int">
-	SELECT COUNT(c.`uuid`)
-	FROM `channel` c
-	JOIN `channel_process` cp ON cp.`channel_uuid` = c.`uuid` AND cp.`process_uuid` = #{processUuid}
+		SELECT COUNT(c.`uuid`)
+		FROM `channel` c
+		JOIN `channel_process` cp ON cp.`channel_uuid` = c.`uuid` AND cp.`process_uuid` = #{processUuid}
 	</select>
 
 	<select id="getProcessReferenceList" parameterType="codedriver.module.process.dto.ChannelProcessVo" resultType="codedriver.module.process.dto.ChannelVo">
-	SELECT 
-	c.`uuid`, 
-	c.`name`
-	FROM `channel` c
-	JOIN `channel_process` cp ON cp.`channel_uuid` = c.`uuid` AND cp.`process_uuid` = #{processUuid}
-	ORDER BY c.`parent_uuid`, c.`sort`
-	<if test="needPage">
-	limit #{startNum}, #{pageSize}
-	</if>
+		SELECT
+		c.`uuid`,
+		c.`name`
+		FROM `channel` c
+		JOIN `channel_process` cp ON cp.`channel_uuid` = c.`uuid` AND cp.`process_uuid` = #{processUuid}
+		ORDER BY c.`parent_uuid`, c.`sort`
+		<if test="needPage">
+			limit #{startNum}, #{pageSize}
+		</if>
 	</select>
-	
+
+	<select id="checkProcessDraftIsExists" parameterType="codedriver.module.process.dto.ProcessDraftVo" resultType="int">
+		SELECT
+		count(1)
+		FROM
+		`process_draft`
+		WHERE `process_uuid` = #{processUuid}
+		AND `md5` = #{md5}
+		AND `fcu` = #{fcu}
+	</select>
+
+	<select id="getProcessDraftByUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessDraftVo">
+		SELECT
+		`uuid`,
+		`process_uuid` as processUuid,
+		`name`,
+		`config`,
+		`fcd`,
+		`fcu`,
+		`md5`
+		FROM
+		`process_draft`
+		WHERE `uuid` = #{uuid}
+	</select>
+
+	<select id="getProcessDraftList" parameterType="codedriver.module.process.dto.ProcessDraftVo" resultType="codedriver.module.process.dto.ProcessDraftVo">
+		SELECT
+		pd.`uuid`,
+		pd.`process_uuid` as processUuid,
+		pd.`name`,
+		pd.`fcd`
+		FROM `process_draft` pd
+		<if test="processUuid == null">
+			LEFT
+		</if>
+		JOIN `process` p ON p.`uuid` = pd.`process_uuid`
+		WHERE pd.`fcu` = #{fcu}
+		<if test="processUuid == null">
+			AND p.`uuid` IS NULL
+		</if>
+		<if test="processUuid != null">
+			AND pd.`process_uuid` = #{processUuid}
+		</if>
+		ORDER BY pd.`fcd` DESC
+		LIMIT 6
+	</select>
+
+	<select id="getEarliestProcessDraft" parameterType="codedriver.module.process.dto.ProcessDraftVo" resultType="java.lang.String">
+		SELECT
+		pd.`uuid`
+		FROM `process_draft` pd
+		<if test="processUuid == null">
+			LEFT
+		</if>
+		JOIN `process` p ON p.`uuid` = pd.`process_uuid`
+		WHERE pd.`fcu` = #{fcu}
+		<if test="processUuid == null">
+			AND p.`uuid` IS NULL
+		</if>
+		<if test="processUuid != null">
+			AND pd.`process_uuid` = #{processUuid}
+		</if>
+		ORDER BY pd.`fcd` DESC
+		LIMIT 5, 1
+	</select>
+
+	<insert id="insertProcessSla" parameterType="codedriver.module.process.dto.ProcessSlaVo">
+		INSERT INTO `process_sla` (
+		`uuid`,
+		`process_uuid`,
+		`name`,
+		`config`
+		)
+		VALUES
+		(
+		#{uuid},
+		#{processUuid},
+		#{name},
+		#{config}
+		)
+	</insert>
+
+	<insert id="insertProcessStepSla">
+		INSERT INTO `process_step_sla` (`sla_uuid`, `step_uuid`)
+		VALUES
+		(#{slaUuid}, #{stepUuid})
+	</insert>
+
 	<insert id="insertProcessStepTimeoutPolicy" parameterType="codedriver.module.process.dto.ProcessStepTimeoutPolicyVo">
 		INSERT INTO `process_step_timeout_policy` (
 		`process_uuid`,
@@ -393,25 +480,47 @@
 		INSERT INTO `process_form` (`process_uuid`, `form_uuid`)
 		VALUES (#{processUuid}, #{formUuid})
 	</insert>
-	
+
 	<insert id="insertProcessStepNotifyTemplate" parameterType="codedriver.module.process.dto.ProcessStepNotifyTemplateVo">
-	INSERT INTO `process_step_notifytemplate` ( `process_uuid`, `process_step_uuid`, `template_uuid` ) 
-	VALUES ( #{processUuid}, #{processStepUuid}, #{templateUuid} ) 
+		INSERT INTO `process_step_notifytemplate` ( `process_uuid`, `process_step_uuid`, `template_uuid` )
+		VALUES ( #{processUuid}, #{processStepUuid}, #{templateUuid} )
 	</insert>
-	
+
+	<insert id="insertProcessDraft" parameterType="codedriver.module.process.dto.ProcessDraftVo">
+		INSERT INTO `process_draft` (
+		`uuid`,
+		`process_uuid`,
+		`name`,
+		`config`,
+		`fcd`,
+		`fcu`,
+		`md5`
+		)
+		VALUES
+		(
+		#{uuid},
+		#{processUuid},
+		#{name},
+		#{config},
+		now(),
+		#{fcu},
+		#{md5}
+		)
+	</insert>
+
 	<update id="updateProcess" parameterType="codedriver.module.process.dto.ProcessVo">
-	UPDATE `process` SET 
-	<if test="name != null and name != ''">
-	`name` = #{name},
-	</if>
-	<if test="isActive != null">
-	`is_active` = #{isActive},
-	</if>
-	<if test="config != null">
-	`config` = #{config},
-	</if>
-	`uuid` = #{uuid}
-	WHERE `uuid` = #{uuid}
+		UPDATE `process` SET
+		<if test="name != null and name != ''">
+			`name` = #{name},
+		</if>
+		<if test="isActive != null">
+			`is_active` = #{isActive},
+		</if>
+		<if test="config != null">
+			`config` = #{config},
+		</if>
+		`uuid` = #{uuid}
+		WHERE `uuid` = #{uuid}
 	</update>
 
 	<delete id="deleteProcessStepByProcessUuid" parameterType="java.lang.String">
@@ -462,16 +571,24 @@
 		`process_step_formattribute`
 		WHERE `process_uuid` = #{value}
 	</delete>
-	
+
 	<delete id="deleteProcessByUuid" parameterType="java.lang.String">
 		DELETE FROM `process` WHERE `uuid` = #{uuid}
 	</delete>
-	
+
 	<delete id="deleteProcessFormByProcessUuid" parameterType="java.lang.String">
 		DELETE FROM `process_form` WHERE `process_uuid` = #{processUuid}
 	</delete>
-	
-	<delete id="deleteProcessStepNotifyTemplateByProcessUuid"  parameterType="java.lang.String">
+
+	<delete id="deleteProcessStepNotifyTemplateByProcessUuid" parameterType="java.lang.String">
 		DELETE FROM `process_step_notifytemplate` WHERE `process_uuid` = #{processUuid}
+	</delete>
+
+	<delete id="deleteProcessDraft" parameterType="codedriver.module.process.dto.ProcessDraftVo">
+		DELETE FROM `process_draft` WHERE `process_uuid` = #{processUuid} AND `fcu` = #{fcu}
+	</delete>
+
+	<delete id="deleteProcessDraftByUuid" parameterType="java.lang.String">
+		DELETE FROM `process_draft` WHERE `uuid` = #{uuid}
 	</delete>
 </mapper>

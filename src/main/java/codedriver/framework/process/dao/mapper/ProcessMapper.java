@@ -2,9 +2,13 @@ package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import codedriver.module.process.dto.ChannelProcessVo;
 import codedriver.module.process.dto.ChannelVo;
+import codedriver.module.process.dto.ProcessDraftVo;
 import codedriver.module.process.dto.ProcessFormVo;
+import codedriver.module.process.dto.ProcessSlaVo;
 import codedriver.module.process.dto.ProcessStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessStepNotifyTemplateVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
@@ -25,7 +29,8 @@ public interface ProcessMapper {
 
 	public List<ProcessStepVo> getProcessStepDetailByProcessUuid(String processUuid);
 
-	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo);
+	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(
+			ProcessStepFormAttributeVo processStepFormAttributeVo);
 
 	public ProcessVo getProcessByUuid(String processUuid);
 
@@ -45,6 +50,14 @@ public interface ProcessMapper {
 
 	public List<ChannelVo> getProcessReferenceList(ChannelProcessVo channelProcessVo);
 
+	public int checkProcessDraftIsExists(ProcessDraftVo processDraftVo);
+
+	public ProcessDraftVo getProcessDraftByUuid(String uuid);
+
+	public List<ProcessDraftVo> getProcessDraftList(ProcessDraftVo processDraftVo);
+
+	public String getEarliestProcessDraft(ProcessDraftVo processDraftVo);
+
 	public int insertProcess(ProcessVo processVo);
 
 	public int insertProcessStep(ProcessStepVo processStepVo);
@@ -63,8 +76,14 @@ public interface ProcessMapper {
 
 	public int insertProcessForm(ProcessFormVo processFormVo);
 
+	public int insertProcessStepSla(@Param("stepUuid") String stepUuid, @Param("slaUuid") String slaUuid);
+
+	public int insertProcessSla(ProcessSlaVo processSlaVo);
+
 	public int insertProcessStepNotifyTemplate(ProcessStepNotifyTemplateVo processStepNotifyTemplateVo);
 
+	public int insertProcessDraft(ProcessDraftVo processDraftVo);
+	
 	public int updateProcess(ProcessVo processVo);
 
 	public int deleteProcessStepByProcessUuid(String processUuid);
@@ -86,5 +105,9 @@ public interface ProcessMapper {
 	public int deleteProcessFormByProcessUuid(String processUuid);
 
 	public int deleteProcessStepNotifyTemplateByProcessUuid(String processUuid);
+
+	public int deleteProcessDraft(ProcessDraftVo processDraftVo);
+
+	public int deleteProcessDraftByUuid(String uuid);
 
 }

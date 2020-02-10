@@ -46,9 +46,11 @@ public class ProcessVo extends BasePageVo implements Serializable {
 	// @EntityField(name = "流程属性列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessStepRelVo> stepRelList;
 
+	private List<ProcessSlaVo> slaList;
+
 	private transient String fcu;
 	private transient String keyword;
-	
+
 	public synchronized String getUuid() {
 		if (StringUtils.isBlank(uuid)) {
 			uuid = UUID.randomUUID().toString().replace("-", "");
@@ -108,9 +110,9 @@ public class ProcessVo extends BasePageVo implements Serializable {
 	}
 
 	public void makeupFromConfigObj() {
-		if ( this.getConfigObj() == null) {
+		if (this.getConfigObj() == null) {
 			return;
-		}	
+		}
 		/** 组装表单属性 **/
 		Map<String, List<ProcessStepFormAttributeVo>> processStepFormAttributeMap = new HashMap<>();
 		if (this.getConfigObj().containsKey("formConfig")) {
@@ -119,15 +121,15 @@ public class ProcessVo extends BasePageVo implements Serializable {
 				String formUuid = formConfig.getString("uuid");
 				this.setFormUuid(formUuid);
 			}
-			if(formConfig.containsKey("authorityList")) {
+			if (formConfig.containsKey("authorityList")) {
 				JSONArray authorityList = formConfig.getJSONArray("authorityList");
 				for (int i = 0; i < authorityList.size(); i++) {
 					JSONObject authorityObj = authorityList.getJSONObject(i);
-					if(authorityObj.containsKey("processStepUuidList")) {
+					if (authorityObj.containsKey("processStepUuidList")) {
 						String attributeUuid = authorityObj.getString("attributeUuid");
 						String action = authorityObj.getString("action");
 						JSONArray processStepUuidList = authorityObj.getJSONArray("processStepUuidList");
-						for(int j = 0; j < processStepUuidList.size(); j++) {
+						for (int j = 0; j < processStepUuidList.size(); j++) {
 							String processStepUuid = processStepUuidList.getString(j);
 							ProcessStepFormAttributeVo processStepFormAttributeVo = new ProcessStepFormAttributeVo();
 							processStepFormAttributeVo.setProcessUuid(this.getUuid());
@@ -135,9 +137,10 @@ public class ProcessVo extends BasePageVo implements Serializable {
 							processStepFormAttributeVo.setProcessStepUuid(processStepUuid);
 							processStepFormAttributeVo.setAttributeUuid(attributeUuid);
 							processStepFormAttributeVo.setAction(action);
-														
-							List<ProcessStepFormAttributeVo> processStepFormAttributeList = processStepFormAttributeMap.get(processStepUuid);
-							if(processStepFormAttributeList == null) {
+
+							List<ProcessStepFormAttributeVo> processStepFormAttributeList = processStepFormAttributeMap
+									.get(processStepUuid);
+							if (processStepFormAttributeList == null) {
 								processStepFormAttributeList = new ArrayList<>();
 								processStepFormAttributeMap.put(processStepUuid, processStepFormAttributeList);
 							}
@@ -145,6 +148,20 @@ public class ProcessVo extends BasePageVo implements Serializable {
 						}
 					}
 				}
+			}
+		}
+
+		if (this.getConfigObj().containsKey("slaList")) {
+			this.slaList = new ArrayList<>();
+			JSONArray slaList = this.getConfigObj().getJSONArray("slaList");
+			for (int i = 0; i < slaList.size(); i++) {
+				JSONObject slaObj = slaList.getJSONObject(i);
+				ProcessSlaVo processSlaVo = new ProcessSlaVo();
+				processSlaVo.setProcessUuid(this.getUuid());
+				processSlaVo.setUuid(slaObj.getString("uuid"));
+				processSlaVo.setName(slaObj.getString("name"));
+				processSlaVo.setConfig(slaObj.toJSONString());
+				this.slaList.add(processSlaVo);
 			}
 		}
 
@@ -157,39 +174,39 @@ public class ProcessVo extends BasePageVo implements Serializable {
 				this.stepList.add(processStepVo);
 				processStepVo.setProcessUuid(this.getUuid());
 				processStepVo.setConfig(stepObj.toJSONString());
-				
-				if(stepObj.containsKey("uuid")) {
+
+				if (stepObj.containsKey("uuid")) {
 					String uuid = stepObj.getString("uuid");
 					processStepVo.setUuid(uuid);
 					processStepVo.setFormAttributeList(processStepFormAttributeMap.get(uuid));
 				}
-				if(stepObj.containsKey("name")) {
+				if (stepObj.containsKey("name")) {
 					processStepVo.setName(stepObj.getString("name"));
 				}
-				if(stepObj.containsKey("type")) {
+				if (stepObj.containsKey("type")) {
 					String handler = stepObj.getString("type");
 					processStepVo.setHandler(handler);
 					processStepVo.setType(ProcessStepHandler.getType(handler));
 				}
 				/** 组装通知模板 **/
-				if(stepObj.containsKey("notifyList")) {
+				if (stepObj.containsKey("notifyList")) {
 					JSONArray notifyList = stepObj.getJSONArray("notifyList");
 					List<String> templateUuidList = new ArrayList<>();
-					for(int j = 0; j < notifyList.size(); j++) {
+					for (int j = 0; j < notifyList.size(); j++) {
 						JSONObject notifyObj = notifyList.getJSONObject(j);
-						if(notifyObj.containsKey("template")) {
+						if (notifyObj.containsKey("template")) {
 							templateUuidList.add(notifyObj.getString("template"));
 						}
 					}
 					processStepVo.setTemplateUuidList(templateUuidList);
 				}
 				/** 组装分配策略 **/
-				if(stepObj.containsKey("workerPolicyConfig")) {
+				if (stepObj.containsKey("workerPolicyConfig")) {
 					JSONObject workerPolicyConfig = stepObj.getJSONObject("workerPolicyConfig");
-					if(workerPolicyConfig.containsKey("policyList")) {
+					if (workerPolicyConfig.containsKey("policyList")) {
 						JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
 						List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
-						for(int k = 0; k < policyList.size(); k++) {
+						for (int k = 0; k < policyList.size(); k++) {
 							JSONObject policyObj = policyList.getJSONObject(k);
 							ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
 							processStepWorkerPolicyVo.setProcessUuid(this.getUuid());
@@ -200,12 +217,29 @@ public class ProcessVo extends BasePageVo implements Serializable {
 							workerPolicyList.add(processStepWorkerPolicyVo);
 						}
 						processStepVo.setWorkerPolicyList(workerPolicyList);
-					}					
+					}
 				}
 			}
 		}
-		
-		//TODO linbq 解析chart
+
+		if (this.getConfigObj().containsKey("connectionList")) {
+			this.stepRelList = new ArrayList<>();
+			JSONArray relList = this.getConfigObj().getJSONArray("connectionList");
+			for (int i = 0; i < relList.size(); i++) {
+				JSONObject relObj = relList.getJSONObject(i);
+				ProcessStepRelVo processStepRelVo = new ProcessStepRelVo();
+				processStepRelVo.setFromStepUuid(relObj.getString("fromStepUuid"));
+				processStepRelVo.setToStepUuid(relObj.getString("toStepUuid"));
+				processStepRelVo.setUuid(relObj.getString("uuid"));
+				processStepRelVo.setProcessUuid(this.getUuid());
+				if (relObj.containsKey("conditionConfig")) {
+					processStepRelVo.setCondition(relObj.getString("conditionConfig"));
+				}
+				stepRelList.add(processStepRelVo);
+			}
+		}
+
+		// TODO linbq 解析chart
 	}
 
 	public void setStepList(List<ProcessStepVo> stepList) {
@@ -250,5 +284,13 @@ public class ProcessVo extends BasePageVo implements Serializable {
 
 	public void setFcu(String fcu) {
 		this.fcu = fcu;
+	}
+
+	public List<ProcessSlaVo> getSlaList() {
+		return slaList;
+	}
+
+	public void setSlaList(List<ProcessSlaVo> slaList) {
+		this.slaList = slaList;
 	}
 }

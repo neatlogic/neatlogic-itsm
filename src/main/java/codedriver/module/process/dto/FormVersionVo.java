@@ -114,7 +114,7 @@ public class FormVersionVo extends BasePageVo implements Serializable {
 			if(config == null || config.isEmpty()) {
 				continue;
 			}
-			formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), config.getString("uuid"), config.getString("label"), "system", config.getString("handler"), controllerObj.getString("config"), config.getString("defaultValueList")));
+			formAttributeList.add(new FormAttributeVo(this.getFormUuid(), this.getUuid(), controllerObj.getString("uuid"), controllerObj.getString("label"), controllerObj.getString("type"), controllerObj.getString("handler"), controllerObj.getString("config"), config.getString("defaultValueList")));
 		}
 		return formAttributeList;
 	}
