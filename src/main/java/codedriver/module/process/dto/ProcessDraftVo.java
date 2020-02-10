@@ -73,10 +73,10 @@ public class ProcessDraftVo {
 		if(md5 != null) {
 			return md5;
 		}
-		if (StringUtils.isBlank(config) || StringUtils.isBlank(name)) {
+		if (StringUtils.isBlank(config)) {
 			return null;
 		}
-		md5 = "{MD5}" + DigestUtils.md5DigestAsHex(config.concat(name).getBytes());
+		md5 = "{MD5}" + DigestUtils.md5DigestAsHex(config.getBytes());
 		return md5;
 	}
 
