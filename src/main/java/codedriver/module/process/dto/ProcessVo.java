@@ -182,7 +182,7 @@ public class ProcessVo extends BasePageVo implements Serializable {
 				ProcessStepVo processStepVo = new ProcessStepVo();
 				this.stepList.add(processStepVo);
 				processStepVo.setProcessUuid(this.getUuid());
-				processStepVo.setConfig(stepObj.toJSONString());
+				processStepVo.setConfig(stepConfigObj.toJSONString());
 
 				if (stepObj.containsKey("uuid")) {
 					String uuid = stepObj.getString("uuid");
