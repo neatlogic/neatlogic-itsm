@@ -14,6 +14,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.EntityField;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 
@@ -166,7 +169,6 @@ public class ProcessVo extends BasePageVo implements Serializable {
 					for (int p = 0; p < slaObj.getJSONArray("processStepUuidList").size(); p++) {
 						processSlaVo.addProcessStepUuid(slaObj.getJSONArray("processStepUuidList").getString(p));
 					}
-
 				}
 			}
 		}
@@ -176,6 +178,7 @@ public class ProcessVo extends BasePageVo implements Serializable {
 			JSONArray stepList = this.getConfigObj().getJSONArray("stepList");
 			for (int i = 0; i < stepList.size(); i++) {
 				JSONObject stepObj = stepList.getJSONObject(i);
+				JSONObject stepConfigObj = stepObj.getJSONObject("stepConfig");
 				ProcessStepVo processStepVo = new ProcessStepVo();
 				this.stepList.add(processStepVo);
 				processStepVo.setProcessUuid(this.getUuid());
@@ -189,42 +192,18 @@ public class ProcessVo extends BasePageVo implements Serializable {
 				if (stepObj.containsKey("name")) {
 					processStepVo.setName(stepObj.getString("name"));
 				}
-				if (stepObj.containsKey("type")) {
-					String handler = stepObj.getString("type");
+				if (stepObj.containsKey("handler")) {
+					String handler = stepObj.getString("handler");
 					processStepVo.setHandler(handler);
 					processStepVo.setType(ProcessStepHandler.getType(handler));
-				}
-				/** 组装通知模板 **/
-				if (stepObj.containsKey("notifyList")) {
-					JSONArray notifyList = stepObj.getJSONArray("notifyList");
-					List<String> templateUuidList = new ArrayList<>();
-					for (int j = 0; j < notifyList.size(); j++) {
-						JSONObject notifyObj = notifyList.getJSONObject(j);
-						if (notifyObj.containsKey("template")) {
-							templateUuidList.add(notifyObj.getString("template"));
-						}
-					}
-					processStepVo.setTemplateUuidList(templateUuidList);
-				}
-				/** 组装分配策略 **/
-				if (stepObj.containsKey("workerPolicyConfig")) {
-					JSONObject workerPolicyConfig = stepObj.getJSONObject("workerPolicyConfig");
-					if (workerPolicyConfig.containsKey("policyList")) {
-						JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
-						List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
-						for (int k = 0; k < policyList.size(); k++) {
-							JSONObject policyObj = policyList.getJSONObject(k);
-							ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
-							processStepWorkerPolicyVo.setProcessUuid(this.getUuid());
-							processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
-							processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
-							processStepWorkerPolicyVo.setSort(k + 1);
-							processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
-							workerPolicyList.add(processStepWorkerPolicyVo);
-						}
-						processStepVo.setWorkerPolicyList(workerPolicyList);
+					IProcessStepHandler procssStepHandler = ProcessStepHandlerFactory.getHandler(handler);
+					if (procssStepHandler != null) {
+						procssStepHandler.makeupProcessStep(processStepVo, stepConfigObj);
+					} else {
+						throw new ProcessStepHandlerNotFoundException(handler);
 					}
 				}
+
 			}
 		}
 
