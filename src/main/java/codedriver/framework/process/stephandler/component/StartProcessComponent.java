@@ -10,26 +10,24 @@ import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
-import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.module.process.dto.ProcessTaskVo;
 
 @Service
-public class EndProcessComponent extends ProcessStepHandlerBase {
+public class StartProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.END.getHandler();
+		return ProcessStepHandler.START.getHandler();
 	}
-	
+
 	@Override
 	public String getType() {
-		return ProcessStepHandler.END.getType();
+		return ProcessStepHandler.START.getType();
 	}
-	
+
 	@Override
 	public ProcessStepMode getMode() {
 		return ProcessStepMode.AT;
@@ -42,7 +40,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getName() {
-		return ProcessStepHandler.END.getName();
+		return ProcessStepHandler.START.getName();
 	}
 
 	@Override
@@ -65,7 +63,6 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		return true;
 	}
 
-
 	@Override
 	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo processTaskStepVo) {
 		return null;
@@ -73,7 +70,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
-		
+
 		return 1;
 	}
 
@@ -84,17 +81,11 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		/**设置已完成标记位**/
-		currentProcessTaskStepVo.setIsAllDone(true);
 		return 0;
 	}
 
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
-		ProcessTaskVo processTaskVo = new ProcessTaskVo();
-		processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
-		processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskMapper.updateProcessTaskStatus(processTaskVo);
 		return 0;
 	}
 
@@ -108,13 +99,10 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-
-
 	@Override
 	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 0;
 	}
-
 
 	@Override
 	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
@@ -139,7 +127,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

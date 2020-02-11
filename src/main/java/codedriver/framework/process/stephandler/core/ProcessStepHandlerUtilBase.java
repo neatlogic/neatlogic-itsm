@@ -3,10 +3,8 @@ package codedriver.framework.process.stephandler.core;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,14 +54,17 @@ import codedriver.framework.process.notify.schedule.plugin.ProcessTaskStepNotify
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
+import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
-import codedriver.module.process.constvalue.ProcessTaskStepUserType;
+import codedriver.module.process.constvalue.UserType;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.module.process.dto.ProcessTaskSlaNotifyVo;
+import codedriver.module.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.module.process.dto.ProcessTaskSlaVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
@@ -154,12 +155,12 @@ public abstract class ProcessStepHandlerUtilBase {
 	 * public static void main(String[] atr) { ScriptEngineManager sem = new
 	 * ScriptEngineManager();
 	 * 
-	 * ScriptEngine se = sem.getEngineByName("nashorn"); JSONObject paramObj =
-	 * new JSONObject(); paramObj.put("form.name", "chenqw");
-	 * paramObj.put("form.age", "37"); se.put("json", paramObj); String script =
+	 * ScriptEngine se = sem.getEngineByName("nashorn"); JSONObject paramObj = new
+	 * JSONObject(); paramObj.put("form.name", "chenqw"); paramObj.put("form.age",
+	 * "37"); se.put("json", paramObj); String script =
 	 * "json['form.name'] == 'chen2qw' && json['form.age'] == '37'"; try {
-	 * System.out.println(Boolean.parseBoolean(se.eval(script).toString())); }
-	 * catch (ScriptException e) { logger.error(e.getMessage(), e); }
+	 * System.out.println(Boolean.parseBoolean(se.eval(script).toString())); } catch
+	 * (ScriptException e) { logger.error(e.getMessage(), e); }
 	 * 
 	 * }
 	 */
@@ -612,9 +613,11 @@ public abstract class ProcessStepHandlerUtilBase {
 				}
 				for (ProcessTaskSlaVo slaVo : slaList) {
 					/** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
-					if (slaVo.getTimeSum() == null) {
-						if (slaVo.getRuleObj() != null) {
-							JSONArray policyList = slaVo.getRuleObj().getJSONArray("calculatePolicyList");
+					ProcessTaskSlaTimeVo slaTimeVo = slaVo.getSlaTimeVo();
+					boolean isSlaTimeExists = false;
+					if (slaTimeVo == null) {
+						if (slaVo.getConfigObj() != null) {
+							JSONArray policyList = slaVo.getConfigObj().getJSONArray("calculatePolicyList");
 							if (policyList != null && policyList.size() > 0) {
 								POLICY: for (int i = 0; i < policyList.size(); i++) {
 									JSONObject policyObj = policyList.getJSONObject(i);
@@ -631,20 +634,21 @@ public abstract class ProcessStepHandlerUtilBase {
 										isHit = true;
 									}
 									if (isHit) {
+										slaTimeVo = new ProcessTaskSlaTimeVo();
 										if (enablePriority == 0) {
 											long timecost = getRealtime(time, unit);
-											slaVo.setTimeSum(timecost);
-											slaVo.setRealTimeLeft(timecost);
-											slaVo.setTimeLeft(timecost);
+											slaTimeVo.setTimeSum(timecost);
+											slaTimeVo.setRealTimeLeft(timecost);
+											slaTimeVo.setTimeLeft(timecost);
 										} else {
 											if (priorityList != null && priorityList.size() > 0) {
 												for (int p = 0; p < priorityList.size(); p++) {
 													JSONObject priorityObj = priorityList.getJSONObject(p);
 													if (priorityObj.getString("priority").equals(processTaskVo.getPriorityUuid())) {
 														long timecost = getRealtime(priorityObj.getIntValue("time"), priorityObj.getString("unit"));
-														slaVo.setTimeSum(timecost);
-														slaVo.setRealTimeLeft(timecost);
-														slaVo.setTimeLeft(timecost);
+														slaTimeVo.setTimeSum(timecost);
+														slaTimeVo.setRealTimeLeft(timecost);
+														slaTimeVo.setTimeLeft(timecost);
 														break POLICY;
 													}
 												}
@@ -656,6 +660,7 @@ public abstract class ProcessStepHandlerUtilBase {
 							}
 						}
 					} else {
+						isSlaTimeExists = true;
 						// 非第一次进入，进行时间扣减
 						List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList = processTaskStepTimeAuditMapper.getProcessTaskStepTimeAuditBySlaId(slaVo.getId());
 						long realTimeCost = getRealTimeCost(processTaskStepTimeAuditList);
@@ -663,68 +668,54 @@ public abstract class ProcessStepHandlerUtilBase {
 						if (StringUtils.isNotBlank(worktimeUuid)) {// 如果有工作时间，则计算实际消耗的工作时间
 							timeCost = getTimeCost(processTaskStepTimeAuditList, worktimeUuid);
 						}
-						slaVo.setRealTimeLeft(slaVo.getRealTimeLeft() - realTimeCost);
-						slaVo.setTimeLeft(slaVo.getTimeLeft() - timeCost);
+						slaTimeVo.setRealTimeLeft(slaTimeVo.getRealTimeLeft() - realTimeCost);
+						slaTimeVo.setTimeLeft(slaTimeVo.getTimeLeft() - timeCost);
 
 					}
+
 					// 修正最终超时日期
-					if (slaVo.getRealTimeLeft() != null) {
-						slaVo.setRealExpireTime(sdf.format(new Date(now + slaVo.getRealTimeLeft())));
-					} else {
-						throw new RuntimeException("计算实际剩余时间失败");
-					}
-					if (StringUtils.isNotBlank(worktimeUuid)) {
-						if (slaVo.getTimeLeft() != null) {
-							long expireTime = calculateExpireTime(now, slaVo.getTimeLeft(), worktimeUuid);
-							slaVo.setExpireTime(sdf.format(new Date(expireTime)));
+					if (slaTimeVo != null) {
+						slaTimeVo.setRealExpireTime(sdf.format(new Date(now + slaTimeVo.getRealTimeLeft())));
+						if (StringUtils.isNotBlank(worktimeUuid)) {
+							if (slaTimeVo.getTimeLeft() != null) {
+								long expireTime = calculateExpireTime(now, slaTimeVo.getTimeLeft(), worktimeUuid);
+								slaTimeVo.setExpireTime(sdf.format(new Date(expireTime)));
+							} else {
+								throw new RuntimeException("计算剩余时间失败");
+							}
 						} else {
-							throw new RuntimeException("计算剩余时间失败");
+							if (slaTimeVo.getTimeLeft() != null) {
+								slaTimeVo.setExpireTime(sdf.format(new Date(now + slaTimeVo.getTimeLeft())));
+							} else {
+								throw new RuntimeException("计算剩余时间失败");
+							}
 						}
-					} else {
-						if (slaVo.getTimeLeft() != null) {
-							slaVo.setExpireTime(sdf.format(new Date(now + slaVo.getTimeLeft())));
+						slaTimeVo.setSlaId(slaVo.getId());
+						if (isSlaTimeExists) {
+							processTaskMapper.updateProcessTaskSlaTime(slaTimeVo);
 						} else {
-							throw new RuntimeException("计算剩余时间失败");
+							processTaskMapper.insertProcessTaskSlaTime(slaTimeVo);
 						}
-					}
-					processTaskMapper.updateProcessTaskSlaTime(slaVo);
 
-					// TODO 执行超时操作
-					if (StringUtils.isNotBlank(slaVo.getExpireTime()) && slaVo.getRuleObj() != null) {
-						JSONArray notifyPolicyList = slaVo.getRuleObj().getJSONArray("notifyPolicyList");
-						if (notifyPolicyList != null && notifyPolicyList.size() > 0) {
-							for (int i = 0; i < notifyPolicyList.size(); i++) {
-								JSONObject policyObj = notifyPolicyList.getJSONObject(i);
-								String expression = policyObj.getString("expression");
-								int time = policyObj.getIntValue("time");
-								String unit = policyObj.getString("unit");
-								JSONArray notifyPluginList = policyObj.getJSONArray("pluginList");
-								String executeType = policyObj.getString("executeType");
-								int intervalTime = policyObj.getIntValue("intervalTime");
-								String intervalUnit = policyObj.getString("intervalUnit");
-								String template = policyObj.getString("template");
-								JSONArray receiverList = policyObj.getJSONArray("receiverList");
+						// 执行超时操作
+						if (StringUtils.isNotBlank(slaTimeVo.getExpireTime()) && slaVo.getConfigObj() != null) {
+							JSONArray notifyPolicyList = slaVo.getConfigObj().getJSONArray("notifyPolicyList");
+							if (notifyPolicyList != null && notifyPolicyList.size() > 0) {
+								for (int i = 0; i < notifyPolicyList.size(); i++) {
+									JSONObject notifyPolicyObj = notifyPolicyList.getJSONObject(i);
+									ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = new ProcessTaskSlaNotifyVo();
+									processTaskSlaNotifyVo.setSlaId(slaVo.getId());
+									processTaskSlaNotifyVo.setConfig(notifyPolicyObj.toJSONString());
+									processTaskMapper.insertProcessTaskSlaNotify(processTaskSlaNotifyVo);
 
-								if (StringUtils.isNotBlank(expression) && time > 0 && StringUtils.isNotBlank("unit") && notifyPluginList != null && notifyPluginList.size() > 0) {
-									try {
-										Date etdate = sdf.parse(slaVo.getExpireTime());
-										Calendar notifyDate = Calendar.getInstance();
-										notifyDate.setTime(etdate);
-										if (expression.equalsIgnoreCase("before")) {
-											time = -time;
-										}
-										if (unit.equalsIgnoreCase("day")) {
-											notifyDate.add(time, Calendar.DAY_OF_MONTH);
-										} else if (unit.equalsIgnoreCase("hour")) {
-											notifyDate.add(time, Calendar.HOUR);
-										} else {
-											notifyDate.add(time, Calendar.MINUTE);
-										}
-										IJob jobHandler = SchedulerManager.getHandler(ProcessTaskStepNotifyJob.class.getName());
-										JobObject jobObject = new JobObject.Builder(currentProcessTaskStepVo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()).withTriggerTime(notifyDate.getTime()).build();
-										schedulerManager.loadJob(jobObject);
-									} catch (ParseException e) {
-										logger.error(e.getMessage(), e);
+									IJob jobHandler = SchedulerManager.getHandler(ProcessTaskStepNotifyJob.class.getName());
+									if (jobHandler != null) {
+										JobObject jobObject = new JobObject.Builder(currentProcessTaskStepVo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()).build();
+										jobObject.addData("slaId", slaVo.getId());
+										jobObject.addData("hash", processTaskSlaNotifyVo.getHash());
+										jobHandler.reloadJob(jobObject);
+									} else {
+										throw new ScheduleHandlerNotFoundException(ProcessTaskStepNotifyJob.class.getName());
 									}
 
 								}
@@ -810,7 +801,7 @@ public abstract class ProcessStepHandlerUtilBase {
 
 	protected static class ActionRoleChecker {
 		protected static boolean isWorker(ProcessTaskStepVo currentProcessTaskStepVo) {
-			List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessTaskStepUserType.MAJOR.getValue());
+			List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), UserType.MAJOR.getValue());
 			boolean hasRight = false;
 			if (userList.size() > 0) {
 				for (ProcessTaskStepUserVo userVo : userList) {

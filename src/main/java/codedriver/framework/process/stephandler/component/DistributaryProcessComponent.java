@@ -6,10 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
+import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
@@ -21,6 +24,11 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public String getName() {
 		return ProcessStepHandler.DISTRIBUTARY.getName();
+	}
+	
+	@Override
+	public String getType() {
+		return ProcessStepHandler.DISTRIBUTARY.getType();
 	}
 
 	@Override
@@ -120,6 +128,12 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		return 0;
+	}
+
+	@Override
+	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
