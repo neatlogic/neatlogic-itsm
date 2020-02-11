@@ -970,7 +970,7 @@
 		)
 	</insert>
 
-	<insert id="insertProcessSlaNotify" parameterType="codedriver.module.process.dto.ProcessSlaNotifyVo">
+	<insert id="insertProcessSlaNotify" parameterType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
 		INSERT INTO `processtask_step_sla_notify` (
 		`sla_id`,
 		`hash`,
