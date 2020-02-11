@@ -126,6 +126,28 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		
 		
 		JSONArray resultArray = new JSONArray();
+		//默认
+		JSONObject commonObj = new JSONObject();
+		commonObj.put("value", "common");
+		commonObj.put("text", "公共");
+		JSONArray commonArray = new JSONArray();
+		if(commonList.size()>0) {
+			for(String common : commonList) {
+				JSONObject commonTmp = new JSONObject();
+				commonTmp.put("value", COMMON_HEADER+common);
+				commonTmp.put("text", UserType.getText(common));
+				commonArray.add(commonTmp);
+			}
+		}else {
+			for (UserType s : UserType.values()) {
+				JSONObject commonTmp = new JSONObject();
+				commonTmp.put("value", COMMON_HEADER+s.getValue());
+				commonTmp.put("text", s.getText());
+				commonArray.add(commonTmp);
+			}
+		}
+		commonObj.put("dataList", commonArray);
+		resultArray.add(commonObj);
 		//用户
 		JSONObject userObj = new JSONObject();
 		userObj.put("value", "user");
@@ -165,28 +187,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		}
 		roleObj.put("dataList", roleArray);
 		resultArray.add(roleObj);
-		//默认
-		JSONObject commonObj = new JSONObject();
-		commonObj.put("value", "common");
-		commonObj.put("text", "公共");
-		JSONArray commonArray = new JSONArray();
-		if(commonList.size()>0) {
-			for(String common : commonList) {
-				JSONObject commonTmp = new JSONObject();
-				commonTmp.put("value", COMMON_HEADER+common);
-				commonTmp.put("text", UserType.getText(common));
-				commonArray.add(commonTmp);
-			}
-		}else {
-			for (UserType s : UserType.values()) {
-				JSONObject commonTmp = new JSONObject();
-				commonTmp.put("value", COMMON_HEADER+s.getValue());
-				commonTmp.put("text", s.getText());
-				commonArray.add(commonTmp);
-			}
-		}
-		commonObj.put("dataList", commonArray);
-		resultArray.add(commonObj);
+		
 		
 		return resultArray;
 	}
