@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskMapper">
+
+	<select id="getProcessTaskNotifyVo" resultType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
+		SELECT
+		`sla_id` AS slaId,
+		`hash`,
+		DATE_FORMAT(`trigger_time`, '%Y-%m-%d %H:%i:%s') as triggerTime,
+		`config`
+		FROM
+		`processtask_sla_notify`
+		WHERE
+		sla_id = #{slaId}
+		AND
+		hash = #{hash}
+	</select>
+
 	<select id="getProcessTaskStepRelByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepRelVo">
 		SELECT
 		`processtask_id` AS processTaskId,
@@ -58,6 +73,19 @@
 		ON a.`id` = b.`sla_id`
 		LEFT JOIN processtask_sla_time c ON a.id = c.sla_id
 		WHERE b.`processtask_step_id` = #{value}
+	</select>
+
+	<select id="getProcessTaskSlaTimeBySlaId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskSlaTimeVo">
+		SELECT
+		`sla_id` as slaId,
+		DATE_FORMAT(`expire_time`, '%Y-%m-%d %H:%i:%s') as expireTime,
+		DATE_FORMAT(`realexpire_time`, '%Y-%m-%d %H:%i:%s') AS realExpireTime,
+		`time_left` as timeLeft,
+		`realtime_left` as realTimeLeft,
+		`time_sum` as timeSum
+		FROM
+		`processtask_sla_time`
+		WHERE sla_id = #{value}
 	</select>
 
 	<select id="getProcessTaskStepAuditDetail" resultType="codedriver.module.process.dto.ProcessTaskStepAuditDetailVo">
@@ -532,6 +560,22 @@
 		WHERE `id` = #{id}
 	</update>
 
+	<insert id="insertProcessTaskSlaNotify" parameterType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
+		INSERT INTO `processtask_sla_notify` (
+		`sla_id`,
+		`hash`,
+		`trigger_time`,
+		`config`
+		)
+		VALUES
+		(
+		#{slaId},
+		#{hash},
+		#{triggerTime},
+		#{config}
+		)
+	</insert>
+
 	<insert id="insertProcessTaskStepSla">
 		INSERT INTO `processtask_step_sla` (`processtask_step_id`, `sla_id`)
 		VALUES
@@ -923,6 +967,22 @@
 		#{realExpireTime},
 		#{timeLeft},
 		#{realTimeLeft}
+		)
+	</insert>
+
+	<insert id="insertProcessSlaNotify" parameterType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
+		INSERT INTO `processtask_step_sla_notify` (
+		`sla_id`,
+		`hash`,
+		`trigger_time`,
+		`config`
+		)
+		VALUES
+		(
+		#{slaId},
+		#{hash},
+		#{triggerTime},
+		#{config}
 		)
 	</insert>
 

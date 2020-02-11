@@ -10,8 +10,7 @@ public enum NotifyTriggerType {
 	RECOVER("recover", "恢复", "流程步骤已恢复", "流程步骤已恢复"),
 	ACCEPT("accept", "接管", "流程步骤接管", "流程步骤接管"),
 	TRANSFER("transfer", "转交", "流程步骤已转交", "流程步骤已转交"),
-	ASSIGN("assign", "分配处理人", "流程步骤已分配", "流程步骤已分配"),
-	TIMEOUT("timeout", "超时", "流程步骤已超时", "流程步骤已超时");
+	ASSIGN("assign", "分配处理人", "流程步骤已分配", "流程步骤已分配");
 
 	private String trigger;
 	private String text;

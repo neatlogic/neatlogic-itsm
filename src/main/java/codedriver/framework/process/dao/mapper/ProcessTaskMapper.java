@@ -10,6 +10,7 @@ import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskConvergeVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
+import codedriver.module.process.dto.ProcessTaskSlaNotifyVo;
 import codedriver.module.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.module.process.dto.ProcessTaskSlaVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
@@ -28,6 +29,9 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskMapper {
+	public ProcessTaskSlaTimeVo getProcessTaskSlaTimeBySlaId(Long slaId);
+
+	public ProcessTaskSlaNotifyVo getProcessTaskNotifyVo(@Param("slaId") Long slaId, @Param("hash") String hash);
 
 	public ProcessTaskConfigVo getProcessTaskConfigByHash(String hash);
 
@@ -102,6 +106,8 @@ public interface ProcessTaskMapper {
 	public int replaceProcessTaskContent(ProcessTaskContentVo processTaskContentVo);
 
 	public int insertProcessTaskStep(ProcessTaskStepVo processTaskStepVo);
+
+	public int insertProcessTaskSlaNotify(ProcessTaskSlaNotifyVo processTaskSlaNotifyVo);
 
 	public int insertProcessTaskStepUser(ProcessTaskStepUserVo processTaskStepUserVo);
 
