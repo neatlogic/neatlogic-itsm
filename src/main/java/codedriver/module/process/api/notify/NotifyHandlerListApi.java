@@ -1,31 +1,24 @@
 package codedriver.module.process.api.notify;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.process.notify.core.NotifyTriggerType;
+import codedriver.framework.process.notify.core.NotifyHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.notify.dto.NotifyTemplateVo;
 
 @Service
 public class NotifyHandlerListApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/trigger/list";
+		return "notify/handler/list";
 	}
 
 	@Override
 	public String getName() {
-		return "通知触发点列表接口";
+		return "通知插件列表接口";
 	}
 
 	@Override
@@ -33,17 +26,10 @@ public class NotifyHandlerListApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Description(desc = "通知触发点列表接口")
-	@Output({
-			@Param(explode = NotifyTemplateVo[].class,
-					desc = "通知触发点列表") })
+	@Description(desc = "通知插件列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		List<ValueTextVo> returnList = new ArrayList<>();
-		for (NotifyTriggerType notifyTriggerType : NotifyTriggerType.values()) {
-			returnList.add(new ValueTextVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText()));
-		}
-		return returnList;
+		return NotifyHandlerFactory.getNotifyHandlerTypeList();
 	}
 
 }
