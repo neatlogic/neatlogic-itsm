@@ -10,33 +10,26 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.restful.annotation.EntityField;
 
 public class ProcessTaskSlaVo {
-	@EntityField(name = "id",
-			type = ApiParamType.LONG)
+	@EntityField(name = "id", type = ApiParamType.LONG)
 	private Long id;
-	@EntityField(name = "流程任务id",
-			type = ApiParamType.LONG)
+	@EntityField(name = "流程任务id", type = ApiParamType.LONG)
 	private Long processTaskId;
-	@EntityField(name = "名称",
-			type = ApiParamType.STRING)
+	@EntityField(name = "名称", type = ApiParamType.STRING)
 	private String name;
-	@EntityField(name = "规则",
-			type = ApiParamType.STRING)
-	private String rule;
-	private transient JSONObject ruleObj;
-	@EntityField(name = "超时日期（根据工作日历计算）",
-			type = ApiParamType.STRING)
-	private String expireTime;
-	@EntityField(name = "超时日期（不考虑工作日历）",
-			type = ApiParamType.STRING)
-	private String realExpireTime;
-	@EntityField(name = "总耗时，单位：毫秒",
-			type = ApiParamType.LONG)
-	private Long timeSum;
-	@EntityField(name = "剩余时间，单位：毫秒",
-			type = ApiParamType.LONG)
-	private Long timeLeft;
-	private Long realTimeLeft;
+	@EntityField(name = "配置", type = ApiParamType.JSONOBJECT)
+	private String config;
+	private transient JSONObject configObj;
 	private List<Long> processTaskStepIdList;
+	private ProcessTaskSlaTimeVo slaTimeVo;
+
+	public ProcessTaskSlaVo() {
+
+	}
+
+	public ProcessTaskSlaVo(ProcessSlaVo processSlaVo) {
+		this.config = processSlaVo.getConfig();
+		this.name = processSlaVo.getName();
+	}
 
 	public Long getId() {
 		return id;
@@ -54,23 +47,23 @@ public class ProcessTaskSlaVo {
 		this.processTaskId = processTaskId;
 	}
 
-	public String getRule() {
-		return rule;
+	public String getConfig() {
+		return config;
 	}
 
-	public void setRule(String rule) {
-		this.rule = rule;
+	public void setConfig(String config) {
+		this.config = config;
 	}
 
-	public JSONObject getRuleObj() {
-		if (ruleObj == null && StringUtils.isNotBlank(rule)) {
-			ruleObj = JSONObject.parseObject(rule);
+	public JSONObject getConfigObj() {
+		if (configObj == null && StringUtils.isNotBlank(config)) {
+			configObj = JSONObject.parseObject(config);
 		}
-		return ruleObj;
+		return configObj;
 	}
 
-	public void setRuleObj(JSONObject ruleObj) {
-		this.ruleObj = ruleObj;
+	public void setConfigObj(JSONObject configObj) {
+		this.configObj = configObj;
 	}
 
 	public List<Long> getProcessTaskStepIdList() {
@@ -89,44 +82,12 @@ public class ProcessTaskSlaVo {
 		this.name = name;
 	}
 
-	public String getExpireTime() {
-		return expireTime;
+	public ProcessTaskSlaTimeVo getSlaTimeVo() {
+		return slaTimeVo;
 	}
 
-	public void setExpireTime(String expireTime) {
-		this.expireTime = expireTime;
-	}
-
-	public String getRealExpireTime() {
-		return realExpireTime;
-	}
-
-	public void setRealExpireTime(String realExpireTime) {
-		this.realExpireTime = realExpireTime;
-	}
-
-	public Long getTimeLeft() {
-		return timeLeft;
-	}
-
-	public void setTimeLeft(Long timeLeft) {
-		this.timeLeft = timeLeft;
-	}
-
-	public Long getRealTimeLeft() {
-		return realTimeLeft;
-	}
-
-	public void setRealTimeLeft(Long realTimeLeft) {
-		this.realTimeLeft = realTimeLeft;
-	}
-
-	public Long getTimeSum() {
-		return timeSum;
-	}
-
-	public void setTimeSum(Long timesum) {
-		this.timeSum = timesum;
+	public void setSlaTimeVo(ProcessTaskSlaTimeVo slaTimeVo) {
+		this.slaTimeVo = slaTimeVo;
 	}
 
 }

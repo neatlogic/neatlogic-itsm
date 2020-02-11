@@ -1,6 +1,8 @@
 package codedriver.module.process.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,6 +15,7 @@ public class ProcessSlaVo implements Serializable {
 	private String name;
 	private String config;
 	private JSONObject configObj;
+	private List<String> processStepUuidList;
 
 	public String getUuid() {
 		return uuid;
@@ -55,6 +58,23 @@ public class ProcessSlaVo implements Serializable {
 
 	public void setConfigObj(JSONObject configObj) {
 		this.configObj = configObj;
+	}
+
+	public List<String> getProcessStepUuidList() {
+		return processStepUuidList;
+	}
+
+	public void setProcessStepUuidList(List<String> processStepUuidList) {
+		this.processStepUuidList = processStepUuidList;
+	}
+
+	public void addProcessStepUuid(String processStepUuid) {
+		if (this.processStepUuidList == null) {
+			this.processStepUuidList = new ArrayList<>();
+		}
+		if (StringUtils.isNotBlank(processStepUuid) && !this.processStepUuidList.contains(processStepUuid)) {
+			this.processStepUuidList.add(processStepUuid);
+		}
 	}
 
 }

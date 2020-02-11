@@ -23,6 +23,8 @@ import codedriver.module.process.constvalue.ProcessStepMode;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.module.process.dto.ProcessStepVo;
+import codedriver.module.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
@@ -39,6 +41,11 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public String getHandler() {
 		return ProcessStepHandler.OMNIPOTENT.getHandler();
+	}
+
+	@Override
+	public String getType() {
+		return ProcessStepHandler.OMNIPOTENT.getType();
 	}
 
 	@Override
@@ -246,12 +253,10 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-
 	@Override
 	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}
-
 
 	@Override
 	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
@@ -266,6 +271,41 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		return 0;
+	}
+
+	@Override
+	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
+		/** 组装通知模板 **/
+		if (stepConfigObj.containsKey("notifyList")) {
+			JSONArray notifyList = stepConfigObj.getJSONArray("notifyList");
+			List<String> templateUuidList = new ArrayList<>();
+			for (int j = 0; j < notifyList.size(); j++) {
+				JSONObject notifyObj = notifyList.getJSONObject(j);
+				if (notifyObj.containsKey("template")) {
+					templateUuidList.add(notifyObj.getString("template"));
+				}
+			}
+			processStepVo.setTemplateUuidList(templateUuidList);
+		}
+		/** 组装分配策略 **/
+		if (stepConfigObj.containsKey("workerPolicyConfig")) {
+			JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+			if (workerPolicyConfig.containsKey("policyList")) {
+				JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
+				List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
+				for (int k = 0; k < policyList.size(); k++) {
+					JSONObject policyObj = policyList.getJSONObject(k);
+					ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
+					processStepWorkerPolicyVo.setProcessUuid(processStepVo.getUuid());
+					processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
+					processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
+					processStepWorkerPolicyVo.setSort(k + 1);
+					processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
+					workerPolicyList.add(processStepWorkerPolicyVo);
+				}
+				processStepVo.setWorkerPolicyList(workerPolicyList);
+			}
+		}
 	}
 
 }

@@ -21,6 +21,7 @@ import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
+import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -34,6 +35,11 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public String getName() {
 		return ProcessStepHandler.CONDITION.getName();
+	}
+	
+	@Override
+	public String getType() {
+		return ProcessStepHandler.CONDITION.getType();
 	}
 
 	@Override
@@ -349,6 +355,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		return 0;
+	}
+
+	@Override
+	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

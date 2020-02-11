@@ -23,14 +23,17 @@ import codedriver.module.process.dto.ProcessVo;
 public interface ProcessMapper {
 	public int checkProcessIsExists(String processUuid);
 
+	public List<String> getProcessStepUuidBySlaUuid(String slaUuid);
+
 	public ProcessFormVo getProcessFormByProcessUuid(String processUuid);
 
 	public List<ProcessStepRelVo> getProcessStepRelByProcessUuid(String processUuid);
 
+	public List<ProcessSlaVo> getProcessSlaByProcessUuid(String processUuid);
+
 	public List<ProcessStepVo> getProcessStepDetailByProcessUuid(String processUuid);
 
-	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(
-			ProcessStepFormAttributeVo processStepFormAttributeVo);
+	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo);
 
 	public ProcessVo getProcessByUuid(String processUuid);
 
@@ -83,7 +86,7 @@ public interface ProcessMapper {
 	public int insertProcessStepNotifyTemplate(ProcessStepNotifyTemplateVo processStepNotifyTemplateVo);
 
 	public int insertProcessDraft(ProcessDraftVo processDraftVo);
-	
+
 	public int updateProcess(ProcessVo processVo);
 
 	public int deleteProcessStepByProcessUuid(String processUuid);

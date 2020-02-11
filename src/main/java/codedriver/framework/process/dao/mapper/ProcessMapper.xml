@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessMapper">
+	<select id="getProcessStepUuidBySlaUuid" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT
+		`step_uuid`
+		FROM
+		`process_step_sla`
+		WHERE
+		sla_uuid = #{value}
+	</select>
+
+	<select id="getProcessSlaByProcessUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessSlaVo">
+		SELECT
+		`uuid`,
+		`process_uuid` AS processUuid,
+		`name`,
+		`config`
+		FROM
+		`process_sla`
+		WHERE
+		process_uuid = #{value}
+	</select>
+
 	<select id="getProcessFormByProcessUuid" parameterType="java.lang.String" resultType="codedriver.module.process.dto.ProcessFormVo">
 		SELECT
 		`process_uuid` AS processUuid,
@@ -32,9 +53,6 @@
 		WHERE
 		process_uuid = #{processUuid}
 	</select>
-
-
-
 
 	<resultMap id="processStepDetailMap" type="codedriver.module.process.dto.ProcessStepVo">
 		<id column="processUuid" property="processUuid" />

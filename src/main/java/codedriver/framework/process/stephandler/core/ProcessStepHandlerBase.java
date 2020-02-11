@@ -37,11 +37,13 @@ import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.module.process.constvalue.UserType;
 import codedriver.module.process.dto.FormVersionVo;
+import codedriver.module.process.dto.ProcessSlaVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessTaskConvergeVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
+import codedriver.module.process.dto.ProcessTaskSlaVo;
 import codedriver.module.process.dto.ProcessTaskStepConfigVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepRelVo;
@@ -209,8 +211,6 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 				/** 计算SLA并触发超时警告 **/
 				SlaHandler.calculate(currentProcessTaskStepVo);
-
-				
 
 				/** 触发通知 **/
 				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.ACTIVE);
@@ -913,6 +913,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			processTaskMapper.replaceProcessTaskConfig(new ProcessTaskConfigVo(hash, processVo.getConfig()));
 		}
 
+		List<ProcessSlaVo> processSlaList = processMapper.getProcessSlaByProcessUuid(currentProcessTaskStepVo.getProcessUuid());
 		List<ProcessStepVo> processStepList = processMapper.getProcessStepDetailByProcessUuid(currentProcessTaskStepVo.getProcessUuid());
 		List<ProcessStepRelVo> processStepRelList = processMapper.getProcessStepRelByProcessUuid(currentProcessTaskStepVo.getProcessUuid());
 
@@ -1020,6 +1021,21 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				/** 同时找到from step id 和to step id 时才写入，其他数据舍弃 **/
 				if (processTaskStepRelVo.getFromProcessTaskStepId() != null && processTaskStepRelVo.getToProcessTaskStepId() != null) {
 					processTaskMapper.insertProcessTaskStepRel(processTaskStepRelVo);
+				}
+			}
+		}
+
+		/** 写入sla信息 **/
+		if (processSlaList != null && processSlaList.size() > 0) {
+			for (ProcessSlaVo slaVo : processSlaList) {
+				List<String> slaStepUuidList = processMapper.getProcessStepUuidBySlaUuid(slaVo.getUuid());
+				if (slaStepUuidList.size() > 0) {
+					ProcessTaskSlaVo processTaskSlaVo = new ProcessTaskSlaVo(slaVo);
+					processTaskSlaVo.setProcessTaskId(processTaskVo.getId());
+					processTaskMapper.insertProcessTaskSla(processTaskSlaVo);
+					for (String suuid : slaStepUuidList) {
+						processTaskMapper.insertProcessTaskStepSla(stepIdMap.get(suuid), processTaskSlaVo.getId());
+					}
 				}
 			}
 		}
