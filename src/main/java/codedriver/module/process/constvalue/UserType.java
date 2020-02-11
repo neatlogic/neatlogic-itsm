@@ -1,7 +1,7 @@
 package codedriver.module.process.constvalue;
 
 public enum UserType {
-	ALL("#{all}","所有人"),MAJOR("major", "主处理人"), MINOR("minor", "协助处理人"),OWNER("owner","上报人"),REPORTER("reporter","代报人");
+	ALL("all","所有人"),MAJOR("major", "主处理人"), MINOR("minor", "协助处理人"),OWNER("owner","上报人"),REPORTER("reporter","代报人");
 
 	private String status;
 	private String text;
