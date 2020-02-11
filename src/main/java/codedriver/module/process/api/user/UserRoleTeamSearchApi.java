@@ -50,9 +50,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	}
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", isRequired = false, xss = true),
-		@Param(name = "userIdList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用户id列表"),
-		@Param(name = "roleNameList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "角色名称列表"),
-		@Param(name = "teamUuidList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "组uuid列表"),
+		@Param(name = "valueList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于回显的参数列表"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10", isRequired = false),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页", isRequired = false)
@@ -66,9 +64,14 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	@Description(desc = "用户角色及组织架构查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		final String USER_HEADER = "user#";
+		final String ROLE_HEADER = "role#";
+		final String TEAM_HEADER = "team#";
+		final String COMMON_HEADER = "common#";
 		List<UserVo> userList = new ArrayList<UserVo>();
 		List<RoleVo> roleList = new ArrayList<RoleVo>();
 		List<TeamVo> teamList = new ArrayList<TeamVo>();
+		List<String> commonList = new ArrayList<String>();
 		if(jsonObj.containsKey("keyword")) {
 			UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
 			if (userVo.getNeedPage()) {
@@ -94,17 +97,30 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 			}
 			teamList = teamMapper.searchTeam(teamVo);
 		}else {//回显
-			if(jsonObj.containsKey("userIdList") && !jsonObj.getJSONArray("userIdList").isEmpty()) {
-				List<String> userIdList = JSON.parseArray(jsonObj.getJSONArray("userIdList").toJSONString(), String.class);
-				userList = userMapper.getUserByUserIdList(userIdList);
-			}
-			if(jsonObj.containsKey("roleNameList") && !jsonObj.getJSONArray("roleNameList").isEmpty()) {
-				List<String> roleNameList = JSON.parseArray(jsonObj.getJSONArray("roleNameList").toJSONString(), String.class);
-				roleList = roleMapper.getRoleByRoleNameList(roleNameList);
-			}
-			if(jsonObj.containsKey("teamUuidList") && !jsonObj.getJSONArray("teamUuidList").isEmpty()) {
-				List<String> teamUuidList = JSON.parseArray(jsonObj.getJSONArray("teamUuidList").toJSONString(), String.class);
-				teamList = teamMapper.getTeamByUuidList(teamUuidList);
+			if(jsonObj.containsKey("valueList") && !jsonObj.getJSONArray("valueList").isEmpty()) {
+				List<String> userIdList = new ArrayList<String>();
+				List<String> roleNameList = new ArrayList<String>();
+				List<String> teamUuidList = new ArrayList<String>();
+				for(Object value :jsonObj.getJSONArray("valueList")) {
+					if(value.toString().startsWith(USER_HEADER)) {
+						userIdList.add(value.toString().replace(USER_HEADER, ""));
+					}else if(value.toString().startsWith(TEAM_HEADER)){
+						teamUuidList.add(value.toString().replace(TEAM_HEADER, ""));
+					}else if(value.toString().startsWith(ROLE_HEADER)){
+						roleNameList.add(value.toString().replace(ROLE_HEADER, ""));
+					}else if(value.toString().startsWith(COMMON_HEADER)){
+						commonList.add(value.toString().replace(COMMON_HEADER, ""));
+					}
+				}
+				if(userIdList.size()>0) {
+					userList = userMapper.getUserByUserIdList(userIdList);
+				}
+				if(roleNameList.size()>0) {
+					roleList = roleMapper.getRoleByRoleNameList(roleNameList);
+				}
+				if(teamUuidList.size()>0) {
+					teamList = teamMapper.getTeamByUuidList(teamUuidList);
+				}
 			}
 		}
 		
@@ -117,7 +133,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		JSONArray userArray = new JSONArray();
 		for(UserVo user:userList) {
 			JSONObject userTmp = new JSONObject();
-			userTmp.put("value", "user#"+user.getUserId());
+			userTmp.put("value", USER_HEADER+user.getUserId());
 			userTmp.put("text", user.getUserName());
 			userArray.add(userTmp);
 		}
@@ -130,7 +146,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		JSONArray teamArray = new JSONArray();
 		for(TeamVo team:teamList) {
 			JSONObject teamTmp = new JSONObject();
-			teamTmp.put("value", "team#"+team.getUuid());
+			teamTmp.put("value", TEAM_HEADER+team.getUuid());
 			teamTmp.put("text", team.getName());
 			teamArray.add(teamTmp);
 		}
@@ -143,7 +159,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		JSONArray roleArray = new JSONArray();
 		for(RoleVo role:roleList) {
 			JSONObject roleTmp = new JSONObject();
-			roleTmp.put("value", "team#"+role.getName());
+			roleTmp.put("value", ROLE_HEADER+role.getName());
 			roleTmp.put("text", role.getDescription());
 			roleArray.add(roleTmp);
 		}
@@ -154,11 +170,20 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		commonObj.put("value", "common");
 		commonObj.put("text", "公共");
 		JSONArray commonArray = new JSONArray();
-		for (UserType s : UserType.values()) {
-			JSONObject commonTmp = new JSONObject();
-			commonTmp.put("value", "common#"+s.getValue());
-			commonTmp.put("text", s.getText());
-			commonArray.add(commonTmp);
+		if(commonList.size()>0) {
+			for(String common : commonList) {
+				JSONObject commonTmp = new JSONObject();
+				commonTmp.put("value", COMMON_HEADER+common);
+				commonTmp.put("text", UserType.getText(common));
+				commonArray.add(commonTmp);
+			}
+		}else {
+			for (UserType s : UserType.values()) {
+				JSONObject commonTmp = new JSONObject();
+				commonTmp.put("value", COMMON_HEADER+s.getValue());
+				commonTmp.put("text", s.getText());
+				commonArray.add(commonTmp);
+			}
 		}
 		commonObj.put("dataList", commonArray);
 		resultArray.add(commonObj);
