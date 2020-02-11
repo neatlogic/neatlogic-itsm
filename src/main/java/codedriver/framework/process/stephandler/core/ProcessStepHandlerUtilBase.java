@@ -60,7 +60,7 @@ import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
-import codedriver.module.process.constvalue.ProcessTaskStepUserType;
+import codedriver.module.process.constvalue.UserType;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
@@ -810,7 +810,7 @@ public abstract class ProcessStepHandlerUtilBase {
 
 	protected static class ActionRoleChecker {
 		protected static boolean isWorker(ProcessTaskStepVo currentProcessTaskStepVo) {
-			List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessTaskStepUserType.MAJOR.getValue());
+			List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), UserType.MAJOR.getValue());
 			boolean hasRight = false;
 			if (userList.size() > 0) {
 				for (ProcessTaskStepUserVo userVo : userList) {
