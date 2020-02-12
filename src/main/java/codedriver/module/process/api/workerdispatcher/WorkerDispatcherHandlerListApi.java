@@ -26,7 +26,7 @@ public class WorkerDispatcherHandlerListApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "分派器列表";
+		return "分派器列表接口";
 	}
 
 	@Override
