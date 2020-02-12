@@ -18,7 +18,11 @@ public class WorkerDispatcherVo {
 	@EntityField(name = "输入帮助",
 			type = ApiParamType.STRING)
 	private String help;
+	@EntityField(name = "分派器扩展配置",
+			type = ApiParamType.STRING)
 	private JSONObject config;
+	@EntityField(name = "分派器所属模块",
+			type = ApiParamType.STRING)
 	private String moduleId;
 
 	public String getName() {
