@@ -51,8 +51,13 @@ public class LeaderDispatcher extends WorkerDispatcherBase {
 	}
 
 	@Override
-	public String getConfigPage() {
-		return "process.workerdispatcher.handler.teamleader";
+	public JSONObject getConfig() {
+		JSONObject configObj = new JSONObject();
+		configObj.put("plugin", "teamFilter");
+		JSONObject pluginConfigObj = new JSONObject();
+		pluginConfigObj.put("isMultiple", false);
+		configObj.put("config",pluginConfigObj);
+		return configObj;
 	}
 
 }
