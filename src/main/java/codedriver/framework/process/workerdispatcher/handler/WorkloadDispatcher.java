@@ -36,8 +36,8 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 	}
 
 	@Override
-	public String getConfigPage() {
-		return "process.workerdispatcher.handler.workload";
+	public JSONObject getConfig() {
+		return null;
 	}
 
 }

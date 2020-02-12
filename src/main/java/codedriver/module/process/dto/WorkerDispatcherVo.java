@@ -1,5 +1,7 @@
 package codedriver.module.process.dto;
 
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.restful.annotation.EntityField;
 
@@ -16,7 +18,7 @@ public class WorkerDispatcherVo {
 	@EntityField(name = "输入帮助",
 			type = ApiParamType.STRING)
 	private String help;
-	private String configPage;
+	private JSONObject config;
 	private String moduleId;
 
 	public String getName() {
@@ -51,12 +53,12 @@ public class WorkerDispatcherVo {
 		this.help = help;
 	}
 
-	public String getConfigPage() {
-		return configPage;
+	public JSONObject getConfig() {
+		return config;
 	}
 
-	public void setConfigPage(String configPage) {
-		this.configPage = configPage;
+	public void setConfig(JSONObject config) {
+		this.config = config;
 	}
 
 	public String getModuleId() {

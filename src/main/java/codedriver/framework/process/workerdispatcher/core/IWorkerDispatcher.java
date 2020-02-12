@@ -28,11 +28,11 @@ public interface IWorkerDispatcher {
 	/**
 	 * @Author: chenqiwei
 	 * @Time:Aug 26, 2019
-	 * @Description: 获取编辑页面配置
+	 * @Description: 获取分派器配置
 	 * @param @return
 	 * @return JSONObject
 	 */
-	public String getConfigPage();
+	public JSONObject getConfig();
 
 	/**
 	 * @Author: chenqiwei

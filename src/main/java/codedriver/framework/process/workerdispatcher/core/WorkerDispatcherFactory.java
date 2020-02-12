@@ -56,7 +56,7 @@ public class WorkerDispatcherFactory implements ApplicationListener<ContextRefre
 				workerDispatcherVo.setName(component.getName());
 				workerDispatcherVo.setIsActive(1);
 				workerDispatcherVo.setHelp(component.getHelp());
-				workerDispatcherVo.setConfigPage(component.getConfigPage());
+				workerDispatcherVo.setConfig(component.getConfig());
 				workerDispatcherVo.setModuleId(context.getId());
 				workerDispatcherList.add(workerDispatcherVo);
 			}
