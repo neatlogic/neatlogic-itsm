@@ -2,6 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskMapper">
 
+	<select id="getProcessTaskSlaById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskSlaVo">
+		SELECT
+		`processtask_id` AS processTaskId,
+		`id`,
+		`name`,
+		`config`
+		FROM
+		`processtask_sla`
+		WHERE
+		id = #{value}
+	</select>
+
 	<select id="getProcessTaskNotifyVo" resultType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
 		SELECT
 		`sla_id` AS slaId,
@@ -462,6 +474,27 @@
 		FROM
 		`processtask_step`
 		WHERE id = #{value}
+	</select>
+
+	<select id="getProcessTaskStepBaseInfoBySlaId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
+		SELECT
+		`id`,
+		`processtask_id` AS processTaskId,
+		`name`,
+		`process_step_uuid` AS processStepUuid,
+		`status`,
+		`result`,
+		`type`,
+		`handler`,
+		`is_active` AS isActive,
+		`config_hash` AS configHash,
+		`start_time`,
+		`end_time`,
+		`error`
+		FROM
+		`processtask_step` a JOIN `processtask_step_sla` b ON
+		a.id = b.processtask_step_id
+		WHERE b.sla_id = #{value}
 	</select>
 
 	<select id="getProcessTaskStepBaseInfoByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepVo">

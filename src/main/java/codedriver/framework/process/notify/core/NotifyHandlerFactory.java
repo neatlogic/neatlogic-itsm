@@ -40,9 +40,9 @@ public class NotifyHandlerFactory implements ApplicationListener<ContextRefreshe
 		Map<String, INotifyHandler> myMap = context.getBeansOfType(INotifyHandler.class);
 		for (Map.Entry<String, INotifyHandler> entry : myMap.entrySet()) {
 			INotifyHandler plugin = entry.getValue();
-			if (plugin.getId() != null) {
-				notifyHandlerMap.put(plugin.getId(), plugin);
-				notifyHandlerTypeList.add(new ValueTextVo(plugin.getId(), plugin.getName()));
+			if (plugin.getClassName() != null) {
+				notifyHandlerMap.put(plugin.getClassName(), plugin);
+				notifyHandlerTypeList.add(new ValueTextVo(plugin.getClassName(), plugin.getName()));
 			}
 		}
 	}
