@@ -29,6 +29,10 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskMapper {
+	public ProcessTaskSlaVo getProcessTaskSlaById(Long slaId);
+
+	public List<ProcessTaskStepVo> getProcessTaskStepBaseInfoBySlaId(Long slaId);
+
 	public ProcessTaskSlaTimeVo getProcessTaskSlaTimeBySlaId(Long slaId);
 
 	public ProcessTaskSlaNotifyVo getProcessTaskNotifyVo(@Param("slaId") Long slaId, @Param("hash") String hash);

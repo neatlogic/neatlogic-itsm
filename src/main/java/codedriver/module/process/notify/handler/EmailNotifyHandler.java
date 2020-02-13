@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ClassUtils;
 
 import codedriver.framework.dao.mapper.MailServerMapper;
 import codedriver.framework.dto.MailServerVo;
@@ -33,20 +32,6 @@ public class EmailNotifyHandler extends NotifyHandlerBase {
 		this.sendEmail(notifyVo);
 	}
 
-	@Override
-	public String getId() {
-		return ClassUtils.getUserClass(this.getClass()).getName();
-	}
-
-	@Override
-	public String getTemplateContent() {
-		return null;
-	}
-
-	@Override
-	public String getTemplateTitle() {
-		return null;
-	}
 
 	private void sendEmail(NotifyVo notifyVo) {
 		if (notifyVo.getToUserList().size() > 0) {

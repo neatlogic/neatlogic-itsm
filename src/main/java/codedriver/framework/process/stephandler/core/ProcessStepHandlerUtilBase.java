@@ -1,8 +1,5 @@
 package codedriver.framework.process.stephandler.core;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -50,7 +47,7 @@ import codedriver.framework.process.notify.core.INotifyHandler;
 import codedriver.framework.process.notify.core.NotifyHandlerFactory;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 import codedriver.framework.process.notify.dao.mapper.NotifyMapper;
-import codedriver.framework.process.notify.schedule.plugin.ProcessTaskStepNotifyJob;
+import codedriver.framework.process.notify.schedule.plugin.ProcessTaskSlaNotifyJob;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -79,10 +76,7 @@ import codedriver.module.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.module.process.formattribute.core.IFormAttributeHandler;
 import codedriver.module.process.notify.dto.NotifyTemplateVo;
 import codedriver.module.process.notify.dto.NotifyVo;
-import freemarker.cache.StringTemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import codedriver.module.process.utils.FreemarkerUtil;
 
 public abstract class ProcessStepHandlerUtilBase {
 	static Logger logger = LoggerFactory.getLogger(ProcessStepHandlerUtilBase.class);
@@ -99,12 +93,12 @@ public abstract class ProcessStepHandlerUtilBase {
 	private static WorktimeMapper worktimeMapper;
 	private static ChannelMapper channelMapper;
 	private static NotifyMapper notifyMapper;
-	private static SchedulerManager schedulerManager;
+	// private static SchedulerManager schedulerManager;
 
-	@Autowired
-	public void setSchedulerManager(SchedulerManager _schedulerManager) {
-		schedulerManager = _schedulerManager;
-	}
+	// @Autowired
+	// public void setSchedulerManager(SchedulerManager _schedulerManager) {
+	// schedulerManager = _schedulerManager;
+	// }
 
 	@Autowired
 	public void setProcessMapper(ProcessMapper _processMapper) {
@@ -151,20 +145,6 @@ public abstract class ProcessStepHandlerUtilBase {
 		notifyMapper = _notifyMapper;
 	}
 
-	/*
-	 * public static void main(String[] atr) { ScriptEngineManager sem = new
-	 * ScriptEngineManager();
-	 * 
-	 * ScriptEngine se = sem.getEngineByName("nashorn"); JSONObject paramObj = new
-	 * JSONObject(); paramObj.put("form.name", "chenqw"); paramObj.put("form.age",
-	 * "37"); se.put("json", paramObj); String script =
-	 * "json['form.name'] == 'chen2qw' && json['form.age'] == '37'"; try {
-	 * System.out.println(Boolean.parseBoolean(se.eval(script).toString())); } catch
-	 * (ScriptException e) { logger.error(e.getMessage(), e); }
-	 * 
-	 * }
-	 */
-
 	protected static class NotifyHandler extends CodeDriverThread {
 		private ProcessTaskStepVo currentProcessTaskStepVo;
 		private NotifyTriggerType notifyTriggerType;
@@ -204,43 +184,6 @@ public abstract class ProcessStepHandlerUtilBase {
 			}
 		}
 
-		private static String getFreemarkerContent(NotifyVo notifyVo, String content) {
-			String resultStr = "";
-			if (content != null) {
-				Configuration cfg = new Configuration();
-				cfg.setNumberFormat("0.##");
-				cfg.setClassicCompatible(true);
-				StringTemplateLoader stringLoader = new StringTemplateLoader();
-				stringLoader.putTemplate("template", content);
-				cfg.setTemplateLoader(stringLoader);
-				Template temp;
-				Writer out = null;
-				try {
-					temp = cfg.getTemplate("template", "utf-8");
-					out = new StringWriter();
-					temp.process(notifyVo, out);
-					resultStr = out.toString();
-					out.flush();
-				} catch (IOException e) {
-					logger.error(e.getMessage(), e);
-				} catch (TemplateException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-			return resultStr;
-		}
-
-		public static void main(String[] argv) {
-			NotifyVo notifyVo = new NotifyVo();
-			JSONObject jsonObj = new JSONObject();
-			ProcessTaskVo processTaskVo = new ProcessTaskVo();
-			processTaskVo.setTitle("标题");
-			notifyVo.addData("name", "陈其炜");
-			notifyVo.addData("processTask", processTaskVo);
-			String content = "abc${data.name}abc${data.processTask.title}";
-			System.out.println(getFreemarkerContent(notifyVo, content));
-		}
-
 		@Override
 		protected void execute() {
 			try {
@@ -261,66 +204,47 @@ public abstract class ProcessStepHandlerUtilBase {
 							String templateUuid = notifyObj.getString("template");
 							JSONArray receiverList = notifyObj.getJSONArray("receiverList");
 							if (receiverList != null && receiverList.size() > 0 && notifyTriggerType.getTrigger().equalsIgnoreCase(trigger)) {
-								String titleTemplate = null, contentTemplate = null;
-								NotifyTemplateVo notifyTemplateVo = null;
-								if (StringUtils.isNotBlank(templateUuid)) {
-									notifyTemplateVo = notifyMapper.getNotifyTemplateByUuid(templateUuid);
-								}
-								if (notifyTemplateVo != null) {
-									titleTemplate = notifyTemplateVo.getTitle();
-									contentTemplate = notifyTemplateVo.getContent();
-								} else {
-									titleTemplate = notifyTriggerType.getTitleTemplate();
-									contentTemplate = notifyTriggerType.getContentTemplate();
-								}
 								INotifyHandler handler = NotifyHandlerFactory.getHandler(type);
 								if (handler != null) {
-									NotifyVo notifyVo = new NotifyVo();
-									/***
-									 * 注入流程作业信息 不够将来再补充
-									 */
-									notifyVo.addData("title", processTaskVo.getTitle());
-									notifyVo.addData("reporter", processTaskVo.getReporter());
-									notifyVo.addData("reporterName", processTaskVo.getReporterName());
-									notifyVo.addData("status", processTaskVo.getStatus());
-									notifyVo.addData("stepName", stepVo.getName());
-									notifyVo.addData("stepStatus", stepVo.getStatus());
-									/** 注入结束 **/
+									NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(notifyTriggerType);
+									if (StringUtils.isNotBlank(templateUuid)) {
+										NotifyTemplateVo notifyTemplateVo = notifyMapper.getNotifyTemplateByUuid(templateUuid);
+										if (notifyTemplateVo != null) {
+											notifyBuilder.withContentTemplate(notifyTemplateVo.getContent());
+											notifyBuilder.withTitleTemplate(notifyTemplateVo.getTitle());
+										}
+									}
 
-									if (StringUtils.isNotBlank(titleTemplate)) {
-										notifyVo.setTitle(getFreemarkerContent(notifyVo, titleTemplate));
-									}
-									if (StringUtils.isNotBlank(contentTemplate)) {
-										notifyVo.setContent(getFreemarkerContent(notifyVo, contentTemplate));
-									}
+									/** 注入流程作业信息 不够将来再补充 **/
+									notifyBuilder.addData("task", processTaskVo).addData("step", stepVo);
+									/** 注入结束 **/
+									
+
 									for (int u = 0; u < receiverList.size(); u++) {
 										String worker = receiverList.getString(u);
-										if (worker.startsWith("default.")) {
-											worker = worker.substring(8);
+										if (worker.startsWith("common.")) {
+											worker = worker.substring(7);
 											if (workerList == null) {
 												workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(currentProcessTaskStepVo.getId());
 											}
 											if (worker.equalsIgnoreCase("reporter")) {
-												notifyVo.addUserId(processTaskVo.getReporter());
+												notifyBuilder.addUserId(processTaskVo.getReporter());
 											} else if (worker.equalsIgnoreCase("owner")) {
-												notifyVo.addUserId(processTaskVo.getOwner());
+												notifyBuilder.addUserId(processTaskVo.getOwner());
 											} else if (worker.equalsIgnoreCase("worker")) {
 												for (ProcessTaskStepWorkerVo workerVo : workerList) {
-													notifyVo.addUserId(workerVo.getUserId());
+													notifyBuilder.addUserId(workerVo.getUserId());
 												}
 											}
 										} else if (worker.startsWith("user.")) {
 											worker = worker.substring(5);
-											notifyVo.addUserId(worker);
+											notifyBuilder.addUserId(worker);
 										} else if (worker.startsWith("team.")) {
 											worker = worker.substring(5);
-											List<UserVo> teamUserIdList = userMapper.getActiveUserByTeamId(worker);
-											for (UserVo userVo : teamUserIdList) {
-												notifyVo.addUserId(userVo.getUserId());
-											}
+											notifyBuilder.addTeamId(worker);
 										}
 									}
-
+									NotifyVo notifyVo = notifyBuilder.build();
 									handler.execute(notifyVo);
 								} else {
 									throw new NotifyHandlerNotFoundException(type);
@@ -708,14 +632,14 @@ public abstract class ProcessStepHandlerUtilBase {
 									processTaskSlaNotifyVo.setConfig(notifyPolicyObj.toJSONString());
 									processTaskMapper.insertProcessTaskSlaNotify(processTaskSlaNotifyVo);
 
-									IJob jobHandler = SchedulerManager.getHandler(ProcessTaskStepNotifyJob.class.getName());
+									IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaNotifyJob.class.getName());
 									if (jobHandler != null) {
 										JobObject jobObject = new JobObject.Builder(currentProcessTaskStepVo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()).build();
 										jobObject.addData("slaId", slaVo.getId());
 										jobObject.addData("hash", processTaskSlaNotifyVo.getHash());
 										jobHandler.reloadJob(jobObject);
 									} else {
-										throw new ScheduleHandlerNotFoundException(ProcessTaskStepNotifyJob.class.getName());
+										throw new ScheduleHandlerNotFoundException(ProcessTaskSlaNotifyJob.class.getName());
 									}
 
 								}
