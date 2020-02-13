@@ -7,6 +7,8 @@ public class ProcessStepHandlerVo implements Comparable<ProcessStepHandlerVo> {
 	
 	@EntityField(name = "类型", type = ApiParamType.STRING)
 	private String type;
+	@EntityField(name = "处理器", type = ApiParamType.STRING)
+	private String handler;
 	@EntityField(name = "名称", type = ApiParamType.STRING)
 	private String name;
 	@EntityField(name = "模块id", type = ApiParamType.STRING)
@@ -40,6 +42,14 @@ public class ProcessStepHandlerVo implements Comparable<ProcessStepHandlerVo> {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getHandler() {
+		return handler;
+	}
+
+	public void setHandler(String handler) {
+		this.handler = handler;
 	}
 
 	public String getName() {
