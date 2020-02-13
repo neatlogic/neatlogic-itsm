@@ -57,7 +57,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", isRequired = false, xss = true),
 		@Param(name = "valueList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于回显的参数列表"),
-		@Param(name = "groupList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "限制接口返回类型，['common','user','team','role']"),
+		@Param(name = "groupList", type = ApiParamType.JSONARRAY,  isRequired = true, desc = "限制接口返回类型，['common','user','team','role']"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10", isRequired = false),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页", isRequired = false)
