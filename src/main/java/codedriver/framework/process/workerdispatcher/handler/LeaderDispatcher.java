@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherBase;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -19,9 +18,6 @@ import codedriver.module.process.dto.ProcessTaskStepVo;
 public class LeaderDispatcher extends WorkerDispatcherBase {
 	@Autowired
 	private UserMapper userMapper;
-
-	@Autowired
-	private TeamMapper teamMapper;
 
 	@Override
 	public String getHandler() {
