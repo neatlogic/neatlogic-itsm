@@ -32,7 +32,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -76,7 +75,6 @@ import codedriver.module.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.module.process.formattribute.core.IFormAttributeHandler;
 import codedriver.module.process.notify.dto.NotifyTemplateVo;
 import codedriver.module.process.notify.dto.NotifyVo;
-import codedriver.module.process.utils.FreemarkerUtil;
 
 public abstract class ProcessStepHandlerUtilBase {
 	static Logger logger = LoggerFactory.getLogger(ProcessStepHandlerUtilBase.class);
@@ -218,7 +216,6 @@ public abstract class ProcessStepHandlerUtilBase {
 									/** 注入流程作业信息 不够将来再补充 **/
 									notifyBuilder.addData("task", processTaskVo).addData("step", stepVo);
 									/** 注入结束 **/
-									
 
 									for (int u = 0; u < receiverList.size(); u++) {
 										String worker = receiverList.getString(u);
@@ -630,13 +627,13 @@ public abstract class ProcessStepHandlerUtilBase {
 									ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = new ProcessTaskSlaNotifyVo();
 									processTaskSlaNotifyVo.setSlaId(slaVo.getId());
 									processTaskSlaNotifyVo.setConfig(notifyPolicyObj.toJSONString());
+									// 需要发通知时写入数据，不需要通知时清除掉
 									processTaskMapper.insertProcessTaskSlaNotify(processTaskSlaNotifyVo);
 
 									IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaNotifyJob.class.getName());
 									if (jobHandler != null) {
-										JobObject jobObject = new JobObject.Builder(currentProcessTaskStepVo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()).build();
-										jobObject.addData("slaId", slaVo.getId());
-										jobObject.addData("hash", processTaskSlaNotifyVo.getHash());
+										JobObject.Builder jobObjectBuilder = new JobObject.Builder(processTaskSlaNotifyVo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()).addData("slaNotifyId", processTaskSlaNotifyVo.getId());
+										JobObject jobObject = jobObjectBuilder.build();
 										jobHandler.reloadJob(jobObject);
 									} else {
 										throw new ScheduleHandlerNotFoundException(ProcessTaskSlaNotifyJob.class.getName());
