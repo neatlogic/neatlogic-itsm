@@ -2,7 +2,11 @@ package codedriver.module.process.api.user;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.javers.common.collections.Arrays;
+import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.mchange.lang.ArrayUtils;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
@@ -19,6 +24,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.process.workerdispatcher.core.IWorkerDispatcher;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -51,6 +57,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", isRequired = false, xss = true),
 		@Param(name = "valueList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于回显的参数列表"),
+		@Param(name = "groupList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "限制接口返回类型，['common','user','team','role']"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10", isRequired = false),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页", isRequired = false)
@@ -64,133 +71,271 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	@Description(desc = "用户角色及组织架构查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		final String USER_HEADER = "user#";
-		final String ROLE_HEADER = "role#";
-		final String TEAM_HEADER = "team#";
-		final String COMMON_HEADER = "common#";
-		List<UserVo> userList = new ArrayList<UserVo>();
-		List<RoleVo> roleList = new ArrayList<RoleVo>();
-		List<TeamVo> teamList = new ArrayList<TeamVo>();
-		List<String> commonList = new ArrayList<String>();
-		if(jsonObj.containsKey("keyword")) {
-			UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
-			if (userVo.getNeedPage()) {
-				int rowNum = userMapper.searchUserCount(userVo);
-				userVo.setRowNum(rowNum);
-				userVo.setPageCount(PageUtil.getPageCount(rowNum, userVo.getPageSize()));
-			}
-			userList = userMapper.searchUser(userVo);
-			
-			RoleVo roleVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<RoleVo>() {});
-			if(roleVo.getNeedPage()) {
-				int rowNum = roleMapper.searchRoleCount(roleVo);
-				roleVo.setPageCount(PageUtil.getPageCount(rowNum, roleVo.getPageSize()));
-				roleVo.setRowNum(rowNum);
-			}
-			roleList = roleMapper.searchRole(roleVo);
-			
-			TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});		
-			if (teamVo.getNeedPage()) {
-				int rowNum = teamMapper.searchTeamCount(teamVo);
-				teamVo.setRowNum(rowNum);
-				teamVo.setPageCount(PageUtil.getPageCount(rowNum, teamVo.getPageSize()));
-			}
-			teamList = teamMapper.searchTeam(teamVo);
-		}else {//回显
-			if(jsonObj.containsKey("valueList") && !jsonObj.getJSONArray("valueList").isEmpty()) {
-				List<String> userIdList = new ArrayList<String>();
-				List<String> roleNameList = new ArrayList<String>();
-				List<String> teamUuidList = new ArrayList<String>();
-				for(Object value :jsonObj.getJSONArray("valueList")) {
-					if(value.toString().startsWith(USER_HEADER)) {
-						userIdList.add(value.toString().replace(USER_HEADER, ""));
-					}else if(value.toString().startsWith(TEAM_HEADER)){
-						teamUuidList.add(value.toString().replace(TEAM_HEADER, ""));
-					}else if(value.toString().startsWith(ROLE_HEADER)){
-						roleNameList.add(value.toString().replace(ROLE_HEADER, ""));
-					}else if(value.toString().startsWith(COMMON_HEADER)){
-						commonList.add(value.toString().replace(COMMON_HEADER, ""));
+		jsonObj.put("userMapper", userMapper);
+		jsonObj.put("roleMapper", roleMapper);
+		jsonObj.put("teamMapper", teamMapper);
+		List<Object> groupList = Arrays.asList(jsonObj.getJSONArray("groupList").toArray());
+		Reflections reflections = new Reflections(this.getClass().getPackage().getName());
+		Set<?> apiClass = reflections.getSubTypesOf(IHandler.class);
+		JSONArray resultArray = new JSONArray();
+		for(Object group: groupList) {//为了按group的顺序显示数据,错一层外循环
+			for (Object c: apiClass) {
+				IHandler handler = (IHandler) ((Class<?>) c).getConstructors()[0].newInstance(UserRoleTeamSearchApi.class.newInstance());
+				if(!group.equals(handler.getName())) {
+					continue;
+				}
+				List<Object> dataList = null;
+				if(jsonObj.containsKey("keyword")) {
+					dataList = handler.search(jsonObj);
+				}else {
+					if(jsonObj.containsKey("valueList") && !jsonObj.getJSONArray("valueList").isEmpty()) {
+						dataList = handler.reload(jsonObj);
 					}
 				}
-				if(userIdList.size()>0) {
-					userList = userMapper.getUserByUserIdList(userIdList);
-				}
-				if(roleNameList.size()>0) {
-					roleList = roleMapper.getRoleByRoleNameList(roleNameList);
-				}
-				if(teamUuidList.size()>0) {
-					teamList = teamMapper.getTeamByUuidList(teamUuidList);
-				}
+				resultArray.add(handler.repack(dataList));
 			}
 		}
-		
-		
-		JSONArray resultArray = new JSONArray();
-		//默认
-		JSONObject commonObj = new JSONObject();
-		commonObj.put("value", "common");
-		commonObj.put("text", "公共");
-		JSONArray commonArray = new JSONArray();
-		if(commonList.size()>0) {
-			for(String common : commonList) {
-				JSONObject commonTmp = new JSONObject();
-				commonTmp.put("value", COMMON_HEADER+common);
-				commonTmp.put("text", UserType.getText(common));
-				commonArray.add(commonTmp);
-			}
-		}else {
-			for (UserType s : UserType.values()) {
-				JSONObject commonTmp = new JSONObject();
-				commonTmp.put("value", COMMON_HEADER+s.getValue());
-				commonTmp.put("text", s.getText());
-				commonArray.add(commonTmp);
-			}
-		}
-		commonObj.put("dataList", commonArray);
-		resultArray.add(commonObj);
-		//用户
-		JSONObject userObj = new JSONObject();
-		userObj.put("value", "user");
-		userObj.put("text", "用户");
-		JSONArray userArray = new JSONArray();
-		for(UserVo user:userList) {
-			JSONObject userTmp = new JSONObject();
-			userTmp.put("value", USER_HEADER+user.getUserId());
-			userTmp.put("text", user.getUserName());
-			userArray.add(userTmp);
-		}
-		userObj.put("dataList", userArray);
-		resultArray.add(userObj);
-		//分组
-		JSONObject teamObj = new JSONObject();
-		teamObj.put("value", "team");
-		teamObj.put("text", "分组");
-		JSONArray teamArray = new JSONArray();
-		for(TeamVo team:teamList) {
-			JSONObject teamTmp = new JSONObject();
-			teamTmp.put("value", TEAM_HEADER+team.getUuid());
-			teamTmp.put("text", team.getName());
-			teamArray.add(teamTmp);
-		}
-		teamObj.put("dataList", teamArray);
-		resultArray.add(teamObj);
-		//角色
-		JSONObject roleObj = new JSONObject();
-		roleObj.put("value", "role");
-		roleObj.put("text", "角色");
-		JSONArray roleArray = new JSONArray();
-		for(RoleVo role:roleList) {
-			JSONObject roleTmp = new JSONObject();
-			roleTmp.put("value", ROLE_HEADER+role.getName());
-			roleTmp.put("text", role.getDescription());
-			roleArray.add(roleTmp);
-		}
-		roleObj.put("dataList", roleArray);
-		resultArray.add(roleObj);
-		
-		
 		return resultArray;
 	}
 	
+	public interface IHandler{
+		String getName();
+		
+		String getHeader();
+		
+		<T> List<T> search(JSONObject jsonObj);
+		
+		<T> List<T> reload(JSONObject jsonObj);
+		
+		<T> JSONObject repack(List<T> dataList);
+		
+		
+	}
+	
+    public class RoleHandler implements IHandler{
+		@Override
+		public String getName() {
+    		return "role";
+    	}
+    	
+    	@Override
+    	public String getHeader() {
+    		return getName()+"#";
+    	}
 
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> search(JSONObject jsonObj) {
+			List<RoleVo> roleList = new ArrayList<RoleVo>();
+			RoleVo roleVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<RoleVo>() {});
+			if(roleVo.getNeedPage()) {
+				int rowNum = ((RoleMapper)jsonObj.get("roleMapper")).searchRoleCount(roleVo);
+				roleVo.setPageCount(PageUtil.getPageCount(rowNum, roleVo.getPageSize()));
+				roleVo.setRowNum(rowNum);
+			}
+			roleList = ((RoleMapper)jsonObj.get("roleMapper")).searchRole(roleVo);
+			return (List<T>) roleList;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> reload(JSONObject jsonObj) {
+			List<RoleVo> roleList = new ArrayList<RoleVo>();
+			List<String> roleNameList = new ArrayList<String>();
+			for(Object value :jsonObj.getJSONArray("valueList")) {
+				if(value.toString().startsWith(getHeader())){
+					roleNameList.add(value.toString().replace(getHeader(), ""));
+				}
+			}
+			if(roleNameList.size()>0) {
+				roleList = ((RoleMapper)jsonObj.get("roleMapper")).getRoleByRoleNameList(roleNameList);
+			}
+			return (List<T>) roleList;
+		}
+
+		@Override
+		public <T> JSONObject repack(List<T> roleList) {
+			JSONObject roleObj = new JSONObject();
+			roleObj.put("value", "role");
+			roleObj.put("text", "角色");
+			JSONArray roleArray = new JSONArray();
+			for(T role:roleList) {
+				JSONObject roleTmp = new JSONObject();
+				roleTmp.put("value", getHeader()+((RoleVo) role).getName());
+				roleTmp.put("text", ((RoleVo) role).getDescription());
+				roleArray.add(roleTmp);
+			}
+			roleObj.put("dataList", roleArray);
+			return roleObj;
+		}
+
+    }
+    
+    public class UserHandler implements IHandler{
+    	@Override
+		public String getName() {
+    		return "user";
+    	}
+    	
+    	@Override
+    	public String getHeader() {
+    		return getName()+"#";
+    	}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> search(JSONObject jsonObj) {
+			List<UserVo> userList = new ArrayList<UserVo>();
+			UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
+			if (userVo.getNeedPage()) {
+				int rowNum = ((UserMapper)jsonObj.get("userMapper")).searchUserCount(userVo);
+				userVo.setRowNum(rowNum);
+				userVo.setPageCount(PageUtil.getPageCount(rowNum, userVo.getPageSize()));
+			}
+			userList = ((UserMapper)jsonObj.get("userMapper")).searchUser(userVo);
+			return (List<T>) userList;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> reload(JSONObject jsonObj) {
+			List<UserVo> userList = new ArrayList<UserVo>();
+			List<String> userIdList = new ArrayList<String>();
+			for(Object value :jsonObj.getJSONArray("valueList")) {
+				if(value.toString().startsWith(getHeader())) {
+					userIdList.add(value.toString().replace(getHeader(), ""));
+				}
+			}
+			if(userIdList.size()>0) {
+				userList = ((UserMapper)jsonObj.get("userMapper")).getUserByUserIdList(userIdList);
+			}
+			return (List<T>) userList;
+		}
+
+		@Override
+		public <T> JSONObject repack(List<T> userList) {
+			JSONObject userObj = new JSONObject();
+			userObj.put("value", "user");
+			userObj.put("text", "用户");
+			JSONArray userArray = new JSONArray();
+			for(T user:userList) {
+				JSONObject userTmp = new JSONObject();
+				userTmp.put("value", getHeader()+((UserVo) user).getUserId());
+				userTmp.put("text", ((UserVo) user).getUserName());
+				userArray.add(userTmp);
+			}
+			userObj.put("dataList", userArray);
+			return userObj;
+		}
+    }
+
+    public class TeamHandler implements IHandler{
+    	@Override
+		public String getName() {
+    		return "team";
+    	}
+    	
+    	@Override
+    	public String getHeader() {
+    		return getName()+"#";
+    	}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> search(JSONObject jsonObj) {
+			List<TeamVo> teamList = new ArrayList<TeamVo>();
+			TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});		
+			if (teamVo.getNeedPage()) {
+				int rowNum = ((TeamMapper)jsonObj.get("teamMapper")).searchTeamCount(teamVo);
+				teamVo.setRowNum(rowNum);
+				teamVo.setPageCount(PageUtil.getPageCount(rowNum, teamVo.getPageSize()));
+			}
+			teamList = ((TeamMapper)jsonObj.get("teamMapper")).searchTeam(teamVo);
+			return (List<T>) teamList;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> reload(JSONObject jsonObj) {
+			List<TeamVo> teamList = new ArrayList<TeamVo>();
+			List<String> teamUuidList = new ArrayList<String>();
+			for(Object value :jsonObj.getJSONArray("valueList")) {
+				if(value.toString().startsWith(getHeader())){
+					teamUuidList.add(value.toString().replace(getHeader(), ""));
+				}
+			}
+			if(teamUuidList.size()>0) {
+				teamList = ((TeamMapper)jsonObj.get("teamMapper")).getTeamByUuidList(teamUuidList);
+			}
+			return (List<T>) teamList;
+		}
+
+		@Override
+		public <T> JSONObject repack(List<T> teamList) {
+			JSONObject teamObj = new JSONObject();
+			teamObj.put("value", "team");
+			teamObj.put("text", "分组");
+			JSONArray teamArray = new JSONArray();
+			for(T team:teamList) {
+				JSONObject teamTmp = new JSONObject();
+				teamTmp.put("value", getHeader()+((TeamVo) team).getUuid());
+				teamTmp.put("text", ((TeamVo) team).getName());
+				teamArray.add(teamTmp);
+			}
+			teamObj.put("dataList", teamArray);
+			return teamObj;
+		}
+    }
+
+    public class CommonHandler implements IHandler{
+    	@Override
+		public String getName() {
+    		return "common";
+    	}
+    	
+    	@Override
+    	public String getHeader() {
+    		return getName()+"#";
+    	}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> search(JSONObject jsonObj) {
+			List<String> commonList = new ArrayList<String>();
+			for (UserType s : UserType.values()) {
+				commonList.add(s.getValue());
+			}
+			return (List<T>) commonList;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> List<T> reload(JSONObject jsonObj) {
+			List<String> commonList = new ArrayList<String>();
+			for(Object value :jsonObj.getJSONArray("valueList")) {
+				if(value.toString().startsWith(getHeader())){
+					commonList.add(value.toString().replace(getHeader(), ""));
+				}
+			}
+			return (List<T>) commonList;
+		}
+
+		@Override
+		public <T> JSONObject repack(List<T> commonList) {
+			JSONObject commonObj = new JSONObject();
+			commonObj.put("value", "common");
+			commonObj.put("text", "公共");
+			JSONArray commonArray = new JSONArray();
+			for(T common : commonList) {
+				JSONObject commonTmp = new JSONObject();
+				commonTmp.put("value", getHeader()+common);
+				commonTmp.put("text", UserType.getText(common.toString()));
+				commonArray.add(commonTmp);
+			}
+			
+			commonObj.put("dataList", commonArray);
+			return commonObj;
+		}
+    }
 }
