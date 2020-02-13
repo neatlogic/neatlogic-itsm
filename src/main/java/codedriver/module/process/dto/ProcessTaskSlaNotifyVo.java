@@ -6,6 +6,7 @@ import org.springframework.util.DigestUtils;
 import com.alibaba.fastjson.JSONObject;
 
 public class ProcessTaskSlaNotifyVo {
+	private Long id;
 	private Long slaId;
 	private String triggerTime;
 	private String hash;
@@ -60,6 +61,14 @@ public class ProcessTaskSlaNotifyVo {
 
 	public void setHash(String hash) {
 		this.hash = hash;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }

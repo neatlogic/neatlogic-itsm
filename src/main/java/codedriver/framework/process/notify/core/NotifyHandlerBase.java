@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.exception.notify.NotifyNoReceiverException;
@@ -15,8 +14,6 @@ public abstract class NotifyHandlerBase implements INotifyHandler {
 	@Autowired
 	private UserMapper userMapper;
 
-	@Autowired
-	private TeamMapper teamMapper;
 
 	public final void execute(NotifyVo notifyVo) {
 		if ((notifyVo.getToUserList() == null || notifyVo.getToUserList().size() <= 0)) {
