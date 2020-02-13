@@ -94,6 +94,8 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 			}else {
 				if(jsonObj.containsKey("valueList") && !jsonObj.getJSONArray("valueList").isEmpty()) {
 					dataList = handler.reload(jsonObj);
+				}else {
+					return resultArray;
 				}
 			}
 			resultArray.add(handler.repack(dataList));
