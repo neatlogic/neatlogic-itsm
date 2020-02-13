@@ -2,6 +2,7 @@ package codedriver.framework.process.workerdispatcher.core;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -32,7 +33,7 @@ public interface IWorkerDispatcher {
 	 * @param @return
 	 * @return JSONObject
 	 */
-	public JSONObject getConfig();
+	public JSONArray getConfig();
 
 	/**
 	 * @Author: chenqiwei
