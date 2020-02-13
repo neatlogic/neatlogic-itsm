@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherBase;
@@ -36,7 +37,7 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 	}
 
 	@Override
-	public JSONObject getConfig() {
+	public JSONArray getConfig() {
 		return null;
 	}
 

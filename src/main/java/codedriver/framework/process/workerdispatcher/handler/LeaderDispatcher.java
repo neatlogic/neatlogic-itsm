@@ -7,9 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherBase;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -18,9 +18,6 @@ import codedriver.module.process.dto.ProcessTaskStepVo;
 public class LeaderDispatcher extends WorkerDispatcherBase {
 	@Autowired
 	private UserMapper userMapper;
-
-	@Autowired
-	private TeamMapper teamMapper;
 
 	@Override
 	public String getHandler() {
@@ -51,13 +48,16 @@ public class LeaderDispatcher extends WorkerDispatcherBase {
 	}
 
 	@Override
-	public JSONObject getConfig() {
+	public JSONArray getConfig() {
+		JSONArray resultArray = new JSONArray();
 		JSONObject configObj = new JSONObject();
 		configObj.put("plugin", "teamFilter");
+		configObj.put("pluginName", "处理组");
 		JSONObject pluginConfigObj = new JSONObject();
 		pluginConfigObj.put("isMultiple", false);
 		configObj.put("config",pluginConfigObj);
-		return configObj;
+		resultArray.add(configObj);
+		return resultArray;
 	}
 
 }
