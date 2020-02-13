@@ -1,6 +1,8 @@
 package codedriver.module.process.api.user;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +59,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", isRequired = false, xss = true),
 		@Param(name = "valueList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于回显的参数列表"),
-		@Param(name = "groupList", type = ApiParamType.JSONARRAY,  isRequired = true, desc = "限制接口返回类型，['common','user','team','role']"),
+		@Param(name = "groupList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "限制接口返回类型，['common','user','team','role']"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10", isRequired = false),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页", isRequired = false)
@@ -74,27 +76,30 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		jsonObj.put("userMapper", userMapper);
 		jsonObj.put("roleMapper", roleMapper);
 		jsonObj.put("teamMapper", teamMapper);
-		List<Object> groupList = Arrays.asList(jsonObj.getJSONArray("groupList").toArray());
+		List<Object> groupList = null;
+		if(jsonObj.containsKey("groupList")) {
+			groupList = Arrays.asList(jsonObj.getJSONArray("groupList").toArray());
+		}
 		Reflections reflections = new Reflections(this.getClass().getPackage().getName());
 		Set<?> apiClass = reflections.getSubTypesOf(IHandler.class);
 		JSONArray resultArray = new JSONArray();
-		for(Object group: groupList) {//为了按group的顺序显示数据,错一层外循环
-			for (Object c: apiClass) {
-				IHandler handler = (IHandler) ((Class<?>) c).getConstructors()[0].newInstance(UserRoleTeamSearchApi.class.newInstance());
-				if(!group.equals(handler.getName())) {
-					continue;
-				}
-				List<Object> dataList = null;
-				if(jsonObj.containsKey("keyword")) {
-					dataList = handler.search(jsonObj);
-				}else {
-					if(jsonObj.containsKey("valueList") && !jsonObj.getJSONArray("valueList").isEmpty()) {
-						dataList = handler.reload(jsonObj);
-					}
-				}
-				resultArray.add(handler.repack(dataList));
+		for (Object c: apiClass) {
+			IHandler handler = (IHandler) ((Class<?>) c).getConstructors()[0].newInstance(UserRoleTeamSearchApi.class.newInstance());
+			if(groupList != null && !groupList.contains(handler.getName())) {
+				continue;
 			}
+			List<Object> dataList = null;
+			if(jsonObj.containsKey("keyword")) {
+				dataList = handler.search(jsonObj);
+			}else {
+				if(jsonObj.containsKey("valueList") && !jsonObj.getJSONArray("valueList").isEmpty()) {
+					dataList = handler.reload(jsonObj);
+				}
+			}
+			resultArray.add(handler.repack(dataList));
 		}
+		//排序
+		resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getInteger("sort")));
 		return resultArray;
 	}
 	
@@ -102,6 +107,8 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		String getName();
 		
 		String getHeader();
+		
+		int getSort();
 		
 		<T> List<T> search(JSONObject jsonObj);
 		
@@ -166,8 +173,14 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 				roleTmp.put("text", ((RoleVo) role).getDescription());
 				roleArray.add(roleTmp);
 			}
+			roleObj.put("sort", getSort());
 			roleObj.put("dataList", roleArray);
 			return roleObj;
+		}
+
+		@Override
+		public int getSort() {
+			return 3;
 		}
 
     }
@@ -225,8 +238,14 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 				userTmp.put("text", ((UserVo) user).getUserName());
 				userArray.add(userTmp);
 			}
+			userObj.put("sort", getSort());
 			userObj.put("dataList", userArray);
 			return userObj;
+		}
+
+		@Override
+		public int getSort() {
+			return 1;
 		}
     }
 
@@ -283,8 +302,14 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 				teamTmp.put("text", ((TeamVo) team).getName());
 				teamArray.add(teamTmp);
 			}
+			teamObj.put("sort", getSort());
 			teamObj.put("dataList", teamArray);
 			return teamObj;
+		}
+
+		@Override
+		public int getSort() {
+			return 2;
 		}
     }
 
@@ -333,9 +358,14 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 				commonTmp.put("text", UserType.getText(common.toString()));
 				commonArray.add(commonTmp);
 			}
-			
+			commonObj.put("sort", getSort());
 			commonObj.put("dataList", commonArray);
 			return commonObj;
+		}
+
+		@Override
+		public int getSort() {
+			return 0;
 		}
     }
 }
