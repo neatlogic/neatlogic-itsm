@@ -1,10 +1,8 @@
 package codedriver.module.process.api.user;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.javers.common.collections.Arrays;
@@ -16,7 +14,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.mchange.lang.ArrayUtils;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
@@ -26,7 +23,6 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.process.workerdispatcher.core.IWorkerDispatcher;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -34,7 +30,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.UserType;
 @Service
-public class UserRoleTeamSearchApi extends ApiComponentBase {
+public class ProcessUserRoleTeamSearchApi extends ApiComponentBase {
 	@Autowired
 	private UserMapper userMapper;
 	@Autowired
@@ -84,7 +80,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		Set<?> apiClass = reflections.getSubTypesOf(IHandler.class);
 		JSONArray resultArray = new JSONArray();
 		for (Object c: apiClass) {
-			IHandler handler = (IHandler) ((Class<?>) c).getConstructors()[0].newInstance(UserRoleTeamSearchApi.class.newInstance());
+			IHandler handler = (IHandler) ((Class<?>) c).getConstructors()[0].newInstance(ProcessUserRoleTeamSearchApi.class.newInstance());
 			if(groupList != null && !groupList.contains(handler.getName())) {
 				continue;
 			}
