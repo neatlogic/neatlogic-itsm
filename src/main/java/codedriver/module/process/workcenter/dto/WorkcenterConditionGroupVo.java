@@ -1,8 +1,11 @@
 package codedriver.module.process.workcenter.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class WorkcenterConditionGroupVo {
+public class WorkcenterConditionGroupVo implements Serializable{
+	private static final long serialVersionUID = 8392325201425982471L;
+	
 	private String uuid;
 	private List<WorkcenterConditionVo> conditionList;
 	private List<WorkcenterConditionRelVo> conditionRelList;

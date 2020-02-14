@@ -1,6 +1,10 @@
 package codedriver.module.process.workcenter.dto;
 
-public class WorkcenterConditionRelVo {
+import java.io.Serializable;
+
+public class WorkcenterConditionRelVo implements Serializable{
+	private static final long serialVersionUID = 4997220400582456563L;
+	
 	private String fromConditionUuid;
 	private String toConditionUuid;
 	private String joinType;

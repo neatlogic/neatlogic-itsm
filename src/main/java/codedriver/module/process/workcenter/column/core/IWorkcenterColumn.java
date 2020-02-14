@@ -19,6 +19,14 @@ public interface IWorkcenterColumn {
 	 * @Date: 2020/2/2
 	 */
 	public String getDisplayName();
+	
+	/**
+	 * @Description: 字段是否允许排序
+	 * @Param:
+	 * @return: java.lang.String
+	 * @Date: 2020/2/2
+	 */
+	public Boolean allowSort();
 
 	/**
 	 * @Description: 获取显示值

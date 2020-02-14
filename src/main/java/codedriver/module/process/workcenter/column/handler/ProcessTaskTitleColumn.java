@@ -25,4 +25,9 @@ public class ProcessTaskTitleColumn implements IWorkcenterColumn{
 		return title;
 	}
 
+	@Override
+	public Boolean allowSort() {
+		return false;
+	}
+
 }

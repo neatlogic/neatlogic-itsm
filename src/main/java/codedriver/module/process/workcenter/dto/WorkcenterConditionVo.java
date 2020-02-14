@@ -1,8 +1,11 @@
 package codedriver.module.process.workcenter.dto;
 
+import java.io.Serializable;
+
 import com.alibaba.fastjson.JSONObject;
 
-public class WorkcenterConditionVo {
+public class WorkcenterConditionVo implements Serializable{
+	private static final long serialVersionUID = -776692828809703841L;
 	
 	private String name;
 	private String displayName;

@@ -12,7 +12,7 @@ import codedriver.framework.common.RootComponent;
 @RootComponent
 public class WorkcenterColumnFactory extends ApplicationListenerBase{
 
-	private static Map<String, IWorkcenterColumn> columnComponentMap = new HashMap<>();
+	public static Map<String, IWorkcenterColumn> columnComponentMap = new HashMap<>();
 	
 	public static IWorkcenterColumn getHandler(String name) {
 		name = name.toUpperCase();
