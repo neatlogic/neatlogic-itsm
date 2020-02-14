@@ -29,9 +29,15 @@ import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskMapper {
+	public ProcessTaskSlaVo getProcessTaskSlaById(Long slaId);
+
+	public List<ProcessTaskSlaNotifyVo> getAllProcessTaskSlaNotify();
+
+	public List<ProcessTaskStepVo> getProcessTaskStepBaseInfoBySlaId(Long slaId);
+
 	public ProcessTaskSlaTimeVo getProcessTaskSlaTimeBySlaId(Long slaId);
 
-	public ProcessTaskSlaNotifyVo getProcessTaskNotifyVo(@Param("slaId") Long slaId, @Param("hash") String hash);
+	public ProcessTaskSlaNotifyVo getProcessTaskNotifyVoById(Long id);
 
 	public ProcessTaskConfigVo getProcessTaskConfigByHash(String hash);
 
@@ -149,6 +155,8 @@ public interface ProcessTaskMapper {
 
 	public int updateProcessTaskStatus(ProcessTaskVo processTaskVo);
 
+	public int updateProcessTaskSlaNotify(ProcessTaskSlaNotifyVo processTaskNotifyVo);
+
 	public int updateProcessTaskSlaTime(ProcessTaskSlaTimeVo processTaskSlaTimeVo);
 
 	public int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId") Long fromProcessTaskStepId, @Param("toProcessTaskStepId") Long toProcessTaskStepId, @Param("isHit") Integer isHit);
@@ -164,6 +172,8 @@ public interface ProcessTaskMapper {
 	public int deleteProcessTaskStepUser(@Param("processTaskStepId") Long processTaskStepId, @Param("userType") String userType);
 
 	public int deleteProcessTaskConvergeByStepId(Long processTaskStepId);
+
+	public int deleteProcessTaskSlaNotifyById(Long slaNotifyId);
 
 	public int deleteProcessTaskStepWorkerByProcessTaskId(Long processTaskId);
 

@@ -70,7 +70,8 @@ public class ProcessStepHandlerFactory implements ApplicationListener<ContextRef
 			if (component.getHandler() != null) {
 				componentMap.put(component.getHandler(), component);
 				ProcessStepHandlerVo processStepHandlerVo = new ProcessStepHandlerVo();
-				processStepHandlerVo.setType(component.getHandler());
+				processStepHandlerVo.setType(component.getType());
+				processStepHandlerVo.setHandler(component.getHandler());
 				processStepHandlerVo.setName(component.getName());
 				processStepHandlerVo.setIcon(component.getIcon());
 				processStepHandlerVo.setSort(component.getSort());

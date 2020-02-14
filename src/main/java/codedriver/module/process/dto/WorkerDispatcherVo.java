@@ -1,5 +1,6 @@
 package codedriver.module.process.dto;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -18,7 +19,11 @@ public class WorkerDispatcherVo {
 	@EntityField(name = "输入帮助",
 			type = ApiParamType.STRING)
 	private String help;
-	private JSONObject config;
+	@EntityField(name = "分派器扩展配置",
+			type = ApiParamType.STRING)
+	private JSONArray config;
+	@EntityField(name = "分派器所属模块",
+			type = ApiParamType.STRING)
 	private String moduleId;
 
 	public String getName() {
@@ -53,11 +58,11 @@ public class WorkerDispatcherVo {
 		this.help = help;
 	}
 
-	public JSONObject getConfig() {
+	public JSONArray getConfig() {
 		return config;
 	}
 
-	public void setConfig(JSONObject config) {
+	public void setConfig(JSONArray config) {
 		this.config = config;
 	}
 
