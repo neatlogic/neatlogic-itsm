@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskMapper">
+
+	<select id="getAllProcessTaskSlaTransfer" resultType="codedriver.module.process.dto.ProcessTaskSlaTransferVo">
+		SELECT
+		`id`,
+		`sla_id` AS slaId,
+		`hash`,
+		DATE_FORMAT(`trigger_time`, '%Y-%m-%d %H:%i:%s') as triggerTime,
+		`config`
+		FROM
+		`processtask_sla_transfer`
+	</select>
+
+	<select id="getProcessTaskSlaTransferById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskSlaTransferVo">
+		SELECT
+		`id`,
+		`sla_id` AS slaId,
+		`hash`,
+		DATE_FORMAT(`trigger_time`, '%Y-%m-%d %H:%i:%s') as triggerTime,
+		`config`
+		FROM
+		`processtask_sla_transfer`
+		WHERE
+		id = #{value}
+	</select>
+
 	<select id="getAllProcessTaskSlaNotify" resultType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
 		SELECT
 		id,
@@ -24,7 +49,7 @@
 		id = #{value}
 	</select>
 
-	<select id="getProcessTaskNotifyVoById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
+	<select id="getProcessTaskNotifyById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
 		SELECT
 		id,
 		`sla_id` AS slaId,
@@ -621,6 +646,25 @@
 		)
 	</insert>
 
+	<insert id="insertProcessTaskSlaTransfer" parameterType="codedriver.module.process.dto.ProcessTaskSlaTransferVo">
+		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO `processtask_sla_transfer` (
+		`sla_id`,
+		`hash`,
+		`trigger_time`,
+		`config`
+		)
+		VALUES
+		(
+		#{slaId},
+		#{hash},
+		#{triggerTime},
+		#{config}
+		)
+	</insert>
+
 	<insert id="insertProcessTaskStepSla">
 		INSERT INTO `processtask_step_sla` (`processtask_step_id`, `sla_id`)
 		VALUES
@@ -1015,21 +1059,13 @@
 		)
 	</insert>
 
-	<insert id="insertProcessSlaNotify" parameterType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
-		INSERT INTO `processtask_step_sla_notify` (
-		`sla_id`,
-		`hash`,
-		`trigger_time`,
-		`config`
-		)
-		VALUES
-		(
-		#{slaId},
-		#{hash},
-		#{triggerTime},
-		#{config}
-		)
-	</insert>
+	<update id="updateProcessTaskSlaTransfer" parameterType="codedriver.module.process.dto.ProcessTaskSlaTransferVo">
+		UPDATE
+		`processtask_sla_transfer`
+		SET
+		`trigger_time` = #{triggerTime}
+		WHERE id = #{id}
+	</update>
 
 	<update id="updateProcessTaskSlaNotify" parameterType="codedriver.module.process.dto.ProcessTaskSlaNotifyVo">
 		UPDATE
@@ -1131,6 +1167,13 @@
 		DELETE
 		FROM
 		`processtask_sla_notify`
+		WHERE id = #{value}
+	</delete>
+
+	<delete id="deleteProcessTaskSlaTransferById" parameterType="java.lang.Long">
+		DELETE
+		FROM
+		`processtask_sla_transfer`
 		WHERE id = #{value}
 	</delete>
 </mapper>
