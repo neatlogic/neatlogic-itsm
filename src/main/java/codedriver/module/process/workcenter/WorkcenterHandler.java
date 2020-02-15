@@ -16,10 +16,10 @@ import codedriver.module.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Service
-public class WorkcenterService {
+public class WorkcenterHandler {
 
 	@Autowired
-	WorkcenterEsService workcenterEsService;
+	WorkcenterEsHandler workcenterEsService;
 	
 	public JSONObject doSearch(WorkcenterVo workcenterVo) {
 		JSONObject returnObj = new JSONObject();

@@ -40,6 +40,7 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private List<ProcessTaskStepUserVo> userList;
 	private List<ProcessTaskStepTeamVo> teamList;
 	private List<ProcessTaskStepRelVo> relList;
+	private List<ProcessTaskStepWorkerVo> workerList;
 	private List<ProcessTaskStepWorkerPolicyVo> workerPolicyList;
 	private List<ProcessTaskStepTimeoutPolicyVo> timeoutPolicyList;
 	private List<ProcessTaskStepFormAttributeVo> formAttributeList;
@@ -236,6 +237,14 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setRelList(List<ProcessTaskStepRelVo> relList) {
 		this.relList = relList;
+	}
+
+	public List<ProcessTaskStepWorkerVo> getWorkerList() {
+		return workerList;
+	}
+
+	public void setWorkerList(List<ProcessTaskStepWorkerVo> workerList) {
+		this.workerList = workerList;
 	}
 
 	public String getHandler() {

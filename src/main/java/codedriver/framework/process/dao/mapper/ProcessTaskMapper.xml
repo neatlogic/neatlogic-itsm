@@ -434,6 +434,39 @@
 		AND
 		`type` = #{type}
 	</select>
+	
+	<resultMap id="processTaskStepDetailMap" type="codedriver.module.process.dto.ProcessTaskStepVo">
+		<id column="id" property="id" />
+		<result column="processTaskId" property="processTaskId" />
+		<result column="processTaskId" property="processTaskId" />
+		<result column="processTaskId" property="processTaskId" />
+		<result column="processTaskId" property="processTaskId" />
+		<result column="processTaskId" property="processTaskId" />
+		<result column="processTaskId" property="processTaskId" />
+		<result column="processTaskId" property="processTaskId" />
+		
+	</resultMap>
+	
+	<select id="getProcessTaskActiveStepByProcessTaskId" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
+		SELECT
+		ps.`id`,
+		ps.`processtask_id` AS processTaskId,
+		ps.`name`,
+		ps.`process_step_uuid` AS processStepUuid,
+		ps.`status`,
+		ps.`result`,
+		ps.`type`,
+		ps.`handler`,
+		ps.`is_active` AS isActive,
+		ps.`start_time`,
+		ps.`end_time`,
+		ps.`error`
+		FROM
+		`processtask_step`
+		WHERE `processtask_id` = #{processTaskId}
+		AND
+		`type` = #{type}
+	</select>
 
 	<select id="getProcessTaskStepRelByToId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepRelVo">
 		SELECT
