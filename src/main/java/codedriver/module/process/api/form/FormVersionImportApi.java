@@ -54,7 +54,7 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 		})
 	@Output({
 		@Param(name = "version", type = ApiParamType.INTEGER, desc = "导入版本号"),
-		@Param(name = "action", type = ApiParamType.STRING, desc = "新增或覆盖")
+		@Param(name = "result", type = ApiParamType.STRING, desc = "导入结果")
 	})
 	@Description(desc = "表单版本导入接口")
 	@Override
@@ -123,7 +123,7 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 			
 		}
 		
-		return resultObj;
+		return null;
 	}
 
 }
