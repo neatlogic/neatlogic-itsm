@@ -438,17 +438,25 @@
 	<resultMap id="processTaskStepDetailMap" type="codedriver.module.process.dto.ProcessTaskStepVo">
 		<id column="id" property="id" />
 		<result column="processTaskId" property="processTaskId" />
-		<result column="processTaskId" property="processTaskId" />
-		<result column="processTaskId" property="processTaskId" />
-		<result column="processTaskId" property="processTaskId" />
-		<result column="processTaskId" property="processTaskId" />
-		<result column="processTaskId" property="processTaskId" />
-		<result column="processTaskId" property="processTaskId" />
-		
+		<result column="name" property="name" />
+		<result column="processStepUuid" property="processStepUuid" />
+		<result column="status" property="status" />
+		<result column="result" property="result" />
+		<result column="type" property="type" />
+		<result column="handler" property="handler" />
+		<result column="isActive" property="isActive" />
+		<result column="startTime" property="startTime" />
+		<result column="endTime" property="endTime" />
+		<result column="error" property="error" />
+		<collection property="workerList" ofType="codedriver.module.process.dto.ProcessTaskStepWorkerVo">
+			<result column="roleName" property="roleName" />
+			<result column="teamUuid" property="teamUuid" />
+			<result column="userId" property="userId" />
+		</collection>
 	</resultMap>
 	
-	<select id="getProcessTaskActiveStepByProcessTaskId" resultType="codedriver.module.process.dto.ProcessTaskStepVo">
-		SELECT
+	<select id="getProcessTaskActiveStepByProcessTaskId" parameterType="java.lang.Long" resultMap="processTaskStepDetailMap">
+		SELECT 
 		ps.`id`,
 		ps.`processtask_id` AS processTaskId,
 		ps.`name`,
@@ -458,14 +466,15 @@
 		ps.`type`,
 		ps.`handler`,
 		ps.`is_active` AS isActive,
-		ps.`start_time`,
-		ps.`end_time`,
-		ps.`error`
-		FROM
-		`processtask_step`
-		WHERE `processtask_id` = #{processTaskId}
-		AND
-		`type` = #{type}
+		ps.`start_time` AS startTime,
+		ps.`end_time` AS endTime,
+		ps.`error`,
+		psw.`role_name` AS roleName,
+		psw.`team_uuid` AS teamUuid,
+		psw.`user_id` AS userId
+		FROM `processtask_step` ps 
+		LEFT JOIN `processtask_step_worker` psw ON ps.`processtask_id` = psw.`processtask_id` AND ps.`id` AND psw.`processtask_step_id` 
+		WHERE ps.`processtask_id` = #{processTaskId} AND ps.`type` = 'process' AND ps.`is_active` =1 AND psw.`action` = 'handle'  
 	</select>
 
 	<select id="getProcessTaskStepRelByToId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepRelVo">

@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
@@ -211,12 +213,25 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 			 transferUserIdList.add(auditVo.getUserId());
 		 }
 		 /** 获取工单当前步骤 **/
-		 List<ProcessTaskStepVo>  processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(currentProcessTaskStepVo.getProcessTaskId(), ProcessStepType.PROCESS.getValue());
+		 List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		 List<String> activeStepIdList = new ArrayList<String>();
-		 for(ProcessTaskStepVo step : processTaskStepList) {
-			 if(step.getIsActive() == 1) {
-				 activeStepIdList.add(step.getId().toString());
+		 List<String> activeStepWorkerList = new ArrayList<String>();
+		 List<String> activeStepStatusList = new ArrayList<String>();
+		 for(ProcessTaskStepVo step : processTaskActiveStepList) {
+			 activeStepIdList.add(step.getId().toString());
+			 for(ProcessTaskStepWorkerVo worker : step.getWorkerList()) {
+				 if(!StringUtils.isBlank(worker.getTeamUuid())) {
+					 activeStepWorkerList.add(step.getId()+"@team#"+worker.getTeamUuid());
+				 }
+				 if(!StringUtils.isBlank(worker.getUserId())) {
+					 activeStepWorkerList.add(step.getId()+"@user#"+worker.getUserId());
+				 }
+				 if(!StringUtils.isBlank(worker.getRoleName())) {
+					 activeStepWorkerList.add(step.getId()+"@role#"+worker.getRoleName());
+				 }
 			 }
+			 activeStepStatusList.add(step.getId()+"@"+step.getStatus());
+			
 		 }
 		 
 		 //标题
@@ -240,7 +255,14 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //当前步骤idList
 		 patch.setStrings("stepIds", activeStepIdList);
 		 //当前步骤处理人List
-		 patch.setStrings("stepUsers", activeStepIdList);
+		 patch.setStrings("stepUsers", activeStepWorkerList);
+		 //当前步骤状态
+		 patch.setStrings("stepStatus", activeStepStatusList);
+		 //时间窗口
+		 patch.set("worktime", channel.getWorktimeUuid());
+		 //超时时间
+		 patch.set("expiredTime", processTaskVo.getExpireTime());
+		 //表单属性
 		 
 		 
 		 
