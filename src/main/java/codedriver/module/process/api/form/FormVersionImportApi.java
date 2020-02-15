@@ -53,7 +53,8 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true)
 		})
 	@Output({
-		@Param(name = "Return", type = ApiParamType.JSONARRAY, desc = "导入结果")
+		@Param(name = "version", type = ApiParamType.INTEGER, desc = "导入版本号"),
+		@Param(name = "action", type = ApiParamType.STRING, desc = "新增或覆盖")
 	})
 	@Description(desc = "表单版本导入接口")
 	@Override
@@ -73,6 +74,7 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 		ObjectInputStream ois = null;
 		Object obj = null;
 		MultipartFile multipartFile = null;
+		JSONObject resultObj = new JSONObject();
 		//遍历导入文件, 目前只获取第一个文件内容, 其余的放弃
 		for(Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
 			multipartFile = entry.getValue();
@@ -92,13 +94,14 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 				FormVersionVo formVersionVo = (FormVersionVo) obj;
 				formVersionVo.setFormUuid(uuid);
 				//将导入版本设置为激活版本
-				formMapper.resetFormVersionIsActiveByFormUuid(uuid);
-				formVersionVo.setIsActive(1);
+				formVersionVo.setIsActive(0);
 				FormVersionVo existsFormVersionVo = formMapper.getFormVersionByUuid(formVersionVo.getUuid());
 				//如果导入的表单版本已存在, 且表单uuid相同, 则覆盖，反之，新增一个版本
 				if(existsFormVersionVo != null && existsFormVersionVo.getFormUuid().equals(uuid)) {
 					formMapper.updateFormVersion(formVersionVo);
-					return "版本" + existsFormVersionVo.getVersion() + "被覆盖";
+					resultObj.put("version", existsFormVersionVo.getVersion());
+					resultObj.put("result", "版本" + existsFormVersionVo.getVersion() + "被覆盖");
+					return resultObj;
 				}else {				
 					Integer version = formMapper.getMaxVersionByFormUuid(uuid);
 					if(version == null) {
@@ -109,7 +112,9 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 					formVersionVo.setVersion(version);
 					formVersionVo.setUuid(null);
 					formMapper.insertFormVersion(formVersionVo);
-					return "新增版本" + version;
+					resultObj.put("version", version);
+					resultObj.put("result", "新增版本" + version);
+					return resultObj;
 				}
 				
 			}else {
@@ -118,7 +123,7 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 			
 		}
 		
-		return null;
+		return resultObj;
 	}
 
 }
