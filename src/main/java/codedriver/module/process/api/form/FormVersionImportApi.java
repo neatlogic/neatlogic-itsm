@@ -53,7 +53,7 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true)
 		})
 	@Output({
-		@Param(name = "version", type = ApiParamType.INTEGER, desc = "导入版本号"),
+		@Param(name = "versionUuid", type = ApiParamType.INTEGER, desc = "导入版本号"),
 		@Param(name = "result", type = ApiParamType.STRING, desc = "导入结果")
 	})
 	@Description(desc = "表单版本导入接口")
@@ -99,7 +99,7 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 				//如果导入的表单版本已存在, 且表单uuid相同, 则覆盖，反之，新增一个版本
 				if(existsFormVersionVo != null && existsFormVersionVo.getFormUuid().equals(uuid)) {
 					formMapper.updateFormVersion(formVersionVo);
-					resultObj.put("version", existsFormVersionVo.getVersion());
+					resultObj.put("versionUuid", formVersionVo.getUuid());
 					resultObj.put("result", "版本" + existsFormVersionVo.getVersion() + "被覆盖");
 					return resultObj;
 				}else {				
@@ -112,7 +112,7 @@ public class FormVersionImportApi extends BinaryStreamApiComponentBase{
 					formVersionVo.setVersion(version);
 					formVersionVo.setUuid(null);
 					formMapper.insertFormVersion(formVersionVo);
-					resultObj.put("version", version);
+					resultObj.put("versionUuid", formVersionVo.getUuid());
 					resultObj.put("result", "新增版本" + version);
 					return resultObj;
 				}
