@@ -49,8 +49,13 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 
 	@Override
 	public Boolean checkCronIsExpired(JobObject jobObject) {
-		// TODO Auto-generated method stub
-		return null;
+		Long slaTransferId = (Long) jobObject.getData("slaNotifyId");
+		ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskNotifyById(slaTransferId);
+		if (processTaskSlaNotifyVo == null) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	@Override
@@ -58,7 +63,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 		String tenantUuid = jobObject.getTenantUuid();
 		TenantContext.get().switchTenant(tenantUuid);
 		Long slaNotifyId = (Long) jobObject.getData("slaNotifyId");
-		ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskNotifyVoById(slaNotifyId);
+		ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskNotifyById(slaNotifyId);
 		boolean isJobLoaded = false;
 		if (processTaskSlaNotifyVo != null) {
 			ProcessTaskSlaTimeVo slaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(processTaskSlaNotifyVo.getSlaId());
@@ -133,8 +138,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 	@Override
 	public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
 		Long slaNotifyId = (Long) jobObject.getData("slaNotifyId");
-		boolean isJobRunned = false;
-		ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskNotifyVoById(slaNotifyId);
+		ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskNotifyById(slaNotifyId);
 		if (processTaskSlaNotifyVo != null) {
 			Long slaId = processTaskSlaNotifyVo.getSlaId();
 			ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
@@ -203,7 +207,6 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 							INotifyHandler notifyHandler = NotifyHandlerFactory.getHandler(handler);
 							if (notifyHandler != null) {
 								notifyHandler.execute(notifyVo);
-								isJobRunned = true;
 							}
 						}
 						Date nextFireTime = context.getNextFireTime();
@@ -235,7 +238,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
 
 	@Override
 	public String getGroupName() {
-		return TenantContext.get().getTenantUuid() + "-PROCESSTASKSTEPNOTIFY";
+		return TenantContext.get().getTenantUuid() + "-PROCESSTASK-SLA-NOTIFY";
 	}
 
 }
