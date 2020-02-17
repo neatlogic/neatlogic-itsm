@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.javers.common.collections.Arrays;
 import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +55,7 @@ public class ProcessUserRoleTeamSearchApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", isRequired = false, xss = true),
 		@Param(name = "valueList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于回显的参数列表"),
+		@Param(name = "excludeList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于过滤回显参数"),
 		@Param(name = "groupList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "限制接口返回类型，['common','user','team','role']"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10", isRequired = false),
@@ -72,10 +73,8 @@ public class ProcessUserRoleTeamSearchApi extends ApiComponentBase {
 		jsonObj.put("userMapper", userMapper);
 		jsonObj.put("roleMapper", roleMapper);
 		jsonObj.put("teamMapper", teamMapper);
-		List<Object> groupList = null;
-		if(jsonObj.containsKey("groupList")) {
-			groupList = Arrays.asList(jsonObj.getJSONArray("groupList").toArray());
-		}
+		List<Object> groupList = jsonObj.getJSONArray("groupList");
+		List<Object> excludeList = jsonObj.getJSONArray("excludeList");
 		Reflections reflections = new Reflections(this.getClass().getPackage().getName());
 		Set<?> apiClass = reflections.getSubTypesOf(IHandler.class);
 		JSONArray resultArray = new JSONArray();
@@ -94,7 +93,16 @@ public class ProcessUserRoleTeamSearchApi extends ApiComponentBase {
 					return resultArray;
 				}
 			}
-			resultArray.add(handler.repack(dataList));
+			JSONObject resultObj = handler.repack(dataList);
+			//过滤 excludeList
+			dataList = resultObj.getJSONArray("dataList");
+			if(excludeList != null &&!excludeList.isEmpty()) {
+				for(Object exclude : excludeList) {
+					dataList= dataList.stream().filter(data-> !((JSONObject)data).getString("value").equalsIgnoreCase(exclude.toString())).collect(Collectors.toList());
+				}
+			}
+			resultObj.put("dataList", dataList);
+			resultArray.add(resultObj);
 		}
 		//排序
 		resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getInteger("sort")));

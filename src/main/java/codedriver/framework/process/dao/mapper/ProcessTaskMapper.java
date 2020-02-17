@@ -12,6 +12,7 @@ import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
 import codedriver.module.process.dto.ProcessTaskSlaNotifyVo;
 import codedriver.module.process.dto.ProcessTaskSlaTimeVo;
+import codedriver.module.process.dto.ProcessTaskSlaTransferVo;
 import codedriver.module.process.dto.ProcessTaskSlaVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditFormAttributeDataVo;
@@ -33,11 +34,15 @@ public interface ProcessTaskMapper {
 
 	public List<ProcessTaskSlaNotifyVo> getAllProcessTaskSlaNotify();
 
+	public List<ProcessTaskSlaTransferVo> getAllProcessTaskSlaTransfer();
+
 	public List<ProcessTaskStepVo> getProcessTaskStepBaseInfoBySlaId(Long slaId);
 
 	public ProcessTaskSlaTimeVo getProcessTaskSlaTimeBySlaId(Long slaId);
 
-	public ProcessTaskSlaNotifyVo getProcessTaskNotifyVoById(Long id);
+	public ProcessTaskSlaNotifyVo getProcessTaskNotifyById(Long id);
+
+	public ProcessTaskSlaTransferVo getProcessTaskSlaTransferById(Long id);
 
 	public ProcessTaskConfigVo getProcessTaskConfigByHash(String hash);
 
@@ -117,6 +122,8 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTaskSlaNotify(ProcessTaskSlaNotifyVo processTaskSlaNotifyVo);
 
+	public int insertProcessTaskSlaTransfer(ProcessTaskSlaTransferVo processTaskSlaTransferVo);
+
 	public int insertProcessTaskStepUser(ProcessTaskStepUserVo processTaskStepUserVo);
 
 	public int insertProcessTaskStepWorkerPolicy(ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo);
@@ -161,6 +168,8 @@ public interface ProcessTaskMapper {
 
 	public int updateProcessTaskSlaTime(ProcessTaskSlaTimeVo processTaskSlaTimeVo);
 
+	public int updateProcessTaskSlaTransfer(ProcessTaskSlaTransferVo processTaskSlaTransferVo);
+
 	public int updateProcessTaskStepRelIsHit(@Param("fromProcessTaskStepId") Long fromProcessTaskStepId, @Param("toProcessTaskStepId") Long toProcessTaskStepId, @Param("isHit") Integer isHit);
 
 	public int updateProcessTaskStepConvergeIsCheck(@Param("isCheck") Integer isCheck, @Param("convergeId") Long convergeId, @Param("processTaskStepId") Long processTaskStepId);
@@ -178,5 +187,7 @@ public interface ProcessTaskMapper {
 	public int deleteProcessTaskSlaNotifyById(Long slaNotifyId);
 
 	public int deleteProcessTaskStepWorkerByProcessTaskId(Long processTaskId);
+
+	public int deleteProcessTaskSlaTransferById(Long slaTransferId);
 
 }

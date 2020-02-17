@@ -47,6 +47,7 @@ import codedriver.framework.process.notify.core.NotifyHandlerFactory;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 import codedriver.framework.process.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.process.notify.schedule.plugin.ProcessTaskSlaNotifyJob;
+import codedriver.framework.process.notify.schedule.plugin.ProcessTaskSlaTransferJob;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -61,6 +62,7 @@ import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskSlaNotifyVo;
 import codedriver.module.process.dto.ProcessTaskSlaTimeVo;
+import codedriver.module.process.dto.ProcessTaskSlaTransferVo;
 import codedriver.module.process.dto.ProcessTaskSlaVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
@@ -618,8 +620,8 @@ public abstract class ProcessStepHandlerUtilBase {
 							processTaskMapper.insertProcessTaskSlaTime(slaTimeVo);
 						}
 
-						// 执行超时操作
 						if (StringUtils.isNotBlank(slaTimeVo.getExpireTime()) && slaVo.getConfigObj() != null) {
+							// 加载定时作业，执行超时通知操作
 							JSONArray notifyPolicyList = slaVo.getConfigObj().getJSONArray("notifyPolicyList");
 							if (notifyPolicyList != null && notifyPolicyList.size() > 0) {
 								for (int i = 0; i < notifyPolicyList.size(); i++) {
@@ -627,7 +629,7 @@ public abstract class ProcessStepHandlerUtilBase {
 									ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = new ProcessTaskSlaNotifyVo();
 									processTaskSlaNotifyVo.setSlaId(slaVo.getId());
 									processTaskSlaNotifyVo.setConfig(notifyPolicyObj.toJSONString());
-									// 需要发通知时写入数据，不需要通知时清除掉
+									// 需要发通知时写入数据，执行完毕后清除
 									processTaskMapper.insertProcessTaskSlaNotify(processTaskSlaNotifyVo);
 
 									IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaNotifyJob.class.getName());
@@ -637,6 +639,28 @@ public abstract class ProcessStepHandlerUtilBase {
 										jobHandler.reloadJob(jobObject);
 									} else {
 										throw new ScheduleHandlerNotFoundException(ProcessTaskSlaNotifyJob.class.getName());
+									}
+
+								}
+							}
+							// 加载定时作业，执行超时转交操作
+							JSONArray transferPolicyList = slaVo.getConfigObj().getJSONArray("transferPolicyList");
+							if (transferPolicyList != null && transferPolicyList.size() > 0) {
+								for (int i = 0; i < transferPolicyList.size(); i++) {
+									JSONObject transferPolicyObj = transferPolicyList.getJSONObject(i);
+									ProcessTaskSlaTransferVo processTaskSlaTransferVo = new ProcessTaskSlaTransferVo();
+									processTaskSlaTransferVo.setSlaId(slaVo.getId());
+									processTaskSlaTransferVo.setConfig(transferPolicyObj.toJSONString());
+									// 需要转交时写入数据，执行完毕后清除
+									processTaskMapper.insertProcessTaskSlaTransfer(processTaskSlaTransferVo);
+
+									IJob jobHandler = SchedulerManager.getHandler(ProcessTaskSlaTransferJob.class.getName());
+									if (jobHandler != null) {
+										JobObject.Builder jobObjectBuilder = new JobObject.Builder(processTaskSlaTransferVo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()).addData("slaTransferId", processTaskSlaTransferVo.getId());
+										JobObject jobObject = jobObjectBuilder.build();
+										jobHandler.reloadJob(jobObject);
+									} else {
+										throw new ScheduleHandlerNotFoundException(ProcessTaskSlaTransferVo.class.getName());
 									}
 
 								}
