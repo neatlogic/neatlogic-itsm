@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.query.QueryResult;
 
+import codedriver.framework.common.util.PageUtil;
 import codedriver.module.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.module.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
@@ -36,7 +37,6 @@ public class WorkcenterHandler {
             	taskJson.put("taskId", el.getId());
             	for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
             		IWorkcenterColumn column = entry.getValue();
-            		//TODO es 要提供判断 column 是否存在的方法
             		taskJson.put(column.getName(), column.getValue(el));
             	}
             	//补充表单属性值
@@ -48,12 +48,20 @@ public class WorkcenterHandler {
             	dataList.add(taskJson);
             }
         }
+		//TODO 从新获取header，兼容表单
 		returnObj.put("headerList", headerList);
 		returnObj.put("dataList", dataList);
-		returnObj.put("rowNum", null);
+		returnObj.put("rowNum", result.getTotal());
 		returnObj.put("pageSize", workcenterVo.getPageSize());
 		returnObj.put("currentPage", workcenterVo.getCurrentPage());
-		returnObj.put("pageCount", result.getTotal());
+		returnObj.put("pageCount", PageUtil.getPageCount(result.getTotal(), workcenterVo.getPageSize()));
 		return returnObj;
+	}
+	
+	public static void main(String[] args) {
+		JSONObject json = new JSONObject();
+		 String a =json.getString("a");
+		 System.out.println(a);
+		
 	}
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 import com.techsure.multiattrsearch.MultiAttrsObjectPool;
 import com.techsure.multiattrsearch.query.QueryBuilder;
@@ -34,6 +35,7 @@ import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.CatalogVo;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
+import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -263,8 +265,10 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //超时时间
 		 patch.set("expiredTime", processTaskVo.getExpireTime());
 		 //表单属性
-		 
-		 
+		 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+		 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
+			 patch.set(attributeData.getAttributeUuid(), attributeData.getData());
+		 }
 		 
 		 
 		 try {

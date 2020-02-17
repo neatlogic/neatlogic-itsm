@@ -11,6 +11,11 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	private static final long serialVersionUID = 1952066708451908924L;
 	
 	private String uuid;
+	private String name;
+	private Integer isPrivate;
+	private String type;
+	private Integer sort;
+	private String conditionConfig;
 	private JSONArray headerArray;
 	private List<WorkcenterConditionGroupVo> WorkcenterConditionGroupList;
 	private List<WorkcenterConditionGroupRelVo> WorkcenterConditionGroupRelList;
@@ -19,6 +24,37 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	}
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Integer getIsPrivate() {
+		return isPrivate;
+	}
+	public void setIsPrivate(Integer isPrivate) {
+		this.isPrivate = isPrivate;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public Integer getSort() {
+		return sort;
+	}
+	public void setSort(Integer sort) {
+		this.sort = sort;
+	}
+	public String getConditionConfig() {
+		return conditionConfig;
+	}
+	public void setConditionConfig(String conditionConfig) {
+		this.conditionConfig = conditionConfig;
 	}
 	public List<WorkcenterConditionGroupVo> getWorkcenterConditionGroupList() {
 		return WorkcenterConditionGroupList;
