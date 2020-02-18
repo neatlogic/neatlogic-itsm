@@ -7,14 +7,26 @@ import com.alibaba.fastjson.JSONObject;
 public class WorkcenterConditionVo implements Serializable{
 	private static final long serialVersionUID = -776692828809703841L;
 	
+	private String uuid;
 	private String name;
 	private String displayName;
 	private String type;
 	private JSONObject config;
 	private Integer sort;
-	private String[] expressionList;
+	private String expression;
+	private String[] valueList;
 	
 	
+	public String getUuid() {
+		return uuid;
+	}
+
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+
 	public String getName() {
 		return name;
 	}
@@ -65,14 +77,24 @@ public class WorkcenterConditionVo implements Serializable{
 	}
 
 
-	public String[] getExpressionList() {
-		return expressionList;
+	public String getExpression() {
+		return expression;
 	}
 
 
-	public void setExpressionList(String[] expressionList) {
-		this.expressionList = expressionList;
+	public void setExpression(String expression) {
+		this.expression = expression;
 	}
+	
+	public String[] getValueList() {
+		return valueList;
+	}
+
+	public void setValueList(String[] valueList) {
+		this.valueList = valueList;
+	}
+
+
 
 	public enum Type {
 		TEXT("text"), SELECT("select"), MSELECT("mselect"), INPUTSELECT("inputselect"), TIMESCOPE("timescope"), TEXTAREA("textarea");
@@ -88,46 +110,54 @@ public class WorkcenterConditionVo implements Serializable{
 		}
 	}
 
-	public enum ExpressionType {
-		EQ("eq", "等于", "="), LIKE("like", "模糊查询", "like"), CONTAIN("contain", "模糊查询", "contain"),LT("lt", "小于", "&lt;"), GT("gt", "大于", "&gt;");
-		private String name;
-		private String text;
+	public enum ProcessExpressionEs {
+		EQUAL("equal", "等于", " %s = '%s'"),
+		UNEQUAL("equal", "不等于", " not %s = '%s' "),
+		INCLUDE("include", "包含", " %s contains any all ( %s )"),
+		EXCLUDE("exclude", "不包含", " not %s contains any all ( %s )"),
+		GREATERTHAN("greater-than", "大于", " %s > %s )"),
+		LESSTHAN("less-than", "小于", " %s < %s )");
+		
 		private String expression;
-
-		private ExpressionType(String _name, String _text, String _expression) {
-			this.name = _name;
-			this.text = _text;
+		private String expressionName;
+		private String expressionEs;
+		
+		private ProcessExpressionEs(String _expression, String _expressionName, String _expressionEs) {
 			this.expression = _expression;
+			this.expressionName = _expressionName;
+			this.expressionEs = _expressionEs;
 		}
-
-		public String getValue() {
-			return name;
-		}
-
-		public String getText() {
-			return text;
-		}
-
+		
 		public String getExpression() {
 			return expression;
 		}
-
-		public static String getValue(String name) {
-			for (ExpressionType s : ExpressionType.values()) {
-				if (s.getValue().equals(name)) {
-					return s.getExpression();
-				}
-			}
-			return "";
+		
+		public String getExpressionName() {
+			return expressionName;
+		}
+		
+		public String getExpressionEs() {
+			return expressionEs;
 		}
 
-		public static String getText(String name) {
-			for (ExpressionType s : ExpressionType.values()) {
-				if (s.getValue().equals(name)) {
-					return s.getText();
+		
+		public static String getExpressionName(String _expression) {
+			for (ProcessExpressionEs s : ProcessExpressionEs.values()) {
+				if (s.getExpression().equals(_expression)) {
+					return s.getExpressionName();
 				}
 			}
-			return "";
+			return null;
 		}
+		
+		public static String getExpressionEs(String _expression) {
+			for (ProcessExpressionEs s : ProcessExpressionEs.values()) {
+				if (s.getExpression().equals(_expression)) {
+					return s.getExpressionEs();
+				}
+			}
+			return null;
+		}
+		
 	}
 }

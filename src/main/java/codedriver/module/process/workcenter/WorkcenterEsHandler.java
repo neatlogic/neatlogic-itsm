@@ -1,9 +1,9 @@
 package codedriver.module.process.workcenter;
 
-import static com.techsure.multiattrsearch.query.QueryBuilder.attr;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -15,15 +15,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 import com.techsure.multiattrsearch.MultiAttrsObjectPool;
+import com.techsure.multiattrsearch.MultiAttrsQuery;
+import com.techsure.multiattrsearch.MultiAttrsSearch;
+import com.techsure.multiattrsearch.MultiAttrsSearchConfig;
 import com.techsure.multiattrsearch.query.QueryBuilder;
+import com.techsure.multiattrsearch.query.QueryParser;
 import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -41,6 +43,10 @@ import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
+import codedriver.module.process.workcenter.dto.WorkcenterConditionGroupRelVo;
+import codedriver.module.process.workcenter.dto.WorkcenterConditionGroupVo;
+import codedriver.module.process.workcenter.dto.WorkcenterConditionRelVo;
+import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Service
@@ -118,27 +124,70 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 	 * @return 
 	 */
 	public QueryResult searchTask(WorkcenterVo workcenterVo){
-		//TODO lvzk 条件解析拼成es api 的格式查询
-		QueryBuilder.ConditionBuilder cond = null;
-		cond = attr("title").contains("标题1");
-        /*if (status != null) {
-            cond = attr("status").eq(status);
-        }
-        if (!tags.isEmpty()) {
-            cond = cond == null ? attr("tags").containsAny(tags) : cond.and().attr("tags").containsAny(tags);
-        }
-        if (title != null && !StringUtils.isBlank(title)) {
-            cond = cond == null ? attr("title").contains(title) : cond.and().attr("title").contains(title);
-        }*/
-		QueryBuilder builder = createQueryBuilder(TenantContext.get().getTenantUuid())
-             .select("title", "status", "created_at")
-             .orderBy("created_time", false)
-            .limit(workcenterVo.getCurrentPage(), workcenterVo.getPageSize());
-	     if (cond != null) {
-	         builder.where(cond);
-	     }
-	     QueryResult result = builder.build().execute();
-	     return result;
+		String selectColumn = "*";
+		String where = assembleWhere(workcenterVo);
+		String orderBy = "created_at desc";
+		Integer limit = 10;
+		String sql = String.format("select %s from cdr where %s  order by %s limit %d,", selectColumn,where,orderBy,limit);
+		MultiAttrsSearchConfig config = new MultiAttrsSearchConfig();
+        MultiAttrsObjectPool pool = MultiAttrsSearch.getObjectPool(config);
+        QueryParser parser = pool.createQueryParser();
+        MultiAttrsQuery query = parser.parse(sql);
+        QueryResult result = query.execute();
+        return result;
+	}
+	
+	public String assembleWhere(WorkcenterVo workcenterVo) {
+		Map<String,String> groupRelMap = new HashMap<String,String>();
+		StringBuilder whereSb = new StringBuilder();
+		List<WorkcenterConditionGroupRelVo> groupRelList = workcenterVo.getWorkcenterConditionGroupRelList();
+		if(groupRelList != null && !groupRelList.isEmpty()) {
+			//将group 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
+			for(WorkcenterConditionGroupRelVo groupRel : groupRelList) {
+				groupRelMap.put(groupRel.getFromConditionGroupUuid()+"_"+groupRel.getToConditionGroupUuid(), groupRel.getJoinType());
+			}
+			List<WorkcenterConditionGroupVo> groupList = workcenterVo.getWorkcenterConditionGroupList();
+			String fromGroupUuid = null;
+			String toGroupUuid = groupList.get(0).getUuid();
+			for(WorkcenterConditionGroupVo group : groupList) {
+				Map<String,String> conditionRelMap = new HashMap<String,String>();
+				if(fromGroupUuid != null) {
+					whereSb.append(conditionRelMap.get(fromGroupUuid+"_"+toGroupUuid));
+				}
+				whereSb.append("(");
+				String uuid = group.getUuid();
+				List<WorkcenterConditionRelVo> conditionRelList = group.getConditionRelList();
+				if(conditionRelList != null && !conditionRelList.isEmpty()) {
+					//将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
+					for(WorkcenterConditionRelVo conditionRel : conditionRelList) {
+						conditionRelMap.put(conditionRel.getFromConditionUuid()+"_"+conditionRel.getToConditionUuid(),conditionRel.getJoinType());
+					}
+					List<WorkcenterConditionVo> conditionList = group.getConditionList();
+					String fromConditionUuid = null;
+					String toConditionUuid = conditionList.get(0).getUuid();
+					for(int i = 0; i<conditionList.size();i++) {
+						if(fromConditionUuid != null) {
+							whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
+						}
+						WorkcenterConditionVo condition =  conditionList.get(i);
+						if(i != 0) {
+							toConditionUuid = condition.getUuid();
+						}
+						String value = condition.getValueList()[0];
+						if(condition.getValueList().length>1) {
+							value = String.format(" '%s' ",  String.join("','",condition.getValueList()));
+						}
+						whereSb.append(String.format(WorkcenterConditionVo.ProcessExpressionEs.getExpressionEs(condition.getExpression()),condition.getUuid(),value));
+						fromConditionUuid = toConditionUuid;
+					}
+				}
+				whereSb.append(")");
+			}
+		}
+		
+		
+		
+		return whereSb.toString();
 	}
 	
 	protected static synchronized void update(ProcessTaskStepVo currentProcessTaskStepVo) {
