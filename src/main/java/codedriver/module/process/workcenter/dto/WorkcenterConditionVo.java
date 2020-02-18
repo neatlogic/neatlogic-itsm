@@ -111,7 +111,7 @@ public class WorkcenterConditionVo implements Serializable{
 	}
 
 	public enum ProcessExpressionEs {
-		EQUAL("equal", "等于", " %s = '%s'"),
+		EQUAL("equal", "等于", " %s like '%s'"),
 		UNEQUAL("equal", "不等于", " not %s = '%s' "),
 		INCLUDE("include", "包含", " %s contains any all ( %s )"),
 		EXCLUDE("exclude", "不包含", " not %s contains any all ( %s )"),

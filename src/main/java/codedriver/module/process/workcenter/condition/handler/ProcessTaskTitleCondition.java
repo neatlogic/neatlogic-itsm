@@ -37,7 +37,7 @@ public class ProcessTaskTitleCondition implements IWorkcenterCondition{
 
 	@Override
 	public String[] getExpressionList() {
-		return new String[] { WorkcenterConditionVo.ExpressionType.LIKE.getValue() };
+		return new String[] { WorkcenterConditionVo.ProcessExpressionEs.EQUAL.getExpressionName() };
 	}
 
 }
