@@ -39,9 +39,9 @@ public class ProcessDraftClearApi extends ApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid", isRequired = true)
+		@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid，清空当前流程的草稿")
 	})
-	@Description(desc = "流程草稿清空接口")
+	@Description(desc = "流程草稿清空接口，最后更新时间2020-02-18 15:01，修改参数说明")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();

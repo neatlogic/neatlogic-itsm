@@ -40,12 +40,12 @@ public class ProcessDraftListApi extends ApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid")
+		@Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid，获取已正式保存的当前流程的草稿列表，如不传，获取未正式保存的所有草稿列表")
 	})
 	@Output({
-		@Param(name="processDraftList",explode=ProcessDraftVo[].class,desc="流程草稿列表")
+		@Param(name="Return",explode=ProcessDraftVo[].class,desc="流程草稿列表")
 	})
-	@Description(desc = "流程草稿列表接口")
+	@Description(desc = "流程草稿列表接口，最后更新时间2020-02-18 14:55，修改参数说明及输出参数列表")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();
