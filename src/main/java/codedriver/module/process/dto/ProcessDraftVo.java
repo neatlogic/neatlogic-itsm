@@ -19,10 +19,11 @@ public class ProcessDraftVo {
 	@EntityField(name = "流程名称", type = ApiParamType.STRING)
 	private String name;
 
-	@EntityField(name = "流程图配置", type = ApiParamType.STRING)
+	@EntityField(name = "流程图配置", type = ApiParamType.JSONOBJECT)
 	private String config;
 	
-	private transient String fcu;
+	@EntityField(name = "保存时间", type = ApiParamType.LONG)
+	private String fcu;
 	
 	private transient String md5;
 
