@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter.column.core;
+package codedriver.framework.process.workcenter.column.core;
 
 import com.techsure.multiattrsearch.MultiAttrsObject;
 

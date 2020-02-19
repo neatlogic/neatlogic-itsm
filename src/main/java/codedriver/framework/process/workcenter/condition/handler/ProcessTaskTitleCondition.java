@@ -1,10 +1,10 @@
-package codedriver.module.process.workcenter.condition.handler;
+package codedriver.framework.process.workcenter.condition.handler;
 
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.module.process.workcenter.condition.core.IWorkcenterCondition;
+import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
 @Component

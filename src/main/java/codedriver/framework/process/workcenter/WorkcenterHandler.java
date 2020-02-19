@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter;
+package codedriver.framework.process.workcenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +12,8 @@ import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.common.util.PageUtil;
-import codedriver.module.process.workcenter.column.core.IWorkcenterColumn;
-import codedriver.module.process.workcenter.column.core.WorkcenterColumnFactory;
+import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Service

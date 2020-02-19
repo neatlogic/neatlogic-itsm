@@ -1,10 +1,10 @@
-package codedriver.module.process.workcenter.column.handler;
+package codedriver.framework.process.workcenter.column.handler;
 
 import org.springframework.stereotype.Component;
 
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
-import codedriver.module.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 
 @Component
 public class ProcessTaskTitleColumn implements IWorkcenterColumn{
