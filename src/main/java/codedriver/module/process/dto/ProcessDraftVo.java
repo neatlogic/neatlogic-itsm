@@ -1,5 +1,6 @@
 package codedriver.module.process.dto;
 
+import java.util.Date;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +24,9 @@ public class ProcessDraftVo {
 	private String config;
 	
 	@EntityField(name = "保存时间", type = ApiParamType.LONG)
-	private String fcu;
+	private Date fcd;
+	
+	private transient String fcu;
 	
 	private transient String md5;
 
@@ -60,6 +63,14 @@ public class ProcessDraftVo {
 
 	public void setConfig(String config) {
 		this.config = config;
+	}
+
+	public Date getFcd() {
+		return fcd;
+	}
+
+	public void setFcd(Date fcd) {
+		this.fcd = fcd;
 	}
 
 	public String getFcu() {
