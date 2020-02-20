@@ -212,7 +212,6 @@
 		`color`,
 		`desc`,
 		`sort`,
-		`sla`,
 		`allow_desc`,
 		`help`,
 		`is_active_help`
@@ -227,7 +226,6 @@
 		#{color},
 		#{desc},
 		#{sort},
-		#{sla},
 		#{allowDesc},
 		#{help},
 		#{isActiveHelp}
