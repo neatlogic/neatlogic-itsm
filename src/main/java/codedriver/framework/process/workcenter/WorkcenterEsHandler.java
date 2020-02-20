@@ -289,10 +289,16 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 patch.set("priority", processTaskVo.getPriority());
 		 //服务目录
 		 patch.set("catalog", catalog.getUuid());
+		 //服务类型
+		 patch.set("channelType",channel.getType());
 		 //服务
 		 patch.set("channel", channel.getUuid());
 		 //上报内容
 		 patch.set("content", startContentVo.getContent());
+		 //工单开始时间
+		 patch.set("createTime", processTaskVo.getStartTime());
+		 //工单结束时间
+		 patch.set("createTime", processTaskVo.getEndTime());
 		 //上报人
 		 patch.set("owner",processTaskVo.getOwner());
 		 //代报人
@@ -319,7 +325,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 try {
 			 patch.commit();
 		 } catch (Exception e) {
-			 logger.error("failed to update title of task{id={}}, reason: {}", taskId, e.getMessage());
+			 logger.error("failed to update task{id={}}, reason: {}", taskId, e.getMessage());
 		 }
 	 }
 	

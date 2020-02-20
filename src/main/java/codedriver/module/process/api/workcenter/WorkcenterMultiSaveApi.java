@@ -18,7 +18,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ProcessVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Transactional

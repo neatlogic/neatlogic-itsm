@@ -131,7 +131,7 @@ public class WorkcenterConditionVo implements Serializable{
 	}
 
 	public enum Handler {
-		TEXT("forminput"), SELECT("formselect"),  TEXTAREA("formtextarea"),RADIO("formradio"),CHECKBOX("formcheckbox"),DATE("formdate"), TIME("formtime");
+		TEXT("input"), SELECT("select"),  TEXTAREA("textarea"),RADIO("radio"),CHECKBOX("checkbox"),DATE("date"), TIME("time"),USERSELECT("userselect");
 		private String name;
 
 		private Handler(String _name) {
@@ -145,7 +145,8 @@ public class WorkcenterConditionVo implements Serializable{
 	}
 
 	public enum ProcessExpressionEs {
-		EQUAL("equal", "等于", " %s like '%s'"),
+		LIKE("like", "等于", " %s like '%s'"),
+		EQUAL("equal", "等于", " %s = '%s'"),
 		UNEQUAL("equal", "不等于", " not %s = '%s' "),
 		INCLUDE("include", "包含", " %s contains any all ( %s )"),
 		EXCLUDE("exclude", "不包含", " not %s contains any all ( %s )"),
