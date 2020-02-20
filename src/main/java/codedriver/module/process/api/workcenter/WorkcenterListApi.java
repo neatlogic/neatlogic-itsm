@@ -14,14 +14,14 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Service
-public class WorkcenterApi extends ApiComponentBase {
+public class WorkcenterListApi extends ApiComponentBase {
 
 	@Autowired
 	WorkcenterMapper workcenterMapper;
 	
 	@Override
 	public String getToken() {
-		return "workcenter";
+		return "workcenter/list";
 	}
 
 	@Override

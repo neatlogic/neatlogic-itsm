@@ -1,6 +1,7 @@
 package codedriver.module.process.workcenter.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -11,12 +12,26 @@ public class WorkcenterConditionVo implements Serializable{
 	private String name;
 	private String displayName;
 	private String type;
+	private String handler;
 	private JSONObject config;
 	private Integer sort;
 	private String expression;
-	private String[] valueList;
+	private List<String> valueList;
 	
 	
+	public WorkcenterConditionVo() {
+		super();
+	}
+	
+	public WorkcenterConditionVo(JSONObject jsonObj) {
+		this.uuid = jsonObj.getString("uuid");
+		this.name = jsonObj.getString("key").split(".")[1];
+		this.type = jsonObj.getString("key").split(".")[0];
+		this.expression = jsonObj.getString("expression");
+		this.valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
+	}
+
+
 	public String getUuid() {
 		return uuid;
 	}
@@ -56,6 +71,13 @@ public class WorkcenterConditionVo implements Serializable{
 		this.type = type;
 	}
 
+	public String getHandler() {
+		return handler;
+	}
+
+	public void setHandler(String handler) {
+		this.handler = handler;
+	}
 
 	public JSONObject getConfig() {
 		return config;
@@ -86,21 +108,33 @@ public class WorkcenterConditionVo implements Serializable{
 		this.expression = expression;
 	}
 	
-	public String[] getValueList() {
+	public List<String> getValueList() {
 		return valueList;
 	}
 
-	public void setValueList(String[] valueList) {
+	public void setValueList(List<String> valueList) {
 		this.valueList = valueList;
 	}
 
-
-
 	public enum Type {
-		TEXT("text"), SELECT("select"), MSELECT("mselect"), INPUTSELECT("inputselect"), TIMESCOPE("timescope"), TEXTAREA("textarea");
+		COMMON("common"), FORM("form");
 		private String name;
 
 		private Type(String _name) {
+			this.name = _name;
+		}
+
+		@Override
+		public String toString() {
+			return this.name;
+		}
+	}
+
+	public enum Handler {
+		TEXT("forminput"), SELECT("formselect"),  TEXTAREA("formtextarea"),RADIO("formradio"),CHECKBOX("formcheckbox"),DATE("formdate"), TIME("formtime");
+		private String name;
+
+		private Handler(String _name) {
 			this.name = _name;
 		}
 

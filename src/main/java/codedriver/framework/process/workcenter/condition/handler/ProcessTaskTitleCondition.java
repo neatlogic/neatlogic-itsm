@@ -21,8 +21,13 @@ public class ProcessTaskTitleCondition implements IWorkcenterCondition{
 	}
 
 	@Override
+	public String getHandler() {
+		return WorkcenterConditionVo.Handler.TEXT.toString();
+	}
+	
+	@Override
 	public String getType() {
-		return WorkcenterConditionVo.Type.TEXT.toString();
+		return WorkcenterConditionVo.Type.COMMON.toString();
 	}
 
 	@Override

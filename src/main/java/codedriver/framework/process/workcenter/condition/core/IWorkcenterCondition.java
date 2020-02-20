@@ -26,6 +26,14 @@ public interface IWorkcenterCondition {
 	 * @return: java.lang.String
 	 * @Date: 2020/2/11
 	 */
+	public String getHandler();
+	
+	/**
+	 * @Description: 获取类型
+	 * @Param: 
+	 * @return: java.lang.String
+	 * @Date: 2020/2/11
+	 */
 	public String getType();
 	
 	/**

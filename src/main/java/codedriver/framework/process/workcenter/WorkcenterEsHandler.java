@@ -123,7 +123,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 	 * @param workcenterVo
 	 * @return 
 	 */
-	public QueryResult searchTask(WorkcenterVo workcenterVo){
+	public static QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
 		String orderBy = "created_at desc";
@@ -137,16 +137,16 @@ public class WorkcenterEsHandler extends CodeDriverThread{
         return result;
 	}
 	
-	public String assembleWhere(WorkcenterVo workcenterVo) {
+	private static String assembleWhere(WorkcenterVo workcenterVo) {
 		Map<String,String> groupRelMap = new HashMap<String,String>();
 		StringBuilder whereSb = new StringBuilder();
 		List<WorkcenterConditionGroupRelVo> groupRelList = workcenterVo.getWorkcenterConditionGroupRelList();
 		if(groupRelList != null && !groupRelList.isEmpty()) {
 			//将group 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
 			for(WorkcenterConditionGroupRelVo groupRel : groupRelList) {
-				groupRelMap.put(groupRel.getFromConditionGroupUuid()+"_"+groupRel.getToConditionGroupUuid(), groupRel.getJoinType());
+				groupRelMap.put(groupRel.getFrom()+"_"+groupRel.getTo(), groupRel.getJoinType());
 			}
-			List<WorkcenterConditionGroupVo> groupList = workcenterVo.getWorkcenterConditionGroupList();
+			List<WorkcenterConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
 			String fromGroupUuid = null;
 			String toGroupUuid = groupList.get(0).getUuid();
 			for(WorkcenterConditionGroupVo group : groupList) {
@@ -155,26 +155,21 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 					whereSb.append(conditionRelMap.get(fromGroupUuid+"_"+toGroupUuid));
 				}
 				whereSb.append("(");
-				String uuid = group.getUuid();
 				List<WorkcenterConditionRelVo> conditionRelList = group.getConditionRelList();
 				if(conditionRelList != null && !conditionRelList.isEmpty()) {
 					//将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
 					for(WorkcenterConditionRelVo conditionRel : conditionRelList) {
-						conditionRelMap.put(conditionRel.getFromConditionUuid()+"_"+conditionRel.getToConditionUuid(),conditionRel.getJoinType());
+						conditionRelMap.put(conditionRel.getFrom()+"_"+conditionRel.getTo(),conditionRel.getJoinType());
 					}
 					List<WorkcenterConditionVo> conditionList = group.getConditionList();
 					String fromConditionUuid = null;
 					String toConditionUuid = conditionList.get(0).getUuid();
-					for(int i = 0; i<conditionList.size();i++) {
+					for(WorkcenterConditionVo condition : conditionList) {
 						if(fromConditionUuid != null) {
 							whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
 						}
-						WorkcenterConditionVo condition =  conditionList.get(i);
-						if(i != 0) {
-							toConditionUuid = condition.getUuid();
-						}
-						String value = condition.getValueList()[0];
-						if(condition.getValueList().length>1) {
+						String value = condition.getValueList().get(0);
+						if(condition.getValueList().size()>1) {
 							value = String.format(" '%s' ",  String.join("','",condition.getValueList()));
 						}
 						whereSb.append(String.format(WorkcenterConditionVo.ProcessExpressionEs.getExpressionEs(condition.getExpression()),condition.getUuid(),value));
@@ -182,6 +177,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 					}
 				}
 				whereSb.append(")");
+				fromGroupUuid = toGroupUuid;
 			}
 		}
 		

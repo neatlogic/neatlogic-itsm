@@ -5,16 +5,16 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.workcenter.WorkcenterHandler;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionGroupRelVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionGroupVo;
+import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Service
-public class WorkcenterSearchApi extends ApiComponentBase {
+public class WorkcenterDataSearchApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
@@ -32,9 +32,10 @@ public class WorkcenterSearchApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = false),
-		@Param(name = "conditionGroupList", explode = WorkcenterConditionGroupVo.class, desc = "条件组条件", isRequired = false),
-		@Param(name = "conditionGroupRelList", explode = WorkcenterConditionGroupRelVo.class, desc = "条件组连接类型", isRequired = false),
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid", isRequired = true),
+		@Param(name = "conditionGroupList", type = ApiParamType.JSONARRAY, desc = "条件组条件", isRequired = false),
+		@Param(name = "conditionGroupRelList", type = ApiParamType.JSONARRAY, desc = "条件组连接类型", isRequired = false),
+		@Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "显示的字段", isRequired = false),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目", isRequired = false)
 	})
@@ -49,8 +50,7 @@ public class WorkcenterSearchApi extends ApiComponentBase {
 	@Description(desc = "工单中心搜索接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return WorkcenterHandler.doSearch(new WorkcenterVo(jsonObj));
 	}
 
 }

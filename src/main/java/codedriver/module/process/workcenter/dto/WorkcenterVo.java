@@ -7,10 +7,12 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.dto.RoleVo;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.restful.annotation.EntityField;
 
 public class WorkcenterVo extends BasePageVo implements Serializable{
@@ -27,11 +29,31 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	@EntityField(name = "过滤条件", type = ApiParamType.STRING)
 	private String conditionConfig;
 	@EntityField(name = "显示的字段", type = ApiParamType.JSONARRAY)
-	private JSONArray headerArray;
+	private JSONArray headerList;
 	@EntityField(name = "角色列表", type = ApiParamType.JSONARRAY)
 	private List<RoleVo> roleList;
-	private List<WorkcenterConditionGroupVo> WorkcenterConditionGroupList;
-	private List<WorkcenterConditionGroupRelVo> WorkcenterConditionGroupRelList;
+	private List<WorkcenterConditionGroupVo> conditionGroupList;
+	private List<WorkcenterConditionGroupRelVo> conditionGroupRelList;
+	
+	public WorkcenterVo() {
+		super();
+	}
+	
+	public WorkcenterVo(JSONObject jsonObj) {
+		uuid = jsonObj.getString("uuid");
+		headerList = jsonObj.getJSONArray("headerList");
+		JSONArray conditionGroupArray = jsonObj.getJSONArray("conditionGroupList");
+		if(conditionGroupArray.size() == 0) {
+			 new ParamIrregularException("'conditionGroupList'参数不能为空数组");
+		}
+		for(Object conditionGroup:conditionGroupArray) {
+			conditionGroupList.add(new WorkcenterConditionGroupVo((JSONObject) JSONObject.toJSON(conditionGroup)));
+		}
+		JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
+		for(Object conditionRelGroup:conditionGroupRelArray) {
+			conditionGroupRelList.add(new WorkcenterConditionGroupRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
+		}
+	}
 	public String getUuid() {
 		if (StringUtils.isBlank(uuid)) {
 			uuid = UUID.randomUUID().toString().replace("-", "");
@@ -73,23 +95,23 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	public void setConditionConfig(String conditionConfig) {
 		this.conditionConfig = conditionConfig;
 	}
-	public List<WorkcenterConditionGroupVo> getWorkcenterConditionGroupList() {
-		return WorkcenterConditionGroupList;
+	public List<WorkcenterConditionGroupVo> getConditionGroupList() {
+		return conditionGroupList;
 	}
-	public void setWorkcenterConditionGroupList(List<WorkcenterConditionGroupVo> workcenterConditionGroupList) {
-		WorkcenterConditionGroupList = workcenterConditionGroupList;
+	public void setConditionGroupList(List<WorkcenterConditionGroupVo> conditionGroupList) {
+		this.conditionGroupList = conditionGroupList;
 	}
 	public List<WorkcenterConditionGroupRelVo> getWorkcenterConditionGroupRelList() {
-		return WorkcenterConditionGroupRelList;
+		return conditionGroupRelList;
 	}
-	public void setWorkcenterConditionGroupRelList(List<WorkcenterConditionGroupRelVo> workcenterConditionGroupRelList) {
-		WorkcenterConditionGroupRelList = workcenterConditionGroupRelList;
+	public void setWorkcenterConditionGroupRelList(List<WorkcenterConditionGroupRelVo> conditionGroupRelList) {
+		this.conditionGroupRelList = conditionGroupRelList;
 	}
-	public JSONArray getHeaderArray() {
-		return headerArray;
+	public JSONArray getHeaderList() {
+		return headerList;
 	}
-	public void setHeaderArray(JSONArray headerArray) {
-		this.headerArray = headerArray;
+	public void setHeaderList(JSONArray headerArray) {
+		this.headerList = headerArray;
 	}
 	
 	

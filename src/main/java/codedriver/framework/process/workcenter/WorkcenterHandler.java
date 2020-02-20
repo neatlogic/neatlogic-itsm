@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -19,13 +18,10 @@ import codedriver.module.process.workcenter.dto.WorkcenterVo;
 @Service
 public class WorkcenterHandler {
 
-	@Autowired
-	WorkcenterEsHandler workcenterEsService;
-	
-	public JSONObject doSearch(WorkcenterVo workcenterVo) {
+	public static JSONObject doSearch(WorkcenterVo workcenterVo) {
 		JSONObject returnObj = new JSONObject();
 		//搜索es
-		QueryResult result = workcenterEsService.searchTask(workcenterVo);;
+		QueryResult result = WorkcenterEsHandler.searchTask(workcenterVo);;
 		List<MultiAttrsObject> resultData = result.getData();
 		//返回的数据重新加工
 		List<JSONObject> dataList = new ArrayList<JSONObject>();
@@ -40,7 +36,7 @@ public class WorkcenterHandler {
             		taskJson.put(column.getName(), column.getValue(el));
             	}
             	//补充表单属性值
-            	for(Object header : workcenterVo.getHeaderArray()) {
+            	for(Object header : workcenterVo.getHeaderList()) {
             		if(!taskJson.containsKey(header.toString())) {
             			taskJson.put(header.toString(),el.getString(header.toString()));
             		}
@@ -56,12 +52,5 @@ public class WorkcenterHandler {
 		returnObj.put("currentPage", workcenterVo.getCurrentPage());
 		returnObj.put("pageCount", PageUtil.getPageCount(result.getTotal(), workcenterVo.getPageSize()));
 		return returnObj;
-	}
-	
-	public static void main(String[] args) {
-		JSONObject json = new JSONObject();
-		 String a =json.getString("a");
-		 System.out.println(a);
-		
 	}
 }
