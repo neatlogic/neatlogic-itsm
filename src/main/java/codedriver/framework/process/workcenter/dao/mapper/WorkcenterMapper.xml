@@ -14,7 +14,7 @@
 		</collection>
 	</resultMap>
 	
-	<select id="getWorkcenter" resultMap="workcenterMap" paramType="codedriver.module.process.workcenter.dto.WorkcenterVo">
+	<select id="getWorkcenter"  parameterType="codedriver.module.process.workcenter.dto.WorkcenterVo" resultMap="workcenterMap">
 		SELECT 
 		  pw.`uuid`,
 		  pw.`name`,
@@ -56,7 +56,7 @@
 	</delete>
 
 
-	<insert id="insertWorkcenter" paramType="codedriver.module.process.workcenter.dto.WorkcenterVo">
+	<insert id="insertWorkcenter" parameterType="codedriver.module.process.workcenter.dto.WorkcenterVo">
 		INSERT INTO `process_workcenter` (
 		  `uuid`,
 		  `name`,
@@ -74,7 +74,7 @@
 		  ) ;
 	</insert>
 	
-	<insert id="insertWorkcenterRole" paramType="java.lang.String">
+	<insert id="insertWorkcenterRole" parameterType="java.lang.String">
 		INSERT INTO `codedriver_chenqw`.`process_workcenter_role` (
 		  `workcenter_uuid`,
 		  `role_name`
