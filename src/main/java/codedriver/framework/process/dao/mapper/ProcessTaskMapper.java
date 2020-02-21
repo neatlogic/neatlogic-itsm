@@ -99,6 +99,8 @@ public interface ProcessTaskMapper {
 	public List<ProcessTaskStepRelVo> getProcessTaskStepRelByProcessTaskId(Long processTaskId);
 
 	public List<ProcessTaskStepVo> getProcessTaskStepByProcessTaskIdAndType(@Param("processTaskId") Long processTaskId, @Param("type") String type);
+	
+	public List<ProcessTaskStepVo> getProcessTaskActiveStepByProcessTaskId(@Param("processTaskId") Long processTaskId);
 
 	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
 

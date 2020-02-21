@@ -16,6 +16,16 @@ public class ProcessTaskStepAuditVo {
 	private String action;
 	private List<ProcessTaskStepAuditDetailVo> auditDetailList;
 
+	public ProcessTaskStepAuditVo() {
+		super();
+	}
+	
+	public ProcessTaskStepAuditVo(Long _processTaskId,String _action) {
+		super();
+		this.processTaskId = _processTaskId;
+		this.action = _action;
+	}
+
 	public Long getId() {
 		return id;
 	}

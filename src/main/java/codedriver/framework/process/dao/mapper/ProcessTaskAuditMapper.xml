@@ -2,6 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.process.dao.mapper.ProcessTaskAuditMapper">
 
+	<select id="getProcessTaskAuditList" resultType="codedriver.module.process.dto.ProcessTaskStepAuditVo">
+		SELECT 
+		`processtask_id`,
+		`processtask_step_id`,
+		`user_id`,
+		`action_time`,
+		`action`,
+		`content_id`
+		FROM
+		  `processtask_step_audit`
+		WHERE 1=1
+		<if test="processtask_id != null">
+	 		and `processtask_id` = #{processtaskId}
+	 	</if>
+		<if test="user_id != null">
+	 		and `user_id` = #{userId}
+	 	</if>
+	 	<if test="action != null">
+	 		and `action` = #{action}
+	 	</if>
+	</select>
+
 	<insert id="insertProcessTaskStepAudit" parameterType="codedriver.module.process.dto.ProcessTaskStepAuditVo">
 		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
 			select LAST_INSERT_ID() as id
