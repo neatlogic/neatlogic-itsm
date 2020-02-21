@@ -1,4 +1,4 @@
-package codedriver.framework.process.workcenter;
+package codedriver.module.process.workcenter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,6 +83,10 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 	@Autowired
 	public void setProcessTaskAuditMapper(ProcessTaskAuditMapper _processTaskAuditMapper) {
 		processTaskAuditMapper = _processTaskAuditMapper;
+	}
+	
+	public WorkcenterEsHandler() {
+		
 	}
 	
 	public WorkcenterEsHandler(ProcessTaskStepVo _currentProcessTaskStepVo) {
