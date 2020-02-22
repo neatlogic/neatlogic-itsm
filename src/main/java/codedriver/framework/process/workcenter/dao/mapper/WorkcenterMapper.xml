@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper">
+	
+	<resultMap id="workcenterMap" type="codedriver.module.process.workcenter.dto.WorkcenterVo">
+		<id column="uuid" property="uuid" />
+		<result column="uuid" property="uuid" />
+		<result column="name" property="name" />
+		<result column="is_private" property="isPrivate" />
+		<result column="sort" property="sort" />
+		<result column="condition_config" property="conditionConfig" />
+		<collection property="roleList" ofType="codedriver.framework.dto.RoleVo">
+			<result column="role_name" property="roleName" />
+		</collection>
+	</resultMap>
+	
+	<select id="getWorkcenter"  parameterType="codedriver.module.process.workcenter.dto.WorkcenterVo" resultMap="workcenterMap">
+		SELECT 
+		  pw.`uuid`,
+		  pw.`name`,
+		  pw.`is_private`,
+		  pw.`sort`,
+		  pw.`condition_config`,
+		  pwr.`role_name`
+		FROM
+		  `process_workcenter` pw 
+		   LEFT JOIN `process_workcenter_role` pwr ON pw.`uuid` = pwr.`workcenter_uuid`
+		WHERE 1=1
+		<if test="uuid != null">
+			and uuid = #{uuid}
+		</if>
+		<if test="name != null">
+			and name = #{name}
+		</if>
+		ORDER BY pw.`is_private`, pw.`sort` ASC
+	</select>
+	
+	<select id="getWorkcenterConditionConfig" resultType="java.util.HashMap">
+		SELECT 
+		  pw.`uuid`,
+		  pw.`condition_config`
+		FROM
+		  `process_workcenter` pw 
+	</select>
+	
+	<delete id="deleteWorkcenter">
+		DELETE 
+		FROM
+		  `process_workcenter`
+	</delete>
+	
+	<delete id="deleteWorkcenterRole">
+		DELETE 
+		FROM
+		  `process_workcenter_role`
+	</delete>
+
+
+	<insert id="insertWorkcenter" parameterType="codedriver.module.process.workcenter.dto.WorkcenterVo">
+		INSERT INTO `process_workcenter` (
+		  `uuid`,
+		  `name`,
+		  `is_private`,
+		  `sort`,
+		  `condition_config`
+		) 
+		VALUES
+		  (
+		    #{uuid},
+		    #{name},
+		    #{isPrivate},
+		    #{sort},
+		    #{conditionConfig}
+		  ) ;
+	</insert>
+	
+	<insert id="insertWorkcenterRole" parameterType="java.lang.String">
+		INSERT INTO `codedriver_chenqw`.`process_workcenter_role` (
+		  `workcenter_uuid`,
+		  `role_name`
+		) 
+		VALUES
+		  (
+		    #{workcenterUuid},
+		    #{roleName}
+		  ) ;
+	</insert>
+	
+</mapper>
