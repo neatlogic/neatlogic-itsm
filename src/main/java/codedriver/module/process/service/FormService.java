@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.FormVo;
 
@@ -18,5 +17,4 @@ public interface FormService {
 
 	public List<FormVo> searchForm(FormVo formVo);
 
-	public List<AttributeVo> getAttributeByFormUuid(String formUuid);
 }

@@ -1,10 +1,15 @@
 package codedriver.framework.process.workcenter.condition.handler;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
+import codedriver.module.process.constvalue.ProcessExpression;
+import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
 @Component
@@ -22,7 +27,7 @@ public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getHandler() {
-		return WorkcenterConditionVo.Handler.DATE.toString();
+		return ProcessFormHandlerType.DATE.toString();
 	}
 	
 	@Override
@@ -41,8 +46,8 @@ public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String[] getExpressionList() {
-		return new String[] { WorkcenterConditionVo.ProcessExpressionEs.LESSTHAN.getExpressionName() };
+	public List<ProcessExpression> getExpressionList() {
+		return Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.LESSTHAN,ProcessExpression.GREATERTHAN);
 	}
 
 }

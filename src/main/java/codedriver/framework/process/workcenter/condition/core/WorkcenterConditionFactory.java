@@ -28,6 +28,10 @@ public class WorkcenterConditionFactory extends ApplicationListenerBase{
 			conditionComponentMap.put(column.getName().toUpperCase(), column);
 		}
 	}
+	
+	public static Map<String, IWorkcenterCondition> getConditionComponentMap() {
+		return conditionComponentMap;
+	}
 
 	@Override
 	protected void myInit() {

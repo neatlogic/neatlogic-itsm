@@ -1,38 +1,38 @@
 package codedriver.module.process.api.process;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
+import codedriver.framework.process.workcenter.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessService;
+import codedriver.module.process.constvalue.ProcessExpression;
+import codedriver.module.process.constvalue.ProcessFormHandler;
+import codedriver.module.process.dto.FormAttributeVo;
 
 @Service
 @Transactional
 public class ProcessGetConditionApi extends ApiComponentBase {
 
 	@Autowired
-	private ProcessMapper processMapper;
-	@Autowired
 	private FormMapper formMapper;
-	@Autowired
-	private ProcessService processService;
-	
+
 	@Override
 	public String getToken() {
-		return "process/get/condition";
+		return "process/condition/get";
 	}
 
 	@Override
@@ -49,16 +49,58 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 		@Param(name = "formUuid", type = ApiParamType.STRING, isRequired = true, desc = "流程绑定表单的uuid")
 	})
 	@Output({
-		@Param(name = "Return", type = ApiParamType.STRING, desc = "")
+		@Param(name = "handler", type = ApiParamType.STRING, desc = "处理器"),
+		@Param(name = "handlerName", type = ApiParamType.STRING, desc = "处理器名"),
+		@Param(name = "handlerType", type = ApiParamType.STRING, desc = "控件类型 select|input|radio|userselect|date|area|time"),
+		@Param(name = "type", type = ApiParamType.STRING, desc = "类型  form|common"),
+		@Param(name = "expressionList[0].expression", type = ApiParamType.STRING, desc = "表达式"),
+		@Param(name = "expressionList[0].expressionName", type = ApiParamType.STRING, desc = "表达式名")
 	})
 	@Description(desc = "流程编辑获取条件接口，目前用于流程编辑，初始化条件使用")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String formUuid = jsonObj.getString("uuid");
-		List<AttributeVo> attrList = formMapper.getAttributeByFormUuid(formUuid);
+		JSONArray resultArray = new JSONArray();
 		
-		
-		return null;
+		//固定字段条件
+		Map<String, IWorkcenterCondition> workcenterConditionMap = WorkcenterConditionFactory.getConditionComponentMap();
+		for (Map.Entry<String, IWorkcenterCondition> entry : workcenterConditionMap.entrySet()) {
+			IWorkcenterCondition condition = entry.getValue();
+			JSONObject commonObj = new JSONObject();
+			commonObj.put("handler", condition.getName());
+			commonObj.put("handlerName", condition.getDisplayName());
+			commonObj.put("handlerType", condition.getHandler());
+			commonObj.put("type", condition.getType());
+			JSONArray expressiobArray = new JSONArray();
+			for(ProcessExpression expression:condition.getExpressionList()) {
+				JSONObject expressionObj = new JSONObject();
+				expressionObj.put("expression", expression.getExpression());
+				expressionObj.put("expressionName", expression.getExpressionName());
+				expressiobArray.add(expressionObj);
+				commonObj.put("expressionList", expressiobArray);
+			}
+			resultArray.add(commonObj);
+		}
+		//表单条件
+		String formUuid = jsonObj.getString("formUuid");
+		List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
+		for(FormAttributeVo formAttributeVo : formAttrList) {
+			JSONObject formObj = new JSONObject();
+			String handler = formAttributeVo.getHandler();
+			formObj.put("handler",handler);
+			formObj.put("handlerName", ProcessFormHandler.getHandlerName(handler));
+			formObj.put("handlerType", ProcessFormHandler.getType(handler).toString());
+			formObj.put("type", "form");
+			JSONArray expressiobArray = new JSONArray();
+			for(ProcessExpression expression:ProcessFormHandler.getExpressionList(handler)) {
+				JSONObject expressionObj = new JSONObject();
+				expressionObj.put("expression", expression.getExpression());
+				expressionObj.put("expressionName", expression.getExpressionName());
+				expressiobArray.add(expressionObj);
+				formObj.put("expressionList", expressiobArray);
+			}
+			resultArray.add(formObj);
+		}
+		return resultArray;
 	}
 
 }
