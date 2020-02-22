@@ -49,6 +49,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 		@Param(name = "formUuid", type = ApiParamType.STRING, isRequired = true, desc = "流程绑定表单的uuid")
 	})
 	@Output({
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "组件uuid"),
 		@Param(name = "handler", type = ApiParamType.STRING, desc = "处理器"),
 		@Param(name = "handlerName", type = ApiParamType.STRING, desc = "处理器名"),
 		@Param(name = "handlerType", type = ApiParamType.STRING, desc = "控件类型 select|input|radio|userselect|date|area|time"),
@@ -86,6 +87,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 		for(FormAttributeVo formAttributeVo : formAttrList) {
 			JSONObject formObj = new JSONObject();
 			String handler = formAttributeVo.getHandler();
+			formObj.put("uuid",formAttributeVo.getUuid());
 			formObj.put("handler",handler);
 			formObj.put("handlerName", ProcessFormHandler.getHandlerName(handler));
 			formObj.put("handlerType", ProcessFormHandler.getType(handler).toString());
