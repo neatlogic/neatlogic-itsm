@@ -6,6 +6,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 
 public class ProcessTaskStepContentVo {
 	private Long id;
+	private Long processTaskId;
 	private Long processTaskStepId;
 	private String contentHash;
 	private String fcd;
@@ -17,7 +18,8 @@ public class ProcessTaskStepContentVo {
 
 	}
 
-	public ProcessTaskStepContentVo(Long _processTaskStepId, String _contentHash) {
+	public ProcessTaskStepContentVo(Long _processTaskId, Long _processTaskStepId, String _contentHash) {
+		processTaskId = _processTaskId;
 		processTaskStepId = _processTaskStepId;
 		contentHash = _contentHash;
 	}
@@ -82,6 +84,14 @@ public class ProcessTaskStepContentVo {
 
 	public void setLcu(String lcu) {
 		this.lcu = lcu;
+	}
+
+	public Long getProcessTaskId() {
+		return processTaskId;
+	}
+
+	public void setProcessTaskId(Long processTaskId) {
+		this.processTaskId = processTaskId;
 	}
 
 }
