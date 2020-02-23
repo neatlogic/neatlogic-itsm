@@ -18,29 +18,6 @@
 		AND a.`is_active` = 1
 	</select>
 
-	<select id="getAttributeByFormUuid" parameterType="java.lang.String" resultType="codedriver.framework.attribute.dto.AttributeVo">
-		SELECT
-		c.`uuid`,
-		c.`label`,
-		c.`type`,
-		c.`handler`,
-		c.`unit`,
-		c.`datacube_textfield` AS dataCubeTextField,
-		c.`datacube_valuefield` AS dataCubeValueField,
-		c.`datacube_uuid` AS dataCubeUuid,
-		c.`config`,
-		c.`description`,
-		c.`is_active` AS isActive
-		FROM
-		`form_attribute` a
-		JOIN `form_version` b
-		ON a.`formversion_uuid` = b.`uuid`
-		AND b.`is_active` = 1
-		AND a.`form_uuid` = #{value}
-		JOIN `attribute` c
-		ON a.`attribute_uuid` = c.`uuid` AND c.`is_active` = 1
-	</select>
-
 	<select id="searchFormList" parameterType="codedriver.module.process.dto.FormVo" resultType="codedriver.module.process.dto.FormVo">
 		SELECT
 		f.`uuid`,
@@ -179,7 +156,7 @@
 	JOIN `form_version` b ON b.`uuid`=a.`formversion_uuid` AND b.`is_active` = 1
 	WHERE a.`form_uuid` = #{formUuid}
 	<if test="formVersionUuid != null">
-	AND a.`formversion_uuid` = #{formVersionUuid}
+		AND a.`formversion_uuid` = #{formVersionUuid}
 	</if>
 	</select>
 	

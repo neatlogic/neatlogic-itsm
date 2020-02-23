@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import codedriver.framework.attribute.dto.AttributeVo;
 import codedriver.module.process.dto.FormAttributeVo;
 import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.FormVo;
@@ -14,8 +13,6 @@ import codedriver.module.process.dto.ProcessVo;
 @Component("processFormMapper")
 public interface FormMapper {
 	public FormVersionVo getActionFormVersionByFormUuid(String formUuid);
-
-	public List<AttributeVo> getAttributeByFormUuid(String formUuid);
 
 	public List<FormVo> searchFormList(FormVo formVo);
 

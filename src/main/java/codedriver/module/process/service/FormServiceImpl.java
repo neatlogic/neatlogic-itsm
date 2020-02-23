@@ -18,11 +18,6 @@ public class FormServiceImpl implements FormService {
 
 	@Autowired
 	private FormMapper formMapper;
-	
-	@Override
-	public List<AttributeVo> getAttributeByFormUuid(String formUuid){
-		return formMapper.getAttributeByFormUuid(formUuid);
-	}
 
 	@Override
 	public FormVo getFormDetailByUuid(String formUuid) {

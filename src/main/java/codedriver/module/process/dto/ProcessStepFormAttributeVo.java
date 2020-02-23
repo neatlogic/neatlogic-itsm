@@ -6,8 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.attribute.constvalue.AttributeHandler;
-import codedriver.framework.attribute.constvalue.AttributeType;
+import codedriver.module.process.constvalue.ProcessFormHandler;
 
 public class ProcessStepFormAttributeVo implements Serializable {
 	private static final long serialVersionUID = -6435866167443319573L;
@@ -174,14 +173,14 @@ public class ProcessStepFormAttributeVo implements Serializable {
 
 	public String getHandlerName() {
 		if (StringUtils.isNotBlank(handler) && StringUtils.isBlank(handlerName)) {
-			handlerName = AttributeHandler.getName(handler);
+			handlerName = ProcessFormHandler.getHandlerName(handler);
 		}
 		return handlerName;
 	}
 
 	public String getTypeName() {
 		if (StringUtils.isNotBlank(type) && StringUtils.isBlank(typeName)) {
-			typeName = AttributeType.getName(type);
+			typeName = ProcessFormHandler.getHandlerName(type);
 		}
 		return typeName;
 	}
