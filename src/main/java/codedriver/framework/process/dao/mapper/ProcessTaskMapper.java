@@ -104,6 +104,8 @@ public interface ProcessTaskMapper {
 
 	public ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId);
 
+	public ProcessTaskVo getProcessTaskById(Long id);
+
 	public int replaceProcessTaskConfig(ProcessTaskConfigVo processTaskConfigVo);
 
 	public int insertProcessTaskForm(ProcessTaskFormVo processTaskFormVo);

@@ -585,6 +585,25 @@
 			a.attribute_uuid = #{attributeUuid}
 		</if>
 	</select>
+	
+	<select id="getProcessTaskById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskVo">
+	SELECT 
+	  `id`,
+	  `title`,
+	  `process_uuid` AS processUuid,
+	  `channel_uuid` AS channelUuid,
+	  `config_hash` AS configHash,
+	  `priority_uuid` AS priorityUuid,
+	  `status`,
+	  `start_time` AS startTime,
+	  `end_time` AS endTime,
+	  `owner`,
+	  `reporter`,
+	  `expire_time` AS expireTime,
+	  `error` 
+	FROM `processtask` 
+	WHERE `id`= #{id}
+	</select>
 
 	<update id="updateProcessTaskStepConvergeIsCheck">
 		UPDATE `processtask_converge` SET is_check = #{isCheck} WHERE converge_id = #{convergeId}
