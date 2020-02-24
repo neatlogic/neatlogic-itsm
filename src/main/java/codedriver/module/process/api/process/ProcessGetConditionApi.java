@@ -71,7 +71,18 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			JSONObject commonObj = new JSONObject();
 			commonObj.put("handler", condition.getName());
 			commonObj.put("handlerName", condition.getDisplayName());
-			commonObj.put("handlerType", condition.getHandler());
+			String handlerType = condition.getHandler();
+			if(handlerType.equals("select")) {
+				commonObj.put("isMultiple",condition.getConfig().getString("isMultiple"));
+			}else if(handlerType.equals("radio")) {
+				commonObj.put("isMultiple",false);
+			}else if(handlerType.equals("checkbox")) {
+				commonObj.put("isMultiple",true);
+			}
+			if(handlerType.equals("select")||handlerType.equals("radio")||handlerType.equals("checkbox")) {
+				handlerType = ProcessFormHandlerType.SELECT.toString();
+			}
+			commonObj.put("handlerType", handlerType);
 			commonObj.put("type", condition.getType());
 			commonObj.put("config", condition.getConfig());
 			JSONArray expressiobArray = new JSONArray();
