@@ -1,6 +1,10 @@
 package codedriver.framework.process.workcenter.condition.core;
 
+import java.util.List;
+
 import com.alibaba.fastjson.JSONObject;
+
+import codedriver.module.process.constvalue.ProcessExpression;
 
 public interface IWorkcenterCondition {
 	
@@ -58,6 +62,6 @@ public interface IWorkcenterCondition {
 	 * @return: java.lang.Integer
 	 * @Date: 2020/2/11
 	 */
-	public String[] getExpressionList();
+	public List<ProcessExpression> getExpressionList();
 
 }

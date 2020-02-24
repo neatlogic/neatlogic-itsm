@@ -1,5 +1,6 @@
 package codedriver.framework.process.workcenter.condition.handler;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +10,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
+import codedriver.module.process.constvalue.ProcessExpression;
+import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
@@ -31,7 +33,7 @@ public class ProcessTaskChannelCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getHandler() {
-		return WorkcenterConditionVo.Handler.SELECT.toString();
+		return ProcessFormHandlerType.SELECT.toString();
 	}
 	
 	@Override
@@ -62,8 +64,8 @@ public class ProcessTaskChannelCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String[] getExpressionList() {
-		return new String[] { WorkcenterConditionVo.ProcessExpressionEs.EQUAL.getExpressionName() };
+	public List<ProcessExpression> getExpressionList() {
+		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
 	}
 
 }

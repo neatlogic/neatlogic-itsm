@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter;
+package codedriver.framework.process.workcenter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +32,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskAuditMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerUtilBase;
+import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.CatalogVo;
@@ -176,7 +177,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 						if(condition.getValueList().size()>1) {
 							value = String.format(" '%s' ",  String.join("','",condition.getValueList()));
 						}
-						whereSb.append(String.format(WorkcenterConditionVo.ProcessExpressionEs.getExpressionEs(condition.getExpression()),condition.getUuid(),value));
+						whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getUuid(),value));
 						fromConditionUuid = toConditionUuid;
 					}
 				}
