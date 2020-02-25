@@ -105,7 +105,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 				formObj.put("uuid",formAttributeVo.getUuid());
 				formObj.put("label",formAttributeVo.getLabel());
 				JSONObject configObj =JSONObject.parseObject(formAttributeVo.getConfig());
-				formObj.put("conifg",configObj);
+				formObj.put("config",configObj);
 				formObj.put("handler",handler);
 				formObj.put("handlerName", ProcessFormHandler.getHandlerName(handler));
 				String handlerType = ProcessFormHandler.getType(handler).toString();
