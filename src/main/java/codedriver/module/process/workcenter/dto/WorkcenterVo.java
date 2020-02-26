@@ -39,6 +39,11 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		super();
 	}
 	
+	public WorkcenterVo(String _name,Integer _isPrivate) {
+		this.name =_name;
+		this.isPrivate = _isPrivate;
+	}
+	
 	public WorkcenterVo(JSONObject jsonObj) {
 		uuid = jsonObj.getString("uuid");
 		headerList = jsonObj.getJSONArray("headerList");
