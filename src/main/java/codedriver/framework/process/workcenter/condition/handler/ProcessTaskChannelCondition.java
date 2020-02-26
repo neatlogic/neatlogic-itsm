@@ -3,24 +3,18 @@ package codedriver.framework.process.workcenter.condition.handler;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
-import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
 @Component
 public class ProcessTaskChannelCondition implements IWorkcenterCondition{
-	@Autowired
-	private ChannelMapper channelMapper;
-	
+
 	@Override
 	public String getName() {
 		return "channel";
@@ -43,8 +37,9 @@ public class ProcessTaskChannelCondition implements IWorkcenterCondition{
 
 	@Override
 	public JSONObject getConfig() {
-		ChannelVo channel = new ChannelVo();
+		/*ChannelVo channel = new ChannelVo();
 		channel.setIsActive(1);
+		channel.setNeedPage(false);
  		List<ChannelVo> channelList = channelMapper.searchChannelList(channel);
 		JSONArray jsonList = new JSONArray();
 		for (ChannelVo channelVo : channelList) {
@@ -52,9 +47,14 @@ public class ProcessTaskChannelCondition implements IWorkcenterCondition{
 			jsonObj.put("value", channelVo.getUuid());
 			jsonObj.put("text", channelVo.getName());
 			jsonList.add(jsonObj);
-		}
+		}*/
 		JSONObject returnObj = new JSONObject();
-		returnObj.put("dataList", jsonList);
+		returnObj.put("url", "codedriver/api/rest/process/channel/search");
+		returnObj.put("isMultiple", true);
+		JSONObject mappingObj = new JSONObject();
+		mappingObj.put("value", "uuid");
+		mappingObj.put("text", "name");
+		returnObj.put("mapping", mappingObj);
 		return returnObj;
 	}
 

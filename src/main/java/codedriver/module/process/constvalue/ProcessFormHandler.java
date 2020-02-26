@@ -7,7 +7,7 @@ public enum ProcessFormHandler {
 	
 	FORMSELECT("formselect","下拉框",ProcessFormHandlerType.SELECT,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE)),
 	FORMINPUT("forminput","文本框",ProcessFormHandlerType.INPUT,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LIKE)),
-	FORMAREA("formarea","文本域",ProcessFormHandlerType.TEXTAREA,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LIKE)),
+	FORMTEXTAREA("formtextarea","文本域",ProcessFormHandlerType.TEXTAREA,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LIKE)),
 	FORMRADIO("formradio","单选框",ProcessFormHandlerType.RADIO,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL)),
 	FORMCHECKBOX("formcheckbox","复选框",ProcessFormHandlerType.CHECKBOX,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE)),
 	FORMDATE("formdate","日期",ProcessFormHandlerType.DATE,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LESSTHAN,ProcessExpression.GREATERTHAN)),

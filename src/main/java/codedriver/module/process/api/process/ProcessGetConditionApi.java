@@ -3,6 +3,7 @@ package codedriver.module.process.api.process;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandler;
+import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.dto.FormAttributeVo;
 
 @Service
@@ -46,7 +48,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "formUuid", type = ApiParamType.STRING, isRequired = true, desc = "流程绑定表单的uuid")
+		@Param(name = "formUuid", type = ApiParamType.STRING, isRequired = false, desc = "流程绑定表单的uuid")
 	})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "组件uuid"),
@@ -69,8 +71,20 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			JSONObject commonObj = new JSONObject();
 			commonObj.put("handler", condition.getName());
 			commonObj.put("handlerName", condition.getDisplayName());
-			commonObj.put("handlerType", condition.getHandler());
+			String handlerType = condition.getHandler();
+			if(handlerType.equals("select")) {
+				commonObj.put("isMultiple",condition.getConfig().getString("isMultiple"));
+			}else if(handlerType.equals("radio")) {
+				commonObj.put("isMultiple",false);
+			}else if(handlerType.equals("checkbox")) {
+				commonObj.put("isMultiple",true);
+			}
+			if(handlerType.equals("select")||handlerType.equals("radio")||handlerType.equals("checkbox")) {
+				handlerType = ProcessFormHandlerType.SELECT.toString();
+			}
+			commonObj.put("handlerType", handlerType);
 			commonObj.put("type", condition.getType());
+			commonObj.put("config", condition.getConfig());
 			JSONArray expressiobArray = new JSONArray();
 			for(ProcessExpression expression:condition.getExpressionList()) {
 				JSONObject expressionObj = new JSONObject();
@@ -82,25 +96,40 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			resultArray.add(commonObj);
 		}
 		//表单条件
-		String formUuid = jsonObj.getString("formUuid");
-		List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
-		for(FormAttributeVo formAttributeVo : formAttrList) {
-			JSONObject formObj = new JSONObject();
-			String handler = formAttributeVo.getHandler();
-			formObj.put("uuid",formAttributeVo.getUuid());
-			formObj.put("handler",handler);
-			formObj.put("handlerName", ProcessFormHandler.getHandlerName(handler));
-			formObj.put("handlerType", ProcessFormHandler.getType(handler).toString());
-			formObj.put("type", "form");
-			JSONArray expressiobArray = new JSONArray();
-			for(ProcessExpression expression:ProcessFormHandler.getExpressionList(handler)) {
-				JSONObject expressionObj = new JSONObject();
-				expressionObj.put("expression", expression.getExpression());
-				expressionObj.put("expressionName", expression.getExpressionName());
-				expressiobArray.add(expressionObj);
-				formObj.put("expressionList", expressiobArray);
+		if(jsonObj.containsKey("formUuid") && !StringUtils.isBlank(jsonObj.getString("formUuid"))) {
+			String formUuid = jsonObj.getString("formUuid");
+			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
+			for(FormAttributeVo formAttributeVo : formAttrList) {
+				JSONObject formObj = new JSONObject();
+				String handler = formAttributeVo.getHandler();
+				formObj.put("uuid",formAttributeVo.getUuid());
+				formObj.put("label",formAttributeVo.getLabel());
+				JSONObject configObj =JSONObject.parseObject(formAttributeVo.getConfig());
+				formObj.put("config",configObj);
+				formObj.put("handler",handler);
+				formObj.put("handlerName", ProcessFormHandler.getHandlerName(handler));
+				String handlerType = ProcessFormHandler.getType(handler).toString();
+				if(handlerType.equals("select")||handlerType.equals("radio")||handlerType.equals("checkbox")) {
+					formObj.put("handlerType", ProcessFormHandlerType.SELECT.toString());
+				}
+				if(handlerType.equals("select")) {
+					formObj.put("isMultiple",configObj.getString("isMultiple"));
+				}else if(handlerType.equals("radio")) {
+					formObj.put("isMultiple",false);
+				}else if(handlerType.equals("checkbox")) {
+					formObj.put("isMultiple",true);
+				}
+				formObj.put("type", "form");
+				JSONArray expressiobArray = new JSONArray();
+				for(ProcessExpression expression:ProcessFormHandler.getExpressionList(handler)) {
+					JSONObject expressionObj = new JSONObject();
+					expressionObj.put("expression", expression.getExpression());
+					expressionObj.put("expressionName", expression.getExpressionName());
+					expressiobArray.add(expressionObj);
+					formObj.put("expressionList", expressiobArray);
+				}
+				resultArray.add(formObj);
 			}
-			resultArray.add(formObj);
 		}
 		return resultArray;
 	}
