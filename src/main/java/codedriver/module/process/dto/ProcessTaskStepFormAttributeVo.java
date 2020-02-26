@@ -10,6 +10,7 @@ import codedriver.framework.attribute.constvalue.AttributeType;
 public class ProcessTaskStepFormAttributeVo {
 	private Long processTaskId;
 	private Long processTaskStepId;
+	private String action;
 	private Integer isEditable;
 	private Integer isRequired;
 	private String formUuid;
@@ -46,6 +47,7 @@ public class ProcessTaskStepFormAttributeVo {
 		this.setConfig(processStepFormAttributeVo.getConfig());
 		this.setHandler(processStepFormAttributeVo.getHandler());
 		this.setType(processStepFormAttributeVo.getType());
+		this.setAction(processStepFormAttributeVo.getAction());
 	}
 
 	public Long getProcessTaskStepId() {
@@ -188,5 +190,13 @@ public class ProcessTaskStepFormAttributeVo {
 
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
 	}
 }

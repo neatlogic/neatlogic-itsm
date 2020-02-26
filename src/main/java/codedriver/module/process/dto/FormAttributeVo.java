@@ -12,6 +12,7 @@ public class FormAttributeVo implements Serializable {
 	private String handler;
 	private String config;
 	private String data;
+	private boolean isRequired;
 	
 	public FormAttributeVo() {
 
@@ -33,13 +34,14 @@ public class FormAttributeVo implements Serializable {
 		this.formVersionUuid = formVersionUuid;
 	}
 
-	public FormAttributeVo(String formUuid, String formVersionUuid, String uuid, String label, String type, String handler, String config, String data) {
+	public FormAttributeVo(String formUuid, String formVersionUuid, String uuid, String label, String type, String handler, boolean isRequired, String config, String data) {
 		this.uuid = uuid;
 		this.formUuid = formUuid;
 		this.formVersionUuid = formVersionUuid;
 		this.label = label;
 		this.type = type;
 		this.handler = handler;
+		this.isRequired = isRequired;
 		this.config = config;
 		this.data = data;
 	}
@@ -106,6 +108,14 @@ public class FormAttributeVo implements Serializable {
 
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	public boolean isRequired() {
+		return isRequired;
+	}
+
+	public void setRequired(boolean isRequired) {
+		this.isRequired = isRequired;
 	}
 
 }

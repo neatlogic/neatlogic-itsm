@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -57,9 +59,14 @@ import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.UserType;
+import codedriver.module.process.dto.ChannelPriorityVo;
 import codedriver.module.process.dto.ChannelVo;
+import codedriver.module.process.dto.FormAttributeVo;
+import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
+import codedriver.module.process.dto.ProcessTaskFileVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.module.process.dto.ProcessTaskFormVo;
 import codedriver.module.process.dto.ProcessTaskSlaNotifyVo;
 import codedriver.module.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.module.process.dto.ProcessTaskSlaTransferVo;
@@ -67,6 +74,7 @@ import codedriver.module.process.dto.ProcessTaskSlaVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepContentVo;
+import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepTimeAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -897,4 +905,86 @@ public abstract class ProcessStepHandlerUtilBase {
 		}
 	}
 
+	protected static class DataValid {
+		public static boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo) {
+			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
+			Pattern titlePattern = Pattern.compile("^[A-Za-z_\\d\\u4e00-\\u9fa5]+$");
+			if(titlePattern.matcher(processTaskVo.getTitle()).matches()) {
+				throw new ProcessTaskRuntimeException("工单标题格式不对");
+			}
+			if(processTaskVo.getOwner() == null) {
+				throw new ProcessTaskRuntimeException("工单请求人不能为空");
+			}
+			if(userMapper.getUserBaseInfoByUserId(processTaskVo.getOwner()) == null) {
+				throw new ProcessTaskRuntimeException("工单请求人账号:'" + processTaskVo.getOwner() + "'不存在");
+			}
+			if(processTaskVo.getPriorityUuid() == null) {
+				throw new ProcessTaskRuntimeException("工单优先级不能为空");
+			}
+			List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
+			List<String> priorityUuidlist = new ArrayList<>(channelPriorityList.size());
+			for(ChannelPriorityVo channelPriorityVo : channelPriorityList) {
+				priorityUuidlist.add(channelPriorityVo.getPriorityUuid());
+			}
+			if(!priorityUuidlist.contains(processTaskVo.getPriorityUuid())) {
+				throw new ProcessTaskRuntimeException("工单优先级与服务优先级级不匹配");
+			}
+			List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
+			if(processTaskStepContentList.isEmpty()) {
+				throw new ProcessTaskRuntimeException("工单描述不能为空");
+			}
+			ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
+			processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+			processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+			List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
+			if(processTaskFileList.size() > 0) {
+				for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
+					//TODO 验证附件uuid是否存在
+				}
+			}
+			return true;
+		}
+		protected static boolean formAttributeDataValid(ProcessTaskStepVo currentProcessTaskStepVo) {
+			
+			ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+			if(processTaskFormVo == null) {
+				return true;
+			}
+			if(StringUtils.isBlank(processTaskFormVo.getFormContent())) {
+				return true;
+			}
+			FormVersionVo formVersionVo = new FormVersionVo();
+			formVersionVo.setFormConfig(processTaskFormVo.getFormContent());
+			formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
+			List<FormAttributeVo> formAttributeList =formVersionVo.getFormAttributeList();
+			if(formAttributeList == null || formAttributeList.isEmpty()) {
+				return true;
+			}
+			Map<String, String> formAttributeDataMap = new HashMap<>();
+			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+			for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+				formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getData());
+			}
+			Map<String, String> formAttributeActionMap = new HashMap<>();
+			List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(currentProcessTaskStepVo.getId());
+			for(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
+				formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
+			}
+			
+			for(FormAttributeVo formAttributeVo : formAttributeList) {
+				if(!formAttributeVo.isRequired()) {
+					continue;
+				}
+				if(formAttributeActionMap.containsKey(formAttributeVo.getUuid())) {
+					continue;
+				}
+				String data = formAttributeDataMap.get(formAttributeVo.getUuid());
+				JSONArray jsonArray = JSON.parseArray(data);
+				if(jsonArray == null || jsonArray.isEmpty()) {
+					throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel()+ "'不能为空");
+				}
+			}
+			return true;
+		}
+	}
 }

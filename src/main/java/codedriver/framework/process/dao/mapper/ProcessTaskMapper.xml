@@ -156,13 +156,13 @@
 		`config_hash` AS configHash,
 		`priority_uuid` AS priorityUuid,
 		`status`,
-		DATE_FORMAT(`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
-		DATE_FORMAT(`end_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
+		`start_time` AS startTime,
+		`end_time` AS endTime,
 		`owner`,
 		(SELECT user_name FROM `user` x WHERE x.user_id = `owner`) AS ownerName,
 		`reporter`,
 		(SELECT user_name FROM `user` x WHERE x.user_id = `reporter`) AS reporterName,
-		DATE_FORMAT(`expire_time`,'%Y-%m-%d %H:%i:%s') AS expireTime,
+		`expire_time` AS expireTime,
 		`error`
 		FROM
 		`processtask`
@@ -239,7 +239,7 @@
 		`processtask_step_content`
 		WHERE
 		processtask_step_id = #{value}
-		ORDER BY id
+		ORDER BY id DESC
 	</select>
 	
 	<select id="getProcessTaskStepContentProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepContentVo">
@@ -267,9 +267,9 @@
 		`user_name` as userName,
 		`status` as status,
 		`action`,
-		DATE_FORMAT(`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
-		DATE_FORMAT(`end_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
-		DATE_FORMAT(`active_time`,'%Y-%m-%d %H:%i:%s') AS activeTime
+		`start_time` AS startTime,
+		`end_time` AS endTime,
+		`active_time` AS activeTime
 		FROM
 		`processtask_step_user`
 		WHERE
@@ -290,9 +290,9 @@
 		`type`,
 		`handler`,
 		`is_active` AS isActive,
-		DATE_FORMAT(a.`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
-		DATE_FORMAT(a.`end_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
-		DATE_FORMAT(a.`expire_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
+		a.`start_time` AS startTime,
+		a.`end_time` AS endTime,
+		a.`expire_time` AS endTime,
 		`error`
 		FROM
 		`processtask_step` a
@@ -379,8 +379,8 @@
 		a.`process_step_uuid` AS processStepUuid,
 		a.`processtask_id` AS processTaskId,
 		a.`status`,
-		DATE_FORMAT(a.`start_time`,'%Y-%m-%d %H:%i:%s') AS startTime,
-		DATE_FORMAT(a.`end_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
+		a.`start_time` AS startTime,
+		a.`end_time` AS endTime,
 		a.`is_active` AS isActive,
 		a.`type`,
 		a.`handler`,
@@ -433,8 +433,8 @@
 		a.`type`,
 		a.`handler`,
 		a.`is_active`,
-		DATE_FORMAT(a.`start_time`, '%Y-%m-%d %H:%i:%s') AS startTime,
-		DATE_FORMAT(a.`end_time`,'%Y-%m-%d %H:%i:%s') AS endTime,
+		a.`start_time` AS startTime,
+		a.`end_time` AS endTime,
 		a.`error`
 		FROM
 		`processtask_step` a JOIN `processtask_step_rel` b ON a.`id` = b.`to_processtask_step_id`
@@ -626,8 +626,7 @@
 		a.`processtask_step_id` AS processTaskStepId,
 		a.`attribute_uuid` AS attributeUuid,
 		a.`processtask_id` AS processTaskId,
-		a.`is_editable` AS isEditable,
-		a.`config`,
+		a.`action`,
 		f.`label`,
 		f.`handler`,
 		e.`data`,
@@ -643,6 +642,45 @@
 			AND
 			a.attribute_uuid = #{attributeUuid}
 		</if>
+	</select>
+	
+	<select id="getProcessTaskById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskVo">
+	SELECT 
+	  `id`,
+	  `title`,
+	  `process_uuid` AS processUuid,
+	  `channel_uuid` AS channelUuid,
+	  `config_hash` AS configHash,
+	  `priority_uuid` AS priorityUuid,
+	  `status`,
+	  `start_time` AS startTime,
+	  `end_time` AS endTime,
+	  `owner`,
+	  `reporter`,
+	  `expire_time` AS expireTime,
+	  `error` 
+	FROM `processtask` 
+	WHERE `id`= #{id}
+	</select>
+	
+	<select id="searchProcessTaskFile" parameterType="codedriver.module.process.dto.ProcessTaskFileVo" resultType="codedriver.module.process.dto.ProcessTaskFileVo">
+	SELECT 
+	  `processtask_id` AS processTaskId,
+	  `processtask_step_id` AS processTaskStepId,
+	  `file_uuid` AS fileUuid 
+	FROM `processtask_file` 
+	WHERE `processtask_id` = #{processTaskId} 
+	AND `processtask_step_id` = #{processTaskStepId}
+	</select>
+	
+	<select id="getProcessTaskStepFormAttributeByProcessTaskStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepFormAttributeVo">
+	SELECT 
+	  `processtask_id` AS processTaskId,
+	  `processtask_step_id` AS processTaskStepId,
+	  `attribute_uuid` AS attributeUuid,
+	  `action` 
+	FROM `processtask_step_formattribute` 
+	WHERE `processtask_step_id` = #{processTaskStepId}
 	</select>
 
 	<update id="updateProcessTaskStepConvergeIsCheck">
@@ -1081,16 +1119,14 @@
 		`processtask_id`,
 		`processtask_step_id`,
 		`attribute_uuid`,
-		`is_editable`,
-		`config`
+		`action`
 		)
 		VALUES
 		(
 		#{processTaskId},
 		#{processTaskStepId},
 		#{attributeUuid},
-		#{isEditable},
-		#{config}
+		#{action}
 		)
 	</insert>
 
@@ -1118,6 +1154,20 @@
 		#{timeLeft},
 		#{realTimeLeft}
 		)
+	</insert>
+	
+	<insert id="insertProcessTaskFile" parameterType="codedriver.module.process.dto.ProcessTaskFileVo">
+	INSERT INTO `processtask_file` (
+	  `processtask_id`,
+	  `processtask_step_id`,
+	  `file_uuid`
+	) 
+	VALUES
+	  (
+	    #{processTaskId},
+	    #{processTaskStepId},
+	    #fileUuid}
+	  ) 
 	</insert>
 
 	<update id="updateProcessTaskSlaTransfer" parameterType="codedriver.module.process.dto.ProcessTaskSlaTransferVo">
@@ -1180,6 +1230,16 @@
 		WHERE
 		`id` = #{id}
 	</update>
+	
+	<update id="updateProcessTaskTitleOwnerPriorityUuid" parameterType="codedriver.module.process.dto.ProcessTaskVo">
+	UPDATE 
+	`processtask` 
+	SET
+	  `title` = #{title},
+	  `priority_uuid` = #{priority_uuid},
+	  `owner` = #{owner}
+	WHERE `id` = #{id}
+	</update>
 
 	<delete id="deleteProcessTaskStepWorkerByProcessTaskId" parameterType="java.lang.Long">
 		DELETE
@@ -1236,5 +1296,11 @@
 		FROM
 		`processtask_sla_transfer`
 		WHERE id = #{value}
+	</delete>
+	
+	<delete id="deleteProcessTaskFile" parameterType="codedriver.module.process.dto.ProcessTaskFileVo">
+	DELETE FROM `processtask_file` 
+	WHERE `processtask_id` = #{processTaskId} 
+	AND `processtask_step_id` = #{processTaskStepId} 
 	</delete>
 </mapper>

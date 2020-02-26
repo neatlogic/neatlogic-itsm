@@ -2,6 +2,7 @@ package codedriver.module.process.dto;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
@@ -23,9 +24,9 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private String formUuid;
 	private Integer isActive = 0;
 	private Integer isCheck;
-	private String startTime;
-	private String endTime;
-	private String expireTime;
+	private Date startTime;
+	private Date endTime;
+	private Date expireTime;
 	private String config;
 	private Long expireTimeLong;
 	private String error;
@@ -183,19 +184,19 @@ public class ProcessTaskStepVo extends BasePageVo {
 		this.isActive = isActived;
 	}
 
-	public String getStartTime() {
+	public Date getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(String startTime) {
+	public void setStartTime(Date startTime) {
 		this.startTime = startTime;
 	}
 
-	public String getEndTime() {
+	public Date getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(String endTime) {
+	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
 	}
 
@@ -371,11 +372,11 @@ public class ProcessTaskStepVo extends BasePageVo {
 		this.timeoutPolicyList = timeoutPolicyList;
 	}
 
-	public String getExpireTime() {
+	public Date getExpireTime() {
 		return expireTime;
 	}
 
-	public void setExpireTime(String expireTime) {
+	public void setExpireTime(Date expireTime) {
 		this.expireTime = expireTime;
 	}
 

@@ -1,36 +1,36 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.process.exception.core.ProcessTaskException;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ProcessStepVo;
+import codedriver.module.process.constvalue.ProcessStepHandler;
+import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskVo;
-import codedriver.module.process.dto.ProcessVo;
-import codedriver.module.process.service.ProcessService;
 
 @Service
 public class ProcessTaskStartApi extends ApiComponentBase {
 
 	@Autowired
-	private ProcessService processService;
-
+	private ProcessTaskMapper processTaskMapper;
+	
 	@Override
 	public String getToken() {
-		return "processTask/start";
+		return "processtask/start";
 	}
 
 	@Override
@@ -44,53 +44,23 @@ public class ProcessTaskStartApi extends ApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "processUuid",
-					type = ApiParamType.STRING,
-					isRequired = true,
-					desc = "流程uuid"),
-			@Param(name = "channelUuid",
-					type = ApiParamType.STRING,
-					isRequired = true,
-					desc = "通道uuid"),
-			@Param(name = "title",
-					type = ApiParamType.STRING,
-					isRequired = true,
-					desc = "标题"),
-			@Param(name = "step",
-					type = ApiParamType.JSONOBJECT,
-					isRequired = true,
-					desc = "步骤信息") })
-	@Output({
-			@Param(name = "processTaskId",
-					type = ApiParamType.LONG,
-					desc = "工单id") })
+		@Param(name="processTaskId", type = ApiParamType.LONG, isRequired = true, desc="工单id")
+	})
 	@Description(desc = "工单上报接口")
-	@Example(example = "{\r\n" + "	\"processUuid\":\"90aabb319a534399be7f5f86765849d3\",\r\n" + "	\"channelUuid\":\"tongdao111\",\r\n" + "	\"title\":\"test5\",\r\n" + "	\"step\": \r\n" + "			{\r\n" + "				\"content\": \"<p>哈哈哈哈哈哈</p>\"\r\n" + "			}\r\n" + "}")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String processUuid = jsonObj.getString("processUuid");
-		ProcessTaskVo processTaskVo = new ProcessTaskVo();
-		ProcessVo processVo = processService.getProcessByUuid(processUuid);
-		// 根据uuid去查process的config 然后生成md5
-		// 判断是否在process_history中存在
-		if (processVo != null) {
-		} else {
-			throw new ProcessTaskException("请输入正确的流程编号!");
+		Long processTaskId = jsonObj.getLong("processTaskId");
+		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+		if(processTaskVo == null) {
+			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
-
-		String currentUserId = UserContext.get().getUserId();
-		jsonObj.put("owner", currentUserId);// 工单上报人
-		ProcessStepVo startStepVo = processService.getProcessStartStep(processUuid);
-		if (startStepVo != null) {
-			ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo(startStepVo);
-			startTaskStep.setParamObj(jsonObj);
-			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startStepVo.getHandler());
-			if (handler != null) {
-				handler.startProcess(startTaskStep);
-			}
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+		if(processTaskStepList.size() != 1) {
+			throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 		}
-		// return "上报成功!";
-		return processTaskVo.getId();
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(ProcessStepHandler.START.getHandler());
+		handler.complete(processTaskStepList.get(0));
+		return null;
 	}
 
 }
