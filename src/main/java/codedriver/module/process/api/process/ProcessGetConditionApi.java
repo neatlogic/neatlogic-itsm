@@ -73,7 +73,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			commonObj.put("handlerName", condition.getDisplayName());
 			String handlerType = condition.getHandler();
 			if(handlerType.equals("select")) {
-				commonObj.put("isMultiple",condition.getConfig().getString("isMultiple"));
+				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
 			}else if(handlerType.equals("radio")) {
 				commonObj.put("isMultiple",false);
 			}else if(handlerType.equals("checkbox")) {
@@ -111,6 +111,8 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 				String handlerType = ProcessFormHandler.getType(handler).toString();
 				if(handlerType.equals("select")||handlerType.equals("radio")||handlerType.equals("checkbox")) {
 					formObj.put("handlerType", ProcessFormHandlerType.SELECT.toString());
+				}else {
+					formObj.put("handlerType", handlerType);
 				}
 				if(handlerType.equals("select")) {
 					formObj.put("isMultiple",configObj.getString("isMultiple"));

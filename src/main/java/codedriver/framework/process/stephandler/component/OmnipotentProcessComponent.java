@@ -223,7 +223,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		if (paramObj != null && paramObj.containsKey("content") && StringUtils.isNotBlank(paramObj.getString("content"))) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(paramObj.getString("content"));
 			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getId(), contentVo.getHash()));
+			processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
 		}
 		return 1;
 	}

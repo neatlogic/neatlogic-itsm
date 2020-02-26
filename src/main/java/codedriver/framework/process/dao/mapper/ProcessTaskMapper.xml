@@ -239,6 +239,23 @@
 		`processtask_step_content`
 		WHERE
 		processtask_step_id = #{value}
+		ORDER BY id
+	</select>
+	
+	<select id="getProcessTaskStepContentProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepContentVo">
+		SELECT
+		`id`,
+		`processtask_step_id` AS processTaskStepId,
+		`content_hash` AS contentHash,
+		`fcd`,
+		`fcu`,
+		`lcd`,
+		`lcu`
+		FROM
+		`processtask_step_content`
+		WHERE
+		processtask_id = #{value}
+		ORDER BY id
 	</select>
 
 	<select id="getProcessTaskStepUserByStepId" resultType="codedriver.module.process.dto.ProcessTaskStepUserVo">
@@ -1014,6 +1031,7 @@
 
 	<insert id="insertProcessTaskStepContent" parameterType="codedriver.module.process.dto.ProcessTaskStepContentVo">
 		INSERT INTO `processtask_step_content` (
+		`processtask_id`,
 		`processtask_step_id`,
 		`content_hash`,
 		`fcd`,
@@ -1021,6 +1039,7 @@
 		)
 		VALUES
 		(
+		#{processTaskId},
 		#{processTaskStepId},
 		#{contentHash},
 		NOW(3),
