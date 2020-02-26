@@ -1,5 +1,6 @@
 package codedriver.module.process.dto;
 
+import java.util.Date;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
@@ -20,11 +21,11 @@ public class ProcessTaskVo {
 	private String ownerName;
 	private String reporter;
 	private String reporterName;
-	private String startTime;
-	private String endTime;
+	private Date startTime;
+	private Date endTime;
 	private Long timeCost;
 	private String timeCostStr;
-	private String expireTime;
+	private Date expireTime;
 	private String configHash;
 	private String urgency;
 	private String urgencyText;
@@ -107,19 +108,19 @@ public class ProcessTaskVo {
 		this.reporterName = reporterName;
 	}
 
-	public String getStartTime() {
+	public Date getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(String startTime) {
+	public void setStartTime(Date startTime) {
 		this.startTime = startTime;
 	}
 
-	public String getEndTime() {
+	public Date getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(String endTime) {
+	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
 	}
 
@@ -179,11 +180,11 @@ public class ProcessTaskVo {
 		this.statusText = statusText;
 	}
 
-	public String getExpireTime() {
+	public Date getExpireTime() {
 		return expireTime;
 	}
 
-	public void setExpireTime(String expireTime) {
+	public void setExpireTime(Date expireTime) {
 		this.expireTime = expireTime;
 	}
 

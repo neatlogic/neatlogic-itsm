@@ -1,5 +1,6 @@
 package codedriver.framework.process.workcenter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -285,7 +286,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 			 activeStepStatusList.add(step.getId()+"@"+step.getStatus());
 			
 		 }
-		 
+		 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		 //标题
 		 patch.set("title", processTaskVo.getTitle());
 		 //工单状态
@@ -301,9 +302,9 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //上报内容
 		 patch.set("content", startContentVo.getContent());
 		 //工单开始时间
-		 patch.set("createTime", processTaskVo.getStartTime());
+		 patch.set("createTime", sdf.format(processTaskVo.getStartTime()));
 		 //工单结束时间
-		 patch.set("createTime", processTaskVo.getEndTime());
+		 patch.set("createTime", sdf.format(processTaskVo.getEndTime()));
 		 //上报人
 		 patch.set("owner",processTaskVo.getOwner());
 		 //代报人
@@ -319,7 +320,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //时间窗口
 		 patch.set("worktime", channel.getWorktimeUuid());
 		 //超时时间
-		 patch.set("expiredTime", processTaskVo.getExpireTime());
+		 patch.set("expiredTime", sdf.format(processTaskVo.getExpireTime()));
 		 //表单属性
 		 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
