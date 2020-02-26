@@ -33,7 +33,7 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getHandler() {
-		return ProcessFormHandlerType.SELECT.toString();
+		return ProcessFormHandlerType.CHECKBOX.toString();
 	}
 	
 	@Override

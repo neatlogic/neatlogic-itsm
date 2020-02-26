@@ -58,8 +58,8 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 		jsonList.add(jsonObj2);
 		
 		JSONObject jsonObj3 = new JSONObject();
-		jsonObj2.put("value", ProcessTaskStatus.SUCCEED.getValue());
-		jsonObj2.put("text", ProcessTaskStatus.SUCCEED.getText());
+		jsonObj3.put("value", ProcessTaskStatus.SUCCEED.getValue());
+		jsonObj3.put("text", ProcessTaskStatus.SUCCEED.getText());
 		jsonList.add(jsonObj3);
 		
 		JSONObject returnObj = new JSONObject();
