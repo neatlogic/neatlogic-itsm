@@ -201,6 +201,10 @@
 		</if>
 		ORDER BY c.`parent_uuid`, c.`sort`
 	</select>
+	
+	<select id="getProcessUuidByChannelUuid" parameterType="java.lang.String" resultType="java.lang.String">
+	SELECT `process_uuid` FROM `channel_process` WHERE `channel_uuid` = #{channelUuid}
+	</select>
 
 	<insert id="replaceChannel">
 		REPLACE INTO `channel` (

@@ -34,6 +34,8 @@ public interface ChannelMapper {
 	int checkChannelNameIsRepeat(ChannelVo channelVo);
 
 	List<ChannelVo> getChannelListForTree(Integer isActive);
+
+	String getProcessUuidByChannelUuid(String channelUuid);
 	
 	int replaceChannelUser(@Param("userId")String userId, @Param("channelUuid")String channelUuid);	
 

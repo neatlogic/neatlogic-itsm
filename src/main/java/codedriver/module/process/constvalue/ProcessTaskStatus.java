@@ -13,8 +13,9 @@ public enum ProcessTaskStatus {
 	FAILED("failed", "已失败"),
 	ABORTING("aborting", "终止中"),
 	BACK("back", "已回退"),
-	HANG("hang", "已挂起");
-
+	HANG("hang", "已挂起"),
+	DRAFT("draft", "我的草稿");
+	
 	private String status;
 	private String text;
 

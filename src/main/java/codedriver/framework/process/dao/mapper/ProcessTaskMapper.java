@@ -8,6 +8,7 @@ import codedriver.module.process.dto.ProcessTaskAssignUserVo;
 import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskConvergeVo;
+import codedriver.module.process.dto.ProcessTaskFileVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskFormVo;
 import codedriver.module.process.dto.ProcessTaskSlaNotifyVo;
@@ -108,6 +109,12 @@ public interface ProcessTaskMapper {
 
 	public ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId);
 
+	public ProcessTaskVo getProcessTaskById(Long id);
+	
+	public List<ProcessTaskFileVo> searchProcessTaskFile(ProcessTaskFileVo processTaskFileVo);
+
+	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByProcessTaskStepId(Long processTaskStepId);
+
 	public int replaceProcessTaskConfig(ProcessTaskConfigVo processTaskConfigVo);
 
 	public int insertProcessTaskForm(ProcessTaskFormVo processTaskFormVo);
@@ -159,6 +166,8 @@ public interface ProcessTaskMapper {
 	public int insertProcessTaskStepSla(@Param("processTaskStepId") Long processTaskStepId, @Param("slaId") Long slaId);
 
 	public int replaceProcessTaskFormAttributeData(ProcessTaskFormAttributeDataVo processTaskFromAttributeDataVo);
+	
+	public int insertProcessTaskFile(ProcessTaskFileVo processTaskFileVo);
 
 	public int updateProcessTaskStepExpireTime(ProcessTaskStepVo processTaskStepVo);
 
@@ -177,6 +186,8 @@ public interface ProcessTaskMapper {
 	public int updateProcessTaskStepConvergeIsCheck(@Param("isCheck") Integer isCheck, @Param("convergeId") Long convergeId, @Param("processTaskStepId") Long processTaskStepId);
 
 	public int updateProcessTaskStepUserStatus(ProcessTaskStepUserVo processTaskStepUserVo);
+	
+	public int updateProcessTaskTitleOwnerPriorityUuid(ProcessTaskVo processTaskVo);
 
 	public int deleteProcessTaskFormAttributeValueByProcessTaskIdAndAttributeUuid(@Param("processTaskId") Long processTaskId, @Param("attributeUuid") String attributeUuid);
 
@@ -191,5 +202,7 @@ public interface ProcessTaskMapper {
 	public int deleteProcessTaskStepWorkerByProcessTaskId(Long processTaskId);
 
 	public int deleteProcessTaskSlaTransferById(Long slaTransferId);
+	
+	public int deleteProcessTaskFile(ProcessTaskFileVo processTaskFileVo);
 
 }
