@@ -17,6 +17,7 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessStepType;
@@ -32,7 +33,7 @@ import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 
 @Service
-public class ProcessTaskDetailGetApi extends ApiComponentBase {
+public class ProcessTaskDraftGetApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -54,6 +55,17 @@ public class ProcessTaskDetailGetApi extends ApiComponentBase {
 	
 	@Input({
 		@Param(name="processTaskId", type = ApiParamType.LONG, isRequired = true, desc="工单id")
+	})
+	@Output({
+		@Param(name = "title", type = ApiParamType.STRING, desc = "标题"),
+		@Param(name = "owner", type = ApiParamType.STRING, desc = "请求人"),
+		@Param(name = "channelUuid", type = ApiParamType.STRING, desc = "服务通道"),
+		@Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
+		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
+		@Param(name = "fileUuidList", type = ApiParamType.STRING, desc = "附件uuid列表"),
+		@Param(name = "formVersionVo", type = ApiParamType.STRING, desc = "表单"),
+		@Param(name = "formAttributeDataMap", type = ApiParamType.STRING, desc = "表单属性数据"),
+		@Param(name = "formAttributeActionMap", type = ApiParamType.STRING, desc = "表单属性显示控制"),
 	})
 	@Description(desc = "工单详情数据获取接口")
 	@Override
