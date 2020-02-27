@@ -112,14 +112,18 @@ public class ProcessVo extends BasePageVo implements Serializable {
 		return stepList;
 	}
 
-	public void makeupFromConfigObj() {
+	public void makeupConfigObj() {
 		if (this.getConfigObj() == null) {
+			return;
+		}
+		JSONObject processObj = this.configObj.getJSONObject("process");
+		if(processObj == null || processObj.isEmpty()) {
 			return;
 		}
 		/** 组装表单属性 **/
 		Map<String, List<ProcessStepFormAttributeVo>> processStepFormAttributeMap = new HashMap<>();
-		if (this.getConfigObj().containsKey("formConfig")) {
-			JSONObject formConfig = this.getConfigObj().getJSONObject("formConfig");
+		if (processObj.containsKey("formConfig")) {
+			JSONObject formConfig = processObj.getJSONObject("formConfig");
 			if (formConfig.containsKey("uuid")) {
 				String formUuid = formConfig.getString("uuid");
 				this.setFormUuid(formUuid);
@@ -153,9 +157,9 @@ public class ProcessVo extends BasePageVo implements Serializable {
 			}
 		}
 
-		if (this.getConfigObj().containsKey("slaList")) {
+		if (processObj.containsKey("slaList")) {
 			this.slaList = new ArrayList<>();
-			JSONArray slaList = this.getConfigObj().getJSONArray("slaList");
+			JSONArray slaList = processObj.getJSONArray("slaList");
 			for (int i = 0; i < slaList.size(); i++) {
 				JSONObject slaObj = slaList.getJSONObject(i);
 				/** 关联了步骤的sla策略才保存 **/
@@ -173,9 +177,9 @@ public class ProcessVo extends BasePageVo implements Serializable {
 			}
 		}
 
-		if (this.getConfigObj().containsKey("stepList")) {
+		if (processObj.containsKey("stepList")) {
 			this.stepList = new ArrayList<>();
-			JSONArray stepList = this.getConfigObj().getJSONArray("stepList");
+			JSONArray stepList = processObj.getJSONArray("stepList");
 			for (int i = 0; i < stepList.size(); i++) {
 				JSONObject stepObj = stepList.getJSONObject(i);
 				JSONObject stepConfigObj = stepObj.getJSONObject("stepConfig");
@@ -207,9 +211,9 @@ public class ProcessVo extends BasePageVo implements Serializable {
 			}
 		}
 
-		if (this.getConfigObj().containsKey("connectionList")) {
+		if (processObj.containsKey("connectionList")) {
 			this.stepRelList = new ArrayList<>();
-			JSONArray relList = this.getConfigObj().getJSONArray("connectionList");
+			JSONArray relList = processObj.getJSONArray("connectionList");
 			for (int i = 0; i < relList.size(); i++) {
 				JSONObject relObj = relList.getJSONObject(i);
 				ProcessStepRelVo processStepRelVo = new ProcessStepRelVo();
@@ -223,8 +227,6 @@ public class ProcessVo extends BasePageVo implements Serializable {
 				stepRelList.add(processStepRelVo);
 			}
 		}
-
-		// TODO linbq 解析chart
 	}
 
 	public void setStepList(List<ProcessStepVo> stepList) {
