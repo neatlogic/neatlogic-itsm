@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.dto.RoleVo;
 import codedriver.framework.process.exception.workcenter.WorkcenterNameRepeatException;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
 import codedriver.framework.restful.annotation.Description;
@@ -43,10 +42,9 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name="name", type = ApiParamType.STRING, desc="分类名",isRequired = false),
-		@Param(name="isPrivate", type = ApiParamType.INTEGER, desc="类型，1：自定义分类，0：系统分类",isRequired = false),
-		@Param(name="roleList", type = ApiParamType.JSONARRAY, desc="授权列表", isRequired = false),
-		@Param(name="roleList[0].name", type = ApiParamType.STRING, desc="授权角色名")
+		@Param(name="name", type = ApiParamType.STRING, desc="分类名",isRequired = true),
+		@Param(name="isPrivate", type = ApiParamType.INTEGER, desc="类型，1：自定义分类，0：系统分类",isRequired = true),
+		@Param(name="roleList", type = ApiParamType.JSONARRAY, desc="授权列表", isRequired = false)
 	})
 	@Output({
 		
@@ -54,15 +52,18 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 	@Description(desc = "工单中心分类新增接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		WorkcenterVo workcenterVo = JSON.toJavaObject(jsonObj, WorkcenterVo.class);
+		WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj.getString("name"),jsonObj.getInteger("isPrivate"));
 		//重复name判断
 		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenter(workcenterVo);
 		if(workcenterList.size()>0) {
-			new WorkcenterNameRepeatException(workcenterVo.getName());
+			throw new WorkcenterNameRepeatException(jsonObj.getString("name"));
 		}
 		workcenterMapper.insertWorkcenter(workcenterVo);
-		for(RoleVo roleVo: workcenterVo.getRoleList()) {
-			workcenterMapper.insertWorkcenterRole(workcenterVo.getUuid(),roleVo.getName());
+		JSONArray roleList = jsonObj.getJSONArray("roleList");
+		if(roleList != null) {
+			for(Object roleName:roleList) {
+				workcenterMapper.insertWorkcenterRole(workcenterVo.getUuid(),roleName.toString());
+			}
 		}
 		return null;
 	}
