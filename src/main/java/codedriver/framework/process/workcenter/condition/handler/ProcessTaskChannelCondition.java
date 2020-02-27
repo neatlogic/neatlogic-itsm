@@ -51,6 +51,7 @@ public class ProcessTaskChannelCondition implements IWorkcenterCondition{
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("url", "api/rest/process/channel/search");
 		returnObj.put("isMultiple", true);
+		returnObj.put("rootName", "channelList");
 		JSONObject mappingObj = new JSONObject();
 		mappingObj.put("value", "uuid");
 		mappingObj.put("text", "name");
