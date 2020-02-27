@@ -1030,18 +1030,6 @@
 		)
 	</insert>
 
-	<insert id="insertProcessTaskChannel" parameterType="codedriver.module.process.dto.ProcessTaskVo">
-		INSERT INTO `processtask_channel` (
-		`processtask_id`,
-		`channel_uuid`
-		)
-		VALUES
-		(
-		#{id},
-		#{channelUuid}
-		)
-	</insert>
-
 	<insert id="replaceProcessTaskContent" parameterType="codedriver.module.process.dto.ProcessTaskContentVo">
 		REPLACE INTO `processtask_content` (`content`,`hash`)
 		VALUES
