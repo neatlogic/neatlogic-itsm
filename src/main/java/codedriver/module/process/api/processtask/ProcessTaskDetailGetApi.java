@@ -39,12 +39,12 @@ public class ProcessTaskDetailGetApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "processtask/detail/get";
+		return "processtask/draft/get";
 	}
 
 	@Override
 	public String getName() {
-		return "工单详情数据获取接口";
+		return "工单草稿数据获取接口";
 	}
 
 	@Override
