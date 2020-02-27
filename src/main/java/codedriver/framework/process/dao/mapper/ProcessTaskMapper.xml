@@ -1224,7 +1224,7 @@
 	`processtask` 
 	SET
 	  `title` = #{title},
-	  `priority_uuid` = #{priority_uuid},
+	  `priority_uuid` = #{priorityUuid},
 	  `owner` = #{owner}
 	WHERE `id` = #{id}
 	</update>
