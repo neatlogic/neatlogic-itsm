@@ -6,14 +6,10 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -27,16 +23,10 @@ import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskVo;
 @Service
-public class ProcessTaskSaveApi extends ApiComponentBase  {
+public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 
 	@Autowired
 	private ChannelMapper channelMapper;
-	
-//	@Autowired
-//	private PriorityMapper priorityMapper;
-//	
-//	@Autowired
-//	private UserMapper userMapper;
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -46,7 +36,7 @@ public class ProcessTaskSaveApi extends ApiComponentBase  {
 	
 	@Override
 	public String getToken() {
-		return "processtask/save";
+		return "processtask/draft/save";
 	}
 
 	@Override
@@ -91,14 +81,6 @@ public class ProcessTaskSaveApi extends ApiComponentBase  {
 		if(processMapper.checkProcessIsExists(processUuid) == 0) {
 			throw new ProcessNotFoundException(processUuid);
 		}
-//		String priorityUuid = jsonObj.getString("priorityUuid");
-//		if(priorityUuid != null && priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
-//			throw new PriorityNotFoundException(priorityUuid);
-//		}
-//		String owner = jsonObj.getString("owner");
-//		if(owner != null && userMapper.getUserBaseInfoByUserId(owner) == null) {
-//			throw new UserNotFoundException(owner);
-//		}
 
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		if(processTaskId != null) {
