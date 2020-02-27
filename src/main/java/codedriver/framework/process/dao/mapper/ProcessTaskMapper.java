@@ -123,8 +123,6 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTask(ProcessTaskVo processTaskVo);
 
-	public int insertProcessTaskChannel(ProcessTaskVo processTaskVo);
-
 	public int replaceProcessTaskContent(ProcessTaskContentVo processTaskContentVo);
 
 	public int insertProcessTaskStep(ProcessTaskStepVo processTaskStepVo);

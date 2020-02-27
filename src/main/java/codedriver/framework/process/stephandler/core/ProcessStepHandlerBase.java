@@ -925,9 +925,6 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			
 			/** 创建工单 **/
 			processTaskMapper.insertProcessTask(processTaskVo);
-			
-			/** 写入关联通道 **/
-			processTaskMapper.insertProcessTaskChannel(processTaskVo);
 
 			/** 写入表单信息 **/
 			if (StringUtils.isNotBlank(processVo.getFormUuid())) {
