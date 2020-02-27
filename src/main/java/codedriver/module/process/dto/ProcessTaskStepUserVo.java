@@ -1,5 +1,7 @@
 package codedriver.module.process.dto;
 
+import java.util.Date;
+
 import org.apache.commons.lang3.StringUtils;
 
 import codedriver.module.process.constvalue.ProcessTaskStatus;
@@ -13,8 +15,8 @@ public class ProcessTaskStepUserVo {
 	private String userType = "major";
 	private String status = ProcessTaskStepUserStatus.DOING.getValue();
 	private String statusName;
-	private String startTime;
-	private String endTime;
+	private Date startTime;
+	private Date endTime;
 	private String action;
 	private Long timeCost;
 	private String timeCostStr;
@@ -90,19 +92,19 @@ public class ProcessTaskStepUserVo {
 		this.statusName = statusName;
 	}
 
-	public String getStartTime() {
+	public Date getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(String startTime) {
+	public void setStartTime(Date startTime) {
 		this.startTime = startTime;
 	}
 
-	public String getEndTime() {
+	public Date getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(String endTime) {
+	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
 	}
 

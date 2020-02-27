@@ -101,46 +101,8 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 				processTaskMapper.replaceProcessTaskFormAttributeData(attributeData);
 			}
 		}
-//		ProcessTaskStepFormAttributeVo formAttributeVo = new ProcessTaskStepFormAttributeVo();
-//		formAttributeVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-//		List<ProcessTaskStepFormAttributeVo> formAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByStepId(formAttributeVo);
-//		currentProcessTaskStepVo.setFormAttributeList(formAttributeList);
-//		if (formAttributeList != null && formAttributeList.size() > 0) {
-//			JSONArray attributeObjList = null;
-//			if (paramObj != null && paramObj.containsKey("formAttributeValueList") && paramObj.get("formAttributeValueList") instanceof JSONArray) {
-//				attributeObjList = paramObj.getJSONArray("formAttributeValueList");
-//			}
-//			for (ProcessTaskStepFormAttributeVo attribute : formAttributeList) {
-//				if (attribute.getIsEditable().equals(1)) {
-//					if (attributeObjList != null && attributeObjList.size() > 0) {
-//						for (int i = 0; i < attributeObjList.size(); i++) {
-//							JSONObject attrObj = attributeObjList.getJSONObject(i);
-//							if (attrObj.getString("uuid").equals(attribute.getAttributeUuid())) {
-//								ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
-//								attributeData.setData(attrObj.getString("data"));
-//								attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-//								attributeData.setAttributeUuid(attribute.getAttributeUuid());
-//								processTaskMapper.replaceProcessTaskFormAttributeData(attributeData);
-//								// 放进去方便基类记录日志
-//								attribute.setAttributeData(attributeData);
-//
-//								break;
-//							}
-//						}
-//					}
-//					IAttributeHandler attributeHandler = AttributeHandlerFactory.getHandler(attribute.getHandler());
-//					if (attributeHandler != null) {
-//						try {
-//							attributeHandler.valid(attribute.getAttributeData(), attribute.getConfigObj());
-//						} catch (Exception ex) {
-//							throw new ProcessTaskRuntimeException(ex);
-//						}
-//					}
-//				}
-//			}
-//		}
 
-		/** 保存内容 **/
+		/** 保存描述内容 **/
 		String content = paramObj.getString("content");
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
@@ -178,6 +140,7 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
 		DataValid.baseInfoValid(currentProcessTaskStepVo);
+		DataValid.formAttributeDataValid(currentProcessTaskStepVo);
 		return 0;
 	}
 

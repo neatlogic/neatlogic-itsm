@@ -504,9 +504,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 		if (canComplete) {
 			try {
-				//TODO linbq验证工单输入数据
 				myComplete(currentProcessTaskStepVo);
-				DataValid.formAttributeDataValid(currentProcessTaskStepVo);
 				if (this.getMode().equals(ProcessStepMode.MT)) {
 					/** 更新处理人状态 **/
 					processTaskMajorUser.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
@@ -907,7 +905,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		Long processTaskId = paramObj.getLong("processTaskId");
 		if(processTaskId == null) {//首次保存
-			/** 创建工单 **/
+			
 			ProcessTaskVo processTaskVo = new ProcessTaskVo();
 			processTaskVo.setTitle(paramObj.getString("title"));
 			processTaskVo.setOwner(paramObj.getString("owner"));
@@ -915,12 +913,8 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			processTaskVo.setPriorityUuid(paramObj.getString("priorityUuid"));
 			processTaskVo.setProcessUuid(currentProcessTaskStepVo.getProcessUuid());
 			processTaskVo.setReporter(UserContext.get().getUserId());
-			processTaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-			processTaskMapper.insertProcessTask(processTaskVo);
-			
-			/** 写入关联通道 **/
-			processTaskMapper.insertProcessTaskChannel(processTaskVo);
-			
+			processTaskVo.setStatus(ProcessTaskStatus.DRAFT.getValue());
+					
 			ProcessVo processVo = processMapper.getProcessByUuid(currentProcessTaskStepVo.getProcessUuid());
 			/** 对流程配置进行散列处理 **/
 			if (StringUtils.isNotBlank(processVo.getConfig())) {
@@ -928,6 +922,12 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				processTaskVo.setConfigHash(hash);
 				processTaskMapper.replaceProcessTaskConfig(new ProcessTaskConfigVo(hash, processVo.getConfig()));
 			}
+			
+			/** 创建工单 **/
+			processTaskMapper.insertProcessTask(processTaskVo);
+			
+			/** 写入关联通道 **/
+			processTaskMapper.insertProcessTaskChannel(processTaskVo);
 
 			/** 写入表单信息 **/
 			if (StringUtils.isNotBlank(processVo.getFormUuid())) {
@@ -1040,24 +1040,11 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				currentProcessTaskStepVo.setError(ex.getMessage());
 				updateProcessTaskStepStatus(currentProcessTaskStepVo);
 			}
-			/** 加入上报人为处理人，让处理人可以处理异常 **/
+			/** 加入上报人为处理人 **/
 			processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), processTaskVo.getReporter()));
 			
-			/** 流转到下一步 **/
-			List<ProcessTaskStepVo> nextStepList = getNext(currentProcessTaskStepVo);
-			for (ProcessTaskStepVo nextStep : nextStepList) {
-				IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
-				nextStep.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
-				doNext(new ProcessStepThread(nextStep) {
-					@Override
-					public void execute() {
-						nextStepHandler.active(nextStep);
-					}
-
-				});
-			}
 		}else {
-			//TODO linbq第二次保存时的操作
+			//第二次保存时的操作
 			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 			if(ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
 				throw new ProcessTaskRuntimeException("工单非草稿状态，不能进行上报暂存操作");
@@ -1075,6 +1062,20 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		}
 		/** 处理历史记录 **/
 		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.STARTPROCESS);
+		
+		/** 流转到下一步 **/
+//		List<ProcessTaskStepVo> nextStepList = getNext(currentProcessTaskStepVo);
+//		for (ProcessTaskStepVo nextStep : nextStepList) {
+//			IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
+//			nextStep.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
+//			doNext(new ProcessStepThread(nextStep) {
+//				@Override
+//				public void execute() {
+//					nextStepHandler.active(nextStep);
+//				}
+//
+//			});
+//		}
 		return 0;
 	}
 

@@ -54,7 +54,7 @@ public class ProcessSaveApi extends ApiComponentBase {
 	@Description(desc = "流程保存接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessVo processVo = JSON.toJavaObject(jsonObj, ProcessVo.class);
-		processVo.makeupFromConfigObj();
+		processVo.makeupConfigObj();
 		processService.saveProcess(processVo);
 		return processVo.getUuid();
 	}
