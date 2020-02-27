@@ -944,7 +944,7 @@ public abstract class ProcessStepHandlerUtilBase {
 			}
 			return true;
 		}
-		protected static boolean formAttributeDataValid(ProcessTaskStepVo currentProcessTaskStepVo) {
+		public static boolean formAttributeDataValid(ProcessTaskStepVo currentProcessTaskStepVo) {
 			
 			ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 			if(processTaskFormVo == null) {
