@@ -83,6 +83,9 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		}
 		
 		ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo();
+		startTaskStep.setHandler(ProcessStepHandler.START.getHandler());
+		startTaskStep.setProcessUuid(processUuid);
+		startTaskStep.setParamObj(jsonObj);
 		
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		if(processTaskId != null) {
@@ -93,8 +96,7 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 			startTaskStep.setProcessTaskId(processTaskId);
 		}
 		
-		startTaskStep.setProcessUuid(processUuid);
-		startTaskStep.setParamObj(jsonObj);
+		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(ProcessStepHandler.START.getHandler());
 		handler.startProcess(startTaskStep);
 		

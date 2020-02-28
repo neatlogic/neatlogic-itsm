@@ -924,6 +924,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			}
 			/** 创建工单 **/
 			processTaskMapper.insertProcessTask(processTaskVo);
+			currentProcessTaskStepVo.setProcessTaskId(processTaskVo.getId());
 
 			/** 写入表单信息 **/
 			if (StringUtils.isNotBlank(processVo.getFormUuid())) {
@@ -987,8 +988,6 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 					/** 找到开始节点 **/
 					if (stepVo.getType().equals(ProcessStepType.START.getValue())) {
 						currentProcessTaskStepVo.setId(ptStepVo.getId());
-						currentProcessTaskStepVo.setHandler(ptStepVo.getHandler());
-						currentProcessTaskStepVo.setProcessTaskId(processTaskVo.getId());
 					}
 				}
 			}
@@ -1058,20 +1057,6 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		}
 		/** 处理历史记录 **/
 		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.STARTPROCESS);
-		
-		/** 流转到下一步 **/
-//		List<ProcessTaskStepVo> nextStepList = getNext(currentProcessTaskStepVo);
-//		for (ProcessTaskStepVo nextStep : nextStepList) {
-//			IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
-//			nextStep.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
-//			doNext(new ProcessStepThread(nextStep) {
-//				@Override
-//				public void execute() {
-//					nextStepHandler.active(nextStep);
-//				}
-//
-//			});
-//		}
 		return 0;
 	}
 
