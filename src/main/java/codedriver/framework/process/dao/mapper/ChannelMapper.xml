@@ -22,13 +22,25 @@
 			AND c.`is_active` = #{isActive}
 		</if>
 	</select>
-
-	<select id="searchChannelList" resultType="codedriver.module.process.dto.ChannelVo">
+	
+	<resultMap type="codedriver.module.process.dto.ChannelVo" id="channelMap">
+		<id column="uuid" property="uuid" />
+		<result column="name" property="name" />
+		<result column="parent_uuid" property="parentUuid" />
+		<result column="is_active" property="isActive" />
+		<result column="icon" property="icon" />
+		<result column="color" property="color" />
+		<result column="desc" property="desc" />
+		<result column="isFavorite" property="isFavorite" />
+		<result column="sort" property="sort" />
+	</resultMap>
+	
+	<select id="searchChannelList" parameterType="codedriver.module.process.dto.ChannelVo" resultMap="channelMap">
 		SELECT
 		c.`uuid`,
 		c.`name`,
-		c.`parent_uuid` as parentUuid,
-		c.`is_active` as isActive,
+		c.`parent_uuid`,
+		c.`is_active`,
 		c.`icon`,
 		c.`color`,
 		c.`desc`,
@@ -182,13 +194,13 @@
 		SELECT COUNT(1) FROM `channel` where name=#{name} AND `uuid`!=#{uuid}
 	</select>
 
-	<resultMap type="codedriver.module.process.dto.ChannelVo" id="channelMap">
+	<resultMap type="codedriver.module.process.dto.ChannelVo" id="simpleChannelMap">
 		<id column="uuid" property="uuid" />
 		<result column="name" property="name" />
 		<result column="parent_uuid" property="parentUuid" />
 		<result column="sort" property="sort" />
 	</resultMap>
-	<select id="getChannelListForTree" resultMap="channelMap">
+	<select id="getChannelListForTree" resultMap="simpleChannelMap">
 		SELECT
 		c.`uuid`,
 		c.`name`,
