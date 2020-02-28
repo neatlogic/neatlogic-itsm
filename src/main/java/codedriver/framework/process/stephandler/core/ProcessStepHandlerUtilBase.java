@@ -909,16 +909,16 @@ public abstract class ProcessStepHandlerUtilBase {
 		public static boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo) {
 			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
 			Pattern titlePattern = Pattern.compile("^[A-Za-z_\\d\\u4e00-\\u9fa5]+$");
-			if(titlePattern.matcher(processTaskVo.getTitle()).matches()) {
+			if(!titlePattern.matcher(processTaskVo.getTitle()).matches()) {
 				throw new ProcessTaskRuntimeException("工单标题格式不对");
 			}
-			if(processTaskVo.getOwner() == null) {
+			if(StringUtils.isBlank(processTaskVo.getOwner())) {
 				throw new ProcessTaskRuntimeException("工单请求人不能为空");
 			}
 			if(userMapper.getUserBaseInfoByUserId(processTaskVo.getOwner()) == null) {
 				throw new ProcessTaskRuntimeException("工单请求人账号:'" + processTaskVo.getOwner() + "'不存在");
 			}
-			if(processTaskVo.getPriorityUuid() == null) {
+			if(StringUtils.isBlank(processTaskVo.getPriorityUuid())) {
 				throw new ProcessTaskRuntimeException("工单优先级不能为空");
 			}
 			List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());

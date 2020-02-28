@@ -6,7 +6,7 @@
 	SELECT 
 	  wt.`uuid`,
 	  wt.`name`,
-	  wt.`is_active`,
+	  wt.`is_active` AS isActive,
 	  wt.`lcu`,
 	  wt.`lcd`,
 	  wt.`config`
