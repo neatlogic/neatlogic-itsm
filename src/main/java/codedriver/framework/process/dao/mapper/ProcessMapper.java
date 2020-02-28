@@ -113,4 +113,6 @@ public interface ProcessMapper {
 
 	public int deleteProcessDraftByUuid(String uuid);
 
+	public int deleteProcessSlaByProcessUuid(String uuid);
+
 }

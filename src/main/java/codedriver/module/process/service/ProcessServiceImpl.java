@@ -71,7 +71,6 @@ public class ProcessServiceImpl implements ProcessService {
 
 	@Override
 	public int saveProcess(ProcessVo processVo) {
-		// TODO linbq等流程图config字段格式确定后，再解析config数据保存到对应的表中
 		if (processMapper.checkProcessNameIsRepeat(processVo) > 0) {
 			throw new ProcessNameRepeatException(processVo.getName());
 		}
@@ -80,10 +79,10 @@ public class ProcessServiceImpl implements ProcessService {
 			processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
 			processMapper.deleteProcessStepByProcessUuid(uuid);
 			processMapper.deleteProcessStepNotifyTemplateByProcessUuid(uuid);
-			processMapper.deleteProcessStepRelByProcessUuid(processVo.getUuid());
+			processMapper.deleteProcessStepRelByProcessUuid(uuid);
 			processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
-//			processMapper.deleteProcessStepTimeoutPolicyByProcessUuid(processVo.getUuid());
 			processMapper.deleteProcessFormByProcessUuid(uuid);
+			processMapper.deleteProcessSlaByProcessUuid(uuid);
 			processMapper.updateProcess(processVo);
 		} else {
 			processVo.setFcu(UserContext.get().getUserId());

@@ -296,7 +296,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				for (int k = 0; k < policyList.size(); k++) {
 					JSONObject policyObj = policyList.getJSONObject(k);
 					ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
-					processStepWorkerPolicyVo.setProcessUuid(processStepVo.getUuid());
+					processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
 					processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
 					processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
 					processStepWorkerPolicyVo.setSort(k + 1);

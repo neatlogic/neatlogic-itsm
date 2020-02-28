@@ -57,6 +57,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 		@Param(name="processTaskId", type = ApiParamType.LONG, isRequired = true, desc="工单id")
 	})
 	@Output({
+		@Param(name="processTaskId", type = ApiParamType.LONG, desc="工单id"),
 		@Param(name = "title", type = ApiParamType.STRING, desc = "标题"),
 		@Param(name = "owner", type = ApiParamType.STRING, desc = "请求人"),
 		@Param(name = "channelUuid", type = ApiParamType.STRING, desc = "服务通道"),
@@ -76,6 +77,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
+		resultObj.put("processTaskId", processTaskId);
 		resultObj.put("title", processTaskVo.getTitle());
 		resultObj.put("owner", processTaskVo.getOwner());
 		resultObj.put("channelUuid", processTaskVo.getChannelUuid());

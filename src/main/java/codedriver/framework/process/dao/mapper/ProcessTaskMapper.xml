@@ -1208,13 +1208,13 @@
 	<update id="updateProcessTaskStatus" parameterType="codedriver.module.process.dto.ProcessTaskVo">
 		UPDATE
 		`processtask`
-		SET
-		`status` = #{status},
+		SET 
 		<choose>
-			<when test="status == 'succeed' or status == 'failed' or status == 'aborted'">
-				`end_time` = NOW(3)
+			<when test="status == 'succeed' or status == 'failed' or status == 'aborted' or status == 'draft'">
+				`end_time` = NOW(3),
 			</when>
 		</choose>
+		`status` = #{status}
 		WHERE
 		`id` = #{id}
 	</update>

@@ -81,15 +81,18 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		if(processMapper.checkProcessIsExists(processUuid) == 0) {
 			throw new ProcessNotFoundException(processUuid);
 		}
-
+		
+		ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo();
+		
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		if(processTaskId != null) {
 			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 			if(processTaskVo == null) {
 				throw new ProcessTaskNotFoundException(processTaskId.toString());
 			}
+			startTaskStep.setProcessTaskId(processTaskId);
 		}
-		ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo();
+		
 		startTaskStep.setProcessUuid(processUuid);
 		startTaskStep.setParamObj(jsonObj);
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(ProcessStepHandler.START.getHandler());
