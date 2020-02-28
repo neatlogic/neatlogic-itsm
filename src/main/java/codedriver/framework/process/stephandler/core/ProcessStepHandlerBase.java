@@ -922,7 +922,6 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				processTaskVo.setConfigHash(hash);
 				processTaskMapper.replaceProcessTaskConfig(new ProcessTaskConfigVo(hash, processVo.getConfig()));
 			}
-			
 			/** 创建工单 **/
 			processTaskMapper.insertProcessTask(processTaskVo);
 
@@ -1027,7 +1026,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 			try {
 				myStartProcess(currentProcessTaskStepVo);
-				currentProcessTaskStepVo.setIsActive(2);
+				currentProcessTaskStepVo.setIsActive(1);
 				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 				updateProcessTaskStepStatus(currentProcessTaskStepVo);
 			} catch (ProcessTaskException ex) {

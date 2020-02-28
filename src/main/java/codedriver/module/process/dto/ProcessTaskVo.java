@@ -236,4 +236,9 @@ public class ProcessTaskVo {
 		this.priority = priority;
 	}
 
+	@Override
+	public String toString() {
+		return "ProcessTaskVo [id=" + id + ", title=" + title + ", processUuid=" + processUuid + ", channelUuid=" + channelUuid + ", priorityUuid=" + priorityUuid + ", priority=" + priority + ", config=" + config + ", configPath=" + configPath + ", configObj=" + configObj + ", status=" + status + ", statusText=" + statusText + ", owner=" + owner + ", ownerName=" + ownerName + ", reporter=" + reporter + ", reporterName=" + reporterName + ", startTime=" + startTime + ", endTime=" + endTime + ", timeCost=" + timeCost + ", timeCostStr=" + timeCostStr + ", expireTime=" + expireTime + ", configHash=" + configHash + ", urgency=" + urgency + ", urgencyText=" + urgencyText + ", stepList=" + stepList + "]";
+	}
+
 }
