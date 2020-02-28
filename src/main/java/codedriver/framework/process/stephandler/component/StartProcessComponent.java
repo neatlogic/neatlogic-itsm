@@ -94,9 +94,13 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 			for(int i = 0; i < formAttributeDataList.size(); i++) {
 				JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
 				ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
-				attributeData.setData(formAttributeDataObj.getString("dataList"));
+				String dataList = formAttributeDataObj.getString("dataList");
+				if(StringUtils.isBlank(dataList)) {
+					continue;
+				}
+				attributeData.setData(dataList);
 				attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-				attributeData.setAttributeUuid(formAttributeDataObj.getString("uuid"));
+				attributeData.setAttributeUuid(formAttributeDataObj.getString("attributeUuid"));
 				attributeData.setType(formAttributeDataObj.getString("handler"));
 				processTaskMapper.replaceProcessTaskFormAttributeData(attributeData);
 			}
