@@ -47,11 +47,7 @@ public class ProcessTaskAbortApi extends ApiComponentBase {
 			@Param(name = "processTaskId",
 					type = ApiParamType.LONG,
 					desc = "工单Id",
-					isRequired = true),
-			@Param(name = "processTaskStepId",
-			type = ApiParamType.LONG,
-			desc = "工单步骤Id",
-			isRequired = true)
+					isRequired = true)
 	})
 	@Output({})
 	@Description(desc = "工单取消接口")
