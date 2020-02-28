@@ -977,13 +977,13 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 					}
 
 					/** 写入超时策略信息 **/
-					if (ptStepVo.getTimeoutPolicyList() != null && ptStepVo.getTimeoutPolicyList().size() > 0) {
-						for (ProcessTaskStepTimeoutPolicyVo policyVo : ptStepVo.getTimeoutPolicyList()) {
-							policyVo.setProcessTaskId(processTaskVo.getId());
-							policyVo.setProcessTaskStepId(ptStepVo.getId());
-							processTaskMapper.insertProcessTaskStepTimeoutPolicy(policyVo);
-						}
-					}
+//					if (ptStepVo.getTimeoutPolicyList() != null && ptStepVo.getTimeoutPolicyList().size() > 0) {
+//						for (ProcessTaskStepTimeoutPolicyVo policyVo : ptStepVo.getTimeoutPolicyList()) {
+//							policyVo.setProcessTaskId(processTaskVo.getId());
+//							policyVo.setProcessTaskStepId(ptStepVo.getId());
+//							processTaskMapper.insertProcessTaskStepTimeoutPolicy(policyVo);
+//						}
+//					}
 
 					/** 找到开始节点 **/
 					if (stepVo.getType().equals(ProcessStepType.START.getValue())) {
