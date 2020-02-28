@@ -609,4 +609,11 @@
 	<delete id="deleteProcessDraftByUuid" parameterType="java.lang.String">
 		DELETE FROM `process_draft` WHERE `uuid` = #{uuid}
 	</delete>
+	
+	<delete id="deleteProcessSlaByProcessUuid">
+	DELETE ps, pss
+	FROM `process_sla` ps
+	JOIN `process_step_sla` pss ON pss.`sla_uuid`=ps.`uuid`
+	WHERE `process_uuid` = #{processUuid}
+	</delete>
 </mapper>
