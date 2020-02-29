@@ -23,6 +23,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.dto.FormAttributeVo;
 import codedriver.module.process.dto.FormVersionVo;
+import codedriver.module.process.dto.ProcessTaskConfigVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskFileVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
@@ -63,16 +64,18 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 		@Param(name = "channelUuid", type = ApiParamType.STRING, desc = "服务通道"),
 		@Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-		@Param(name = "fileUuidList", type = ApiParamType.STRING, desc = "附件uuid列表"),
-		@Param(name = "formVersionVo", type = ApiParamType.STRING, desc = "表单"),
-		@Param(name = "formAttributeDataMap", type = ApiParamType.STRING, desc = "表单属性数据"),
-		@Param(name = "formAttributeActionMap", type = ApiParamType.STRING, desc = "表单属性显示控制"),
+		@Param(name = "fileUuidList", type = ApiParamType.JSONARRAY, desc = "附件uuid列表"),
+		@Param(name = "formVersionVo", type = ApiParamType.JSONOBJECT, desc = "表单"),
+		@Param(name = "formAttributeDataMap", type = ApiParamType.JSONOBJECT, desc = "表单属性数据"),
+		@Param(name = "formAttributeActionMap", type = ApiParamType.JSONOBJECT, desc = "表单属性显示控制"),
+		@Param(name = "processTaskConfig", type = ApiParamType.STRING, desc = "流程图信息")
 	})
 	@Description(desc = "工单详情数据获取接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
 		Long processTaskId = jsonObj.getLong("processTaskId");
+		//获取工单基本信息
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
@@ -82,11 +85,13 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 		resultObj.put("owner", processTaskVo.getOwner());
 		resultObj.put("channelUuid", processTaskVo.getChannelUuid());
 		resultObj.put("priorityUuid", processTaskVo.getPriorityUuid());
+		//获取开始步骤信息
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
 		if(processTaskStepList.size() != 1) {
 			throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 		}
 		Long startProcessTaskStepId = processTaskStepList.get(0).getId();
+		//获取上报描述内容
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
 		if(!processTaskStepContentList.isEmpty()) {
 			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
@@ -94,6 +99,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				resultObj.put("content", processTaskContentVo.getContent());
 			}
 		}
+		//获取上传附件uuid
 		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 		processTaskFileVo.setProcessTaskId(processTaskId);
 		processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
@@ -106,7 +112,13 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			}
 			resultObj.put("fileUuidList", fileUuidList);
 		}
-		
+		//获取工单流程图信息
+		ProcessTaskConfigVo processTaskConfig = processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
+		if(processTaskConfig == null) {
+			throw new ProcessTaskRuntimeException("没有找到工单：'" + processTaskId + "'的流程图配置信息");
+		}
+		resultObj.put("processTaskConfig", processTaskConfig.getConfig());
+		//获取工单表单信息
 		ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
 		if(processTaskFormVo == null) {
 			return resultObj;

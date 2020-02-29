@@ -929,10 +929,10 @@ public abstract class ProcessStepHandlerUtilBase {
 			if(!priorityUuidlist.contains(processTaskVo.getPriorityUuid())) {
 				throw new ProcessTaskRuntimeException("工单优先级与服务优先级级不匹配");
 			}
-			List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
-			if(processTaskStepContentList.isEmpty()) {
-				throw new ProcessTaskRuntimeException("工单描述不能为空");
-			}
+//			List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
+//			if(processTaskStepContentList.isEmpty()) {
+//				throw new ProcessTaskRuntimeException("工单描述不能为空");
+//			}
 			ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 			processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 			processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
