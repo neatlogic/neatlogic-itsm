@@ -111,7 +111,7 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
 			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
+			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
 		}
 		
 		/** 保存附件uuid **/
