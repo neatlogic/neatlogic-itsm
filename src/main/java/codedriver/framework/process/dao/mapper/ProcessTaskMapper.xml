@@ -1036,8 +1036,8 @@
 		(#{content}, #{hash})
 	</insert>
 
-	<insert id="insertProcessTaskStepContent" parameterType="codedriver.module.process.dto.ProcessTaskStepContentVo">
-		INSERT INTO `processtask_step_content` (
+	<insert id="replaceProcessTaskStepContent" parameterType="codedriver.module.process.dto.ProcessTaskStepContentVo">
+		REPLACE INTO `processtask_step_content` (
 		`processtask_id`,
 		`processtask_step_id`,
 		`content_hash`,

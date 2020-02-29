@@ -139,7 +139,7 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTaskStepRel(ProcessTaskStepRelVo processTaskStepRelVo);
 
-	public int insertProcessTaskStepContent(ProcessTaskStepContentVo processTaskStepContentVo);
+	public int replaceProcessTaskStepContent(ProcessTaskStepContentVo processTaskStepContentVo);
 
 	public int insertProcessTaskStepAudit(ProcessTaskStepAuditVo processTaskStepAuditVo);
 
