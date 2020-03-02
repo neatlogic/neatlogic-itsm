@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
@@ -50,19 +49,22 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作时间窗口uuid"),
 		@Param(name = "year", type = ApiParamType.INTEGER, isRequired = true, desc = "年份"),
-		@Param(name = "dateList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工作日历列表")
+		@Param(name = "calendarList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工作日历列表")
 	})
 	@Description(desc = "工作日历信息保存接口")
 	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {	
-		WorktimeRangeVo worktimeRangeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<WorktimeRangeVo>() {});
-		String worktimeUuid = worktimeRangeVo.getWorktimeUuid();
+	public Object myDoService(JSONObject jsonObj) throws Exception {
+		String worktimeUuid = jsonObj.getString("worktimeUuid");
 		WorktimeVo worktimeVo = worktimeMapper.getWorktimeByUuid(worktimeUuid);
 		if(worktimeVo == null) {
 			throw new WorktimeNotFoundException(worktimeUuid);
 		}
-
 		JSONObject config = JSON.parseObject(worktimeVo.getConfig());
+		
+		WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
+		worktimeRangeVo.setWorktimeUuid(worktimeUuid);
+		Integer year = jsonObj.getInteger("year");
+		worktimeRangeVo.setYear(year);
 		worktimeMapper.deleteWorktimeRange(worktimeRangeVo);
 		
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd H:mm");
@@ -71,7 +73,8 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 		WorktimeRangeVo worktimeRange = null;
 		JSONArray defineList = null;
 		List<WorktimeRangeVo> worktimeRangeList = new ArrayList<>();
-		List<String> dateList = worktimeRangeVo.getDateList();
+		JSONArray calendarList = jsonObj.getJSONArray("calendarList");
+		List<String> dateList = generateDateList(calendarList);
 		for(String workDate : dateList) {
 			LocalDate localDate= LocalDate.from(dateFormatter.parse(workDate));
 			defineList = config.getJSONArray(localDate.getDayOfWeek().name().toLowerCase());
@@ -102,5 +105,45 @@ public class WorktimeCalendarSaveApi extends ApiComponentBase {
 			worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
 		}
 		return null;
+	}
+
+	private List<String> generateDateList(JSONArray calendarList) {
+		List<String> resultList = new ArrayList<>();
+	
+		if(calendarList == null || calendarList.isEmpty()) {
+			return resultList;
+		}
+		for(int i = 0; i < calendarList.size(); i++) {
+			JSONObject trObj = calendarList.getJSONObject(i);
+			if(trObj == null || trObj.isEmpty()) {
+				continue;
+			}
+			JSONArray monthList = trObj.getJSONArray("monthList");
+			if(monthList == null || monthList.isEmpty()) {
+				continue;
+			}
+			for(int j = 0; j < monthList.size(); j++) {
+				JSONObject monthObj = monthList.getJSONObject(j);
+				if(monthObj == null || monthObj.isEmpty()) {
+					continue;
+				}
+				JSONArray dateList = monthObj.getJSONArray("dateList");
+				if(dateList == null || dateList.isEmpty()) {
+					continue;
+				}
+				for(int k = 0; k < dateList.size(); k++) {
+					JSONObject dateObj = dateList.getJSONObject(k);
+					if(dateObj == null || dateObj.isEmpty()) {
+						continue;
+					}
+
+					int classType = dateObj.getIntValue("classType");
+					if(classType > 3) {//被选中的日期
+						resultList.add(dateObj.getString("name"));
+					}
+				}
+			}
+		}
+		return resultList;
 	}
 }
