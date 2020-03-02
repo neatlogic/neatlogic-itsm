@@ -1,7 +1,7 @@
 package codedriver.module.process.auth.label;
 
 import codedriver.framework.auth.core.AuthBase;
-import codedriver.framework.auth.core.AuthGroupEnum;
+import codedriver.framework.common.constvalue.ModuleEnum;
 
 public class FORM_MODIFY extends AuthBase {
 
@@ -17,7 +17,7 @@ public class FORM_MODIFY extends AuthBase {
 
 	@Override
 	public String getAuthGroup() {
-		return AuthGroupEnum.PROCESS.getValue();
+		return ModuleEnum.PROCESS.getValue();
 	}
 
 }
