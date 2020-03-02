@@ -142,6 +142,7 @@
 	  `name` = #{name},
 	  `is_active` = #{isActive},
 	  `lcu` = #{lcu},
+	  `config` = #{config},
 	  `lcd` = now() 
 	WHERE `uuid` = #{uuid}
 	</update>
