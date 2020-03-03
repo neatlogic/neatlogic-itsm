@@ -45,10 +45,8 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		super();
 	}
 	
-	public WorkcenterVo(String _name,Integer _isPrivate,String _conditionConfig) {
+	public WorkcenterVo(String _name) {
 		this.name =_name;
-		this.isPrivate = _isPrivate;
-		this.conditionConfig = _conditionConfig;
 	}
 	
 	public WorkcenterVo(JSONObject jsonObj) {

@@ -42,10 +42,10 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name="name", type = ApiParamType.STRING, desc="分类名",isRequired = true),
-		@Param(name="isPrivate", type = ApiParamType.INTEGER, desc="类型，1：自定义分类，0：系统分类",isRequired = true),
+		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid"),
+		@Param(name="name", type = ApiParamType.STRING, desc="分类名",isRequired = true,xss = true),
 		@Param(name="conditionConfig", type = ApiParamType.JSONOBJECT, desc="分类过滤配置，json格式",isRequired = true),
-		@Param(name="roleList", type = ApiParamType.JSONARRAY, desc="授权列表", isRequired = false)
+		@Param(name="roleList", type = ApiParamType.JSONARRAY, desc="授权列表", isRequired = true)
 	})
 	@Output({
 		
@@ -53,18 +53,32 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 	@Description(desc = "工单中心分类新增接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj.getString("name"),jsonObj.getInteger("isPrivate"),jsonObj.getString("conditionConfig"));
+		String uuid = jsonObj.getString("uuid");
+		String name = jsonObj.getString("name");
+		WorkcenterVo workcenterVo = new WorkcenterVo(name);
 		//重复name判断
+		workcenterVo.setUuid(uuid);
 		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenter(workcenterVo);
 		if(workcenterList.size()>0) {
-			throw new WorkcenterNameRepeatException(jsonObj.getString("name"));
+			throw new WorkcenterNameRepeatException(name);
 		}
-		workcenterMapper.insertWorkcenter(workcenterVo);
+		//保存、更新分类
 		JSONArray roleList = jsonObj.getJSONArray("roleList");
-		if(roleList != null) {
-			for(Object roleName:roleList) {
-				workcenterMapper.insertWorkcenterRole(workcenterVo.getUuid(),roleName.toString());
-			}
+		if(roleList != null && roleList.size()>0) {
+			workcenterVo.setIsPrivate(0);
+		}else {
+			workcenterVo.setIsPrivate(1);
+		}
+		if(uuid == null) {
+			workcenterVo.setConditionConfig(jsonObj.getString("conditionConfig"));
+			workcenterMapper.insertWorkcenter(workcenterVo);
+		}else { 
+			workcenterMapper.deleteWorkcenterRoleByUuid(workcenterVo.getUuid());
+			workcenterMapper.updateWorkcenter(workcenterVo);
+		}
+		//更新角色
+		for(Object roleName:roleList) {
+			workcenterMapper.insertWorkcenterRole(workcenterVo.getUuid(),roleName.toString());
 		}
 		return null;
 	}
