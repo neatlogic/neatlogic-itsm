@@ -8,8 +8,9 @@
 		<result column="is_private" property="isPrivate" />
 		<result column="sort" property="sort" />
 		<result column="condition_config" property="conditionConfig" />
-		<collection property="roleList" ofType="codedriver.framework.dto.RoleVo">
-			<result column="role_name" property="name" />
+		<collection property="workcenterRoleList" ofType="codedriver.module.process.workcenter.dto.WorkcenterRoleVo">
+			<result column="role_name" property="roleName" />
+			<result column="user_id" property="userId" />
 		</collection>
 	</resultMap>
 	
@@ -20,7 +21,8 @@
 		  pw.`is_private`,
 		  pw.`sort`,
 		  pw.`condition_config`,
-		  pwr.`role_name`
+		  pwr.`role_name`,
+		  pwr.`user_id`
 		FROM
 		  `process_workcenter` pw 
 		   LEFT JOIN `process_workcenter_role` pwr ON pw.`uuid` = pwr.`workcenter_uuid`
@@ -75,15 +77,17 @@
 		  ) ;
 	</insert>
 	
-	<insert id="insertWorkcenterRole" parameterType="java.lang.String">
+	<insert id="insertWorkcenterRole" parameterType="codedriver.module.process.workcenter.dto.WorkcenterRoleVo">
 		INSERT INTO `process_workcenter_role` (
 		  `workcenter_uuid`,
-		  `role_name`
+		  `role_name`,
+		  `user_id`
 		) 
 		VALUES
 		  (
 		    #{workcenterUuid},
-		    #{roleName}
+		    #{roleName},
+		    #{userId}
 		  ) ;
 	</insert>
 	
