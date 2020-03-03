@@ -12,4 +12,14 @@ public interface PriorityMapper {
 
 	public int checkPriorityIsExists(String uuid);
 
+	public PriorityVo getPriorityByUuid(String uuid);
+
+	public int checkPriorityNameIsRepeat(PriorityVo priorityVo);
+
+	public int insertPriority(PriorityVo priorityVo);
+
+	public int updatePriority(PriorityVo priorityVo);
+
+	public int deletePriorityByUuid(String uuid);
+
 }

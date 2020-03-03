@@ -17,7 +17,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.PriorityVo;
 @Service
 public class PrioritySearchApi extends ApiComponentBase {
@@ -52,7 +51,7 @@ public class PrioritySearchApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="priorityList",explode=ChannelVo[].class,desc="优先级列表")
+		@Param(name="tbodyList",explode=PriorityVo[].class,desc="优先级列表")
 	})
 	@Description(desc = "优先级列表搜索接口")
 	@Override
@@ -71,7 +70,7 @@ public class PrioritySearchApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}
 		List<PriorityVo> priorityList = priorityMapper.searchPriorityList(priorityVo);
-		resultObj.put("priorityList", priorityList);
+		resultObj.put("tbodyList", priorityList);
 		return resultObj;
 	}
 
