@@ -1,5 +1,7 @@
 package codedriver.module.process.api.workcenter;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +45,12 @@ public class WorkcenterListApi extends ApiComponentBase {
 	@Description(desc = "获取工单中心分类接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return workcenterMapper.getWorkcenter(new WorkcenterVo());
+		List<WorkcenterVo>  workcenterList = workcenterMapper.getWorkcenter(new WorkcenterVo());
+		for(WorkcenterVo workcenter : workcenterList) {
+			//TODO 查询数量
+			workcenter.setCount(0);
+		}
+		return workcenterList;
 	}
 
 }

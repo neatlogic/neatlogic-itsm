@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
@@ -24,10 +25,15 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	private String name;
 	@EntityField(name = "类型，1：自定义分类，0：系统分类", type = ApiParamType.INTEGER)
 	private Integer isPrivate;
+	@JSONField(serialize = false)
 	@EntityField(name = "排序", type = ApiParamType.INTEGER)
 	private Integer sort;
+	@EntityField(name = "数量", type = ApiParamType.INTEGER)
+	private Integer count;
+	@JSONField(serialize = false)
 	@EntityField(name = "过滤条件", type = ApiParamType.STRING)
 	private String conditionConfig;
+	@JSONField(serialize = false)
 	@EntityField(name = "显示的字段", type = ApiParamType.JSONARRAY)
 	private JSONArray headerList;
 	@EntityField(name = "角色列表", type = ApiParamType.JSONARRAY)
@@ -39,9 +45,10 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		super();
 	}
 	
-	public WorkcenterVo(String _name,Integer _isPrivate) {
+	public WorkcenterVo(String _name,Integer _isPrivate,String _conditionConfig) {
 		this.name =_name;
 		this.isPrivate = _isPrivate;
+		this.conditionConfig = _conditionConfig;
 	}
 	
 	public WorkcenterVo(JSONObject jsonObj) {
@@ -117,6 +124,14 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	}
 	public void setHeaderList(JSONArray headerArray) {
 		this.headerList = headerArray;
+	}
+
+	public Integer getCount() {
+		return count;
+	}
+
+	public void setCount(Integer count) {
+		this.count = count;
 	}
 	
 	

@@ -44,6 +44,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 	@Input({
 		@Param(name="name", type = ApiParamType.STRING, desc="分类名",isRequired = true),
 		@Param(name="isPrivate", type = ApiParamType.INTEGER, desc="类型，1：自定义分类，0：系统分类",isRequired = true),
+		@Param(name="conditionConfig", type = ApiParamType.JSONOBJECT, desc="分类过滤配置，json格式",isRequired = true),
 		@Param(name="roleList", type = ApiParamType.JSONARRAY, desc="授权列表", isRequired = false)
 	})
 	@Output({
@@ -52,7 +53,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 	@Description(desc = "工单中心分类新增接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj.getString("name"),jsonObj.getInteger("isPrivate"));
+		WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj.getString("name"),jsonObj.getInteger("isPrivate"),jsonObj.getString("conditionConfig"));
 		//重复name判断
 		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenter(workcenterVo);
 		if(workcenterList.size()>0) {
