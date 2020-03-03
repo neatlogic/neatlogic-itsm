@@ -8,18 +8,24 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
+import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.FormVo;
+import codedriver.module.process.dto.ProcessVo;
 
 @Service
 public class FormGetApi extends ApiComponentBase {
@@ -27,6 +33,12 @@ public class FormGetApi extends ApiComponentBase {
 	@Autowired
 	private FormMapper formMapper;
 
+	@Autowired
+	private ProcessMapper processMapper;
+	
+	@Autowired
+	private ChannelMapper channelMapper;
+	
 	@Override
 	public String getToken() {
 		return "process/form/get";
@@ -44,13 +56,41 @@ public class FormGetApi extends ApiComponentBase {
 
 	@Override
 	@Input({
-			@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true), 
-			@Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "选择表单版本uuid"), 
-			})
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid"), 
+		@Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid"), 
+		@Param(name = "channelUuid", type = ApiParamType.STRING, desc = "服务uuid"), 
+		@Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "选择表单版本uuid"), 
+	})
 	@Output({ @Param(explode = FormVo.class) })
 	@Description(desc = "单个表单查询接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
+		if(uuid == null) {
+			String processUuid = jsonObj.getString("processUuid");
+			if(processUuid == null) {
+				String channelUuid = jsonObj.getString("channelUuid");
+				if(channelUuid == null) {
+					throw new FormIllegalParameterException("uuid，processUuid，channelUuid这个三个参数必须传一个才能获取表单信息");
+				}else {
+					ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
+					if(channel == null) {
+						throw new ChannelNotFoundException(channelUuid);
+					}
+					processUuid = channel.getProcessUuid();
+					if(processUuid == null) {
+						throw new FormIllegalParameterException("服务:'" + channelUuid + "'没有绑定流程图");
+					}
+				}
+			}
+			ProcessVo process = processMapper.getProcessByUuid(processUuid);
+			if(process == null) {
+				throw new ProcessNotFoundException(processUuid);
+			}
+			uuid = process.getFormUuid();
+			if(uuid == null) {
+				throw new FormIllegalParameterException("流程图:'" + processUuid + "'没有绑定表单");
+			}
+		}
 		FormVo formVo = formMapper.getFormByUuid(uuid);
 		//判断表单是否存在
 		if (formVo == null) {
