@@ -14,7 +14,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
-import codedriver.framework.process.exception.WorktimeNotFoundException;
+import codedriver.framework.process.exception.worktime.WorktimeNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
