@@ -31,10 +31,10 @@
 	<if test="isActive != null">
 	AND `is_active` = #{isActive}
 	</if>
+	ORDER BY `create_time` DESC
 	<if test="needPage">
 	limit #{startNum}, #{pageSize}
 	</if>
-	ORDER BY `create_time` DESC
 	</select>
 	
 	<select id="checkPriorityIsExists" parameterType="java.lang.String" resultType="int">
