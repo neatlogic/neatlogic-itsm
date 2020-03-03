@@ -1,10 +1,7 @@
 package codedriver.module.process.api.workcenter;
 
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +9,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.workcenter.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -21,17 +17,10 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessExpression;
-import codedriver.module.process.constvalue.ProcessFormHandler;
-import codedriver.module.process.constvalue.ProcessFormHandlerType;
-import codedriver.module.process.dto.FormAttributeVo;
 
 @Service
 @Transactional
 public class WorkcenterGetConditionApi extends ApiComponentBase {
-
-	@Autowired
-	private FormMapper formMapper;
-
 	@Override
 	public String getToken() {
 		return "workcenter/condition/get";

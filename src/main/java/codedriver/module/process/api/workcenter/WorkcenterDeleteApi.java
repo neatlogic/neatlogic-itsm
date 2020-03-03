@@ -4,9 +4,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.exception.workcenter.WorkcenterNameRepeatException;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -15,20 +19,21 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
+@Transactional
 @Service
-public class WorkcenterListApi extends ApiComponentBase {
+public class WorkcenterDeleteApi extends ApiComponentBase {
 
 	@Autowired
 	WorkcenterMapper workcenterMapper;
 	
 	@Override
 	public String getToken() {
-		return "workcenter/list";
+		return "workcenter/delete";
 	}
 
 	@Override
 	public String getName() {
-		return "获取工单中心分类接口";
+		return "工单中心分类删除接口";
 	}
 
 	@Override
@@ -37,20 +42,18 @@ public class WorkcenterListApi extends ApiComponentBase {
 	}
 
 	@Input({
-		
+		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid",isRequired = true)
 	})
 	@Output({
-		@Param(name="workcenter", explode = WorkcenterVo.class, desc="分类信息")
+		
 	})
-	@Description(desc = "获取工单中心分类接口")
+	@Description(desc = "工单中心分类删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		List<WorkcenterVo>  workcenterList = workcenterMapper.getWorkcenter(new WorkcenterVo());
-		for(WorkcenterVo workcenter : workcenterList) {
-			//TODO 查询数量
-			workcenter.setCount(0);
-		}
-		return workcenterList;
+		String uuid = jsonObj.getString("uuid");
+		workcenterMapper.deleteWorkcenterRoleByUuid(uuid);
+		workcenterMapper.deleteWorkcenterByUuid(uuid);
+		return null;
 	}
 
 }

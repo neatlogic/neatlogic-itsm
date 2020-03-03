@@ -28,6 +28,9 @@
 		<if test="name != null">
 			and name = #{name}
 		</if>
+		<if test="uuid != null and uuid != ''">
+			and uuid != #{uuid}
+		</if>
 		ORDER BY pw.`is_private`, pw.`sort` ASC
 	</select>
 	
@@ -39,16 +42,18 @@
 		  `process_workcenter` pw 
 	</select>
 	
-	<delete id="deleteWorkcenter">
+	<delete id="deleteWorkcenterByUuid" parameterType="java.lang.String">
 		DELETE 
 		FROM
 		  `process_workcenter`
+		WHERE `uuid` = #{workcenterUuid} ;
 	</delete>
 	
-	<delete id="deleteWorkcenterRole">
+	<delete id="deleteWorkcenterRoleByUuid" parameterType="java.lang.String">
 		DELETE 
 		FROM
 		  `process_workcenter_role`
+		WHERE `workcenter_uuid` = #{workcenterUuid} ;
 	</delete>
 
 
@@ -71,7 +76,7 @@
 	</insert>
 	
 	<insert id="insertWorkcenterRole" parameterType="java.lang.String">
-		INSERT INTO `codedriver_chenqw`.`process_workcenter_role` (
+		INSERT INTO `process_workcenter_role` (
 		  `workcenter_uuid`,
 		  `role_name`
 		) 
@@ -81,5 +86,14 @@
 		    #{roleName}
 		  ) ;
 	</insert>
+	
+	<update id="updateWorkcenter" parameterType="codedriver.module.process.workcenter.dto.WorkcenterVo">
+		UPDATE 
+		  `process_workcenter` 
+		SET
+		  `name` = #{name},
+		  `is_private` = #{isPrivate}
+		WHERE `uuid` = #{uuid} ;
+	</update>
 	
 </mapper>

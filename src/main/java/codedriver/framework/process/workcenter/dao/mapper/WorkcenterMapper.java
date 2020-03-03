@@ -13,11 +13,13 @@ public interface WorkcenterMapper {
 	
 	public Map<String,String> getWorkcenterConditionConfig();
 	
-	public Integer deleteWorkcenter();
+	public Integer deleteWorkcenterByUuid(@Param("workcenterUuid")String workcenterUuid);
 	
-	public Integer deleteWorkcenterRole();
+	public Integer deleteWorkcenterRoleByUuid(@Param("workcenterUuid")String workcenterUuid);
 	
 	public Integer insertWorkcenter(WorkcenterVo workcenterVo);
 	
 	public Integer insertWorkcenterRole(@Param("workcenterUuid") String workcenterUuid,@Param("roleName") String roleName);
+	
+	public Integer updateWorkcenter(WorkcenterVo workcenterVo);
 }
