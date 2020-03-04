@@ -1,4 +1,4 @@
-package codedriver.framework.process.exception;
+package codedriver.framework.process.exception.worktime;
 
 import codedriver.framework.exception.core.ApiRuntimeException;
 
