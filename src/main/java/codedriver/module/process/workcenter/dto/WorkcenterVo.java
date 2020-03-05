@@ -23,8 +23,8 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	private String uuid;
 	@EntityField(name = "工单中心分类名", type = ApiParamType.STRING)
 	private String name;
-	@EntityField(name = "类型，1：自定义分类，0：系统分类", type = ApiParamType.INTEGER)
-	private Integer isPrivate;
+	@EntityField(name = "default:默认出厂  system：系统分类  custom：自定义分类", type = ApiParamType.ENUM)
+	private String type;
 	@JSONField(serialize = false)
 	@EntityField(name = "排序", type = ApiParamType.INTEGER)
 	private Integer sort;
@@ -40,8 +40,18 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	private List<WorkcenterRoleVo> workcenterRoleList;
 	@EntityField(name = "角色列表", type = ApiParamType.JSONARRAY)
 	private List<String> valueList;
+	@EntityField(name = "是否拥有编辑权限", type = ApiParamType.JSONARRAY)
+	private Integer isCanEdit;
+	@EntityField(name = "是否拥有授权权限", type = ApiParamType.JSONARRAY)
+	private Integer isCanRole;
+	
 	private List<WorkcenterConditionGroupVo> conditionGroupList;
 	private List<WorkcenterConditionGroupRelVo> conditionGroupRelList;
+	
+	
+	//params
+	private String userId;
+	private String roleName;
 	
 	public WorkcenterVo() {
 		super();
@@ -91,12 +101,14 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		this.workcenterRoleList = workcenterRoleList;
 	}
 
-	public Integer getIsPrivate() {
-		return isPrivate;
+	public String getType() {
+		return type;
 	}
-	public void setIsPrivate(Integer isPrivate) {
-		this.isPrivate = isPrivate;
+
+	public void setType(String type) {
+		this.type = type;
 	}
+
 	public Integer getSort() {
 		return sort;
 	}
@@ -149,6 +161,38 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		}
 		return valueList;
 	}
-	
+
+	public Integer getIsCanEdit() {
+		return isCanEdit;
+	}
+
+	public void setIsCanEdit(Integer isCanEdit) {
+		this.isCanEdit = isCanEdit;
+	}
+
+	public Integer getIsCanRole() {
+		return isCanRole;
+	}
+
+	public void setIsCanRole(Integer isCanRole) {
+		this.isCanRole = isCanRole;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getRoleName() {
+		return roleName;
+	}
+
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
+	}
+
 	
 }

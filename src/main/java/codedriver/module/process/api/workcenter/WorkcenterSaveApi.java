@@ -17,6 +17,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.constvalue.ProcessWorkcenterType;
 import codedriver.module.process.workcenter.dto.WorkcenterRoleVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
@@ -66,9 +67,9 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		//保存、更新分类
 		JSONArray valueList = jsonObj.getJSONArray("valueList");
 		if(valueList != null && valueList.size()>0) {
-			workcenterVo.setIsPrivate(0);
+			workcenterVo.setType(ProcessWorkcenterType.SYSTEM.getValue());
 		}else {
-			workcenterVo.setIsPrivate(1);
+			workcenterVo.setType(ProcessWorkcenterType.CUSTOM.getValue());
 		}
 		if(uuid == null) {
 			workcenterVo.setConditionConfig(jsonObj.getString("conditionConfig"));

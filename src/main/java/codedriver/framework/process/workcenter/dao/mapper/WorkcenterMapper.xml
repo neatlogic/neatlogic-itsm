@@ -18,7 +18,7 @@
 		SELECT 
 		  pw.`uuid`,
 		  pw.`name`,
-		  pw.`is_private`,
+		  pw.`type`,
 		  pw.`sort`,
 		  pw.`condition_config`,
 		  pwr.`role_name`,
@@ -26,14 +26,17 @@
 		FROM
 		  `process_workcenter` pw 
 		   LEFT JOIN `process_workcenter_role` pwr ON pw.`uuid` = pwr.`workcenter_uuid`
-		WHERE 1=1
-		<if test="name != null">
-			and name = #{name}
-		</if>
-		<if test="uuid != null and uuid != ''">
-			and uuid != #{uuid}
-		</if>
-		ORDER BY pw.`is_private`, pw.`sort` ASC
+		<where>
+			(
+				pwr.`user_id` = #{userId}
+				OR 
+				pwr.`role_name` = #{roleName}
+			)
+			<if test="uuid != null and uuid != ''">
+				and uuid != #{uuid}
+			</if>
+			ORDER BY pw.`sort` ASC
+		</where>
 	</select>
 	
 	<select id="getWorkcenterConditionConfig" resultType="java.util.HashMap">
