@@ -92,7 +92,7 @@ public class ProcessCopyApi extends ApiComponentBase {
 			config = config.replace(processSla.getUuid(), newSlaUuid);
 		}
 		processVo.setConfig(config);
-		
+		processVo.setConfigObj(null);
 		processVo.makeupConfigObj();
 		processService.saveProcess(processVo);
 		processVo.setConfig(null);
