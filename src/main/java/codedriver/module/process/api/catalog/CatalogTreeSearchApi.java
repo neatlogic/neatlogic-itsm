@@ -1,5 +1,6 @@
 package codedriver.module.process.api.catalog;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -99,13 +100,16 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		}
 		
 		ITree root = uuidKeyMap.get(ITree.ROOT_UUID);
-		
+		root.setName("所有服务类型");
 		List<ITree> resultChildren = root.getChildren();
 		root.setChildren(null);
 		if(ITree.ROOT_UUID.equals(catalogUuid)) {
 			root.setSelected(true);
 		}else {
 			root.setSelected(false);
+		}
+		if(resultChildren == null) {
+			resultChildren = new ArrayList<>();
 		}
 		resultChildren.add(root);
 		return resultChildren;

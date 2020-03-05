@@ -57,7 +57,7 @@ public class ProcessExportApi extends BinaryStreamApiComponentBase {
 		}	
 		ProcessVo processVo = processMapper.getProcessByUuid(uuid);
 		
-		//设置导出文件名, 表单名称_版本号.formversion
+		//设置导出文件名
 		String fileNameEncode = processVo.getName() + ".process";
 		Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
 		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
