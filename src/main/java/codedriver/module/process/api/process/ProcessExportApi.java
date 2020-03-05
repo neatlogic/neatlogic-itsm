@@ -66,7 +66,9 @@ public class ProcessExportApi extends BinaryStreamApiComponentBase {
 			fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
 		}
 
-		response.setContentType("aplication/x-msdownload");
+		//response.setContentType("aplication/x-msdownload");
+		//response.setContentType("aplication/octet-stream");
+		
 		response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
 		
 		//获取序列化字节数组
@@ -75,6 +77,7 @@ public class ProcessExportApi extends BinaryStreamApiComponentBase {
 		oos.writeObject(processVo);
 		
 		ServletOutputStream os = null;
+		System.out.println("response.getCharacterEncoding():"+response.getCharacterEncoding());
 		os = response.getOutputStream();
 		IOUtils.write(baos.toByteArray(), os);
 		if (os != null) {

@@ -59,6 +59,13 @@ public class PrioritySaveApi extends ApiComponentBase {
 			throw new PriorityNameRepeatException(priorityVo.getName());
 		}
 		
+		Integer sort = priorityMapper.getMaxSort();
+		if(sort == null) {
+			sort = 0;
+		}else {
+			sort++;
+		}
+		priorityVo.setSort(sort);
 		String uuid = jsonObj.getString("uuid");
 		if(uuid != null) {
 			if(priorityMapper.checkPriorityIsExists(uuid) == 0) {
