@@ -100,7 +100,7 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		}
 		
 		ITree root = uuidKeyMap.get(ITree.ROOT_UUID);
-		root.setName("所有服务类型");
+
 		List<ITree> resultChildren = root.getChildren();
 		root.setChildren(null);
 		if(ITree.ROOT_UUID.equals(catalogUuid)) {
