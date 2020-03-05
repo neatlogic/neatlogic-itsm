@@ -1,54 +1,55 @@
-package codedriver.module.process.api.workcenter;
+package codedriver.module.process.api.priority;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
+import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-
-@Transactional
+import codedriver.module.process.dto.PriorityVo;
 @Service
-public class WorkcenterDeleteApi extends ApiComponentBase {
-
+public class PriorityGetApi extends ApiComponentBase {
+	
 	@Autowired
-	WorkcenterMapper workcenterMapper;
+	private PriorityMapper priorityMapper;
 	
 	@Override
 	public String getToken() {
-		return "workcenter/delete";
+		return "process/priority/get";
 	}
 
 	@Override
 	public String getName() {
-		return "工单中心分类删除接口";
+		return "优先级信息获取接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-
+	
 	@Input({
-		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid",isRequired = true)
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "优先级uuid")
 	})
 	@Output({
-		
+		@Param(name="Return", explode = PriorityVo.class, desc="优先级信息")
 	})
-	@Description(desc = "工单中心分类删除接口")
+	@Description(desc = "优先级信息获取接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		workcenterMapper.deleteWorkcenterRoleByUuid(uuid);
-		workcenterMapper.deleteWorkcenterByUuid(uuid);
-		return null;
+		PriorityVo priority = priorityMapper.getPriorityByUuid(uuid);
+		if(priority == null) {
+			throw new PriorityNotFoundException(uuid);
+		}
+		return priority;
 	}
 
 }

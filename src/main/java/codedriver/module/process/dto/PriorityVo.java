@@ -2,20 +2,23 @@ package codedriver.module.process.dto;
 
 import java.util.UUID;
 
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.restful.annotation.EntityField;
 
 public class PriorityVo extends BasePageVo {
 	
+	@EntityField(name = "优先级uuid", type = ApiParamType.STRING)
 	private String uuid;
-	
+	@EntityField(name = "名称", type = ApiParamType.STRING)
 	private String name;
-	
+	@EntityField(name = "状态", type = ApiParamType.INTEGER)
 	private Integer isActive;
-	
+	@EntityField(name = "图标", type = ApiParamType.STRING)
 	private String icon;
-	
+	@EntityField(name = "颜色", type = ApiParamType.STRING)
 	private String color;
-	
+	@EntityField(name = "描述", type = ApiParamType.STRING)
 	private String desc;
 
 	private transient String keyword;

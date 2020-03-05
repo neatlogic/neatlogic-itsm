@@ -1,6 +1,7 @@
 package codedriver.module.process.workcenter.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +13,6 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.dto.RoleVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.restful.annotation.EntityField;
 
@@ -36,8 +36,10 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	@JSONField(serialize = false)
 	@EntityField(name = "显示的字段", type = ApiParamType.JSONARRAY)
 	private JSONArray headerList;
+	@JSONField(serialize = false)
+	private List<WorkcenterRoleVo> workcenterRoleList;
 	@EntityField(name = "角色列表", type = ApiParamType.JSONARRAY)
-	private List<RoleVo> roleList;
+	private List<String> valueList;
 	private List<WorkcenterConditionGroupVo> conditionGroupList;
 	private List<WorkcenterConditionGroupRelVo> conditionGroupRelList;
 	
@@ -81,12 +83,14 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		this.name = name;
 	}
 	
-	public List<RoleVo> getRoleList() {
-		return roleList;
+	public List<WorkcenterRoleVo> getWorkcenterRoleList() {
+		return workcenterRoleList;
 	}
-	public void setRoleList(List<RoleVo> roleList) {
-		this.roleList = roleList;
+
+	public void setWorkcenterRoleList(List<WorkcenterRoleVo> workcenterRoleList) {
+		this.workcenterRoleList = workcenterRoleList;
 	}
+
 	public Integer getIsPrivate() {
 		return isPrivate;
 	}
@@ -130,6 +134,20 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 
 	public void setCount(Integer count) {
 		this.count = count;
+	}
+
+	public List<String> getValueList() {
+		if(valueList == null) {
+			valueList = new ArrayList<String>();
+			for(WorkcenterRoleVo workcenterRoleVo : this.workcenterRoleList) {
+				if(workcenterRoleVo.getRoleName() !=null) {
+					valueList.add("role#" + workcenterRoleVo.getRoleName());
+				}else if(workcenterRoleVo.getUserId() !=null){
+					valueList.add("user#" + workcenterRoleVo.getUserId());
+				}
+			}
+		}
+		return valueList;
 	}
 	
 	

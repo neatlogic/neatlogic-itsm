@@ -182,11 +182,11 @@ public class ProcessVo extends BasePageVo implements Serializable {
 			this.stepList = new ArrayList<>();
 			for (int i = 0; i < stepList.size(); i++) {
 				JSONObject stepObj = stepList.getJSONObject(i);
-				JSONObject stepConfigObj = stepObj.getJSONObject("stepConfig");
+				
 				ProcessStepVo processStepVo = new ProcessStepVo();
 				this.stepList.add(processStepVo);
 				processStepVo.setProcessUuid(this.getUuid());
-				processStepVo.setConfig(stepConfigObj.toJSONString());
+				processStepVo.setConfig(stepObj.getString("stepConfig"));
 
 				String uuid = stepObj.getString("uuid");
 				if (StringUtils.isNotBlank(uuid)) {
@@ -203,7 +203,10 @@ public class ProcessVo extends BasePageVo implements Serializable {
 					processStepVo.setType(ProcessStepHandler.getType(handler));
 					IProcessStepHandler procssStepHandler = ProcessStepHandlerFactory.getHandler(handler);
 					if (procssStepHandler != null) {
-						procssStepHandler.makeupProcessStep(processStepVo, stepConfigObj);
+						JSONObject stepConfigObj = stepObj.getJSONObject("stepConfig");
+						if(stepConfigObj != null) {
+							procssStepHandler.makeupProcessStep(processStepVo, stepConfigObj);
+						}
 					} else {
 						throw new ProcessStepHandlerNotFoundException(handler);
 					}

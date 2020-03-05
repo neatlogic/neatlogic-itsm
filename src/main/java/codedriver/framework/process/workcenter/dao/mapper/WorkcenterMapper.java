@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
+import codedriver.module.process.workcenter.dto.WorkcenterRoleVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 public interface WorkcenterMapper {
@@ -19,7 +20,7 @@ public interface WorkcenterMapper {
 	
 	public Integer insertWorkcenter(WorkcenterVo workcenterVo);
 	
-	public Integer insertWorkcenterRole(@Param("workcenterUuid") String workcenterUuid,@Param("roleName") String roleName);
+	public Integer insertWorkcenterRole(WorkcenterRoleVo workcenterRoleVo); 
 	
 	public Integer updateWorkcenter(WorkcenterVo workcenterVo);
 }

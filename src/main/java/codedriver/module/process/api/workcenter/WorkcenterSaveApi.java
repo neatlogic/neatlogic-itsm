@@ -17,6 +17,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.workcenter.dto.WorkcenterRoleVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Transactional
@@ -45,7 +46,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid"),
 		@Param(name="name", type = ApiParamType.STRING, desc="分类名",isRequired = true,xss = true),
 		@Param(name="conditionConfig", type = ApiParamType.JSONOBJECT, desc="分类过滤配置，json格式",isRequired = true),
-		@Param(name="roleList", type = ApiParamType.JSONARRAY, desc="授权列表", isRequired = true)
+		@Param(name="valueList", type = ApiParamType.JSONARRAY, desc="授权列表", isRequired = true)
 	})
 	@Output({
 		
@@ -63,8 +64,8 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 			throw new WorkcenterNameRepeatException(name);
 		}
 		//保存、更新分类
-		JSONArray roleList = jsonObj.getJSONArray("roleList");
-		if(roleList != null && roleList.size()>0) {
+		JSONArray valueList = jsonObj.getJSONArray("valueList");
+		if(valueList != null && valueList.size()>0) {
 			workcenterVo.setIsPrivate(0);
 		}else {
 			workcenterVo.setIsPrivate(1);
@@ -77,8 +78,17 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 			workcenterMapper.updateWorkcenter(workcenterVo);
 		}
 		//更新角色
-		for(Object roleName:roleList) {
-			workcenterMapper.insertWorkcenterRole(workcenterVo.getUuid(),roleName.toString());
+		for(Object value:valueList) {
+			String[] roles = value.toString().split("#");
+			WorkcenterRoleVo workcenterRoleVo = new WorkcenterRoleVo();
+			workcenterRoleVo.setWorkcenterUuid(workcenterVo.getUuid());
+			if(roles[0].equals("role")) {
+				workcenterRoleVo.setRoleName(roles[1]);
+			}else if(roles[0].equals("user")) {
+				workcenterRoleVo.setUserId(roles[1]);
+			}
+			workcenterMapper.insertWorkcenterRole(workcenterRoleVo);
+			
 		}
 		return null;
 	}
