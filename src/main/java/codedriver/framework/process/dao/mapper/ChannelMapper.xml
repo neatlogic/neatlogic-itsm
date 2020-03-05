@@ -99,6 +99,7 @@
 		c.`color`,
 		c.`desc`,
 		c.`sort`,
+		c.`sla`,
 		c.`allow_desc` AS allowDesc,
 		c.`help`,
 		c.`is_active_help` AS isActiveHelp,
@@ -228,6 +229,7 @@
 		`color`,
 		`desc`,
 		`sort`,
+		`sla`,
 		`allow_desc`,
 		`help`,
 		`is_active_help`
@@ -242,6 +244,7 @@
 		#{color},
 		#{desc},
 		#{sort},
+		#{sla},
 		#{allowDesc},
 		#{help},
 		#{isActiveHelp}

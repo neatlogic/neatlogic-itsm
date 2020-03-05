@@ -61,8 +61,8 @@ public class FormExportApi extends BinaryStreamApiComponentBase {
 		List<FormVersionVo> formVersionLsit = formMapper.getFormVersionByFormUuid(uuid);
 		formVo.setVersionList(formVersionLsit);		
 		
-		//设置导出文件名, 表单名称_版本号.formversion
-		String fileNameEncode = formVo.getName() + ".form";
+		//设置导出文件名, 表单名称_版本号
+		String fileNameEncode = formVo.getName();
 		Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
 		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器

@@ -62,6 +62,9 @@ public class ChannelVo extends BasePageVo implements ITree {
 	@EntityField(name = "是否激活描述帮助", type = ApiParamType.INTEGER)
 	private Integer isActiveHelp;
 
+	@EntityField(name = "时效", type = ApiParamType.INTEGER)
+	private Integer sla;
+	
 	private transient ITree parent;
 
 	private transient Integer sort;
@@ -280,6 +283,14 @@ public class ChannelVo extends BasePageVo implements ITree {
 
 	public void setIsActiveHelp(Integer isActiveHelp) {
 		this.isActiveHelp = isActiveHelp;
+	}
+
+	public Integer getSla() {
+		return sla;
+	}
+
+	public void setSla(Integer sla) {
+		this.sla = sla;
 	}
 
 	@Override
