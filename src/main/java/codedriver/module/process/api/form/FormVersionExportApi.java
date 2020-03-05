@@ -71,8 +71,8 @@ public class FormVersionExportApi extends BinaryStreamApiComponentBase {
 			throw new FormIllegalParameterException("表单版本：'" + formVersionUuid + "'不属于表单：'" + uuid + "'的版本");
 		}
 		formVersion.setFormName(formVo.getName());
-		//设置导出文件名, 表单名称_版本号.formversion
-		String fileNameEncode = formVersion.getFormName() + "_" + formVersion.getVersion()+".formversion";
+		//设置导出文件名, 表单名称_版本号
+		String fileNameEncode = formVersion.getFormName() + "_" + formVersion.getVersion();
 		Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
 		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器

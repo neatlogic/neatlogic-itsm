@@ -58,7 +58,7 @@ public class ProcessExportApi extends BinaryStreamApiComponentBase {
 		ProcessVo processVo = processMapper.getProcessByUuid(uuid);
 		
 		//设置导出文件名
-		String fileNameEncode = processVo.getName() + ".process";
+		String fileNameEncode = processVo.getName();
 		Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
 		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
