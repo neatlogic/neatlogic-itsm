@@ -26,7 +26,7 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String getHandler() {
+	public String getHandler(String processWorkcenterConditionType) {
 		return ProcessFormHandlerType.USERSELECT.toString();
 	}
 	
@@ -37,7 +37,9 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 
 	@Override
 	public JSONObject getConfig() {
-		return null;
+		JSONObject returnObj = new JSONObject();
+		returnObj.put("isMultiple", true);
+		return returnObj;
 	}
 
 	@Override

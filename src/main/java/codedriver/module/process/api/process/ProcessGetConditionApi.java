@@ -22,7 +22,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandler;
-import codedriver.module.process.constvalue.ProcessFormHandlerType;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.dto.FormAttributeVo;
 
 @Service
@@ -48,7 +48,8 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "formUuid", type = ApiParamType.STRING, isRequired = false, desc = "流程绑定表单的uuid")
+		@Param(name = "formUuid", type = ApiParamType.STRING, desc = "流程绑定表单的uuid"),
+		@Param(name = "conditionModel", type = ApiParamType.STRING, desc = "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件;默认custom"),
 	})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "组件uuid"),
@@ -63,7 +64,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray resultArray = new JSONArray();
-		
+		String conditionModel = jsonObj.getString("conditionModel") == null?ProcessWorkcenterConditionModel.CUSTOM.getValue():jsonObj.getString("conditionModel");
 		//固定字段条件
 		Map<String, IWorkcenterCondition> workcenterConditionMap = WorkcenterConditionFactory.getConditionComponentMap();
 		for (Map.Entry<String, IWorkcenterCondition> entry : workcenterConditionMap.entrySet()) {
@@ -71,18 +72,10 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			JSONObject commonObj = new JSONObject();
 			commonObj.put("handler", condition.getName());
 			commonObj.put("handlerName", condition.getDisplayName());
-			String handlerType = condition.getHandler();
-			if(handlerType.equals("select")) {
+			if(condition.getConfig() != null) {
 				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
-			}else if(handlerType.equals("radio")) {
-				commonObj.put("isMultiple",false);
-			}else if(handlerType.equals("checkbox")) {
-				commonObj.put("isMultiple",true);
 			}
-			if(handlerType.equals("select")||handlerType.equals("radio")||handlerType.equals("checkbox")) {
-				handlerType = ProcessFormHandlerType.SELECT.toString();
-			}
-			commonObj.put("handlerType", handlerType);
+			commonObj.put("handlerType", condition.getHandler(conditionModel));
 			commonObj.put("type", condition.getType());
 			commonObj.put("config", condition.getConfig());
 			JSONArray expressiobArray = new JSONArray();
@@ -108,19 +101,18 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 				formObj.put("config",configObj);
 				formObj.put("handler",handler);
 				formObj.put("handlerName", ProcessFormHandler.getHandlerName(handler));
-				String handlerType = ProcessFormHandler.getType(handler).toString();
-				if(handlerType.equals("select")||handlerType.equals("radio")||handlerType.equals("checkbox")) {
-					formObj.put("handlerType", ProcessFormHandlerType.SELECT.toString());
-				}else {
-					formObj.put("handlerType", handlerType);
-				}
+				String handlerType = ProcessFormHandler.getType(handler,ProcessWorkcenterConditionModel.SIMPLE.getValue()).toString();
 				if(handlerType.equals("select")) {
 					formObj.put("isMultiple",configObj.getString("isMultiple"));
-				}else if(handlerType.equals("radio")) {
-					formObj.put("isMultiple",false);
-				}else if(handlerType.equals("checkbox")) {
-					formObj.put("isMultiple",true);
+				} 
+				if(conditionModel.equals(ProcessWorkcenterConditionModel.CUSTOM.getValue())) {
+					if(handlerType.equals("radio")) {
+						formObj.put("isMultiple",false);
+					}else if(handlerType.equals("checkbox")) {
+						formObj.put("isMultiple",true);
+					}
 				}
+				formObj.put("handlerType", ProcessFormHandler.getType(handler,conditionModel).toString());
 				formObj.put("type", "form");
 				JSONArray expressiobArray = new JSONArray();
 				for(ProcessExpression expression:ProcessFormHandler.getExpressionList(handler)) {

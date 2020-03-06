@@ -26,7 +26,7 @@ public class ProcessTaskTitleCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String getHandler() {
+	public String getHandler(String processWorkcenterConditionType) {
 		return ProcessFormHandlerType.INPUT.toString();
 	}
 	

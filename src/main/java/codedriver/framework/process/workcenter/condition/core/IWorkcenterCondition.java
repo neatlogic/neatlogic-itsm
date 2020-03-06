@@ -25,12 +25,13 @@ public interface IWorkcenterCondition {
 	public String getDisplayName();
 
 	/**
-	 * @Description: 获取控件类型
-	 * @Param: 
+	 * @Description: 获取控件类型，
+	 * @Param: simple:目前用于用于工单中心条件过滤简单模式
+	 *         custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件
 	 * @return: java.lang.String
 	 * @Date: 2020/2/11
 	 */
-	public String getHandler();
+	public String getHandler(String processWorkcenterConditionType);
 	
 	/**
 	 * @Description: 获取类型

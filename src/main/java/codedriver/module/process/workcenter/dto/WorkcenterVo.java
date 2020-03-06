@@ -51,14 +51,18 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	
 	//params
 	private String userId;
-	private String roleName;
+	private List<String> roleNameList;
 	
 	public WorkcenterVo() {
-		super();
 	}
 	
 	public WorkcenterVo(String _name) {
 		this.name =_name;
+	}
+	
+	public WorkcenterVo(String _userId,List<String> _roleNameList) {
+		this.userId = _userId;
+		this.roleNameList = _roleNameList;
 	}
 	
 	public WorkcenterVo(JSONObject jsonObj) {
@@ -186,13 +190,12 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		this.userId = userId;
 	}
 
-	public String getRoleName() {
-		return roleName;
+	public List<String> getRoleNameList() {
+		return roleNameList;
 	}
 
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
+	public void setRoleNameList(List<String> roleNameList) {
+		this.roleNameList = roleNameList;
 	}
 
-	
 }

@@ -27,7 +27,7 @@ public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String getHandler() {
+	public String getHandler(String processWorkcenterConditionType) {
 		return ProcessFormHandlerType.CHECKBOX.toString();
 	}
 	
@@ -50,6 +50,7 @@ public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
 		jsonList.add(jsonObj2);
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("dataList", jsonList);
+		returnObj.put("isMultiple", true);
 		return returnObj;
 	}
 

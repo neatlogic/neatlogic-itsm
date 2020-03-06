@@ -12,6 +12,7 @@ import codedriver.framework.process.workcenter.condition.core.IWorkcenterConditi
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
 @Component
@@ -28,8 +29,12 @@ public class ProcessTaskStepStatusCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String getHandler() {
-		return ProcessFormHandlerType.CHECKBOX.toString();
+	public String getHandler(String processWorkcenterConditionType) {
+		if(ProcessWorkcenterConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
+			return ProcessFormHandlerType.CHECKBOX.toString();
+		}else {
+			return ProcessFormHandlerType.SELECT.toString();
+		}
 	}
 	
 	@Override
@@ -74,6 +79,7 @@ public class ProcessTaskStepStatusCondition implements IWorkcenterCondition{
 		
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("dataList", jsonList);
+		returnObj.put("isMultiple", true);
 		return returnObj;
 	}
 

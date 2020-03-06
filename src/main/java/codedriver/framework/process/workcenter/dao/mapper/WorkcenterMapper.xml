@@ -5,7 +5,7 @@
 	<resultMap id="workcenterMap" type="codedriver.module.process.workcenter.dto.WorkcenterVo">
 		<id column="uuid" property="uuid" />
 		<result column="name" property="name" />
-		<result column="is_private" property="isPrivate" />
+		<result column="type" property="type" />
 		<result column="sort" property="sort" />
 		<result column="condition_config" property="conditionConfig" />
 		<collection property="workcenterRoleList" ofType="codedriver.module.process.workcenter.dto.WorkcenterRoleVo">
@@ -30,7 +30,10 @@
 			(
 				pwr.`user_id` = #{userId}
 				OR 
-				pwr.`role_name` = #{roleName}
+				pwr.`role_name` in
+				<foreach collection="roleNameList" item="roleName"  open="(" separator="," close=")">
+					#{roleName}
+				</foreach>
 			)
 			<if test="uuid != null and uuid != ''">
 				and uuid != #{uuid}

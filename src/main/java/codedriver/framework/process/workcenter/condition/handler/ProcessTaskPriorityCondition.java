@@ -13,6 +13,7 @@ import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.dto.PriorityVo;
 import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
@@ -32,8 +33,12 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String getHandler() {
-		return ProcessFormHandlerType.CHECKBOX.toString();
+	public String getHandler(String processWorkcenterConditionType) {
+		if(ProcessWorkcenterConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
+			return ProcessFormHandlerType.CHECKBOX.toString();
+		}else {
+			return ProcessFormHandlerType.SELECT.toString();
+		}
 	}
 	
 	@Override
@@ -55,6 +60,7 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 		}
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("dataList", jsonList);
+		returnObj.put("isMultiple", true);
 		return returnObj;
 	}
 

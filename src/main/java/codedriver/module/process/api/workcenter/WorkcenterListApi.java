@@ -56,12 +56,12 @@ public class WorkcenterListApi extends ApiComponentBase {
 	@Description(desc = "获取工单中心分类接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		List<WorkcenterVo>  workcenterList = workcenterMapper.getWorkcenter(new WorkcenterVo());
+		List<WorkcenterVo>  workcenterList = workcenterMapper.getWorkcenter(new WorkcenterVo(UserContext.get().getUserId(),UserContext.get().getRoleNameList()));
 		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),WORKCENTER_MODIFY.class.getSimpleName()));
 		Iterator<WorkcenterVo> it =workcenterList.iterator();
 	    while (it.hasNext()) {
 	        WorkcenterVo workcenter = it.next();
-			if(workcenter.getType().equals(ProcessWorkcenterType.DEFAULT.getValue())) {
+			if(workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
 				workcenter.setIsCanEdit(0);
 			}else if(!CollectionUtils.isEmpty(userAuthList)&&workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue())){
 				workcenter.setIsCanEdit(1);

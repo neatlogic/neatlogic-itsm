@@ -15,6 +15,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandler;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 
 @Service
 public class FormHandlerGetApi extends ApiComponentBase {
@@ -52,7 +53,7 @@ public class FormHandlerGetApi extends ApiComponentBase {
 			JSONObject formHandlerObj = new JSONObject();
 			formHandlerObj.put("handler", s.getHandler());
 			formHandlerObj.put("handlerName", s.getHandlerName());
-			formHandlerObj.put("handlerType", s.getType().toString());
+			formHandlerObj.put("handlerType", s.getType(ProcessWorkcenterConditionModel.SIMPLE.getValue()).toString());
 			List<ProcessExpression> expressionList = s.getExpressionList();
 			JSONArray expressiobArray = new JSONArray();
 			for(ProcessExpression expression:expressionList) {
