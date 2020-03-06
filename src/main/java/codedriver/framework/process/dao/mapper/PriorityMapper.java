@@ -16,6 +16,8 @@ public interface PriorityMapper {
 
 	public int checkPriorityNameIsRepeat(PriorityVo priorityVo);
 
+	public Integer getMaxSort();
+
 	public int insertPriority(PriorityVo priorityVo);
 
 	public int updatePriority(PriorityVo priorityVo);
