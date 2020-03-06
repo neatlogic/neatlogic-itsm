@@ -62,9 +62,8 @@ public class PrioritySaveApi extends ApiComponentBase {
 		Integer sort = priorityMapper.getMaxSort();
 		if(sort == null) {
 			sort = 0;
-		}else {
-			sort++;
 		}
+		sort++;
 		priorityVo.setSort(sort);
 		String uuid = jsonObj.getString("uuid");
 		if(uuid != null) {
