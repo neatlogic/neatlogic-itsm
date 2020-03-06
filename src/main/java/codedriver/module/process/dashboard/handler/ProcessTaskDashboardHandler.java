@@ -20,7 +20,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 	protected ChartDataVo myGetData(DashboardWidgetVo widgetVo) {
 		ChartDataVo chartDataVo = new ChartDataVo();
 		chartDataVo.setLegendField("year");
-		chartDataVo.setValueField("value");
+		chartDataVo.addValueField("value");
 		for (int i = 0; i < 10; i++) {
 			JSONObject jsonObj = new JSONObject();
 			jsonObj.put("year", Integer.toString(1000 + i));
