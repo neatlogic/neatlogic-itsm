@@ -20,7 +20,9 @@ public class PriorityVo extends BasePageVo {
 	private String color;
 	@EntityField(name = "描述", type = ApiParamType.STRING)
 	private String desc;
-
+	@EntityField(name = "排序", type = ApiParamType.INTEGER)
+	private Integer sort;
+	
 	private transient String keyword;
 	
 	public String getUuid() {
@@ -80,6 +82,14 @@ public class PriorityVo extends BasePageVo {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public Integer getSort() {
+		return sort;
+	}
+
+	public void setSort(Integer sort) {
+		this.sort = sort;
 	}
 
 }

@@ -62,14 +62,13 @@ public class FormExportApi extends BinaryStreamApiComponentBase {
 		formVo.setVersionList(formVersionLsit);		
 		
 		//设置导出文件名, 表单名称_版本号
-		String fileNameEncode = formVo.getName();
+		String fileNameEncode = formVo.getName() + ".form";
 		Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
 		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
 		} else {
 			fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
 		}
-
 		response.setContentType("aplication/x-msdownload");
 		response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
 		
