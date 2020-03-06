@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
 @Component
@@ -28,7 +29,11 @@ public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
-		return ProcessFormHandlerType.CHECKBOX.toString();
+		if(ProcessWorkcenterConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
+			return ProcessFormHandlerType.CHECKBOX.toString();
+		}else {
+			return ProcessFormHandlerType.SELECT.toString();
+		}
 	}
 	
 	@Override
