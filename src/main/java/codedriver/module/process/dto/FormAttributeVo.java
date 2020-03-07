@@ -1,18 +1,33 @@
 package codedriver.module.process.dto;
 
 import java.io.Serializable;
+import java.util.List;
+
+import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.restful.annotation.EntityField;
 
 public class FormAttributeVo implements Serializable {
 	private static final long serialVersionUID = 8282018124626035430L;
+	@EntityField(name = "属性uuid", type = ApiParamType.STRING)
 	private String uuid;
+	@EntityField(name = "表单uuid", type = ApiParamType.STRING)
 	private String formUuid;
+	@EntityField(name = "表单版本uuid", type = ApiParamType.STRING)
 	private String formVersionUuid;
+	@EntityField(name = "属性标签名", type = ApiParamType.STRING)
 	private String label;
+	@EntityField(name = "类型", type = ApiParamType.STRING)
 	private String type;
+	@EntityField(name = "处理器", type = ApiParamType.STRING)
 	private String handler;
+	@EntityField(name = "属性配置", type = ApiParamType.STRING)
 	private String config;
+	@EntityField(name = "属性数据", type = ApiParamType.STRING)
 	private String data;
+	@EntityField(name = "是否必填", type = ApiParamType.BOOLEAN)
 	private boolean isRequired;
+	@EntityField(name = "表达式列表", type = ApiParamType.JSONARRAY)
+	List<ProcessExpressionVo> expressionList;
 	
 	public FormAttributeVo() {
 
@@ -116,6 +131,14 @@ public class FormAttributeVo implements Serializable {
 
 	public void setRequired(boolean isRequired) {
 		this.isRequired = isRequired;
+	}
+
+	public List<ProcessExpressionVo> getExpressionList() {
+		return expressionList;
+	}
+
+	public void setExpressionList(List<ProcessExpressionVo> expressionList) {
+		this.expressionList = expressionList;
 	}
 
 }
