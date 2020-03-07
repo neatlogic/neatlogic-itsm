@@ -29,17 +29,39 @@
 		<where>
 			(
 				pwr.`user_id` = #{userId}
-				OR 
-				pwr.`role_name` in
-				<foreach collection="roleNameList" item="roleName"  open="(" separator="," close=")">
-					#{roleName}
-				</foreach>
+				<if test="roleNameList !=null and roleNameList.length>0">
+					OR 
+					pwr.`role_name` in
+					<foreach collection="roleNameList" item="roleName"  open="(" separator="," close=")">
+						#{roleName}
+					</foreach>
+				</if>
 			)
 			<if test="uuid != null and uuid != ''">
 				and uuid != #{uuid}
 			</if>
-			ORDER BY pw.`sort` ASC
 		</where>
+		ORDER BY pw.`sort` ASC
+		
+	</select>
+	
+	<select id="getWorkcenterByNameAndUuid"  parameterType="java.lang.String" resultMap="workcenterMap">
+		SELECT 
+		  pw.`uuid`,
+		  pw.`name`,
+		  pw.`type`,
+		  pw.`sort`,
+		  pw.`condition_config`,
+		  pwr.`role_name`,
+		  pwr.`user_id`
+		FROM
+		 	`process_workcenter` pw 
+		   	LEFT JOIN `process_workcenter_role` pwr ON pw.`uuid` = pwr.`workcenter_uuid`
+		WHERE
+			pw.`name` = #{name}
+			<if test="uuid != null and uuid != ''">
+				and uuid != #{uuid}
+			</if>
 	</select>
 	
 	<select id="getWorkcenterConditionConfig" resultType="java.util.HashMap">
@@ -69,7 +91,7 @@
 		INSERT INTO `process_workcenter` (
 		  `uuid`,
 		  `name`,
-		  `is_private`,
+		  `type`,
 		  `sort`,
 		  `condition_config`
 		) 
@@ -77,7 +99,7 @@
 		  (
 		    #{uuid},
 		    #{name},
-		    #{isPrivate},
+		    #{type},
 		    #{sort},
 		    #{conditionConfig}
 		  ) ;
@@ -102,7 +124,7 @@
 		  `process_workcenter` 
 		SET
 		  `name` = #{name},
-		  `is_private` = #{isPrivate}
+		   `type` = #{type}
 		WHERE `uuid` = #{uuid} ;
 	</update>
 	

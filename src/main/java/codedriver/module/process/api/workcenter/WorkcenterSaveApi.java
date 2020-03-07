@@ -2,6 +2,7 @@ package codedriver.module.process.api.workcenter;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.exception.workcenter.WorkcenterNameRepeatException;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
 import codedriver.framework.restful.annotation.Description;
@@ -60,8 +62,8 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		WorkcenterVo workcenterVo = new WorkcenterVo(name);
 		//重复name判断
 		workcenterVo.setUuid(uuid);
-		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenter(workcenterVo);
-		if(workcenterList.size()>0) {
+		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(name,uuid);
+		if(!CollectionUtils.isEmpty(workcenterList)) {
 			throw new WorkcenterNameRepeatException(name);
 		}
 		//保存、更新分类
