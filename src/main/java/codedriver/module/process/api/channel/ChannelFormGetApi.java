@@ -1,7 +1,9 @@
 package codedriver.module.process.api.channel;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +22,12 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandler;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.FormAttributeVo;
 import codedriver.module.process.dto.FormVo;
+import codedriver.module.process.dto.ProcessExpressionVo;
 import codedriver.module.process.dto.ProcessVo;
 @Service
 public class ChannelFormGetApi extends ApiComponentBase {
@@ -53,7 +57,7 @@ public class ChannelFormGetApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "channelUuid", type = ApiParamType.LONG, isRequired = true, desc = "服务uuid")
+		@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid")
 	})
 	@Output({
 		@Param(explode = FormAttributeVo[].class, desc = "表单属性列表")
@@ -85,7 +89,15 @@ public class ChannelFormGetApi extends ApiComponentBase {
 		}
 		List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 		for(FormAttributeVo formAttributeVo : formAttributeList) {
-			formAttributeVo.setExpressionList(ProcessFormHandler.getExpressionList(formAttributeVo.getHandler()));
+			List<ProcessExpression> processExpressionList = ProcessFormHandler.getExpressionList(formAttributeVo.getHandler());
+			if(CollectionUtils.isEmpty(processExpressionList)) {
+				continue;
+			}
+			List<ProcessExpressionVo> expressionList = new ArrayList<>();
+			for(ProcessExpression processExpression : processExpressionList) {
+				expressionList.add(new ProcessExpressionVo(processExpression));
+			}
+			formAttributeVo.setExpressionList(expressionList);
 		}
 		return formAttributeList;
 	}

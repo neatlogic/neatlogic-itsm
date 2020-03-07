@@ -5,7 +5,6 @@ import java.util.List;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.restful.annotation.EntityField;
-import codedriver.module.process.constvalue.ProcessExpression;
 
 public class FormAttributeVo implements Serializable {
 	private static final long serialVersionUID = 8282018124626035430L;
@@ -28,7 +27,7 @@ public class FormAttributeVo implements Serializable {
 	@EntityField(name = "是否必填", type = ApiParamType.BOOLEAN)
 	private boolean isRequired;
 	@EntityField(name = "表达式列表", type = ApiParamType.JSONARRAY)
-	List<ProcessExpression> expressionList;
+	List<ProcessExpressionVo> expressionList;
 	
 	public FormAttributeVo() {
 
@@ -134,11 +133,11 @@ public class FormAttributeVo implements Serializable {
 		this.isRequired = isRequired;
 	}
 
-	public List<ProcessExpression> getExpressionList() {
+	public List<ProcessExpressionVo> getExpressionList() {
 		return expressionList;
 	}
 
-	public void setExpressionList(List<ProcessExpression> expressionList) {
+	public void setExpressionList(List<ProcessExpressionVo> expressionList) {
 		this.expressionList = expressionList;
 	}
 
