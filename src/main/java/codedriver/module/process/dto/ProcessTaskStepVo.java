@@ -7,18 +7,25 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.restful.annotation.EntityField;
 
 public class ProcessTaskStepVo extends BasePageVo {
+	@EntityField(name = "工单步骤id", type = ApiParamType.LONG)
 	private Long id;
+	@EntityField(name = "工单id", type = ApiParamType.LONG)
 	private Long processTaskId;
 	private Long fromProcessTaskStepId;
 	private Long startProcessTaskStepId;
 	private String processUuid;
 	private String processStepUuid;
+	@EntityField(name = "步骤名称", type = ApiParamType.STRING)
 	private String name;
+	@EntityField(name = "状态", type = ApiParamType.STRING)
 	private String status;
-	private String statusName;
+	@EntityField(name = "状态", type = ApiParamType.STRING)
+	private String statusText;
 	private String handler;
 	private String type;
 	private String formUuid;
@@ -168,12 +175,12 @@ public class ProcessTaskStepVo extends BasePageVo {
 		this.status = status;
 	}
 
-	public String getStatusName() {
-		return statusName;
+	public String getStatusText() {
+		return statusText;
 	}
 
-	public void setStatusName(String statusName) {
-		this.statusName = statusName;
+	public void setStatusText(String statusText) {
+		this.statusText = statusText;
 	}
 
 	public Integer getIsActive() {
