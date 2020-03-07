@@ -80,7 +80,7 @@ public class ChannelFormGetApi extends ApiComponentBase {
 		}
 		String formUuid = process.getFormUuid();
 		if(formUuid == null) {
-			throw new FormIllegalParameterException("流程图:'" + processUuid + "'没有绑定表单");
+			return null;
 		}
 		FormVo formVo = formMapper.getFormByUuid(formUuid);
 		//判断表单是否存在
