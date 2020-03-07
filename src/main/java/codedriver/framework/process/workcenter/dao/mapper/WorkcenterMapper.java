@@ -12,6 +12,8 @@ public interface WorkcenterMapper {
 	
 	public List<WorkcenterVo> getWorkcenter(WorkcenterVo workcenterVo);
 	
+	public List<WorkcenterVo> getWorkcenterByNameAndUuid(@Param("name")String workcenterName,@Param("uuid")String workcenterUuid);
+	
 	public Map<String,String> getWorkcenterConditionConfig();
 	
 	public Integer deleteWorkcenterByUuid(@Param("workcenterUuid")String workcenterUuid);
