@@ -27,18 +27,15 @@
 		  `process_workcenter` pw 
 		   LEFT JOIN `process_workcenter_role` pwr ON pw.`uuid` = pwr.`workcenter_uuid`
 		<where>
-			(
+			<if test="userId != null and userId != ''">
 				pwr.`user_id` = #{userId}
-				<if test="roleNameList !=null and roleNameList.length>0">
-					OR 
-					pwr.`role_name` in
-					<foreach collection="roleNameList" item="roleName"  open="(" separator="," close=")">
-						#{roleName}
-					</foreach>
-				</if>
-			)
-			<if test="uuid != null and uuid != ''">
-				and uuid != #{uuid}
+			</if>
+			<if test="roleNameList !=null and roleNameList.size()>0">
+				OR 
+				pwr.`role_name` in
+				<foreach collection="roleNameList" item="roleName"  open="(" separator="," close=")">
+					#{roleName}
+				</foreach>
 			</if>
 		</where>
 		ORDER BY pw.`sort` ASC
