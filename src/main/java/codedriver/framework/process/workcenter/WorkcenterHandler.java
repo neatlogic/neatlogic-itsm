@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.query.QueryResult;
@@ -15,7 +13,7 @@ import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
-@Service
+//@Service
 public class WorkcenterHandler {
 
 	public static JSONObject doSearch(WorkcenterVo workcenterVo) {
