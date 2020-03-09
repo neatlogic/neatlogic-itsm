@@ -12,30 +12,31 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 @Service
-public class ProcessTaskStepListApi extends ApiComponentBase {
+public class ProcessTaskStepGetApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "processtask/step/list";
+		return "processtask/step/get";
 	}
 
 	@Override
 	public String getName() {
-		return "工单步骤列表接口";
+		return "工单步骤基本信息获取接口";
 	}
-
+	
+	@Input({
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id")
+	})
+	@Output({
+		@Param(explode = ProcessTaskStepVo.class, desc = "工单步骤信息")
+	})
+	@Description(desc = "工单步骤基本信息获取接口，当前步骤名称、激活时间、状态、处理人、协助处理人、处理时效、表单属性显示控制等")
 	@Override
 	public String getConfig() {
 		return null;
 	}
 
-	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
-	})
-	@Output({
-		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
-	})
-	@Description(desc = "工单步骤列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		return null;

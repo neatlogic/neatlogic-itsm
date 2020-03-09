@@ -32,22 +32,17 @@ public class ProcessTaskRecoverApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "工单恢复接口";
 	}
 
 	@Override
 	public String getConfig() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	@Input({
-			@Param(name = "processTaskId",
-					type = ApiParamType.LONG,
-					desc = "工单Id",
-					isRequired = true)
+			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id")
 	})
 	@Output({})
 	@Description(desc = "工单恢复接口")

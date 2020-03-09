@@ -36,26 +36,20 @@ public class ProcessTaskTransferApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "工单转交接口";
 	}
 
 	@Override
 	public String getConfig() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	@Input({
-			@Param(name = "processTaskId",
-					type = ApiParamType.LONG,
-					desc = "工单Id",
-					isRequired = true),
-			@Param(name = "processTaskStepId",
-			type = ApiParamType.LONG,
-			desc = "工单步骤Id",
-			isRequired = true)
+			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
+			@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤Id"),
+			@Param(name = "userId", type = ApiParamType.STRING, isRequired = true, desc = "新处理人userId"),
+			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "原因")
 	})
 	@Output({})
 	@Description(desc = "工单转交接口")

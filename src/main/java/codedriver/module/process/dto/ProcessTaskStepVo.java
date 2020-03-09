@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -62,6 +63,8 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private List<ProcessTaskStepFormAttributeVo> formAttributeList;
 	private JSONObject paramObj;
 
+	private Map<String, String> formAttributeActionMap;
+	
 	public ProcessTaskStepVo() {
 
 	}
@@ -433,6 +436,14 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setConfigHash(String configHash) {
 		this.configHash = configHash;
+	}
+
+	public Map<String, String> getFormAttributeActionMap() {
+		return formAttributeActionMap;
+	}
+
+	public void setFormAttributeActionMap(Map<String, String> formAttributeActionMap) {
+		this.formAttributeActionMap = formAttributeActionMap;
 	}
 
 }

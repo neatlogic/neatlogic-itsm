@@ -2,6 +2,7 @@ package codedriver.module.process.dto;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -21,8 +22,8 @@ public class ProcessTaskVo {
 	private String channelUuid;
 	@EntityField(name = "优先级uuid", type = ApiParamType.STRING)
 	private String priorityUuid;
-	@EntityField(name = "优先级", type = ApiParamType.STRING)
-	private String priority;
+	@EntityField(name = "优先级名", type = ApiParamType.STRING)
+	private String priorityName;
 	@EntityField(name = "工单流程图信息", type = ApiParamType.STRING)
 	private String config;
 	private String configPath;
@@ -41,7 +42,7 @@ public class ProcessTaskVo {
 	private String reporterName;
 	@EntityField(name = "开始时间", type = ApiParamType.LONG)
 	private Date startTime;
-	@EntityField(name = "开始结束", type = ApiParamType.LONG)
+	@EntityField(name = "结束时间", type = ApiParamType.LONG)
 	private Date endTime;
 	@EntityField(name = "耗时(秒)", type = ApiParamType.LONG)
 	private Long timeCost;
@@ -55,6 +56,12 @@ public class ProcessTaskVo {
 	
 	@EntityField(name = "描述内容", type = ApiParamType.STRING)
 	private String content;
+	@EntityField(name = "优先级信息", type = ApiParamType.JSONOBJECT)
+	private PriorityVo priority;
+	@EntityField(name = "工单表单信息", type = ApiParamType.STRING)
+	private String formConfig;
+	@EntityField(name = "工单表单属性值", type = ApiParamType.JSONOBJECT)
+	Map<String, String> formAttributeDataMap;
 	
 	public ProcessTaskVo() {
 
@@ -253,12 +260,12 @@ public class ProcessTaskVo {
 		this.priorityUuid = priorityUuid;
 	}
 
-	public String getPriority() {
-		return priority;
+	public String getPriorityName() {
+		return priorityName;
 	}
 
-	public void setPriority(String priority) {
-		this.priority = priority;
+	public void setPriorityName(String priorityName) {
+		this.priorityName = priorityName;
 	}
 
 	public String getContent() {
@@ -267,6 +274,38 @@ public class ProcessTaskVo {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	public PriorityVo getPriority() {
+		return priority;
+	}
+
+	public void setPriority(PriorityVo priority) {
+		this.priority = priority;
+	}
+
+	public String getFormConfig() {
+		return formConfig;
+	}
+
+	public void setFormConfig(String formConfig) {
+		this.formConfig = formConfig;
+	}
+
+	public Map<String, String> getFormAttributeDataMap() {
+		return formAttributeDataMap;
+	}
+
+	public void setFormAttributeDataMap(Map<String, String> formAttributeDataMap) {
+		this.formAttributeDataMap = formAttributeDataMap;
 	}
 
 }
