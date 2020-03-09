@@ -20,9 +20,13 @@ public interface WorkcenterMapper {
 	
 	public Integer deleteWorkcenterRoleByUuid(@Param("workcenterUuid")String workcenterUuid);
 	
+	public Integer deleteWorkcenterOwnerByUuid(@Param("workcenterUuid")String workcenterUuid);
+	
 	public Integer insertWorkcenter(WorkcenterVo workcenterVo);
 	
 	public Integer insertWorkcenterRole(WorkcenterRoleVo workcenterRoleVo); 
+	
+	public Integer insertWorkcenterOwner(@Param("userId")String owner,@Param("uuid")String workcenterUuid); 
 	
 	public Integer updateWorkcenter(WorkcenterVo workcenterVo);
 }

@@ -5,6 +5,7 @@
 	<resultMap id="workcenterMap" type="codedriver.module.process.workcenter.dto.WorkcenterVo">
 		<id column="uuid" property="uuid" />
 		<result column="name" property="name" />
+		<result column="owner" property="owner" />
 		<result column="type" property="type" />
 		<result column="sort" property="sort" />
 		<result column="condition_config" property="conditionConfig" />
@@ -15,18 +16,22 @@
 	</resultMap>
 	
 	<select id="getWorkcenter"  parameterType="codedriver.module.process.workcenter.dto.WorkcenterVo" resultMap="workcenterMap">
-		SELECT 
+		(SELECT 
 		  pw.`uuid`,
 		  pw.`name`,
 		  pw.`type`,
 		  pw.`sort`,
 		  pw.`condition_config`,
+		  null as `owner`,
 		  pwr.`role_name`,
 		  pwr.`user_id`
 		FROM
 		  `process_workcenter` pw 
 		   LEFT JOIN `process_workcenter_role` pwr ON pw.`uuid` = pwr.`workcenter_uuid`
 		<where>
+			pw.`type` = 'system'
+			and
+			(
 			<if test="userId != null and userId != ''">
 				pwr.`user_id` = #{userId}
 			</if>
@@ -37,8 +42,30 @@
 					#{roleName}
 				</foreach>
 			</if>
+			)
 		</where>
-		ORDER BY pw.`sort` ASC
+		ORDER BY pw.`sort` ASC)
+		union
+		(SELECT 
+		  pw.`uuid`,
+		  pw.`name`,
+		  pw.`type`,
+		  pw.`sort`,
+		  pw.`condition_config`,
+		  pwo.user_id as `owner`,
+		  null as `role_name`,
+		  null as `user_id`
+		FROM
+		  `process_workcenter` pw 
+		   LEFT JOIN `process_workcenter_owner` pwo ON pw.`uuid` = pwo.`workcenter_uuid`
+		<where>
+			pw.`type` = 'custom'
+			<if test="owner != null and owner != ''">
+			and	pwo.`user_id` = #{owner}
+			</if>
+			
+		</where>
+		ORDER BY pw.`sort` ASC)
 		
 	</select>
 	
@@ -82,6 +109,13 @@
 		  `process_workcenter_role`
 		WHERE `workcenter_uuid` = #{workcenterUuid} ;
 	</delete>
+	
+	<delete id="deleteWorkcenterOwnerByUuid" parameterType="java.lang.String">
+		DELETE 
+		FROM
+		  `process_workcenter_owner`
+		WHERE `workcenter_uuid` = #{workcenterUuid} ;
+	</delete>
 
 
 	<insert id="insertWorkcenter" parameterType="codedriver.module.process.workcenter.dto.WorkcenterVo">
@@ -114,6 +148,12 @@
 		    #{roleName},
 		    #{userId}
 		  ) ;
+	</insert>
+	
+	<insert id="insertWorkcenterOwner" parameterType="java.lang.String">
+		INSERT INTO `process_workcenter_owner` (`workcenter_uuid`, `user_id`) 
+		VALUES
+		(#{uuid}, #{userId}) ;
 	</insert>
 	
 	<update id="updateWorkcenter" parameterType="codedriver.module.process.workcenter.dto.WorkcenterVo">
