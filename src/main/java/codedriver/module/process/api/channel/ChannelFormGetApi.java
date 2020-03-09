@@ -60,7 +60,7 @@ public class ChannelFormGetApi extends ApiComponentBase {
 		@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid")
 	})
 	@Output({
-		@Param(explode = FormAttributeVo[].class, desc = "表单属性列表")
+		@Param(name = "Return", explode = FormAttributeVo[].class, desc = "表单属性列表")
 	})
 	@Description(desc = "服务绑定的表单属性信息获取接口")
 	@Override

@@ -24,16 +24,22 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private String name;
 	@EntityField(name = "状态", type = ApiParamType.STRING)
 	private String status;
-	@EntityField(name = "状态", type = ApiParamType.STRING)
+	@EntityField(name = "状态名", type = ApiParamType.STRING)
 	private String statusText;
+	@EntityField(name = "步骤处理器", type = ApiParamType.STRING)
 	private String handler;
+	@EntityField(name = "步骤类型", type = ApiParamType.STRING)
 	private String type;
 	private String formUuid;
 	private Integer isActive = 0;
 	private Integer isCheck;
+	@EntityField(name = "开始时间", type = ApiParamType.LONG)
 	private Date startTime;
+	@EntityField(name = "结束时间", type = ApiParamType.LONG)
 	private Date endTime;
+	@EntityField(name = "超时时间点", type = ApiParamType.LONG)
 	private Date expireTime;
+	@EntityField(name = "步骤配置信息", type = ApiParamType.LONG)
 	private String config;
 	private Long expireTimeLong;
 	private String error;
@@ -45,7 +51,9 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private Boolean isWorkerPolicyListSorted = false;
 	private Boolean isAttributeListSorted = false;
 	private Boolean isTimeoutPolicyListSorted = false;
+	@EntityField(name = "处理人列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepUserVo> userList;
+	@EntityField(name = "处理组列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepTeamVo> teamList;
 	private List<ProcessTaskStepRelVo> relList;
 	private List<ProcessTaskStepWorkerVo> workerList;
