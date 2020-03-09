@@ -8,10 +8,11 @@ public enum ProcessFormHandler {
 	FORMSELECT("formselect","下拉框",ProcessFormHandlerType.SELECT,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE)),
 	FORMINPUT("forminput","文本框",ProcessFormHandlerType.INPUT,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LIKE)),
 	FORMTEXTAREA("formtextarea","文本域",ProcessFormHandlerType.TEXTAREA,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LIKE)),
+	FORMEDITOR("formeditor","富文本框",ProcessFormHandlerType.EDITOR,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LIKE)),
 	FORMRADIO("formradio","单选框",ProcessFormHandlerType.RADIO,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL)),
 	FORMCHECKBOX("formcheckbox","复选框",ProcessFormHandlerType.CHECKBOX,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE)),
 	FORMDATE("formdate","日期",ProcessFormHandlerType.DATE,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LESSTHAN,ProcessExpression.GREATERTHAN)),
-	FORMTime("formtime","时间",ProcessFormHandlerType.TIME,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LESSTHAN,ProcessExpression.GREATERTHAN));
+	FORMTIME("formtime","时间",ProcessFormHandlerType.TIME,Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.UNEQUAL,ProcessExpression.LESSTHAN,ProcessExpression.GREATERTHAN));
 	
 	private String handler;
 	private String handlerName;
@@ -56,8 +57,11 @@ public enum ProcessFormHandler {
 
 	public ProcessFormHandlerType getType(String processWorkcenterConditionType) {
 		if(ProcessWorkcenterConditionModel.CUSTOM.getValue().equals(processWorkcenterConditionType)) {
-			if(type.toString().equals(ProcessFormHandlerType.SELECT.toString())||type.toString().equals(ProcessFormHandlerType.RADIO.toString())||type.toString().equals(ProcessFormHandlerType.CHECKBOX.toString())) {
+			if(type == ProcessFormHandlerType.RADIO || type == ProcessFormHandlerType.CHECKBOX) {
 				return ProcessFormHandlerType.SELECT;
+			}
+			if(type == ProcessFormHandlerType.TEXTAREA || type == ProcessFormHandlerType.EDITOR) {
+				return ProcessFormHandlerType.INPUT;
 			}
 		}
 		return type;
