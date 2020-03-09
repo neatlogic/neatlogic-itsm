@@ -1,9 +1,7 @@
 package codedriver.module.process.api.channel;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +20,9 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.constvalue.ProcessExpression;
-import codedriver.module.process.constvalue.ProcessFormHandler;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.FormAttributeVo;
 import codedriver.module.process.dto.FormVo;
-import codedriver.module.process.dto.ProcessExpressionVo;
 import codedriver.module.process.dto.ProcessVo;
 @Service
 public class ChannelFormGetApi extends ApiComponentBase {
@@ -57,10 +52,11 @@ public class ChannelFormGetApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid")
+		@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid"),
+		@Param(name = "conditionModel", type = ApiParamType.ENUM, rule = "simple,custom", isRequired = true, desc = "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件;默认custom"),
 	})
 	@Output({
-		@Param(explode = FormAttributeVo[].class, desc = "表单属性列表")
+		@Param(name = "Return", explode = FormAttributeVo[].class, desc = "表单属性列表")
 	})
 	@Description(desc = "服务绑定的表单属性信息获取接口")
 	@Override
@@ -87,17 +83,10 @@ public class ChannelFormGetApi extends ApiComponentBase {
 		if (formVo == null) {
 			throw new FormNotFoundException(formUuid);
 		}
+		String conditionModel = jsonObj.getString("conditionModel");
 		List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 		for(FormAttributeVo formAttributeVo : formAttributeList) {
-			List<ProcessExpression> processExpressionList = ProcessFormHandler.getExpressionList(formAttributeVo.getHandler());
-			if(CollectionUtils.isEmpty(processExpressionList)) {
-				continue;
-			}
-			List<ProcessExpressionVo> expressionList = new ArrayList<>();
-			for(ProcessExpression processExpression : processExpressionList) {
-				expressionList.add(new ProcessExpressionVo(processExpression));
-			}
-			formAttributeVo.setExpressionList(expressionList);
+			formAttributeVo.setConditionModel(conditionModel);
 		}
 		return formAttributeList;
 	}
