@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
@@ -27,7 +29,7 @@ import codedriver.module.process.constvalue.UserType;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
-import codedriver.module.process.dto.ProcessTaskStepContentVo;
+import codedriver.module.process.dto.ProcessTaskStepCommentVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -37,6 +39,9 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private FileMapper fileMapper;
 	
 	@Override
 	public String getToken() {
@@ -106,20 +111,23 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		processTaskStepAuditVo.setUserId(UserContext.get().getUserId());
 		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+			ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo();
 			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailListt = processTaskStepAuditList.get(0).getAuditDetailList();
 			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailListt) {
 				if(ProcessTaskAuditDetailType.CONTENT.getValue().equals(processTaskStepAuditDetailVo.getType())) {
 					ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
 					if(processTaskContentVo != null) {
-						
+						temporaryComment.setContent(processTaskContentVo.getContent());
 					}
 				}else if(ProcessTaskAuditDetailType.FILE.getValue().equals(processTaskStepAuditDetailVo.getType())){
-					
+					FileVo fileVo = fileMapper.getFileByUuid(processTaskStepAuditDetailVo.getNewContent());
+					temporaryComment.addFile(fileVo);
 				}
 			}
+			processTaskStepVo.setTemporaryComment(temporaryComment);
 		}
 
-		return null;
+		return processTaskStepVo;
 	}
 
 }

@@ -72,6 +72,8 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private List<ProcessTaskStepUserVo> minorUserList;
 	@EntityField(name = "代办人列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepUserVo> agentUserList;
+	@EntityField(name = "暂存评论", type = ApiParamType.JSONARRAY)
+	private ProcessTaskStepCommentVo temporaryComment;
 	
 	public ProcessTaskStepVo() {
 
@@ -484,6 +486,14 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setAgentUserList(List<ProcessTaskStepUserVo> agentUserList) {
 		this.agentUserList = agentUserList;
+	}
+
+	public ProcessTaskStepCommentVo getTemporaryComment() {
+		return temporaryComment;
+	}
+
+	public void setTemporaryComment(ProcessTaskStepCommentVo temporaryComment) {
+		this.temporaryComment = temporaryComment;
 	}
 
 }
