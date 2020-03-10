@@ -23,6 +23,8 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	private String uuid;
 	@EntityField(name = "工单中心分类名", type = ApiParamType.STRING)
 	private String name;
+	@EntityField(name = "custom类型,工单中心分类所属人", type = ApiParamType.ENUM)
+	private String owner;
 	@EntityField(name = "default:默认出厂  system：系统分类  custom：自定义分类", type = ApiParamType.ENUM)
 	private String type;
 	@JSONField(serialize = false)
@@ -60,9 +62,10 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		this.name =_name;
 	}
 	
-	public WorkcenterVo(String _userId,List<String> _roleNameList) {
+	public WorkcenterVo(String _userId,List<String> _roleNameList,String _owner) {
 		this.userId = _userId;
 		this.roleNameList = _roleNameList;
+		this.owner = _owner;
 	}
 	
 	public WorkcenterVo(JSONObject jsonObj) {
@@ -103,6 +106,14 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 
 	public void setWorkcenterRoleList(List<WorkcenterRoleVo> workcenterRoleList) {
 		this.workcenterRoleList = workcenterRoleList;
+	}
+	
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
 	}
 
 	public String getType() {
