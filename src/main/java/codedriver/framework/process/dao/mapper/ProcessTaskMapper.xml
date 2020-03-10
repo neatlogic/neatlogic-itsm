@@ -468,8 +468,8 @@
 		`type`,
 		`handler`,
 		`is_active` AS isActive,
-		`start_time`,
-		`end_time`,
+		`start_time` AS startTime,
+		`end_time` AS endTime,
 		`error`
 		FROM
 		`processtask_step`
@@ -508,7 +508,6 @@
 		ps.`result`,
 		ps.`type`,
 		ps.`handler`,
-		ps.`is_active` AS isActive,
 		ps.`start_time` AS startTime,
 		ps.`end_time` AS endTime,
 		ps.`error`,
@@ -562,8 +561,8 @@
 		`handler`,
 		`is_active` AS isActive,
 		`config_hash` AS configHash,
-		`start_time`,
-		`end_time`,
+		`start_time` AS startTime,
+		`end_time` AS endTime,
 		`error`
 		FROM
 		`processtask_step`
@@ -582,8 +581,8 @@
 		`handler`,
 		`is_active` AS isActive,
 		`config_hash` AS configHash,
-		`start_time`,
-		`end_time`,
+		`start_time` AS startTime,
+		`end_time` AS endTime,
 		`error`
 		FROM
 		`processtask_step` a JOIN `processtask_step_sla` b ON
@@ -603,8 +602,8 @@
 		`handler`,
 		`is_active` AS isActive,
 		`config_hash` AS configHash,
-		`start_time`,
-		`end_time`,
+		`start_time` AS startTime,
+		`end_time` AS endTime,
 		`error`
 		FROM
 		`processtask_step`
