@@ -99,7 +99,7 @@ public abstract class ProcessStepHandlerUtilBase {
 	protected static UserMapper userMapper;
 	protected static ProcessTaskStepTimeAuditMapper processTaskStepTimeAuditMapper;
 	private static WorktimeMapper worktimeMapper;
-	private static ChannelMapper channelMapper;
+	protected static ChannelMapper channelMapper;
 	private static NotifyMapper notifyMapper;
 	// private static SchedulerManager schedulerManager;
 
