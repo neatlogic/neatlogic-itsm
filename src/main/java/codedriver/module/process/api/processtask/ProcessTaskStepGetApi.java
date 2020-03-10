@@ -24,6 +24,12 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		return "工单步骤基本信息获取接口";
 	}
 	
+	
+	@Override
+	public String getConfig() {
+		return null;
+	}
+
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id")
@@ -32,11 +38,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		@Param(explode = ProcessTaskStepVo.class, desc = "工单步骤信息")
 	})
 	@Description(desc = "工单步骤基本信息获取接口，当前步骤名称、激活时间、状态、处理人、协助处理人、处理时效、表单属性显示控制等")
-	@Override
-	public String getConfig() {
-		return null;
-	}
-
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		return null;
