@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
@@ -19,8 +20,14 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
+import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.UserType;
+import codedriver.module.process.dto.ProcessTaskContentVo;
+import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
+import codedriver.module.process.dto.ProcessTaskStepAuditVo;
+import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -63,12 +70,14 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
+		//获取步骤信息
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		if(processTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 		}
 		//状态名
 		processTaskStepVo.setStatusText(ProcessTaskStatus.getText(processTaskStepVo.getStatus()));
+		//处理人列表
 		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(majorUserList)) {
 			processTaskStepVo.setMajorUserList(majorUserList);
@@ -77,6 +86,11 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(CollectionUtils.isNotEmpty(minorUserList)) {
 			processTaskStepVo.setMinorUserList(minorUserList);
 		}
+		List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.AGENT.getValue());
+		if(CollectionUtils.isNotEmpty(agentUserList)) {
+			processTaskStepVo.setAgentUserList(agentUserList);
+		}
+		//表单属性显示控制
 		List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
 		if(processTaskStepFormAttributeList.size() > 0) {
 			Map<String, String> formAttributeActionMap = new HashMap<>();
@@ -85,6 +99,26 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			}
 			processTaskStepVo.setFormAttributeActionMap(formAttributeActionMap);
 		}
+		//回复框内容和附件暂存回显
+		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
+		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
+		processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+		processTaskStepAuditVo.setUserId(UserContext.get().getUserId());
+		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
+		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailListt = processTaskStepAuditList.get(0).getAuditDetailList();
+			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailListt) {
+				if(ProcessTaskAuditDetailType.CONTENT.getValue().equals(processTaskStepAuditDetailVo.getType())) {
+					ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
+					if(processTaskContentVo != null) {
+						
+					}
+				}else if(ProcessTaskAuditDetailType.FILE.getValue().equals(processTaskStepAuditDetailVo.getType())){
+					
+				}
+			}
+		}
+
 		return null;
 	}
 

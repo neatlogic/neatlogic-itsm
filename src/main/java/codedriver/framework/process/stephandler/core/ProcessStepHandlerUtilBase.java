@@ -979,9 +979,14 @@ public abstract class ProcessStepHandlerUtilBase {
 					continue;
 				}
 				String data = formAttributeDataMap.get(formAttributeVo.getUuid());
-				JSONArray jsonArray = JSON.parseArray(data);
-				if(jsonArray == null || jsonArray.isEmpty()) {
+				if(StringUtils.isBlank(data)) {
 					throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel()+ "'不能为空");
+				}
+				if(data.startsWith("[") && data.endsWith("]")) {
+					JSONArray jsonArray = JSON.parseArray(data);
+					if(jsonArray == null || jsonArray.isEmpty()) {
+						throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel()+ "'不能为空");
+					}
 				}
 			}
 			return true;

@@ -232,6 +232,7 @@
 		`id`,
 		`processtask_step_id` AS processTaskStepId,
 		`content_hash` AS contentHash,
+		`is_final` AS isFinal,
 		`fcd`,
 		`fcu`,
 		`lcd`,
@@ -248,6 +249,7 @@
 		`id`,
 		`processtask_step_id` AS processTaskStepId,
 		`content_hash` AS contentHash,
+		`is_final` AS isFinal,
 		`fcd`,
 		`fcu`,
 		`lcd`,
@@ -684,6 +686,40 @@
 	WHERE `processtask_step_id` = #{processTaskStepId}
 	</select>
 
+	<resultMap type="codedriver.module.process.dto.ProcessTaskStepAuditVo" id="processTaskStepAuditMap">
+		<id column="id" property="id"/>
+		<result column="processtask_id" property="processTaskId"/>
+		<result column="processtask_step_id" property="processTaskStepId"/>
+		<result column="user_id" property="userId"/>
+		<result column="action_time" property="actionTime"/>
+		<result column="action" property="action"/>
+		<collection property="auditDetailList" ofType="codedriver.module.process.dto.ProcessTaskStepAuditDetailVo">
+			<result column="audit_id" property="auditId"/>
+			<result column="type" property="type"/>
+			<result column="old_content" property="oldContent"/>
+			<result column="new_content" property="newContent"/>
+		</collection>
+	</resultMap>
+	<select id="getProcessTaskStepAuditList" parameterType="codedriver.module.process.dto.ProcessTaskStepAuditVo" resultMap="processTaskStepAuditMap">
+	SELECT 
+	  psa.`id`,
+	  psa.`processtask_id`,
+	  psa.`processtask_step_id`,
+	  psa.`user_id`,
+	  psa.`action_time`,
+	  psa.`action`, 
+	  psad.`audit_id`,
+	  psad.`type`,
+	  psad.`old_content`,
+	  psad.`new_content`
+	FROM `processtask_step_audit` psa
+	JOIN `processtask_step_audit_detail` psad ON psad.`audit_id` = psa.`id`
+	WHERE psa.`processtask_step_id` = #{processTaskStepId} 
+	AND psa.`action` = #{action} 
+	AND psa.`user_id` = #{userId} 
+	ORDER BY psa.`action_time` DESC
+	</select>
+	
 	<update id="updateProcessTaskStepConvergeIsCheck">
 		UPDATE `processtask_converge` SET is_check = #{isCheck} WHERE converge_id = #{convergeId}
 		AND processtask_step_id = #{processTaskStepId}
@@ -1044,6 +1080,7 @@
 		`processtask_id`,
 		`processtask_step_id`,
 		`content_hash`,
+		`is_final`,
 		`fcd`,
 		`fcu`
 		)
@@ -1052,6 +1089,7 @@
 		#{processTaskId},
 		#{processTaskStepId},
 		#{contentHash},
+		#{isFinal},
 		NOW(3),
 		#{fcu}
 		)
