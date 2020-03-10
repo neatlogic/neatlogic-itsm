@@ -873,7 +873,7 @@ public abstract class ProcessStepHandlerUtilBase {
 				}
 				/** 优先级修改审计 **/
 				ProcessTaskStepAuditDetailVo urgencyAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.URGENCY.getValue());
-				saveAuditDetail(processTaskStepAuditVo, urgencyAudit, ProcessTaskAuditDetailType.CONTENT, processTaskVo.getUrgency());
+				saveAuditDetail(processTaskStepAuditVo, urgencyAudit, ProcessTaskAuditDetailType.CONTENT, processTaskVo.getProcessUuid());
 
 				/** 表单修改审计 **/
 				ProcessTaskStepAuditDetailVo formAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.FORM.getValue());

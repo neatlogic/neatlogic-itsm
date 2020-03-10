@@ -50,8 +50,8 @@ public class ProcessTaskVo {
 	@EntityField(name = "超时时间点", type = ApiParamType.LONG)
 	private Date expireTime;
 	private String configHash;
-	private String urgency;
-	private String urgencyText;
+//	private String urgency;
+//	private String urgencyText;
 	private List<ProcessTaskStepVo> stepList;
 	
 	@EntityField(name = "描述内容", type = ApiParamType.STRING)
@@ -236,21 +236,21 @@ public class ProcessTaskVo {
 		this.configHash = configHash;
 	}
 
-	public String getUrgency() {
-		return urgency;
-	}
-
-	public void setUrgency(String urgency) {
-		this.urgency = urgency;
-	}
-
-	public String getUrgencyText() {
-		return urgencyText;
-	}
-
-	public void setUrgencyText(String urgencyText) {
-		this.urgencyText = urgencyText;
-	}
+//	public String getUrgency() {
+//		return urgency;
+//	}
+//
+//	public void setUrgency(String urgency) {
+//		this.urgency = urgency;
+//	}
+//
+//	public String getUrgencyText() {
+//		return urgencyText;
+//	}
+//
+//	public void setUrgencyText(String urgencyText) {
+//		this.urgencyText = urgencyText;
+//	}
 
 	public String getPriorityUuid() {
 		return priorityUuid;
