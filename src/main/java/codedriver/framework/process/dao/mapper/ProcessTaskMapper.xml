@@ -163,6 +163,7 @@
 		`reporter`,
 		(SELECT user_name FROM `user` x WHERE x.user_id = `reporter`) AS reporterName,
 		`expire_time` AS expireTime,
+		`worktime_uuid` AS worktimeUuid,
 		`error`
 		FROM
 		`processtask`
@@ -658,6 +659,7 @@
 	  `owner`,
 	  `reporter`,
 	  `expire_time` AS expireTime,
+	  `worktime_uuid` AS worktimeUuid,
 	  `error` 
 	FROM `processtask` 
 	WHERE `id`= #{id}
@@ -1014,7 +1016,8 @@
 		`start_time`,
 		`owner`,
 		`reporter`,
-		`expire_time`
+		`expire_time`,
+		`worktime_uuid`
 		)
 		VALUES
 		(
@@ -1026,7 +1029,8 @@
 		NOW(3),
 		#{owner},
 		#{reporter},
-		#{expireTime}
+		#{expireTime},
+		#{worktimeUuid}
 		)
 	</insert>
 

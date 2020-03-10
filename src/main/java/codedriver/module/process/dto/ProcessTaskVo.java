@@ -20,6 +20,8 @@ public class ProcessTaskVo {
 	private String processUuid;
 	@EntityField(name = "服务uuid", type = ApiParamType.STRING)
 	private String channelUuid;
+	@EntityField(name = "服务路径", type = ApiParamType.STRING)
+	private String channelPath;
 	@EntityField(name = "优先级uuid", type = ApiParamType.STRING)
 	private String priorityUuid;
 	@EntityField(name = "优先级名", type = ApiParamType.STRING)
@@ -62,6 +64,8 @@ public class ProcessTaskVo {
 	private String formConfig;
 	@EntityField(name = "工单表单属性值", type = ApiParamType.JSONOBJECT)
 	Map<String, String> formAttributeDataMap;
+	@EntityField(name = "工作时间窗口uuid", type = ApiParamType.STRING)
+	private String worktimeUuid;
 	
 	public ProcessTaskVo() {
 
@@ -228,6 +232,14 @@ public class ProcessTaskVo {
 		this.channelUuid = channelUuid;
 	}
 
+	public String getChannelPath() {
+		return channelPath;
+	}
+
+	public void setChannelPath(String channelPath) {
+		this.channelPath = channelPath;
+	}
+
 	public String getConfigHash() {
 		return configHash;
 	}
@@ -306,6 +318,14 @@ public class ProcessTaskVo {
 
 	public void setFormAttributeDataMap(Map<String, String> formAttributeDataMap) {
 		this.formAttributeDataMap = formAttributeDataMap;
+	}
+
+	public String getWorktimeUuid() {
+		return worktimeUuid;
+	}
+
+	public void setWorktimeUuid(String worktimeUuid) {
+		this.worktimeUuid = worktimeUuid;
 	}
 
 }
