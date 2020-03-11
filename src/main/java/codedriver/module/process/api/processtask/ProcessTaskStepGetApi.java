@@ -8,12 +8,16 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
@@ -26,7 +30,7 @@ import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.UserType;
-import codedriver.module.process.dto.ProcessTaskContentVo;
+//import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepCommentVo;
@@ -40,8 +44,8 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 	
-	@Autowired
-	private FileMapper fileMapper;
+//	@Autowired
+//	private FileMapper fileMapper;
 	
 	@Override
 	public String getToken() {
@@ -106,6 +110,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		}
 		//回复框内容和附件暂存回显
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
+		processTaskStepAuditVo.setProcessTaskId(processTaskId);
 		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
 		processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
 		processTaskStepAuditVo.setUserId(UserContext.get().getUserId());
@@ -114,17 +119,24 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo();
 			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailListt = processTaskStepAuditList.get(0).getAuditDetailList();
 			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailListt) {
+				IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
+				if(auditDetailHandler != null) {
+					auditDetailHandler.handle(processTaskStepAuditDetailVo);
+				}
 				if(ProcessTaskAuditDetailType.CONTENT.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-					ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
-					if(processTaskContentVo != null) {
-						temporaryComment.setContent(processTaskContentVo.getContent());
-					}
+					//ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
+					//if(processTaskContentVo != null) {
+					//	temporaryComment.setContent(processTaskContentVo.getContent());
+					//}
+					temporaryComment.setContent(processTaskStepAuditDetailVo.getNewContent());
 				}else if(ProcessTaskAuditDetailType.FILE.getValue().equals(processTaskStepAuditDetailVo.getType())){
-					FileVo fileVo = fileMapper.getFileByUuid(processTaskStepAuditDetailVo.getNewContent());
+					//FileVo fileVo = fileMapper.getFileByUuid(processTaskStepAuditDetailVo.getNewContent());
+					//temporaryComment.addFile(fileVo);
+					FileVo fileVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), new TypeReference<FileVo>() {});
 					temporaryComment.addFile(fileVo);
 				}
 			}
-			processTaskStepVo.setTemporaryComment(temporaryComment);
+			processTaskStepVo.setComment(temporaryComment);
 		}
 
 		return processTaskStepVo;

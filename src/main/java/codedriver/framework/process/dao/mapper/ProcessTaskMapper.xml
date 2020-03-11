@@ -690,7 +690,9 @@
 		<id column="id" property="id"/>
 		<result column="processtask_id" property="processTaskId"/>
 		<result column="processtask_step_id" property="processTaskStepId"/>
+		<result column="processTaskStepName" property="processTaskStepName"/>
 		<result column="user_id" property="userId"/>
+		<result column="userName" property="userName"/>
 		<result column="action_time" property="actionTime"/>
 		<result column="action" property="action"/>
 		<collection property="auditDetailList" ofType="codedriver.module.process.dto.ProcessTaskStepAuditDetailVo">
@@ -705,7 +707,9 @@
 	  psa.`id`,
 	  psa.`processtask_id`,
 	  psa.`processtask_step_id`,
+	  ps.`name` AS processTaskStepName,
 	  psa.`user_id`,
+	  (SELECT user_name FROM `user` x WHERE x.user_id = psa.`user_id`) AS userName,
 	  psa.`action_time`,
 	  psa.`action`, 
 	  psad.`audit_id`,
@@ -714,10 +718,18 @@
 	  psad.`new_content`
 	FROM `processtask_step_audit` psa
 	JOIN `processtask_step_audit_detail` psad ON psad.`audit_id` = psa.`id`
-	WHERE psa.`processtask_step_id` = #{processTaskStepId} 
+	JOIN `processtask_step` ps on ps.`id` = psa.`processtask_step_id`
+	WHERE psa.`processtask_id` = #{processTaskId}
+	<if test="processTaskStepId != null">
+	psa.`processtask_step_id` = #{processTaskStepId} 
+	</if>
+	<if test="action != null and action != ''">
 	AND psa.`action` = #{action} 
+	</if>
+	<if test="userId != null and userId != ''">
 	AND psa.`user_id` = #{userId} 
-	ORDER BY psa.`action_time` DESC
+	</if>
+	ORDER BY psa.`id` ASC
 	</select>
 	
 	<update id="updateProcessTaskStepConvergeIsCheck">

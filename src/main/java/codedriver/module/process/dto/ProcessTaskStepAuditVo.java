@@ -2,14 +2,11 @@ package codedriver.module.process.dto;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-
 public class ProcessTaskStepAuditVo {
 	private Long id;
 	private Long processTaskId;
 	private Long processTaskStepId;
+	private String processTaskStepName;
 	private String userId;
 	private String userName;
 	private String actionTime;
@@ -50,10 +47,18 @@ public class ProcessTaskStepAuditVo {
 		this.processTaskStepId = processTaskStepId;
 	}
 
+	public String getProcessTaskStepName() {
+		return processTaskStepName;
+	}
+
+	public void setProcessTaskStepName(String processTaskStepName) {
+		this.processTaskStepName = processTaskStepName;
+	}
+
 	public String getUserId() {
-		if (StringUtils.isBlank(userId)) {
-			userId = UserContext.get().getUserId();
-		}
+//		if (StringUtils.isBlank(userId)) {
+//			userId = UserContext.get().getUserId();
+//		}
 		return userId;
 	}
 

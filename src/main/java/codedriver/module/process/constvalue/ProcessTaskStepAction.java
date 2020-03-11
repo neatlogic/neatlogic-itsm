@@ -10,7 +10,8 @@ public enum ProcessTaskStepAction {
 	RECOVER("recover", "恢复"),
 	TRANSFER("transfer", "转交"),
 	BACK("back", "回退"),
-	SAVE("save", "暂存");
+	SAVE("save", "暂存"),
+	COMMENT("comment", "暂存");
 	private String status;
 	private String text;
 
