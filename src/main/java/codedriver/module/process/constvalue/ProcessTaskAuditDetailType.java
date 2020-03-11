@@ -5,8 +5,9 @@ public enum ProcessTaskAuditDetailType {
 	URGENCY("urgency", "优先级"),
 	CONTENT("content", "回复内容"),
 	FORM("form", "表单"),
-	WORKER("worker", "处理人");
-
+	WORKER("worker", "处理人"),
+	FILE("file", "上传文件");
+	
 	private String status;
 	private String text;
 

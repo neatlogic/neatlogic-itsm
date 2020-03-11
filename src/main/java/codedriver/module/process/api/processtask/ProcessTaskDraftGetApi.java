@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
@@ -38,7 +40,8 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-	
+	@Autowired
+	private FileMapper fileMapper;
 	@Override
 	public String getToken() {
 		return "processtask/draft/get";
@@ -65,6 +68,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 		@Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
 		@Param(name = "fileUuidList", type = ApiParamType.JSONARRAY, desc = "附件uuid列表"),
+		@Param(name = "fileList", type = ApiParamType.JSONARRAY, desc = "附件列表"),
 		@Param(name = "formVersionVo", type = ApiParamType.JSONOBJECT, desc = "表单"),
 		@Param(name = "formAttributeDataMap", type = ApiParamType.JSONOBJECT, desc = "表单属性数据"),
 		@Param(name = "formAttributeActionMap", type = ApiParamType.JSONOBJECT, desc = "表单属性显示控制"),
@@ -107,10 +111,14 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 		
 		if(processTaskFileList.size() > 0) {
 			List<String> fileUuidList = new ArrayList<>();
+			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
 				fileUuidList.add(processTaskFile.getFileUuid());
+				FileVo fileVo = fileMapper.getFileByUuid(processTaskFile.getFileUuid());
+				fileList.add(fileVo);
 			}
 			resultObj.put("fileUuidList", fileUuidList);
+			resultObj.put("fileList", fileList);
 		}
 		//获取工单流程图信息
 		ProcessTaskConfigVo processTaskConfig = processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());

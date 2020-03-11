@@ -103,7 +103,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 				formObj.put("handlerName", ProcessFormHandler.getHandlerName(handler));
 				String handlerType = ProcessFormHandler.getType(handler,ProcessWorkcenterConditionModel.SIMPLE.getValue()).toString();
 				if(handlerType.equals("select")) {
-					formObj.put("isMultiple",configObj.getString("isMultiple"));
+					formObj.put("isMultiple",configObj.getBoolean("isMultiple"));
 				} 
 				if(conditionModel.equals(ProcessWorkcenterConditionModel.CUSTOM.getValue())) {
 					if(handlerType.equals("radio")) {

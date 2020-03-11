@@ -37,6 +37,7 @@ import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.module.process.constvalue.UserType;
+import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.FormVersionVo;
 import codedriver.module.process.dto.ProcessSlaVo;
 import codedriver.module.process.dto.ProcessStepRelVo;
@@ -922,6 +923,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				processTaskVo.setConfigHash(hash);
 				processTaskMapper.replaceProcessTaskConfig(new ProcessTaskConfigVo(hash, processVo.getConfig()));
 			}
+			ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+			System.out.println("channelVo.getWorktimeUuid():"+channelVo.getWorktimeUuid());
+			processTaskVo.setWorktimeUuid(channelVo.getWorktimeUuid());
 			/** 创建工单 **/
 			processTaskMapper.insertProcessTask(processTaskVo);
 			currentProcessTaskStepVo.setProcessTaskId(processTaskVo.getId());

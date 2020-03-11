@@ -34,6 +34,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -99,8 +100,9 @@ public abstract class ProcessStepHandlerUtilBase {
 	protected static UserMapper userMapper;
 	protected static ProcessTaskStepTimeAuditMapper processTaskStepTimeAuditMapper;
 	private static WorktimeMapper worktimeMapper;
-	private static ChannelMapper channelMapper;
+	protected static ChannelMapper channelMapper;
 	private static NotifyMapper notifyMapper;
+	private static FileMapper fileMapper;
 	// private static SchedulerManager schedulerManager;
 
 	// @Autowired
@@ -873,7 +875,7 @@ public abstract class ProcessStepHandlerUtilBase {
 				}
 				/** 优先级修改审计 **/
 				ProcessTaskStepAuditDetailVo urgencyAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.URGENCY.getValue());
-				saveAuditDetail(processTaskStepAuditVo, urgencyAudit, ProcessTaskAuditDetailType.CONTENT, processTaskVo.getUrgency());
+				saveAuditDetail(processTaskStepAuditVo, urgencyAudit, ProcessTaskAuditDetailType.CONTENT, processTaskVo.getProcessUuid());
 
 				/** 表单修改审计 **/
 				ProcessTaskStepAuditDetailVo formAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.FORM.getValue());
@@ -940,6 +942,9 @@ public abstract class ProcessStepHandlerUtilBase {
 			if(processTaskFileList.size() > 0) {
 				for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
 					//TODO 验证附件uuid是否存在
+					if(fileMapper.getFileByUuid(processTaskFile.getFileUuid()) == null) {
+						throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileUuid() + "'不存在");
+					}
 				}
 			}
 			return true;
@@ -979,9 +984,14 @@ public abstract class ProcessStepHandlerUtilBase {
 					continue;
 				}
 				String data = formAttributeDataMap.get(formAttributeVo.getUuid());
-				JSONArray jsonArray = JSON.parseArray(data);
-				if(jsonArray == null || jsonArray.isEmpty()) {
+				if(StringUtils.isBlank(data)) {
 					throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel()+ "'不能为空");
+				}
+				if(data.startsWith("[") && data.endsWith("]")) {
+					JSONArray jsonArray = JSON.parseArray(data);
+					if(jsonArray == null || jsonArray.isEmpty()) {
+						throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel()+ "'不能为空");
+					}
 				}
 			}
 			return true;
