@@ -10,6 +10,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 @Service
 public class ProcessTaskAuditListApi extends ApiComponentBase {
 
@@ -31,7 +32,9 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
 	})
-	@Output({})
+	@Output({
+		@Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "工单活动列表")
+	})
 	@Description(desc = "工单活动列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

@@ -292,7 +292,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //工单状态
 		 patch.set("status", processTaskVo.getStatusText());
 		 //优先级
-		 patch.set("priority", processTaskVo.getPriority());
+		 patch.set("priority", processTaskVo.getPriorityName());
 		 //服务目录
 		 patch.set("catalog", catalog.getUuid());
 		 //服务类型

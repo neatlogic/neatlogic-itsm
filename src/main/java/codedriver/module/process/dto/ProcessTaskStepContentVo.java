@@ -9,6 +9,7 @@ public class ProcessTaskStepContentVo {
 	private Long processTaskId;
 	private Long processTaskStepId;
 	private String contentHash;
+	private Integer isFinal;
 	private String fcd;
 	private String fcu;
 	private String lcd;
@@ -92,6 +93,14 @@ public class ProcessTaskStepContentVo {
 
 	public void setProcessTaskId(Long processTaskId) {
 		this.processTaskId = processTaskId;
+	}
+
+	public Integer getIsFinal() {
+		return isFinal;
+	}
+
+	public void setIsFinal(Integer isFinal) {
+		this.isFinal = isFinal;
 	}
 
 }

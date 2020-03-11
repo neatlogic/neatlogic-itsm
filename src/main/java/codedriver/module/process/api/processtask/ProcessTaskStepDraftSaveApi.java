@@ -10,18 +10,17 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ProcessTaskStepVo;
 @Service
-public class ProcessTaskStepListApi extends ApiComponentBase {
+public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "processtask/step/list";
+		return "processtask/step/draft/save";
 	}
 
 	@Override
 	public String getName() {
-		return "工单步骤列表接口";
+		return "工单步骤暂存接口";
 	}
 
 	@Override
@@ -30,12 +29,13 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
+		@Param(name="formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
+		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述"),
+		@Param(name="fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
-	@Output({
-		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
-	})
-	@Description(desc = "工单步骤列表接口")
+	@Description(desc = "工单步骤暂存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		return null;
