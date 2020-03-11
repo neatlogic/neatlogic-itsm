@@ -1,5 +1,6 @@
 package codedriver.framework.process.stephandler.component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -72,8 +73,26 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo processTaskStepVo) {
-		return null;
+	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
+		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromId(currentProcessTaskStepVo.getId());
+		if (nextStepList.size() == 1) {
+			return nextStepList;
+		} else if (nextStepList.size() > 1) {
+			JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+			if (paramObj != null && paramObj.containsKey("nextStepId")) {
+				Long nextStepId = paramObj.getLong("nextStepId");
+				for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
+					if (processTaskStepVo.getId().equals(nextStepId)) {
+						returnNextStepList.add(processTaskStepVo);
+						break;
+					}
+				}
+			} else {
+				throw new ProcessTaskException("找到多个后续节点");
+			}
+		}
+		return returnNextStepList;
 	}
 
 	@Override
