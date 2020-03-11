@@ -32,13 +32,11 @@ public class ProcessTaskAbortApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "工单取消接口";
 	}
 
 	@Override
 	public String getConfig() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

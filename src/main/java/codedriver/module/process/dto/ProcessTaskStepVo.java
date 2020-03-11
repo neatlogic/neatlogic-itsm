@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -33,6 +34,8 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private String formUuid;
 	private Integer isActive = 0;
 	private Integer isCheck;
+	@EntityField(name = "激活时间", type = ApiParamType.LONG)
+	private Date activeTime;
 	@EntityField(name = "开始时间", type = ApiParamType.LONG)
 	private Date startTime;
 	@EntityField(name = "结束时间", type = ApiParamType.LONG)
@@ -51,9 +54,9 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private Boolean isWorkerPolicyListSorted = false;
 	private Boolean isAttributeListSorted = false;
 	private Boolean isTimeoutPolicyListSorted = false;
-	@EntityField(name = "处理人列表", type = ApiParamType.JSONARRAY)
+	//@EntityField(name = "处理人列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepUserVo> userList;
-	@EntityField(name = "处理组列表", type = ApiParamType.JSONARRAY)
+	//@EntityField(name = "处理组列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepTeamVo> teamList;
 	private List<ProcessTaskStepRelVo> relList;
 	private List<ProcessTaskStepWorkerVo> workerList;
@@ -61,7 +64,17 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private List<ProcessTaskStepTimeoutPolicyVo> timeoutPolicyList;
 	private List<ProcessTaskStepFormAttributeVo> formAttributeList;
 	private JSONObject paramObj;
-
+	@EntityField(name = "表单属性显示控制", type = ApiParamType.JSONOBJECT)
+	private Map<String, String> formAttributeActionMap;
+	@EntityField(name = "处理人列表", type = ApiParamType.JSONARRAY)
+	private List<ProcessTaskStepUserVo> majorUserList;
+	@EntityField(name = "子任务处理人列表", type = ApiParamType.JSONARRAY)
+	private List<ProcessTaskStepUserVo> minorUserList;
+	@EntityField(name = "代办人列表", type = ApiParamType.JSONARRAY)
+	private List<ProcessTaskStepUserVo> agentUserList;
+	@EntityField(name = "暂存评论", type = ApiParamType.JSONARRAY)
+	private ProcessTaskStepCommentVo temporaryComment;
+	
 	public ProcessTaskStepVo() {
 
 	}
@@ -197,6 +210,14 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setIsActive(Integer isActived) {
 		this.isActive = isActived;
+	}
+
+	public Date getActiveTime() {
+		return activeTime;
+	}
+
+	public void setActiveTime(Date activeTime) {
+		this.activeTime = activeTime;
 	}
 
 	public Date getStartTime() {
@@ -433,6 +454,46 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setConfigHash(String configHash) {
 		this.configHash = configHash;
+	}
+
+	public Map<String, String> getFormAttributeActionMap() {
+		return formAttributeActionMap;
+	}
+
+	public void setFormAttributeActionMap(Map<String, String> formAttributeActionMap) {
+		this.formAttributeActionMap = formAttributeActionMap;
+	}
+
+	public List<ProcessTaskStepUserVo> getMajorUserList() {
+		return majorUserList;
+	}
+
+	public void setMajorUserList(List<ProcessTaskStepUserVo> majorUserList) {
+		this.majorUserList = majorUserList;
+	}
+
+	public List<ProcessTaskStepUserVo> getMinorUserList() {
+		return minorUserList;
+	}
+
+	public void setMinorUserList(List<ProcessTaskStepUserVo> minorUserList) {
+		this.minorUserList = minorUserList;
+	}
+
+	public List<ProcessTaskStepUserVo> getAgentUserList() {
+		return agentUserList;
+	}
+
+	public void setAgentUserList(List<ProcessTaskStepUserVo> agentUserList) {
+		this.agentUserList = agentUserList;
+	}
+
+	public ProcessTaskStepCommentVo getTemporaryComment() {
+		return temporaryComment;
+	}
+
+	public void setTemporaryComment(ProcessTaskStepCommentVo temporaryComment) {
+		this.temporaryComment = temporaryComment;
 	}
 
 }

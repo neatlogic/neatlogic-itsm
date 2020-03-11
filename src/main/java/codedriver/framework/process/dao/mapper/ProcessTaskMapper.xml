@@ -163,6 +163,7 @@
 		`reporter`,
 		(SELECT user_name FROM `user` x WHERE x.user_id = `reporter`) AS reporterName,
 		`expire_time` AS expireTime,
+		`worktime_uuid` AS worktimeUuid,
 		`error`
 		FROM
 		`processtask`
@@ -231,6 +232,7 @@
 		`id`,
 		`processtask_step_id` AS processTaskStepId,
 		`content_hash` AS contentHash,
+		`is_final` AS isFinal,
 		`fcd`,
 		`fcu`,
 		`lcd`,
@@ -247,6 +249,7 @@
 		`id`,
 		`processtask_step_id` AS processTaskStepId,
 		`content_hash` AS contentHash,
+		`is_final` AS isFinal,
 		`fcd`,
 		`fcu`,
 		`lcd`,
@@ -467,8 +470,8 @@
 		`type`,
 		`handler`,
 		`is_active` AS isActive,
-		`start_time`,
-		`end_time`,
+		`start_time` AS startTime,
+		`end_time` AS endTime,
 		`error`
 		FROM
 		`processtask_step`
@@ -507,7 +510,6 @@
 		ps.`result`,
 		ps.`type`,
 		ps.`handler`,
-		ps.`is_active` AS isActive,
 		ps.`start_time` AS startTime,
 		ps.`end_time` AS endTime,
 		ps.`error`,
@@ -561,8 +563,8 @@
 		`handler`,
 		`is_active` AS isActive,
 		`config_hash` AS configHash,
-		`start_time`,
-		`end_time`,
+		`start_time` AS startTime,
+		`end_time` AS endTime,
 		`error`
 		FROM
 		`processtask_step`
@@ -581,8 +583,8 @@
 		`handler`,
 		`is_active` AS isActive,
 		`config_hash` AS configHash,
-		`start_time`,
-		`end_time`,
+		`start_time` AS startTime,
+		`end_time` AS endTime,
 		`error`
 		FROM
 		`processtask_step` a JOIN `processtask_step_sla` b ON
@@ -602,8 +604,8 @@
 		`handler`,
 		`is_active` AS isActive,
 		`config_hash` AS configHash,
-		`start_time`,
-		`end_time`,
+		`start_time` AS startTime,
+		`end_time` AS endTime,
 		`error`
 		FROM
 		`processtask_step`
@@ -658,6 +660,7 @@
 	  `owner`,
 	  `reporter`,
 	  `expire_time` AS expireTime,
+	  `worktime_uuid` AS worktimeUuid,
 	  `error` 
 	FROM `processtask` 
 	WHERE `id`= #{id}
@@ -683,6 +686,40 @@
 	WHERE `processtask_step_id` = #{processTaskStepId}
 	</select>
 
+	<resultMap type="codedriver.module.process.dto.ProcessTaskStepAuditVo" id="processTaskStepAuditMap">
+		<id column="id" property="id"/>
+		<result column="processtask_id" property="processTaskId"/>
+		<result column="processtask_step_id" property="processTaskStepId"/>
+		<result column="user_id" property="userId"/>
+		<result column="action_time" property="actionTime"/>
+		<result column="action" property="action"/>
+		<collection property="auditDetailList" ofType="codedriver.module.process.dto.ProcessTaskStepAuditDetailVo">
+			<result column="audit_id" property="auditId"/>
+			<result column="type" property="type"/>
+			<result column="old_content" property="oldContent"/>
+			<result column="new_content" property="newContent"/>
+		</collection>
+	</resultMap>
+	<select id="getProcessTaskStepAuditList" parameterType="codedriver.module.process.dto.ProcessTaskStepAuditVo" resultMap="processTaskStepAuditMap">
+	SELECT 
+	  psa.`id`,
+	  psa.`processtask_id`,
+	  psa.`processtask_step_id`,
+	  psa.`user_id`,
+	  psa.`action_time`,
+	  psa.`action`, 
+	  psad.`audit_id`,
+	  psad.`type`,
+	  psad.`old_content`,
+	  psad.`new_content`
+	FROM `processtask_step_audit` psa
+	JOIN `processtask_step_audit_detail` psad ON psad.`audit_id` = psa.`id`
+	WHERE psa.`processtask_step_id` = #{processTaskStepId} 
+	AND psa.`action` = #{action} 
+	AND psa.`user_id` = #{userId} 
+	ORDER BY psa.`action_time` DESC
+	</select>
+	
 	<update id="updateProcessTaskStepConvergeIsCheck">
 		UPDATE `processtask_converge` SET is_check = #{isCheck} WHERE converge_id = #{convergeId}
 		AND processtask_step_id = #{processTaskStepId}
@@ -1014,7 +1051,8 @@
 		`start_time`,
 		`owner`,
 		`reporter`,
-		`expire_time`
+		`expire_time`,
+		`worktime_uuid`
 		)
 		VALUES
 		(
@@ -1026,7 +1064,8 @@
 		NOW(3),
 		#{owner},
 		#{reporter},
-		#{expireTime}
+		#{expireTime},
+		#{worktimeUuid}
 		)
 	</insert>
 
@@ -1041,6 +1080,7 @@
 		`processtask_id`,
 		`processtask_step_id`,
 		`content_hash`,
+		`is_final`,
 		`fcd`,
 		`fcu`
 		)
@@ -1049,6 +1089,7 @@
 		#{processTaskId},
 		#{processTaskStepId},
 		#{contentHash},
+		#{isFinal},
 		NOW(3),
 		#{fcu}
 		)

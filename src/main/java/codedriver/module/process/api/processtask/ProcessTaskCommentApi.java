@@ -10,32 +10,31 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ProcessTaskVo;
 @Service
-public class ProcessTaskInfoApi extends ApiComponentBase {
+public class ProcessTaskCommentApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "processtask/info";
+		return "processtask/comment";
 	}
 
 	@Override
 	public String getName() {
-		return "工单基本信息获取接口";
+		return "工单回复接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-	
+
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
+		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述"),
+		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
-	@Output({
-		@Param(explode = ProcessTaskVo.class, desc = "工单信息")
-	})
-	@Description(desc = "工单基本信息获取接口")
+	@Description(desc = "工单回复接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		return null;
