@@ -721,7 +721,7 @@
 	JOIN `processtask_step` ps on ps.`id` = psa.`processtask_step_id`
 	WHERE psa.`processtask_id` = #{processTaskId}
 	<if test="processTaskStepId != null">
-	psa.`processtask_step_id` = #{processTaskStepId} 
+	AND psa.`processtask_step_id` = #{processTaskStepId} 
 	</if>
 	<if test="action != null and action != ''">
 	AND psa.`action` = #{action} 
