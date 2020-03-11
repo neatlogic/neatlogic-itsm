@@ -135,7 +135,7 @@ public class ProcessTaskGetApi extends ApiComponentBase {
 		
 		//获取工单表单信息
 		ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-		if(processTaskFormVo != null && StringUtils.isBlank(processTaskFormVo.getFormContent())) {
+		if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
 			processTaskVo.setFormConfig(processTaskFormVo.getFormContent());
 			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
 			if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {

@@ -34,6 +34,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -101,6 +102,7 @@ public abstract class ProcessStepHandlerUtilBase {
 	private static WorktimeMapper worktimeMapper;
 	protected static ChannelMapper channelMapper;
 	private static NotifyMapper notifyMapper;
+	private static FileMapper fileMapper;
 	// private static SchedulerManager schedulerManager;
 
 	// @Autowired
@@ -940,6 +942,9 @@ public abstract class ProcessStepHandlerUtilBase {
 			if(processTaskFileList.size() > 0) {
 				for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
 					//TODO 验证附件uuid是否存在
+					if(fileMapper.getFileByUuid(processTaskFile.getFileUuid()) == null) {
+						throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileUuid() + "'不存在");
+					}
 				}
 			}
 			return true;
