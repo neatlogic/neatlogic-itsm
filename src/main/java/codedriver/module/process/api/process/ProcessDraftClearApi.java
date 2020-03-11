@@ -11,13 +11,13 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActive;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.dto.ProcessDraftVo;
 @Service
 @Transactional
-@IsActive
+@IsActived
 public class ProcessDraftClearApi extends ApiComponentBase {
 
 	@Autowired
