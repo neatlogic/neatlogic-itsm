@@ -14,7 +14,6 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
@@ -30,7 +29,6 @@ import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.UserType;
-//import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepCommentVo;
@@ -43,9 +41,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-	
-//	@Autowired
-//	private FileMapper fileMapper;
 	
 	@Override
 	public String getToken() {
@@ -113,7 +108,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		processTaskStepAuditVo.setProcessTaskId(processTaskId);
 		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
 		processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-		processTaskStepAuditVo.setUserId(UserContext.get().getUserId());
+		processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
 		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
 			ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo();
@@ -124,14 +119,8 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					auditDetailHandler.handle(processTaskStepAuditDetailVo);
 				}
 				if(ProcessTaskAuditDetailType.CONTENT.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-					//ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
-					//if(processTaskContentVo != null) {
-					//	temporaryComment.setContent(processTaskContentVo.getContent());
-					//}
 					temporaryComment.setContent(processTaskStepAuditDetailVo.getNewContent());
 				}else if(ProcessTaskAuditDetailType.FILE.getValue().equals(processTaskStepAuditDetailVo.getType())){
-					//FileVo fileVo = fileMapper.getFileByUuid(processTaskStepAuditDetailVo.getNewContent());
-					//temporaryComment.addFile(fileVo);
 					FileVo fileVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), new TypeReference<FileVo>() {});
 					temporaryComment.addFile(fileVo);
 				}
