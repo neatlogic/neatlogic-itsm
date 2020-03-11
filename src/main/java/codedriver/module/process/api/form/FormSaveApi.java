@@ -19,7 +19,7 @@ import codedriver.framework.process.exception.form.FormNameRepeatException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActive;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -30,7 +30,7 @@ import codedriver.module.process.dto.FormVo;
 @Service
 @Transactional
 @AuthAction(name = "FORM_MODIFY")
-@IsActive
+@IsActived
 public class FormSaveApi extends ApiComponentBase {
 
 	@Autowired

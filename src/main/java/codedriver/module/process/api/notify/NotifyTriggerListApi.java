@@ -10,14 +10,14 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.IsActive;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.notify.dto.NotifyTemplateVo;
 
 @Service
-@IsActive
+@IsActived
 public class NotifyTriggerListApi extends ApiComponentBase {
 
 	@Override

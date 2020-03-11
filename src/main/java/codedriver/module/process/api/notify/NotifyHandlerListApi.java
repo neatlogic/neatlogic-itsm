@@ -6,11 +6,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.notify.core.NotifyHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.IsActive;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
-@IsActive
+@IsActived
 public class NotifyHandlerListApi extends ApiComponentBase {
 
 	@Override
