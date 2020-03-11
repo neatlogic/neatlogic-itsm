@@ -49,7 +49,7 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 
 	@Override
 	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.EQUAL);
+		return Arrays.asList(ProcessExpression.INCLUDE);
 	}
 
 }
