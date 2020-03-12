@@ -7,22 +7,22 @@ import com.techsure.multiattrsearch.MultiAttrsObject;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 
 @Component
-public class ProcessTaskTitleColumn implements IWorkcenterColumn{
+public class ProcessTaskStatusColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "title";
+		return "status";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "标题";
+		return "工单状态";
 	}
 
 	@Override
 	public Object getValue(MultiAttrsObject el) throws RuntimeException {
-		String title = el.getString(this.getName());
-		return title;
+		String status = el.getString(this.getName());
+		return status;
 	}
 
 	@Override

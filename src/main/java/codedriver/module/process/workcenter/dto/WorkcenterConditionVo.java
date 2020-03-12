@@ -25,8 +25,8 @@ public class WorkcenterConditionVo implements Serializable{
 	
 	public WorkcenterConditionVo(JSONObject jsonObj) {
 		this.uuid = jsonObj.getString("uuid");
-		this.name = jsonObj.getString("key").split(".")[1];
-		this.type = jsonObj.getString("key").split(".")[0];
+		this.name = jsonObj.getString("name").split("\\.")[1];
+		this.type = jsonObj.getString("name").split("\\.")[0];
 		this.expression = jsonObj.getString("expression");
 		this.valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
 	}

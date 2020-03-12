@@ -1,5 +1,7 @@
 package codedriver.framework.process.workcenter.column.handler;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.techsure.multiattrsearch.MultiAttrsObject;
@@ -7,22 +9,22 @@ import com.techsure.multiattrsearch.MultiAttrsObject;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 
 @Component
-public class ProcessTaskTitleColumn implements IWorkcenterColumn{
+public class ProcessTaskCurrentStepColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "title";
+		return "currentStep";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "标题";
+		return "当前步骤";
 	}
 
 	@Override
 	public Object getValue(MultiAttrsObject el) throws RuntimeException {
-		String title = el.getString(this.getName());
-		return title;
+		List<String> currentStepList = el.getStringList(this.getName());
+		return currentStepList;
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.workcenter.dto.WorkcenterTheadVo;
 
 @Transactional
 @Service
@@ -48,6 +49,7 @@ public class WorkcenterDeleteApi extends ApiComponentBase {
 		String uuid = jsonObj.getString("uuid");
 		workcenterMapper.deleteWorkcenterRoleByUuid(uuid);
 		workcenterMapper.deleteWorkcenterByUuid(uuid);
+		workcenterMapper.deleteWorkcenterThead(new WorkcenterTheadVo(uuid,null));
 		return null;
 	}
 
