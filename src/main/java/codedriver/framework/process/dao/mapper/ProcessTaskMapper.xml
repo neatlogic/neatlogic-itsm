@@ -369,7 +369,10 @@
 		SELECT
 		`processtask_id` AS processTaskId,
 		`processtask_step_id` AS processTaskStepId,
-		`user_id` AS userId
+		`user_id` AS userId,
+  		`role_name` AS roleName,
+  		`team_uuid` AS teamUuid,
+  		`action` 
 		FROM
 		`processtask_step_worker`
 		WHERE
@@ -742,6 +745,42 @@
 	  `action` 
 	FROM `processtask_step_audit`
 	WHERE `id` = #{id}
+	</select>
+	
+	<resultMap type="codedriver.module.process.dto.ProcessTaskStepVo" id="processTaskStepMap">
+		<id column="id" property="id"/>
+		<result column="processtask_id" property="processTaskId"/>
+		<result column="name" property="name"/>
+		<result column="process_step_uuid" property="processStepUuid"/>
+		<result column="status" property="status"/>
+		<result column="result" property="result"/>
+		<result column="type" property="type"/>
+		<result column="handler" property="handler"/>
+		<result column="is_active" property="isActive"/>
+		<result column="start_time" property="startTime"/>
+		<result column="end_time" property="endTime"/>
+		<result column="error" property="error"/>
+		<result column="expire_time" property="expireTime"/>
+		<result column="config_hash" property="configHash"/>
+	</resultMap>
+	<select id="getProcessTaskStepListByProcessTaskId" parameterType="java.lang.Long" resultMap="processTaskStepMap">
+	SELECT 
+	  `id`,
+	  `processtask_id`,
+	  `name`,
+	  `process_step_uuid`,
+	  `status`,
+	  `result`,
+	  `type`,
+	  `handler`,
+	  `is_active`,
+	  `start_time`,
+	  `end_time`,
+	  `error`,
+	  `expire_time`,
+	  `config_hash`
+	FROM `processtask_step` pts
+	WHERE pts.`processtask_id` = #{processTaskId}
 	</select>
 	
 	<update id="updateProcessTaskStepConvergeIsCheck">

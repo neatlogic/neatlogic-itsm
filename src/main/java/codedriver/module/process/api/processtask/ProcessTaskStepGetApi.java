@@ -27,7 +27,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
-import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.UserType;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
@@ -83,8 +82,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
 			throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'工单：'" + processTaskId + "'的步骤");
 		}
-		//状态名
-		processTaskStepVo.setStatusText(ProcessTaskStatus.getText(processTaskStepVo.getStatus()));
 		//处理人列表
 		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(majorUserList)) {

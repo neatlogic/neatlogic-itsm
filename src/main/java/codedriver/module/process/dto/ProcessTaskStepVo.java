@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.restful.annotation.EntityField;
+import codedriver.module.process.constvalue.ProcessTaskStatus;
 
 public class ProcessTaskStepVo extends BasePageVo {
 	@EntityField(name = "工单步骤id", type = ApiParamType.LONG)
@@ -59,6 +60,7 @@ public class ProcessTaskStepVo extends BasePageVo {
 	//@EntityField(name = "处理组列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepTeamVo> teamList;
 	private List<ProcessTaskStepRelVo> relList;
+	@EntityField(name = "有权限处理人列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepWorkerVo> workerList;
 	private List<ProcessTaskStepWorkerPolicyVo> workerPolicyList;
 	private List<ProcessTaskStepTimeoutPolicyVo> timeoutPolicyList;
@@ -199,6 +201,13 @@ public class ProcessTaskStepVo extends BasePageVo {
 	}
 
 	public String getStatusText() {
+		if(status == null) {
+			return null;
+		}
+		if(statusText != null) {
+			return statusText;
+		}
+		statusText = ProcessTaskStatus.getText(status);
 		return statusText;
 	}
 
