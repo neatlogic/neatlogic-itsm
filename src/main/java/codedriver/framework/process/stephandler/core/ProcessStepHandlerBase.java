@@ -924,7 +924,6 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				processTaskMapper.replaceProcessTaskConfig(new ProcessTaskConfigVo(hash, processVo.getConfig()));
 			}
 			ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-			System.out.println("channelVo.getWorktimeUuid():"+channelVo.getWorktimeUuid());
 			processTaskVo.setWorktimeUuid(channelVo.getWorktimeUuid());
 			/** 创建工单 **/
 			processTaskMapper.insertProcessTask(processTaskVo);

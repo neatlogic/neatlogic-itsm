@@ -1,5 +1,9 @@
 package codedriver.framework.process.audithandler.handler;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,16 +30,30 @@ public class FileAuditHandler implements IProcessTaskStepAuditDetailHandler{
 	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
-			FileVo fileVo = fileMapper.getFileByUuid(oldContent);
-			if(fileVo != null) {
-				processTaskStepAuditDetailVo.setOldContent(JSON.toJSONString(fileVo));
+			List<String> fileUuidList = JSON.parseArray(oldContent, String.class);
+			if(CollectionUtils.isNotEmpty(fileUuidList)) {
+				List<FileVo> fileList = new ArrayList<>();
+				for(String fileUuid : fileUuidList) {
+					FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+					if(fileVo != null) {
+						fileList.add(fileVo);
+					}
+				}
+				processTaskStepAuditDetailVo.setOldContent(JSON.toJSONString(fileList));
 			}
 		}
 		String newContent = processTaskStepAuditDetailVo.getNewContent();
 		if(StringUtils.isNotBlank(newContent)) {
-			FileVo fileVo = fileMapper.getFileByUuid(newContent);
-			if(fileVo != null) {
-				processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(fileVo));
+			List<String> fileUuidList = JSON.parseArray(newContent, String.class);
+			if(CollectionUtils.isNotEmpty(fileUuidList)) {
+				List<FileVo> fileList = new ArrayList<>();
+				for(String fileUuid : fileUuidList) {
+					FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+					if(fileVo != null) {
+						fileList.add(fileVo);
+					}
+				}
+				processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(fileList));
 			}
 		}
 	}

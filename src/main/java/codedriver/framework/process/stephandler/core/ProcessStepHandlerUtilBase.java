@@ -850,6 +850,7 @@ public abstract class ProcessStepHandlerUtilBase {
 				processTaskStepAuditVo.setAction(action.getValue());
 				processTaskStepAuditVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				processTaskStepAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+				processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
 				processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
 				/** 获取作业信息 **/
 				ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());

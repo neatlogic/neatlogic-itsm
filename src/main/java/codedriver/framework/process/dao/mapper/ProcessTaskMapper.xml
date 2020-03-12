@@ -732,6 +732,18 @@
 	ORDER BY psa.`id` ASC
 	</select>
 	
+	<select id="getProcessTaskStepAuditById" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskStepAuditVo">
+	SELECT 
+	  `id`,
+	  `processtask_id` AS processTaskId,
+	  `processtask_step_id` AS processTaskStepId,
+	  `user_id` AS userId,
+	  `action_time` AS actionTime,
+	  `action` 
+	FROM `processtask_step_audit`
+	WHERE `id` = #{id}
+	</select>
+	
 	<update id="updateProcessTaskStepConvergeIsCheck">
 		UPDATE `processtask_converge` SET is_check = #{isCheck} WHERE converge_id = #{convergeId}
 		AND processtask_step_id = #{processTaskStepId}
@@ -1343,5 +1355,12 @@
 	DELETE FROM `processtask_file` 
 	WHERE `processtask_id` = #{processTaskId} 
 	AND `processtask_step_id` = #{processTaskStepId} 
+	</delete>
+	
+	<delete id="deleteProcessTaskStepAuditById" parameterType="java.lang.Long">
+	DELETE psa, psad
+	FROM `processtask_step_audit` psa
+	JOIN `processtask_step_audit_detail` psad ON psad.`audit_id` = psa.`id`
+	WHERE `id` = #{id} AND psa.`action`='save'
 	</delete>
 </mapper>

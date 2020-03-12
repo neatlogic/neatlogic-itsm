@@ -18,6 +18,7 @@ import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -79,6 +80,9 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(processTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 		}
+		if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
+			throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'工单：'" + processTaskId + "'的步骤");
+		}
 		//状态名
 		processTaskStepVo.setStatusText(ProcessTaskStatus.getText(processTaskStepVo.getStatus()));
 		//处理人列表
@@ -112,6 +116,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
 			ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo();
+			temporaryComment.setAuditId(processTaskStepAuditList.get(0).getId());
 			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailListt = processTaskStepAuditList.get(0).getAuditDetailList();
 			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailListt) {
 				IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());

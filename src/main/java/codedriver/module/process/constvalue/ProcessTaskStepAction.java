@@ -11,7 +11,10 @@ public enum ProcessTaskStepAction {
 	TRANSFER("transfer", "转交"),
 	BACK("back", "回退"),
 	SAVE("save", "暂存"),
-	COMMENT("comment", "暂存");
+	UPDATETITLE("updateTitle", "更新标题"),
+	UPDATEPRIORITY("updatePriority", "更新优先级"),
+	UPDATECONTENT("updateContent", "更新上报描述内容"),
+	COMMENT("comment", "评论");
 	private String status;
 	private String text;
 
