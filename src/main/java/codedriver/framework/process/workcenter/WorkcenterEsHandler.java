@@ -28,6 +28,7 @@ import com.techsure.multiattrsearch.query.QueryResult;
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskAuditMapper;
@@ -54,7 +55,8 @@ import codedriver.module.process.workcenter.dto.WorkcenterVo;
 @Service
 public class WorkcenterEsHandler extends CodeDriverThread{
 	static Logger logger = LoggerFactory.getLogger(ProcessStepHandlerUtilBase.class);
-	private MultiAttrsObjectPool objectPool;
+	 private static final String POOL_NAME = "workcenter";
+	private static MultiAttrsObjectPool objectPool;
 	private ProcessTaskStepVo currentProcessTaskStepVo;
 	private static final ThreadLocal<List<WorkcenterEsHandler>> ES_HANDLERS = new ThreadLocal<>();
 	
@@ -95,9 +97,17 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		currentProcessTaskStepVo = _currentProcessTaskStepVo;
 	}
 	
+	public WorkcenterEsHandler(ProcessTaskStepVo _currentProcessTaskStepVo,MultiAttrsObjectPool _objectPool) {
+		currentProcessTaskStepVo = _currentProcessTaskStepVo;
+		objectPool = _objectPool;
+	}
+	
 	@PostConstruct
 	public void init() {
-		/*Map<String, String> esClusters = Config.ES_CLUSTERS;
+		if (!Config.ES_ENABLE) {
+            return;
+        }
+		Map<String, String> esClusters = Config.ES_CLUSTERS;
 		if (esClusters.isEmpty()) {
 			throw new IllegalStateException("ES集群信息未配置，es.cluster.<cluster-name>=<ip:port>[,<ip:port>...]");
 		}
@@ -112,7 +122,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 					cluster.getKey());
 		}
 
-		objectPool = MultiAttrsSearch.getObjectPool(config);*/
+		objectPool = MultiAttrsSearch.getObjectPool(config);
 	}
 
 	/**
@@ -131,13 +141,11 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 	 */
 	public static QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
-		String where = assembleWhere(workcenterVo);
-		String orderBy = "created_at desc";
+		String where = "";//" where " + assembleWhere(workcenterVo);
+		String orderBy = "order by createTime desc";
 		Integer limit = 10;
-		String sql = String.format("select %s from cdr where %s  order by %s limit %d,", selectColumn,where,orderBy,limit);
-		MultiAttrsSearchConfig config = new MultiAttrsSearchConfig();
-        MultiAttrsObjectPool pool = MultiAttrsSearch.getObjectPool(config);
-        QueryParser parser = pool.createQueryParser();
+		String sql = String.format("select %s from techsure %s %s limit %d", selectColumn,where,orderBy,limit);
+        QueryParser parser = objectPool.createQueryParser();
         MultiAttrsQuery query = parser.parse(sql);
         QueryResult result = query.execute();
         return result;
@@ -192,9 +200,9 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		return whereSb.toString();
 	}
 	
-	protected static synchronized void update(ProcessTaskStepVo currentProcessTaskStepVo) {
+	public static synchronized void update(ProcessTaskStepVo currentProcessTaskStepVo) {
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-			WorkcenterEsHandler handler = new WorkcenterEsHandler(currentProcessTaskStepVo);
+			WorkcenterEsHandler handler = new WorkcenterEsHandler(currentProcessTaskStepVo,objectPool);
 			CommonThreadPool.execute(handler);
 		} else {
 			List<WorkcenterEsHandler> handlerList = ES_HANDLERS.get();
@@ -216,7 +224,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 					}
 				});
 			}
-			handlerList.add(new WorkcenterEsHandler(currentProcessTaskStepVo));
+			handlerList.add(new WorkcenterEsHandler(currentProcessTaskStepVo,objectPool));
 		}
 	}
 	
@@ -225,7 +233,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		String oldName = Thread.currentThread().getName();
 		Thread.currentThread().setName("WOEKCENTER-UPDATE-" + currentProcessTaskStepVo.getId());
 		try {
-			updateTask(TenantContext.get().getTenantUuid(),currentProcessTaskStepVo);
+			updateTask(TenantContext.get().getTenantUuid(),currentProcessTaskStepVo,objectPool);
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 		} finally {
@@ -238,10 +246,10 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 	 * @param tenantId
 	 * @param currentProcessTaskStepVo
 	 */
-	public void updateTask(String tenantId,ProcessTaskStepVo currentProcessTaskStepVo) {
+	public void updateTask(String tenantId,ProcessTaskStepVo currentProcessTaskStepVo,MultiAttrsObjectPool objectPool) {
 		 Long taskId = currentProcessTaskStepVo.getProcessTaskId();
 		 objectPool.checkout(tenantId, null);
-		 MultiAttrsObjectPatch patch = objectPool.update(currentProcessTaskStepVo.getProcessTaskId().toString());
+		 MultiAttrsObjectPatch patch = objectPool.save(currentProcessTaskStepVo.getProcessTaskId().toString());
 		 /** 获取工单信息 **/
 		 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
 		 /** 获取服务信息 **/
@@ -304,7 +312,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //工单开始时间
 		 patch.set("createTime", sdf.format(processTaskVo.getStartTime()));
 		 //工单结束时间
-		 patch.set("createTime", sdf.format(processTaskVo.getEndTime()));
+		 patch.set("endTime", processTaskVo.getEndTime() == null?null:sdf.format(processTaskVo.getEndTime()));
 		 //上报人
 		 patch.set("owner",processTaskVo.getOwner());
 		 //代报人
@@ -320,7 +328,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //时间窗口
 		 patch.set("worktime", channel.getWorktimeUuid());
 		 //超时时间
-		 patch.set("expiredTime", sdf.format(processTaskVo.getExpireTime()));
+		 patch.set("expiredTime", processTaskVo.getExpireTime() == null?null:sdf.format(processTaskVo.getExpireTime()));
 		 //表单属性
 		 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {

@@ -1,6 +1,7 @@
 package codedriver.module.process.workcenter.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONArray;
@@ -26,12 +27,14 @@ public class WorkcenterConditionGroupVo implements Serializable{
 		if(conditionArray.size() == 0) {
 			 new ParamIrregularException("'conditionList'参数不能为空数组");
 		}
+		conditionList = new ArrayList<WorkcenterConditionVo>();
 		for(Object condition:conditionArray) {
 			conditionList.add(new WorkcenterConditionVo((JSONObject) JSONObject.toJSON(condition)));
 		}
-		JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
-		for(Object conditionRelGroup:conditionGroupRelArray) {
-			conditionRelList.add(new WorkcenterConditionRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
+		JSONArray conditionRelArray = jsonObj.getJSONArray("conditionRelList");
+		conditionRelList = new ArrayList<WorkcenterConditionRelVo>();
+		for(Object conditionRel:conditionRelArray) {
+			conditionRelList.add(new WorkcenterConditionRelVo((JSONObject) JSONObject.toJSON(conditionRel)));
 		}
 		
 	}

@@ -70,15 +70,17 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	
 	public WorkcenterVo(JSONObject jsonObj) {
 		uuid = jsonObj.getString("uuid");
-		headerList = jsonObj.getJSONArray("headerList");
+		//headerList = jsonObj.getJSONArray("headerList");
 		JSONArray conditionGroupArray = jsonObj.getJSONArray("conditionGroupList");
 		if(conditionGroupArray.size() == 0) {
 			 new ParamIrregularException("'conditionGroupList'参数不能为空数组");
 		}
+		conditionGroupList = new ArrayList<WorkcenterConditionGroupVo>();
 		for(Object conditionGroup:conditionGroupArray) {
 			conditionGroupList.add(new WorkcenterConditionGroupVo((JSONObject) JSONObject.toJSON(conditionGroup)));
 		}
 		JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
+		conditionGroupRelList = new ArrayList<WorkcenterConditionGroupRelVo>();
 		for(Object conditionRelGroup:conditionGroupRelArray) {
 			conditionGroupRelList.add(new WorkcenterConditionGroupRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
 		}
