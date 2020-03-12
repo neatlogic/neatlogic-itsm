@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -18,6 +19,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskVo;
@@ -63,15 +65,20 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 		if(CollectionUtils.isEmpty(processTaskStepAuditList)) {
 			return null;
 		}
+		List<ProcessTaskStepAuditVo> resutlList = new ArrayList<>();
 		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+			if(ProcessTaskStepAction.SAVE.getValue().equals(processTaskStepAudit.getAction())) {
+				continue;
+			}
 			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
 				IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
 				if(auditDetailHandler != null) {
 					auditDetailHandler.handle(processTaskStepAuditDetailVo);
 				}
 			}
+			resutlList.add(processTaskStepAudit);
 		}
-		return processTaskStepAuditList;
+		return resutlList;
 	}
 
 }

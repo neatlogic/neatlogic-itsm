@@ -1361,6 +1361,6 @@
 	DELETE psa, psad
 	FROM `processtask_step_audit` psa
 	JOIN `processtask_step_audit_detail` psad ON psad.`audit_id` = psa.`id`
-	WHERE `id` = #{id} AND psa.`action`='save'
+	WHERE `id` = #{id}
 	</delete>
 </mapper>
