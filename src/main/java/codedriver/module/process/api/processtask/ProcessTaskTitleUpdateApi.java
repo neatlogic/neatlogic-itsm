@@ -69,11 +69,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 		processTaskVo.setTitle(title);
 		processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
 		//生成活动
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-		processTaskStepAuditVo.setAction(ProcessTaskStepAction.UPDATETITLE.getValue());
-		processTaskStepAuditVo.setProcessTaskId(processTaskId);
-		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
+		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.UPDATETITLE.getValue());
 		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
 		
 		processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.TITLE.getValue(), oldTile, title));

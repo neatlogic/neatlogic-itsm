@@ -112,11 +112,7 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 			return null;
 		}
 		//生成活动
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-		processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-		processTaskStepAuditVo.setProcessTaskId(processTaskId);
-		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
+		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.SAVE.getValue());
 		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
 		
 		if (StringUtils.isNotBlank(content)) {

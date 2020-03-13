@@ -86,11 +86,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			processTaskMapper.deleteProcessTaskStepAuditById(auditId);
 		}
 		//生成活动
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-		processTaskStepAuditVo.setAction(ProcessTaskStepAction.COMMENT.getValue());
-		processTaskStepAuditVo.setProcessTaskId(processTaskId);
-		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
+		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.COMMENT.getValue());
 		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
 		
 		String content = jsonObj.getString("content");

@@ -87,11 +87,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		processTaskMapper.replaceProcessTaskContent(contentVo);
 		processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, contentVo.getHash()));
 		//生成活动
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-		processTaskStepAuditVo.setAction(ProcessTaskStepAction.UPDATECONTENT.getValue());
-		processTaskStepAuditVo.setProcessTaskId(processTaskId);
-		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
+		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.UPDATECONTENT.getValue());
 		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
 				
 		processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.CONTENT.getValue(), oldContentHash, contentVo.getHash()));	

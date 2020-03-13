@@ -13,14 +13,19 @@ public class ProcessTaskStepAuditVo {
 	private String action;
 	private List<ProcessTaskStepAuditDetailVo> auditDetailList;
 
-	public ProcessTaskStepAuditVo() {
-		super();
+	public ProcessTaskStepAuditVo() { 
 	}
 	
-	public ProcessTaskStepAuditVo(Long _processTaskId,String _action) {
-		super();
+	public ProcessTaskStepAuditVo(Long _processTaskId,String _action) { 
 		this.processTaskId = _processTaskId;
 		this.action = _action;
+	}
+
+	public ProcessTaskStepAuditVo(Long processTaskId, Long processTaskStepId, String userId, String action) {
+		this.processTaskId = processTaskId;
+		this.processTaskStepId = processTaskStepId;
+		this.userId = userId;
+		this.action = action;
 	}
 
 	public Long getId() {
