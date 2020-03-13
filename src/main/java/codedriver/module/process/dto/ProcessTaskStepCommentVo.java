@@ -16,6 +16,8 @@ public class ProcessTaskStepCommentVo {
 	private String content;
 	private List<FileVo> fileList;
 	
+	public ProcessTaskStepCommentVo() {
+	}
 	public ProcessTaskStepCommentVo(ProcessTaskStepAuditVo processTaskStepAuditVo) {
 		auditId = processTaskStepAuditVo.getId();
 		List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailListt = processTaskStepAuditVo.getAuditDetailList();
