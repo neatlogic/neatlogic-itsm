@@ -850,6 +850,7 @@ public abstract class ProcessStepHandlerUtilBase {
 				processTaskStepAuditVo.setAction(action.getValue());
 				processTaskStepAuditVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				processTaskStepAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+				processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
 				processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
 				/** 获取作业信息 **/
 				ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
@@ -874,8 +875,8 @@ public abstract class ProcessStepHandlerUtilBase {
 					saveAuditDetail(processTaskStepAuditVo, contentAudit, ProcessTaskAuditDetailType.CONTENT, startContentVo.getHash());
 				}
 				/** 优先级修改审计 **/
-				ProcessTaskStepAuditDetailVo urgencyAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.URGENCY.getValue());
-				saveAuditDetail(processTaskStepAuditVo, urgencyAudit, ProcessTaskAuditDetailType.CONTENT, processTaskVo.getProcessUuid());
+				ProcessTaskStepAuditDetailVo urgencyAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.PRIORITY.getValue());
+				saveAuditDetail(processTaskStepAuditVo, urgencyAudit, ProcessTaskAuditDetailType.PRIORITY, processTaskVo.getPriorityUuid());
 
 				/** 表单修改审计 **/
 				ProcessTaskStepAuditDetailVo formAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.FORM.getValue());

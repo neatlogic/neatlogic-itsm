@@ -117,6 +117,10 @@ public interface ProcessTaskMapper {
 
 	public List<ProcessTaskStepAuditVo> getProcessTaskStepAuditList(ProcessTaskStepAuditVo processTaskStepAuditVo);
 
+	public ProcessTaskStepAuditVo getProcessTaskStepAuditById(Long auditId);
+
+	public List<ProcessTaskStepVo> getProcessTaskStepListByProcessTaskId(Long processTaskId);
+
 	public int replaceProcessTaskConfig(ProcessTaskConfigVo processTaskConfigVo);
 
 	public int insertProcessTaskForm(ProcessTaskFormVo processTaskFormVo);
@@ -204,5 +208,7 @@ public interface ProcessTaskMapper {
 	public int deleteProcessTaskSlaTransferById(Long slaTransferId);
 	
 	public int deleteProcessTaskFile(ProcessTaskFileVo processTaskFileVo);
+
+	public int deleteProcessTaskStepAuditById(Long auditId);
 
 }

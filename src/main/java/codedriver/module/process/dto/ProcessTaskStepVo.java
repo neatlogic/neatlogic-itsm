@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.restful.annotation.EntityField;
+import codedriver.module.process.constvalue.ProcessTaskStatus;
 
 public class ProcessTaskStepVo extends BasePageVo {
 	@EntityField(name = "工单步骤id", type = ApiParamType.LONG)
@@ -59,6 +60,7 @@ public class ProcessTaskStepVo extends BasePageVo {
 	//@EntityField(name = "处理组列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepTeamVo> teamList;
 	private List<ProcessTaskStepRelVo> relList;
+	@EntityField(name = "有权限处理人列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepWorkerVo> workerList;
 	private List<ProcessTaskStepWorkerPolicyVo> workerPolicyList;
 	private List<ProcessTaskStepTimeoutPolicyVo> timeoutPolicyList;
@@ -72,8 +74,10 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private List<ProcessTaskStepUserVo> minorUserList;
 	@EntityField(name = "代办人列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepUserVo> agentUserList;
-	@EntityField(name = "暂存评论", type = ApiParamType.JSONARRAY)
-	private ProcessTaskStepCommentVo temporaryComment;
+	@EntityField(name = "暂存评论附件或上报描述附件", type = ApiParamType.JSONOBJECT)
+	private ProcessTaskStepCommentVo comment;
+	@EntityField(name = "评论附件列表", type = ApiParamType.JSONARRAY)
+	private List<ProcessTaskStepCommentVo> commentList;
 	
 	public ProcessTaskStepVo() {
 
@@ -197,6 +201,13 @@ public class ProcessTaskStepVo extends BasePageVo {
 	}
 
 	public String getStatusText() {
+		if(status == null) {
+			return null;
+		}
+		if(statusText != null) {
+			return statusText;
+		}
+		statusText = ProcessTaskStatus.getText(status);
 		return statusText;
 	}
 
@@ -488,12 +499,20 @@ public class ProcessTaskStepVo extends BasePageVo {
 		this.agentUserList = agentUserList;
 	}
 
-	public ProcessTaskStepCommentVo getTemporaryComment() {
-		return temporaryComment;
+	public ProcessTaskStepCommentVo getComment() {
+		return comment;
 	}
 
-	public void setTemporaryComment(ProcessTaskStepCommentVo temporaryComment) {
-		this.temporaryComment = temporaryComment;
+	public void setComment(ProcessTaskStepCommentVo comment) {
+		this.comment = comment;
+	}
+
+	public List<ProcessTaskStepCommentVo> getCommentList() {
+		return commentList;
+	}
+
+	public void setCommentList(List<ProcessTaskStepCommentVo> commentList) {
+		this.commentList = commentList;
 	}
 
 }

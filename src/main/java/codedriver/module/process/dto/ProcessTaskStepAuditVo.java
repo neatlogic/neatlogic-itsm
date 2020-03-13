@@ -2,28 +2,30 @@ package codedriver.module.process.dto;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-
 public class ProcessTaskStepAuditVo {
 	private Long id;
 	private Long processTaskId;
 	private Long processTaskStepId;
+	private String processTaskStepName;
 	private String userId;
 	private String userName;
 	private String actionTime;
 	private String action;
 	private List<ProcessTaskStepAuditDetailVo> auditDetailList;
 
-	public ProcessTaskStepAuditVo() {
-		super();
+	public ProcessTaskStepAuditVo() { 
 	}
 	
-	public ProcessTaskStepAuditVo(Long _processTaskId,String _action) {
-		super();
+	public ProcessTaskStepAuditVo(Long _processTaskId,String _action) { 
 		this.processTaskId = _processTaskId;
 		this.action = _action;
+	}
+
+	public ProcessTaskStepAuditVo(Long processTaskId, Long processTaskStepId, String userId, String action) {
+		this.processTaskId = processTaskId;
+		this.processTaskStepId = processTaskStepId;
+		this.userId = userId;
+		this.action = action;
 	}
 
 	public Long getId() {
@@ -50,10 +52,18 @@ public class ProcessTaskStepAuditVo {
 		this.processTaskStepId = processTaskStepId;
 	}
 
+	public String getProcessTaskStepName() {
+		return processTaskStepName;
+	}
+
+	public void setProcessTaskStepName(String processTaskStepName) {
+		this.processTaskStepName = processTaskStepName;
+	}
+
 	public String getUserId() {
-		if (StringUtils.isBlank(userId)) {
-			userId = UserContext.get().getUserId();
-		}
+//		if (StringUtils.isBlank(userId)) {
+//			userId = UserContext.get().getUserId();
+//		}
 		return userId;
 	}
 

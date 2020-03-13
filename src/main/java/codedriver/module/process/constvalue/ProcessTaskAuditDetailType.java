@@ -2,7 +2,7 @@ package codedriver.module.process.constvalue;
 
 public enum ProcessTaskAuditDetailType {
 	TITLE("title", "标题"),
-	URGENCY("urgency", "优先级"),
+	PRIORITY("priority", "优先级"),
 	CONTENT("content", "回复内容"),
 	FORM("form", "表单"),
 	WORKER("worker", "处理人"),

@@ -1,6 +1,7 @@
 package codedriver.module.process.constvalue;
 
 public enum ProcessTaskStepAction {
+	VIEW("view", "查看节点信息"),
 	STARTPROCESS("startprocess", "上报"),
 	START("start", "开始"),
 	ACTIVE("active", "激活"),
@@ -10,7 +11,11 @@ public enum ProcessTaskStepAction {
 	RECOVER("recover", "恢复"),
 	TRANSFER("transfer", "转交"),
 	BACK("back", "回退"),
-	SAVE("save", "暂存");
+	SAVE("save", "暂存"),
+	UPDATETITLE("updateTitle", "更新标题"),
+	UPDATEPRIORITY("updatePriority", "更新优先级"),
+	UPDATECONTENT("updateContent", "更新上报描述内容"),
+	COMMENT("comment", "评论");
 	private String status;
 	private String text;
 
