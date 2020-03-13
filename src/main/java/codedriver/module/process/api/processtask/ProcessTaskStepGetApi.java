@@ -8,27 +8,20 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.actionauthorityverificationhandler.core.IProcessTaskStepUserActionAuthorityVerificationHandler;
 import codedriver.framework.process.actionauthorityverificationhandler.core.ProcessTaskStepUserActionAuthorityVerificationHandlerFactory;
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
-import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.UserType;
-import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepCommentVo;
 import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
@@ -106,21 +99,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
 		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-			ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo();
-			temporaryComment.setAuditId(processTaskStepAuditList.get(0).getId());
-			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailListt = processTaskStepAuditList.get(0).getAuditDetailList();
-			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailListt) {
-				IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
-				if(auditDetailHandler != null) {
-					auditDetailHandler.handle(processTaskStepAuditDetailVo);
-				}
-				if(ProcessTaskAuditDetailType.CONTENT.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-					temporaryComment.setContent(processTaskStepAuditDetailVo.getNewContent());
-				}else if(ProcessTaskAuditDetailType.FILE.getValue().equals(processTaskStepAuditDetailVo.getType())){
-					FileVo fileVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), new TypeReference<FileVo>() {});
-					temporaryComment.addFile(fileVo);
-				}
-			}
+			ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo(processTaskStepAuditList.get(0));
 			processTaskStepVo.setComment(temporaryComment);
 		}
 

@@ -3,16 +3,38 @@ package codedriver.module.process.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
+import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 
 public class ProcessTaskStepCommentVo {
-	//private Long processTaskId;
-	//private Long processTaskStepId;
 	private Long auditId;
 	private String content;
 	private List<FileVo> fileList;
-	//private List<String> fileUuidList;
 	
+	public ProcessTaskStepCommentVo(ProcessTaskStepAuditVo processTaskStepAuditVo) {
+		auditId = processTaskStepAuditVo.getId();
+		List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailListt = processTaskStepAuditVo.getAuditDetailList();
+		for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailListt) {
+			IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
+			if(auditDetailHandler != null) {
+				auditDetailHandler.handle(processTaskStepAuditDetailVo);
+			}
+			if(ProcessTaskAuditDetailType.CONTENT.getValue().equals(processTaskStepAuditDetailVo.getType())) {
+				content = processTaskStepAuditDetailVo.getNewContent();
+			}else if(ProcessTaskAuditDetailType.FILE.getValue().equals(processTaskStepAuditDetailVo.getType())){
+				FileVo fileVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), new TypeReference<FileVo>() {});
+				if(fileList == null) {
+					fileList = new ArrayList<>();
+				}
+				fileList.add(fileVo);
+			}
+		}
+	}
 	public String getContent() {
 		return content;
 	}
@@ -25,35 +47,12 @@ public class ProcessTaskStepCommentVo {
 	public void setFileList(List<FileVo> fileList) {
 		this.fileList = fileList;
 	}
-	
-	public void addFile(FileVo fileVo) {
-		if(fileList == null) {
-			fileList = new ArrayList<>();
-		}
-		fileList.add(fileVo);
-	}
-//	public Long getProcessTaskId() {
-//		return processTaskId;
-//	}
-//	public void setProcessTaskId(Long processTaskId) {
-//		this.processTaskId = processTaskId;
-//	}
-//	public Long getProcessTaskStepId() {
-//		return processTaskStepId;
-//	}
-//	public void setProcessTaskStepId(Long processTaskStepId) {
-//		this.processTaskStepId = processTaskStepId;
-//	}
+
 	public Long getAuditId() {
 		return auditId;
 	}
 	public void setAuditId(Long auditId) {
 		this.auditId = auditId;
 	}
-//	public List<String> getFileUuidList() {
-//		return fileUuidList;
-//	}
-//	public void setFileUuidList(List<String> fileUuidList) {
-//		this.fileUuidList = fileUuidList;
-//	}
+
 }
