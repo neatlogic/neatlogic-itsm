@@ -67,6 +67,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'工单：'" + processTaskId + "'的步骤");
 		}
 		List<String> actionList = new ArrayList<>();
+		//TODO linbq
+		for(ProcessTaskStepAction processTaskStepAction : ProcessTaskStepAction.values()) {
+			actionList.add(processTaskStepAction.getValue());
+		}
 		return actionList;
 	}
 

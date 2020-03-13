@@ -93,7 +93,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW)) {
-			return null;
+			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
 		
 		//获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)

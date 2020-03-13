@@ -70,7 +70,7 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.SAVE)) {
-			return null;
+			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
 		//写入当前步骤的表单属性值
 		JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");

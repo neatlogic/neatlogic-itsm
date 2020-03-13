@@ -13,6 +13,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -59,7 +60,7 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW)) {
-			return null;
+			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
 		
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();

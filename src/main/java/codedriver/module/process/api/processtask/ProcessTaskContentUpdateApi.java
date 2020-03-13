@@ -61,7 +61,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATECONTENT)) {
-			return null;
+			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
 		
 		//获取开始步骤id

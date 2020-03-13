@@ -67,7 +67,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMMENT)) {
-			return null;
+			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
 		//删除暂存活动
 		Long auditId = jsonObj.getLong("auditId");
