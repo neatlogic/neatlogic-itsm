@@ -1,6 +1,7 @@
 package codedriver.module.process.constvalue;
 
 public enum ProcessTaskStepAction {
+	VIEW("view", "查看节点信息"),
 	STARTPROCESS("startprocess", "上报"),
 	START("start", "开始"),
 	ACTIVE("active", "激活"),
