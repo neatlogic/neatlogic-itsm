@@ -73,7 +73,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	@Override
 	public boolean verifyActionAuthoriy(Long processTaskId, Long processTaskStepId, ProcessTaskStepAction action) {
 		List<String> actionList = getProcessTaskStepActionList(processTaskId, processTaskStepId);
-		return actionList.contains(action);
+		return actionList.contains(action.getValue());
 	}
 	
 }
