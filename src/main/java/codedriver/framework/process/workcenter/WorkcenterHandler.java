@@ -4,18 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.query.QueryResult;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
+import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
+import codedriver.module.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
-//@Service
 public class WorkcenterHandler {
-
+	static WorkcenterMapper workcenterMapper;
+	@Autowired
+	public void setWorkcenterMapper(WorkcenterMapper _workcenterMapper) {
+		workcenterMapper = _workcenterMapper;
+	}
+	
 	public static JSONObject doSearch(WorkcenterVo workcenterVo) {
 		JSONObject returnObj = new JSONObject();
 		//搜索es
@@ -34,17 +43,17 @@ public class WorkcenterHandler {
             		taskJson.put(column.getName(), column.getValue(el));
             	}
             	//补充表单属性值
-            	for(Object header : workcenterVo.getHeaderList()) {
-            		if(!taskJson.containsKey(header.toString())) {
-            			taskJson.put(header.toString(),el.getString(header.toString()));
+            	for(WorkcenterTheadVo header : workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(),UserContext.get().getUserId()))) {
+            		if(!taskJson.containsKey(header.getName())) {
+            			taskJson.put(header.getName(),el.getString(header.getName()));
             		}
             	}
             	dataList.add(taskJson);
             }
         }
 		//TODO 从新获取header，兼容表单
-		returnObj.put("headerList", headerList);
-		returnObj.put("dataList", dataList);
+		returnObj.put("theadList", headerList);
+		returnObj.put("tbodyList", dataList);
 		returnObj.put("rowNum", result.getTotal());
 		returnObj.put("pageSize", workcenterVo.getPageSize());
 		returnObj.put("currentPage", workcenterVo.getCurrentPage());

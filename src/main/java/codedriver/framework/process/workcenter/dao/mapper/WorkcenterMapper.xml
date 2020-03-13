@@ -96,6 +96,19 @@
 		  `process_workcenter` pw 
 	</select>
 	
+	<select id="getWorkcenterThead" parameterType="codedriver.module.process.workcenter.dto.WorkcenterTheadVo" resultType="codedriver.module.process.workcenter.dto.WorkcenterTheadVo">
+		SELECT 
+		  `workcenter_uuid` as workcenterUuid,
+		  `name`,
+		  `sort`,
+		  `user_id`  as userId
+		FROM
+		  `process_workcenter_thead` 
+		where
+		   workcenter_uuid = #{workcenterUuid}
+		   and userId = #{userId}
+	</select>
+	
 	<delete id="deleteWorkcenterByUuid" parameterType="java.lang.String">
 		DELETE 
 		FROM
@@ -117,6 +130,17 @@
 		WHERE `workcenter_uuid` = #{workcenterUuid} ;
 	</delete>
 
+	<delete id="deleteWorkcenterThead" parameterType="codedriver.module.process.workcenter.dto.WorkcenterTheadVo">
+		DELETE 
+		FROM
+		  `process_workcenter_thead`
+		<where>
+			`workcenter_uuid` = #{workcenterUuid} 
+			<if test="userId != null and userId != ''">
+				and user_id = #{userId}
+			</if>
+		</where>
+	</delete>
 
 	<insert id="insertWorkcenter" parameterType="codedriver.module.process.workcenter.dto.WorkcenterVo">
 		INSERT INTO `process_workcenter` (
@@ -148,6 +172,22 @@
 		    #{roleName},
 		    #{userId}
 		  ) ;
+	</insert>
+	
+	<insert id="insertWorkcenterThead" parameterType="codedriver.module.process.workcenter.dto.WorkcenterTheadVo">
+			INSERT INTO `process_workcenter_thead` (
+			  `workcenter_uuid`,
+			  `name`,
+			  `sort`,
+			  `user_id`
+			) 
+			VALUES
+			  (
+			    #{workcenterUuid},
+			    #{name},
+			    #{sort},
+			    #{userId}
+			  ) ;
 	</insert>
 	
 	<insert id="insertWorkcenterOwner" parameterType="java.lang.String">

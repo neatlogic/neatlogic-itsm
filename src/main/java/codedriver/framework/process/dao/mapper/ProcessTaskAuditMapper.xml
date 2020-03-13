@@ -4,19 +4,18 @@
 
 	<select id="getProcessTaskAuditList" resultType="codedriver.module.process.dto.ProcessTaskStepAuditVo">
 		SELECT 
-		`processtask_id`,
-		`processtask_step_id`,
-		`user_id`,
-		`action_time`,
-		`action`,
-		`content_id`
+		`processtask_id` as processTaskId,
+		`processtask_step_id` as processTaskStepId,
+		`user_id` as userId,
+		`action_time` as actionTime,
+		`action`
 		FROM
 		  `processtask_step_audit`
 		WHERE 1=1
-		<if test="processtask_id != null">
-	 		and `processtask_id` = #{processtaskId}
+		<if test="processTaskId != null">
+	 		and `processtask_id` = #{processTaskId}
 	 	</if>
-		<if test="user_id != null">
+		<if test="userId != null">
 	 		and `user_id` = #{userId}
 	 	</if>
 	 	<if test="action != null">
@@ -33,8 +32,7 @@
 		`processtask_step_id`,
 		`user_id`,
 		`action_time`,
-		`action`,
-		`content_id`
+		`action`
 		)
 		VALUES
 		(
@@ -42,8 +40,7 @@
 		#{processTaskStepId},
 		#{userId},
 		NOW(3),
-		#{action},
-		#{contentId}
+		#{action}
 		)
 	</insert>
 </mapper>
