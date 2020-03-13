@@ -85,7 +85,8 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id")
 	})
 	@Output({
-		@Param(explode = ProcessTaskStepVo.class, desc = "工单步骤信息")
+		@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "工单信息"),
+		@Param(name = "processTaskStep", explode = ProcessTaskStepVo.class, desc = "工单步骤信息")
 	})
 	@Description(desc = "工单步骤基本信息获取接口，当前步骤名称、激活时间、状态、处理人、协助处理人、处理时效、表单属性显示控制等")
 	@Override
