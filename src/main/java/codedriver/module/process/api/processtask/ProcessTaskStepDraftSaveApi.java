@@ -15,8 +15,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.process.actionauthorityverificationhandler.core.IProcessTaskStepUserActionAuthorityVerificationHandler;
-import codedriver.framework.process.actionauthorityverificationhandler.core.ProcessTaskStepUserActionAuthorityVerificationHandlerFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.restful.annotation.Description;
@@ -29,12 +27,16 @@ import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
+import codedriver.module.process.service.ProcessTaskService;
 @Service
 @Transactional
 public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private ProcessTaskService processTaskService;
 	
 	@Autowired
 	private FileMapper fileMapper;
@@ -67,11 +69,8 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		IProcessTaskStepUserActionAuthorityVerificationHandler handler = ProcessTaskStepUserActionAuthorityVerificationHandlerFactory.getHandler(ProcessTaskStepAction.SAVE.getValue());
-		if(handler != null) {
-			if(!handler.test(processTaskId, processTaskStepId)) {
-				return null;
-			}
+		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.SAVE)) {
+			return null;
 		}
 		//写入当前步骤的表单属性值
 		JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");

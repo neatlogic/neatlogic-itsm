@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.actionauthorityverificationhandler.core.IProcessTaskStepUserActionAuthorityVerificationHandler;
-import codedriver.framework.process.actionauthorityverificationhandler.core.ProcessTaskStepUserActionAuthorityVerificationHandlerFactory;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -23,11 +21,15 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
+import codedriver.module.process.service.ProcessTaskService;
 @Service
 public class ProcessTaskAuditListApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -56,11 +58,8 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		IProcessTaskStepUserActionAuthorityVerificationHandler handler = ProcessTaskStepUserActionAuthorityVerificationHandlerFactory.getHandler(ProcessTaskStepAction.VIEW.getValue());
-		if(handler != null) {
-			if(!handler.test(processTaskId, processTaskStepId)) {
-				return null;
-			}
+		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW)) {
+			return null;
 		}
 		
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();

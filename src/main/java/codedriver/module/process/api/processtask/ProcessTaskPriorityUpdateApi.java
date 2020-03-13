@@ -8,8 +8,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.process.actionauthorityverificationhandler.core.IProcessTaskStepUserActionAuthorityVerificationHandler;
-import codedriver.framework.process.actionauthorityverificationhandler.core.ProcessTaskStepUserActionAuthorityVerificationHandlerFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -20,12 +18,16 @@ import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskVo;
+import codedriver.module.process.service.ProcessTaskService;
 @Service
 @Transactional
 public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -51,11 +53,8 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		IProcessTaskStepUserActionAuthorityVerificationHandler handler = ProcessTaskStepUserActionAuthorityVerificationHandlerFactory.getHandler(ProcessTaskStepAction.UPDATEPRIORITY.getValue());
-		if(handler != null) {
-			if(!handler.test(processTaskId, processTaskStepId)) {
-				return null;
-			}
+		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATEPRIORITY)) {
+			return null;
 		}
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		String oldPriorityUuid = processTaskVo.getPriorityUuid();

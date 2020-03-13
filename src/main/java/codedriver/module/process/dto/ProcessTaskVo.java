@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.restful.annotation.EntityField;
+import codedriver.module.process.constvalue.ProcessTaskStatus;
 
 public class ProcessTaskVo {
 	@EntityField(name = "工单id", type = ApiParamType.LONG)
@@ -209,6 +210,13 @@ public class ProcessTaskVo {
 	}
 
 	public String getStatusText() {
+		if(status == null) {
+			return null;
+		}
+		if(statusText != null) {
+			return statusText;
+		}
+		statusText = ProcessTaskStatus.getText(status);
 		return statusText;
 	}
 
