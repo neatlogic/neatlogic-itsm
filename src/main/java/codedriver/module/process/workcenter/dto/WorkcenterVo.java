@@ -74,25 +74,24 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		uuid = jsonObj.getString("uuid");
 		//headerList = jsonObj.getJSONArray("headerList");
 		JSONArray conditionGroupArray = jsonObj.getJSONArray("conditionGroupList");
-		if(conditionGroupArray.size() == 0) {
-			 new ParamIrregularException("'conditionGroupList'参数不能为空数组");
-		}
-		conditionGroupList = new ArrayList<WorkcenterConditionGroupVo>();
-		channelUuidList = new ArrayList<String>();
-		for(Object conditionGroup:conditionGroupArray) {
-			JSONObject conditionGroupJson = (JSONObject) JSONObject.toJSON(conditionGroup);
-			JSONArray channelArray =conditionGroupJson.getJSONArray("channelUuidList");
-			List<String> channelUuidListTmp = new ArrayList<String>();
-			if(CollectionUtils.isNotEmpty(channelArray)) {
-				channelUuidListTmp = JSONObject.parseArray(channelArray.toJSONString(),String.class);
+		if(CollectionUtils.isNotEmpty(conditionGroupArray)) {
+			conditionGroupList = new ArrayList<WorkcenterConditionGroupVo>();
+			channelUuidList = new ArrayList<String>();
+			for(Object conditionGroup:conditionGroupArray) {
+				JSONObject conditionGroupJson = (JSONObject) JSONObject.toJSON(conditionGroup);
+				JSONArray channelArray =conditionGroupJson.getJSONArray("channelUuidList");
+				List<String> channelUuidListTmp = new ArrayList<String>();
+				if(CollectionUtils.isNotEmpty(channelArray)) {
+					channelUuidListTmp = JSONObject.parseArray(channelArray.toJSONString(),String.class);
+				}
+				channelUuidList.addAll(channelUuidListTmp);
+				conditionGroupList.add(new WorkcenterConditionGroupVo(conditionGroupJson));
 			}
-			channelUuidList.addAll(channelUuidListTmp);
-			conditionGroupList.add(new WorkcenterConditionGroupVo(conditionGroupJson));
-		}
-		JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
-		conditionGroupRelList = new ArrayList<WorkcenterConditionGroupRelVo>();
-		for(Object conditionRelGroup:conditionGroupRelArray) {
-			conditionGroupRelList.add(new WorkcenterConditionGroupRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
+			JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
+			conditionGroupRelList = new ArrayList<WorkcenterConditionGroupRelVo>();
+			for(Object conditionRelGroup:conditionGroupRelArray) {
+				conditionGroupRelList.add(new WorkcenterConditionGroupRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
+			}
 		}
 	}
 	public String getUuid() {

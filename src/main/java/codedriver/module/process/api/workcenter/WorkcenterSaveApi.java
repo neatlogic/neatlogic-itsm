@@ -1,7 +1,5 @@
 package codedriver.module.process.api.workcenter;
 
-import java.util.List;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,8 +67,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		WorkcenterVo workcenterVo = new WorkcenterVo(name);
 		//重复name判断
 		workcenterVo.setUuid(uuid);
-		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(name,uuid);
-		if(CollectionUtils.isNotEmpty(workcenterList)) {
+		if(workcenterMapper.checkWorkcenterNameIsRepeat(name,uuid)>0) {
 			throw new WorkcenterNameRepeatException(name);
 		}
 		//保存、更新分类

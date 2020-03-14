@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,7 +142,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 	 */
 	public static QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
-		String where = "" ;//" where " + assembleWhere(workcenterVo);
+		String where = assembleWhere(workcenterVo);
 		String orderBy = "order by createTime desc";
 		Integer limit = 10;
 		String sql = String.format("select %s from techsure %s %s limit %d", selectColumn,where,orderBy,limit);
@@ -154,6 +155,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 	private static String assembleWhere(WorkcenterVo workcenterVo) {
 		Map<String,String> groupRelMap = new HashMap<String,String>();
 		StringBuilder whereSb = new StringBuilder();
+		whereSb.append(" where ");
 		List<WorkcenterConditionGroupRelVo> groupRelList = workcenterVo.getWorkcenterConditionGroupRelList();
 		if(groupRelList != null && !groupRelList.isEmpty()) {
 			//将group 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
@@ -162,6 +164,9 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 			}
 		}
 		List<WorkcenterConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
+		if(CollectionUtils.isEmpty(groupList)) {
+			return "";
+		}
 		String fromGroupUuid = null;
 		String toGroupUuid = groupList.get(0).getUuid();
 		for(WorkcenterConditionGroupVo group : groupList) {
