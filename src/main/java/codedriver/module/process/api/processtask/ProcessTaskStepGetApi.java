@@ -82,7 +82,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id")
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")
 	})
 	@Output({
 		@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "工单信息"),
@@ -159,46 +159,47 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			}
 		}
 		
-		
-		//获取步骤信息
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		//处理人列表
-		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MAJOR.getValue());
-		if(CollectionUtils.isNotEmpty(majorUserList)) {
-			processTaskStepVo.setMajorUserList(majorUserList);
-		}
-		List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MINOR.getValue());
-		if(CollectionUtils.isNotEmpty(minorUserList)) {
-			processTaskStepVo.setMinorUserList(minorUserList);
-		}
-		List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.AGENT.getValue());
-		if(CollectionUtils.isNotEmpty(agentUserList)) {
-			processTaskStepVo.setAgentUserList(agentUserList);
-		}
-		//表单属性显示控制
-		List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
-		if(processTaskStepFormAttributeList.size() > 0) {
-			Map<String, String> formAttributeActionMap = new HashMap<>();
-			for(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
-				formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
-			}
-			processTaskStepVo.setFormAttributeActionMap(formAttributeActionMap);
-		}
-		//回复框内容和附件暂存回显
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-		processTaskStepAuditVo.setProcessTaskId(processTaskId);
-		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-		processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
-		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-			ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo(processTaskStepAuditList.get(0));
-			processTaskStepVo.setComment(temporaryComment);
-		}
-
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("processTask", processTaskVo);
-		resultObj.put("processTaskStep", processTaskStepVo);
+		
+		if(processTaskStepId != null) {
+			//获取步骤信息
+			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+			//处理人列表
+			List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MAJOR.getValue());
+			if(CollectionUtils.isNotEmpty(majorUserList)) {
+				processTaskStepVo.setMajorUserList(majorUserList);
+			}
+			List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MINOR.getValue());
+			if(CollectionUtils.isNotEmpty(minorUserList)) {
+				processTaskStepVo.setMinorUserList(minorUserList);
+			}
+			List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.AGENT.getValue());
+			if(CollectionUtils.isNotEmpty(agentUserList)) {
+				processTaskStepVo.setAgentUserList(agentUserList);
+			}
+			//表单属性显示控制
+			List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
+			if(processTaskStepFormAttributeList.size() > 0) {
+				Map<String, String> formAttributeActionMap = new HashMap<>();
+				for(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
+					formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
+				}
+				processTaskStepVo.setFormAttributeActionMap(formAttributeActionMap);
+			}
+			//回复框内容和附件暂存回显
+			ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
+			processTaskStepAuditVo.setProcessTaskId(processTaskId);
+			processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
+			processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+			processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
+			List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
+			if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+				ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo(processTaskStepAuditList.get(0));
+				processTaskStepVo.setComment(temporaryComment);
+			}
+			resultObj.put("processTaskStep", processTaskStepVo);
+		}
 		return resultObj;
 	}
 
