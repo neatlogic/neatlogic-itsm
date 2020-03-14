@@ -12,6 +12,7 @@ public enum ProcessTaskStepAction {
 	TRANSFER("transfer", "转交"),
 	BACK("back", "回退"),
 	SAVE("save", "暂存"),
+	UPDATE("update", "修改上报内容"),//包括标题、优先级、描述
 	UPDATETITLE("updateTitle", "更新标题"),
 	UPDATEPRIORITY("updatePriority", "更新优先级"),
 	UPDATECONTENT("updateContent", "更新上报描述内容"),

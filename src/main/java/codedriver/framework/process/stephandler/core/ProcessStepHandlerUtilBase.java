@@ -102,7 +102,7 @@ public abstract class ProcessStepHandlerUtilBase {
 	private static WorktimeMapper worktimeMapper;
 	protected static ChannelMapper channelMapper;
 	private static NotifyMapper notifyMapper;
-	private static FileMapper fileMapper;
+	protected static FileMapper fileMapper;
 	// private static SchedulerManager schedulerManager;
 
 	// @Autowired
@@ -909,47 +909,7 @@ public abstract class ProcessStepHandlerUtilBase {
 	}
 
 	protected static class DataValid {
-		public static boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo) {
-			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
-			Pattern titlePattern = Pattern.compile("^[A-Za-z_\\d\\u4e00-\\u9fa5]+$");
-			if(!titlePattern.matcher(processTaskVo.getTitle()).matches()) {
-				throw new ProcessTaskRuntimeException("工单标题格式不对");
-			}
-			if(StringUtils.isBlank(processTaskVo.getOwner())) {
-				throw new ProcessTaskRuntimeException("工单请求人不能为空");
-			}
-			if(userMapper.getUserBaseInfoByUserId(processTaskVo.getOwner()) == null) {
-				throw new ProcessTaskRuntimeException("工单请求人账号:'" + processTaskVo.getOwner() + "'不存在");
-			}
-			if(StringUtils.isBlank(processTaskVo.getPriorityUuid())) {
-				throw new ProcessTaskRuntimeException("工单优先级不能为空");
-			}
-			List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
-			List<String> priorityUuidlist = new ArrayList<>(channelPriorityList.size());
-			for(ChannelPriorityVo channelPriorityVo : channelPriorityList) {
-				priorityUuidlist.add(channelPriorityVo.getPriorityUuid());
-			}
-			if(!priorityUuidlist.contains(processTaskVo.getPriorityUuid())) {
-				throw new ProcessTaskRuntimeException("工单优先级与服务优先级级不匹配");
-			}
-//			List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
-//			if(processTaskStepContentList.isEmpty()) {
-//				throw new ProcessTaskRuntimeException("工单描述不能为空");
-//			}
-			ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
-			processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-			processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-			List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
-			if(processTaskFileList.size() > 0) {
-				for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-					//TODO 验证附件uuid是否存在
-					if(fileMapper.getFileByUuid(processTaskFile.getFileUuid()) == null) {
-						throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileUuid() + "'不存在");
-					}
-				}
-			}
-			return true;
-		}
+		
 		public static boolean formAttributeDataValid(ProcessTaskStepVo currentProcessTaskStepVo) {
 			
 			ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
