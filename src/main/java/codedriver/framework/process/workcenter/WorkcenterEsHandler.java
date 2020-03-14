@@ -141,7 +141,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 	 */
 	public static QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
-		String where = "";//" where " + assembleWhere(workcenterVo);
+		String where = "" ;//" where " + assembleWhere(workcenterVo);
 		String orderBy = "order by createTime desc";
 		Integer limit = 10;
 		String sql = String.format("select %s from techsure %s %s limit %d", selectColumn,where,orderBy,limit);
@@ -160,40 +160,42 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 			for(WorkcenterConditionGroupRelVo groupRel : groupRelList) {
 				groupRelMap.put(groupRel.getFrom()+"_"+groupRel.getTo(), groupRel.getJoinType());
 			}
-			List<WorkcenterConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
-			String fromGroupUuid = null;
-			String toGroupUuid = groupList.get(0).getUuid();
-			for(WorkcenterConditionGroupVo group : groupList) {
-				Map<String,String> conditionRelMap = new HashMap<String,String>();
-				if(fromGroupUuid != null) {
-					whereSb.append(conditionRelMap.get(fromGroupUuid+"_"+toGroupUuid));
-				}
-				whereSb.append("(");
-				List<WorkcenterConditionRelVo> conditionRelList = group.getConditionRelList();
-				if(conditionRelList != null && !conditionRelList.isEmpty()) {
-					//将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
-					for(WorkcenterConditionRelVo conditionRel : conditionRelList) {
-						conditionRelMap.put(conditionRel.getFrom()+"_"+conditionRel.getTo(),conditionRel.getJoinType());
-					}
-					List<WorkcenterConditionVo> conditionList = group.getConditionList();
-					String fromConditionUuid = null;
-					String toConditionUuid = conditionList.get(0).getUuid();
-					for(WorkcenterConditionVo condition : conditionList) {
-						if(fromConditionUuid != null) {
-							whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
-						}
-						String value = condition.getValueList().get(0);
-						if(condition.getValueList().size()>1) {
-							value = String.format(" '%s' ",  String.join("','",condition.getValueList()));
-						}
-						whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getUuid(),value));
-						fromConditionUuid = toConditionUuid;
-					}
-				}
-				whereSb.append(")");
-				fromGroupUuid = toGroupUuid;
-			}
 		}
+		List<WorkcenterConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
+		String fromGroupUuid = null;
+		String toGroupUuid = groupList.get(0).getUuid();
+		for(WorkcenterConditionGroupVo group : groupList) {
+			Map<String,String> conditionRelMap = new HashMap<String,String>();
+			if(fromGroupUuid != null) {
+				whereSb.append(conditionRelMap.get(fromGroupUuid+"_"+toGroupUuid));
+			}
+			whereSb.append("(");
+			List<WorkcenterConditionRelVo> conditionRelList = group.getConditionRelList();
+			if(conditionRelList != null && !conditionRelList.isEmpty()) {
+				//将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
+				for(WorkcenterConditionRelVo conditionRel : conditionRelList) {
+					conditionRelMap.put(conditionRel.getFrom()+"_"+conditionRel.getTo(),conditionRel.getJoinType());
+				}
+				List<WorkcenterConditionVo> conditionList = group.getConditionList();
+				String fromConditionUuid = null;
+				String toConditionUuid = conditionList.get(0).getUuid();
+				for(WorkcenterConditionVo condition : conditionList) {
+					if(fromConditionUuid != null) {
+						toConditionUuid = condition.getUuid();
+						whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
+					}
+					String value = condition.getValueList().get(0);
+					if(condition.getValueList().size()>1) {
+						value = String.format("'%s'",  String.join("','",condition.getValueList()));
+					}
+					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getName(),value));
+					fromConditionUuid = toConditionUuid;
+				}
+			}
+			whereSb.append(")");
+			fromGroupUuid = toGroupUuid;
+		}
+		
 		
 		
 		

@@ -116,17 +116,4 @@ public class WorkcenterConditionVo implements Serializable{
 		this.valueList = valueList;
 	}
 
-	public enum Type {
-		COMMON("common"), FORM("form");
-		private String name;
-
-		private Type(String _name) {
-			this.name = _name;
-		}
-
-		@Override
-		public String toString() {
-			return this.name;
-		}
-	}
 }

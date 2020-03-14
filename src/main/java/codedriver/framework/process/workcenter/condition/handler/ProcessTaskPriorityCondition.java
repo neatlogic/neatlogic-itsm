@@ -14,8 +14,8 @@ import codedriver.framework.process.workcenter.condition.core.IWorkcenterConditi
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 import codedriver.module.process.dto.PriorityVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
 @Component
 public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
@@ -43,7 +43,7 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return WorkcenterConditionVo.Type.COMMON.toString();
+		return ProcessWorkcenterConditionType.COMMON.toString();
 	}
 
 	@Override

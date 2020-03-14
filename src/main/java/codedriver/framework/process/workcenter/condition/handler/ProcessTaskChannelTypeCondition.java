@@ -12,7 +12,7 @@ import codedriver.framework.process.workcenter.condition.core.IWorkcenterConditi
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 @Component
 public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
@@ -38,7 +38,7 @@ public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return WorkcenterConditionVo.Type.COMMON.toString();
+		return ProcessWorkcenterConditionType.COMMON.toString();
 	}
 
 	@Override

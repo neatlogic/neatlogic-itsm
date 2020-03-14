@@ -7,7 +7,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.restful.annotation.EntityField;
-import codedriver.module.process.constvalue.ProcessWorkcenterType;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 public class WorkcenterTheadVo {
 
@@ -46,7 +46,7 @@ public class WorkcenterTheadVo {
 		this.isShow = 0;
 		this.userId = UserContext.get().getUserId();
 		this.displayName = column.getDisplayName();
-		this.type = FormType.Process.getValue();
+		this.type = ProcessWorkcenterConditionType.COMMON.getValue();
 	}
 	
 	public WorkcenterTheadVo(String _workcenterUuid,String _userId) {
@@ -116,41 +116,4 @@ public class WorkcenterTheadVo {
 		this.type = type;
 	}
 	
-	public enum FormType {
-		Process("process", "工单固有属性"), FORM("form", "表单属性");
-		private String value;
-		private String name;
-
-		private FormType(String _value, String _name) {
-			this.value = _value;
-			this.name = _name;
-		}
-
-		public String getValue() {
-			return value;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public static String getValue(String _value) {
-			for (ProcessWorkcenterType s : ProcessWorkcenterType.values()) {
-				if (s.getValue().equals(_value)) {
-					return s.getValue();
-				}
-			}
-			return null;
-		}
-
-		public static String getName(String _value) {
-			for (ProcessWorkcenterType s : ProcessWorkcenterType.values()) {
-				if (s.getValue().equals(_value)) {
-					return s.getName();
-				}
-			}
-			return "";
-		}
-
-	}
 }

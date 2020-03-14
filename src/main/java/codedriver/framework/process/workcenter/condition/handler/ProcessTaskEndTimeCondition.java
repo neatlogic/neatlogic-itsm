@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 @Component
 public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
@@ -32,7 +32,7 @@ public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return WorkcenterConditionVo.Type.COMMON.toString();
+		return ProcessWorkcenterConditionType.COMMON.toString();
 	}
 
 	@Override

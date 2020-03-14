@@ -3,10 +3,8 @@ package codedriver.module.process.workcenter.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.javers.common.collections.Arrays;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -28,6 +26,7 @@ public class WorkcenterConditionGroupVo implements Serializable{
 	}
 
 	public WorkcenterConditionGroupVo(JSONObject jsonObj) {
+		this.uuid = jsonObj.getString("uuid");
 		JSONArray conditionArray =jsonObj.getJSONArray("conditionList");
 		if(conditionArray.size() == 0) {
 			 new ParamIrregularException("'conditionList'参数不能为空数组");

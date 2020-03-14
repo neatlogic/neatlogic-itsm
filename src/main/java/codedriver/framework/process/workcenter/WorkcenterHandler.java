@@ -20,6 +20,7 @@ import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 import codedriver.module.process.dto.FormAttributeVo;
 import codedriver.module.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
@@ -52,7 +53,7 @@ public class WorkcenterHandler {
 		ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
 		while(it.hasNext()) {
 			WorkcenterTheadVo thead = it.next();
-			if(thead.getType().equals(WorkcenterTheadVo.FormType.Process.getValue())) {
+			if(thead.getType().equals(ProcessWorkcenterConditionType.COMMON.getValue())) {
 				if(!columnComponentMap.containsKey(thead.getName())) {
 					it.remove();
 				}else {
