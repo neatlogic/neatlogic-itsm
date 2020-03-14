@@ -15,7 +15,6 @@ public class WorkcenterColumnFactory extends ApplicationListenerBase{
 	public static Map<String, IWorkcenterColumn> columnComponentMap = new HashMap<>();
 	
 	public static IWorkcenterColumn getHandler(String name) {
-		name = name.toUpperCase();
 		return columnComponentMap.get(name);
 	}
 	

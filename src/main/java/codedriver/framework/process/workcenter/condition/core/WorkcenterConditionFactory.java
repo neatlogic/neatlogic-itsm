@@ -15,7 +15,6 @@ public class WorkcenterConditionFactory extends ApplicationListenerBase{
 	private static Map<String, IWorkcenterCondition> conditionComponentMap = new HashMap<>();
 	
 	public static IWorkcenterCondition getHandler(String name) {
-		name = name.toUpperCase();
 		return conditionComponentMap.get(name);
 	}
 	
@@ -25,7 +24,7 @@ public class WorkcenterConditionFactory extends ApplicationListenerBase{
 		Map<String, IWorkcenterCondition> myMap = context.getBeansOfType(IWorkcenterCondition.class);
 		for (Map.Entry<String, IWorkcenterCondition> entry : myMap.entrySet()) {
 			IWorkcenterCondition column= entry.getValue();
-			conditionComponentMap.put(column.getName().toUpperCase(), column);
+			conditionComponentMap.put(column.getName(), column);
 		}
 	}
 	
