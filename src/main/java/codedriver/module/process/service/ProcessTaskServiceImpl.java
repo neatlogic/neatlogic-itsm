@@ -58,14 +58,17 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
-		//获取步骤信息
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		if(processTaskStepVo == null) {
-			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+		if(processTaskStepId != null) {
+			//获取步骤信息
+			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+			if(processTaskStepVo == null) {
+				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+			}
+			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
+				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'工单：'" + processTaskId + "'的步骤");
+			}
 		}
-		if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
-			throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'工单：'" + processTaskId + "'的步骤");
-		}
+		
 		List<String> actionList = new ArrayList<>();
 		//TODO linbq根据流程设置和步骤状态判断当前用户权限
 		for(ProcessTaskStepAction processTaskStepAction : ProcessTaskStepAction.values()) {

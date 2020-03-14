@@ -50,7 +50,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤id")
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
