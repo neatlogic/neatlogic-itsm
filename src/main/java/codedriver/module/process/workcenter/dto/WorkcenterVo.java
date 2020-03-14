@@ -83,10 +83,10 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 		channelUuidList = new ArrayList<String>();
 		for(Object conditionGroup:conditionGroupArray) {
 			JSONObject conditionGroupJson = (JSONObject) JSONObject.toJSON(conditionGroup);
-			JSONArray channelArray =jsonObj.getJSONArray("channelUuidList");
+			JSONArray channelArray =conditionGroupJson.getJSONArray("channelUuidList");
 			List<String> channelUuidListTmp = new ArrayList<String>();
 			if(CollectionUtils.isNotEmpty(channelArray)) {
-				channelUuidListTmp = Arrays.asList(channelArray).stream().map(object -> object.toString()).collect(Collectors.toList());
+				channelUuidListTmp = JSONObject.parseArray(channelArray.toJSONString(),String.class);
 			}
 			channelUuidList.addAll(channelUuidListTmp);
 			conditionGroupList.add(new WorkcenterConditionGroupVo(conditionGroupJson));

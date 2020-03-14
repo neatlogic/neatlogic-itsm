@@ -160,7 +160,7 @@
 	</if>
 	</select>
 	
-	<select id="getFormAttributeListByChannelIdList" parameterType="java.util.List" resultType="codedriver.module.process.dto.FormAttributeVo">
+	<select id="getFormAttributeListByChannelUuidList" parameterType="java.util.List" resultType="codedriver.module.process.dto.FormAttributeVo">
 		SELECT 
 		 fa.`form_uuid` AS formUuid,
 		 fa.`formversion_uuid` AS formversionUuid,
@@ -177,7 +177,6 @@
 		<where>
 			 cp.`channel_uuid` IN 
 			<if test="channelUuidList != null and channelUuidList.size() > 0 ">
-				AND c.channel_id IN
 				<foreach collection="channelUuidList" item="item" open="(" separator="," close=")">
 					#{item}
 				</foreach>

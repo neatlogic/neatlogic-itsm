@@ -34,7 +34,7 @@ public class WorkcenterConditionGroupVo implements Serializable{
 		}
 		JSONArray channelArray =jsonObj.getJSONArray("channelUuidList");
 		if(CollectionUtils.isNotEmpty(channelArray)) {
-			channelUuidList = Arrays.asList(channelArray).stream().map(object -> object.toString()).collect(Collectors.toList());
+			channelUuidList = JSONObject.parseArray(channelArray.toJSONString(),String.class);
 		}
 		conditionList = new ArrayList<WorkcenterConditionVo>();
 		for(Object condition:conditionArray) {

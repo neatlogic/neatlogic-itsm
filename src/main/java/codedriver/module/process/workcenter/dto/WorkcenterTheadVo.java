@@ -41,10 +41,11 @@ public class WorkcenterTheadVo {
 	
 	public WorkcenterTheadVo(IWorkcenterColumn column) {
 		this.name = column.getName();
-		this.sort = null;
+		this.sort = 100;
 		this.width = null;
 		this.isShow = 0;
 		this.userId = UserContext.get().getUserId();
+		this.displayName = column.getDisplayName();
 		this.type = FormType.Process.getValue();
 	}
 	

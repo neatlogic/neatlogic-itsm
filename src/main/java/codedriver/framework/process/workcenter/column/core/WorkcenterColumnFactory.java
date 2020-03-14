@@ -25,7 +25,7 @@ public class WorkcenterColumnFactory extends ApplicationListenerBase{
 		Map<String, IWorkcenterColumn> myMap = context.getBeansOfType(IWorkcenterColumn.class);
 		for (Map.Entry<String, IWorkcenterColumn> entry : myMap.entrySet()) {
 			IWorkcenterColumn column= entry.getValue();
-			columnComponentMap.put(column.getName().toUpperCase(), column);
+			columnComponentMap.put(column.getName(), column);
 		}
 	}
 

@@ -48,35 +48,37 @@ public class WorkcenterHandler {
 		//获取用户历史自定义theadList
 		List<WorkcenterTheadVo> theadList = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(),UserContext.get().getUserId()));
 		//矫正theadList 或存在表单属性或固定字段增删
-		//固定字段矫正 多删，少补
+		//多删
 		ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
 		while(it.hasNext()) {
 			WorkcenterTheadVo thead = it.next();
-			if(!columnComponentMap.containsKey(thead.getName())) {
-				it.remove();
+			if(thead.getType().equals(WorkcenterTheadVo.FormType.Process.getValue())) {
+				if(!columnComponentMap.containsKey(thead.getName())) {
+					it.remove();
+				}else {
+					thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
+				}
+			}else {
+				List<String> channelUuidList = workcenterVo.getChannelUuidList();
+				if(CollectionUtils.isNotEmpty(channelUuidList)) {
+					List<FormAttributeVo> formAttrList = formMapper.getFormAttributeListByChannelUuidList(channelUuidList);
+					List<FormAttributeVo> theadFormList = formAttrList.stream().filter(attr->attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
+					if(CollectionUtils.isEmpty(theadFormList)){
+						it.remove();
+					}else {
+						thead.setDisplayName(theadFormList.get(0).getLabel());
+					}
+				}
 			}
 		}
+		//少补
 		for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
     		IWorkcenterColumn column = entry.getValue();
     		if(CollectionUtils.isEmpty(theadList.stream().filter(data->column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
     			theadList.add(new WorkcenterTheadVo(column));
     		}
     	}
-		//表单字段矫正 多删
-		List<String> channelUuidList = workcenterVo.getChannelUuidList();
-		if(CollectionUtils.isNotEmpty(channelUuidList)) {
-			List<FormAttributeVo>  formAttrList = formMapper.getFormAttributeListByChannelList(channelUuidList);
-			
-		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
 		if (!resultData.isEmpty()) {
             for (MultiAttrsObject el : resultData) {
             	JSONObject taskJson = new JSONObject();
@@ -84,13 +86,6 @@ public class WorkcenterHandler {
             	for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
             		IWorkcenterColumn column = entry.getValue();
             		taskJson.put(column.getName(), column.getValue(el));
-            	}
-            	//补充表单属性值
-            	for(WorkcenterTheadVo header : theadList) {
-            		if(!taskJson.containsKey(header.getName())) {
-            			taskJson.put(header.getName(),el.getString(header.getName()));
-            		}
-            		header.setIsShow(1);
             	}
             	dataList.add(taskJson);
             }

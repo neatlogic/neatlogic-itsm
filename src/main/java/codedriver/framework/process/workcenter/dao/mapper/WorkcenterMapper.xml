@@ -101,6 +101,8 @@
 		  `workcenter_uuid` as workcenterUuid,
 		  `name`,
 		  `sort`,
+		  `is_show` as isShow,
+		  `type`,
 		  `user_id`  as userId
 		FROM
 		  `process_workcenter_thead` 
@@ -179,6 +181,7 @@
 			  `workcenter_uuid`,
 			  `name`,
 			  `sort`,
+			  `type`,
 			  `is_show`,
 			  `width`,
 			  `user_id`
@@ -188,6 +191,7 @@
 			    #{workcenterUuid},
 			    #{name},
 			    #{sort},
+			    #{type},
 			    #{isShow},
 			    #{width},
 			    #{userId}
