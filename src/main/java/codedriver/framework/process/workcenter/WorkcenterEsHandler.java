@@ -157,7 +157,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		StringBuilder whereSb = new StringBuilder();
 		whereSb.append(" where ");
 		List<WorkcenterConditionGroupRelVo> groupRelList = workcenterVo.getWorkcenterConditionGroupRelList();
-		if(groupRelList != null && !groupRelList.isEmpty()) {
+		if(CollectionUtils.isNotEmpty(groupRelList)) {
 			//将group 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
 			for(WorkcenterConditionGroupRelVo groupRel : groupRelList) {
 				groupRelMap.put(groupRel.getFrom()+"_"+groupRel.getTo(), groupRel.getJoinType());
@@ -172,11 +172,12 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		for(WorkcenterConditionGroupVo group : groupList) {
 			Map<String,String> conditionRelMap = new HashMap<String,String>();
 			if(fromGroupUuid != null) {
-				whereSb.append(conditionRelMap.get(fromGroupUuid+"_"+toGroupUuid));
+				toGroupUuid = group.getUuid();
+				whereSb.append(groupRelMap.get(fromGroupUuid+"_"+toGroupUuid));
 			}
 			whereSb.append("(");
 			List<WorkcenterConditionRelVo> conditionRelList = group.getConditionRelList();
-			if(conditionRelList != null && !conditionRelList.isEmpty()) {
+			if(CollectionUtils.isNotEmpty(conditionRelList)) {
 				//将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
 				for(WorkcenterConditionRelVo conditionRel : conditionRelList) {
 					conditionRelMap.put(conditionRel.getFrom()+"_"+conditionRel.getTo(),conditionRel.getJoinType());
