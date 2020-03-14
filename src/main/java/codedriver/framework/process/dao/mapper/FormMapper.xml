@@ -160,6 +160,31 @@
 	</if>
 	</select>
 	
+	<select id="getFormAttributeListByChannelIdList" parameterType="java.util.List" resultType="codedriver.module.process.dto.FormAttributeVo">
+		SELECT 
+		 fa.`form_uuid` AS formUuid,
+		 fa.`formversion_uuid` AS formversionUuid,
+		 fa.`uuid`,
+		 fa.`label`,
+		 fa.`type`,
+		 fa.`handler`,
+		 fa.`config`,
+		 fa.`data`
+		FROM `channel_process` cp
+		JOIN `process_form` pf ON cp.`process_uuid` = pf.`process_uuid`
+		JOIN `form_version` fv ON pf.`form_uuid` = fv.`form_uuid` AND fv.`is_active` =1 
+		JOIN `form_attribute` fa ON fv.`form_uuid` = fa.`form_uuid` AND fv.`uuid` = fa.`formversion_uuid`
+		<where>
+			 cp.`channel_uuid` IN 
+			<if test="channelUuidList != null and channelUuidList.size() > 0 ">
+				AND c.channel_id IN
+				<foreach collection="channelUuidList" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
 	<update id="updateFormVersion" parameterType="codedriver.module.process.dto.FormVersionVo">
 		UPDATE
 		`form_version`

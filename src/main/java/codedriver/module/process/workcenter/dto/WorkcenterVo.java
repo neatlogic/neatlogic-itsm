@@ -4,8 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.javers.common.collections.Arrays;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -54,6 +57,7 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	//params
 	private String userId;
 	private List<String> roleNameList;
+	private List<String> channelUuidList;
 	
 	public WorkcenterVo() {
 	}
@@ -76,8 +80,16 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 			 new ParamIrregularException("'conditionGroupList'参数不能为空数组");
 		}
 		conditionGroupList = new ArrayList<WorkcenterConditionGroupVo>();
+		channelUuidList = new ArrayList<String>();
 		for(Object conditionGroup:conditionGroupArray) {
-			conditionGroupList.add(new WorkcenterConditionGroupVo((JSONObject) JSONObject.toJSON(conditionGroup)));
+			JSONObject conditionGroupJson = (JSONObject) JSONObject.toJSON(conditionGroup);
+			JSONArray channelArray =jsonObj.getJSONArray("channelUuidList");
+			List<String> channelUuidListTmp = new ArrayList<String>();
+			if(CollectionUtils.isNotEmpty(channelArray)) {
+				channelUuidListTmp = Arrays.asList(channelArray).stream().map(object -> object.toString()).collect(Collectors.toList());
+			}
+			channelUuidList.addAll(channelUuidListTmp);
+			conditionGroupList.add(new WorkcenterConditionGroupVo(conditionGroupJson));
 		}
 		JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
 		conditionGroupRelList = new ArrayList<WorkcenterConditionGroupRelVo>();
@@ -210,5 +222,14 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	public void setRoleNameList(List<String> roleNameList) {
 		this.roleNameList = roleNameList;
 	}
+
+	public List<String> getChannelUuidList() {
+		return channelUuidList;
+	}
+
+	public void setChannelUuidList(List<String> channelUuidList) {
+		this.channelUuidList = channelUuidList;
+	}
+
 
 }

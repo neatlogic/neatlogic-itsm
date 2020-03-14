@@ -39,6 +39,8 @@ public interface FormMapper {
 	public int checkFormVersionIsExists(String uuid);
 
 	public List<FormAttributeVo> getFormAttributeList(FormAttributeVo formAttributeVo);
+	
+	public List<FormAttributeVo> getFormAttributeListByChannelList(List<String> channelUuidList);
 
 	public int insertForm(FormVo formVo);
 

@@ -106,7 +106,7 @@
 		  `process_workcenter_thead` 
 		where
 		   workcenter_uuid = #{workcenterUuid}
-		   and userId = #{userId}
+		   and user_id = #{userId}
 	</select>
 	
 	<delete id="deleteWorkcenterByUuid" parameterType="java.lang.String">
@@ -179,6 +179,8 @@
 			  `workcenter_uuid`,
 			  `name`,
 			  `sort`,
+			  `is_show`,
+			  `width`,
 			  `user_id`
 			) 
 			VALUES
@@ -186,6 +188,8 @@
 			    #{workcenterUuid},
 			    #{name},
 			    #{sort},
+			    #{isShow},
+			    #{width},
 			    #{userId}
 			  ) ;
 	</insert>

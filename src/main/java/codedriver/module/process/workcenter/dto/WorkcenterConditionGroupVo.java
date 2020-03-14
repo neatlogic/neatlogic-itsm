@@ -3,6 +3,10 @@ package codedriver.module.process.workcenter.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.javers.common.collections.Arrays;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -15,6 +19,7 @@ public class WorkcenterConditionGroupVo implements Serializable{
 	private String uuid;
 	private List<WorkcenterConditionVo> conditionList;
 	private List<WorkcenterConditionRelVo> conditionRelList;
+	private List<String> channelUuidList;
 	
 	
 	
@@ -26,6 +31,10 @@ public class WorkcenterConditionGroupVo implements Serializable{
 		JSONArray conditionArray =jsonObj.getJSONArray("conditionList");
 		if(conditionArray.size() == 0) {
 			 new ParamIrregularException("'conditionList'参数不能为空数组");
+		}
+		JSONArray channelArray =jsonObj.getJSONArray("channelUuidList");
+		if(CollectionUtils.isNotEmpty(channelArray)) {
+			channelUuidList = Arrays.asList(channelArray).stream().map(object -> object.toString()).collect(Collectors.toList());
 		}
 		conditionList = new ArrayList<WorkcenterConditionVo>();
 		for(Object condition:conditionArray) {
@@ -65,6 +74,16 @@ public class WorkcenterConditionGroupVo implements Serializable{
 	public void setConditionRelList(List<WorkcenterConditionRelVo> conditionRelList) {
 		this.conditionRelList = conditionRelList;
 	}
+
+	public List<String> getChannelUuidList() {
+		return channelUuidList;
+	}
+
+	public void setChannelUuidList(List<String> channelUuidList) {
+		this.channelUuidList = channelUuidList;
+	}
+
+
 	
 	
 }
