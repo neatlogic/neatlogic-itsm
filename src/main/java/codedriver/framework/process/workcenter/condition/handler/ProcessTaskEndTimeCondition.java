@@ -32,7 +32,7 @@ public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterConditionType.COMMON.toString();
+		return ProcessWorkcenterConditionType.COMMON.getValue();
 	}
 
 	@Override
