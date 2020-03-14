@@ -27,7 +27,7 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "processtask/step/action/List";
+		return "processtask/step/action/list";
 	}
 
 	@Override

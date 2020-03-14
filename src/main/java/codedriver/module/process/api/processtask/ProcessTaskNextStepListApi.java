@@ -29,7 +29,7 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 	
 	@Override
 	public String getToken() {
-		return "processTask/nextstep/list";
+		return "processtask/nextstep/list";
 	}
 
 	@Override
