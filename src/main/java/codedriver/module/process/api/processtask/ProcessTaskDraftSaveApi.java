@@ -98,7 +98,7 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		
 		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(ProcessStepHandler.START.getHandler());
-		handler.startProcess(startTaskStep);
+		handler.saveDraft(startTaskStep);
 		
 		return startTaskStep.getProcessTaskId();
 	}

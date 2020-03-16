@@ -363,4 +363,9 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 		
 	}
 
+	@Override
+	protected int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
+		return 0;
+	}
+
 }

@@ -99,58 +99,8 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-		
-		/** 更新工单信息**/
-		ProcessTaskVo processTaskVo = new ProcessTaskVo();
-		processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskVo.setTitle(paramObj.getString("title"));
-		processTaskVo.setOwner(paramObj.getString("owner"));
-		processTaskVo.setPriorityUuid(paramObj.getString("priorityUuid"));
-		processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
-		
-		/** 写入当前步骤的表单属性值 **/
-		JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
-		if(formAttributeDataList != null && formAttributeDataList.size() > 0) {
-			for(int i = 0; i < formAttributeDataList.size(); i++) {
-				JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
-				ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
-				String dataList = formAttributeDataObj.getString("dataList");
-				if(StringUtils.isBlank(dataList)) {
-					continue;
-				}
-				attributeData.setData(dataList);
-				attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-				attributeData.setAttributeUuid(formAttributeDataObj.getString("attributeUuid"));
-				attributeData.setType(formAttributeDataObj.getString("handler"));
-				processTaskMapper.replaceProcessTaskFormAttributeData(attributeData);
-			}
-		}
-
-		/** 保存描述内容 **/
-		String content = paramObj.getString("content");
-		if (StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-		}
-		
-		/** 保存附件uuid **/
-		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
-		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
-		String fileUuidListStr = paramObj.getString("fileUuidList");
-		if(StringUtils.isNotBlank(fileUuidListStr)) {
-			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
-			for(String fileUuid : fileUuidList) {
-				processTaskFileVo.setFileUuid(fileUuid);
-				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
-			}
-		}
-		
-		return 1;
+	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {	
+		return 0;
 	}
 
 	@Override
@@ -250,5 +200,59 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	protected int mySaveDraft(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+		
+		/** 更新工单信息**/
+		ProcessTaskVo processTaskVo = new ProcessTaskVo();
+		processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskVo.setTitle(paramObj.getString("title"));
+		processTaskVo.setOwner(paramObj.getString("owner"));
+		processTaskVo.setPriorityUuid(paramObj.getString("priorityUuid"));
+		processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
+		
+		/** 写入当前步骤的表单属性值 **/
+		JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
+		if(formAttributeDataList != null && formAttributeDataList.size() > 0) {
+			for(int i = 0; i < formAttributeDataList.size(); i++) {
+				JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+				ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
+				String dataList = formAttributeDataObj.getString("dataList");
+				if(StringUtils.isBlank(dataList)) {
+					continue;
+				}
+				attributeData.setData(dataList);
+				attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+				attributeData.setAttributeUuid(formAttributeDataObj.getString("attributeUuid"));
+				attributeData.setType(formAttributeDataObj.getString("handler"));
+				processTaskMapper.replaceProcessTaskFormAttributeData(attributeData);
+			}
+		}
+
+		/** 保存描述内容 **/
+		String content = paramObj.getString("content");
+		if (StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(contentVo);
+			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
+		}
+		
+		/** 保存附件uuid **/
+		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
+		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+		processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
+		String fileUuidListStr = paramObj.getString("fileUuidList");
+		if(StringUtils.isNotBlank(fileUuidListStr)) {
+			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
+			for(String fileUuid : fileUuidList) {
+				processTaskFileVo.setFileUuid(fileUuid);
+				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
+			}
+		}
+		return 1;
 	}
 }

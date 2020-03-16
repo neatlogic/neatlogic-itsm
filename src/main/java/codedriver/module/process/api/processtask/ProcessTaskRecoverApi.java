@@ -6,9 +6,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -16,14 +15,18 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.ProcessTaskVo;
+import codedriver.module.process.service.ProcessTaskService;
 
 @Service
-@AuthAction(name = "PROCESS_MODIFY")
 public class ProcessTaskRecoverApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private ProcessTaskService processTaskService;
 
 	@Override
 	public String getToken() {
@@ -47,19 +50,15 @@ public class ProcessTaskRecoverApi extends ApiComponentBase {
 	@Output({})
 	@Description(desc = "工单恢复接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject result = new JSONObject();
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-		if (processTaskVo != null) {
-			processTaskVo.setConfig(processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash()).getConfig());
-			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
-			if (handler != null) {
-				handler.recoverProcessTask(processTaskVo);
-			}
-		} else {
-			throw new ProcessTaskNotFoundException(processTaskId.toString());
+		if(!processTaskService.verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.RECOVER)) {
+			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
-		return result;
+		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+		processTaskVo.setConfig(processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash()).getConfig());
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
+		handler.recoverProcessTask(processTaskVo);
+		return null;
 	}
 
 }

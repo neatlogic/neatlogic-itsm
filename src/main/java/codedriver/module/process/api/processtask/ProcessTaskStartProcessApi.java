@@ -1,5 +1,7 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,26 +16,28 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.constvalue.ProcessStepHandler;
+import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
-public class ProcessTaskRetreatApi extends ApiComponentBase {
-	
+public class ProcessTaskStartProcessApi extends ApiComponentBase {
+
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
-	
+
 	@Override
 	public String getToken() {
-		return "processtask/retreat";
+		return "processtask/startprocess";
 	}
 
 	@Override
 	public String getName() {
-		return "上一步发起的撤回动作接口";
+		return "工单上报提交接口";
 	}
 
 	@Override
@@ -42,22 +46,26 @@ public class ProcessTaskRetreatApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述"),
+		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true)
 	})
-	@Description(desc = "上一步发起的撤回动作接口")
+	@Description(desc = "工单上报提交接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.RETREAT)) {
+		if(!processTaskService.verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.STARTPROCESS)) {
 			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		processTaskStepVo.setParamObj(jsonObj);
-		handler.retreat(processTaskStepVo);
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+		if(processTaskStepList.size() != 1) {
+			throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
+		}
+		
+		ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo();
+		startTaskStep.setHandler(ProcessStepHandler.START.getHandler());
+		startTaskStep.setId(processTaskStepList.get(0).getId());
+		startTaskStep.setProcessTaskId(processTaskId);
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(ProcessStepHandler.START.getHandler());
+		handler.startProcess(startTaskStep);
 		return null;
 	}
 
