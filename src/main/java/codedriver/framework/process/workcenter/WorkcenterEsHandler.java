@@ -150,7 +150,12 @@ public class WorkcenterEsHandler extends CodeDriverThread{
         QueryResult result = query.execute();
         return result;
 	}
-		
+	
+	/**
+	 * 拼接where条件
+	 * @param workcenterVo
+	 * @return
+	 */
 	private static String assembleWhere(WorkcenterVo workcenterVo) {
 		Map<String,String> groupRelMap = new HashMap<String,String>();
 		StringBuilder whereSb = new StringBuilder();

@@ -113,6 +113,17 @@ public class WorkcenterHandler {
 	}
 	
 	/**
+	 * 工单中心根据条件获取工单列表数据
+	 * @param workcenterVo
+	 * @return
+	 */
+	public static Integer doSearchCount(WorkcenterVo workcenterVo) {
+		//搜索es
+		QueryResult result = WorkcenterEsHandler.searchTask(workcenterVo);;
+		return result.getTotal();
+	}
+	
+	/**
 	 * 根据单个关键字获取过滤选项
 	 * @param keyword
 	 * @return
