@@ -84,13 +84,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		if(UserContext.get().getUserId(true).equals(processTaskVo.getOwner())) {
 			currentUserProcessUserTypeList.add(UserType.OWNER.getValue());
 			if(ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
-				actionList.add(ProcessTaskStepAction.COMPLETE.getValue());
+				actionList.add(ProcessTaskStepAction.STARTPROCESS.getValue());
 			}
 		}
 		if(UserContext.get().getUserId(true).equals(processTaskVo.getReporter())) {
 			currentUserProcessUserTypeList.add(UserType.REPORTER.getValue());
 			if(ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
-				actionList.add(ProcessTaskStepAction.COMPLETE.getValue());
+				actionList.add(ProcessTaskStepAction.STARTPROCESS.getValue());
 			}
 		}
 		
