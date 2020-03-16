@@ -1314,9 +1314,12 @@
 		`processtask`
 		SET 
 		<choose>
-			<when test="status == 'succeed' or status == 'failed' or status == 'aborted' or status == 'draft'">
+			<when test="status == 'succeed' or status == 'failed' or status == 'aborted'">
 				`end_time` = NOW(3),
 			</when>
+			<otherwise>
+				`end_time` = null,
+			</otherwise>
 		</choose>
 		`status` = #{status}
 		WHERE

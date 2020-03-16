@@ -66,7 +66,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 		int runningCount = 0, succeedCount = 0, failedCount = 0, abortedCount = 0;
 		for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-			if (processTaskStepVo.getIsActive().equals(1)) {
+			if (processTaskStepVo.getIsActive().equals(1) && !ProcessStepHandler.START.getHandler().equals(processTaskStepVo.getHandler())) {
 				runningCount += 1;
 			} else if (processTaskStepVo.getIsActive().equals(-1)) {
 				abortedCount += 1;
@@ -76,18 +76,21 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				failedCount += 1;
 			}
 		}
+		//System.out.println("runningCount:" + runningCount);
 		ProcessTaskVo processTaskVo = new ProcessTaskVo();
 		processTaskVo.setId(processTaskId);
-		if (runningCount <= 0) {
-			if (abortedCount > 0) {
-				processTaskVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
-			} else if (failedCount > 0) {
-				processTaskVo.setStatus(ProcessTaskStatus.FAILED.getValue());
-			} else if (succeedCount > 0) {
-				processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
-			}
-			processTaskMapper.updateProcessTaskStatus(processTaskVo);
+		if (runningCount > 0) {
+			processTaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+		} else if (abortedCount > 0) {
+			processTaskVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
+		} else if (failedCount > 0) {
+			processTaskVo.setStatus(ProcessTaskStatus.FAILED.getValue());
+		} else if (succeedCount > 0) {
+			processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+		} else {
+			return 1;
 		}
+		processTaskMapper.updateProcessTaskStatus(processTaskVo);
 		return 1;
 	}
 
