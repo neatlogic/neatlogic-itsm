@@ -1,7 +1,7 @@
 package codedriver.module.process.constvalue;
 
 public enum ProcessExpression {
-	LIKE("like", "包含", " %s match '%s' "),
+	LIKE("like", "包含", " %s contains '%s' "),
 	EQUAL("equal", "等于", " %s = '%s' "),
 	UNEQUAL("unequal", "不等于", " not %s = '%s' "),
 	INCLUDE("include", "包含", " %s contains any all ( %s ) "),

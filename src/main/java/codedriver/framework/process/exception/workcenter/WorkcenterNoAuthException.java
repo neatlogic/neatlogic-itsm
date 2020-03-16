@@ -4,9 +4,9 @@ import codedriver.framework.exception.core.ApiRuntimeException;
 
 public class WorkcenterNoAuthException extends ApiRuntimeException {
 
-	private static final long serialVersionUID = 1901910086387644808L;
+	private static final long serialVersionUID = 834889107197646727L;
 
 	public WorkcenterNoAuthException(String name) {
-		super("没有权限进行'" + name + "'操作");
+		super("过滤条件参数 '" + name + "'非法");
 	}
 }

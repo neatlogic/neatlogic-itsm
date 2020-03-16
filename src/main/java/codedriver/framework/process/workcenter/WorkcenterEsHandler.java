@@ -89,7 +89,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 	public void setProcessTaskAuditMapper(ProcessTaskAuditMapper _processTaskAuditMapper) {
 		processTaskAuditMapper = _processTaskAuditMapper;
 	}
-	
+		
 	public WorkcenterEsHandler() {
 		
 	}
@@ -144,14 +144,13 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
 		String orderBy = "order by createTime desc";
-		Integer limit = 10;
-		String sql = String.format("select %s from techsure %s %s limit %d", selectColumn,where,orderBy,limit);
+		String sql = String.format("select %s from techsure %s %s limit %d", selectColumn,where,orderBy,workcenterVo.getPageSize());
         QueryParser parser = objectPool.createQueryParser();
         MultiAttrsQuery query = parser.parse(sql);
         QueryResult result = query.execute();
         return result;
 	}
-	
+		
 	private static String assembleWhere(WorkcenterVo workcenterVo) {
 		Map<String,String> groupRelMap = new HashMap<String,String>();
 		StringBuilder whereSb = new StringBuilder();
@@ -182,22 +181,23 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 				for(WorkcenterConditionRelVo conditionRel : conditionRelList) {
 					conditionRelMap.put(conditionRel.getFrom()+"_"+conditionRel.getTo(),conditionRel.getJoinType());
 				}
-				List<WorkcenterConditionVo> conditionList = group.getConditionList();
-				String fromConditionUuid = null;
-				String toConditionUuid = conditionList.get(0).getUuid();
-				for(WorkcenterConditionVo condition : conditionList) {
-					if(fromConditionUuid != null) {
-						toConditionUuid = condition.getUuid();
-						whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
-					}
-					String value = condition.getValueList().get(0);
-					if(condition.getValueList().size()>1) {
-						value = String.format("'%s'",  String.join("','",condition.getValueList()));
-					}
-					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getName(),value));
-					fromConditionUuid = toConditionUuid;
-				}
 			}
+			List<WorkcenterConditionVo> conditionList = group.getConditionList();
+			String fromConditionUuid = null;
+			String toConditionUuid = conditionList.get(0).getUuid();
+			for(WorkcenterConditionVo condition : conditionList) {
+				if(fromConditionUuid != null) {
+					toConditionUuid = condition.getUuid();
+					whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
+				}
+				String value = condition.getValueList().get(0);
+				if(condition.getValueList().size()>1) {
+					value = String.format("'%s'",  String.join("','",condition.getValueList()));
+				}
+				whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getName(),value));
+				fromConditionUuid = toConditionUuid;
+			}
+			
 			whereSb.append(")");
 			fromGroupUuid = toGroupUuid;
 		}
@@ -306,9 +306,9 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //标题
 		 patch.set("title", processTaskVo.getTitle());
 		 //工单状态
-		 patch.set("status", processTaskVo.getStatusText());
+		 patch.set("status", processTaskVo.getStatus());
 		 //优先级
-		 patch.set("priority", processTaskVo.getPriorityName());
+		 patch.set("priority", processTaskVo.getPriorityUuid());
 		 //服务目录
 		 patch.set("catalog", catalog.getUuid());
 		 //服务类型
@@ -316,7 +316,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //服务
 		 patch.set("channel", channel.getUuid());
 		 //上报内容
-		 patch.set("content", startContentVo.getContent());
+		 patch.set("content", startContentVo == null?"":startContentVo.getContent());
 		 //工单开始时间
 		 patch.set("createTime", sdf.format(processTaskVo.getStartTime()));
 		 //工单结束时间
@@ -330,7 +330,7 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 //当前步骤idList
 		 patch.setStrings("stepIds", activeStepIdList);
 		 //当前步骤处理人List
-		 patch.setStrings("stepUsers", activeStepWorkerList);
+		 patch.setStrings("stepUser", activeStepWorkerList);
 		 //当前步骤状态
 		 patch.setStrings("stepStatus", activeStepStatusList);
 		 //时间窗口
@@ -342,8 +342,6 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 		 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
 			 patch.set(attributeData.getAttributeUuid(), attributeData.getData());
 		 }
-		 
-		 
 		 try {
 			 patch.commit();
 		 } catch (Exception e) {

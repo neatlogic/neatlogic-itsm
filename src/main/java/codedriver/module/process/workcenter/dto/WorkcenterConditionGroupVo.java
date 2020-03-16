@@ -40,9 +40,11 @@ public class WorkcenterConditionGroupVo implements Serializable{
 			conditionList.add(new WorkcenterConditionVo((JSONObject) JSONObject.toJSON(condition)));
 		}
 		JSONArray conditionRelArray = jsonObj.getJSONArray("conditionRelList");
-		conditionRelList = new ArrayList<WorkcenterConditionRelVo>();
-		for(Object conditionRel:conditionRelArray) {
-			conditionRelList.add(new WorkcenterConditionRelVo((JSONObject) JSONObject.toJSON(conditionRel)));
+		if(CollectionUtils.isNotEmpty(conditionRelArray)) {
+			conditionRelList = new ArrayList<WorkcenterConditionRelVo>();
+			for(Object conditionRel:conditionRelArray) {
+				conditionRelList.add(new WorkcenterConditionRelVo((JSONObject) JSONObject.toJSON(conditionRel)));
+			}
 		}
 		
 	}
