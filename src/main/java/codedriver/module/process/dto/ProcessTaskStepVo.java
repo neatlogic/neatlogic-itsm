@@ -35,8 +35,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private String formUuid;
 	private Integer isActive = 0;
 	private Integer isCheck;
-	@EntityField(name = "激活时间", type = ApiParamType.LONG)
-	private Date activeTime;
 	@EntityField(name = "开始时间", type = ApiParamType.LONG)
 	private Date startTime;
 	@EntityField(name = "结束时间", type = ApiParamType.LONG)
@@ -221,14 +219,6 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setIsActive(Integer isActived) {
 		this.isActive = isActived;
-	}
-
-	public Date getActiveTime() {
-		return activeTime;
-	}
-
-	public void setActiveTime(Date activeTime) {
-		this.activeTime = activeTime;
 	}
 
 	public Date getStartTime() {
