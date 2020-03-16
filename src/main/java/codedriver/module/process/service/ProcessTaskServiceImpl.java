@@ -71,6 +71,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	@Override
 	public List<String> getProcessTaskStepActionList(Long processTaskId, Long processTaskStepId) {
+		List<String> actionList = new ArrayList<>();
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
@@ -82,9 +83,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		currentUserProcessUserTypeList.add(UserType.ALL.getValue());
 		if(UserContext.get().getUserId(true).equals(processTaskVo.getOwner())) {
 			currentUserProcessUserTypeList.add(UserType.OWNER.getValue());
+			if(ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+				actionList.add(ProcessTaskStepAction.COMPLETE.getValue());
+			}
 		}
 		if(UserContext.get().getUserId(true).equals(processTaskVo.getReporter())) {
 			currentUserProcessUserTypeList.add(UserType.REPORTER.getValue());
+			if(ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+				actionList.add(ProcessTaskStepAction.COMPLETE.getValue());
+			}
 		}
 		
 		JSONArray authorityList = null;
@@ -95,7 +102,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 			}
 			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
-				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'工单：'" + processTaskId + "'的步骤");
+				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
 			processTaskStepIsActive = processTaskStepVo.getIsActive();
 			List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MAJOR.getValue());
@@ -122,7 +129,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			//TODO linbq获取组件全局权限设置
 		}
 		//目前只有四种权限可以设置：查看节点信息view、终止/恢复流程abort、转交transfer、修改上报内容update
-		List<String> actionList = new ArrayList<>();		
+				
 		if(CollectionUtils.isNotEmpty(authorityList)) {
 			for(int i = 0; i < authorityList.size(); i++) {
 				JSONObject authorityObj = authorityList.getJSONObject(i);

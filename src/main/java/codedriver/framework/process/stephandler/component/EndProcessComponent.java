@@ -142,4 +142,10 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		
 	}
 
+	@Override
+	protected int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
