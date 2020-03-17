@@ -820,7 +820,7 @@
 	SELECT 
 	  pt.`id` AS processTaskId,
 	  pt.`title` AS title,
-	  pts.`id` AS processTastStepId,
+	  pts.`id` AS processTaskStepId,
 	  pts.`name` AS stepName
 	FROM`processtask` pt
 	JOIN `processtask_step` pts ON pts.`processtask_id`=pt.`id`
