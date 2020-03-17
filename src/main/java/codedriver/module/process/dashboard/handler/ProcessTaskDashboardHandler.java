@@ -18,7 +18,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 
 	@Override
 	protected ChartDataVo myGetData(DashboardWidgetVo widgetVo) {
-		
+
 		ChartDataVo chartDataVo = new ChartDataVo();
 		chartDataVo.setLegendField("year");
 		chartDataVo.setValueField("value");
@@ -36,6 +36,11 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 	public JSONObject getChartConfig() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String getType() {
+		return "ITSM";
 	}
 
 }
