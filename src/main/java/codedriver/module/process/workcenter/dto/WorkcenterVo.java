@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
@@ -13,7 +14,6 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.restful.annotation.EntityField;
 
 public class WorkcenterVo extends BasePageVo implements Serializable{
@@ -54,6 +54,7 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	//params
 	private String userId;
 	private List<String> roleNameList;
+	private List<String> channelUuidList;
 	
 	public WorkcenterVo() {
 	}
@@ -70,19 +71,27 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	
 	public WorkcenterVo(JSONObject jsonObj) {
 		uuid = jsonObj.getString("uuid");
-		//headerList = jsonObj.getJSONArray("headerList");
 		JSONArray conditionGroupArray = jsonObj.getJSONArray("conditionGroupList");
-		if(conditionGroupArray.size() == 0) {
-			 new ParamIrregularException("'conditionGroupList'参数不能为空数组");
-		}
-		conditionGroupList = new ArrayList<WorkcenterConditionGroupVo>();
-		for(Object conditionGroup:conditionGroupArray) {
-			conditionGroupList.add(new WorkcenterConditionGroupVo((JSONObject) JSONObject.toJSON(conditionGroup)));
-		}
-		JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
-		conditionGroupRelList = new ArrayList<WorkcenterConditionGroupRelVo>();
-		for(Object conditionRelGroup:conditionGroupRelArray) {
-			conditionGroupRelList.add(new WorkcenterConditionGroupRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
+		if(CollectionUtils.isNotEmpty(conditionGroupArray)) {
+			conditionGroupList = new ArrayList<WorkcenterConditionGroupVo>();
+			channelUuidList = new ArrayList<String>();
+			for(Object conditionGroup:conditionGroupArray) {
+				JSONObject conditionGroupJson = (JSONObject) JSONObject.toJSON(conditionGroup);
+				JSONArray channelArray =conditionGroupJson.getJSONArray("channelUuidList");
+				List<String> channelUuidListTmp = new ArrayList<String>();
+				if(CollectionUtils.isNotEmpty(channelArray)) {
+					channelUuidListTmp = JSONObject.parseArray(channelArray.toJSONString(),String.class);
+				}
+				channelUuidList.addAll(channelUuidListTmp);
+				conditionGroupList.add(new WorkcenterConditionGroupVo(conditionGroupJson));
+			}
+			JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
+			if(CollectionUtils.isNotEmpty(conditionGroupRelArray)) {
+				conditionGroupRelList = new ArrayList<WorkcenterConditionGroupRelVo>();
+				for(Object conditionRelGroup:conditionGroupRelArray) {
+					conditionGroupRelList.add(new WorkcenterConditionGroupRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
+				}
+			}
 		}
 	}
 	public String getUuid() {
@@ -210,5 +219,14 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	public void setRoleNameList(List<String> roleNameList) {
 		this.roleNameList = roleNameList;
 	}
+
+	public List<String> getChannelUuidList() {
+		return channelUuidList;
+	}
+
+	public void setChannelUuidList(List<String> channelUuidList) {
+		this.channelUuidList = channelUuidList;
+	}
+
 
 }

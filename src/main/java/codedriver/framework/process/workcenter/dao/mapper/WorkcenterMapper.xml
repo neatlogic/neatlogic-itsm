@@ -69,6 +69,22 @@
 		
 	</select>
 	
+	<select id="checkWorkcenterNameIsRepeat"  parameterType="java.lang.String" resultType="java.lang.Integer">
+		SELECT 
+		 count(1)
+		FROM
+		 	`process_workcenter` pw 
+		   	LEFT JOIN `process_workcenter_role` pwr ON pw.`uuid` = pwr.`workcenter_uuid`
+		<where>
+			<if test="name != null and name != ''">
+				pw.`name` = #{name}
+			</if>
+			<if test="uuid != null and uuid != ''">
+				and uuid != #{uuid}
+			</if>
+		</where>
+	</select>
+	
 	<select id="getWorkcenterByNameAndUuid"  parameterType="java.lang.String" resultMap="workcenterMap">
 		SELECT 
 		  pw.`uuid`,
@@ -81,11 +97,14 @@
 		FROM
 		 	`process_workcenter` pw 
 		   	LEFT JOIN `process_workcenter_role` pwr ON pw.`uuid` = pwr.`workcenter_uuid`
-		WHERE
-			pw.`name` = #{name}
-			<if test="uuid != null and uuid != ''">
-				and uuid != #{uuid}
+		<where>
+			<if test="name != null and name != ''">
+				pw.`name` = #{name}
 			</if>
+			<if test="uuid != null and uuid != ''">
+				and uuid = #{uuid}
+			</if>
+		</where>
 	</select>
 	
 	<select id="getWorkcenterConditionConfig" resultType="java.util.HashMap">
@@ -101,12 +120,14 @@
 		  `workcenter_uuid` as workcenterUuid,
 		  `name`,
 		  `sort`,
+		  `is_show` as isShow,
+		  `type`,
 		  `user_id`  as userId
 		FROM
 		  `process_workcenter_thead` 
 		where
 		   workcenter_uuid = #{workcenterUuid}
-		   and userId = #{userId}
+		   and user_id = #{userId}
 	</select>
 	
 	<delete id="deleteWorkcenterByUuid" parameterType="java.lang.String">
@@ -179,6 +200,9 @@
 			  `workcenter_uuid`,
 			  `name`,
 			  `sort`,
+			  `type`,
+			  `is_show`,
+			  `width`,
 			  `user_id`
 			) 
 			VALUES
@@ -186,6 +210,9 @@
 			    #{workcenterUuid},
 			    #{name},
 			    #{sort},
+			    #{type},
+			    #{isShow},
+			    #{width},
 			    #{userId}
 			  ) ;
 	</insert>

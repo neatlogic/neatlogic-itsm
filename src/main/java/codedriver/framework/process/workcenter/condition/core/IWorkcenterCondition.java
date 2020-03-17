@@ -6,8 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.module.process.constvalue.ProcessExpression;
 
-public interface IWorkcenterCondition {
-	
+public interface IWorkcenterCondition { 
 	/**
 	 * @Description: 条件英文名
 	 * @Param:

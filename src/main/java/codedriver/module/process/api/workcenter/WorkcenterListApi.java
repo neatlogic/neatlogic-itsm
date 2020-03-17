@@ -13,6 +13,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
+import codedriver.framework.process.workcenter.WorkcenterHandler;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -70,8 +71,8 @@ public class WorkcenterListApi extends ApiComponentBase {
 				workcenter.setIsCanEdit(1);
 				workcenter.setIsCanRole(0);
 			}
-			//TODO 查询数量
-			workcenter.setCount(0);
+			//查询数量
+			workcenter.setCount(WorkcenterHandler.doSearchCount(new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()))));
 		}
 		return workcenterList;
 	}

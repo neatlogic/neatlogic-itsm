@@ -10,11 +10,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 @Component
 public class ProcessTaskTitleCondition implements IWorkcenterCondition{
-
 	@Override
 	public String getName() {
 		return "title";
@@ -32,7 +31,7 @@ public class ProcessTaskTitleCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return WorkcenterConditionVo.Type.COMMON.toString();
+		return ProcessWorkcenterConditionType.COMMON.getValue();
 	}
 
 	@Override
@@ -42,7 +41,7 @@ public class ProcessTaskTitleCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 1;
+		return 2;
 	}
 
 	@Override

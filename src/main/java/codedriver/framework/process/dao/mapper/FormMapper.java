@@ -2,6 +2,7 @@ package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import codedriver.module.process.dto.FormAttributeVo;
@@ -39,6 +40,8 @@ public interface FormMapper {
 	public int checkFormVersionIsExists(String uuid);
 
 	public List<FormAttributeVo> getFormAttributeList(FormAttributeVo formAttributeVo);
+	
+	public List<FormAttributeVo> getFormAttributeListByChannelUuidList(@Param("channelUuidList") List<String> channelUuidList);
 
 	public int insertForm(FormVo formVo);
 

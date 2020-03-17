@@ -18,6 +18,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 
 	@Override
 	protected ChartDataVo myGetData(DashboardWidgetVo widgetVo) {
+		
 		ChartDataVo chartDataVo = new ChartDataVo();
 		chartDataVo.setLegendField("year");
 		chartDataVo.setValueField("value");

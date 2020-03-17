@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
+
 public class WorkcenterConditionVo implements Serializable{
 	private static final long serialVersionUID = -776692828809703841L;
 	
@@ -25,8 +27,11 @@ public class WorkcenterConditionVo implements Serializable{
 	
 	public WorkcenterConditionVo(JSONObject jsonObj) {
 		this.uuid = jsonObj.getString("uuid");
-		this.name = jsonObj.getString("name").split("\\.")[1];
-		this.type = jsonObj.getString("name").split("\\.")[0];
+		if(!jsonObj.getString("name").contains("#")) {
+			throw new WorkcenterNoAuthException("name");
+		}
+		this.name = jsonObj.getString("name").split("#")[1];
+		this.type = jsonObj.getString("name").split("#")[0];
 		this.expression = jsonObj.getString("expression");
 		this.valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
 	}
@@ -116,17 +121,4 @@ public class WorkcenterConditionVo implements Serializable{
 		this.valueList = valueList;
 	}
 
-	public enum Type {
-		COMMON("common"), FORM("form");
-		private String name;
-
-		private Type(String _name) {
-			this.name = _name;
-		}
-
-		@Override
-		public String toString() {
-			return this.name;
-		}
-	}
 }

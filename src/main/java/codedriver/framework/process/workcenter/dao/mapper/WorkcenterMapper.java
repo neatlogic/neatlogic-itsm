@@ -13,6 +13,8 @@ public interface WorkcenterMapper {
 	
 	public List<WorkcenterVo> getWorkcenter(WorkcenterVo workcenterVo);
 	
+	public Integer checkWorkcenterNameIsRepeat(@Param("name")String workcenterName,@Param("uuid")String workcenterUuid);
+	
 	public List<WorkcenterVo> getWorkcenterByNameAndUuid(@Param("name")String workcenterName,@Param("uuid")String workcenterUuid);
 	
 	public Map<String,String> getWorkcenterConditionConfig();

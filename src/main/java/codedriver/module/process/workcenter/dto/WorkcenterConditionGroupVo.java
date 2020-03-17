@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -15,6 +17,7 @@ public class WorkcenterConditionGroupVo implements Serializable{
 	private String uuid;
 	private List<WorkcenterConditionVo> conditionList;
 	private List<WorkcenterConditionRelVo> conditionRelList;
+	private List<String> channelUuidList;
 	
 	
 	
@@ -23,18 +26,25 @@ public class WorkcenterConditionGroupVo implements Serializable{
 	}
 
 	public WorkcenterConditionGroupVo(JSONObject jsonObj) {
+		this.uuid = jsonObj.getString("uuid");
 		JSONArray conditionArray =jsonObj.getJSONArray("conditionList");
 		if(conditionArray.size() == 0) {
 			 new ParamIrregularException("'conditionList'参数不能为空数组");
+		}
+		JSONArray channelArray =jsonObj.getJSONArray("channelUuidList");
+		if(CollectionUtils.isNotEmpty(channelArray)) {
+			channelUuidList = JSONObject.parseArray(channelArray.toJSONString(),String.class);
 		}
 		conditionList = new ArrayList<WorkcenterConditionVo>();
 		for(Object condition:conditionArray) {
 			conditionList.add(new WorkcenterConditionVo((JSONObject) JSONObject.toJSON(condition)));
 		}
 		JSONArray conditionRelArray = jsonObj.getJSONArray("conditionRelList");
-		conditionRelList = new ArrayList<WorkcenterConditionRelVo>();
-		for(Object conditionRel:conditionRelArray) {
-			conditionRelList.add(new WorkcenterConditionRelVo((JSONObject) JSONObject.toJSON(conditionRel)));
+		if(CollectionUtils.isNotEmpty(conditionRelArray)) {
+			conditionRelList = new ArrayList<WorkcenterConditionRelVo>();
+			for(Object conditionRel:conditionRelArray) {
+				conditionRelList.add(new WorkcenterConditionRelVo((JSONObject) JSONObject.toJSON(conditionRel)));
+			}
 		}
 		
 	}
@@ -65,6 +75,16 @@ public class WorkcenterConditionGroupVo implements Serializable{
 	public void setConditionRelList(List<WorkcenterConditionRelVo> conditionRelList) {
 		this.conditionRelList = conditionRelList;
 	}
+
+	public List<String> getChannelUuidList() {
+		return channelUuidList;
+	}
+
+	public void setChannelUuidList(List<String> channelUuidList) {
+		this.channelUuidList = channelUuidList;
+	}
+
+
 	
 	
 }

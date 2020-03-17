@@ -13,21 +13,20 @@ import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 @Component
-public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
-
+public class ProcessTaskContentCondition implements IWorkcenterCondition{
 	@Override
 	public String getName() {
-		return "endTime";
+		return "content";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "结束时间";
+		return "内容";
 	}
 
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
-		return ProcessFormHandlerType.DATE.toString();
+		return ProcessFormHandlerType.INPUT.toString();
 	}
 	
 	@Override
@@ -42,12 +41,12 @@ public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 2;
+		return 1;
 	}
 
 	@Override
 	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.LESSTHAN,ProcessExpression.GREATERTHAN);
+		return Arrays.asList(ProcessExpression.LIKE);
 	}
 
 }
