@@ -121,6 +121,8 @@ public interface ProcessTaskMapper {
 
 	public List<ProcessTaskStepVo> getProcessTaskStepListByProcessTaskId(Long processTaskId);
 
+	public List<ProcessTaskStepWorkerVo> getProcessTaskStepWorkerList(@Param("userId") String userId, @Param("teamUuidList") List<String> teamUuidList, @Param("roleNameList") List<String> roleNameList);
+
 	public int replaceProcessTaskConfig(ProcessTaskConfigVo processTaskConfigVo);
 
 	public int insertProcessTaskForm(ProcessTaskFormVo processTaskFormVo);
@@ -210,5 +212,4 @@ public interface ProcessTaskMapper {
 	public int deleteProcessTaskFile(ProcessTaskFileVo processTaskFileVo);
 
 	public int deleteProcessTaskStepAuditById(Long auditId);
-
 }
