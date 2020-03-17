@@ -75,7 +75,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				failedCount += 1;
 			}
 		}
-		//System.out.println("runningCount:" + runningCount);
+
 		ProcessTaskVo processTaskVo = new ProcessTaskVo();
 		processTaskVo.setId(processTaskId);
 		if (runningCount > 0) {

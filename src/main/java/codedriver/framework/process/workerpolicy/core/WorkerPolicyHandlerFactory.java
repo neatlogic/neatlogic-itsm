@@ -1,4 +1,4 @@
-package codedriver.framework.process.workerpolicy.handler;
+package codedriver.framework.process.workerpolicy.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +9,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.RootComponent;
 import codedriver.module.process.dto.WorkerPolicyVo;
 

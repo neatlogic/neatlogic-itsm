@@ -141,7 +141,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					List<String> teamList = new ArrayList<>();
 					List<String> roleList = new ArrayList<>();
 					for(int j = 0; j < acceptList.size(); j++) {
-						String accept = acceptList.getString(i);
+						String accept = acceptList.getString(j);
 						String[] split = accept.split("#");
 						if(ProcessTaskAuthorizationObjectType.PROCESSUSERTYPE.getValue().equals(split[0])) {
 							processUserTypeList.add(split[1]);
