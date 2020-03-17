@@ -800,7 +800,7 @@
 	  `team_uuid`,
 	  `action` 
 	FROM `processtask_step_worker` 
-	WHERE `user_id` = #{userId}
+	WHERE `action`='handle' and (`user_id` = #{userId}
 	<if test="teamUuidList != null and teamUuidList.size > 0">
 	OR `team_uuid` in 
 		<foreach collection="teamUuidList" item="teamUuid" open="(" separator=","  close=")">
@@ -813,6 +813,25 @@
 			#{roleName}
 		</foreach>
 	</if>
+	)
+	</select>
+	
+	<select id="getProcessTaskTaskInfoList" resultType="java.util.HashMap">
+	SELECT 
+	  pt.`id` AS processTaskId,
+	  pt.`title` AS title,
+	  pts.`id` AS processTaskStepId,
+	  pts.`name` AS stepName
+	FROM`processtask` pt
+	JOIN `processtask_step` pts ON pts.`processtask_id`=pt.`id`
+	WHERE pts.`id` IN 
+	<foreach collection="processTaskStepIdList" item="stepId" open="(" separator="," close=")">
+	#{stepId}
+	</foreach>
+	<if test="keyword != null and keyword != ''">
+	AND pt.`title` LIKE CONCAT(#{keyword},'%')
+	</if>
+	ORDER BY pts.`id`DESC
 	</select>
 	
 	<update id="updateProcessTaskStepConvergeIsCheck">

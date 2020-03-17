@@ -16,8 +16,8 @@ import codedriver.framework.attribute.core.IAttributeHandler;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
-import codedriver.framework.process.workerpolicy.handler.IWorkerPolicyHandler;
-import codedriver.framework.process.workerpolicy.handler.WorkerPolicyHandlerFactory;
+import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
+import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
 import codedriver.module.process.constvalue.ProcessStepType;
@@ -94,9 +94,10 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				}
 			}
 			if (stepConfigObj != null) {
-				if (stepConfigObj.containsKey("assignPolicy")) {
+				if (stepConfigObj.containsKey("workerPolicyConfig")) {
+					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
 					/** 顺序分配处理人 **/
-					if ("serial".equals(stepConfigObj.getString("assignPolicy"))) {
+					if ("sort".equals(workerPolicyConfig.getString("executeMode"))) {
 						List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
 						if (workerPolicyList != null && workerPolicyList.size() > 0) {
 							for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
@@ -110,7 +111,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 								}
 							}
 						}
-					} else if ("parallel".equals(stepConfigObj.getString("assignPolicy"))) {
+					} else if ("batch".equals(workerPolicyConfig.getString("executeMode"))) {
 						List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
 						if (workerPolicyList != null && workerPolicyList.size() > 0) {
 							for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
@@ -125,8 +126,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 						}
 					}
 				}
-
-				if (stepConfigObj.containsKey("isAutoStart") && stepConfigObj.getString("isAutoStart").equals("1") && workerList.size() == 1) {
+				if (stepConfigObj.containsKey("autoStart") && stepConfigObj.getString("autoStart").equals("1") && workerList.size() == 1) {
 					/** 设置当前步骤状态为处理中 **/
 					if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
 						ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
