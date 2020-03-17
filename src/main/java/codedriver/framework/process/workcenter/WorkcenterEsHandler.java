@@ -2,9 +2,11 @@ package codedriver.framework.process.workcenter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 import com.techsure.multiattrsearch.MultiAttrsObjectPool;
 import com.techsure.multiattrsearch.MultiAttrsQuery;
@@ -34,10 +38,17 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskAuditMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.exception.workcenter.WorkcenterConditionException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerUtilBase;
+import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
+import codedriver.framework.process.workcenter.condition.core.WorkcenterConditionFactory;
+import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.constvalue.ProcessExpression;
+import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.dto.CatalogVo;
 import codedriver.module.process.dto.ChannelVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
@@ -195,11 +206,40 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 					toConditionUuid = condition.getUuid();
 					whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
 				}
-				String value = condition.getValueList().get(0);
-				if(condition.getValueList().size()>1) {
-					value = String.format("'%s'",  String.join("','",condition.getValueList()));
+				Object value = condition.getValueList().get(0);
+				IWorkcenterCondition workcenterCondition = WorkcenterConditionFactory.getHandler(condition.getName());
+				//Date 类型过滤条件特殊处理
+				if(workcenterCondition != null && workcenterCondition.getHandler(ProcessWorkcenterConditionModel.SIMPLE.getValue()).equals(ProcessFormHandlerType.DATE.toString())){
+					JSONArray dateJSONArray = JSONArray.parseArray(condition.getValueList().toString());
+					if(CollectionUtils.isNotEmpty(dateJSONArray)) {
+						JSONObject dateValue = (JSONObject) dateJSONArray.get(0);
+						SimpleDateFormat format = new SimpleDateFormat(TimeUtil.TIME_FORMAT);
+						String startTime = StringUtils.EMPTY;
+						String endTime = StringUtils.EMPTY;
+						String expression = condition.getExpression();
+						if(dateValue.containsKey("startTime")) {
+							startTime = format.format(new Date(dateValue.getLong("startTime")));
+							endTime = format.format(new Date(dateValue.getLong("endTime")));
+						}else {
+							startTime = TimeUtil.timeTransfer(dateValue.getInteger("timeRange"), dateValue.getString("timeUnit"));
+							endTime = TimeUtil.timeNow();
+						}
+						if(StringUtils.isEmpty(startTime)) {
+							expression = ProcessExpression.LESSTHAN.getExpression();
+							startTime = endTime;
+						}else if(StringUtils.isEmpty(endTime)) {
+							expression = ProcessExpression.GREATERTHAN.getExpression();
+						}
+						whereSb.append(String.format(ProcessExpression.getExpressionEs(expression),condition.getName(),startTime,endTime));
+					}else {
+						throw new WorkcenterConditionException(condition.getName());
+					}
+				}else {
+					if(condition.getValueList().size()>1) {
+						value = String.format("'%s'",  String.join("','",condition.getValueList()));
+					}
+					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getName(),value));
 				}
-				whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getName(),value));
 				fromConditionUuid = toConditionUuid;
 			}
 			
