@@ -1,6 +1,7 @@
 package codedriver.framework.process.dao.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -122,6 +123,8 @@ public interface ProcessTaskMapper {
 	public List<ProcessTaskStepVo> getProcessTaskStepListByProcessTaskId(Long processTaskId);
 
 	public List<ProcessTaskStepWorkerVo> getProcessTaskStepWorkerList(@Param("userId") String userId, @Param("teamUuidList") List<String> teamUuidList, @Param("roleNameList") List<String> roleNameList);
+
+	public List<Map<String, Object>> getProcessTaskTaskInfoList(@Param("keyword") String keyword, @Param("processTaskStepIdList") List<Long> processTaskStepIdList);
 
 	public int replaceProcessTaskConfig(ProcessTaskConfigVo processTaskConfigVo);
 
