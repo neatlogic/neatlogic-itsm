@@ -1,7 +1,7 @@
 package codedriver.module.process.constvalue;
 
 public enum ProcessTaskAuthorizationObjectType {
-	PROCESSUSERTYPE("processUserType","流程干系人类型"),
+	PROCESSUSERTYPE("processUserType","工单干系人类型"),
 	USER("user", "用户类型"),
 	TEAM("team", "组类型"),
 	ROLE("role", "角色类型");
