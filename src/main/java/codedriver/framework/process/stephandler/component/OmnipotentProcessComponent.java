@@ -94,9 +94,9 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				}
 			}
 			if (stepConfigObj != null) {
-				if (stepConfigObj.containsKey("assignPolicy")) {
+				if (stepConfigObj.containsKey("workerPolicyConfig")) {
 					/** 顺序分配处理人 **/
-					if ("serial".equals(stepConfigObj.getString("assignPolicy"))) {
+					if ("sort".equals(stepConfigObj.getString("executeMode"))) {
 						List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
 						if (workerPolicyList != null && workerPolicyList.size() > 0) {
 							for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
@@ -110,7 +110,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 								}
 							}
 						}
-					} else if ("parallel".equals(stepConfigObj.getString("assignPolicy"))) {
+					} else if ("batch".equals(stepConfigObj.getString("executeMode"))) {
 						List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicyByProcessTaskStepId(currentProcessTaskStepVo.getId());
 						if (workerPolicyList != null && workerPolicyList.size() > 0) {
 							for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
@@ -126,7 +126,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 					}
 				}
 
-				if (stepConfigObj.containsKey("isAutoStart") && stepConfigObj.getString("isAutoStart").equals("1") && workerList.size() == 1) {
+				if (stepConfigObj.containsKey("autoStart") && stepConfigObj.getString("autoStart").equals("1") && workerList.size() == 1) {
 					/** 设置当前步骤状态为处理中 **/
 					if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
 						ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
