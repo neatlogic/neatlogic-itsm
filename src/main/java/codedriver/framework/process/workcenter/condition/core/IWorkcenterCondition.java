@@ -64,4 +64,12 @@ public interface IWorkcenterCondition {
 	 */
 	public List<ProcessExpression> getExpressionList();
 
+	/**
+	 * @Description: 后端查询es使用 默认表达式
+	 * @Param: 
+	 * @return: java.lang.Integer
+	 * @Date: 2020/2/11
+	 */
+	ProcessExpression getDefaultExpression();
+
 }

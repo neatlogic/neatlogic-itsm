@@ -13,6 +13,7 @@ import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 import codedriver.module.process.dto.PriorityVo;
@@ -24,12 +25,12 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getName() {
-		return "priority";
+		return ProcessWorkcenterCondition.PRIORITY.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "优先级";
+		return ProcessWorkcenterCondition.PRIORITY.getName();
 	}
 
 	@Override
@@ -72,6 +73,11 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 	@Override
 	public List<ProcessExpression> getExpressionList() {
 		return Arrays.asList(ProcessExpression.INCLUDE);
+	}
+	
+	@Override
+	public ProcessExpression getDefaultExpression() {
+		return ProcessExpression.INCLUDE;
 	}
 
 }

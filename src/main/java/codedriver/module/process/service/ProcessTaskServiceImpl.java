@@ -14,12 +14,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.module.process.constvalue.ProcessTaskAuthorizationObjectType;
+import codedriver.module.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.ProcessTaskStepWorkerAction;
@@ -143,13 +144,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					for(int j = 0; j < acceptList.size(); j++) {
 						String accept = acceptList.getString(i);
 						String[] split = accept.split("#");
-						if(ProcessTaskAuthorizationObjectType.PROCESSUSERTYPE.getValue().equals(split[0])) {
+						if(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
 							processUserTypeList.add(split[1]);
-						}else if(ProcessTaskAuthorizationObjectType.USER.getValue().equals(split[0])) {
+						}else if(GroupSearch.USER.getValue().equals(split[0])) {
 							userList.add(split[1]);
-						}else if(ProcessTaskAuthorizationObjectType.TEAM.getValue().equals(split[0])) {
+						}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
 							teamList.add(split[1]);
-						}else if(ProcessTaskAuthorizationObjectType.ROLE.getValue().equals(split[0])) {
+						}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
 							roleList.add(split[1]);
 						}
 					}

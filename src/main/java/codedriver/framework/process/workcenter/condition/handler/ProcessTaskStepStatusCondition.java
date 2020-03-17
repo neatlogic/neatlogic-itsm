@@ -12,6 +12,7 @@ import codedriver.framework.process.workcenter.condition.core.IWorkcenterConditi
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
@@ -20,12 +21,12 @@ public class ProcessTaskStepStatusCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getName() {
-		return "stepStatus";
+		return ProcessWorkcenterCondition.STEPSTATUS.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "流程步骤状态";
+		return ProcessWorkcenterCondition.STEPSTATUS.getName();
 	}
 
 	@Override
@@ -93,4 +94,8 @@ public class ProcessTaskStepStatusCondition implements IWorkcenterCondition{
 		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
 	}
 
+	@Override
+	public ProcessExpression getDefaultExpression() {
+		return ProcessExpression.INCLUDE;
+	}
 }
