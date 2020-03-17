@@ -31,7 +31,7 @@ public class ProcessTaskStepStatusListApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "processtask/step/status/List";
+		return "processtask/step/status/list";
 	}
 
 	@Override
