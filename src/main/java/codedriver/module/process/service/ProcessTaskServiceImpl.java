@@ -19,6 +19,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.module.process.constvalue.ProcessTaskAuthorizationObjectType;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.ProcessTaskStepWorkerAction;
@@ -142,13 +143,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					for(int j = 0; j < acceptList.size(); j++) {
 						String accept = acceptList.getString(i);
 						String[] split = accept.split("#");
-						if("processUserType".equals(split[0])) {
+						if(ProcessTaskAuthorizationObjectType.PROCESSUSERTYPE.getValue().equals(split[0])) {
 							processUserTypeList.add(split[1]);
-						}else if("user".equals(split[0])) {
+						}else if(ProcessTaskAuthorizationObjectType.USER.getValue().equals(split[0])) {
 							userList.add(split[1]);
-						}else if("team".equals(split[0])) {
+						}else if(ProcessTaskAuthorizationObjectType.TEAM.getValue().equals(split[0])) {
 							teamList.add(split[1]);
-						}else if("role".equals(split[0])) {
+						}else if(ProcessTaskAuthorizationObjectType.ROLE.getValue().equals(split[0])) {
 							roleList.add(split[1]);
 						}
 					}
