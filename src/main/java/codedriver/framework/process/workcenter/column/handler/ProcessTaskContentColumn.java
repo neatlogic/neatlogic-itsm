@@ -5,18 +5,19 @@ import org.springframework.stereotype.Component;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 
 @Component
 public class ProcessTaskContentColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "content";
+		return ProcessWorkcenterCondition.CONTENT.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "上报内容";
+		return ProcessWorkcenterCondition.CONTENT.getName();
 	}
 
 	@Override

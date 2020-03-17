@@ -5,18 +5,19 @@ import org.springframework.stereotype.Component;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 
 @Component
 public class ProcessTaskExpiredTimeColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "expiredTime";
+		return ProcessWorkcenterCondition.EXPIRED_TIME.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "超时时间";
+		return ProcessWorkcenterCondition.EXPIRED_TIME.getName();
 	}
 
 	@Override

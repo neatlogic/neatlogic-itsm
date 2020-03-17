@@ -21,12 +21,12 @@ public class ProcessTaskStepStatusCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.STEPSTATUS.getValue();
+		return ProcessWorkcenterCondition.CURRENT_STEP_STATUS.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.STEPSTATUS.getName();
+		return ProcessWorkcenterCondition.CURRENT_STEP_STATUS.getName();
 	}
 
 	@Override
