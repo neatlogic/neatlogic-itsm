@@ -83,7 +83,15 @@ public class ProcessTaskStepWorkerVo {
 		this.teamUuid = _teamUuid;
 		this.action = _action;
 	}
-	
+
+	public ProcessTaskStepWorkerVo(Long processTaskId, Long processTaskStepId, String userId, String teamUuid, String roleName, String action) {
+		this.processTaskId = processTaskId;
+		this.processTaskStepId = processTaskStepId;
+		this.userId = userId;
+		this.teamUuid = teamUuid;
+		this.roleName = roleName;
+		this.action = action;
+	}
 
 	public Long getProcessTaskId() {
 		return processTaskId;

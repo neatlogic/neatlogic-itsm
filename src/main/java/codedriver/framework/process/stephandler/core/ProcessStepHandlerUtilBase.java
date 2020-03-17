@@ -879,26 +879,26 @@ public abstract class ProcessStepHandlerUtilBase {
 				saveAuditDetail(processTaskStepAuditVo, urgencyAudit, ProcessTaskAuditDetailType.PRIORITY, processTaskVo.getPriorityUuid());
 
 				/** 表单修改审计 **/
-				ProcessTaskStepAuditDetailVo formAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.FORM.getValue());
-
-				List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-				JSONObject newFormObj = new JSONObject();
-				for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
-					newFormObj.put(attributeData.getAttributeUuid(), attributeData.getData());
-				}
-
-				if (formAudit == null) {
-					if (!newFormObj.isEmpty()) {
-						processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.FORM.getValue(), null, newFormObj.toJSONString()));
-					}
-				} else {
-					Javers javers = JaversBuilder.javers().build();
-					JSONObject oldFormObj = JSONObject.parseObject(formAudit.getNewContent());
-					Diff diff = javers.compare(newFormObj, oldFormObj);
-					if (diff.hasChanges()) {
-						processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.FORM.getValue(), formAudit.getNewContent(), newFormObj.toJSONString()));
-					}
-				}
+//				ProcessTaskStepAuditDetailVo formAudit = processTaskMapper.getProcessTaskStepAuditDetail(currentProcessTaskStepVo.getProcessTaskId(), ProcessTaskAuditDetailType.FORM.getValue());
+//
+//				List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+//				JSONObject newFormObj = new JSONObject();
+//				for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
+//					newFormObj.put(attributeData.getAttributeUuid(), attributeData.getData());
+//				}
+//
+//				if (formAudit == null) {
+//					if (!newFormObj.isEmpty()) {
+//						processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.FORM.getValue(), null, newFormObj.toJSONString()));
+//					}
+//				} else {
+//					Javers javers = JaversBuilder.javers().build();
+//					JSONObject oldFormObj = JSONObject.parseObject(formAudit.getNewContent());
+//					Diff diff = javers.compare(newFormObj, oldFormObj);
+//					if (diff.hasChanges()) {
+//						processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.FORM.getValue(), formAudit.getNewContent(), newFormObj.toJSONString()));
+//					}
+//				}
 
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);

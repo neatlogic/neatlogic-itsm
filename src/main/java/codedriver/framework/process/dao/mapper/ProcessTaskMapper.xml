@@ -782,6 +782,38 @@
 	FROM `processtask_step` pts
 	WHERE pts.`processtask_id` = #{processTaskId}
 	</select>
+
+	<resultMap type="codedriver.module.process.dto.ProcessTaskStepWorkerVo" id="processTaskStepWorkerMap">
+		<id column="processtask_step_id" property="processTaskStepId"/>
+		<result column="processtask_id" property="processTaskId"/>
+		<result column="user_id" property="userId"/>
+		<result column="role_name" property="roleName"/>
+		<result column="team_uuid" property="teamUuid"/>
+		<result column="action" property="action"/>
+	</resultMap>
+	<select id="getProcessTaskStepWorkerList" resultMap="processTaskStepWorkerMap">
+	SELECT 
+	  `processtask_id`,
+	  `processtask_step_id`,
+	  `user_id`,
+	  `role_name`,
+	  `team_uuid`,
+	  `action` 
+	FROM `processtask_step_worker` 
+	WHERE `user_id` = #{userId}
+	<if test="teamUuidList != null and teamUuidList.size > 0">
+	OR `team_uuid` in 
+		<foreach collection="teamUuidList" item="teamUuid" open="(" separator=","  close=")">
+		#{teamUuid}
+		</foreach>
+	</if>
+	<if test="roleNameList != null and roleNameList.size > 0">
+	OR `role_name` in 
+		<foreach collection="roleNameList" item="roleName" open="(" separator=","  close=")">
+			#{roleName}
+		</foreach>
+	</if>
+	</select>
 	
 	<update id="updateProcessTaskStepConvergeIsCheck">
 		UPDATE `processtask_converge` SET is_check = #{isCheck} WHERE converge_id = #{convergeId}
