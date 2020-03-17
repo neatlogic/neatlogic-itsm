@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -47,7 +46,6 @@ import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
-import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.dto.CatalogVo;
 import codedriver.module.process.dto.ChannelVo;
@@ -236,9 +234,9 @@ public class WorkcenterEsHandler extends CodeDriverThread{
 					}
 				}else {
 					if(condition.getValueList().size()>1) {
-						value = String.format("'%s'",  String.join("','",condition.getValueList()));
+						value = String.join("','",condition.getValueList());
 					}
-					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getName(),value));
+					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getName(),String.format("'%s'",  value)));
 				}
 				fromConditionUuid = toConditionUuid;
 			}
