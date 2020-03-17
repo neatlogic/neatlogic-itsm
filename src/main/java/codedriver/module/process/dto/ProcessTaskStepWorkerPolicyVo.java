@@ -107,5 +107,5 @@ public class ProcessTaskStepWorkerPolicyVo implements Comparable<ProcessTaskStep
 	public void setProcessTaskId(Long processTaskId) {
 		this.processTaskId = processTaskId;
 	}
-
+	
 }
