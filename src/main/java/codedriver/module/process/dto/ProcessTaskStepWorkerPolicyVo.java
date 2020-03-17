@@ -107,10 +107,5 @@ public class ProcessTaskStepWorkerPolicyVo implements Comparable<ProcessTaskStep
 	public void setProcessTaskId(Long processTaskId) {
 		this.processTaskId = processTaskId;
 	}
-
-	@Override
-	public String toString() {
-		return "ProcessTaskStepWorkerPolicyVo [processTaskId=" + processTaskId + ", processTaskStepId=" + processTaskStepId + ", processStepUuid=" + processStepUuid + ", policy=" + policy + ", sort=" + sort + ", config=" + config + ", configObj=" + configObj + ", configObjList=" + configObjList + "]";
-	}
-
+	
 }
