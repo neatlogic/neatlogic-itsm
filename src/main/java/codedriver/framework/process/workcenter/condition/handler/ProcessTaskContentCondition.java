@@ -13,15 +13,15 @@ import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 @Component
-public class ProcessTaskTitleCondition implements IWorkcenterCondition{
+public class ProcessTaskContentCondition implements IWorkcenterCondition{
 	@Override
 	public String getName() {
-		return "title";
+		return "content";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "标题";
+		return "内容";
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class ProcessTaskTitleCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 2;
+		return 1;
 	}
 
 	@Override

@@ -8,28 +8,28 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessStepType;
+import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.ProcessTaskStepVo;
-import codedriver.module.process.dto.ProcessTaskVo;
+import codedriver.module.process.service.ProcessTaskService;
 
 @Service
-@AuthAction(name = "PROCESS_MODIFY")
 public class ProcessTaskCompleteApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private ProcessTaskService processTaskService;
 
 	@Override
 	public String getToken() {
@@ -45,34 +45,41 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
-
-	@Override
+	
 	@Input({
-			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true),
-			@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤Id")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "当前步骤Id"),// isRequired = true,
+		@Param(name = "nextProcessTaskStepId", type = ApiParamType.LONG, desc = "激活下一步骤Id")//, isRequired = true
 	})
-	@Output({})
 	@Description(desc = "工单完成接口")
+	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-		if(processTaskVo == null) {
-			throw new ProcessTaskNotFoundException(processTaskId.toString());
+		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMPLETE)) {
+			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
 		ProcessTaskStepVo processTaskStepVo = null;
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(processTaskStepId != null) {
 			processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-			if (processTaskStepVo != null) {
-				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
-			}
 		}else {
 			List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
 			if(processTaskStepList.size() != 1) {
 				throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 			}
 			processTaskStepVo = processTaskStepList.get(0);
+		}
+		
+		Long nextProcessTaskStepId = jsonObj.getLong("nextProcessTaskStepId");
+		if(nextProcessTaskStepId != null) {
+			ProcessTaskStepVo nextProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(nextProcessTaskStepId);
+			if(nextProcessTaskStepVo == null) {
+				throw new ProcessTaskStepNotFoundException(nextProcessTaskStepId.toString());
+			}
+			if(!processTaskId.equals(nextProcessTaskStepVo.getProcessTaskId())) {
+				throw new ProcessTaskRuntimeException("步骤：'" + nextProcessTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
+			}
 		}
 		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());

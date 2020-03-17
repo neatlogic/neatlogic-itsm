@@ -65,7 +65,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 		int runningCount = 0, succeedCount = 0, failedCount = 0, abortedCount = 0;
 		for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-			if (processTaskStepVo.getIsActive().equals(1)) {
+			if (processTaskStepVo.getIsActive().equals(1) && !ProcessStepHandler.START.getHandler().equals(processTaskStepVo.getHandler())) {
 				runningCount += 1;
 			} else if (processTaskStepVo.getIsActive().equals(-1)) {
 				abortedCount += 1;
@@ -75,18 +75,21 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				failedCount += 1;
 			}
 		}
+		//System.out.println("runningCount:" + runningCount);
 		ProcessTaskVo processTaskVo = new ProcessTaskVo();
 		processTaskVo.setId(processTaskId);
-		if (runningCount <= 0) {
-			if (abortedCount > 0) {
-				processTaskVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
-			} else if (failedCount > 0) {
-				processTaskVo.setStatus(ProcessTaskStatus.FAILED.getValue());
-			} else if (succeedCount > 0) {
-				processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
-			}
-			processTaskMapper.updateProcessTaskStatus(processTaskVo);
+		if (runningCount > 0) {
+			processTaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+		} else if (abortedCount > 0) {
+			processTaskVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
+		} else if (failedCount > 0) {
+			processTaskVo.setStatus(ProcessTaskStatus.FAILED.getValue());
+		} else if (succeedCount > 0) {
+			processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+		} else {
+			return 1;
 		}
+		processTaskMapper.updateProcessTaskStatus(processTaskVo);
 		return 1;
 	}
 
@@ -900,8 +903,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 	protected abstract int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException;
 
 	@Override
-	public final int startProcess(ProcessTaskStepVo currentProcessTaskStepVo) {
-
+	public final int saveDraft(ProcessTaskStepVo currentProcessTaskStepVo) {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		Long processTaskId = paramObj.getLong("processTaskId");
 		if(processTaskId == null) {//首次保存
@@ -1026,7 +1028,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			}
 
 			try {
-				myStartProcess(currentProcessTaskStepVo);
+				mySaveDraft(currentProcessTaskStepVo);
 				currentProcessTaskStepVo.setIsActive(1);
 				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 				updateProcessTaskStepStatus(currentProcessTaskStepVo);
@@ -1052,13 +1054,46 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			}
 			currentProcessTaskStepVo.setId(processTaskStepList.get(0).getId());
 			try {
-				myStartProcess(currentProcessTaskStepVo);
+				mySaveDraft(currentProcessTaskStepVo);
 			} catch (ProcessTaskException ex) {
 				logger.error(ex.getMessage(), ex);
 			}
 		}
+		
+		return 1;
+	}
+	
+	protected abstract int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException;
+	
+	@Override
+	public final int startProcess(ProcessTaskStepVo currentProcessTaskStepVo) {
+		try {
+			myStartProcess(currentProcessTaskStepVo);
+			currentProcessTaskStepVo.setIsActive(2);
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+			updateProcessTaskStepStatus(currentProcessTaskStepVo);
+		}catch(ProcessTaskException ex) {
+			logger.error(ex.getMessage(), ex);
+			currentProcessTaskStepVo.setIsActive(1);
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
+			currentProcessTaskStepVo.setError(ex.getMessage());
+			updateProcessTaskStepStatus(currentProcessTaskStepVo);
+		}
 		/** 处理历史记录 **/
 		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.STARTPROCESS);
+		/** 流转到下一步 **/
+		List<ProcessTaskStepVo> nextStepList = getNext(currentProcessTaskStepVo);
+		for (ProcessTaskStepVo nextStep : nextStepList) {
+			IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
+			nextStep.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
+			doNext(new ProcessStepThread(nextStep) {
+				@Override
+				public void execute() {
+					nextStepHandler.active(nextStep);
+				}
+
+			});
+		}
 		return 0;
 	}
 

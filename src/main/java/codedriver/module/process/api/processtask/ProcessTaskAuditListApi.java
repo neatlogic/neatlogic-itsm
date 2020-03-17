@@ -52,7 +52,8 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")
 	})
 	@Output({
-		@Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "工单活动列表")
+		@Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "工单活动列表"),
+		@Param(name = "Return[n].auditDetailList", explode = ProcessTaskStepAuditDetailVo[].class, desc = "工单活动详情列表")
 	})
 	@Description(desc = "工单活动列表接口")
 	@Override

@@ -226,7 +226,17 @@ public interface IProcessStepHandler {
 	 * @return List<ProcessTaskStepVo>
 	 */
 	public List<ProcessTaskStepVo> getNext(ProcessTaskStepVo currentProcessTaskStepVo);
-
+	
+	/**
+	 * @Author: 
+	 * @Time:
+	 * @Description: 保存工单草稿，将会创建一个工单，工单状态为草稿状态
+	 * @param @return
+	 * @return int
+	 */
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
+	public int saveDraft(ProcessTaskStepVo currentProcessTaskStepVo);
+	
 	/**
 	 * @Author: chenqiwei
 	 * @Time:Aug 7, 2019

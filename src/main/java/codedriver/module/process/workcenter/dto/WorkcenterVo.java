@@ -14,7 +14,6 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.restful.annotation.EntityField;
 
 public class WorkcenterVo extends BasePageVo implements Serializable{
@@ -72,7 +71,6 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	
 	public WorkcenterVo(JSONObject jsonObj) {
 		uuid = jsonObj.getString("uuid");
-		//headerList = jsonObj.getJSONArray("headerList");
 		JSONArray conditionGroupArray = jsonObj.getJSONArray("conditionGroupList");
 		if(CollectionUtils.isNotEmpty(conditionGroupArray)) {
 			conditionGroupList = new ArrayList<WorkcenterConditionGroupVo>();
@@ -88,9 +86,11 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 				conditionGroupList.add(new WorkcenterConditionGroupVo(conditionGroupJson));
 			}
 			JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
-			conditionGroupRelList = new ArrayList<WorkcenterConditionGroupRelVo>();
-			for(Object conditionRelGroup:conditionGroupRelArray) {
-				conditionGroupRelList.add(new WorkcenterConditionGroupRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
+			if(CollectionUtils.isNotEmpty(conditionGroupRelArray)) {
+				conditionGroupRelList = new ArrayList<WorkcenterConditionGroupRelVo>();
+				for(Object conditionRelGroup:conditionGroupRelArray) {
+					conditionGroupRelList.add(new WorkcenterConditionGroupRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
+				}
 			}
 		}
 	}
