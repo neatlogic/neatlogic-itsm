@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
+import codedriver.module.process.constvalue.ProcessTaskStepWorkerAction;
 import codedriver.module.process.constvalue.UserType;
 import codedriver.module.process.constvalue.WorkerPolicy;
 import codedriver.module.process.dto.ProcessTaskStepUserVo;
@@ -53,11 +54,7 @@ public class CopyWorkerPolicyHandler implements IWorkerPolicyHandler {
 		ProcessTaskStepVo prevStep = processTaskStepList.get(0);
 		List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(prevStep.getId(),UserType.MAJOR.getValue());
 		for (ProcessTaskStepUserVo user : userList) {
-			ProcessTaskStepWorkerVo workerVo = new ProcessTaskStepWorkerVo();
-			workerVo.setUserId(user.getUserId());
-			workerVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-			workerVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-			processTaskStepWorkerList.add(workerVo);
+			processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), user.getUserId(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
 		}
 		
 		return processTaskStepWorkerList;
