@@ -268,25 +268,29 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
 		/** 组装通知模板 **/
-		if (stepConfigObj.containsKey("notifyList")) {
-			JSONArray notifyList = stepConfigObj.getJSONArray("notifyList");
+		JSONArray notifyList = stepConfigObj.getJSONArray("notifyList");
+		if (!CollectionUtils.isEmpty(notifyList)) {
 			List<String> templateUuidList = new ArrayList<>();
 			for (int j = 0; j < notifyList.size(); j++) {
 				JSONObject notifyObj = notifyList.getJSONObject(j);
-				if (notifyObj.containsKey("template")) {
-					templateUuidList.add(notifyObj.getString("template"));
+				String template = notifyObj.getString("template");
+				if(StringUtils.isNotBlank(template)) {
+					templateUuidList.add(template);
 				}
 			}
 			processStepVo.setTemplateUuidList(templateUuidList);
 		}
 		/** 组装分配策略 **/
-		if (stepConfigObj.containsKey("workerPolicyConfig")) {
-			JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-			if (workerPolicyConfig.containsKey("policyList")) {
-				JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
+		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+		if (!CollectionUtils.isEmpty(workerPolicyConfig)) {
+			JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
+			if (!CollectionUtils.isEmpty(policyList)) {
 				List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
 				for (int k = 0; k < policyList.size(); k++) {
 					JSONObject policyObj = policyList.getJSONObject(k);
+					if(!"1".equals(policyObj.getString("isChecked"))) {
+						continue;
+					}
 					ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
 					processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
 					processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
