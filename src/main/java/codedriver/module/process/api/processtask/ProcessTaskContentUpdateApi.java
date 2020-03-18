@@ -60,7 +60,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATECONTENT)) {
+		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE)) {
 			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
 		
