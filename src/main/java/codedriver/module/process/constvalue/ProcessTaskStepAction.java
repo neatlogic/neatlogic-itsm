@@ -5,7 +5,7 @@ public enum ProcessTaskStepAction {
 	STARTPROCESS("startprocess", "上报"),
 	START("start", "开始"),
 	ACTIVE("active", "激活"),
-	COMPLETE("complete", "完成"),
+	COMPLETE("complete", "流转"),
 	RETREAT("retreat", "撤回"),
 	ACCEPT("accept", "接受"),
 	ABORT("abort", "终止"),
