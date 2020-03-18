@@ -19,6 +19,16 @@ public class ProcessStepHandlerVo implements Comparable<ProcessStepHandlerVo> {
 	private String icon;
 	@EntityField(name = "排序", type = ApiParamType.INTEGER)
 	private Integer sort;
+	@EntityField(name = "配置信息", type = ApiParamType.STRING)
+	private String config;
+
+	public String getConfig() {
+		return config;
+	}
+
+	public void setConfig(String config) {
+		this.config = config;
+	}
 
 	public String getIcon() {
 		return icon;
