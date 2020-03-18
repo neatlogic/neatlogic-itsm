@@ -192,20 +192,6 @@
 		`processtask_id` = #{value}
 	</select>
 
-	<select id="getProcessTaskStepFormAttributeDataByProcessTaskStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskFormAttributeDataVo">
-		SELECT
-		a.`processtask_id` AS processTaskId,
-		a.`processtask_step_id` AS processTaskStepId,
-		a.`attribute_uuid` AS attributeUuid,
-		b.`data`,
-		b.`type`
-		FROM
-		`processtask_step_formattribute` a
-		JOIN `processtask_formattribute_data` b ON a.`attribute_uuid` = b.`attribute_uuid` AND a.`processtask_id` = b.`processtask_id`
-		WHERE
-		a.`processtask_step_id` = #{value}
-	</select>
-
 	<select id="getProcessTaskStepFormAttributeDataByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskFormAttributeDataVo">
 		SELECT
 		`processtask_id` AS processTaskId,
