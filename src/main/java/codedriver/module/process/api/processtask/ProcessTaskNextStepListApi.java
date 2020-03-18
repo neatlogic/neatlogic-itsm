@@ -57,9 +57,7 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMPLETE)) {
 			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
-		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-		return processStepHandler.getNext(currentProcessTaskStepVo);
+		return processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
 	}
 
 }
