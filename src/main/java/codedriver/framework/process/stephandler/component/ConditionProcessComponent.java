@@ -10,6 +10,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,29 +195,33 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepVo> nextStepList = new ArrayList<ProcessTaskStepVo>();
-		if (currentProcessTaskStepVo.getRelList() != null && currentProcessTaskStepVo.getRelList().size() > 0) {
-			for (ProcessTaskStepRelVo relVo : currentProcessTaskStepVo.getRelList()) {
-				if (relVo.getCondition() != null) {
-					Boolean result = false;
-					try {
-						result = runScript(currentProcessTaskStepVo.getProcessTaskId(), relVo.getCondition());
-					} catch (NoSuchMethodException e) {
-						logger.error(e.getMessage(), e);
-					} catch (ScriptException e) {
-						logger.error(e.getMessage(), e);
-					}
-					if (result) {
-						nextStepList.add(new ProcessTaskStepVo() {
-							{
-								this.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-								this.setId(relVo.getToProcessTaskStepId());
-								this.setHandler(relVo.getToProcessStepHandler());
-							}
-						});
-					}
-				}
-			}
+//		if (currentProcessTaskStepVo.getRelList() != null && currentProcessTaskStepVo.getRelList().size() > 0) {
+//			for (ProcessTaskStepRelVo relVo : currentProcessTaskStepVo.getRelList()) {
+//				if (relVo.getCondition() != null) {
+//					Boolean result = false;
+//					try {
+//						result = runScript(currentProcessTaskStepVo.getProcessTaskId(), relVo.getCondition());
+//					} catch (NoSuchMethodException e) {
+//						logger.error(e.getMessage(), e);
+//					} catch (ScriptException e) {
+//						logger.error(e.getMessage(), e);
+//					}
+//					if (result) {
+//						nextStepList.add(new ProcessTaskStepVo() {
+//							{
+//								this.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+//								this.setId(relVo.getToProcessTaskStepId());
+//								this.setHandler(relVo.getToProcessStepHandler());
+//							}
+//						});
+//					}
+//				}
+//			}
+//		}
+		if(CollectionUtils.isEmpty(currentProcessTaskStepVo.getRelList())) {
+			return nextStepList;
 		}
+		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(currentProcessTaskStepVo.getConfigHash());
 		return nextStepList;
 	}
 
