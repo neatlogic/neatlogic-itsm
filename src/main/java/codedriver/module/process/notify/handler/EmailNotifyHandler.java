@@ -88,6 +88,6 @@ public class EmailNotifyHandler extends NotifyHandlerBase {
 
 	@Override
 	public String getName() {
-		return "邮件通知插件";
+		return "邮件通知";
 	}
 }
