@@ -5,10 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.workcenter.WorkcenterEsHandler;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ProcessTaskStepVo;
 
 @Transactional
 @Service
@@ -32,9 +30,7 @@ public class workcenterUpdateTestApi extends ApiComponentBase {
 	@Description(desc = "测试工单中心update接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		ProcessTaskStepVo currentProcessTaskStepVo = new ProcessTaskStepVo();
-		currentProcessTaskStepVo.setProcessTaskId(jsonObj.getLong("processTaskId"));
-		WorkcenterEsHandler.update(currentProcessTaskStepVo);
+		
 		return "OK";
 	}
 
