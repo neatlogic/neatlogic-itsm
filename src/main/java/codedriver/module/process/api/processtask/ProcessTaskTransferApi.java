@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -19,7 +20,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.constvalue.ProcessTaskAuthorizationObjectType;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.ProcessTaskStepWorkerAction;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -73,11 +73,11 @@ public class ProcessTaskTransferApi extends ApiComponentBase {
 		List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
 		for(String worker : workerList) {	
 			String[] split = worker.split("#");
-			if(ProcessTaskAuthorizationObjectType.USER.getValue().equals(split[0])) {
+			if(GroupSearch.USER.getValue().equals(split[0])) {
 				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
-			}else if(ProcessTaskAuthorizationObjectType.TEAM.getValue().equals(split[0])) {
+			}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
 				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, null, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
-			}else if(ProcessTaskAuthorizationObjectType.ROLE.getValue().equals(split[0])) {
+			}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
 				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, null, null, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
 			}
 		}

@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
@@ -19,12 +20,12 @@ public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getName() {
-		return "channelType";
+		return ProcessWorkcenterCondition.CHANNELTYPE.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "服务类型";
+		return ProcessWorkcenterCondition.CHANNELTYPE.getName();
 	}
 
 	@Override
@@ -69,4 +70,8 @@ public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
 		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
 	}
 
+	@Override
+	public ProcessExpression getDefaultExpression() {
+		return ProcessExpression.INCLUDE;
+	}
 }

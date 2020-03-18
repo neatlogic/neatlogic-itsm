@@ -10,18 +10,19 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 @Component
 public class ProcessTaskContentCondition implements IWorkcenterCondition{
 	@Override
 	public String getName() {
-		return "content";
+		return ProcessWorkcenterCondition.CONTENT.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "内容";
+		return ProcessWorkcenterCondition.CONTENT.getName();
 	}
 
 	@Override
@@ -49,4 +50,8 @@ public class ProcessTaskContentCondition implements IWorkcenterCondition{
 		return Arrays.asList(ProcessExpression.LIKE);
 	}
 
+	@Override
+	public ProcessExpression getDefaultExpression() {
+		return ProcessExpression.LIKE;
+	}
 }

@@ -1,7 +1,13 @@
 package codedriver.module.process.constvalue;
 
 public enum WorkerPolicy {
-	ASSIGN("assign", "管理员指定"), MANUAL("manual", "处理人抢单"), AUTOMATIC("automatic", "分配器分派"), FROMER("fromer", "前置步骤指定"), COPY("copy", "复制前置步骤"), ATTRIBUTE("attribute", "属性值"), FORM("form", "表单值");
+	ASSIGN("assign", "自定义"), 
+	//MANUAL("manual", "处理人抢单"), 
+	AUTOMATIC("automatic", "分配器分派"),
+	//FROMER("fromer", "前置步骤指定"), 
+	COPY("copy", "复制前置步骤"), 
+	//ATTRIBUTE("attribute", "属性值"), 
+	FORM("form", "表单值");
 
 	private String policy;
 	private String text;

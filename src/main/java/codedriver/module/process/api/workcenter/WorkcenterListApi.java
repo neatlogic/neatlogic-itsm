@@ -13,7 +13,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
-import codedriver.framework.process.workcenter.WorkcenterHandler;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -22,6 +21,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
 import codedriver.module.process.constvalue.ProcessWorkcenterType;
+import codedriver.module.process.service.WorkcenterService;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @AuthAction(name = "WORKCENTER_VIEW")
@@ -32,6 +32,9 @@ public class WorkcenterListApi extends ApiComponentBase {
 	WorkcenterMapper workcenterMapper;
 	@Autowired
 	UserMapper userMapper;
+	
+	@Autowired
+	WorkcenterService workcenterService;
 	
 	@Override
 	public String getToken() {
@@ -72,7 +75,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 				workcenter.setIsCanRole(0);
 			}
 			//查询数量
-			workcenter.setCount(WorkcenterHandler.doSearchCount(new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()))));
+			workcenter.setCount(workcenterService.doSearchCount(new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()))));
 		}
 		return workcenterList;
 	}

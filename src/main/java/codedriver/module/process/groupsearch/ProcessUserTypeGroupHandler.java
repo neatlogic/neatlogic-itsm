@@ -9,12 +9,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.restful.groupsearch.core.IGroupSearchHandler;
+import codedriver.module.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.module.process.constvalue.UserType;
 @Service
 public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 	@Override
 	public String getName() {
-		return "processUserType";
+		return ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue();
 	}
 	
 	@Override

@@ -5,18 +5,19 @@ import org.springframework.stereotype.Component;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 
 @Component
 public class ProcessTaskWorkTimeColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "worktime";
+		return ProcessWorkcenterCondition.WOKRTIME.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "时间窗口";
+		return ProcessWorkcenterCondition.WOKRTIME.getName();
 	}
 
 	@Override

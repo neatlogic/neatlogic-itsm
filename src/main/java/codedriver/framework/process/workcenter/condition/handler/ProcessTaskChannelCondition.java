@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 @Component
@@ -17,12 +18,12 @@ public class ProcessTaskChannelCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getName() {
-		return "channel";
+		return ProcessWorkcenterCondition.CHANNEL.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "服务";
+		return ProcessWorkcenterCondition.CHANNEL.getName();
 	}
 
 	@Override
@@ -67,6 +68,11 @@ public class ProcessTaskChannelCondition implements IWorkcenterCondition{
 	@Override
 	public List<ProcessExpression> getExpressionList() {
 		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
+	}
+	
+	@Override
+	public ProcessExpression getDefaultExpression() {
+		return ProcessExpression.INCLUDE;
 	}
 
 }

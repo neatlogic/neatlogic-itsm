@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 @Component
@@ -17,12 +18,12 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getName() {
-		return "owner";
+		return ProcessWorkcenterCondition.OWNER.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "上报人";
+		return ProcessWorkcenterCondition.OWNER.getName();
 	}
 
 	@Override
@@ -50,6 +51,11 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 	@Override
 	public List<ProcessExpression> getExpressionList() {
 		return Arrays.asList(ProcessExpression.INCLUDE);
+	}
+	
+	@Override
+	public ProcessExpression getDefaultExpression() {
+		return ProcessExpression.INCLUDE;
 	}
 
 }

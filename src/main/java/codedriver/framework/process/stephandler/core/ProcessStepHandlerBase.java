@@ -75,7 +75,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				failedCount += 1;
 			}
 		}
-		//System.out.println("runningCount:" + runningCount);
+
 		ProcessTaskVo processTaskVo = new ProcessTaskVo();
 		processTaskVo.setId(processTaskId);
 		if (runningCount > 0) {
@@ -914,7 +914,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			processTaskVo.setChannelUuid(paramObj.getString("channelUuid"));
 			processTaskVo.setPriorityUuid(paramObj.getString("priorityUuid"));
 			processTaskVo.setProcessUuid(currentProcessTaskStepVo.getProcessUuid());
-			processTaskVo.setReporter(UserContext.get().getUserId());
+			processTaskVo.setReporter(UserContext.get().getUserId(true));
 			processTaskVo.setStatus(ProcessTaskStatus.DRAFT.getValue());
 					
 			ProcessVo processVo = processMapper.getProcessByUuid(currentProcessTaskStepVo.getProcessUuid());
@@ -1040,7 +1040,10 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				updateProcessTaskStepStatus(currentProcessTaskStepVo);
 			}
 			/** 加入上报人为处理人 **/
-			processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), processTaskVo.getReporter()));
+			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), UserContext.get().getUserId(true));
+			processTaskStepUserVo.setUserName(UserContext.get().getUserName());
+			processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
+			processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), UserContext.get().getUserId(true)));
 			
 		}else {
 			//第二次保存时的操作
@@ -1069,6 +1072,12 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 	public final int startProcess(ProcessTaskStepVo currentProcessTaskStepVo) {
 		try {
 			myStartProcess(currentProcessTaskStepVo);
+			/** 更新处理人状态 **/
+			ProcessTaskStepUserVo processTaskMajorUser = new ProcessTaskStepUserVo(currentProcessTaskStepVo.getId(), UserContext.get().getUserId());
+			processTaskMajorUser.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
+			processTaskMapper.updateProcessTaskStepUserStatus(processTaskMajorUser);
+			/** 清空worker表 **/
+			processTaskMapper.deleteProcessTaskStepWorker(currentProcessTaskStepVo.getId(), null);
 			currentProcessTaskStepVo.setIsActive(2);
 			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);

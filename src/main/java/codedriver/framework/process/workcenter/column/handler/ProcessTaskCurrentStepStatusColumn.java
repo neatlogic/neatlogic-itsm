@@ -7,18 +7,19 @@ import org.springframework.stereotype.Component;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 
 @Component
 public class ProcessTaskCurrentStepStatusColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "currentStepStatus";
+		return ProcessWorkcenterCondition.CURRENT_STEP_STATUS.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "当前步骤状态";
+		return ProcessWorkcenterCondition.CURRENT_STEP_USER.getName();
 	}
 
 	@Override

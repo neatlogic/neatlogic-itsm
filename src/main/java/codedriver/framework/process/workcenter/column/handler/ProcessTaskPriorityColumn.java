@@ -5,18 +5,19 @@ import org.springframework.stereotype.Component;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 
 @Component
 public class ProcessTaskPriorityColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "priority";
+		return ProcessWorkcenterCondition.PRIORITY.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "优先级";
+		return ProcessWorkcenterCondition.PRIORITY.getName();
 	}
 
 	@Override
