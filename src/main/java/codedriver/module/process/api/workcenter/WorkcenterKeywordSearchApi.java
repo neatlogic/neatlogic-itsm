@@ -8,18 +8,20 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.workcenter.WorkcenterHandler;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.WorkcenterService;
 
 @Service
 public class WorkcenterKeywordSearchApi extends ApiComponentBase {
 	@Autowired
 	WorkcenterMapper workcenterMapper;
+	@Autowired
+	WorkcenterService workcenterService;
 	
 	@Override
 	public String getToken() {
@@ -50,6 +52,6 @@ public class WorkcenterKeywordSearchApi extends ApiComponentBase {
 		if(StringUtils.isEmpty(keyword)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		return WorkcenterHandler.getKeywordOptions(keyword,jsonObj.getInteger("pageSize"));
+		return workcenterService.getKeywordOptions(keyword,jsonObj.getInteger("pageSize"));
 	}
 }
