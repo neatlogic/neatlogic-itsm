@@ -1,7 +1,9 @@
 package codedriver.framework.process.stephandler.component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,12 +12,14 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.exception.core.ProcessTaskException;
@@ -221,7 +225,56 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 		if(CollectionUtils.isEmpty(currentProcessTaskStepVo.getRelList())) {
 			return nextStepList;
 		}
-		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(currentProcessTaskStepVo.getConfigHash());
+		Map<String, ProcessTaskStepRelVo> toProcessStepUuidMap = new HashMap<>();
+		for(ProcessTaskStepRelVo relVo : currentProcessTaskStepVo.getRelList()) {
+			toProcessStepUuidMap.put(relVo.getToProcessStepUuid(), relVo);
+		}
+		if(CollectionUtils.isEmpty(currentProcessTaskStepVo.getRelList())) {
+			return nextStepList;
+		}
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		System.out.println("stepConfig:" + stepConfig);
+		//stepConfig:{"moveonConfigList":[{"targetStepList":["YfsOrBMvn0ZoU9gPuNFBL4xV36FgQ5dZ"],"conditionGroupList":[],"type":"always","conditionGroupRelList":[]},{"targetStepList":["oTIzMKifba6oHQJeDZum4pbRfs6EzgF9"],"conditionGroupList":[],"type":"negative","conditionGroupRelList":[]},{"targetStepList":["X4MKW27ND367chRKCURfojLJAz38JY1O","XyJUPc3GJWjoBO06wd9OpA5xkkgrPRsE"],"conditionGroupList":[{"conditionList":[{"expression":"include","valueList":["user#chenqw","user#lvzk"],"uuid":"de6918c535504518b3d070939583d6a8","key":"common.owner"},{"expression":"like","valueList":"114","uuid":"ab8d46c3850d45babc545bcf356b3b04","key":"common.id"},{"expression":"include","valueList":["41ba513c4433462cb17a2974d9f09eeb"],"uuid":"0a8664b12ee741e5ad97504b45f26ef0","key":"common.priority"},{"expression":"exclude","valueList":["running"],"uuid":"b4e6f9ebe14c4ea09a82c0dff94c8c3f","key":"common.status"},{"expression":"between","valueList":1584547200000,"uuid":"bf8ba3d8ff75491a96d3e268e04738d9","key":"common.startTime"}],"conditionRelList":[{"joinType":"and","to":"ab8d46c3850d45babc545bcf356b3b04"},{"joinType":"or","from":"ab8d46c3850d45babc545bcf356b3b04","to":"0a8664b12ee741e5ad97504b45f26ef0"},{"joinType":"and","from":"0a8664b12ee741e5ad97504b45f26ef0","to":"b4e6f9ebe14c4ea09a82c0dff94c8c3f"},{"joinType":"and","from":"b4e6f9ebe14c4ea09a82c0dff94c8c3f","to":"bf8ba3d8ff75491a96d3e268e04738d9"}],"uuid":"2cea68abf04c4489acda4f63cb193203"}],"type":"optional","conditionGroupRelList":[]}]}
+		if (StringUtils.isBlank(stepConfig)) {
+			return nextStepList;
+		}
+		JSONObject stepConfigObj = null;
+		try {
+			stepConfigObj = JSONObject.parseObject(stepConfig);
+			currentProcessTaskStepVo.setParamObj(stepConfigObj);
+		} catch (Exception ex) {
+			logger.error("条件步骤设置配置失败，" + ex.getMessage(), ex);
+		}
+		if (CollectionUtils.isEmpty(stepConfigObj)) {
+			return nextStepList;
+		}
+		JSONArray moveonConfigList = stepConfigObj.getJSONArray("moveonConfigList");
+		if(CollectionUtils.isEmpty(moveonConfigList)) {
+			return nextStepList;
+		}
+		for(int i = 0; i < moveonConfigList.size(); i++) {
+			JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
+			String type = moveonConfig.getString("type");
+			if("always".equals(type)) {//直接流转
+				List<String> targetStepList = JSON.parseArray(moveonConfig.getString("targetStepList"), String.class);
+				if(CollectionUtils.isEmpty(targetStepList)) {
+					continue;
+				}
+				for(String targetStep : targetStepList) {
+					ProcessTaskStepRelVo relVo = toProcessStepUuidMap.get(targetStep);
+					ProcessTaskStepVo toStep = new ProcessTaskStepVo();
+					toStep.setProcessTaskId(relVo.getProcessTaskId());
+					toStep.setId(relVo.getToProcessTaskStepId());
+					toStep.setHandler(relVo.getToProcessStepHandler());
+					nextStepList.add(toStep);
+				}
+			}else if("negative".equals(type)) {//不流转
+				continue;
+			}else if("optional".equals(type)) {//自定义
+				
+			}
+		}
 		return nextStepList;
 	}
 

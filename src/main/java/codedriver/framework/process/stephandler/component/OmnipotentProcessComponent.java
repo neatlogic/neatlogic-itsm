@@ -262,7 +262,39 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
-		return 0;
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			
+		if (StringUtils.isBlank(stepConfig)) {
+			return 1;
+		}
+		JSONObject stepConfigObj = null;
+		try {
+			stepConfigObj = JSONObject.parseObject(stepConfig);
+			currentProcessTaskStepVo.setParamObj(stepConfigObj);
+		} catch (Exception ex) {
+			logger.error("转换步骤设置配置失败，" + ex.getMessage(), ex);
+		}
+		if (CollectionUtils.isEmpty(stepConfigObj)) {
+			return 1;			
+		}
+		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+		if (CollectionUtils.isEmpty(workerPolicyConfig)) {
+			return 1;
+		}
+		String autoStart = workerPolicyConfig.getString("autoStart");
+		if ("1".equals(autoStart) && workerList.size() == 1) {
+			/** 设置当前步骤状态为处理中 **/
+			if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
+				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
+				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+				userVo.setUserId(workerList.get(0).getUserId());
+				userList.add(userVo);
+				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+			}
+		}
+		return 1;
 	}
 
 	@Override
