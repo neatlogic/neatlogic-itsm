@@ -44,7 +44,7 @@ public class ProcessTaskRetreatApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述"),
+		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
 	})
 	@Description(desc = "上一步发起的撤回动作接口")
 	@Override

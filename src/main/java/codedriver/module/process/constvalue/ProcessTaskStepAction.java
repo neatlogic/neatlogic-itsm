@@ -5,10 +5,10 @@ public enum ProcessTaskStepAction {
 	STARTPROCESS("startprocess", "上报"),
 	START("start", "开始"),
 	ACTIVE("active", "激活"),
-	COMPLETE("complete", "完成"),
+	COMPLETE("complete", "流转"),
 	RETREAT("retreat", "撤回"),
 	ACCEPT("accept", "接受"),
-	ABORT("abort", "终止"),
+	ABORT("abort", "取消"),
 	RECOVER("recover", "恢复"),
 	TRANSFER("transfer", "转交"),
 	BACK("back", "回退"),
@@ -17,7 +17,7 @@ public enum ProcessTaskStepAction {
 	UPDATETITLE("updateTitle", "更新标题"),
 	UPDATEPRIORITY("updatePriority", "更新优先级"),
 	UPDATECONTENT("updateContent", "更新上报描述内容"),
-	COMMENT("comment", "评论");
+	COMMENT("comment", "回复");
 	private String status;
 	private String text;
 
