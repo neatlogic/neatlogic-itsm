@@ -12,22 +12,25 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import codedriver.module.process.constvalue.WorkerPolicy;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 
-@Service
+//@Service
 public class ManualWorkerPolicyHandler implements IWorkerPolicyHandler {
 
 	@Override
 	public String getType() {
-		return WorkerPolicy.MANUAL.getValue();
+		//return WorkerPolicy.MANUAL.getValue();
+		return "manual";
 	}
 
 	@Override
 	public String getName() {
-		return WorkerPolicy.MANUAL.getText();
+		//return WorkerPolicy.MANUAL.getText();
+		return "manual";
 	}
 	
 	@Autowired

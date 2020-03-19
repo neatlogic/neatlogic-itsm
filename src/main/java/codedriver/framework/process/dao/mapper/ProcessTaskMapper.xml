@@ -192,20 +192,6 @@
 		`processtask_id` = #{value}
 	</select>
 
-	<select id="getProcessTaskStepFormAttributeDataByProcessTaskStepId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskFormAttributeDataVo">
-		SELECT
-		a.`processtask_id` AS processTaskId,
-		a.`processtask_step_id` AS processTaskStepId,
-		a.`attribute_uuid` AS attributeUuid,
-		b.`data`,
-		b.`type`
-		FROM
-		`processtask_step_formattribute` a
-		JOIN `processtask_formattribute_data` b ON a.`attribute_uuid` = b.`attribute_uuid` AND a.`processtask_id` = b.`processtask_id`
-		WHERE
-		a.`processtask_step_id` = #{value}
-	</select>
-
 	<select id="getProcessTaskStepFormAttributeDataByProcessTaskId" parameterType="java.lang.Long" resultType="codedriver.module.process.dto.ProcessTaskFormAttributeDataVo">
 		SELECT
 		`processtask_id` AS processTaskId,
@@ -781,6 +767,57 @@
 	  `config_hash`
 	FROM `processtask_step` pts
 	WHERE pts.`processtask_id` = #{processTaskId}
+	</select>
+
+	<resultMap type="codedriver.module.process.dto.ProcessTaskStepWorkerVo" id="processTaskStepWorkerMap">
+		<id column="processtask_step_id" property="processTaskStepId"/>
+		<result column="processtask_id" property="processTaskId"/>
+		<result column="user_id" property="userId"/>
+		<result column="role_name" property="roleName"/>
+		<result column="team_uuid" property="teamUuid"/>
+		<result column="action" property="action"/>
+	</resultMap>
+	<select id="getProcessTaskStepWorkerList" resultMap="processTaskStepWorkerMap">
+	SELECT 
+	  `processtask_id`,
+	  `processtask_step_id`,
+	  `user_id`,
+	  `role_name`,
+	  `team_uuid`,
+	  `action` 
+	FROM `processtask_step_worker` 
+	WHERE `action`='handle' and (`user_id` = #{userId}
+	<if test="teamUuidList != null and teamUuidList.size > 0">
+	OR `team_uuid` in 
+		<foreach collection="teamUuidList" item="teamUuid" open="(" separator=","  close=")">
+		#{teamUuid}
+		</foreach>
+	</if>
+	<if test="roleNameList != null and roleNameList.size > 0">
+	OR `role_name` in 
+		<foreach collection="roleNameList" item="roleName" open="(" separator=","  close=")">
+			#{roleName}
+		</foreach>
+	</if>
+	)
+	</select>
+	
+	<select id="getProcessTaskTaskInfoList" resultType="java.util.HashMap">
+	SELECT 
+	  pt.`id` AS processTaskId,
+	  pt.`title` AS title,
+	  pts.`id` AS processTaskStepId,
+	  pts.`name` AS stepName
+	FROM`processtask` pt
+	JOIN `processtask_step` pts ON pts.`processtask_id`=pt.`id`
+	WHERE pts.`id` IN 
+	<foreach collection="processTaskStepIdList" item="stepId" open="(" separator="," close=")">
+	#{stepId}
+	</foreach>
+	<if test="keyword != null and keyword != ''">
+	AND pt.`title` LIKE CONCAT(#{keyword},'%')
+	</if>
+	ORDER BY pts.`id`DESC
 	</select>
 	
 	<update id="updateProcessTaskStepConvergeIsCheck">

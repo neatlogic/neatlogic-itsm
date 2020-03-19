@@ -19,6 +19,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
@@ -63,6 +64,9 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		@Param(name = "auditId", type = ApiParamType.LONG, desc = "活动id"),
 		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述"),
 		@Param(name="fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
+	})
+	@Output({
+		@Param(name = "auditId", type = ApiParamType.LONG, desc = "活动id")
 	})
 	@Description(desc = "工单步骤暂存接口")
 	@Override
@@ -131,7 +135,7 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 				processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.FILE.getValue(), null, fileUuidListStr));
 			}
 		}
-		return null;
+		return processTaskStepAuditVo.getId();
 	}
 
 }

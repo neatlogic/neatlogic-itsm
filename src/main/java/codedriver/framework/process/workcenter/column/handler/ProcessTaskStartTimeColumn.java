@@ -5,18 +5,19 @@ import org.springframework.stereotype.Component;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 
 @Component
-public class ProcessTaskCreateTimeColumn implements IWorkcenterColumn{
+public class ProcessTaskStartTimeColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "createTime";
+		return ProcessWorkcenterCondition.STARTTIME.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "工单开始时间";
+		return ProcessWorkcenterCondition.STARTTIME.getName();
 	}
 
 	@Override

@@ -48,8 +48,9 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 	
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "当前步骤Id"),// isRequired = true,
-		@Param(name = "nextProcessTaskStepId", type = ApiParamType.LONG, desc = "激活下一步骤Id")//, isRequired = true
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
+		@Param(name = "nextStepId", type = ApiParamType.LONG, isRequired = true, desc = "激活下一步骤Id"),
+		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "原因")
 	})
 	@Description(desc = "工单完成接口")
 	@Override
@@ -71,14 +72,14 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 			processTaskStepVo = processTaskStepList.get(0);
 		}
 		
-		Long nextProcessTaskStepId = jsonObj.getLong("nextProcessTaskStepId");
-		if(nextProcessTaskStepId != null) {
-			ProcessTaskStepVo nextProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(nextProcessTaskStepId);
+		Long nextStepId = jsonObj.getLong("nextStepId");
+		if(nextStepId != null) {
+			ProcessTaskStepVo nextProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(nextStepId);
 			if(nextProcessTaskStepVo == null) {
-				throw new ProcessTaskStepNotFoundException(nextProcessTaskStepId.toString());
+				throw new ProcessTaskStepNotFoundException(nextStepId.toString());
 			}
 			if(!processTaskId.equals(nextProcessTaskStepVo.getProcessTaskId())) {
-				throw new ProcessTaskRuntimeException("步骤：'" + nextProcessTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
+				throw new ProcessTaskRuntimeException("步骤：'" + nextStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
 		}
 		

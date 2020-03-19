@@ -6,9 +6,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -52,8 +54,8 @@ public class ProcessTaskTransferApi extends ApiComponentBase {
 	@Input({
 			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
 			@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤Id"),
-			@Param(name = "userId", type = ApiParamType.STRING, isRequired = true, desc = "新处理人userId"),
-			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "原因")
+			@Param(name = "workerList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "新可处理对象列表，[\"user#userId\",\"team#teamUuid\",\"role#roleName\"]"),
+			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "原因")
 	})
 	@Output({})
 	@Description(desc = "工单转交接口")
@@ -66,10 +68,21 @@ public class ProcessTaskTransferApi extends ApiComponentBase {
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		processTaskStepVo.setParamObj(jsonObj);
-		String userId = jsonObj.getString("userId");
-		List<ProcessTaskStepWorkerVo> workerList =  new ArrayList<ProcessTaskStepWorkerVo>();
-		workerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, userId, ProcessTaskStepWorkerAction.HANDLE.getValue()));
-		handler.transfer(processTaskStepVo,workerList);		
+		
+		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList =  new ArrayList<ProcessTaskStepWorkerVo>();
+		List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
+		for(String worker : workerList) {	
+			String[] split = worker.split("#");
+			if(GroupSearch.USER.getValue().equals(split[0])) {
+				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
+			}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
+				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, null, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
+			}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
+				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, null, null, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
+			}
+		}
+		
+		handler.transfer(processTaskStepVo,processTaskStepWorkerList);		
 		return null;
 	}
 

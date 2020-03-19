@@ -10,22 +10,25 @@ import codedriver.framework.attribute.dao.mapper.AttributeMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import codedriver.module.process.constvalue.WorkerPolicy;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 
-@Service
+//@Service
 public class AttributeWorkerPolicyHandler implements IWorkerPolicyHandler {
 
 	@Override
 	public String getType() {
-		return WorkerPolicy.ATTRIBUTE.getValue();
+		//return WorkerPolicy.ATTRIBUTE.getValue();
+		return "attribute";
 	}
 	
 	@Override
 	public String getName() {
-		return WorkerPolicy.ATTRIBUTE.getText();
+		//return WorkerPolicy.ATTRIBUTE.getText();
+		return "attribute";
 	}
 	
 	@Autowired

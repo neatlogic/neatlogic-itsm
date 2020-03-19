@@ -7,6 +7,6 @@ public class WorkcenterNoAuthException extends ApiRuntimeException {
 	private static final long serialVersionUID = 834889107197646727L;
 
 	public WorkcenterNoAuthException(String name) {
-		super("过滤条件参数 '" + name + "'非法");
+		super("没有'" + name + "'权限");
 	}
 }

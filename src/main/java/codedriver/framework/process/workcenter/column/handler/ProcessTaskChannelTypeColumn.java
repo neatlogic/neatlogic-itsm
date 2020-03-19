@@ -5,18 +5,19 @@ import org.springframework.stereotype.Component;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 
 @Component
 public class ProcessTaskChannelTypeColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "channelType";
+		return ProcessWorkcenterCondition.CHANNELTYPE.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "服务类型";
+		return ProcessWorkcenterCondition.CHANNELTYPE.getName();
 	}
 
 	@Override

@@ -14,11 +14,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.module.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.ProcessTaskStepWorkerAction;
@@ -78,6 +80,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		String processTaskStatus = processTaskVo.getStatus();
 		int processTaskStepIsActive = -1;
+		String processTaskStepStatus = ProcessTaskStatus.PENDING.getValue();
 		List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
 		List<String> currentUserProcessUserTypeList = new ArrayList<>();
 		currentUserProcessUserTypeList.add(UserType.ALL.getValue());
@@ -105,6 +108,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
 			processTaskStepIsActive = processTaskStepVo.getIsActive();
+			processTaskStepStatus = processTaskStepVo.getStatus();
 			List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MAJOR.getValue());
 			List<String> majorUserIdList = majorUserList.stream().map(ProcessTaskStepUserVo::getUserId).collect(Collectors.toList());
 			if(majorUserIdList.contains(UserContext.get().getUserId(true))) {
@@ -140,15 +144,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					List<String> teamList = new ArrayList<>();
 					List<String> roleList = new ArrayList<>();
 					for(int j = 0; j < acceptList.size(); j++) {
-						String accept = acceptList.getString(i);
+						String accept = acceptList.getString(j);
 						String[] split = accept.split("#");
-						if("processUserType".equals(split[0])) {
+						if(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
 							processUserTypeList.add(split[1]);
-						}else if("user".equals(split[0])) {
+						}else if(GroupSearch.USER.getValue().equals(split[0])) {
 							userList.add(split[1]);
-						}else if("team".equals(split[0])) {
+						}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
 							teamList.add(split[1]);
-						}else if("role".equals(split[0])) {
+						}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
 							roleList.add(split[1]);
 						}
 					}
@@ -190,20 +194,20 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					iterator.remove();
 				}
 			}else if(ProcessTaskStepAction.TRANSFER.getValue().equals(action)) {
-				//步骤状态为未处理的才能转交
-				if(processTaskStepIsActive != 0) {
+				//步骤状态为正在处理的才能转交
+				if(!ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepStatus)) {
 					iterator.remove();
 				}
 			}else if(ProcessTaskStepAction.UPDATE.getValue().equals(action)) {
 				//步骤状态为正在处理的才能修改上报内容
-				if(processTaskStepIsActive != 1) {
+				if(!ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepStatus)) {
 					iterator.remove();
 				}
 			}
 		}
 		
 		//以上是权限设置中可自定义的四个权限，接下来判断当前用户是否有开始start、完成complete、暂存save、评论comment的权限
-		if(processTaskStepIsActive == 0) {
+		if(processTaskStepIsActive == 1 && ProcessTaskStatus.PENDING.getValue().equals(processTaskStepStatus)) {
 			//接受开始start
 			List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
 			for(ProcessTaskStepWorkerVo processTaskStepWorkerVo : processTaskStepWorkerList) {
@@ -224,11 +228,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				}
 			}
 			
-		}
-		//完成complete
-		//暂存save
-		//评论comment
-		if(processTaskStepIsActive == 1) {
+		}else if(processTaskStepIsActive == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepStatus)) {
+			//完成complete 暂存save 评论comment
 			if(currentUserProcessUserTypeList.contains(UserType.MAJOR.getValue()) || currentUserProcessUserTypeList.contains(UserType.AGENT.getValue())) {
 				actionList.add(ProcessTaskStepAction.COMPLETE.getValue());
 				actionList.add(ProcessTaskStepAction.SAVE.getValue());

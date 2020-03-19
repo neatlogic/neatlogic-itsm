@@ -5,18 +5,19 @@ import org.springframework.stereotype.Component;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 
 @Component
 public class ProcessTaskEndTimeColumn implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "endTime";
+		return ProcessWorkcenterCondition.ENDTIME.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "工单结束时间";
+		return ProcessWorkcenterCondition.ENDTIME.getName();
 	}
 
 	@Override

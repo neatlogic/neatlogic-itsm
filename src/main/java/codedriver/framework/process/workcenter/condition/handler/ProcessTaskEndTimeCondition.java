@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
+import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 
 @Component
@@ -17,12 +18,12 @@ public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getName() {
-		return "endTime";
+		return ProcessWorkcenterCondition.ENDTIME.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "结束时间";
+		return ProcessWorkcenterCondition.ENDTIME.getName();
 	}
 
 	@Override
@@ -47,7 +48,11 @@ public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
 
 	@Override
 	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.EQUAL,ProcessExpression.LESSTHAN,ProcessExpression.GREATERTHAN);
+		return Arrays.asList(ProcessExpression.BETWEEN);
 	}
 
+	@Override
+	public ProcessExpression getDefaultExpression() {
+		return ProcessExpression.BETWEEN;
+	}
 }
