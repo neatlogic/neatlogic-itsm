@@ -38,13 +38,15 @@ public class ProcessStepHandleConfigSaveApi extends ApiComponentBase {
     }
 
     @Input( {@Param( name = "handler", type = ApiParamType.STRING, desc = "流程节点组件", isRequired = true),
-            @Param( name = "config", type = ApiParamType.STRING, desc = "流程节点组件配置")})
+            @Param( name = "config", type = ApiParamType.JSONOBJECT, desc = "流程节点组件配置")})
     @Description(desc = "流程节点组件配置保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessStepHandlerVo handlerVo = new ProcessStepHandlerVo();
         handlerVo.setHandler(jsonObj.getString("handler"));
-        handlerVo.setConfig(jsonObj.getString("config"));
+        if (jsonObj.containsKey("config")){
+            handlerVo.setConfig(jsonObj.getJSONObject("config").toString());
+        }
         stepHandlerService.saveStepHandlerConfig(handlerVo);
         return null;
     }
