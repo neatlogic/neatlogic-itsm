@@ -51,10 +51,7 @@ public class ProcessStepHandlerServiceImpl implements ProcessStepHandlerService 
 
     @Override
     public void saveStepHandlerConfig(ProcessStepHandlerVo stepHandlerVo) {
-        if (StringUtils.isNotBlank(stepHandlerVo.getConfig())){
-            stepHandlerMapper.updateProcessStepHandlerConfig(stepHandlerVo);
-        }else {
-            stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
-        }
+        stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
+        stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
     }
 }
