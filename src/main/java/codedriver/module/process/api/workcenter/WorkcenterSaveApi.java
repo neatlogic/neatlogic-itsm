@@ -12,8 +12,8 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
-import codedriver.framework.process.exception.workcenter.WorkcenterNameRepeatException;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
+import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -66,10 +66,10 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		String userId = UserContext.get().getUserId();
 		WorkcenterVo workcenterVo = new WorkcenterVo(name);
 		//重复name判断
-		workcenterVo.setUuid(uuid);
+		/*workcenterVo.setUuid(uuid);
 		if(workcenterMapper.checkWorkcenterNameIsRepeat(name,uuid)>0) {
 			throw new WorkcenterNameRepeatException(name);
-		}
+		}*/
 		//保存、更新分类
 		JSONArray valueList = jsonObj.getJSONArray("valueList");
 		if(CollectionUtils.isNotEmpty(valueList)) {
@@ -89,6 +89,8 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 					workcenterRoleVo.setRoleName(roles[1]);
 				}else if(roles[0].equals("user")) {
 					workcenterRoleVo.setUserId(roles[1]);
+				}else {
+					throw new WorkcenterParamException("valueList");
 				}
 				workcenterMapper.insertWorkcenterRole(workcenterRoleVo);
 			}
