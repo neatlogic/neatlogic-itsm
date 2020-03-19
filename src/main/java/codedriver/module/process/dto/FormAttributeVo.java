@@ -37,6 +37,8 @@ public class FormAttributeVo implements Serializable {
 	private boolean isRequired;
 	@EntityField(name = "表达式列表", type = ApiParamType.JSONARRAY)
 	List<ProcessExpressionVo> expressionList;
+	@EntityField(name = "默认表达式", type = ApiParamType.JSONOBJECT)
+	ProcessExpressionVo defaultExpression;
 	
 	@EntityField(name = "条件模型")
 	private String conditionModel;
@@ -145,6 +147,22 @@ public class FormAttributeVo implements Serializable {
 		this.isRequired = isRequired;
 	}
 
+	
+	public ProcessExpressionVo getDefaultExpression() {
+		if(expressionList != null) {
+			return defaultExpression;
+		}
+		if(handler == null) {
+			return null;
+		}
+		ProcessExpression processExpression = ProcessFormHandler.getExpression(handler);
+		return new ProcessExpressionVo(processExpression);
+	}
+
+	public void setDefaultExpression(ProcessExpressionVo defaultExpression) {
+		this.defaultExpression = defaultExpression;
+	}
+
 	public List<ProcessExpressionVo> getExpressionList() {
 		if(expressionList != null) {
 			return expressionList;
@@ -196,16 +214,18 @@ public class FormAttributeVo implements Serializable {
 		if(handler == null) {
 			return null;
 		}
-		if(conditionModel == null || conditionModel.equals(ProcessWorkcenterConditionModel.SIMPLE.getValue())) {
-			return null;
-		}
 		if(ProcessFormHandler.FORMSELECT.getHandler().equals(handler)) {
 			JSONObject configObj = JSON.parseObject(config);
 			return configObj.getBoolean("isMultiple");
-		}else if(ProcessFormHandler.FORMCHECKBOX.getHandler().equals(handler)){
-			return true;
-		}else {
-			return false;
+		} 
+
+		if(conditionModel.equals(ProcessWorkcenterConditionModel.CUSTOM.getValue())) {
+			if(ProcessFormHandler.FORMCHECKBOX.getHandler().equals(handler)){
+				return true;
+			}else {
+				return false;
+			}
 		}
+		return null;
 	}
 }
