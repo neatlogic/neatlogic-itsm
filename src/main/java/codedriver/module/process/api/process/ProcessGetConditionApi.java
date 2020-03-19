@@ -101,37 +101,9 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			String formUuid = jsonObj.getString("formUuid");
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
-				JSONObject formObj = new JSONObject();
-				String handler = formAttributeVo.getHandler();
-				formObj.put("uuid",formAttributeVo.getUuid());
-				formObj.put("label",formAttributeVo.getLabel());
-				JSONObject configObj =JSONObject.parseObject(formAttributeVo.getConfig());
-				formObj.put("config",configObj);
-				formObj.put("handler",handler);
-				formObj.put("handlerName", ProcessFormHandler.getHandlerName(handler));
-				String handlerType = ProcessFormHandler.getType(handler,ProcessWorkcenterConditionModel.SIMPLE.getValue()).toString();
-				if(handlerType.equals("select")) {
-					formObj.put("isMultiple",configObj.getBoolean("isMultiple"));
-				} 
-				if(conditionModel.equals(ProcessWorkcenterConditionModel.CUSTOM.getValue())) {
-					if(handlerType.equals("radio")) {
-						formObj.put("isMultiple",false);
-					}else if(handlerType.equals("checkbox")) {
-						formObj.put("isMultiple",true);
-					}
-				}
-				formObj.put("handlerType", ProcessFormHandler.getType(handler,conditionModel).toString());
-				formObj.put("type", "form");
-				formObj.put("defaultExpression", ProcessFormHandler.getExpression(handler).getExpression());
-				JSONArray expressiobArray = new JSONArray();
-				for(ProcessExpression expression:ProcessFormHandler.getExpressionList(handler)) {
-					JSONObject expressionObj = new JSONObject();
-					expressionObj.put("expression", expression.getExpression());
-					expressionObj.put("expressionName", expression.getExpressionName());
-					expressiobArray.add(expressionObj);
-					formObj.put("expressionList", expressiobArray);
-				}
-				resultArray.add(formObj);
+				formAttributeVo.setConditionModel(conditionModel);
+				formAttributeVo.setType("form");
+				resultArray.add(formAttributeVo);
 			}
 		}
 		return resultArray;

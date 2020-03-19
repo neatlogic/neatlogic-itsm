@@ -60,9 +60,11 @@ public class WorkcenterDataSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		if(jsonObj.containsKey("uuid")) {
-			List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, jsonObj.getString("uuid"));
+			String uuid = jsonObj.getString("uuid");
+			List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
 			if(CollectionUtils.isNotEmpty(workcenterList)) {
 				jsonObj = JSONObject.parseObject(workcenterList.get(0).getConditionConfig());
+				jsonObj.put("uuid", uuid);
 			}
 		}
 		return workcenterService.doSearch(new WorkcenterVo(jsonObj));

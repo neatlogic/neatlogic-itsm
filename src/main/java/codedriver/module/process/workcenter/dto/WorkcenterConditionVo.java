@@ -11,6 +11,7 @@ import codedriver.framework.process.workcenter.condition.core.IWorkcenterConditi
 import codedriver.framework.process.workcenter.condition.core.WorkcenterConditionFactory;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 
 public class WorkcenterConditionVo implements Serializable{
 	private static final long serialVersionUID = -776692828809703841L;
@@ -32,7 +33,7 @@ public class WorkcenterConditionVo implements Serializable{
 	public WorkcenterConditionVo(JSONObject jsonObj) {
 		this.uuid = jsonObj.getString("uuid");
 		if(!jsonObj.getString("name").contains("#")) {
-			throw new WorkcenterNoAuthException("name");
+			throw new WorkcenterParamException("name");
 		}
 		this.name = jsonObj.getString("name").split("#")[1];
 		this.type = jsonObj.getString("name").split("#")[0];
