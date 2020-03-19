@@ -3,6 +3,8 @@ package codedriver.framework.process.workcenter.condition.handler;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -12,6 +14,8 @@ import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
 @Component
 public class ProcessTaskIdCondition implements IWorkcenterCondition{
@@ -53,5 +57,22 @@ public class ProcessTaskIdCondition implements IWorkcenterCondition{
 	@Override
 	public ProcessExpression getDefaultExpression() {
 		return ProcessExpression.LIKE;
+	}
+
+	@Override
+	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+		if(ProcessExpression.LIKE.getExpression().equals(conditionVo.getExpression())) {
+			List<String> valueList = conditionVo.getValueList();
+			if(CollectionUtils.isEmpty(valueList)) {
+				return "(false)";
+			}
+			String id = conditionVo.getValueList().get(0);
+			if(StringUtils.isBlank(id)) {
+				return "(false)";
+			}
+			return "(" + currentProcessTaskStepVo.getProcessTaskId().toString().contains(id) + ")";
+		}else {
+			return "(false)";
+		}
 	}
 }

@@ -5,6 +5,8 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.module.process.constvalue.ProcessExpression;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
 
 public interface IWorkcenterCondition { 
 	/**
@@ -71,5 +73,13 @@ public interface IWorkcenterCondition {
 	 * @Date: 2020/2/11
 	 */
 	ProcessExpression getDefaultExpression();
+
+	/**
+	 * @Description: 生成javaScript表达式
+	 * @Param: 
+	 * @return: java.lang.String
+	 * @Date: 2020/2/11
+	 */
+	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo workcenterConditionVo);
 
 }

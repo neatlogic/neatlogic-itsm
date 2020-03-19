@@ -82,8 +82,8 @@ public class FormSaveApi extends ApiComponentBase {
 		FormVersionVo formVersionVo = new FormVersionVo();
 		formVersionVo.setFormConfig(formVo.getFormConfig());
 		formVersionVo.setFormUuid(formVo.getUuid());
-		formMapper.resetFormVersionIsActiveByFormUuid(formVo.getUuid());
-		formVersionVo.setIsActive(1);
+		//formMapper.resetFormVersionIsActiveByFormUuid(formVo.getUuid());
+		//formVersionVo.setIsActive(1);
 		if (StringUtils.isBlank(formVo.getCurrentVersionUuid())) {
 			Integer version = formMapper.getMaxVersionByFormUuid(formVo.getUuid());
 			if (version == null) {

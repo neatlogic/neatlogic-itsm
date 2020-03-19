@@ -2,7 +2,9 @@ package codedriver.module.process.workcenter.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -10,12 +12,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 public class WorkcenterConditionGroupVo implements Serializable{
 	private static final long serialVersionUID = 8392325201425982471L;
 	
 	private String uuid;
 	private List<WorkcenterConditionVo> conditionList;
+	private Map<String, WorkcenterConditionVo> conditionMap;
 	private List<WorkcenterConditionRelVo> conditionRelList;
 	private List<String> channelUuidList;
 	
@@ -36,8 +40,11 @@ public class WorkcenterConditionGroupVo implements Serializable{
 			channelUuidList = JSONObject.parseArray(channelArray.toJSONString(),String.class);
 		}
 		conditionList = new ArrayList<WorkcenterConditionVo>();
+		conditionMap = new HashMap<String, WorkcenterConditionVo>();
 		for(Object condition:conditionArray) {
-			conditionList.add(new WorkcenterConditionVo((JSONObject) JSONObject.toJSON(condition)));
+			WorkcenterConditionVo conditionVo = new WorkcenterConditionVo((JSONObject) JSONObject.toJSON(condition));
+			conditionList.add(conditionVo);
+			conditionMap.put(conditionVo.getUuid(), conditionVo);
 		}
 		JSONArray conditionRelArray = jsonObj.getJSONArray("conditionRelList");
 		if(CollectionUtils.isNotEmpty(conditionRelArray)) {
@@ -84,7 +91,22 @@ public class WorkcenterConditionGroupVo implements Serializable{
 		this.channelUuidList = channelUuidList;
 	}
 
-
-	
-	
+	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo) {	
+		if(!CollectionUtils.isEmpty(conditionRelList)) {
+			StringBuilder script = new StringBuilder();
+			script.append("(");
+			String toUuid = null;
+			for(WorkcenterConditionRelVo conditionRelVo : conditionRelList) {
+				script.append(conditionMap.get(conditionRelVo.getFrom()).buildScript(currentProcessTaskStepVo));
+				script.append("and".equals(conditionRelVo.getJoinType()) ? " && " : " || ");
+				toUuid = conditionRelVo.getTo();
+			}
+			script.append(conditionMap.get(toUuid).buildScript(currentProcessTaskStepVo));
+			script.append(")");
+			return script.toString();
+		}else {
+			WorkcenterConditionVo conditionVo = conditionList.get(0);
+			return conditionVo.buildScript(currentProcessTaskStepVo);
+		}		
+	}
 }

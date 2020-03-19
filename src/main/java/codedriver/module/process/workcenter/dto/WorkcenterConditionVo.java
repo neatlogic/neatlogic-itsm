@@ -1,11 +1,16 @@
 package codedriver.module.process.workcenter.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
+import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
+import codedriver.framework.process.workcenter.condition.core.WorkcenterConditionFactory;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 
 public class WorkcenterConditionVo implements Serializable{
 	private static final long serialVersionUID = -776692828809703841L;
@@ -20,7 +25,6 @@ public class WorkcenterConditionVo implements Serializable{
 	private String expression;
 	private List<String> valueList;
 	
-	
 	public WorkcenterConditionVo() {
 		super();
 	}
@@ -33,7 +37,14 @@ public class WorkcenterConditionVo implements Serializable{
 		this.name = jsonObj.getString("name").split("#")[1];
 		this.type = jsonObj.getString("name").split("#")[0];
 		this.expression = jsonObj.getString("expression");
-		this.valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
+//		this.valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
+		String values = jsonObj.getString("valueList");
+		if(values.startsWith("[") && values.endsWith("]")) {
+			this.valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
+		}else {
+			this.valueList = new ArrayList<>();
+			this.valueList.add(values);
+		}
 	}
 
 
@@ -121,4 +132,16 @@ public class WorkcenterConditionVo implements Serializable{
 		this.valueList = valueList;
 	}
 
+	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo) {
+		IWorkcenterCondition workcenterCondition = null;
+		if(ProcessWorkcenterConditionType.COMMON.getValue().equals(this.type)) {
+			workcenterCondition = WorkcenterConditionFactory.getHandler(this.name);
+		}else if(ProcessWorkcenterConditionType.FORM.getValue().equals(this.type)) {
+			workcenterCondition = WorkcenterConditionFactory.getHandler(this.type);
+		}
+		if(workcenterCondition != null) {
+			return workcenterCondition.buildScript(currentProcessTaskStepVo, this);
+		}
+		return "(false)";
+	}
 }

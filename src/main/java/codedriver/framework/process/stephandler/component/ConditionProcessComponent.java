@@ -32,6 +32,7 @@ import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.RelExpressionVo;
+import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Service
 public class ConditionProcessComponent extends ProcessStepHandlerBase {
@@ -256,23 +257,42 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 		for(int i = 0; i < moveonConfigList.size(); i++) {
 			JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
 			String type = moveonConfig.getString("type");
-			if("always".equals(type)) {//直接流转
-				List<String> targetStepList = JSON.parseArray(moveonConfig.getString("targetStepList"), String.class);
-				if(CollectionUtils.isEmpty(targetStepList)) {
-					continue;
-				}
-				for(String targetStep : targetStepList) {
-					ProcessTaskStepRelVo relVo = toProcessStepUuidMap.get(targetStep);
-					ProcessTaskStepVo toStep = new ProcessTaskStepVo();
-					toStep.setProcessTaskId(relVo.getProcessTaskId());
-					toStep.setId(relVo.getToProcessTaskStepId());
-					toStep.setHandler(relVo.getToProcessStepHandler());
-					nextStepList.add(toStep);
-				}
-			}else if("negative".equals(type)) {//不流转
+			if("negative".equals(type)) {//不流转
 				continue;
 			}else if("optional".equals(type)) {//自定义
+				JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
+				if(!CollectionUtils.isEmpty(conditionGroupList)) {
+					WorkcenterVo workcenterVo = new WorkcenterVo(moveonConfig);
+					String script = workcenterVo.buildScript(currentProcessTaskStepVo);
+					System.out.println(script);
+//					try {
+//						if(!runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
+//							continue;
+//						}
+//					} catch (NoSuchMethodException e) {
+//						logger.error(e.getMessage(), e);
+//					} catch (ScriptException e) {
+//						logger.error(e.getMessage(), e);
+//					}
+				}
+			}else if("always".equals(type)) {//直接流转
 				
+			}else {//type不合法
+				continue;
+			}
+			
+			//符合条件
+			List<String> targetStepList = JSON.parseArray(moveonConfig.getString("targetStepList"), String.class);
+			if(CollectionUtils.isEmpty(targetStepList)) {
+				continue;
+			}
+			for(String targetStep : targetStepList) {
+				ProcessTaskStepRelVo relVo = toProcessStepUuidMap.get(targetStep);
+				ProcessTaskStepVo toStep = new ProcessTaskStepVo();
+				toStep.setProcessTaskId(relVo.getProcessTaskId());
+				toStep.setId(relVo.getToProcessTaskStepId());
+				toStep.setHandler(relVo.getToProcessStepHandler());
+				nextStepList.add(toStep);
 			}
 		}
 		return nextStepList;
@@ -425,5 +445,4 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	protected int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}
-
 }

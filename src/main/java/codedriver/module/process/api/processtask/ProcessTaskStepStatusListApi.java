@@ -45,8 +45,7 @@ public class ProcessTaskStepStatusListApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤状态列表")
@@ -55,8 +54,7 @@ public class ProcessTaskStepStatusListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW)) {
+		if(!processTaskService.verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.VIEW)) {
 			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
 		
