@@ -23,7 +23,7 @@
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
-	<aop:aspectj-autoproxy expose-proxy="true" />
+	<aop:aspectj-autoproxy expose-proxy="true" proxy-target-class="false"/>
 
 	<mvc:annotation-driven />
 
