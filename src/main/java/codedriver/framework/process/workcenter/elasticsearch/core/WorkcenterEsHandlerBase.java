@@ -15,8 +15,4 @@ public abstract class WorkcenterEsHandlerBase implements IElasticSearchHandler {
 		}
 		return objectPool;
 	}
-	
-	public String getPoolName() {
-		return POOL_NAME;
-	}
 }
