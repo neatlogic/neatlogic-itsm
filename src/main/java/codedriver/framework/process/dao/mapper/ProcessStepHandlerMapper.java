@@ -11,4 +11,6 @@ public interface ProcessStepHandlerMapper {
     public void updateProcessStepHandlerConfig(ProcessStepHandlerVo stepHandlerVo);
 
     public void deleteProcessStepHandlerConfigByHandler(String handler);
+
+    public void insertProcessStepHandlerConfig(ProcessStepHandlerVo stepHandlerVo);
 }

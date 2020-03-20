@@ -15,4 +15,14 @@
 	<delete id="deleteProcessStepHandlerConfigByHandler" parameterType="string">
 		DELETE FROM `process_step_handler` WHERE `handler` = #{value}
 	</delete>
+
+	<insert id="insertProcessStepHandlerConfig" parameterType="codedriver.module.process.dto.ProcessStepHandlerVo">
+		INSERT 	INTO `process_step_handler` (
+		`handler`,
+		`config`
+		) VALUES (
+		#{handler},
+		#{config}
+		)
+	</insert>
 </mapper>
