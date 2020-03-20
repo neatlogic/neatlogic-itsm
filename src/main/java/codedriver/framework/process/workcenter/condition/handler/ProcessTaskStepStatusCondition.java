@@ -108,7 +108,7 @@ public class ProcessTaskStepStatusCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
 		boolean result = false;
 		List<String> valueList = conditionVo.getValueList();
 		if(!CollectionUtils.isEmpty(valueList)) {
@@ -116,11 +116,11 @@ public class ProcessTaskStepStatusCondition implements IWorkcenterCondition{
 			result = valueList.contains(processTaskStep.getStatus());
 		}			
 		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
-			return "(" + result + ")";
+			return result;
 		}else if(ProcessExpression.EXCLUDE.getExpression().equals(conditionVo.getExpression())) {
-			return "(" + !result + ")";
+			return !result;
 		}else {
-			return "(false)";
+			return false;
 		}
 	}
 }

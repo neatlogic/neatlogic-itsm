@@ -200,29 +200,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepVo> nextStepList = new ArrayList<ProcessTaskStepVo>();
-//		if (currentProcessTaskStepVo.getRelList() != null && currentProcessTaskStepVo.getRelList().size() > 0) {
-//			for (ProcessTaskStepRelVo relVo : currentProcessTaskStepVo.getRelList()) {
-//				if (relVo.getCondition() != null) {
-//					Boolean result = false;
-//					try {
-//						result = runScript(currentProcessTaskStepVo.getProcessTaskId(), relVo.getCondition());
-//					} catch (NoSuchMethodException e) {
-//						logger.error(e.getMessage(), e);
-//					} catch (ScriptException e) {
-//						logger.error(e.getMessage(), e);
-//					}
-//					if (result) {
-//						nextStepList.add(new ProcessTaskStepVo() {
-//							{
-//								this.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-//								this.setId(relVo.getToProcessTaskStepId());
-//								this.setHandler(relVo.getToProcessStepHandler());
-//							}
-//						});
-//					}
-//				}
-//			}
-//		}
 		if(CollectionUtils.isEmpty(currentProcessTaskStepVo.getRelList())) {
 			return nextStepList;
 		}
@@ -264,7 +241,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 				if(!CollectionUtils.isEmpty(conditionGroupList)) {
 					WorkcenterVo workcenterVo = new WorkcenterVo(moveonConfig);
 					String script = workcenterVo.buildScript(currentProcessTaskStepVo);
-					System.out.println(script);
+					System.out.println(script);//(((false) || (true)) || ((true) && (false)) || ((true) || (false)))
 //					try {
 //						if(!runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
 //							continue;

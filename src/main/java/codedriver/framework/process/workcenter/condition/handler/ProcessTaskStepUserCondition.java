@@ -61,8 +61,8 @@ public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo workcenterConditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo workcenterConditionVo) {
 		// 条件步骤没有处理人
-		return "(false)";
+		return false;
 	}
 }

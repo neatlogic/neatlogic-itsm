@@ -69,15 +69,15 @@ public class ProcessTaskContentCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
 		if(ProcessExpression.LIKE.getExpression().equals(conditionVo.getExpression())) {
 			List<String> valueList = conditionVo.getValueList();
 			if(CollectionUtils.isEmpty(valueList)) {
-				return "(false)";
+				return false;
 			}
 			String content = conditionVo.getValueList().get(0);
 			if(StringUtils.isBlank(content)) {
-				return "(false)";
+				return false;
 			}
 			//获取开始步骤id
 			List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(currentProcessTaskStepVo.getProcessTaskId(), ProcessStepType.START.getValue());
@@ -85,16 +85,16 @@ public class ProcessTaskContentCondition implements IWorkcenterCondition{
 			//获取上报描述内容
 			List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
 			if(processTaskStepContentList.isEmpty()) {
-				return "(false)";
+				return false;
 			}
 			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
 			if(processTaskContentVo == null) {
-				return "(false)";
+				return false;
 			}
 			
-			return "(" + processTaskContentVo.getContent().contains(content)+ ")";
+			return processTaskContentVo.getContent().contains(content);
 		}else {
-			return "(false)";
+			return false;
 		}
 	}
 }

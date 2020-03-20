@@ -66,29 +66,29 @@ public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
 		if(ProcessExpression.BETWEEN.getExpression().equals(conditionVo.getExpression())) {
 			List<String> valueList = conditionVo.getValueList();
 			if(CollectionUtils.isEmpty(valueList)) {
-				return "(false)";
+				return false;
 			}
 			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
 			boolean result = false;
-			long start = Long.parseLong(valueList.get(0));
-			if(processTask.getStartTime().getTime() >= start) {
+			long left = Long.parseLong(valueList.get(0));
+			if(processTask.getStartTime().getTime() >= left) {
 				result = true;
 			}
 			if(result && valueList.size() == 2) {
-				long end = Long.parseLong(valueList.get(1));
-				if(processTask.getStartTime().getTime() <= end) {
+				long right = Long.parseLong(valueList.get(1));
+				if(processTask.getStartTime().getTime() <= right) {
 					result = true;
 				}else {
-					result = true;
+					result = false;
 				}
 			}
-			return "(" + result + ")";
+			return result;
 		}else {
-			return "(false)";
+			return false;
 		}
 	}
 }

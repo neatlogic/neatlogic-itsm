@@ -78,8 +78,8 @@ public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo workcenterConditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo workcenterConditionVo) {
 		// TODO linbq暂时没有服务类型
-		return "(false)";
+		return false;
 	}
 }

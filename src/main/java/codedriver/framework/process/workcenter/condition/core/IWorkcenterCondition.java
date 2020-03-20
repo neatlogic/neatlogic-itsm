@@ -75,11 +75,11 @@ public interface IWorkcenterCondition {
 	ProcessExpression getDefaultExpression();
 
 	/**
-	 * @Description: 生成javaScript表达式
+	 * @Description: 判断条件是否成立
 	 * @Param: 
-	 * @return: java.lang.String
+	 * @return: boolean
 	 * @Date: 2020/2/11
 	 */
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo workcenterConditionVo);
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo workcenterConditionVo);
 
 }

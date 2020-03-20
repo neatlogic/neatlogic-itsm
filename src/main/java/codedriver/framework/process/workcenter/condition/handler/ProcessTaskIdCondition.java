@@ -60,19 +60,19 @@ public class ProcessTaskIdCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
 		if(ProcessExpression.LIKE.getExpression().equals(conditionVo.getExpression())) {
 			List<String> valueList = conditionVo.getValueList();
 			if(CollectionUtils.isEmpty(valueList)) {
-				return "(false)";
+				return false;
 			}
 			String id = conditionVo.getValueList().get(0);
 			if(StringUtils.isBlank(id)) {
-				return "(false)";
+				return false;
 			}
-			return "(" + currentProcessTaskStepVo.getProcessTaskId().toString().contains(id) + ")";
+			return currentProcessTaskStepVo.getProcessTaskId().toString().contains(id);
 		}else {
-			return "(false)";
+			return false;
 		}
 	}
 }

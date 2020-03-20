@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.workcenter.condition.core.WorkcenterConditionFactory;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
@@ -141,7 +140,7 @@ public class WorkcenterConditionVo implements Serializable{
 			workcenterCondition = WorkcenterConditionFactory.getHandler(this.type);
 		}
 		if(workcenterCondition != null) {
-			return workcenterCondition.buildScript(currentProcessTaskStepVo, this);
+			return "(" + workcenterCondition.predicate(currentProcessTaskStepVo, this) + ")";
 		}
 		return "(false)";
 	}

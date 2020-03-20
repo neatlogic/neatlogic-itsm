@@ -68,17 +68,17 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
 		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
 			List<String> valueList = conditionVo.getValueList();
 			if(CollectionUtils.isEmpty(valueList)) {
-				return "(false)";
+				return false;
 			}		
 			//TODO linbq解析valueList
 			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
-			return "(" + valueList.contains(processTaskVo.getOwner())+ ")";
+			return valueList.contains(processTaskVo.getOwner());
 		}else {
-			return "(false)";
+			return false;
 		}
 	}
 

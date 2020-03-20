@@ -89,16 +89,16 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
 		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
 			List<String> valueList = conditionVo.getValueList();
 			if(CollectionUtils.isEmpty(valueList)) {
-				return "(false)";
+				return false;
 			}
 			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());		
-			return "("+ valueList.contains(processTask.getPriorityUuid()) +")";
+			return valueList.contains(processTask.getPriorityUuid());
 		}else {
-			return "(false)";
+			return false;
 		}
 		
 	}
