@@ -35,7 +35,6 @@ import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
-import codedriver.module.process.workcenter.dto.WorkcenterSelfCureVo;
 
 @Service
 public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
@@ -73,8 +72,6 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			if(param instanceof ProcessTaskVo) {
 				taskId = ((ProcessTaskVo)param).getId();
 				break TO;
-			}else if(param instanceof WorkcenterSelfCureVo){//自愈重复执行
-				taskId = ((WorkcenterSelfCureVo)param).getProcessTaskId();
 			}else{
 				Method[] ms= param.getClass().getMethods();
 				for(Method m : ms) {
