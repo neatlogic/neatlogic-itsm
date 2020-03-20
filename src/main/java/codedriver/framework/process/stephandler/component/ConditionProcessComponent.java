@@ -32,6 +32,7 @@ import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.RelExpressionVo;
+import codedriver.module.process.dto.condition.ConditionConfigVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Service
@@ -237,8 +238,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 			}else if("optional".equals(type)) {//自定义
 				JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
 				if(!CollectionUtils.isEmpty(conditionGroupList)) {
-					WorkcenterVo workcenterVo = new WorkcenterVo(moveonConfig);
-					String script = workcenterVo.buildScript(currentProcessTaskStepVo);
+					ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
+					String script = conditionConfigVo.buildScript(currentProcessTaskStepVo);
 					//((false || true) || (true && false) || (true || false))
 					try {
 						if(!runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {

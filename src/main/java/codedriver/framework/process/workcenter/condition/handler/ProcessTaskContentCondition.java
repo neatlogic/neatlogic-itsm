@@ -20,7 +20,7 @@ import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskStepContentVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskContentCondition implements IWorkcenterCondition{
@@ -69,7 +69,7 @@ public class ProcessTaskContentCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
 		if(ProcessExpression.LIKE.getExpression().equals(conditionVo.getExpression())) {
 			List<String> valueList = conditionVo.getValueList();
 			if(CollectionUtils.isEmpty(valueList)) {

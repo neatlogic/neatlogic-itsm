@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter.dto;
+package codedriver.module.process.dto.condition;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,22 +14,22 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 
-public class WorkcenterConditionGroupVo implements Serializable{
+public class ConditionGroupVo implements Serializable{
 	private static final long serialVersionUID = 8392325201425982471L;
 	
 	private String uuid;
-	private List<WorkcenterConditionVo> conditionList;
-	private Map<String, WorkcenterConditionVo> conditionMap;
-	private List<WorkcenterConditionRelVo> conditionRelList;
+	private List<ConditionVo> conditionList;
+	private Map<String, ConditionVo> conditionMap;
+	private List<ConditionRelVo> conditionRelList;
 	private List<String> channelUuidList;
 	
 	
 	
-	public WorkcenterConditionGroupVo() {
+	public ConditionGroupVo() {
 		super();
 	}
 
-	public WorkcenterConditionGroupVo(JSONObject jsonObj) {
+	public ConditionGroupVo(JSONObject jsonObj) {
 		this.uuid = jsonObj.getString("uuid");
 		JSONArray conditionArray =jsonObj.getJSONArray("conditionList");
 		if(conditionArray.size() == 0) {
@@ -39,18 +39,18 @@ public class WorkcenterConditionGroupVo implements Serializable{
 		if(CollectionUtils.isNotEmpty(channelArray)) {
 			channelUuidList = JSONObject.parseArray(channelArray.toJSONString(),String.class);
 		}
-		conditionList = new ArrayList<WorkcenterConditionVo>();
-		conditionMap = new HashMap<String, WorkcenterConditionVo>();
+		conditionList = new ArrayList<ConditionVo>();
+		conditionMap = new HashMap<String, ConditionVo>();
 		for(Object condition:conditionArray) {
-			WorkcenterConditionVo conditionVo = new WorkcenterConditionVo((JSONObject) JSONObject.toJSON(condition));
+			ConditionVo conditionVo = new ConditionVo((JSONObject) JSONObject.toJSON(condition));
 			conditionList.add(conditionVo);
 			conditionMap.put(conditionVo.getUuid(), conditionVo);
 		}
 		JSONArray conditionRelArray = jsonObj.getJSONArray("conditionRelList");
 		if(CollectionUtils.isNotEmpty(conditionRelArray)) {
-			conditionRelList = new ArrayList<WorkcenterConditionRelVo>();
+			conditionRelList = new ArrayList<ConditionRelVo>();
 			for(Object conditionRel:conditionRelArray) {
-				conditionRelList.add(new WorkcenterConditionRelVo((JSONObject) JSONObject.toJSON(conditionRel)));
+				conditionRelList.add(new ConditionRelVo((JSONObject) JSONObject.toJSON(conditionRel)));
 			}
 		}
 		
@@ -67,19 +67,19 @@ public class WorkcenterConditionGroupVo implements Serializable{
 		return uuid;
 	}
 
-	public List<WorkcenterConditionVo> getConditionList() {
+	public List<ConditionVo> getConditionList() {
 		return conditionList;
 	}
 
-	public void setConditionList(List<WorkcenterConditionVo> conditionList) {
+	public void setConditionList(List<ConditionVo> conditionList) {
 		this.conditionList = conditionList;
 	}
 
-	public List<WorkcenterConditionRelVo> getConditionRelList() {
+	public List<ConditionRelVo> getConditionRelList() {
 		return conditionRelList;
 	}
 
-	public void setConditionRelList(List<WorkcenterConditionRelVo> conditionRelList) {
+	public void setConditionRelList(List<ConditionRelVo> conditionRelList) {
 		this.conditionRelList = conditionRelList;
 	}
 
@@ -96,7 +96,7 @@ public class WorkcenterConditionGroupVo implements Serializable{
 			StringBuilder script = new StringBuilder();
 			script.append("(");
 			String toUuid = null;
-			for(WorkcenterConditionRelVo conditionRelVo : conditionRelList) {
+			for(ConditionRelVo conditionRelVo : conditionRelList) {
 				script.append(conditionMap.get(conditionRelVo.getFrom()).predicate(currentProcessTaskStepVo));
 				script.append("and".equals(conditionRelVo.getJoinType()) ? " && " : " || ");
 				toUuid = conditionRelVo.getTo();
@@ -105,7 +105,7 @@ public class WorkcenterConditionGroupVo implements Serializable{
 			script.append(")");
 			return script.toString();
 		}else {
-			WorkcenterConditionVo conditionVo = conditionList.get(0);
+			ConditionVo conditionVo = conditionList.get(0);
 			return String.valueOf(conditionVo.predicate(currentProcessTaskStepVo));
 		}		
 	}

@@ -1,21 +1,21 @@
-package codedriver.module.process.workcenter.dto;
+package codedriver.module.process.dto.condition;
 
 import java.io.Serializable;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class WorkcenterConditionGroupRelVo implements Serializable{
-	private static final long serialVersionUID = -6787505561626358277L;
+public class ConditionRelVo implements Serializable{
+	private static final long serialVersionUID = 4997220400582456563L;
 	
 	private String from;
 	private String to;
 	private String joinType;
 	
-	public WorkcenterConditionGroupRelVo() {
+	public ConditionRelVo() {
 		super();
 	}
 	
-	public WorkcenterConditionGroupRelVo(JSONObject jsonObj) {
+	public ConditionRelVo(JSONObject jsonObj) {
 		this.from = jsonObj.getString("from");
 		this.to = jsonObj.getString("to");
 		this.joinType = jsonObj.getString("joinType");

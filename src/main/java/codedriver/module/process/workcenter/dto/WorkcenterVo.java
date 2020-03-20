@@ -2,9 +2,7 @@ package codedriver.module.process.workcenter.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -15,11 +13,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.restful.annotation.EntityField;
-import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.condition.ConditionConfigVo;
 
-public class WorkcenterVo extends BasePageVo implements Serializable{
+public class WorkcenterVo extends ConditionConfigVo implements Serializable{
 	private static final long serialVersionUID = 1952066708451908924L;
 	
 	@EntityField(name = "工单中心分类uuid", type = ApiParamType.STRING)
@@ -50,11 +47,6 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	@EntityField(name = "是否拥有授权权限", type = ApiParamType.JSONARRAY)
 	private Integer isCanRole;
 	
-	private List<WorkcenterConditionGroupVo> conditionGroupList;
-	private Map<String, WorkcenterConditionGroupVo> conditionGroupMap;
-	private List<WorkcenterConditionGroupRelVo> conditionGroupRelList;
-	
-	
 	//params
 	private String userId;
 	private List<String> roleNameList;
@@ -74,11 +66,10 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	}
 	
 	public WorkcenterVo(JSONObject jsonObj) {
+		super(jsonObj);
 		uuid = jsonObj.getString("uuid");
 		JSONArray conditionGroupArray = jsonObj.getJSONArray("conditionGroupList");
 		if(CollectionUtils.isNotEmpty(conditionGroupArray)) {
-			conditionGroupList = new ArrayList<WorkcenterConditionGroupVo>();
-			conditionGroupMap = new HashMap<String, WorkcenterConditionGroupVo>();
 			channelUuidList = new ArrayList<String>();
 			for(Object conditionGroup:conditionGroupArray) {
 				JSONObject conditionGroupJson = (JSONObject) JSONObject.toJSON(conditionGroup);
@@ -88,16 +79,6 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 					channelUuidListTmp = JSONObject.parseArray(channelArray.toJSONString(),String.class);
 				}
 				channelUuidList.addAll(channelUuidListTmp);
-				WorkcenterConditionGroupVo conditionGroupVo = new WorkcenterConditionGroupVo(conditionGroupJson);
-				conditionGroupList.add(conditionGroupVo);
-				conditionGroupMap.put(conditionGroupVo.getUuid(), conditionGroupVo);
-			}
-			JSONArray conditionGroupRelArray = jsonObj.getJSONArray("conditionGroupRelList");
-			if(CollectionUtils.isNotEmpty(conditionGroupRelArray)) {
-				conditionGroupRelList = new ArrayList<WorkcenterConditionGroupRelVo>();
-				for(Object conditionRelGroup:conditionGroupRelArray) {
-					conditionGroupRelList.add(new WorkcenterConditionGroupRelVo((JSONObject) JSONObject.toJSON(conditionRelGroup)));
-				}
 			}
 		}
 	}
@@ -154,18 +135,7 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	public void setConditionConfig(String conditionConfig) {
 		this.conditionConfig = conditionConfig;
 	}
-	public List<WorkcenterConditionGroupVo> getConditionGroupList() {
-		return conditionGroupList;
-	}
-	public void setConditionGroupList(List<WorkcenterConditionGroupVo> conditionGroupList) {
-		this.conditionGroupList = conditionGroupList;
-	}
-	public List<WorkcenterConditionGroupRelVo> getWorkcenterConditionGroupRelList() {
-		return conditionGroupRelList;
-	}
-	public void setWorkcenterConditionGroupRelList(List<WorkcenterConditionGroupRelVo> conditionGroupRelList) {
-		this.conditionGroupRelList = conditionGroupRelList;
-	}
+	
 	public JSONArray getHeaderList() {
 		return headerList;
 	}
@@ -233,24 +203,5 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 
 	public void setChannelUuidList(List<String> channelUuidList) {
 		this.channelUuidList = channelUuidList;
-	}
-
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo) {		
-		if(!CollectionUtils.isEmpty(conditionGroupRelList)) {
-			StringBuilder script = new StringBuilder();
-			script.append("(");
-			String toUuid = null;
-			for(WorkcenterConditionGroupRelVo conditionGroupRelVo : conditionGroupRelList) {
-				script.append(conditionGroupMap.get(conditionGroupRelVo.getFrom()).buildScript(currentProcessTaskStepVo));
-				script.append("and".equals(conditionGroupRelVo.getJoinType()) ? " && " : " || ");
-				toUuid = conditionGroupRelVo.getTo();
-			}
-			script.append(conditionGroupMap.get(toUuid).buildScript(currentProcessTaskStepVo));
-			script.append(")");
-			return script.toString();
-		}else {
-			WorkcenterConditionGroupVo conditionGroupVo = conditionGroupList.get(0);
-			return conditionGroupVo.buildScript(currentProcessTaskStepVo);
-		}
 	}
 }

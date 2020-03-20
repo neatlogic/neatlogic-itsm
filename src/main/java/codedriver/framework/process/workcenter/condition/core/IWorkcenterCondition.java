@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.dto.ProcessTaskStepVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 
 public interface IWorkcenterCondition { 
 	/**
@@ -80,6 +80,6 @@ public interface IWorkcenterCondition {
 	 * @return: boolean
 	 * @Date: 2020/2/11
 	 */
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo workcenterConditionVo);
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo);
 
 }

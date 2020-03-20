@@ -18,7 +18,7 @@ import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 @Component
 public class ProcessTaskFormAttributeCondition implements IWorkcenterCondition {
 
@@ -66,7 +66,7 @@ public class ProcessTaskFormAttributeCondition implements IWorkcenterCondition {
 	}
 
 	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
 		List<String> valueList = conditionVo.getValueList();
 		if(CollectionUtils.isEmpty(valueList)) {
 			return false;

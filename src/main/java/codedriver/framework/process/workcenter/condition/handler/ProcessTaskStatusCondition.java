@@ -20,7 +20,7 @@ import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskStatusCondition implements IWorkcenterCondition{
@@ -99,7 +99,7 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 	}
 
 	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
 		boolean result = false;
 		List<String> valueList = conditionVo.getValueList();
 		if(!CollectionUtils.isEmpty(valueList)) {
