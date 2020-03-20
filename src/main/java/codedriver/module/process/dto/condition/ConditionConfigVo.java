@@ -25,20 +25,12 @@ public class ConditionConfigVo extends BasePageVo implements Serializable {
 	public ConditionConfigVo() {
 	}
 	public ConditionConfigVo(JSONObject jsonObj) {
-		//uuid = jsonObj.getString("uuid");
 		JSONArray conditionGroupArray = jsonObj.getJSONArray("conditionGroupList");
 		if(CollectionUtils.isNotEmpty(conditionGroupArray)) {
 			conditionGroupList = new ArrayList<ConditionGroupVo>();
 			conditionGroupMap = new HashMap<String, ConditionGroupVo>();
-			//channelUuidList = new ArrayList<String>();
 			for(Object conditionGroup:conditionGroupArray) {
 				JSONObject conditionGroupJson = (JSONObject) JSONObject.toJSON(conditionGroup);
-//				JSONArray channelArray =conditionGroupJson.getJSONArray("channelUuidList");
-//				List<String> channelUuidListTmp = new ArrayList<String>();
-//				if(CollectionUtils.isNotEmpty(channelArray)) {
-//					channelUuidListTmp = JSONObject.parseArray(channelArray.toJSONString(),String.class);
-//				}
-				//channelUuidList.addAll(channelUuidListTmp);
 				ConditionGroupVo conditionGroupVo = new ConditionGroupVo(conditionGroupJson);
 				conditionGroupList.add(conditionGroupVo);
 				conditionGroupMap.put(conditionGroupVo.getUuid(), conditionGroupVo);
