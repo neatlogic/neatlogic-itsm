@@ -212,7 +212,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 		}
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-		System.out.println("stepConfig:" + stepConfig);
 		if (StringUtils.isBlank(stepConfig)) {
 			return nextStepList;
 		}

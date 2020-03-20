@@ -66,7 +66,7 @@ public class ProcessTaskTitleCondition implements IWorkcenterCondition{
 
 	@Override
 	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, WorkcenterConditionVo conditionVo) {	
-		if(ProcessExpression.LIKE.equals(conditionVo.getExpression())) {
+		if(ProcessExpression.LIKE.getExpression().equals(conditionVo.getExpression())) {
 			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
 			List<String> valueList = conditionVo.getValueList();
 			return processTaskVo.getTitle().contains(valueList.get(0));
