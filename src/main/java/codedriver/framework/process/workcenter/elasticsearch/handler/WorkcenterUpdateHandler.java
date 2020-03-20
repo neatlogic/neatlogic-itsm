@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -88,6 +89,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			}
 		}
 		paramJson.put("taskId", taskId);
+		paramJson.put("tenantUuid", TenantContext.get().getTenantUuid());
 		return paramJson;
 	}
 	
