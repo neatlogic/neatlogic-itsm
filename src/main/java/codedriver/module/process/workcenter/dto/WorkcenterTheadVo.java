@@ -19,11 +19,11 @@ public class WorkcenterTheadVo {
 	@EntityField(name = "字段中文名", type = ApiParamType.STRING)
 	private String displayName ;
 	@EntityField(name = "字段排序", type = ApiParamType.INTEGER)
-	private Integer sort ;
+	private Integer sort = 100;
 	@EntityField(name = "字段宽度", type = ApiParamType.INTEGER)
-	private Integer width ;
+	private Integer width = 1;
 	@EntityField(name = "字段是否展示", type = ApiParamType.INTEGER)
-	private Integer isShow ;
+	private Integer isShow = 1;
 	@JSONField(serialize = false)
 	@EntityField(name = "所属用户", type = ApiParamType.STRING)
 	private String userId;
@@ -41,9 +41,6 @@ public class WorkcenterTheadVo {
 	
 	public WorkcenterTheadVo(IWorkcenterColumn column) {
 		this.name = column.getName();
-		this.sort = 100;
-		this.width = null;
-		this.isShow = 0;
 		this.userId = UserContext.get().getUserId();
 		this.displayName = column.getDisplayName();
 		this.type = ProcessWorkcenterConditionType.COMMON.getValue();
