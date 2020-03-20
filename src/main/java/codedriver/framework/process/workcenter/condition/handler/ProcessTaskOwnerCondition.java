@@ -1,5 +1,6 @@
 package codedriver.framework.process.workcenter.condition.handler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,6 +10,10 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.TeamVo;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
@@ -24,6 +29,9 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private UserMapper userMapper;
 	
 	@Override
 	public String getName() {
@@ -71,15 +79,40 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
 		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
 			List<String> valueList = conditionVo.getValueList();
-			if(CollectionUtils.isEmpty(valueList)) {
-				return false;
+			if(!CollectionUtils.isEmpty(valueList)) {
+				//解析valueList
+				//["user#userId", "team#teamUuid","role#roleName"]
+				List<String> userIdList = new ArrayList<>();
+				List<String> teamUuidList = new ArrayList<>();
+				List<String> roleNameList = new ArrayList<>();
+				for(String value : valueList) {
+					String[] split = value.split("#");
+					if(GroupSearch.USER.getValue().equals(split[0])) {
+						userIdList.add(split[1]);
+					}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
+						teamUuidList.add(split[1]);
+					}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
+						roleNameList.add(split[1]);
+					}
+				}	
+				ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
+				if(userIdList.contains(processTaskVo.getOwner())) {
+					return true;
+				}
+				UserVo user = userMapper.getUserByUserId(processTaskVo.getOwner());
+				if(roleNameList.removeAll(user.getRoleNameList())) {
+					return true;
+				}
+				if(!CollectionUtils.isEmpty(user.getTeamList())) {
+					for(TeamVo team : user.getTeamList()) {
+						if(teamUuidList.contains(team.getUuid())) {
+							return true;
+						}
+					}
+				}
 			}		
-			//TODO linbq解析valueList
-			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
-			return valueList.contains(processTaskVo.getOwner());
-		}else {
-			return false;
 		}
+		return false;
 	}
 
 }
