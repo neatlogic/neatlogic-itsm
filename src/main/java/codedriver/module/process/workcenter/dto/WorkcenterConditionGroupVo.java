@@ -97,16 +97,16 @@ public class WorkcenterConditionGroupVo implements Serializable{
 			script.append("(");
 			String toUuid = null;
 			for(WorkcenterConditionRelVo conditionRelVo : conditionRelList) {
-				script.append(conditionMap.get(conditionRelVo.getFrom()).buildScript(currentProcessTaskStepVo));
+				script.append(conditionMap.get(conditionRelVo.getFrom()).predicate(currentProcessTaskStepVo));
 				script.append("and".equals(conditionRelVo.getJoinType()) ? " && " : " || ");
 				toUuid = conditionRelVo.getTo();
 			}
-			script.append(conditionMap.get(toUuid).buildScript(currentProcessTaskStepVo));
+			script.append(conditionMap.get(toUuid).predicate(currentProcessTaskStepVo));
 			script.append(")");
 			return script.toString();
 		}else {
 			WorkcenterConditionVo conditionVo = conditionList.get(0);
-			return conditionVo.buildScript(currentProcessTaskStepVo);
+			return String.valueOf(conditionVo.predicate(currentProcessTaskStepVo));
 		}		
 	}
 }

@@ -240,7 +240,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 				if(!CollectionUtils.isEmpty(conditionGroupList)) {
 					WorkcenterVo workcenterVo = new WorkcenterVo(moveonConfig);
 					String script = workcenterVo.buildScript(currentProcessTaskStepVo);
-					//(((false) || (true)) || ((true) && (false)) || ((true) || (false)))
+					//((false || true) || (true && false) || (true || false))
 					try {
 						if(!runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
 							continue;

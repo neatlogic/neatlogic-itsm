@@ -132,7 +132,7 @@ public class WorkcenterConditionVo implements Serializable{
 		this.valueList = valueList;
 	}
 
-	public String buildScript(ProcessTaskStepVo currentProcessTaskStepVo) {
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo) {
 		IWorkcenterCondition workcenterCondition = null;
 		if(ProcessWorkcenterConditionType.COMMON.getValue().equals(this.type)) {
 			workcenterCondition = WorkcenterConditionFactory.getHandler(this.name);
@@ -140,8 +140,8 @@ public class WorkcenterConditionVo implements Serializable{
 			workcenterCondition = WorkcenterConditionFactory.getHandler(this.type);
 		}
 		if(workcenterCondition != null) {
-			return "(" + workcenterCondition.predicate(currentProcessTaskStepVo, this) + ")";
+			return workcenterCondition.predicate(currentProcessTaskStepVo, this);
 		}
-		return "(false)";
+		return false;
 	}
 }
