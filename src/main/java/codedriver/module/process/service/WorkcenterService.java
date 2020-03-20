@@ -40,10 +40,10 @@ import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 import codedriver.module.process.dto.FormAttributeVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionGroupRelVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionGroupVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionRelVo;
-import codedriver.module.process.workcenter.dto.WorkcenterConditionVo;
+import codedriver.module.process.dto.condition.ConditionGroupRelVo;
+import codedriver.module.process.dto.condition.ConditionGroupVo;
+import codedriver.module.process.dto.condition.ConditionRelVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 import codedriver.module.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.module.process.workcenter.dto.WorkcenterVo;
 @Service
@@ -219,37 +219,37 @@ public class WorkcenterService {
 		Map<String,String> groupRelMap = new HashMap<String,String>();
 		StringBuilder whereSb = new StringBuilder();
 		whereSb.append(" where ");
-		List<WorkcenterConditionGroupRelVo> groupRelList = workcenterVo.getWorkcenterConditionGroupRelList();
+		List<ConditionGroupRelVo> groupRelList = workcenterVo.getConditionGroupRelList();
 		if(CollectionUtils.isNotEmpty(groupRelList)) {
 			//将group 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
-			for(WorkcenterConditionGroupRelVo groupRel : groupRelList) {
+			for(ConditionGroupRelVo groupRel : groupRelList) {
 				groupRelMap.put(groupRel.getFrom()+"_"+groupRel.getTo(), groupRel.getJoinType());
 			}
 		}
-		List<WorkcenterConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
+		List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
 		if(CollectionUtils.isEmpty(groupList)) {
 			return "";
 		}
 		String fromGroupUuid = null;
 		String toGroupUuid = groupList.get(0).getUuid();
-		for(WorkcenterConditionGroupVo group : groupList) {
+		for(ConditionGroupVo group : groupList) {
 			Map<String,String> conditionRelMap = new HashMap<String,String>();
 			if(fromGroupUuid != null) {
 				toGroupUuid = group.getUuid();
 				whereSb.append(groupRelMap.get(fromGroupUuid+"_"+toGroupUuid));
 			}
 			whereSb.append("(");
-			List<WorkcenterConditionRelVo> conditionRelList = group.getConditionRelList();
+			List<ConditionRelVo> conditionRelList = group.getConditionRelList();
 			if(CollectionUtils.isNotEmpty(conditionRelList)) {
 				//将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
-				for(WorkcenterConditionRelVo conditionRel : conditionRelList) {
+				for(ConditionRelVo conditionRel : conditionRelList) {
 					conditionRelMap.put(conditionRel.getFrom()+"_"+conditionRel.getTo(),conditionRel.getJoinType());
 				}
 			}
-			List<WorkcenterConditionVo> conditionList = group.getConditionList();
+			List<ConditionVo> conditionList = group.getConditionList();
 			String fromConditionUuid = null;
 			String toConditionUuid = conditionList.get(0).getUuid();
-			for(WorkcenterConditionVo condition : conditionList) {
+			for(ConditionVo condition : conditionList) {
 				if(fromConditionUuid != null) {
 					toConditionUuid = condition.getUuid();
 					whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));

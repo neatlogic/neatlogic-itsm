@@ -212,9 +212,6 @@
 	<if test="name != null and name != ''">
 	`name`=#{name}, 
 	</if>
-	<if test="isActive != null">
-	is_active = #{isActive}, 
-	</if>
 	`uuid` = #{uuid} 
 	WHERE `uuid` = #{uuid};
 	</update>

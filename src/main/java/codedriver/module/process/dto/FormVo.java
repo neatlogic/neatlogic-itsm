@@ -19,7 +19,7 @@ public class FormVo extends BasePageVo implements Serializable {
 	@EntityField(name = "表单名称", type = ApiParamType.STRING)
 	private String name;
 	@EntityField(name = "是否激活", type = ApiParamType.INTEGER)
-	private Integer isActive;
+	private Integer isActive = 1;
 	@EntityField(name = "当前版本", type = ApiParamType.INTEGER)
 	private Integer currentVersion;
 	@EntityField(name = "当前版本uuid", type = ApiParamType.STRING)

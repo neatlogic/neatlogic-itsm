@@ -21,7 +21,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessExpression;
-import codedriver.module.process.constvalue.ProcessFormHandler;
 import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.dto.FormAttributeVo;
@@ -70,10 +69,11 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 		Map<String, IWorkcenterCondition> workcenterConditionMap = WorkcenterConditionFactory.getConditionComponentMap();
 		for (Map.Entry<String, IWorkcenterCondition> entry : workcenterConditionMap.entrySet()) {
 			IWorkcenterCondition condition = entry.getValue();
-			//不支持endTime过滤，如果是简单模式 title、id、content 不返回
+			//不支持endTime过滤，如果是简单模式 title、id、content 不返回，表单过滤不在这for循坏里返回，而是在表单条件里返回
 			if(conditionModel.equals(ProcessWorkcenterConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterCondition.TITLE.getValue())
 					||condition.getName().equals(ProcessWorkcenterCondition.ID.getValue())||condition.getName().equals(ProcessWorkcenterCondition.CONTENT.getValue()))
-					||condition.getName().equals(ProcessWorkcenterCondition.ENDTIME.getValue())) {
+					||condition.getName().equals(ProcessWorkcenterCondition.ENDTIME.getValue())
+					||condition.getName().equals(ProcessWorkcenterCondition.FORM.getValue())) {
 				continue;
 			}
 			JSONObject commonObj = new JSONObject();

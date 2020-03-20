@@ -12,6 +12,8 @@ import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
@@ -56,5 +58,11 @@ public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
 	@Override
 	public ProcessExpression getDefaultExpression() {
 		return ProcessExpression.INCLUDE;
+	}
+
+	@Override
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo workcenterConditionVo) {
+		// 条件步骤没有处理人
+		return false;
 	}
 }

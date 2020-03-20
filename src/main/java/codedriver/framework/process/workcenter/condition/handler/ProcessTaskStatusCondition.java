@@ -3,11 +3,14 @@ package codedriver.framework.process.workcenter.condition.handler;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
@@ -15,9 +18,15 @@ import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskStatusCondition implements IWorkcenterCondition{
+
+	@Autowired
+	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public String getName() {
@@ -87,6 +96,23 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 	@Override
 	public ProcessExpression getDefaultExpression() {
 		return ProcessExpression.INCLUDE;
+	}
+
+	@Override
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
+		boolean result = false;
+		List<String> valueList = conditionVo.getValueList();
+		if(!CollectionUtils.isEmpty(valueList)) {
+			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
+			result = valueList.contains(processTask.getStatus());
+		}			
+		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
+			return result;
+		}else if(ProcessExpression.EXCLUDE.getExpression().equals(conditionVo.getExpression())) {
+			return !result;
+		}else {
+			return false;
+		}
 	}
 
 }

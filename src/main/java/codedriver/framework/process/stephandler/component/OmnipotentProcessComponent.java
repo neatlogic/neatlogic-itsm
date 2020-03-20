@@ -3,11 +3,12 @@ package codedriver.framework.process.stephandler.component;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -86,13 +87,13 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			stepConfigObj = JSONObject.parseObject(stepConfig);
 			currentProcessTaskStepVo.setParamObj(stepConfigObj);
 		} catch (Exception ex) {
-			logger.error("转换步骤设置配置失败，" + ex.getMessage(), ex);
+			logger.error("hash为"+processTaskStepVo.getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
 		}
-		if (CollectionUtils.isEmpty(stepConfigObj)) {
+		if (MapUtils.isEmpty(stepConfigObj)) {
 			return 1;			
 		}
 		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (CollectionUtils.isEmpty(workerPolicyConfig)) {
+		if (MapUtils.isEmpty(workerPolicyConfig)) {
 			return 1;
 		}
 		
@@ -262,7 +263,39 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
-		return 0;
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			
+		if (StringUtils.isBlank(stepConfig)) {
+			return 1;
+		}
+		JSONObject stepConfigObj = null;
+		try {
+			stepConfigObj = JSONObject.parseObject(stepConfig);
+			currentProcessTaskStepVo.setParamObj(stepConfigObj);
+		} catch (Exception ex) {
+			logger.error("hash为"+processTaskStepVo.getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
+		}
+		if (MapUtils.isEmpty(stepConfigObj)) {
+			return 1;			
+		}
+		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+		if (MapUtils.isEmpty(workerPolicyConfig)) {
+			return 1;
+		}
+		String autoStart = workerPolicyConfig.getString("autoStart");
+		if ("1".equals(autoStart) && workerList.size() == 1) {
+			/** 设置当前步骤状态为处理中 **/
+			if (StringUtils.isNotBlank(workerList.get(0).getUserId())) {
+				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
+				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+				userVo.setUserId(workerList.get(0).getUserId());
+				userList.add(userVo);
+				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+			}
+		}
+		return 1;
 	}
 
 	@Override
@@ -282,7 +315,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		}
 		/** 组装分配策略 **/
 		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (!CollectionUtils.isEmpty(workerPolicyConfig)) {
+		if (!MapUtils.isEmpty(workerPolicyConfig)) {
 			JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
 			if (!CollectionUtils.isEmpty(policyList)) {
 				List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();

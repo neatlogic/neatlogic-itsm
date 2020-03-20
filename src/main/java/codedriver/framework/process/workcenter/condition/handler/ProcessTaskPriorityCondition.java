@@ -3,6 +3,7 @@ package codedriver.framework.process.workcenter.condition.handler;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessExpression;
 import codedriver.module.process.constvalue.ProcessFormHandlerType;
@@ -17,11 +19,17 @@ import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
 import codedriver.module.process.dto.PriorityVo;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 	@Autowired
 	private PriorityMapper priorityMapper;
+
+	@Autowired
+	private ProcessTaskMapper processTaskMapper;
 	
 	@Override
 	public String getName() {
@@ -78,6 +86,21 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 	@Override
 	public ProcessExpression getDefaultExpression() {
 		return ProcessExpression.INCLUDE;
+	}
+
+	@Override
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
+		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
+			List<String> valueList = conditionVo.getValueList();
+			if(CollectionUtils.isEmpty(valueList)) {
+				return false;
+			}
+			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());		
+			return valueList.contains(processTask.getPriorityUuid());
+		}else {
+			return false;
+		}
+		
 	}
 
 }
