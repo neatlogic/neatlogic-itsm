@@ -71,6 +71,8 @@ public class WorkcenterVo extends BasePageVo implements Serializable{
 	
 	public WorkcenterVo(JSONObject jsonObj) {
 		uuid = jsonObj.getString("uuid");
+		this.setCurrentPage(jsonObj.getInteger("currentPage"));
+		this.setPageSize(jsonObj.getInteger("pageSize"));
 		JSONArray conditionGroupArray = jsonObj.getJSONArray("conditionGroupList");
 		if(CollectionUtils.isNotEmpty(conditionGroupArray)) {
 			conditionGroupList = new ArrayList<WorkcenterConditionGroupVo>();

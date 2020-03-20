@@ -18,13 +18,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.query.QueryResult;
+import com.techsure.multiattrsearch.util.ESQueryUtil;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterConditionException;
-import codedriver.framework.process.workcenter.EsHandler;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
@@ -64,9 +64,8 @@ public class WorkcenterService {
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
 		String orderBy = "order by createTime desc";
-		String sql = String.format("select %s from techsure %s %s limit %d", selectColumn,where,orderBy,workcenterVo.getPageSize());
-		return EsHandler.searchSql(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
-		
+		String sql = String.format("select %s from techsure %s %s limit %d,%d", selectColumn,where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
+		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
 	}
 	/**
 	 * 工单中心根据条件获取工单列表数据
