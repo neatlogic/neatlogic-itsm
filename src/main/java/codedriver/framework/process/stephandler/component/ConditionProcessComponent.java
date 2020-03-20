@@ -12,11 +12,12 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -201,57 +202,54 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepVo> nextStepList = new ArrayList<ProcessTaskStepVo>();
-		if(!CollectionUtils.isEmpty(currentProcessTaskStepVo.getRelList())) {
+		if(CollectionUtils.isNotEmpty(currentProcessTaskStepVo.getRelList())) {
 			Map<String, ProcessTaskStepRelVo> toProcessStepUuidMap = new HashMap<>();
 			for(ProcessTaskStepRelVo relVo : currentProcessTaskStepVo.getRelList()) {
 				toProcessStepUuidMap.put(relVo.getToProcessStepUuid(), relVo);
 			}
-			if(!CollectionUtils.isEmpty(currentProcessTaskStepVo.getRelList())) {
-				ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-				if (StringUtils.isNotBlank(stepConfig)) {
-					JSONObject stepConfigObj = null;
-					try {
-						stepConfigObj = JSONObject.parseObject(stepConfig);
-						currentProcessTaskStepVo.setParamObj(stepConfigObj);
-					} catch (Exception ex) {
-						logger.error("条件步骤设置配置失败，" + ex.getMessage(), ex);
-					}
-					if (!CollectionUtils.isEmpty(stepConfigObj)) {
-						JSONArray moveonConfigList = stepConfigObj.getJSONArray("moveonConfigList");
-						if(!CollectionUtils.isEmpty(moveonConfigList)) {
-							for(int i = 0; i < moveonConfigList.size(); i++) {
-								JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
-								String type = moveonConfig.getString("type");
-								if("negative".equals(type)) {//不流转
-									continue;
-								}else if("optional".equals(type)) {//自定义
-									JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
-									if(!CollectionUtils.isEmpty(conditionGroupList)) {
-										ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
-										String script = conditionConfigVo.buildScript(currentProcessTaskStepVo);
-										//((false || true) || (true && false) || (true || false))
-										try {
-											if(!runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
-												continue;
-											}
-										} catch (NoSuchMethodException e) {
-											logger.error(e.getMessage(), e);
-										} catch (ScriptException e) {
-											logger.error(e.getMessage(), e);
+			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			if (StringUtils.isNotBlank(stepConfig)) {
+				JSONObject stepConfigObj = null;
+				try {
+					stepConfigObj = JSONObject.parseObject(stepConfig);
+					currentProcessTaskStepVo.setParamObj(stepConfigObj);
+				} catch (Exception ex) {
+					logger.error("hash为"+processTaskStepVo.getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
+				}
+				if (MapUtils.isNotEmpty(stepConfigObj)) {
+					JSONArray moveonConfigList = stepConfigObj.getJSONArray("moveonConfigList");
+					if(CollectionUtils.isNotEmpty(moveonConfigList)) {
+						for(int i = 0; i < moveonConfigList.size(); i++) {
+							JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
+							String type = moveonConfig.getString("type");
+							if("negative".equals(type)) {//不流转
+								continue;
+							}else if("optional".equals(type)) {//自定义
+								JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
+								if(CollectionUtils.isNotEmpty(conditionGroupList)) {
+									ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
+									String script = conditionConfigVo.buildScript(currentProcessTaskStepVo);
+									//((false || true) || (true && false) || (true || false))
+									try {
+										if(!runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
+											continue;
 										}
+									} catch (NoSuchMethodException e) {
+										logger.error(e.getMessage(), e);
+									} catch (ScriptException e) {
+										logger.error(e.getMessage(), e);
 									}
-								}else if("always".equals(type)) {//直接流转
-									
-								}else {//type不合法
-									continue;
 								}
+							}else if("always".equals(type)) {//直接流转
 								
-								//符合条件
-								List<String> targetStepList = JSON.parseArray(moveonConfig.getString("targetStepList"), String.class);
-								if(CollectionUtils.isEmpty(targetStepList)) {
-									continue;
-								}
+							}else {//type不合法
+								continue;
+							}
+							
+							//符合条件
+							List<String> targetStepList = JSON.parseArray(moveonConfig.getString("targetStepList"), String.class);
+							if(CollectionUtils.isNotEmpty(targetStepList)) {
 								for(String targetStep : targetStepList) {
 									ProcessTaskStepRelVo relVo = toProcessStepUuidMap.get(targetStep);
 									ProcessTaskStepVo toStep = new ProcessTaskStepVo();
@@ -261,6 +259,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 									nextStepList.add(toStep);
 								}
 							}
+							
 						}
 					}
 				}

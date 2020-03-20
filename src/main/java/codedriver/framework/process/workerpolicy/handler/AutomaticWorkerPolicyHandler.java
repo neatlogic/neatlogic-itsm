@@ -3,11 +3,12 @@ package codedriver.framework.process.workerpolicy.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -37,7 +38,7 @@ public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {
 	@Override
 	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
-		if (CollectionUtils.isEmpty(workerPolicyVo.getConfigObj())) {
+		if (MapUtils.isEmpty(workerPolicyVo.getConfigObj())) {
 			return processTaskStepWorkerList;
 		}
 		String handler = workerPolicyVo.getConfigObj().getString("handler");
@@ -49,7 +50,7 @@ public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {
 			return processTaskStepWorkerList;
 		}
 		JSONObject handlerConfig = workerPolicyVo.getConfigObj().getJSONObject("handlerConfig");
-		if(CollectionUtils.isEmpty(handlerConfig)) {
+		if(MapUtils.isEmpty(handlerConfig)) {
 			return processTaskStepWorkerList;
 		}
 		List<String> workerList = dispatcher.getWorker(currentProcessTaskStepVo, handlerConfig);

@@ -3,11 +3,12 @@ package codedriver.framework.process.stephandler.component;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -86,13 +87,13 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			stepConfigObj = JSONObject.parseObject(stepConfig);
 			currentProcessTaskStepVo.setParamObj(stepConfigObj);
 		} catch (Exception ex) {
-			logger.error("转换步骤设置配置失败，" + ex.getMessage(), ex);
+			logger.error("hash为"+processTaskStepVo.getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
 		}
-		if (CollectionUtils.isEmpty(stepConfigObj)) {
+		if (MapUtils.isEmpty(stepConfigObj)) {
 			return 1;			
 		}
 		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (CollectionUtils.isEmpty(workerPolicyConfig)) {
+		if (MapUtils.isEmpty(workerPolicyConfig)) {
 			return 1;
 		}
 		
@@ -273,13 +274,13 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			stepConfigObj = JSONObject.parseObject(stepConfig);
 			currentProcessTaskStepVo.setParamObj(stepConfigObj);
 		} catch (Exception ex) {
-			logger.error("转换步骤设置配置失败，" + ex.getMessage(), ex);
+			logger.error("hash为"+processTaskStepVo.getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
 		}
-		if (CollectionUtils.isEmpty(stepConfigObj)) {
+		if (MapUtils.isEmpty(stepConfigObj)) {
 			return 1;			
 		}
 		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (CollectionUtils.isEmpty(workerPolicyConfig)) {
+		if (MapUtils.isEmpty(workerPolicyConfig)) {
 			return 1;
 		}
 		String autoStart = workerPolicyConfig.getString("autoStart");
@@ -314,7 +315,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		}
 		/** 组装分配策略 **/
 		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (!CollectionUtils.isEmpty(workerPolicyConfig)) {
+		if (!MapUtils.isEmpty(workerPolicyConfig)) {
 			JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
 			if (!CollectionUtils.isEmpty(policyList)) {
 				List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
