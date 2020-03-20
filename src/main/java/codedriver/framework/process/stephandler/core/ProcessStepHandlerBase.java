@@ -69,7 +69,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				runningCount += 1;
 			} else if (processTaskStepVo.getIsActive().equals(-1)) {
 				abortedCount += 1;
-			} else if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue())) {
+			} else if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue()) && ProcessStepHandler.END.getHandler().equals(processTaskStepVo.getHandler())) {
 				succeedCount += 1;
 			} else if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.FAILED.getValue())) {
 				failedCount += 1;

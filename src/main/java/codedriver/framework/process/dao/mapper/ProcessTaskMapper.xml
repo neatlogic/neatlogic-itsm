@@ -820,6 +820,17 @@
 	ORDER BY pts.`id`DESC
 	</select>
 	
+	<select id="getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid" parameterType="codedriver.module.process.dto.ProcessTaskFormAttributeDataVo" resultType="codedriver.module.process.dto.ProcessTaskFormAttributeDataVo">
+	SELECT 
+	  `processtask_id` AS processTaskId,
+	  `type`,
+	  `attribute_uuid` AS attributeUuid,
+	  `data` 
+	FROM `processtask_formattribute_data` 
+	WHERE `processtask_id` = #{processTaskId} 
+	AND `attribute_uuid` = #{attributeUuid}
+	</select>
+	
 	<update id="updateProcessTaskStepConvergeIsCheck">
 		UPDATE `processtask_converge` SET is_check = #{isCheck} WHERE converge_id = #{convergeId}
 		AND processtask_step_id = #{processTaskStepId}

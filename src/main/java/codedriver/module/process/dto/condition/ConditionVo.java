@@ -1,13 +1,18 @@
-package codedriver.module.process.workcenter.dto;
+package codedriver.module.process.dto.condition;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
+import codedriver.framework.process.workcenter.condition.core.WorkcenterConditionFactory;
+import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
+import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 
-public class WorkcenterConditionVo implements Serializable{
+public class ConditionVo implements Serializable{
 	private static final long serialVersionUID = -776692828809703841L;
 	
 	private String uuid;
@@ -20,12 +25,11 @@ public class WorkcenterConditionVo implements Serializable{
 	private String expression;
 	private List<String> valueList;
 	
-	
-	public WorkcenterConditionVo() {
+	public ConditionVo() {
 		super();
 	}
 	
-	public WorkcenterConditionVo(JSONObject jsonObj) {
+	public ConditionVo(JSONObject jsonObj) {
 		this.uuid = jsonObj.getString("uuid");
 		if(!jsonObj.getString("name").contains("#")) {
 			throw new WorkcenterParamException("name");
@@ -33,7 +37,13 @@ public class WorkcenterConditionVo implements Serializable{
 		this.name = jsonObj.getString("name").split("#")[1];
 		this.type = jsonObj.getString("name").split("#")[0];
 		this.expression = jsonObj.getString("expression");
-		this.valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
+		String values = jsonObj.getString("valueList");
+		if(values.startsWith("[") && values.endsWith("]")) {
+			this.valueList = jsonObj.getJSONArray("valueList").toJavaList(String.class);
+		}else {
+			this.valueList = new ArrayList<>();
+			this.valueList.add(values);
+		}
 	}
 
 
@@ -121,4 +131,16 @@ public class WorkcenterConditionVo implements Serializable{
 		this.valueList = valueList;
 	}
 
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo) {
+		IWorkcenterCondition workcenterCondition = null;
+		if(ProcessWorkcenterConditionType.COMMON.getValue().equals(this.type)) {
+			workcenterCondition = WorkcenterConditionFactory.getHandler(this.name);
+		}else if(ProcessWorkcenterConditionType.FORM.getValue().equals(this.type)) {
+			workcenterCondition = WorkcenterConditionFactory.getHandler(this.type);
+		}
+		if(workcenterCondition != null) {
+			return workcenterCondition.predicate(currentProcessTaskStepVo, this);
+		}
+		return false;
+	}
 }

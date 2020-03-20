@@ -39,6 +39,6 @@ public class RemindNotifyHandler extends NotifyHandlerBase {
 
     @Override
     public String getName() {
-        return "消息中心";
+        return "消息通知";
     }
 }

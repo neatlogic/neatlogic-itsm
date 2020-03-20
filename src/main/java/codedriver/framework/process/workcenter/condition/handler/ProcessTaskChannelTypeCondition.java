@@ -14,6 +14,8 @@ import codedriver.module.process.constvalue.ProcessFormHandlerType;
 import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.module.process.constvalue.ProcessWorkcenterConditionType;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
@@ -73,5 +75,11 @@ public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
 	@Override
 	public ProcessExpression getDefaultExpression() {
 		return ProcessExpression.INCLUDE;
+	}
+
+	@Override
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo workcenterConditionVo) {
+		// TODO linbq暂时没有服务类型
+		return false;
 	}
 }

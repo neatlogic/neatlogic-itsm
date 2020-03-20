@@ -5,6 +5,8 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.module.process.constvalue.ProcessExpression;
+import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.condition.ConditionVo;
 
 public interface IWorkcenterCondition { 
 	/**
@@ -71,5 +73,13 @@ public interface IWorkcenterCondition {
 	 * @Date: 2020/2/11
 	 */
 	ProcessExpression getDefaultExpression();
+
+	/**
+	 * @Description: 判断条件是否成立
+	 * @Param: 
+	 * @return: boolean
+	 * @Date: 2020/2/11
+	 */
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo);
 
 }

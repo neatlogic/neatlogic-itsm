@@ -3,10 +3,11 @@ package codedriver.framework.process.workerpolicy.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
@@ -37,7 +38,7 @@ public class CopyWorkerPolicyHandler implements IWorkerPolicyHandler {
 	@Override
 	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
-		if (CollectionUtils.isEmpty(workerPolicyVo.getConfigObj())) {
+		if (MapUtils.isEmpty(workerPolicyVo.getConfigObj())) {
 			return processTaskStepWorkerList;
 		}
 		String processStepUuidList = workerPolicyVo.getConfigObj().getString("processStepUuidList");
