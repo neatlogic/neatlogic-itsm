@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -83,10 +84,13 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 				throw new ProcessTaskRuntimeException("步骤：'" + nextStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
 		}
-		
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		processTaskStepVo.setParamObj(jsonObj);
-		handler.complete(processTaskStepVo);
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+		if(handler != null) {
+			handler.complete(processTaskStepVo);
+		}else {
+			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+		}
 		return null;
 	}
 

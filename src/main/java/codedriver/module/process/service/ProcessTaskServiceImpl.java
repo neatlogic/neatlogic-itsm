@@ -20,6 +20,7 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -275,15 +276,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		/** 找到所有已完成步骤 **/
 		for (ProcessTaskStepVo fromStep : fromStepList) {
 			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromStep.getHandler());
-			if (ProcessStepMode.MT == handler.getMode()) {//手动处理节点
-				//获取步骤处理人
-				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(fromStep.getId(), UserType.MAJOR.getValue());
-				List<String> majorUserIdList = majorUserList.stream().map(ProcessTaskStepUserVo::getUserId).collect(Collectors.toList());
-				if(majorUserIdList.contains(UserContext.get().getUserId())) {
-					resultList.add(fromStep);
+			if(handler != null) {
+				if (ProcessStepMode.MT == handler.getMode()) {//手动处理节点
+					//获取步骤处理人
+					List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(fromStep.getId(), UserType.MAJOR.getValue());
+					List<String> majorUserIdList = majorUserList.stream().map(ProcessTaskStepUserVo::getUserId).collect(Collectors.toList());
+					if(majorUserIdList.contains(UserContext.get().getUserId())) {
+						resultList.add(fromStep);
+					}
+				}else {//自动处理节点，继续找前置节点
+					resultList.addAll(getRetractableStepListByProcessTaskStepId(fromStep.getId()));
 				}
-			}else {//自动处理节点，继续找前置节点
-				resultList.addAll(getRetractableStepListByProcessTaskStepId(fromStep.getId()));
+			}else {
+				throw new ProcessStepHandlerNotFoundException(fromStep.getHandler());
 			}
 		}
 		return resultList;

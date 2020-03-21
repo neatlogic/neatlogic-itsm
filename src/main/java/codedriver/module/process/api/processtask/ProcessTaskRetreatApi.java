@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
@@ -55,9 +56,13 @@ public class ProcessTaskRetreatApi extends ApiComponentBase {
 			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.RETREAT.getText());
 		}
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		processTaskStepVo.setParamObj(jsonObj);
-		handler.retreat(processTaskStepVo);
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+		if(handler != null) {
+			handler.retreat(processTaskStepVo);
+		}else {
+			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+		}
 		return null;
 	}
 

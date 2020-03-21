@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
@@ -66,7 +67,11 @@ public class ProcessTaskStartProcessApi extends ApiComponentBase {
 		startTaskStep.setId(processTaskStepList.get(0).getId());
 		startTaskStep.setProcessTaskId(processTaskId);
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(ProcessStepHandler.START.getHandler());
-		handler.startProcess(startTaskStep);
+		if(handler != null) {
+			handler.startProcess(startTaskStep);
+		}else {
+			throw new ProcessStepHandlerNotFoundException(ProcessStepHandler.START.getHandler());
+		}
 		return null;
 	}
 
