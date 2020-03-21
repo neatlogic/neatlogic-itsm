@@ -17,7 +17,8 @@ public enum ProcessTaskStepAction {
 	UPDATETITLE("updateTitle", "更新标题"),
 	UPDATEPRIORITY("updatePriority", "更新优先级"),
 	UPDATECONTENT("updateContent", "更新上报描述内容"),
-	COMMENT("comment", "回复");
+	COMMENT("comment", "回复"),
+	SUBTASK("subtask", "创建子任务");
 	private String status;
 	private String text;
 

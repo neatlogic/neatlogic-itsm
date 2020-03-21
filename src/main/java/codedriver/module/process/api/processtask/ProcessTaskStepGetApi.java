@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +48,9 @@ import codedriver.module.process.dto.ProcessTaskVo;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 public class ProcessTaskStepGetApi extends ApiComponentBase {
-
+	
+	private final static Logger logger = LoggerFactory.getLogger(ProcessTaskStepGetApi.class);
+	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 	
@@ -165,6 +170,21 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(processTaskStepId != null) {
 			//获取步骤信息
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			if(StringUtils.isNotBlank(stepConfig)) {
+				JSONObject stepConfigObj = null;
+				try {
+					stepConfigObj = JSONObject.parseObject(stepConfig);
+				} catch (Exception ex) {
+					logger.error("hash为"+processTaskStepVo.getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
+				}
+				if (MapUtils.isNotEmpty(stepConfigObj)) {
+					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+					if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+						processTaskStepVo.setIsRequired(stepConfigObj.getInteger("isRequired"));
+					}
+				}
+			}
 			//处理人列表
 			List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MAJOR.getValue());
 			if(CollectionUtils.isNotEmpty(majorUserList)) {

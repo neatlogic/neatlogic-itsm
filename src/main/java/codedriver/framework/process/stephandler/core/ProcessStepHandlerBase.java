@@ -582,11 +582,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			/** 找到所有已激活步骤，执行终止操作 **/
 			if (stepVo.getIsActive().equals(1)) {
 				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(stepVo.getHandler());
-				if (handler != null) {
-					handler.abort(stepVo);
-				} else {
-					throw new ProcessStepHandlerNotFoundException(stepVo.getHandler());
-				}
+				handler.abort(stepVo);
 			}
 		}
 
@@ -637,11 +633,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			/** 找到所有已终止步骤，执行终止操作 **/
 			if (stepVo.getIsActive().equals(-1)) {
 				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(stepVo.getHandler());
-				if (handler != null) {
-					handler.recover(stepVo);
-				} else {
-					throw new ProcessStepHandlerNotFoundException(stepVo.getHandler());
-				}
+				handler.recover(stepVo);
 			}
 		}
 

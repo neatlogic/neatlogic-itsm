@@ -174,7 +174,7 @@ public interface ProcessTaskMapper {
 
 	public int insertProcessTaskStepSla(@Param("processTaskStepId") Long processTaskStepId, @Param("slaId") Long slaId);
 
-	public int replaceProcessTaskFormAttributeData(ProcessTaskFormAttributeDataVo processTaskFromAttributeDataVo);
+	public int replaceProcessTaskFormAttributeData(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo);
 	
 	public int insertProcessTaskFile(ProcessTaskFileVo processTaskFileVo);
 

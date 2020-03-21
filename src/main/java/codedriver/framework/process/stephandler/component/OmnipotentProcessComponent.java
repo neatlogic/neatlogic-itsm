@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.attribute.core.AttributeHandlerFactory;
 import codedriver.framework.attribute.core.IAttributeHandler;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
@@ -127,6 +128,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 				userVo.setUserId(workerList.get(0).getUserId());
+				UserVo user = userMapper.getUserByUserId(workerList.get(0).getUserId());
+				userVo.setUserName(user.getUserName());
 				userList.add(userVo);
 				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 			}
@@ -291,6 +294,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 				userVo.setUserId(workerList.get(0).getUserId());
+				UserVo user = userMapper.getUserByUserId(workerList.get(0).getUserId());
+				userVo.setUserName(user.getUserName());
 				userList.add(userVo);
 				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 			}

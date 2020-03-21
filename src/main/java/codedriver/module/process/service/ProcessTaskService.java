@@ -1,6 +1,7 @@
 package codedriver.module.process.service;
 
 import java.util.List;
+import java.util.Set;
 
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.ProcessTaskFormVo;
@@ -22,4 +23,8 @@ public interface ProcessTaskService {
 	public List<String> getProcessTaskStepActionList(Long processTaskId, Long processTaskStepId);
 	
 	public boolean verifyActionAuthoriy(Long processTaskId, Long processTaskStepId, ProcessTaskStepAction action);
+	
+	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTaskId(Long processTaskId);
+	
+	public List<ProcessTaskStepVo> getAcceptableStepList(Long processTaskId);
 }

@@ -1,5 +1,8 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,17 +11,17 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.ProcessTaskStepVo;
+import codedriver.module.process.dto.ProcessTaskVo;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
-public class ProcessTaskRetreatApi extends ApiComponentBase {
+public class ProcessTaskRetreatableStepList extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -28,37 +31,37 @@ public class ProcessTaskRetreatApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "processtask/retreat";
+		return "processtask/retreatablestep/list";
 	}
 
 	@Override
 	public String getName() {
-		return "上一步发起的撤回动作接口";
+		return "当前用户可撤回的步骤列表接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true)
 	})
-	@Description(desc = "上一步发起的撤回动作接口")
+	@Output({
+		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
+	})
+	@Description(desc = "当前用户可撤回的步骤列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.RETREAT)) {
+		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+		if(processTaskVo == null) {
+			throw new ProcessTaskNotFoundException(processTaskId.toString());
+		}
+		Set<ProcessTaskStepVo> resultSet = processTaskService.getRetractableStepListByProcessTaskId(processTaskId);
+		if(CollectionUtils.isNotEmpty(resultSet)) {
 			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		processTaskStepVo.setParamObj(jsonObj);
-		handler.active(processTaskStepVo);
-		return null;
+		return resultSet;
 	}
 
 }

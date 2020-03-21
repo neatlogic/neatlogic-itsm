@@ -50,7 +50,7 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
 		@Param(name = "nextStepId", type = ApiParamType.LONG, isRequired = true, desc = "激活下一步骤Id"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "原因")
+		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "原因")
 	})
 	@Description(desc = "工单完成接口")
 	@Override
