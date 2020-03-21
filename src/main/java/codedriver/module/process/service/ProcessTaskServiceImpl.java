@@ -214,17 +214,20 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		//以上是权限设置中可自定义的四个权限，接下来判断当前用户是否有开始start、完成complete、暂存save、评论comment的权限
 
 		//获取当前用户可处理步骤列表
-		List<ProcessTaskStepVo> acceptableStepList = getAcceptableStepList(processTaskId);
-		if(CollectionUtils.isNotEmpty(acceptableStepList)) {
-			if(processTaskStepId != null) {
-				for(ProcessTaskStepVo processTaskStepVo : acceptableStepList) {
-					if(processTaskStepId.equals(processTaskStepVo.getId())) {
+		List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId);
+		if(CollectionUtils.isNotEmpty(processableStepList)) {
+			for(ProcessTaskStepVo processTaskStepVo : processableStepList) {
+				if(ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {//已激活未处理
+					if(processTaskStepId != null) {
+						if(processTaskStepId.equals(processTaskStepVo.getId())) {
+							actionList.add(ProcessTaskStepAction.START.getValue());
+							break;
+						}
+					}else {
 						actionList.add(ProcessTaskStepAction.START.getValue());
-						break;
 					}
 				}
-			}else {
-				actionList.add(ProcessTaskStepAction.START.getValue());
+				
 			}
 		}
 
@@ -287,13 +290,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	}
 	
 	@Override
-	public List<ProcessTaskStepVo> getAcceptableStepList(Long processTaskId) {
+	public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId) {
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
 		List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
 		for (ProcessTaskStepVo stepVo : processTaskStepList) {
 			/** 找到所有已激活未处理的步骤 **/
-			if (stepVo.getIsActive().equals(1) && ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus())) {
+			if (stepVo.getIsActive().equals(1)) {
 				List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(stepVo.getId());
 				for(ProcessTaskStepWorkerVo processTaskStepWorkerVo : processTaskStepWorkerList) {
 					if(ProcessTaskStepWorkerAction.UPDATE.getValue().equals(processTaskStepWorkerVo.getAction())) {

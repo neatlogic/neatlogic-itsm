@@ -58,7 +58,7 @@ public class ProcessTaskRetreatableStepList extends ApiComponentBase {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
 		Set<ProcessTaskStepVo> resultSet = processTaskService.getRetractableStepListByProcessTaskId(processTaskId);
-		if(CollectionUtils.isNotEmpty(resultSet)) {
+		if(CollectionUtils.isEmpty(resultSet)) {
 			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
 		}
 		return resultSet;

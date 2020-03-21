@@ -26,5 +26,5 @@ public interface ProcessTaskService {
 	
 	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTaskId(Long processTaskId);
 	
-	public List<ProcessTaskStepVo> getAcceptableStepList(Long processTaskId);
+	public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId);
 }
