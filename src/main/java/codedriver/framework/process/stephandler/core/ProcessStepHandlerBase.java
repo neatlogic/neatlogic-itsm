@@ -464,7 +464,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
 		}
 		/** 处理历史记录 **/
-		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.START);
+		//AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.START);
 		return 0;
 	}
 
@@ -550,7 +550,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			}
 			if (this.getMode().equals(ProcessStepMode.MT)) {
 				/** 处理历史记录 **/
-				AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
+				//AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
 				/** 写入时间审计 **/
 				TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETE);
 				/** 计算SLA **/
@@ -605,7 +605,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
 
 		/** 处理历史记录 **/
-		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORT);
+		//AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORT);
 
 		/** 写入时间审计 **/
 		TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORT);
@@ -674,7 +674,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			processTaskMapper.updateProcessTaskStepStatus(currentProcessTaskStepVo);
 
 			/** 处理历史记录 **/
-			AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.RECOVER);
+			//AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.RECOVER);
 
 			/** 写入时间审计 **/
 			TimeAuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.RECOVER);
@@ -736,7 +736,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
 
 				/** 处理历史记录 **/
-				AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ACCEPT);
+				//AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.ACCEPT);
 
 				/** 触发通知 **/
 				NotifyHandler.notify(currentProcessTaskStepVo, NotifyTriggerType.ACCEPT);
@@ -816,7 +816,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		}
 
 		/** 处理历史记录 **/
-		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.TRANSFER);
+		//AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.TRANSFER);
 
 		return 0;
 	}
@@ -885,7 +885,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
 		}
 		/** 处理历史记录 **/
-		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.BACK);
+		//AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.BACK);
 
 		/** 计算SLA **/
 		SlaHandler.calculate(currentProcessTaskStepVo);
@@ -1081,7 +1081,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
 		}
 		/** 处理历史记录 **/
-		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.STARTPROCESS);
+		//AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.STARTPROCESS);
 		/** 流转到下一步 **/
 		List<ProcessTaskStepVo> nextStepList = getNext(currentProcessTaskStepVo);
 		for (ProcessTaskStepVo nextStep : nextStepList) {

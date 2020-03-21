@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -14,7 +15,11 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
+import codedriver.module.process.dto.ProcessTaskContentVo;
+import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
+import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
@@ -58,6 +63,13 @@ public class ProcessTaskRetreatApi extends ApiComponentBase {
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		processTaskStepVo.setParamObj(jsonObj);
 		handler.active(processTaskStepVo);
+		//生成活动
+		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.RETREAT.getValue());
+		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
+		String content = jsonObj.getString("content");
+		ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+		processTaskMapper.replaceProcessTaskContent(contentVo);
+		processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.CONTENT.getValue(), null, contentVo.getHash()));
 		return null;
 	}
 

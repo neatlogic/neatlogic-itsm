@@ -64,7 +64,7 @@ public class ProcessTaskVo {
 	@EntityField(name = "工单表单信息", type = ApiParamType.STRING)
 	private String formConfig;
 	@EntityField(name = "工单表单属性值", type = ApiParamType.JSONOBJECT)
-	Map<String, String> formAttributeDataMap;
+	Map<String, Object> formAttributeDataMap;
 	@EntityField(name = "工作时间窗口uuid", type = ApiParamType.STRING)
 	private String worktimeUuid;
 	
@@ -320,11 +320,11 @@ public class ProcessTaskVo {
 		this.formConfig = formConfig;
 	}
 
-	public Map<String, String> getFormAttributeDataMap() {
+	public Map<String, Object> getFormAttributeDataMap() {
 		return formAttributeDataMap;
 	}
 
-	public void setFormAttributeDataMap(Map<String, String> formAttributeDataMap) {
+	public void setFormAttributeDataMap(Map<String, Object> formAttributeDataMap) {
 		this.formAttributeDataMap = formAttributeDataMap;
 	}
 

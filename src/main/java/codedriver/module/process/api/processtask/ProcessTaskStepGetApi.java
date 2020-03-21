@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -156,9 +157,15 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			processTaskVo.setFormConfig(processTaskFormVo.getFormContent());
 			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
 			if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-				Map<String, String> formAttributeDataMap = new HashMap<>();
+				Map<String, Object> formAttributeDataMap = new HashMap<>();
 				for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-					formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getData());
+					String data = processTaskFormAttributeDataVo.getData();
+					if(data.startsWith("[") && data.endsWith("]")) {
+						List<String> dataList = JSON.parseArray(data, String.class);
+						formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
+					}else {
+						formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
+					}
 				}
 				processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 			}
