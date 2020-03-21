@@ -14,6 +14,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -64,7 +65,7 @@ public class ProcessTaskStartProcessApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.STARTPROCESS)) {
-			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
+			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.STARTPROCESS.getText());
 		}
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
 		if(processTaskStepList.size() != 1) {

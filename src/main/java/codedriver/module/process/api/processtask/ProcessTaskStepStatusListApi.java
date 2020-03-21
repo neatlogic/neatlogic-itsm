@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -55,7 +55,7 @@ public class ProcessTaskStepStatusListApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.VIEW)) {
-			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
+			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.VIEW.getText());
 		}
 		
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);

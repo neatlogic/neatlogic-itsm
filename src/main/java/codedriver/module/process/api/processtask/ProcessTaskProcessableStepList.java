@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -66,7 +66,7 @@ public class ProcessTaskProcessableStepList extends ApiComponentBase {
 				}
 			}
 			if(CollectionUtils.isEmpty(processableStepList)) {
-				throw new ProcessTaskRuntimeException("您没有权限执行此操作");
+				throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.getText(action));
 			}
 		}
 		return processableStepList;

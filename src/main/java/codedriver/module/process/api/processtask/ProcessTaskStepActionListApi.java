@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -54,7 +54,7 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		List<String> actionList = processTaskService.getProcessTaskStepActionList(processTaskId, processTaskStepId);
 		if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())) {
-			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
+			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.VIEW.getText());
 		}
 
 		List<ValueTextVo> resultList = new ArrayList<>();
