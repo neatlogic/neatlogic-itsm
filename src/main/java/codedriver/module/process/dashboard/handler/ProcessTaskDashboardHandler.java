@@ -1,23 +1,24 @@
 package codedriver.module.process.dashboard.handler;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.session.ResultContext;
-import org.apache.ibatis.session.ResultHandler;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.dashboard.core.DashboardChartFactory;
 import codedriver.framework.dashboard.core.DashboardHandlerBase;
+import codedriver.framework.dashboard.core.DashboardChartBase;
 import codedriver.framework.dashboard.dto.ChartDataVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
-import codedriver.module.process.dto.ProcessTaskVo;
+import codedriver.module.process.service.WorkcenterService;
 
 @Component
 public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
+
+	@Autowired
+	private WorkcenterService workcenterService;
 
 	@Override
 	public String getName() {
@@ -31,46 +32,33 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 	 * "sort":"createTime", "limit":10 }
 	 */
 
-	protected ChartDataVo myGetData2(DashboardWidgetVo widgetVo) {
-		JSONObject resultObj = null;
+	@Override
+	protected JSONArray myGetData(DashboardWidgetVo widgetVo) {
 
-		JSONObject chartConfigObj = widgetVo.getChartConfigObj();
-		if (chartConfigObj != null) {
-			final String groupField = chartConfigObj.getString("groupField");
-			final String subGroupField = chartConfigObj.getString("subGroupField");
-			final String aggregate = chartConfigObj.getString("aggregate");
-			final String valueField = chartConfigObj.getString("valueField");
+		DashboardChartBase chart = DashboardChartFactory.getChart(widgetVo.getChartType());
 
-			ChartDataVo chartDataVo = new ChartDataVo();
-			chartDataVo.setGroupField(groupField);
-			chartDataVo.setSubGroupField(subGroupField);
-			chartDataVo.setValueField("value");
-
-			Map<String, Long> resultMap = null;
-			if (aggregate.equals("sum")) {
-				resultMap = resultObj.getJSONArray("tbodyList").stream().collect(Collectors.groupingBy(map -> ((JSONObject) map).getString(groupField) + (StringUtils.isNotBlank(subGroupField) ? "#" + ((JSONObject) map).getString(subGroupField) : ""), Collectors.summingLong(map -> ((JSONObject) map).getLong(valueField))));
-			} else if (aggregate.equals("count")) {
-				resultMap = resultObj.getJSONArray("tbodyList").stream().collect(Collectors.groupingBy(map -> ((JSONObject) map).getString(groupField) + (StringUtils.isNotBlank(subGroupField) ? "#" + ((JSONObject) map).getString(subGroupField) : ""), Collectors.counting()));
+		if (chart != null) {
+			// JSONObject resultObj = workcenterService.doSearch(new WorkcenterVo());
+			// JSONArray dataList = resultObj.getJSONArray("tbodyList");
+			JSONArray dataList = new JSONArray();
+			String[] workers = new String[] { "chenqw", "admin", "wangtc", "wenhb", "wugq" };
+			String[] urgencys = new String[] {"紧急","普通"};
+			for (int i = 0; i < 100; i++) {
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("worker", workers[(int) (Math.random() * 100 % 5)]);
+				jsonObj.put("processTaskId", Math.random() * 100);
+				jsonObj.put("urgency", urgencys[(int) (Math.random() * 100 % 2)]);
+				dataList.add(jsonObj);
 			}
-
-			Iterator<String> it = resultMap.keySet().iterator();
-			while (it.hasNext()) {
-				String key = it.next();
-				for (int i = 0; i < 10; i++) {
-					JSONObject jsonObj = new JSONObject();
-					jsonObj.put("year", Integer.toString(1000 + i));
-					jsonObj.put("value", Math.random() * 100);
-					chartDataVo.addData(jsonObj);
-				}
+			if (CollectionUtils.isNotEmpty(dataList)) {
+				return chart.getData(dataList, widgetVo.getChartConfigObj());
 			}
-
 		}
 
 		return null;
 	}
 
-	@Override
-	protected ChartDataVo myGetData(DashboardWidgetVo widgetVo) {
+	protected ChartDataVo myGetData2(DashboardWidgetVo widgetVo) {
 
 		ChartDataVo chartDataVo = new ChartDataVo();
 		chartDataVo.setGroupField("year");
@@ -96,17 +84,13 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 		return "ITSM";
 	}
 
-	class ProcessTaskResultHandler implements ResultHandler<ProcessTaskVo> {
-		@Override
-		public void handleResult(ResultContext resultContext) {
-			// TODO Auto-generated method stub
-
-		}
-
-	}
-
 	@Override
 	public String getDisplayName() {
 		return "ITSM任务数据";
+	}
+
+	@Override
+	public String getIcon() {
+		return "xx-icon";
 	}
 }
