@@ -2,14 +2,12 @@ package codedriver.module.process.api.processtask;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
@@ -21,11 +19,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessStepType;
-import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
-import codedriver.module.process.dto.ProcessTaskContentVo;
-import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.service.ProcessTaskService;
 
@@ -93,15 +87,6 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		processTaskStepVo.setParamObj(jsonObj);
 		handler.complete(processTaskStepVo);
-		//生成活动
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.COMPLETE.getValue());
-		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
-		String content = jsonObj.getString("content");
-		if(StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.CONTENT.getValue(), null, contentVo.getHash()));
-		}	
 		return null;
 	}
 

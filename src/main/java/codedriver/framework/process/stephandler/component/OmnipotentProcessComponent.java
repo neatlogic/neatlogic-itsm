@@ -236,6 +236,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
+		DataValid.formAttributeDataValid(currentProcessTaskStepVo);
 		return 0;
 	}
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepHandler;
 import codedriver.module.process.constvalue.ProcessStepMode;
+import codedriver.module.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.module.process.dto.ChannelPriorityVo;
 import codedriver.module.process.dto.ProcessStepVo;
 import codedriver.module.process.dto.ProcessTaskContentVo;
@@ -99,7 +101,9 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {	
+	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+		baseInfoValid(currentProcessTaskStepVo);
+		DataValid.formAttributeDataValid(currentProcessTaskStepVo);
 		return 0;
 	}
 
@@ -115,8 +119,6 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
-		baseInfoValid(currentProcessTaskStepVo);
-		DataValid.formAttributeDataValid(currentProcessTaskStepVo);
 		return 0;
 	}
 
@@ -166,11 +168,13 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 
 	}
 	private boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo) {
+		JSONObject paramObj = new JSONObject();
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
 		Pattern titlePattern = Pattern.compile("^[A-Za-z_\\d\\u4e00-\\u9fa5]+$");
 		if(!titlePattern.matcher(processTaskVo.getTitle()).matches()) {
 			throw new ProcessTaskRuntimeException("工单标题格式不对");
 		}
+		paramObj.put(ProcessTaskAuditDetailType.TITLE.getParamName(), processTaskVo.getTitle());
 		if(StringUtils.isBlank(processTaskVo.getOwner())) {
 			throw new ProcessTaskRuntimeException("工单请求人不能为空");
 		}
@@ -188,22 +192,31 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 		if(!priorityUuidlist.contains(processTaskVo.getPriorityUuid())) {
 			throw new ProcessTaskRuntimeException("工单优先级与服务优先级级不匹配");
 		}
-//		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
-//		if(processTaskStepContentList.isEmpty()) {
-//			throw new ProcessTaskRuntimeException("工单描述不能为空");
-//		}
+		paramObj.put(ProcessTaskAuditDetailType.PRIORITY.getParamName(), processTaskVo.getPriorityUuid());
+		
+		//获取上报描述内容
+		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
+		if(CollectionUtils.isNotEmpty(processTaskStepContentList)) {
+			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
+			if(processTaskContentVo != null && StringUtils.isNotBlank(processTaskContentVo.getContent())) {
+				paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskContentVo.getContent());
+			}
+		}
 		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		if(processTaskFileList.size() > 0) {
+			List<String> fileUuidList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				//TODO 验证附件uuid是否存在
 				if(fileMapper.getFileByUuid(processTaskFile.getFileUuid()) == null) {
 					throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileUuid() + "'不存在");
 				}
+				fileUuidList.add(processTaskFile.getFileUuid());
 			}
+			paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), fileUuidList);
 		}
+		currentProcessTaskStepVo.setParamObj(paramObj);
 		return true;
 	}
 
