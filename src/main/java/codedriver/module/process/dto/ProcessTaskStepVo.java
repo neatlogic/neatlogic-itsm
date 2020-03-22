@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.restful.annotation.EntityField;
+import codedriver.module.process.constvalue.ProcessTaskFlowDirection;
 import codedriver.module.process.constvalue.ProcessTaskStatus;
 
 public class ProcessTaskStepVo extends BasePageVo {
@@ -76,7 +77,10 @@ public class ProcessTaskStepVo extends BasePageVo {
 	private ProcessTaskStepCommentVo comment;
 	@EntityField(name = "评论附件列表", type = ApiParamType.JSONARRAY)
 	private List<ProcessTaskStepCommentVo> commentList;
-	
+	@EntityField(name = "回复是否必填", type = ApiParamType.INTEGER)
+	private Integer isRequired;
+	@EntityField(name = "流转方向", type = ApiParamType.STRING)
+	private String flowDirection;
 	public ProcessTaskStepVo() {
 
 	}
@@ -267,6 +271,29 @@ public class ProcessTaskStepVo extends BasePageVo {
 
 	public void setTeamList(List<ProcessTaskStepTeamVo> teamList) {
 		this.teamList = teamList;
+	}
+
+	public Integer getIsRequired() {
+		return isRequired;
+	}
+
+	public void setIsRequired(Integer isRequired) {
+		this.isRequired = isRequired;
+	}
+
+	public String getFlowDirection() {
+		if(this.isActive != null) {
+			if(this.isActive.intValue() == 2) {
+				flowDirection = ProcessTaskFlowDirection.BACKWARD.getText();
+			}else {
+				flowDirection = ProcessTaskFlowDirection.FORWARD.getText();
+			}
+		}
+		return flowDirection;
+	}
+
+	public void setFlowDirection(String flowDirection) {
+		this.flowDirection = flowDirection;
 	}
 
 	public List<ProcessTaskStepRelVo> getRelList() {

@@ -5,10 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -19,6 +23,7 @@ import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -45,7 +50,9 @@ import codedriver.module.process.dto.ProcessTaskVo;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 public class ProcessTaskStepGetApi extends ApiComponentBase {
-
+	
+	private final static Logger logger = LoggerFactory.getLogger(ProcessTaskStepGetApi.class);
+	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 	
@@ -94,7 +101,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW)) {
-			throw new ProcessTaskRuntimeException("您没有权限执行此操作");
+			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.VIEW.getText());
 		}
 		
 		//获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
@@ -151,9 +158,15 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			processTaskVo.setFormConfig(processTaskFormVo.getFormContent());
 			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
 			if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-				Map<String, String> formAttributeDataMap = new HashMap<>();
+				Map<String, Object> formAttributeDataMap = new HashMap<>();
 				for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-					formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getData());
+					String data = processTaskFormAttributeDataVo.getData();
+					if(data.startsWith("[") && data.endsWith("]")) {
+						List<String> dataList = JSON.parseArray(data, String.class);
+						formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
+					}else {
+						formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
+					}
 				}
 				processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 			}
@@ -165,6 +178,21 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(processTaskStepId != null) {
 			//获取步骤信息
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			if(StringUtils.isNotBlank(stepConfig)) {
+				JSONObject stepConfigObj = null;
+				try {
+					stepConfigObj = JSONObject.parseObject(stepConfig);
+				} catch (Exception ex) {
+					logger.error("hash为"+processTaskStepVo.getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
+				}
+				if (MapUtils.isNotEmpty(stepConfigObj)) {
+					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+					if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+						processTaskStepVo.setIsRequired(stepConfigObj.getInteger("isRequired"));
+					}
+				}
+			}
 			//处理人列表
 			List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MAJOR.getValue());
 			if(CollectionUtils.isNotEmpty(majorUserList)) {

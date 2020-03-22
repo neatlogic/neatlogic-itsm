@@ -380,7 +380,7 @@
 		FROM
 		processtask_step a
 		JOIN
-		processtask_step_rel b ON a.id = b.from_processtask_step_id
+		processtask_step_rel b ON a.id = b.from_processtask_step_id and b.is_hit = 1
 		WHERE
 		to_processtask_step_id = #{value}
 	</select>

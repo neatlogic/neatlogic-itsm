@@ -150,12 +150,14 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 							nextProcessTaskStepVo.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
 							// 标记挂起操作的发起步骤，避免出现死循环
 							nextProcessTaskStepVo.setStartProcessTaskStepId(currentProcessTaskStepVo.getId());
-							doNext(new ProcessStepThread(nextProcessTaskStepVo) {
-								@Override
-								public void execute() {
-									handler.hang(nextProcessTaskStepVo);
-								}
-							});
+							if(handler != null) {
+								doNext(new ProcessStepThread(nextProcessTaskStepVo) {
+									@Override
+									public void execute() {
+										handler.hang(nextProcessTaskStepVo);
+									}
+								});
+							}
 						}
 					}
 					// 恢复路径命中状态为0，代表路径未通过
@@ -527,12 +529,14 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 					for (ProcessTaskStepVo nextStep : nextStepList) {
 						IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
 						nextStep.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
-						doNext(new ProcessStepThread(nextStep) {
-							@Override
-							public void execute() {
-								nextStepHandler.active(nextStep);
-							}
-						});
+						if(nextStepHandler != null) {
+							doNext(new ProcessStepThread(nextStep) {
+								@Override
+								public void execute() {
+									nextStepHandler.active(nextStep);
+								}
+							});
+						}
 					}
 				} else if (nextStepList.size() == 0 && !processTaskStepVo.getHandler().equals(ProcessStepHandler.END.getHandler())) {
 					throw new ProcessTaskException("找不到可流转路径");
@@ -565,6 +569,18 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 
 	@Override
 	public final int retreat(ProcessTaskStepVo currentProcessTaskStepVo) {
+		try {
+			myRetreat(currentProcessTaskStepVo);
+			active(currentProcessTaskStepVo);
+			/** 处理历史记录 **/
+			AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskStepAction.RETREAT);
+		} catch (ProcessTaskException ex) {
+			logger.error(ex.getMessage(), ex);
+			currentProcessTaskStepVo.setError(ex.getMessage());
+			currentProcessTaskStepVo.setIsActive(1);
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
+			updateProcessTaskStepStatus(currentProcessTaskStepVo);
+		}
 		return 1;
 	}
 
@@ -582,9 +598,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			/** 找到所有已激活步骤，执行终止操作 **/
 			if (stepVo.getIsActive().equals(1)) {
 				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(stepVo.getHandler());
-				if (handler != null) {
+				if(handler != null) {
 					handler.abort(stepVo);
-				} else {
+				}else {
 					throw new ProcessStepHandlerNotFoundException(stepVo.getHandler());
 				}
 			}
@@ -637,10 +653,8 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			/** 找到所有已终止步骤，执行终止操作 **/
 			if (stepVo.getIsActive().equals(-1)) {
 				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(stepVo.getHandler());
-				if (handler != null) {
+				if(handler != null) {
 					handler.recover(stepVo);
-				} else {
-					throw new ProcessStepHandlerNotFoundException(stepVo.getHandler());
 				}
 			}
 		}
@@ -1095,13 +1109,15 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		for (ProcessTaskStepVo nextStep : nextStepList) {
 			IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
 			nextStep.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
-			doNext(new ProcessStepThread(nextStep) {
-				@Override
-				public void execute() {
-					nextStepHandler.active(nextStep);
-				}
+			if(nextStepHandler != null) {
+				doNext(new ProcessStepThread(nextStep) {
+					@Override
+					public void execute() {
+						nextStepHandler.active(nextStep);
+					}
 
-			});
+				});
+			}
 		}
 		return 0;
 	}

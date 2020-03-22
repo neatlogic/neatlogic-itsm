@@ -1,19 +1,21 @@
 package codedriver.module.process.constvalue;
 
 public enum ProcessTaskAuditDetailType {
-	TITLE("title", "标题"),
-	PRIORITY("priority", "优先级"),
-	CONTENT("content", "回复内容"),
-	FORM("form", "表单"),
-	WORKER("worker", "处理人"),
-	FILE("file", "上传文件");
+	TITLE("title", "标题", "title"),
+	PRIORITY("priority", "优先级", "priorityUuid"),
+	CONTENT("content", "回复内容", "content"),
+	//FORM("form", "表单"),
+	WORKER("worker", "处理人", "workerList"),
+	FILE("file", "上传文件", "fileUuidList");
 	
 	private String status;
 	private String text;
-
-	private ProcessTaskAuditDetailType(String _status, String _text) {
+	private String paramName;
+	
+	private ProcessTaskAuditDetailType(String _status, String _text, String _paramName) {
 		this.status = _status;
 		this.text = _text;
+		this.paramName = _paramName;
 	}
 
 	public String getValue() {
@@ -22,6 +24,10 @@ public enum ProcessTaskAuditDetailType {
 
 	public String getText() {
 		return text;
+	}
+
+	public String getParamName() {
+		return paramName;
 	}
 
 	public static String getValue(String _status) {
@@ -41,5 +47,4 @@ public enum ProcessTaskAuditDetailType {
 		}
 		return "";
 	}
-
 }

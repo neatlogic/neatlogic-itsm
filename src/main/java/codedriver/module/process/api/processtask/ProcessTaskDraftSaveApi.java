@@ -11,6 +11,7 @@ import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
@@ -96,10 +97,12 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 			startTaskStep.setProcessTaskId(processTaskId);
 		}
 		
-		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(ProcessStepHandler.START.getHandler());
-		handler.saveDraft(startTaskStep);
-		
+		if(handler != null) {
+			handler.saveDraft(startTaskStep);
+		}else {
+			throw new ProcessStepHandlerNotFoundException(ProcessStepHandler.START.getHandler());
+		}
 		return startTaskStep.getProcessTaskId();
 	}
 
