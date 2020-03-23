@@ -30,32 +30,26 @@ public class FileAuditHandler implements IProcessTaskStepAuditDetailHandler{
 	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
-			List<String> fileUuidList = JSON.parseArray(oldContent, String.class);
-			if(CollectionUtils.isNotEmpty(fileUuidList)) {
-				List<FileVo> fileList = new ArrayList<>();
-				for(String fileUuid : fileUuidList) {
-					FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
-					if(fileVo != null) {
-						fileList.add(fileVo);
-					}
-				}
-				processTaskStepAuditDetailVo.setOldContent(JSON.toJSONString(fileList));
-			}
+			processTaskStepAuditDetailVo.setNewContent(parse(oldContent));
 		}
 		String newContent = processTaskStepAuditDetailVo.getNewContent();
 		if(StringUtils.isNotBlank(newContent)) {
-			List<String> fileUuidList = JSON.parseArray(newContent, String.class);
-			if(CollectionUtils.isNotEmpty(fileUuidList)) {
-				List<FileVo> fileList = new ArrayList<>();
-				for(String fileUuid : fileUuidList) {
-					FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
-					if(fileVo != null) {
-						fileList.add(fileVo);
-					}
-				}
-				processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(fileList));
-			}
+			processTaskStepAuditDetailVo.setNewContent(parse(newContent));
 		}
 	}
 
+	private String parse(String content) {
+		List<String> fileUuidList = JSON.parseArray(content, String.class);
+		if(CollectionUtils.isNotEmpty(fileUuidList)) {
+			List<FileVo> fileList = new ArrayList<>();
+			for(String fileUuid : fileUuidList) {
+				FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+				if(fileVo != null) {
+					fileList.add(fileVo);
+				}
+			}
+			return JSON.toJSONString(fileList);
+		}
+		return content;
+	}
 }

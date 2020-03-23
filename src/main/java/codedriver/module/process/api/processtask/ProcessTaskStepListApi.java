@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
@@ -21,6 +23,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.constvalue.ProcessStepType;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.constvalue.UserType;
+import codedriver.module.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepCommentVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
@@ -101,12 +104,15 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 				processTaskStepAuditVo.setAction(ProcessTaskStepAction.COMMENT.getValue());
 				processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 				if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-					List<ProcessTaskStepCommentVo> commentList = new ArrayList<>();
 					for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-						ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo(processTaskStepAudit);
-						commentList.add(comment);
+						for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
+							IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
+							if(auditDetailHandler != null) {
+								auditDetailHandler.handle(processTaskStepAuditDetailVo);
+							}
+						}
 					}
-					processTaskStepVo.setCommentList(commentList);
+					processTaskStepVo.setProcessTaskStepAuditList(processTaskStepAuditList);
 				}
 				resultList.add(processTaskStepVo);
 			}
