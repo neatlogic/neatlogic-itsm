@@ -86,8 +86,9 @@ public class FormSaveApi extends ApiComponentBase {
 		//formVersionVo.setIsActive(1);
 		if (StringUtils.isBlank(formVo.getCurrentVersionUuid())) {
 			Integer version = formMapper.getMaxVersionByFormUuid(formVo.getUuid());
-			if (version == null) {
+			if (version == null) {//如果表单没有激活版本时，设置当前版本号为1，且为激活版本
 				version = 1;
+				formVersionVo.setIsActive(1);
 			} else {
 				version += 1;
 			}
