@@ -224,8 +224,9 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 						for (int i = 0; i < moveonConfigList.size(); i++) {
 							JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
 							String type = moveonConfig.getString("type");
-							if ("negative".equals(type)) {// 不流转
-								continue;
+							Boolean canRun = false;
+							if ("always".equals(type)) {// 直接流转
+								canRun = true;
 							} else if ("optional".equals(type)) {// 自定义
 								JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
 								if (CollectionUtils.isNotEmpty(conditionGroupList)) {
@@ -233,8 +234,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 									String script = conditionConfigVo.buildScript(currentProcessTaskStepVo);
 									// ((false || true) || (true && false) || (true || false))
 									try {
-										if (!runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
-											continue;
+										if (runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
+											canRun = true;
 										}
 									} catch (NoSuchMethodException e) {
 										logger.error(e.getMessage(), e);
@@ -242,25 +243,22 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 										logger.error(e.getMessage(), e);
 									}
 								}
-							} else if ("always".equals(type)) {// 直接流转
-
-							} else {// type不合法
-								continue;
 							}
 
 							// 符合条件
-							List<String> targetStepList = JSON.parseArray(moveonConfig.getString("targetStepList"), String.class);
-							if (CollectionUtils.isNotEmpty(targetStepList)) {
-								for (String targetStep : targetStepList) {
-									ProcessTaskStepRelVo relVo = toProcessStepUuidMap.get(targetStep);
-									ProcessTaskStepVo toStep = new ProcessTaskStepVo();
-									toStep.setProcessTaskId(relVo.getProcessTaskId());
-									toStep.setId(relVo.getToProcessTaskStepId());
-									toStep.setHandler(relVo.getToProcessStepHandler());
-									nextStepList.add(toStep);
+							if (canRun) {
+								List<String> targetStepList = JSON.parseArray(moveonConfig.getString("targetStepList"), String.class);
+								if (CollectionUtils.isNotEmpty(targetStepList)) {
+									for (String targetStep : targetStepList) {
+										ProcessTaskStepRelVo relVo = toProcessStepUuidMap.get(targetStep);
+										ProcessTaskStepVo toStep = new ProcessTaskStepVo();
+										toStep.setProcessTaskId(relVo.getProcessTaskId());
+										toStep.setId(relVo.getToProcessTaskStepId());
+										toStep.setHandler(relVo.getToProcessStepHandler());
+										nextStepList.add(toStep);
+									}
 								}
 							}
-
 						}
 					}
 				}
