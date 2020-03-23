@@ -42,7 +42,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			// JSONArray dataList = resultObj.getJSONArray("tbodyList");
 			JSONArray dataList = new JSONArray();
 			String[] workers = new String[] { "chenqw", "admin", "wangtc", "wenhb", "wugq" };
-			String[] urgencys = new String[] {"紧急","普通"};
+			String[] urgencys = new String[] { "紧急", "普通" };
 			for (int i = 0; i < 100; i++) {
 				JSONObject jsonObj = new JSONObject();
 				jsonObj.put("worker", workers[(int) (Math.random() * 100 % 5)]);
@@ -58,24 +58,8 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 		return null;
 	}
 
-	protected ChartDataVo myGetData2(DashboardWidgetVo widgetVo) {
-
-		ChartDataVo chartDataVo = new ChartDataVo();
-		chartDataVo.setGroupField("year");
-		chartDataVo.setValueField("value");
-		for (int i = 0; i < 10; i++) {
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.put("year", Integer.toString(1000 + i));
-			jsonObj.put("value", Math.random() * 100);
-			chartDataVo.addData(jsonObj);
-		}
-
-		return chartDataVo;
-	}
-
 	@Override
 	public JSONObject getChartConfig() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
