@@ -150,7 +150,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 							nextProcessTaskStepVo.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
 							// 标记挂起操作的发起步骤，避免出现死循环
 							nextProcessTaskStepVo.setStartProcessTaskStepId(currentProcessTaskStepVo.getId());
-							if(handler != null) {
+							if (handler != null) {
 								doNext(new ProcessStepThread(nextProcessTaskStepVo) {
 									@Override
 									public void execute() {
@@ -424,14 +424,15 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		try {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(currentProcessTaskStepVo.getProcessTaskId());
+
+			/** 检查处理人是否合法 **/
 			ActionRoleChecker.start(currentProcessTaskStepVo);
 
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-			/** 检查处理人是否合法 **/
 
 			/** 检查步骤是否“已激活” **/
 			if (!processTaskStepVo.getIsActive().equals(1)) {
-				throw new ProcessTaskRuntimeException("当前步骤未激活");
+				throw new ProcessTaskStepUnActivedException();
 			}
 			/** 判断工单步骤状态是否 “未开始” **/
 			if (processTaskStepVo.getStatus().equals(ProcessTaskStatus.RUNNING.getValue())) {
@@ -494,6 +495,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		boolean canComplete = false;
 		ProcessTaskStepUserVo processTaskMajorUser = null;
 		if (this.getMode().equals(ProcessStepMode.MT)) {
+			// TODO 还需要增加代理人的逻辑
 			/** 获取主处理人列表，检查当前用户是否为处理人 **/
 			List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), UserType.MAJOR.getValue());
 			for (ProcessTaskStepUserVo userVo : userList) {
@@ -529,7 +531,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 					for (ProcessTaskStepVo nextStep : nextStepList) {
 						IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
 						nextStep.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
-						if(nextStepHandler != null) {
+						if (nextStepHandler != null) {
 							doNext(new ProcessStepThread(nextStep) {
 								@Override
 								public void execute() {
@@ -598,9 +600,9 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			/** 找到所有已激活步骤，执行终止操作 **/
 			if (stepVo.getIsActive().equals(1)) {
 				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(stepVo.getHandler());
-				if(handler != null) {
+				if (handler != null) {
 					handler.abort(stepVo);
-				}else {
+				} else {
 					throw new ProcessStepHandlerNotFoundException(stepVo.getHandler());
 				}
 			}
@@ -653,7 +655,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			/** 找到所有已终止步骤，执行终止操作 **/
 			if (stepVo.getIsActive().equals(-1)) {
 				IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(stepVo.getHandler());
-				if(handler != null) {
+				if (handler != null) {
 					handler.recover(stepVo);
 				}
 			}
@@ -920,8 +922,8 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 	public final int saveDraft(ProcessTaskStepVo currentProcessTaskStepVo) {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		Long processTaskId = paramObj.getLong("processTaskId");
-		if(processTaskId == null) {//首次保存
-			
+		if (processTaskId == null) {// 首次保存
+
 			ProcessTaskVo processTaskVo = new ProcessTaskVo();
 			processTaskVo.setTitle(paramObj.getString("title"));
 			processTaskVo.setOwner(paramObj.getString("owner"));
@@ -930,7 +932,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			processTaskVo.setProcessUuid(currentProcessTaskStepVo.getProcessUuid());
 			processTaskVo.setReporter(UserContext.get().getUserId(true));
 			processTaskVo.setStatus(ProcessTaskStatus.DRAFT.getValue());
-					
+
 			ProcessVo processVo = processMapper.getProcessByUuid(currentProcessTaskStepVo.getProcessUuid());
 			/** 对流程配置进行散列处理 **/
 			if (StringUtils.isNotBlank(processVo.getConfig())) {
@@ -1058,15 +1060,15 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			processTaskStepUserVo.setUserName(UserContext.get().getUserName());
 			processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
 			processTaskMapper.insertProcessTaskStepWorker(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), UserContext.get().getUserId(true)));
-			
-		}else {
-			//第二次保存时的操作
+
+		} else {
+			// 第二次保存时的操作
 			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-			if(!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+			if (!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
 				throw new ProcessTaskRuntimeException("工单非草稿状态，不能进行上报暂存操作");
 			}
 			List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
-			if(processTaskStepList.size() != 1) {
+			if (processTaskStepList.size() != 1) {
 				throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 			}
 			currentProcessTaskStepVo.setId(processTaskStepList.get(0).getId());
@@ -1076,12 +1078,12 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 				logger.error(ex.getMessage(), ex);
 			}
 		}
-		
+
 		return 1;
 	}
-	
+
 	protected abstract int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException;
-	
+
 	@Override
 	public final int startProcess(ProcessTaskStepVo currentProcessTaskStepVo) {
 		try {
@@ -1095,7 +1097,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 			currentProcessTaskStepVo.setIsActive(2);
 			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
 			updateProcessTaskStepStatus(currentProcessTaskStepVo);
-		}catch(ProcessTaskException ex) {
+		} catch (ProcessTaskException ex) {
 			logger.error(ex.getMessage(), ex);
 			currentProcessTaskStepVo.setIsActive(1);
 			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.FAILED.getValue());
@@ -1109,7 +1111,7 @@ public abstract class ProcessStepHandlerBase extends ProcessStepHandlerUtilBase 
 		for (ProcessTaskStepVo nextStep : nextStepList) {
 			IProcessStepHandler nextStepHandler = ProcessStepHandlerFactory.getHandler(nextStep.getHandler());
 			nextStep.setFromProcessTaskStepId(currentProcessTaskStepVo.getId());
-			if(nextStepHandler != null) {
+			if (nextStepHandler != null) {
 				doNext(new ProcessStepThread(nextStep) {
 					@Override
 					public void execute() {

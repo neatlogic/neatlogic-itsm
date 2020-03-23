@@ -163,7 +163,7 @@ public abstract class ProcessStepHandlerUtilBase {
 
 		protected static void notify(ProcessTaskStepVo currentProcessTaskStepVo, NotifyTriggerType trigger) {
 			if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-				CommonThreadPool.execute(new NotifyHandler(currentProcessTaskStepVo, trigger));
+				CachedThreadPool.execute(new NotifyHandler(currentProcessTaskStepVo, trigger));
 			} else {
 				List<NotifyHandler> handlerList = NOTIFY_HANDLERS.get();
 				if (handlerList == null) {
@@ -174,7 +174,7 @@ public abstract class ProcessStepHandlerUtilBase {
 						public void afterCommit() {
 							List<NotifyHandler> handlerList = NOTIFY_HANDLERS.get();
 							for (NotifyHandler handler : handlerList) {
-								CommonThreadPool.execute(handler);
+								CachedThreadPool.execute(handler);
 							}
 						}
 

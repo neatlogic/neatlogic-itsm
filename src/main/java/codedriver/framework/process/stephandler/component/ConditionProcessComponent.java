@@ -34,7 +34,6 @@ import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.RelExpressionVo;
 import codedriver.module.process.dto.condition.ConditionConfigVo;
-import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @Service
 public class ConditionProcessComponent extends ProcessStepHandlerBase {
@@ -44,7 +43,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	public String getName() {
 		return ProcessStepHandler.CONDITION.getName();
 	}
-	
+
 	@Override
 	public String getType() {
 		return ProcessStepHandler.CONDITION.getType();
@@ -152,7 +151,9 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 				newkey += "[\"" + k + "\"]";
 			}
 			matcher.appendReplacement(temp, "json" + newkey);
-			stepAndKeyList.add(matcher.group(1));
+			if (!stepAndKeyList.contains(matcher.group(1))) {
+				stepAndKeyList.add(matcher.group(1));
+			}
 		}
 		matcher.appendTail(temp);
 
@@ -202,9 +203,9 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepVo> nextStepList = new ArrayList<ProcessTaskStepVo>();
-		if(CollectionUtils.isNotEmpty(currentProcessTaskStepVo.getRelList())) {
+		if (CollectionUtils.isNotEmpty(currentProcessTaskStepVo.getRelList())) {
 			Map<String, ProcessTaskStepRelVo> toProcessStepUuidMap = new HashMap<>();
-			for(ProcessTaskStepRelVo relVo : currentProcessTaskStepVo.getRelList()) {
+			for (ProcessTaskStepRelVo relVo : currentProcessTaskStepVo.getRelList()) {
 				toProcessStepUuidMap.put(relVo.getToProcessStepUuid(), relVo);
 			}
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
@@ -215,24 +216,24 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 					stepConfigObj = JSONObject.parseObject(stepConfig);
 					currentProcessTaskStepVo.setParamObj(stepConfigObj);
 				} catch (Exception ex) {
-					logger.error("hash为"+processTaskStepVo.getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
+					logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
 				}
 				if (MapUtils.isNotEmpty(stepConfigObj)) {
 					JSONArray moveonConfigList = stepConfigObj.getJSONArray("moveonConfigList");
-					if(CollectionUtils.isNotEmpty(moveonConfigList)) {
-						for(int i = 0; i < moveonConfigList.size(); i++) {
+					if (CollectionUtils.isNotEmpty(moveonConfigList)) {
+						for (int i = 0; i < moveonConfigList.size(); i++) {
 							JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
 							String type = moveonConfig.getString("type");
-							if("negative".equals(type)) {//不流转
+							if ("negative".equals(type)) {// 不流转
 								continue;
-							}else if("optional".equals(type)) {//自定义
+							} else if ("optional".equals(type)) {// 自定义
 								JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
-								if(CollectionUtils.isNotEmpty(conditionGroupList)) {
+								if (CollectionUtils.isNotEmpty(conditionGroupList)) {
 									ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
 									String script = conditionConfigVo.buildScript(currentProcessTaskStepVo);
-									//((false || true) || (true && false) || (true || false))
+									// ((false || true) || (true && false) || (true || false))
 									try {
-										if(!runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
+										if (!runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
 											continue;
 										}
 									} catch (NoSuchMethodException e) {
@@ -241,16 +242,16 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 										logger.error(e.getMessage(), e);
 									}
 								}
-							}else if("always".equals(type)) {//直接流转
-								
-							}else {//type不合法
+							} else if ("always".equals(type)) {// 直接流转
+
+							} else {// type不合法
 								continue;
 							}
-							
-							//符合条件
+
+							// 符合条件
 							List<String> targetStepList = JSON.parseArray(moveonConfig.getString("targetStepList"), String.class);
-							if(CollectionUtils.isNotEmpty(targetStepList)) {
-								for(String targetStep : targetStepList) {
+							if (CollectionUtils.isNotEmpty(targetStepList)) {
+								for (String targetStep : targetStepList) {
 									ProcessTaskStepRelVo relVo = toProcessStepUuidMap.get(targetStep);
 									ProcessTaskStepVo toStep = new ProcessTaskStepVo();
 									toStep.setProcessTaskId(relVo.getProcessTaskId());
@@ -259,13 +260,13 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 									nextStepList.add(toStep);
 								}
 							}
-							
+
 						}
 					}
 				}
 			}
 		}
-		
+
 		return nextStepList;
 	}
 
@@ -385,7 +386,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-
 	@Override
 	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 0;
@@ -409,7 +409,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
