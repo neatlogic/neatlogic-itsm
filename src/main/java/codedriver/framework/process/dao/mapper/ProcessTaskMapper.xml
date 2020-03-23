@@ -802,7 +802,7 @@
 	)
 	</select>
 	
-	<select id="getProcessTaskTaskInfoList" resultType="java.util.HashMap">
+	<select id="getProcessTaskActiveStepListByStepIdList" resultType="java.util.HashMap">
 	SELECT 
 	  pt.`id` AS processTaskId,
 	  pt.`title` AS title,
@@ -810,7 +810,7 @@
 	  pts.`name` AS stepName
 	FROM`processtask` pt
 	JOIN `processtask_step` pts ON pts.`processtask_id`=pt.`id` AND pts.`is_active`=1
-	WHERE pt.`status` = 'running' AND pts.`id` IN 
+	WHERE pts.`id` IN 
 	<foreach collection="processTaskStepIdList" item="stepId" open="(" separator="," close=")">
 	#{stepId}
 	</foreach>
