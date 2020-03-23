@@ -706,7 +706,7 @@
 	  psad.`old_content`,
 	  psad.`new_content`
 	FROM `processtask_step_audit` psa
-	JOIN `processtask_step_audit_detail` psad ON psad.`audit_id` = psa.`id`
+	LEFT JOIN `processtask_step_audit_detail` psad ON psad.`audit_id` = psa.`id`
 	JOIN `processtask_step` ps on ps.`id` = psa.`processtask_step_id`
 	WHERE psa.`processtask_id` = #{processTaskId}
 	<if test="processTaskStepId != null">
