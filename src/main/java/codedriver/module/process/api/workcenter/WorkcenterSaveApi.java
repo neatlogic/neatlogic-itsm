@@ -1,6 +1,7 @@
 package codedriver.module.process.api.workcenter;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单中心分类新增接口";
+		return "工单中心分类保存接口";
 	}
 
 	@Override
@@ -70,6 +71,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		if(workcenterMapper.checkWorkcenterNameIsRepeat(name,uuid)>0) {
 			throw new WorkcenterNameRepeatException(name);
 		}*/
+		workcenterVo.setUuid(uuid);
 		//保存、更新分类
 		JSONArray valueList = jsonObj.getJSONArray("valueList");
 		if(CollectionUtils.isNotEmpty(valueList)) {
@@ -98,7 +100,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 			workcenterVo.setType(ProcessWorkcenterType.CUSTOM.getValue());
 			workcenterMapper.insertWorkcenterOwner(userId, workcenterVo.getUuid());
 		}
-		if(uuid == null) {
+		if(StringUtils.isBlank(uuid)) {
 			workcenterVo.setConditionConfig(jsonObj.getString("conditionConfig"));
 			workcenterMapper.insertWorkcenter(workcenterVo);
 		}else { 

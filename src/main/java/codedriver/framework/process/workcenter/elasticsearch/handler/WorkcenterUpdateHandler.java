@@ -13,10 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -125,24 +127,17 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 }
 			 /** 获取工单当前步骤 **/
 			 List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskId(taskId);
-			 List<String> activeStepIdList = new ArrayList<String>();
-			 List<String> activeStepWorkerList = new ArrayList<String>();
-			 List<String> activeStepStatusList = new ArrayList<String>();
+			 List<String> currentStepIdList = new ArrayList<String>();
+			 JSONObject currentStepWorkerJson = new JSONObject();
+			 JSONObject currentStepStausJson = new JSONObject();
 			 for(ProcessTaskStepVo step : processTaskActiveStepList) {
-				 activeStepIdList.add(step.getId().toString());
+				 currentStepIdList.add(step.getId().toString());
+				 JSONArray currentStepWorkerArrayTmp = new JSONArray();
 				 for(ProcessTaskStepWorkerVo worker : step.getWorkerList()) {
-					 if(!StringUtils.isBlank(worker.getTeamUuid())) {
-						 activeStepWorkerList.add(step.getId()+"@team#"+worker.getTeamUuid());
-					 }
-					 if(!StringUtils.isBlank(worker.getUserId())) {
-						 activeStepWorkerList.add(step.getId()+"@user#"+worker.getUserId());
-					 }
-					 if(!StringUtils.isBlank(worker.getRoleName())) {
-						 activeStepWorkerList.add(step.getId()+"@role#"+worker.getRoleName());
-					 }
+					 currentStepWorkerArrayTmp.add(worker.getWorkList());
 				 }
-				 activeStepStatusList.add(step.getId()+"@"+step.getStatus());
-				
+				 currentStepWorkerJson.put(step.getId().toString(), currentStepWorkerArrayTmp);
+				 currentStepStausJson.put(step.getId().toString(),step.getStatus());
 			 }
 			 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			 //标题
@@ -170,11 +165,11 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 //转交人
 			 patch.setStrings("transferFromUsers", transferUserIdList);
 			 //当前步骤idList
-			 patch.setStrings("stepIds", activeStepIdList);
+			 patch.setStrings("currentStep", currentStepIdList);
 			 //当前步骤处理人List
-			 patch.setStrings("stepUser", activeStepWorkerList);
+			 patch.set("currentStepUser",  JSONObject.toJSONString(currentStepWorkerJson));
 			 //当前步骤状态
-			 patch.setStrings("stepStatus", activeStepStatusList);
+			 patch.set("currentStepStatus", JSONObject.toJSONString(currentStepStausJson));
 			 //时间窗口
 			 patch.set("worktime", channel.getWorktimeUuid());
 			 //超时时间

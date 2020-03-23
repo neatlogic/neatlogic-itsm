@@ -91,7 +91,9 @@ public class WorkcenterVo extends ConditionConfigVo implements Serializable{
 		return uuid;
 	}
 	public void setUuid(String uuid) {
-		this.uuid = uuid;
+		if(StringUtils.isNotBlank(uuid)) {
+			this.uuid = uuid;
+		}
 	}
 	
 	public String getName() {

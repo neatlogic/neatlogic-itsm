@@ -1,29 +1,35 @@
 package codedriver.framework.process.workcenter.column.handler;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
+import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
 
 @Component
-public class ProcessTaskTitleColumn implements IWorkcenterColumn{
-
+public class ProcessTaskActionColumn implements IWorkcenterColumn{
+	@Autowired
+	CatalogMapper catalogMapper;
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.TITLE.getValue();
+		return ProcessWorkcenterCondition.ACTION.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.TITLE.getName();
+		return ProcessWorkcenterCondition.ACTION.getName();
 	}
 
 	@Override
 	public Object getValue(MultiAttrsObject el) throws RuntimeException {
-		String title = el.getString(this.getName());
-		return title;
+		
+		return "";
 	}
 
 	@Override

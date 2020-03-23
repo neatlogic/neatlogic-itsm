@@ -19,6 +19,7 @@ public enum ProcessWorkcenterCondition {
 	CURRENT_STEP_STATUS("currentStepStatus","当前步骤状态"),
 	WOKRTIME("worktime","时间窗口"),
 	STEPUSER("stepUser", "当前处理人"),
+	ACTION("action", "操作栏"),
 	FORM("form", "表单");
 	private String value;
 	private String name;

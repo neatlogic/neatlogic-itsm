@@ -2,6 +2,8 @@ package codedriver.module.process.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
+import codedriver.framework.common.constvalue.GroupSearch;
+
 /**
  * @Author:chenqiwei
  * @Time:Jun 19, 2019
@@ -149,4 +151,17 @@ public class ProcessTaskStepWorkerVo {
 		this.teamUuid = teamUuid;
 	}
 
+	public String getWorkList() {
+		String stepWorkerValue = null;
+		 if(!StringUtils.isBlank(this.getTeamUuid())) {
+			 stepWorkerValue =  String.format("%s#%s",GroupSearch.TEAM.getValue(),this.getTeamUuid());
+		 }
+		 if(!StringUtils.isBlank(this.getUserId())) {
+			 stepWorkerValue =  String.format("%s#%s",GroupSearch.USER.getValue(),this.getUserId());
+		 }
+		 if(!StringUtils.isBlank(this.getRoleName())) {
+			 stepWorkerValue =  String.format("%s#%s",GroupSearch.ROLE.getValue(),this.getRoleName());
+		 }
+		return stepWorkerValue;
+	}
 }
