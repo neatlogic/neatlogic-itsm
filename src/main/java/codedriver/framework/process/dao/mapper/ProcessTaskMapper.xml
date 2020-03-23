@@ -487,6 +487,9 @@
 			<result column="teamUuid" property="teamUuid" />
 			<result column="userId" property="userId" />
 		</collection>
+		<collection property="userList" ofType="codedriver.module.process.dto.ProcessTaskStepUserVo">
+			<result column="userType" property="roleName" />
+		</collection>
 	</resultMap>
 	
 	<select id="getProcessTaskActiveStepByProcessTaskId" parameterType="java.lang.Long" resultMap="processTaskStepDetailMap">
@@ -502,11 +505,15 @@
 		ps.`start_time` AS startTime,
 		ps.`end_time` AS endTime,
 		ps.`error`,
+		ps.`is_active`,
 		psw.`role_name` AS roleName,
 		psw.`team_uuid` AS teamUuid,
-		psw.`user_id` AS userId
+		psw.`user_id` AS userId,
+		psw.`action`,
+		psu.`user_type` AS userType
 		FROM `processtask_step` ps 
-		LEFT JOIN `processtask_step_worker` psw ON ps.`processtask_id` = psw.`processtask_id` AND ps.`id` AND psw.`processtask_step_id` 
+		LEFT JOIN `processtask_step_worker` psw ON ps.`processtask_id` = psw.`processtask_id` AND ps.`id` = psw.`processtask_step_id` 
+		LEFT JOIN `processtask_step_user` psu ON ps.`processtask_id` = psu.`processtask_id` AND ps.`id` = psu.`processtask_step_id`
 		WHERE ps.`processtask_id` = #{processTaskId} AND ps.`type` = 'process' AND ps.`is_active` =1 AND psw.`action` = 'handle'  
 	</select>
 

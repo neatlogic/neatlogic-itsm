@@ -151,7 +151,7 @@ public class ProcessTaskStepWorkerVo {
 		this.teamUuid = teamUuid;
 	}
 
-	public String getWorkList() {
+	public String getWorkerValue() {
 		String stepWorkerValue = null;
 		 if(!StringUtils.isBlank(this.getTeamUuid())) {
 			 stepWorkerValue =  String.format("%s#%s",GroupSearch.TEAM.getValue(),this.getTeamUuid());

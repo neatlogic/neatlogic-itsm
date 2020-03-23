@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
 import codedriver.module.process.constvalue.ProcessStepType;
+import codedriver.module.process.constvalue.ProcessTaskStatus;
 import codedriver.module.process.constvalue.ProcessTaskStepAction;
 import codedriver.module.process.dto.CatalogVo;
 import codedriver.module.process.dto.ChannelVo;
@@ -35,6 +35,7 @@ import codedriver.module.process.dto.ProcessTaskContentVo;
 import codedriver.module.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.module.process.dto.ProcessTaskStepAuditVo;
 import codedriver.module.process.dto.ProcessTaskStepContentVo;
+import codedriver.module.process.dto.ProcessTaskStepUserVo;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.dto.ProcessTaskVo;
@@ -133,8 +134,16 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 for(ProcessTaskStepVo step : processTaskActiveStepList) {
 				 currentStepIdList.add(step.getId().toString());
 				 JSONArray currentStepWorkerArrayTmp = new JSONArray();
-				 for(ProcessTaskStepWorkerVo worker : step.getWorkerList()) {
-					 currentStepWorkerArrayTmp.add(worker.getWorkList());
+				 if(step.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
+					 for(ProcessTaskStepWorkerVo worker : step.getWorkerList()) {
+						 
+						 currentStepWorkerArrayTmp.add(worker.getWorkerValue());
+					 }
+				 }else {
+					 for(ProcessTaskStepUserVo userVo : step.getUserList()) {
+						 userVo.getUserType();
+						 currentStepWorkerArrayTmp.add(String.format("%s#%s#@%s", GroupSearch.USER.getValue(),userVo.getUserId(),userVo.getUserType()));
+					 }
 				 }
 				 currentStepWorkerJson.put(step.getId().toString(), currentStepWorkerArrayTmp);
 				 currentStepStausJson.put(step.getId().toString(),step.getStatus());

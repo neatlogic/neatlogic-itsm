@@ -18,6 +18,7 @@ import codedriver.framework.process.dao.cache.WorkcenterColumnDataCache;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.module.process.constvalue.ProcessWorkcenterCondition;
+import codedriver.module.process.constvalue.UserType;
 import codedriver.module.process.dto.ProcessTaskStepVo;
 
 @Component
@@ -64,36 +65,43 @@ public class ProcessTaskCurrentStepUserColumn implements IWorkcenterColumn{
 			resultObject.put("stepName",stepName);
 			JSONArray resultWorkerArray = new JSONArray();
 			JSONArray currentStepWorkArray = currentStepWorkerJson.getJSONArray(stepId.toString());
-			for(Object worker: currentStepWorkArray) {
+			for(Object workerObj: currentStepWorkArray) {
 				JSONObject resultWorkerJson = new JSONObject();
+				String worker = workerObj.toString();
+				String userType = null;
+				if(worker.contains("#@")) {
+					String[] tmp = worker.split("#@");
+					worker = tmp[0];
+					userType = tmp[1];
+				}
 				String valueName = (String) WorkcenterColumnDataCache.getItem(worker.toString());
-				String text = null;
 				if(valueName == null) {
 					if(worker.toString().startsWith(GroupSearch.USER.getValue())) {
 						UserVo userVo= userMapper.getUserByUserId(worker.toString().replace(GroupSearch.USER.getValue()+"#", ""));
 						if(userVo != null) {
-							text = userVo.getUserName();
-							WorkcenterColumnDataCache.addItem(worker.toString(), text);
+							valueName = userVo.getUserName();
+							WorkcenterColumnDataCache.addItem(worker.toString(), valueName);
 							
 						}
 					}
 					if(worker.toString().startsWith(GroupSearch.ROLE.getValue())) {
 						RoleVo roleVo = roleMapper.getRoleByRoleName(worker.toString().replace(GroupSearch.ROLE.getValue()+"#", ""));
 						if(roleVo != null) {
-							text = roleVo.getDescription();
-							WorkcenterColumnDataCache.addItem(worker.toString(), text);
+							valueName = roleVo.getDescription();
+							WorkcenterColumnDataCache.addItem(worker.toString(), valueName);
 						}
 					}
 					if(worker.toString().startsWith(GroupSearch.TEAM.getValue())) {
 						TeamVo teamVo = teamMapper.getTeamByUuid(worker.toString().replace(GroupSearch.TEAM.getValue()+"#", ""));
 						if(teamVo != null) {
-							text = teamVo.getName();
-							WorkcenterColumnDataCache.addItem(worker.toString(), text);
+							valueName = teamVo.getName();
+							WorkcenterColumnDataCache.addItem(worker.toString(), valueName);
 						}
 					}
 				}
 				resultWorkerJson.put("value", worker);
-				resultWorkerJson.put("text", text);
+				resultWorkerJson.put("text", valueName);
+				resultWorkerJson.put("userType", UserType.getText(userType));
 				resultWorkerArray.add(resultWorkerJson);
 			}
 			resultObject.put("currentStepWorkerList", resultWorkerArray);
