@@ -238,7 +238,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				actionList.add(ProcessTaskStepAction.COMPLETE.getValue());
 				actionList.add(ProcessTaskStepAction.SAVE.getValue());
 				actionList.add(ProcessTaskStepAction.COMMENT.getValue());
-				actionList.add(ProcessTaskStepAction.SUBTASK.getValue());
+				actionList.add(ProcessTaskStepAction.CREATESUBTASK.getValue());
 			}
 		}
 		
