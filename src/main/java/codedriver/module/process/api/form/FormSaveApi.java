@@ -91,6 +91,7 @@ public class FormSaveApi extends ApiComponentBase {
 				formVersionVo.setIsActive(1);
 			} else {
 				version += 1;
+				formVersionVo.setIsActive(0);
 			}
 			formVersionVo.setVersion(version);
 			formMapper.insertFormVersion(formVersionVo);

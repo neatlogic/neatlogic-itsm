@@ -811,14 +811,14 @@
 	)
 	</select>
 	
-	<select id="getProcessTaskTaskInfoList" resultType="java.util.HashMap">
+	<select id="getProcessTaskActiveStepListByStepIdList" resultType="java.util.HashMap">
 	SELECT 
 	  pt.`id` AS processTaskId,
 	  pt.`title` AS title,
 	  pts.`id` AS processTaskStepId,
 	  pts.`name` AS stepName
 	FROM`processtask` pt
-	JOIN `processtask_step` pts ON pts.`processtask_id`=pt.`id`
+	JOIN `processtask_step` pts ON pts.`processtask_id`=pt.`id` AND pts.`is_active`=1
 	WHERE pts.`id` IN 
 	<foreach collection="processTaskStepIdList" item="stepId" open="(" separator="," close=")">
 	#{stepId}
@@ -1200,7 +1200,6 @@
 		`processtask_id`,
 		`processtask_step_id`,
 		`content_hash`,
-		`is_final`,
 		`fcd`,
 		`fcu`
 		)
@@ -1209,7 +1208,6 @@
 		#{processTaskId},
 		#{processTaskStepId},
 		#{contentHash},
-		#{isFinal},
 		NOW(3),
 		#{fcu}
 		)
@@ -1462,4 +1460,11 @@
 	JOIN `processtask_step_audit_detail` psad ON psad.`audit_id` = psa.`id`
 	WHERE `id` = #{id}
 	</delete>
+	
+	<delete id="deleteProcessTaskStepContent" parameterType="codedriver.module.process.dto.ProcessTaskStepContentVo">
+	DELETE FROM `processtask_step_content` 
+	WHERE `processtask_step_id` = #{processTaskStepId} 
+	AND `content_hash` = #{contentHash}
+	</delete>
+	
 </mapper>

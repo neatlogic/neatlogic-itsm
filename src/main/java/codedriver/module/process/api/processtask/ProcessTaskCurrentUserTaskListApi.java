@@ -71,7 +71,7 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 			processTaskStepIdList.add(processTaskStepWorkerVo.getProcessTaskStepId());
 		}
 		String keyword = jsonObj.getString("keyword");
-		List<Map<String, Object>> taskList = processTaskMapper.getProcessTaskTaskInfoList(keyword, processTaskStepIdList);
+		List<Map<String, Object>> taskList = processTaskMapper.getProcessTaskActiveStepListByStepIdList(keyword, processTaskStepIdList);
 		return taskList;
 	}
 
