@@ -141,7 +141,6 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 					 }
 				 }else {
 					 for(ProcessTaskStepUserVo userVo : step.getUserList()) {
-						 userVo.getUserType();
 						 currentStepWorkerArrayTmp.add(String.format("%s#%s#@%s", GroupSearch.USER.getValue(),userVo.getUserId(),userVo.getUserType()));
 					 }
 				 }

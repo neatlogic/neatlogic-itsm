@@ -488,7 +488,8 @@
 			<result column="userId" property="userId" />
 		</collection>
 		<collection property="userList" ofType="codedriver.module.process.dto.ProcessTaskStepUserVo">
-			<result column="userType" property="roleName" />
+			<result column="userType" property="userType" />
+			<result column="user_id" property="userId" />
 		</collection>
 	</resultMap>
 	
@@ -510,6 +511,7 @@
 		psw.`team_uuid` AS teamUuid,
 		psw.`user_id` AS userId,
 		psw.`action`,
+		psu.`user_id`,
 		psu.`user_type` AS userType
 		FROM `processtask_step` ps 
 		LEFT JOIN `processtask_step_worker` psw ON ps.`processtask_id` = psw.`processtask_id` AND ps.`id` = psw.`processtask_step_id` 
