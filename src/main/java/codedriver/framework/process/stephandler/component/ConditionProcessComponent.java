@@ -81,60 +81,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-	private static boolean runScriptOld(Long flowJobId, String expression) throws ScriptException, NoSuchMethodException {
-		Pattern pattern = null;
-		Matcher matcher = null;
-		StringBuffer temp = new StringBuffer();
-		String regex = "\\$\\{([^}]+)\\}";
-		pattern = Pattern.compile(regex, Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-		matcher = pattern.matcher(expression);
-		List<String> stepAndKeyList = new ArrayList<String>();
-		while (matcher.find()) {
-			matcher.appendReplacement(temp, "map[\"" + matcher.group(1) + "\"]");
-			stepAndKeyList.add(matcher.group(1));
-		}
-		matcher.appendTail(temp);
-
-		StringBuilder script = new StringBuilder();
-		script.append("function run(){");
-		script.append("var map = new Object();");
-
-		if (stepAndKeyList.size() > 0) {
-			for (String stepAndKey : stepAndKeyList) {
-				if (stepAndKey.indexOf(".") > -1 && stepAndKey.split("\\.").length == 2) {
-					String stepUid = stepAndKey.split("\\.")[0];
-					String key = stepAndKey.split("\\.")[1];
-					List<String> valueList = new ArrayList<>();// flowJobMapper.getFlowJobStepNodeParamValueByFlowJobIdUidKey(flowJobId,
-																// stepUid,
-																// key);
-					if (valueList.size() > 0) {
-						if (valueList.size() > 1) {
-							script.append("map[\"" + stepUid + "." + key + "\"] = [");
-							for (int i = 0; i < valueList.size(); i++) {
-								String value = valueList.get(i);
-								script.append("\"" + value + "\"");
-								if (i < valueList.size() - 1) {
-									script.append(",");
-								}
-							}
-							script.append("];");
-						} else {
-							script.append("map[\"" + stepUid + "." + key + "\"] = \"" + valueList.get(0) + "\";");
-						}
-					}
-				}
-			}
-		}
-		script.append("return " + temp.toString() + ";");
-		script.append("}");
-		ScriptEngineManager sem = new ScriptEngineManager();
-		ScriptEngine se = sem.getEngineByName("nashorn");
-		se.eval(script.toString());
-		Invocable invocableEngine = (Invocable) se;
-		Object callbackvalue = invocableEngine.invokeFunction("run");
-		return Boolean.parseBoolean(callbackvalue.toString());
-	}
-
 	private static boolean runScript(Long flowJobId, String expression) throws ScriptException, NoSuchMethodException {
 		Pattern pattern = null;
 		Matcher matcher = null;
@@ -286,7 +232,9 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 					List<String> stepAndKeyList = new ArrayList<String>();
 					while (matcher.find()) {
 						matcher.appendReplacement(temp, "map[\"" + matcher.group(1) + "\"]");
-						stepAndKeyList.add(matcher.group(1));
+						if (!stepAndKeyList.contains(matcher.group(1))) {
+							stepAndKeyList.add(matcher.group(1));
+						}
 					}
 					matcher.appendTail(temp);
 
