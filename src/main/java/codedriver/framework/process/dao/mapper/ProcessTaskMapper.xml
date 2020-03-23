@@ -1191,7 +1191,6 @@
 		`processtask_id`,
 		`processtask_step_id`,
 		`content_hash`,
-		`is_final`,
 		`fcd`,
 		`fcu`
 		)
@@ -1200,7 +1199,6 @@
 		#{processTaskId},
 		#{processTaskStepId},
 		#{contentHash},
-		#{isFinal},
 		NOW(3),
 		#{fcu}
 		)
@@ -1453,4 +1451,11 @@
 	JOIN `processtask_step_audit_detail` psad ON psad.`audit_id` = psa.`id`
 	WHERE `id` = #{id}
 	</delete>
+	
+	<delete id="deleteProcessTaskStepContent" parameterType="codedriver.module.process.dto.ProcessTaskStepContentVo">
+	DELETE FROM `processtask_step_content` 
+	WHERE `processtask_step_id` = #{processTaskStepId} 
+	AND `content_hash` = #{contentHash}
+	</delete>
+	
 </mapper>

@@ -62,7 +62,6 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
 		@Param(name="formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
-		@Param(name = "auditId", type = ApiParamType.LONG, desc = "活动id"),
 		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述"),
 		@Param(name="fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
@@ -96,19 +95,14 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		}
 		
 		//删除暂存活动
-		Long auditId = jsonObj.getLong("auditId");
-		if(auditId != null) {
-			ProcessTaskStepAuditVo processTaskStepAuditVo = processTaskMapper.getProcessTaskStepAuditById(auditId);
-			if(processTaskStepAuditVo == null) {
-				throw new ProcessTaskRuntimeException("活动：'" + auditId + "'不存在");
-			}
-			if(!ProcessTaskStepAction.SAVE.getValue().equals(processTaskStepAuditVo.getAction())) {
-				throw new ProcessTaskRuntimeException("活动：'" + auditId + "'不是暂存活动");
-			}
-			if(!UserContext.get().getUserId(true).equals(processTaskStepAuditVo.getUserId())) {
-				throw new ProcessTaskRuntimeException("活动：'" + auditId + "'不是当前用户的暂存活动");
-			}
-			processTaskMapper.deleteProcessTaskStepAuditById(auditId);
+		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
+		auditVo.setProcessTaskId(processTaskId);
+		auditVo.setProcessTaskStepId(processTaskStepId);
+		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+		auditVo.setUserId(UserContext.get().getUserId(true));
+		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
+		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
 		}
 		String content = jsonObj.getString("content");
 		String fileUuidListStr = jsonObj.getString("fileUuidList");

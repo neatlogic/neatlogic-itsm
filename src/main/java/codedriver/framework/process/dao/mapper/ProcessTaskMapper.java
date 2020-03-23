@@ -229,4 +229,6 @@ public interface ProcessTaskMapper {
 	public int deleteProcessTaskFile(ProcessTaskFileVo processTaskFileVo);
 
 	public int deleteProcessTaskStepAuditById(Long auditId);
+	
+	public int deleteProcessTaskStepContent(ProcessTaskStepContentVo processTaskStepContentVo);
 }

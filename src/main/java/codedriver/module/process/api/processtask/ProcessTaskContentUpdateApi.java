@@ -2,6 +2,7 @@ package codedriver.module.process.api.processtask;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +55,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
+		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述")
 	})
 	@Description(desc = "工单上报描述内容更新接口")
 	@Override
@@ -72,25 +73,37 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		}
 		Long startProcessTaskStepId = processTaskStepList.get(0).getId();
 		//获取上报描述内容hash
-		String oldContentHash = "";
+		String oldContentHash = null;
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
 		if(!processTaskStepContentList.isEmpty()) {
 			oldContentHash = processTaskStepContentList.get(0).getContentHash();
 		}
 		
 		String content = jsonObj.getString("content");
-		ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-		//如果新的上报描述内容和原来的上报描述内容一样，则不生成活动
-		if(oldContentHash.equals(contentVo.getHash())) {
+		if(oldContentHash == null && StringUtils.isBlank(content)) {
 			return null;
 		}
-		processTaskMapper.replaceProcessTaskContent(contentVo);
-		processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, contentVo.getHash()));
+		
+		String newContentHash = null;
+		if(StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+			newContentHash = contentVo.getHash();
+			//如果新的上报描述内容和原来的上报描述内容不一样，则生成活动
+			if(!newContentHash.equals(oldContentHash)) {
+				processTaskMapper.replaceProcessTaskContent(contentVo);
+				processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, newContentHash));
+			}else {
+				return null;
+			}
+			
+		}else if(oldContentHash != null){
+			processTaskMapper.deleteProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, oldContentHash));
+		}
 		//生成活动
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.UPDATECONTENT.getValue());
-		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
-				
-		processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.CONTENT.getValue(), oldContentHash, contentVo.getHash()));	
+		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);		
+		processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.CONTENT.getValue(), oldContentHash, newContentHash));	
+		
 		return null;
 	}
 
