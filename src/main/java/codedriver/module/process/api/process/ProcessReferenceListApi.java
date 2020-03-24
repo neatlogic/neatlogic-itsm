@@ -12,13 +12,13 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dto.ChannelProcessVo;
+import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ChannelProcessVo;
-import codedriver.module.process.dto.ChannelVo;
 @Service
 public class ProcessReferenceListApi extends ApiComponentBase {
 

@@ -14,6 +14,9 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dto.FormAttributeVo;
+import codedriver.framework.process.dto.FormVersionVo;
+import codedriver.framework.process.dto.FormVo;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNameRepeatException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
@@ -23,9 +26,6 @@ import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.FormAttributeVo;
-import codedriver.module.process.dto.FormVersionVo;
-import codedriver.module.process.dto.FormVo;
 
 @Service
 @Transactional

@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
+import codedriver.framework.process.constvalue.UserType;
 import codedriver.framework.restful.groupsearch.core.IGroupSearchHandler;
-import codedriver.module.process.constvalue.ProcessTaskGroupSearch;
-import codedriver.module.process.constvalue.UserType;
 @Service
 public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 	@Override

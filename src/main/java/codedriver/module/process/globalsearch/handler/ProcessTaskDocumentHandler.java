@@ -13,9 +13,9 @@ import codedriver.framework.globalsearch.dto.DocumentVo;
 import codedriver.framework.globalsearch.dto.FieldVo;
 import codedriver.framework.globalsearch.enums.DocumentType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.module.process.dto.ProcessTaskContentVo;
-import codedriver.module.process.dto.ProcessTaskStepContentVo;
-import codedriver.module.process.dto.ProcessTaskVo;
+import codedriver.framework.process.dto.ProcessTaskContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 
 @Service
 public class ProcessTaskDocumentHandler extends DocumentHandlerBase<ProcessTaskVo> {

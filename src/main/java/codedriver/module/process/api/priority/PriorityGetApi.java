@@ -7,13 +7,13 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.PriorityVo;
 @Service
 public class PriorityGetApi extends ApiComponentBase {
 	

@@ -11,7 +11,7 @@ import codedriver.framework.dao.mapper.MailServerMapper;
 import codedriver.framework.dto.MailServerVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.notify.core.NotifyHandlerBase;
-import codedriver.module.process.notify.dto.NotifyVo;
+import codedriver.framework.process.notify.dto.NotifyVo;
 import codedriver.module.process.notify.exception.EmailServerNotFoundException;
 
 /**

@@ -11,6 +11,10 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.FormVersionVo;
+import codedriver.framework.process.dto.FormVo;
+import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
@@ -22,10 +26,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ChannelVo;
-import codedriver.module.process.dto.FormVersionVo;
-import codedriver.module.process.dto.FormVo;
-import codedriver.module.process.dto.ProcessVo;
 
 @Service
 public class FormGetApi extends ApiComponentBase {

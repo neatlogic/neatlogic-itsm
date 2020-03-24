@@ -16,6 +16,9 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
+import codedriver.framework.process.dto.ChannelPriorityVo;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelIllegalParameterException;
 import codedriver.framework.process.exception.channel.ChannelNameRepeatException;
@@ -24,9 +27,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.ChannelPriorityVo;
-import codedriver.module.process.dto.ChannelVo;
-import codedriver.module.process.dto.ITree;
 
 @Service
 @Transactional

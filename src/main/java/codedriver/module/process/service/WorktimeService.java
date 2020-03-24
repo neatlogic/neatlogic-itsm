@@ -2,7 +2,7 @@ package codedriver.module.process.service;
 
 import java.util.List;
 
-import codedriver.module.process.dto.WorktimeRangeVo;
+import codedriver.framework.process.dto.WorktimeRangeVo;
 
 public interface WorktimeService {
 

@@ -1,8 +1,8 @@
 package codedriver.module.process.service;
 
-import codedriver.module.process.dto.ProcessStepHandlerVo;
-
 import java.util.List;
+
+import codedriver.framework.process.dto.ProcessStepHandlerVo;
 
 public interface ProcessStepHandlerService {
     public List<ProcessStepHandlerVo> searchProcessComponent(String name);

@@ -9,6 +9,9 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dto.CatalogVo;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogIllegalParameterException;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelIllegalParameterException;
@@ -17,9 +20,6 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.dto.CatalogVo;
-import codedriver.module.process.dto.ChannelVo;
-import codedriver.module.process.dto.ITree;
 
 @Service
 @Transactional

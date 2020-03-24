@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import codedriver.module.process.dto.ProcessFormVo;
-import codedriver.module.process.dto.ProcessStepFormAttributeVo;
-import codedriver.module.process.dto.ProcessStepVo;
-import codedriver.module.process.dto.ProcessVo;
+import codedriver.framework.process.dto.ProcessFormVo;
+import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
+import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessVo;
 
 public interface ProcessService {
 	public ProcessVo getProcessByUuid(String processUuid);

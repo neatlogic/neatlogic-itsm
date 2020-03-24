@@ -1,10 +1,10 @@
 package codedriver.module.process.notify.handler;
 
 import codedriver.framework.process.notify.core.NotifyHandlerBase;
+import codedriver.framework.process.notify.dto.NotifyVo;
 import codedriver.framework.reminder.core.GlobalReminderFactory;
 import codedriver.framework.reminder.core.IGlobalReminder;
 import codedriver.framework.reminder.dto.ReminderMessageVo;
-import codedriver.module.process.notify.dto.NotifyVo;
 import codedriver.module.process.reminder.handler.ProcessTaskRemindHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

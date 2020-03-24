@@ -3,11 +3,11 @@ package codedriver.module.process.service;
 import java.util.List;
 import java.util.Set;
 
-import codedriver.module.process.constvalue.ProcessTaskStepAction;
-import codedriver.module.process.dto.ProcessTaskFormVo;
-import codedriver.module.process.dto.ProcessTaskStepFormAttributeVo;
-import codedriver.module.process.dto.ProcessTaskStepVo;
-import codedriver.module.process.dto.ProcessTaskVo;
+import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 
 public interface ProcessTaskService {
 	public ProcessTaskVo getProcessTaskBaseInfoById(Long processTaskId);

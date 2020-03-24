@@ -13,16 +13,16 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
+import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.workcenter.dao.mapper.WorkcenterMapper;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
-import codedriver.module.process.constvalue.ProcessWorkcenterType;
 import codedriver.module.process.service.WorkcenterService;
-import codedriver.module.process.workcenter.dto.WorkcenterVo;
 
 @AuthAction(name = "WORKCENTER_VIEW")
 @Service

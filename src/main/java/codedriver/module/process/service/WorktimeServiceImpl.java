@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
+import codedriver.framework.process.dto.WorktimeRangeVo;
 import codedriver.framework.process.exception.worktime.WorktimeNotFoundException;
-import codedriver.module.process.dto.WorktimeRangeVo;
 
 @Service
 public class WorktimeServiceImpl implements WorktimeService {
