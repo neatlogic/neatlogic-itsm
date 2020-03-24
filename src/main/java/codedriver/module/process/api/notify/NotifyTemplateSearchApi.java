@@ -11,7 +11,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
 import codedriver.framework.process.notify.dto.NotifyTemplateVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
