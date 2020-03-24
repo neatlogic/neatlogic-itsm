@@ -14,11 +14,12 @@ public enum ProcessTaskStepAction {
 	BACK("back", "回退"),
 	SAVE("save", "暂存"),
 	UPDATE("update", "修改上报内容"),//包括标题、优先级、描述
-	UPDATETITLE("updateTitle", "更新标题"),
-	UPDATEPRIORITY("updatePriority", "更新优先级"),
-	UPDATECONTENT("updateContent", "更新上报描述内容"),
+	UPDATETITLE("updatetitle", "更新标题"),
+	UPDATEPRIORITY("updatepriority", "更新优先级"),
+	UPDATECONTENT("updatecontent", "更新上报描述内容"),
 	COMMENT("comment", "回复"),
-	SUBTASK("subtask", "创建子任务");
+	CREATESUBTASK("createsubtask", "创建子任务"),
+	COMPLETESUBTASK("completesubtask", "完成子任务");
 	private String status;
 	private String text;
 
