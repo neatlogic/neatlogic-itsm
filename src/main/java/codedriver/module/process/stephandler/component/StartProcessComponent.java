@@ -48,11 +48,6 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public String getIcon() {
-		return null;
-	}
-
-	@Override
 	public String getName() {
 		return ProcessStepHandler.START.getName();
 	}
@@ -167,38 +162,39 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 		// TODO Auto-generated method stub
 
 	}
+
 	private boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo) {
 		JSONObject paramObj = new JSONObject();
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
 		Pattern titlePattern = Pattern.compile("^[A-Za-z_\\d\\u4e00-\\u9fa5]+$");
-		if(!titlePattern.matcher(processTaskVo.getTitle()).matches()) {
+		if (!titlePattern.matcher(processTaskVo.getTitle()).matches()) {
 			throw new ProcessTaskRuntimeException("工单标题格式不对");
 		}
 		paramObj.put(ProcessTaskAuditDetailType.TITLE.getParamName(), processTaskVo.getTitle());
-		if(StringUtils.isBlank(processTaskVo.getOwner())) {
+		if (StringUtils.isBlank(processTaskVo.getOwner())) {
 			throw new ProcessTaskRuntimeException("工单请求人不能为空");
 		}
-		if(userMapper.getUserBaseInfoByUserId(processTaskVo.getOwner()) == null) {
+		if (userMapper.getUserBaseInfoByUserId(processTaskVo.getOwner()) == null) {
 			throw new ProcessTaskRuntimeException("工单请求人账号:'" + processTaskVo.getOwner() + "'不存在");
 		}
-		if(StringUtils.isBlank(processTaskVo.getPriorityUuid())) {
+		if (StringUtils.isBlank(processTaskVo.getPriorityUuid())) {
 			throw new ProcessTaskRuntimeException("工单优先级不能为空");
 		}
 		List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
 		List<String> priorityUuidlist = new ArrayList<>(channelPriorityList.size());
-		for(ChannelPriorityVo channelPriorityVo : channelPriorityList) {
+		for (ChannelPriorityVo channelPriorityVo : channelPriorityList) {
 			priorityUuidlist.add(channelPriorityVo.getPriorityUuid());
 		}
-		if(!priorityUuidlist.contains(processTaskVo.getPriorityUuid())) {
+		if (!priorityUuidlist.contains(processTaskVo.getPriorityUuid())) {
 			throw new ProcessTaskRuntimeException("工单优先级与服务优先级级不匹配");
 		}
 		paramObj.put(ProcessTaskAuditDetailType.PRIORITY.getParamName(), processTaskVo.getPriorityUuid());
-		
-		//获取上报描述内容
+
+		// 获取上报描述内容
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
-		if(CollectionUtils.isNotEmpty(processTaskStepContentList)) {
+		if (CollectionUtils.isNotEmpty(processTaskStepContentList)) {
 			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
-			if(processTaskContentVo != null && StringUtils.isNotBlank(processTaskContentVo.getContent())) {
+			if (processTaskContentVo != null && StringUtils.isNotBlank(processTaskContentVo.getContent())) {
 				paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskContentVo.getContent());
 			}
 		}
@@ -206,10 +202,10 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
-		if(processTaskFileList.size() > 0) {
+		if (processTaskFileList.size() > 0) {
 			List<String> fileUuidList = new ArrayList<>();
-			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				if(fileMapper.getFileByUuid(processTaskFile.getFileUuid()) == null) {
+			for (ProcessTaskFileVo processTaskFile : processTaskFileList) {
+				if (fileMapper.getFileByUuid(processTaskFile.getFileUuid()) == null) {
 					throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileUuid() + "'不存在");
 				}
 				fileUuidList.add(processTaskFile.getFileUuid());
@@ -223,23 +219,23 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int mySaveDraft(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-		
-		/** 更新工单信息**/
+
+		/** 更新工单信息 **/
 		ProcessTaskVo processTaskVo = new ProcessTaskVo();
 		processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
 		processTaskVo.setTitle(paramObj.getString("title"));
 		processTaskVo.setOwner(paramObj.getString("owner"));
 		processTaskVo.setPriorityUuid(paramObj.getString("priorityUuid"));
 		processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
-		
+
 		/** 写入当前步骤的表单属性值 **/
 		JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
-		if(formAttributeDataList != null && formAttributeDataList.size() > 0) {
-			for(int i = 0; i < formAttributeDataList.size(); i++) {
+		if (formAttributeDataList != null && formAttributeDataList.size() > 0) {
+			for (int i = 0; i < formAttributeDataList.size(); i++) {
 				JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
 				ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
 				String dataList = formAttributeDataObj.getString("dataList");
-				if(StringUtils.isBlank(dataList)) {
+				if (StringUtils.isBlank(dataList)) {
 					continue;
 				}
 				attributeData.setData(dataList);
@@ -257,20 +253,33 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 			processTaskMapper.replaceProcessTaskContent(contentVo);
 			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
 		}
-		
+
 		/** 保存附件uuid **/
 		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
 		String fileUuidListStr = paramObj.getString("fileUuidList");
-		if(StringUtils.isNotBlank(fileUuidListStr)) {
+		if (StringUtils.isNotBlank(fileUuidListStr)) {
 			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
-			for(String fileUuid : fileUuidList) {
+			for (String fileUuid : fileUuidList) {
 				processTaskFileVo.setFileUuid(fileUuid);
 				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
 			}
 		}
 		return 1;
+	}
+
+	@SuppressWarnings("serial")
+	@Override
+	public JSONObject getChartConfig() {
+		return new JSONObject() {
+			{
+				this.put("shape", "circle");
+				this.put("width", 40);
+				this.put("height", 40);
+				this.put("deleteable", false);
+			}
+		};
 	}
 }

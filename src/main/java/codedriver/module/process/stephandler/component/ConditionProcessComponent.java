@@ -49,9 +49,17 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 		return ProcessStepHandler.CONDITION.getType();
 	}
 
+	@SuppressWarnings("serial")
 	@Override
-	public String getIcon() {
-		return "ts-shunt";
+	public JSONObject getChartConfig() {
+		return new JSONObject() {
+			{
+				this.put("icon", "ts-shunt");
+				this.put("shape", "L-rectangle-50%:R-rectangle-50%");
+				this.put("width", 68);
+				this.put("height", 40);
+			}
+		};
 	}
 
 	@Override

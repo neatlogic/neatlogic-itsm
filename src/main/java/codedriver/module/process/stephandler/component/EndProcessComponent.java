@@ -35,9 +35,17 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		return ProcessStepMode.AT;
 	}
 
+	@SuppressWarnings("serial")
 	@Override
-	public String getIcon() {
-		return null;
+	public JSONObject getChartConfig() {
+		return new JSONObject() {
+			{
+				this.put("shape", "circle");
+				this.put("width", 40);
+				this.put("height", 40);
+				this.put("deleteable", false);
+			}
+		};
 	}
 
 	@Override
