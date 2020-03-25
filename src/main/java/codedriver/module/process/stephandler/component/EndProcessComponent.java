@@ -154,4 +154,10 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	protected int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}
+
+	@Override
+	public void updateProcessTaskStepUserAndWorker(ProcessTaskStepVo currentProcessTaskStepVo) {
+		// TODO Auto-generated method stub
+		
+	}
 }

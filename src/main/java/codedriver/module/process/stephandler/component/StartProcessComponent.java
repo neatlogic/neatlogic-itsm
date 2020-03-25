@@ -283,4 +283,10 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 		};
 
 	}
+
+	@Override
+	public void updateProcessTaskStepUserAndWorker(ProcessTaskStepVo currentProcessTaskStepVo) {
+		// TODO Auto-generated method stub
+		
+	}
 }
