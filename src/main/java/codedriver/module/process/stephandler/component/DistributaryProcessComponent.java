@@ -26,15 +26,24 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	public String getName() {
 		return ProcessStepHandler.DISTRIBUTARY.getName();
 	}
-	
+
 	@Override
 	public String getType() {
 		return ProcessStepHandler.DISTRIBUTARY.getType();
 	}
 
+	@SuppressWarnings("serial")
 	@Override
-	public String getIcon() {
-		return "ts-branch";
+	public JSONObject getChartConfig() {
+		return new JSONObject() {
+			{
+				this.put("icon", "ts-branch");
+				this.put("shape", "L-triangle:R-triangle");
+				this.put("width", 68);
+				this.put("height", 68);
+				this.put("rdy", 68 / 4);
+			}
+		};
 	}
 
 	@Override
@@ -90,7 +99,7 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo){
+	protected int myHang(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 0;
 	}
 
@@ -109,12 +118,10 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-
 	@Override
 	protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 0;
 	}
-
 
 	@Override
 	protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
@@ -134,7 +141,7 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
