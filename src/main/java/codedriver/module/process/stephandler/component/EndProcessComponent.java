@@ -10,7 +10,6 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -153,30 +152,6 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
-		return 0;
-	}
-	@Override
-	protected int myCreateSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
-		return 0;
-	}
-
-	@Override
-	protected int myEditSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
-		return 0;
-	}
-
-	@Override
-	protected int myAbortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
-		return 0;
-	}
-
-	@Override
-	protected int myRedoSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
-		return 0;
-	}
-
-	@Override
-	protected int myCompleteSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
 		return 0;
 	}
 }

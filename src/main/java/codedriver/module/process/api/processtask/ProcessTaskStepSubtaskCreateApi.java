@@ -20,11 +20,8 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -80,36 +77,30 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.CREATESUBTASK)) {
 			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.CREATESUBTASK.getText());
 		}
-		
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		if(handler != null) {
-			ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
-			processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
-			processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
-			processTaskStepSubtaskVo.setOwner(UserContext.get().getUserId(true));
-			List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
-			String[] split = workerList.get(0).split("#");
-			if(GroupSearch.USER.getValue().equals(split[0])) {
-				UserVo userVo = userMapper.getUserByUserId(split[1]);
-				if(userVo != null) {
-					processTaskStepSubtaskVo.setUserId(userVo.getUserId());
-					processTaskStepSubtaskVo.setUserName(userVo.getUserName());
-				}else {
-					throw new UserNotFoundException(split[1]);
-				}
+		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
+		processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
+		processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
+		processTaskStepSubtaskVo.setOwner(UserContext.get().getUserId(true));
+		List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
+		String[] split = workerList.get(0).split("#");
+		if(GroupSearch.USER.getValue().equals(split[0])) {
+			UserVo userVo = userMapper.getUserByUserId(split[1]);
+			if(userVo != null) {
+				processTaskStepSubtaskVo.setUserId(userVo.getUserId());
+				processTaskStepSubtaskVo.setUserName(userVo.getUserName());
 			}else {
-				throw new ProcessTaskRuntimeException("子任务处理人不能为空");
+				throw new UserNotFoundException(split[1]);
 			}
-			
-			Long targetTime = jsonObj.getLong("targetTime");
-			if(targetTime != null) {
-				processTaskStepSubtaskVo.setTargetTime(new Date(targetTime));
-			}
-			processTaskStepSubtaskVo.setParamObj(jsonObj);
-			handler.createSubtask(processTaskStepSubtaskVo);
 		}else {
-			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+			throw new ProcessTaskRuntimeException("子任务处理人不能为空");
 		}
+		
+		Long targetTime = jsonObj.getLong("targetTime");
+		if(targetTime != null) {
+			processTaskStepSubtaskVo.setTargetTime(new Date(targetTime));
+		}
+		processTaskStepSubtaskVo.setParamObj(jsonObj);
+		processTaskService.createSubtask(processTaskStepSubtaskVo);
 		return null;
 	}
 

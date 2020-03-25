@@ -25,8 +25,6 @@ import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
@@ -355,45 +353,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
-		return 0;
-	}
-	@Override
-	protected int myCreateSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
-		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
-		String content = paramObj.getString("content");
-		if(StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-			processTaskMapper.replaceProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), processTaskContentVo.getHash()));
-		}
-		return 1;
-	}
-
-	@Override
-	protected int myEditSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
-		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
-		//TODO linbq查出旧数据
-		String content = paramObj.getString("content");
-		if(StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-			processTaskMapper.replaceProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), processTaskContentVo.getHash()));
-		}
-		return 1;
-	}
-
-	@Override
-	protected int myAbortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
-		return 0;
-	}
-
-	@Override
-	protected int myRedoSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
-		return 0;
-	}
-
-	@Override
-	protected int myCompleteSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
 		return 0;
 	}
 }
