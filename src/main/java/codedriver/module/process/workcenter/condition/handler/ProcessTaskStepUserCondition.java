@@ -9,8 +9,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterCondition;
-import codedriver.framework.process.constvalue.ProcessWorkcenterConditionType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
@@ -20,12 +20,12 @@ public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.STEPUSER.getValue();
+		return ProcessWorkcenterColumn.STEPUSER.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.STEPUSER.getName();
+		return ProcessWorkcenterColumn.STEPUSER.getName();
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterConditionType.COMMON.getValue();
+		return ProcessWorkcenterColumnType.COMMON.getValue();
 	}
 
 	@Override

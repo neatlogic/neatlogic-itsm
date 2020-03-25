@@ -16,8 +16,8 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterCondition;
-import codedriver.framework.process.constvalue.ProcessWorkcenterConditionType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -35,12 +35,12 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.OWNER.getValue();
+		return ProcessWorkcenterColumn.OWNER.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.OWNER.getName();
+		return ProcessWorkcenterColumn.OWNER.getName();
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterConditionType.COMMON.getValue();
+		return ProcessWorkcenterColumnType.COMMON.getValue();
 	}
 
 	@Override

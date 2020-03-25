@@ -2,8 +2,6 @@ package codedriver.module.process.workcenter.elasticsearch.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -17,10 +15,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.constvalue.ProcessStepType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -34,10 +30,9 @@ import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterCommonBuilder;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
 
 @Service
@@ -122,71 +117,44 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 }
 			 /** 获取转交记录 **/
 			 List<ProcessTaskStepAuditVo> transferAuditList = processTaskAuditMapper.getProcessTaskAuditList(new ProcessTaskStepAuditVo(processTaskVo.getId(),ProcessTaskStepAction.TRANSFER.getValue()));
-			 List<String> transferUserIdList = new ArrayList<String>();
-			 for(ProcessTaskStepAuditVo auditVo : transferAuditList) {
-				 transferUserIdList.add(auditVo.getUserId());
-			 }
+			
 			 /** 获取工单当前步骤 **/
 			 List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskId(taskId);
-			 List<String> currentStepIdList = new ArrayList<String>();
-			 JSONObject currentStepWorkerJson = new JSONObject();
-			 JSONObject currentStepStausJson = new JSONObject();
-			 for(ProcessTaskStepVo step : processTaskActiveStepList) {
-				 currentStepIdList.add(step.getId().toString());
-				 JSONArray currentStepWorkerArrayTmp = new JSONArray();
-				 if(step.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
-					 for(ProcessTaskStepWorkerVo worker : step.getWorkerList()) {
-						 
-						 currentStepWorkerArrayTmp.add(worker.getWorkerValue());
-					 }
-				 }else {
-					 for(ProcessTaskStepUserVo userVo : step.getUserList()) {
-						 currentStepWorkerArrayTmp.add(String.format("%s#%s#@%s", GroupSearch.USER.getValue(),userVo.getUserId(),userVo.getUserType()));
-					 }
-				 }
-				 currentStepWorkerJson.put(step.getId().toString(), currentStepWorkerArrayTmp);
-				 currentStepStausJson.put(step.getId().toString(),step.getStatus());
-			 }
-			 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			 //标题
-			 patch.set("title", processTaskVo.getTitle());
-			 //工单状态
-			 patch.set("status", processTaskVo.getStatus());
-			 //优先级
-			 patch.set("priority", processTaskVo.getPriorityUuid());
-			 //服务目录
-			 patch.set("catalog", catalog.getUuid());
-			 //服务类型
-			 patch.set("channelType",channel.getType());
-			 //服务
-			 patch.set("channel", channel.getUuid());
-			 //上报内容
-			 patch.set("content", startContentVo == null?"":startContentVo.getContent());
-			 //工单开始时间
-			 patch.set("createTime", sdf.format(processTaskVo.getStartTime()));
-			 //工单结束时间
-			 patch.set("endTime", processTaskVo.getEndTime() == null?null:sdf.format(processTaskVo.getEndTime()));
-			 //上报人
-			 patch.set("owner",processTaskVo.getOwner());
-			 //代报人
-			 patch.set("reporter", processTaskVo.getReporter());
-			 //转交人
-			 patch.setStrings("transferFromUsers", transferUserIdList);
-			 //当前步骤idList
-			 patch.setStrings("currentStep", currentStepIdList);
-			 //当前步骤处理人List
-			 patch.set("currentStepUser",  JSONObject.toJSONString(currentStepWorkerJson));
-			 //当前步骤状态
-			 patch.set("currentStepStatus", JSONObject.toJSONString(currentStepStausJson));
-			 //时间窗口
-			 patch.set("worktime", channel.getWorktimeUuid());
-			 //超时时间
-			 patch.set("expiredTime", processTaskVo.getExpireTime() == null?null:sdf.format(processTaskVo.getExpireTime()));
-			 //表单属性
+			 WorkcenterCommonBuilder builder = new WorkcenterCommonBuilder();
+			 //form
+			 JSONObject formJson = new JSONObject();
 			 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskId);
 			 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
-				 patch.set(attributeData.getAttributeUuid(), attributeData.getData());
+				 if(attributeData.getData().startsWith("[")&&attributeData.getData().endsWith("]")){
+					 Object obj = JSONArray.parse(attributeData.getData());
+					 formJson.put(attributeData.getAttributeUuid(),  JSONObject.parseArray(((JSONArray)obj).toJSONString(), String.class));
+				 }else {
+					 formJson.put(attributeData.getAttributeUuid(), attributeData.getData());
+				 }
+				 
 			 }
+			
+			 //common
+			 JSONObject WorkcenterColumnCommonJson = builder
+					.setTitle(processTaskVo.getTitle())
+			 		.setStatus(processTaskVo.getStatus())
+			 		.setPriority(processTaskVo.getPriorityUuid())
+			 		.setCatalog(catalog.getUuid())
+			 		.setChannelType(channel.getType())
+			 		.setChannel(channel.getUuid())
+			 		.setContent(startContentVo)
+			 		.setStartTime(processTaskVo.getStartTime())
+			 		.setEndTime(processTaskVo.getEndTime())
+			 		.setOwner(processTaskVo.getOwner())
+			 		.setReporter(processTaskVo.getReporter())
+			 		.setCurrentStepList(processTaskActiveStepList)
+			 		.setTransferFromUserList(transferAuditList)
+			 		.setWorktime(channel.getWorktimeUuid())
+			 		.setExpiredTime(processTaskVo.getExpireTime())
+			 		.build();
+			
+			 patch.set("form", formJson);
+			 patch.set("common", WorkcenterColumnCommonJson);
 			 patch.commit();
 		 }else {
 			 ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME).delete(taskId.toString());

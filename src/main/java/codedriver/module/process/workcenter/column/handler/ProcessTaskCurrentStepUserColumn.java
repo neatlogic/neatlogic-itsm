@@ -1,11 +1,11 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
@@ -14,15 +14,15 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.process.constvalue.ProcessWorkcenterCondition;
-import codedriver.framework.process.constvalue.UserType;
-import codedriver.framework.process.dao.cache.WorkcenterColumnDataCache;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
 @Component
-public class ProcessTaskCurrentStepUserColumn implements IWorkcenterColumn{
+public class ProcessTaskCurrentStepUserColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
 
 	@Autowired
 	ProcessTaskMapper processTaskMapper;
@@ -35,84 +35,69 @@ public class ProcessTaskCurrentStepUserColumn implements IWorkcenterColumn{
 	
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.CURRENT_STEP_USER.getValue();
+		return ProcessWorkcenterColumn.CURRENT_STEP_USER.getValueEs();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.CURRENT_STEP_USER.getName();
+		return ProcessWorkcenterColumn.CURRENT_STEP_USER.getName();
 	}
-
+	
 	@Override
-	public Object getValue(MultiAttrsObject el) throws RuntimeException {
-		JSONArray currentStepIdArray = (JSONArray) JSONArray.parse(el.getString(ProcessWorkcenterCondition.CURRENT_STEP.getValue()));
-		JSONObject currentStepWorkerJson = (JSONObject) JSONObject.parse(el.getString(this.getName()));
-		JSONArray resultArray = new JSONArray(); 
-		
-		for(Object currentStepId: currentStepIdArray) {
-			JSONObject resultObject = new JSONObject();
-			Long stepId =Long.valueOf(currentStepId.toString());
-			String cacheKey = "processTaskStep#"+stepId;
-			String stepName = (String) WorkcenterColumnDataCache.getItem(cacheKey);
-			if(stepName == null) {
-				ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(stepId);
-				if(stepVo != null) {
-					stepName = stepVo.getName();
-					WorkcenterColumnDataCache.addItem(cacheKey, stepName);
-				}
-			}
-			resultObject.put("stepId",stepId);
-			resultObject.put("stepName",stepName);
-			JSONArray resultWorkerArray = new JSONArray();
-			JSONArray currentStepWorkArray = currentStepWorkerJson.getJSONArray(stepId.toString());
-			for(Object workerObj: currentStepWorkArray) {
-				JSONObject resultWorkerJson = new JSONObject();
-				String worker = workerObj.toString();
-				String userType = null;
-				if(worker.contains("#@")) {
-					String[] tmp = worker.split("#@");
-					worker = tmp[0];
-					userType = tmp[1];
-				}
-				String valueName = (String) WorkcenterColumnDataCache.getItem(worker.toString());
-				if(valueName == null) {
-					if(worker.toString().startsWith(GroupSearch.USER.getValue())) {
-						UserVo userVo= userMapper.getUserByUserId(worker.toString().replace(GroupSearch.USER.getValue()+"#", ""));
-						if(userVo != null) {
-							valueName = userVo.getUserName();
-							WorkcenterColumnDataCache.addItem(worker.toString(), valueName);
-							
-						}
-					}
-					if(worker.toString().startsWith(GroupSearch.ROLE.getValue())) {
-						RoleVo roleVo = roleMapper.getRoleByRoleName(worker.toString().replace(GroupSearch.ROLE.getValue()+"#", ""));
-						if(roleVo != null) {
-							valueName = roleVo.getDescription();
-							WorkcenterColumnDataCache.addItem(worker.toString(), valueName);
-						}
-					}
-					if(worker.toString().startsWith(GroupSearch.TEAM.getValue())) {
-						TeamVo teamVo = teamMapper.getTeamByUuid(worker.toString().replace(GroupSearch.TEAM.getValue()+"#", ""));
-						if(teamVo != null) {
-							valueName = teamVo.getName();
-							WorkcenterColumnDataCache.addItem(worker.toString(), valueName);
-						}
-					}
-				}
-				resultWorkerJson.put("value", worker);
-				resultWorkerJson.put("text", valueName);
-				resultWorkerJson.put("userType", UserType.getText(userType));
-				resultWorkerArray.add(resultWorkerJson);
-			}
-			resultObject.put("currentStepWorkerList", resultWorkerArray);
-			resultArray.add(resultObject);
+	public Object getMyValue(JSONObject json) {
+		JSONArray currentStepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterColumn.CURRENT_STEP.getValueEs());
+		if(CollectionUtils.isEmpty(currentStepArray)) {
+			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		return resultArray;
+		for(Object currentStepObj: currentStepArray) {
+			JSONObject currentStepJson = (JSONObject)currentStepObj;
+			currentStepJson.put("status", ProcessTaskStatus.getText(currentStepJson.getString("status")));
+			JSONArray handlerList = currentStepJson.getJSONArray("handlerList");
+			for(Object handlerObj : handlerList) {
+				
+				JSONObject handlerJson = (JSONObject)handlerObj;
+				String handler = null;
+				if(handlerJson.containsKey("userId")) {
+					handler = handlerJson.getString("userId");
+				}else{
+					handler = handlerJson.getString("workerId");
+				}
+				if(handler.startsWith(GroupSearch.USER.getValuePlugin())) {
+					UserVo userVo = userMapper.getUserByUserId(handler.replace(GroupSearch.USER.getValuePlugin(), ""));
+					if(userVo != null) {
+						handlerJson.put("userId", handler);
+						handlerJson.put("userName", userVo.getUserName());
+					}
+				}else if(handler.startsWith(GroupSearch.ROLE.getValuePlugin())){
+					RoleVo roleVo = roleMapper.getRoleByRoleName(handler.toString().replace(GroupSearch.ROLE.getValuePlugin(), ""));
+					if(roleVo != null) {
+						handlerJson.put("roleId", handler);
+						handlerJson.put("roleName", roleVo.getDescription());
+					}
+					
+				}else if(handler.startsWith(GroupSearch.TEAM.getValuePlugin())){
+					TeamVo teamVo = teamMapper.getTeamByUuid(handler.toString().replace(GroupSearch.TEAM.getValuePlugin(), ""));
+					if(teamVo != null) {
+						handlerJson.put("teamId", handler);
+						handlerJson.put("teamName", teamVo.getName());
+					}
+				}
+				
+				
+			}
+			
+		}
+		return currentStepArray;
 	}
 
 	@Override
 	public Boolean allowSort() {
 		return false;
+	}
+	
+	@Override
+	public String getType() {
+		return ProcessWorkcenterColumnType.COMMON.getValue();
 	}
 
 }
