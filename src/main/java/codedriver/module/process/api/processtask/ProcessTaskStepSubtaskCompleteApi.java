@@ -46,7 +46,7 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
 	})
 	@Output({})
-	@Description(desc = "子任务创建接口")
+	@Description(desc = "子任务完成接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepSubtaskId = jsonObj.getLong("processTaskStepSubtaskId");
