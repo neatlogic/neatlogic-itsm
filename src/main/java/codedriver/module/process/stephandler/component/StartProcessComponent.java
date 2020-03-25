@@ -21,6 +21,7 @@ import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -272,5 +273,30 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 			}
 		}
 		return 1;
+	}
+	
+	@Override
+	protected int myCreateSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
+		return 0;
+	}
+
+	@Override
+	protected int myEditSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
+		return 0;
+	}
+
+	@Override
+	protected int myAbortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
+		return 0;
+	}
+
+	@Override
+	protected int myRedoSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
+		return 0;
+	}
+
+	@Override
+	protected int myCompleteSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) throws ProcessTaskException {
+		return 0;
 	}
 }

@@ -22,20 +22,21 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+
 @Service
-public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
+public class ProcessTaskStepSubtaskAbortApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public String getToken() {
-		return "processtask/step/subtask/complete";
+		return "processtask/step/subtask/abort";
 	}
 
 	@Override
 	public String getName() {
-		return "子任务完成接口";
+		return "子任务取消接口";
 	}
 
 	@Override
@@ -44,11 +45,10 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
+		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id")
 	})
 	@Output({})
-	@Description(desc = "子任务创建接口")
+	@Description(desc = "子任务取消接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepSubtaskId = jsonObj.getLong("processTaskStepSubtaskId");
@@ -56,7 +56,7 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 		if(processTaskStepSubtaskVo == null) {
 			throw new ProcessTaskStepSubtaskNotFoundException(processTaskStepSubtaskId.toString());
 		}
-		if(UserContext.get().getUserId(true).equals(processTaskStepSubtaskVo.getUserId())) {
+		if(UserContext.get().getUserId(true).equals(processTaskStepSubtaskVo.getOwner())) {
 			//获取步骤信息
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
 			if(processTaskStepVo == null) {
@@ -65,12 +65,12 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 			if(handler != null) {
 				processTaskStepSubtaskVo.setParamObj(jsonObj);
-				handler.completeSubtask(processTaskStepSubtaskVo);
+				handler.abortSubtask(processTaskStepSubtaskVo);
 			}else {
 				throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 			}
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMPLETESUBTASK.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.ABORTSUBTASK.getText());
 		}
 		return null;
 	}
