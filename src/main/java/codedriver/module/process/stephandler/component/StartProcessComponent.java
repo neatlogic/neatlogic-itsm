@@ -269,7 +269,7 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 		}
 		return 1;
 	}
-
+	
 	@SuppressWarnings("serial")
 	@Override
 	public JSONObject getChartConfig() {
@@ -281,5 +281,12 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 				this.put("deleteable", false);
 			}
 		};
+
+	}
+
+	@Override
+	public void updateProcessTaskStepUserAndWorker(List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) {
+		// TODO Auto-generated method stub
+		
 	}
 }

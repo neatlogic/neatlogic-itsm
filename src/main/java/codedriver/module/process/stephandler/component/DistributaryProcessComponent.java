@@ -148,4 +148,9 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
+	@Override
+	public void updateProcessTaskStepUserAndWorker(List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) {
+		// TODO Auto-generated method stub
+		
+	}
 }

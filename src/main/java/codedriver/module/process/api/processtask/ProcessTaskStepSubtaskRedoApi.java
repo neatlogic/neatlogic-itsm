@@ -17,8 +17,9 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
+
 @Service
-public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
+public class ProcessTaskStepSubtaskRedoApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -28,12 +29,12 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "processtask/step/subtask/complete";
+		return "processtask/step/subtask/redo";
 	}
 
 	@Override
 	public String getName() {
-		return "子任务完成接口";
+		return "子任务打回重做接口";
 	}
 
 	@Override
@@ -42,11 +43,10 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
+		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id")
 	})
 	@Output({})
-	@Description(desc = "子任务完成接口")
+	@Description(desc = "子任务打回重做接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepSubtaskId = jsonObj.getLong("processTaskStepSubtaskId");
@@ -54,11 +54,11 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 		if(processTaskStepSubtaskVo == null) {
 			throw new ProcessTaskStepSubtaskNotFoundException(processTaskStepSubtaskId.toString());
 		}
-		if(processTaskStepSubtaskVo.getIsCompletable().intValue() == 1) {
+		if(processTaskStepSubtaskVo.getIsRedoable().intValue() == 1) {
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
-			processTaskService.completeSubtask(processTaskStepSubtaskVo);
+			processTaskService.redoSubtask(processTaskStepSubtaskVo);
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMPLETESUBTASK.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.REDOSUBTASK.getText());
 		}
 		return null;
 	}
