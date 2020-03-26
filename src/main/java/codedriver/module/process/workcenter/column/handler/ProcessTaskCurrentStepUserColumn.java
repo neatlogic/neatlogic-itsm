@@ -53,6 +53,9 @@ public class ProcessTaskCurrentStepUserColumn extends WorkcenterColumnBase imple
 			JSONObject currentStepJson = (JSONObject)currentStepObj;
 			currentStepJson.put("statusName", ProcessTaskStatus.getText(currentStepJson.getString("status")));
 			JSONArray handlerList = currentStepJson.getJSONArray("handlerlist");
+			if(CollectionUtils.isEmpty(handlerList)) {
+				return CollectionUtils.EMPTY_COLLECTION;
+			}
 			for(Object handlerObj : handlerList) {
 				JSONObject handlerJson = (JSONObject)handlerObj;
 				String handler = handlerJson.getString("handler");
