@@ -85,6 +85,8 @@ public class FormAttributeCheckApi extends ApiComponentBase {
 				throw new FormIllegalParameterException("工单：'" + processTaskId + "'没有绑定表单");
 			}
 			formVersionVo = new FormVersionVo();
+			formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
+			formVersionVo.setFormName(processTaskFormVo.getFormName());
 			formVersionVo.setFormConfig(processTaskFormVo.getFormContent());
 			
 		}else if(StringUtils.isNotBlank(channelUuid)){
