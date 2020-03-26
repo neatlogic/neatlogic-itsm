@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.attribute.dto.AttributeDataVo;
 import codedriver.framework.attribute.exception.AttributeValidException;
+import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 
 @Component
@@ -13,7 +14,7 @@ public class SelectHandler implements IFormAttributeHandler {
 
 	@Override
 	public String getType() {
-		return "select";
+		return ProcessFormHandler.FORMSELECT.getHandler();
 	}
 
 	@Override
