@@ -26,10 +26,10 @@ import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -76,7 +76,7 @@ public class WorkcenterService {
 	public JSONObject doSearch(WorkcenterVo workcenterVo) {
 		JSONObject returnObj = new JSONObject();
 		//搜索es
-		QueryResult result = searchTask(workcenterVo);;
+		QueryResult result = searchTask(workcenterVo);
 		List<MultiAttrsObject> resultData = result.getData();
 		//返回的数据重新加工
 		List<JSONObject> dataList = new ArrayList<JSONObject>();
@@ -93,6 +93,7 @@ public class WorkcenterService {
 					it.remove();
 				}else {
 					thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
+					thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
 				}
 			}else {
 				List<String> channelUuidList = workcenterVo.getChannelUuidList();
@@ -279,7 +280,7 @@ public class WorkcenterService {
 						}else if(StringUtils.isEmpty(endTime)) {
 							expression = ProcessExpression.GREATERTHAN.getExpression();
 						}
-						whereSb.append(String.format(ProcessExpression.getExpressionEs(expression),condition.getName(),startTime,endTime));
+						whereSb.append(String.format(ProcessExpression.getExpressionEs(expression),ProcessWorkcenterField.getConditionValue(condition.getName()),startTime,endTime));
 					}else {
 						throw new WorkcenterConditionException(condition.getName());
 					}
@@ -287,7 +288,7 @@ public class WorkcenterService {
 					if(condition.getValueList().size()>1) {
 						value = String.join("','",condition.getValueList());
 					}
-					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getName(),String.format("'%s'",  value)));
+					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(condition.getName()),String.format("'%s'",  value)));
 				}
 				fromConditionUuid = toConditionUuid;
 			}

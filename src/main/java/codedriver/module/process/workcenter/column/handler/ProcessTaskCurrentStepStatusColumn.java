@@ -31,12 +31,13 @@ public class ProcessTaskCurrentStepStatusColumn extends WorkcenterColumnBase imp
 		if(CollectionUtils.isEmpty(currentStepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		for(Object currentStepObj: currentStepArray) {
+		JSONArray stepArray = JSONArray.parseArray(currentStepArray.toJSONString());
+		for(Object currentStepObj: stepArray) {
 			JSONObject currentStepJson = (JSONObject)currentStepObj;
 			currentStepJson.put("statusName", ProcessTaskStatus.getText(currentStepJson.getString("status")));
 			currentStepJson.remove("handlerlist");
 		}
-		return null;
+		return stepArray;
 	}
 
 	@Override

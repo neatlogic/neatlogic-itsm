@@ -31,11 +31,9 @@ public class ProcessTaskChannelColumn extends WorkcenterColumnBase  implements I
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String channelUuid = json.getString(this.getName());
 		String channelName = StringUtils.EMPTY;
-		if(channelName == null) {
-			ChannelVo channelVo =channelMapper.getChannelByUuid(channelUuid);
-			if(channelVo != null) {
-				channelName = channelVo.getName();
-			}
+		ChannelVo channelVo =channelMapper.getChannelByUuid(channelUuid);
+		if(channelVo != null) {
+			channelName = channelVo.getName();
 		}
 		return channelName;
 	}

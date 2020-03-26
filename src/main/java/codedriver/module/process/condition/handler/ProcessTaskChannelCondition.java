@@ -46,17 +46,6 @@ public class ProcessTaskChannelCondition implements IWorkcenterCondition{
 
 	@Override
 	public JSONObject getConfig() {
-		/*ChannelVo channel = new ChannelVo();
-		channel.setIsActive(1);
-		channel.setNeedPage(false);
- 		List<ChannelVo> channelList = channelMapper.searchChannelList(channel);
-		JSONArray jsonList = new JSONArray();
-		for (ChannelVo channelVo : channelList) {
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.put("value", channelVo.getUuid());
-			jsonObj.put("text", channelVo.getName());
-			jsonList.add(jsonObj);
-		}*/
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("url", "api/rest/process/channel/search");
 		returnObj.put("isMultiple", true);
