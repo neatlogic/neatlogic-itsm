@@ -78,7 +78,7 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 				UserVo userVo = userMapper.getUserByUserId(split[1]);
 				if(userVo != null) {
 					List<String> oldWorkerList = new ArrayList<>();
-					oldWorkerList.add(GroupSearch.USER.getValue() + "#" + processTaskStepSubtaskVo.getUserId());
+					oldWorkerList.add(GroupSearch.USER.getValuePlugin() + processTaskStepSubtaskVo.getUserId());
 					jsonObj.put(ProcessTaskAuditDetailType.WORKER.getOldDataParamName(), JSON.toJSONString(oldWorkerList));
 					jsonObj.put("oldUserId", processTaskStepSubtaskVo.getUserId());
 					jsonObj.put("oldUserName", processTaskStepSubtaskVo.getUserName());

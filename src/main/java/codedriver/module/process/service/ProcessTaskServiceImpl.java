@@ -456,6 +456,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	@Override
 	public void abortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
 		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
+		processTaskStepSubtaskVo.setCancelUser(UserContext.get().getUserId(true));
 		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
 		
 		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
