@@ -40,4 +40,10 @@ public class ProcessTaskActionColumn implements IWorkcenterColumn{
 		return null;
 	}
 
+	@Override
+	public String getClassName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -37,4 +37,9 @@ public class ProcessTaskTitleColumn extends WorkcenterColumnBase implements IWor
 		return ProcessFieldType.COMMON.getValue();
 	}
 
+	@Override
+	public String getClassName() {
+		return "fontBold";
+	}
+
 }

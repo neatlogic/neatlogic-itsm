@@ -23,9 +23,12 @@ import com.techsure.multiattrsearch.util.ESQueryUtil;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
+import codedriver.framework.process.condition.core.IWorkcenterCondition;
+import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
@@ -37,8 +40,6 @@ import codedriver.framework.process.dto.condition.ConditionVo;
 import codedriver.framework.process.exception.workcenter.WorkcenterConditionException;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
-import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
-import codedriver.framework.process.workcenter.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
@@ -265,9 +266,9 @@ public class WorkcenterService {
 						String startTime = StringUtils.EMPTY;
 						String endTime = StringUtils.EMPTY;
 						String expression = condition.getExpression();
-						if(dateValue.containsKey("startTime")) {
-							startTime = format.format(new Date(dateValue.getLong("startTime")));
-							endTime = format.format(new Date(dateValue.getLong("endTime")));
+						if(dateValue.containsKey(ProcessWorkcenterField.STARTTIME.getValue())) {
+							startTime = format.format(new Date(dateValue.getLong(ProcessWorkcenterField.STARTTIME.getValue())));
+							endTime = format.format(new Date(dateValue.getLong(ProcessWorkcenterField.ENDTIME.getValue())));
 						}else {
 							startTime = TimeUtil.timeTransfer(dateValue.getInteger("timeRange"), dateValue.getString("timeUnit"));
 							endTime = TimeUtil.timeNow();

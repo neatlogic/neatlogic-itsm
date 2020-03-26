@@ -37,4 +37,10 @@ public class ProcessTaskExpiredTimeColumn extends WorkcenterColumnBase implement
 		return ProcessFieldType.COMMON.getValue();
 	}
 
+	@Override
+	public String getClassName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -37,4 +37,10 @@ public class ProcessTaskStartTimeColumn extends WorkcenterColumnBase implements 
 		return ProcessFieldType.COMMON.getValue();
 	}
 
+	@Override
+	public String getClassName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

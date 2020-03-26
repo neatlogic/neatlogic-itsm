@@ -5,17 +5,14 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.dao.cache.WorkcenterColumnDataCache;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
 @Component
 public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
-
 	@Autowired
 	UserMapper userMapper;
 	@Override
@@ -30,17 +27,14 @@ public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWor
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
+		JSONObject userJson = new JSONObject();
 		String userId = json.getString(this.getName());
-		String cacheKey = GroupSearch.USER+"#"+userId;
-		String userName = (String) WorkcenterColumnDataCache.getItem(cacheKey);
-		if(userName == null) {
-			UserVo userVo =userMapper.getUserByUserId(userId);
-			if(userVo != null) {
-				userName = userVo.getUserName();
-				WorkcenterColumnDataCache.addItem(cacheKey, userName);
-			}
+		UserVo userVo =userMapper.getUserByUserId(userId);
+		if(userVo != null) {
+			userJson.put("username", userVo.getUserName());
 		}
-		return userName;
+		userJson.put("userid", userId);
+		return userJson;
 	}
 
 	@Override
@@ -51,6 +45,12 @@ public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWor
 	@Override
 	public String getType() {
 		return ProcessFieldType.COMMON.getValue();
+	}
+
+	@Override
+	public String getClassName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

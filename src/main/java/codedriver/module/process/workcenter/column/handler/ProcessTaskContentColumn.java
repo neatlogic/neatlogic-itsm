@@ -36,4 +36,10 @@ public class ProcessTaskContentColumn extends WorkcenterColumnBase implements IW
 	public String getType() {
 		return ProcessFieldType.COMMON.getValue();
 	}
+
+	@Override
+	public String getClassName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

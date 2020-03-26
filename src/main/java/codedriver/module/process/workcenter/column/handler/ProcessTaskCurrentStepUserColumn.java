@@ -51,7 +51,7 @@ public class ProcessTaskCurrentStepUserColumn extends WorkcenterColumnBase imple
 		}
 		for(Object currentStepObj: currentStepArray) {
 			JSONObject currentStepJson = (JSONObject)currentStepObj;
-			currentStepJson.put("status", ProcessTaskStatus.getText(currentStepJson.getString("status")));
+			currentStepJson.put("statusName", ProcessTaskStatus.getText(currentStepJson.getString("status")));
 			JSONArray handlerList = currentStepJson.getJSONArray("handlerlist");
 			for(Object handlerObj : handlerList) {
 				JSONObject handlerJson = (JSONObject)handlerObj;
@@ -92,6 +92,12 @@ public class ProcessTaskCurrentStepUserColumn extends WorkcenterColumnBase imple
 	@Override
 	public String getType() {
 		return ProcessFieldType.COMMON.getValue();
+	}
+
+	@Override
+	public String getClassName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

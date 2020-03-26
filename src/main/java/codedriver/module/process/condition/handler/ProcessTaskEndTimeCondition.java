@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
-import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 
 @Component
 public class ProcessTaskEndTimeCondition implements IWorkcenterCondition{

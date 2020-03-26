@@ -37,4 +37,10 @@ public class ProcessTaskEndTimeColumn extends WorkcenterColumnBase implements IW
 		return ProcessFieldType.COMMON.getValue();
 	}
 
+	@Override
+	public String getClassName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
