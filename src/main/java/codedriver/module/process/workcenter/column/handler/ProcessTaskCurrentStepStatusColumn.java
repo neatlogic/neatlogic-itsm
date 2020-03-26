@@ -1,13 +1,10 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
@@ -16,12 +13,12 @@ public class ProcessTaskCurrentStepStatusColumn extends WorkcenterColumnBase imp
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.CURRENT_STEP_STATUS.getValueEs();
+		return "currentstepstatus";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.CURRENT_STEP_USER.getName();
+		return "当前步骤状态";
 	}
 
 	@Override
@@ -37,7 +34,7 @@ public class ProcessTaskCurrentStepStatusColumn extends WorkcenterColumnBase imp
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 }

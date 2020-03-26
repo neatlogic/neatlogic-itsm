@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter.condition.handler;
+package codedriver.module.process.condition.handler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,31 +11,29 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessExpression;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 
 @Component
-public class ProcessTaskStatusCondition implements IWorkcenterCondition{
+public class ProcessTaskStepStatusCondition implements IWorkcenterCondition{
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.STATUS.getValue();
+		return "stepstatus";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.STATUS.getName();
+		return "步骤状态";
 	}
 
 	@Override
@@ -49,7 +47,7 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 	@Override
@@ -58,24 +56,34 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 		JSONArray jsonList = new JSONArray();
 		
 		JSONObject jsonObj = new JSONObject();
-		jsonObj.put("value", ProcessTaskStatus.RUNNING.getValue());
-		jsonObj.put("text", ProcessTaskStatus.RUNNING.getText());
+		jsonObj.put("value", ProcessTaskStatus.PENDING.getValue());
+		jsonObj.put("text", ProcessTaskStatus.PENDING.getText());
 		jsonList.add(jsonObj);
 		
 		JSONObject jsonObj1 = new JSONObject();
-		jsonObj1.put("value", ProcessTaskStatus.ABORTED.getValue());
-		jsonObj1.put("text", ProcessTaskStatus.ABORTED.getText());
+		jsonObj1.put("value", ProcessTaskStatus.RUNNING.getValue());
+		jsonObj1.put("text", ProcessTaskStatus.RUNNING.getText());
 		jsonList.add(jsonObj1);
 		
 		JSONObject jsonObj2 = new JSONObject();
-		jsonObj2.put("value", ProcessTaskStatus.FAILED.getValue());
-		jsonObj2.put("text", ProcessTaskStatus.FAILED.getText());
+		jsonObj2.put("value", ProcessTaskStatus.ABORTED.getValue());
+		jsonObj2.put("text", ProcessTaskStatus.ABORTED.getText());
 		jsonList.add(jsonObj2);
 		
 		JSONObject jsonObj3 = new JSONObject();
-		jsonObj3.put("value", ProcessTaskStatus.SUCCEED.getValue());
-		jsonObj3.put("text", ProcessTaskStatus.SUCCEED.getText());
+		jsonObj3.put("value", ProcessTaskStatus.FAILED.getValue());
+		jsonObj3.put("text", ProcessTaskStatus.FAILED.getText());
 		jsonList.add(jsonObj3);
+		
+		JSONObject jsonObj4 = new JSONObject();
+		jsonObj4.put("value", ProcessTaskStatus.SUCCEED.getValue());
+		jsonObj4.put("text", ProcessTaskStatus.SUCCEED.getText());
+		jsonList.add(jsonObj4);
+		
+		JSONObject jsonObj5 = new JSONObject();
+		jsonObj5.put("value", ProcessTaskStatus.HANG.getValue());
+		jsonObj5.put("text", ProcessTaskStatus.HANG.getText());
+		jsonList.add(jsonObj5);
 		
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("dataList", jsonList);
@@ -85,14 +93,14 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 7;
+		return 8;
 	}
 
 	@Override
 	public List<ProcessExpression> getExpressionList() {
 		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
 	}
-	
+
 	@Override
 	public ProcessExpression getDefaultExpression() {
 		return ProcessExpression.INCLUDE;
@@ -103,8 +111,8 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 		boolean result = false;
 		List<String> valueList = conditionVo.getValueList();
 		if(!CollectionUtils.isEmpty(valueList)) {
-			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
-			result = valueList.contains(processTask.getStatus());
+			ProcessTaskStepVo processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+			result = valueList.contains(processTaskStep.getStatus());
 		}			
 		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
 			return result;
@@ -114,5 +122,4 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 			return false;
 		}
 	}
-
 }

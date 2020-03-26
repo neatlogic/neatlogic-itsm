@@ -1,14 +1,12 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import java.util.List;
-
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
@@ -17,17 +15,20 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.CURRENT_STEP.getValueEs();
+		return "currentstep";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.CURRENT_STEP.getName();
+		return "当前步骤";
 	}
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONArray currentStepArray = json.getJSONArray(this.getName());
+		if(CollectionUtils.isEmpty(currentStepArray)) {
+			return CollectionUtils.EMPTY_COLLECTION;
+		}
 		JSONArray currentStepList = new JSONArray();
 		for(Object step : currentStepArray) {
 			JSONObject stepJson = new JSONObject();
@@ -45,6 +46,6 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 }

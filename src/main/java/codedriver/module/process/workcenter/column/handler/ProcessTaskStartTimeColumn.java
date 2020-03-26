@@ -4,8 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
@@ -14,12 +13,12 @@ public class ProcessTaskStartTimeColumn extends WorkcenterColumnBase implements 
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.STARTTIME.getValueEs();
+		return "starttime";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.STARTTIME.getName();
+		return "上报时间";
 	}
 
 	@Override
@@ -35,7 +34,7 @@ public class ProcessTaskStartTimeColumn extends WorkcenterColumnBase implements 
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 }

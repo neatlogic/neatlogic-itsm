@@ -8,8 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.cache.WorkcenterColumnDataCache;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
@@ -21,12 +20,12 @@ public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWor
 	UserMapper userMapper;
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.OWNER.getValueEs();
+		return "owner";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.OWNER.getName();
+		return "上报人";
 	}
 
 	@Override
@@ -51,7 +50,7 @@ public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWor
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 }

@@ -4,8 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
@@ -14,12 +13,12 @@ public class ProcessTaskExpiredTimeColumn extends WorkcenterColumnBase implement
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.EXPIRED_TIME.getValueEs();
+		return "expiredtime";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.EXPIRED_TIME.getName();
+		return "剩余时间";
 	}
 
 	@Override
@@ -35,7 +34,7 @@ public class ProcessTaskExpiredTimeColumn extends WorkcenterColumnBase implement
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 }

@@ -32,7 +32,7 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterCommonBuilder;
+import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
 
 @Service
@@ -120,7 +120,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			
 			 /** 获取工单当前步骤 **/
 			 List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskId(taskId);
-			 WorkcenterCommonBuilder builder = new WorkcenterCommonBuilder();
+			 WorkcenterFieldBuilder builder = new WorkcenterFieldBuilder();
 			 //form
 			 JSONObject formJson = new JSONObject();
 			 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskId);

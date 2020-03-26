@@ -5,8 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.cache.WorkcenterColumnDataCache;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -19,12 +18,12 @@ public class ProcessTaskCatalogColumn extends WorkcenterColumnBase  implements I
 	CatalogMapper catalogMapper;
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.CATALOG.getValueEs();
+		return "catalog";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.CATALOG.getName();
+		return "服务目录";
 	}
 
 	@Override
@@ -48,7 +47,7 @@ public class ProcessTaskCatalogColumn extends WorkcenterColumnBase  implements I
 
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 }

@@ -14,9 +14,9 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
@@ -35,51 +35,45 @@ public class ProcessTaskCurrentStepUserColumn extends WorkcenterColumnBase imple
 	
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.CURRENT_STEP_USER.getValueEs();
+		return "currentstepuser";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.CURRENT_STEP_USER.getName();
+		return "当前步骤处理人";
 	}
 	
 	@Override
 	public Object getMyValue(JSONObject json) {
-		JSONArray currentStepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterColumn.CURRENT_STEP.getValueEs());
+		JSONArray currentStepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterField.CURRENT_STEP.getValue());
 		if(CollectionUtils.isEmpty(currentStepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
 		for(Object currentStepObj: currentStepArray) {
 			JSONObject currentStepJson = (JSONObject)currentStepObj;
 			currentStepJson.put("status", ProcessTaskStatus.getText(currentStepJson.getString("status")));
-			JSONArray handlerList = currentStepJson.getJSONArray("handlerList");
+			JSONArray handlerList = currentStepJson.getJSONArray("handlerlist");
 			for(Object handlerObj : handlerList) {
-				
 				JSONObject handlerJson = (JSONObject)handlerObj;
-				String handler = null;
-				if(handlerJson.containsKey("userId")) {
-					handler = handlerJson.getString("userId");
-				}else{
-					handler = handlerJson.getString("workerId");
-				}
+				String handler = handlerJson.getString("handler");
 				if(handler.startsWith(GroupSearch.USER.getValuePlugin())) {
 					UserVo userVo = userMapper.getUserByUserId(handler.replace(GroupSearch.USER.getValuePlugin(), ""));
 					if(userVo != null) {
-						handlerJson.put("userId", handler);
-						handlerJson.put("userName", userVo.getUserName());
+						handlerJson.put("handler", handler);
+						handlerJson.put("handlerName", userVo.getUserName());
 					}
 				}else if(handler.startsWith(GroupSearch.ROLE.getValuePlugin())){
 					RoleVo roleVo = roleMapper.getRoleByRoleName(handler.toString().replace(GroupSearch.ROLE.getValuePlugin(), ""));
 					if(roleVo != null) {
-						handlerJson.put("roleId", handler);
-						handlerJson.put("roleName", roleVo.getDescription());
+						handlerJson.put("handler", handler);
+						handlerJson.put("handlerName", roleVo.getDescription());
 					}
 					
 				}else if(handler.startsWith(GroupSearch.TEAM.getValuePlugin())){
 					TeamVo teamVo = teamMapper.getTeamByUuid(handler.toString().replace(GroupSearch.TEAM.getValuePlugin(), ""));
 					if(teamVo != null) {
-						handlerJson.put("teamId", handler);
-						handlerJson.put("teamName", teamVo.getName());
+						handlerJson.put("handler", handler);
+						handlerJson.put("handlerName", teamVo.getName());
 					}
 				}
 				
@@ -97,7 +91,7 @@ public class ProcessTaskCurrentStepUserColumn extends WorkcenterColumnBase imple
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 }

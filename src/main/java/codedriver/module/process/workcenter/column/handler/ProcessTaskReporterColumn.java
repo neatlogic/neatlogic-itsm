@@ -4,8 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
@@ -14,12 +13,12 @@ public class ProcessTaskReporterColumn extends WorkcenterColumnBase implements I
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.REPORTER.getValueEs();
+		return "reporter";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.REPORTER.getName();
+		return "代报人";
 	}
 
 	@Override
@@ -35,7 +34,7 @@ public class ProcessTaskReporterColumn extends WorkcenterColumnBase implements I
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 }

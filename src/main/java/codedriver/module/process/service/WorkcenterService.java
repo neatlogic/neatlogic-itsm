@@ -26,7 +26,7 @@ import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -43,9 +43,9 @@ import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
 import codedriver.framework.util.TimeUtil;
-import codedriver.module.process.workcenter.condition.handler.ProcessTaskContentCondition;
-import codedriver.module.process.workcenter.condition.handler.ProcessTaskIdCondition;
-import codedriver.module.process.workcenter.condition.handler.ProcessTaskTitleCondition;
+import codedriver.module.process.condition.handler.ProcessTaskContentCondition;
+import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
+import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 @Service
 public class WorkcenterService {
 	@Autowired
@@ -87,7 +87,7 @@ public class WorkcenterService {
 		ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
 		while(it.hasNext()) {
 			WorkcenterTheadVo thead = it.next();
-			if(thead.getType().equals(ProcessWorkcenterColumnType.COMMON.getValue())) {
+			if(thead.getType().equals(ProcessFieldType.COMMON.getValue())) {
 				if(!columnComponentMap.containsKey(thead.getName())) {
 					it.remove();
 				}else {

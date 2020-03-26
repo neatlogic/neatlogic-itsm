@@ -4,8 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
@@ -14,12 +13,12 @@ public class ProcessTaskTitleColumn extends WorkcenterColumnBase implements IWor
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.TITLE.getValueEs();
+		return "title";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.TITLE.getName();
+		return "标题";
 	}
 
 	@Override
@@ -35,7 +34,7 @@ public class ProcessTaskTitleColumn extends WorkcenterColumnBase implements IWor
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 }

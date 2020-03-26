@@ -5,8 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.cache.WorkcenterColumnDataCache;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
@@ -20,12 +19,12 @@ public class ProcessTaskChannelColumn extends WorkcenterColumnBase  implements I
 	ChannelMapper channelMapper;
 	@Override
 	public String getName() {
-		return  ProcessWorkcenterColumn.CHANNEL.getValueEs();
+		return "channel";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return  ProcessWorkcenterColumn.CHANNEL.getName();
+		return  "服务";
 	}
 
 	@Override
@@ -49,6 +48,6 @@ public class ProcessTaskChannelColumn extends WorkcenterColumnBase  implements I
 
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 }

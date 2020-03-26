@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter.condition.handler;
+package codedriver.module.process.condition.handler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -7,80 +7,75 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
-import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 
 @Component
-public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
-	@Autowired
-	private PriorityMapper priorityMapper;
-
+public class ProcessTaskChannelCondition implements IWorkcenterCondition{
+	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-	
+
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.PRIORITY.getValue();
+		return "channel";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.PRIORITY.getName();
+		return "服务";
 	}
 
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
-		if(ProcessWorkcenterConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-			return ProcessFormHandlerType.CHECKBOX.toString();
-		}else {
-			return ProcessFormHandlerType.SELECT.toString();
-		}
+		return ProcessFormHandlerType.SELECT.toString();
 	}
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 	@Override
 	public JSONObject getConfig() {
-		PriorityVo priorityVo = new PriorityVo();
-		priorityVo.setIsActive(1);
-		List<PriorityVo> priorityList = priorityMapper.searchPriorityList(priorityVo);
+		/*ChannelVo channel = new ChannelVo();
+		channel.setIsActive(1);
+		channel.setNeedPage(false);
+ 		List<ChannelVo> channelList = channelMapper.searchChannelList(channel);
 		JSONArray jsonList = new JSONArray();
-		for (PriorityVo priority : priorityList) {
+		for (ChannelVo channelVo : channelList) {
 			JSONObject jsonObj = new JSONObject();
-			jsonObj.put("value", priority.getUuid());
-			jsonObj.put("text", priority.getName());
+			jsonObj.put("value", channelVo.getUuid());
+			jsonObj.put("text", channelVo.getName());
 			jsonList.add(jsonObj);
-		}
+		}*/
 		JSONObject returnObj = new JSONObject();
-		returnObj.put("dataList", jsonList);
+		returnObj.put("url", "api/rest/process/channel/search");
 		returnObj.put("isMultiple", true);
+		returnObj.put("rootName", "channelList");
+		JSONObject mappingObj = new JSONObject();
+		mappingObj.put("value", "uuid");
+		mappingObj.put("text", "name");
+		returnObj.put("mapping", mappingObj);
 		return returnObj;
 	}
 
 	@Override
 	public Integer getSort() {
-		return 5;
+		return 9;
 	}
 
 	@Override
 	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.INCLUDE);
+		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
 	}
 	
 	@Override
@@ -90,17 +85,19 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 
 	@Override
 	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
+		boolean result = false;
+		List<String> valueList = conditionVo.getValueList();
+		if(!CollectionUtils.isEmpty(valueList)) {
+			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
+			result = valueList.contains(processTask.getChannelUuid());
+		}			
 		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
-			List<String> valueList = conditionVo.getValueList();
-			if(CollectionUtils.isEmpty(valueList)) {
-				return false;
-			}
-			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());		
-			return valueList.contains(processTask.getPriorityUuid());
+			return result;
+		}else if(ProcessExpression.EXCLUDE.getExpression().equals(conditionVo.getExpression())) {
+			return !result;
 		}else {
 			return false;
 		}
-		
 	}
 
 }

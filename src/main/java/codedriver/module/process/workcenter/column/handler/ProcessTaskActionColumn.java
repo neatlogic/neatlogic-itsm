@@ -1,14 +1,11 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 
@@ -18,12 +15,12 @@ public class ProcessTaskActionColumn implements IWorkcenterColumn{
 	CatalogMapper catalogMapper;
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.ACTION.getValue();
+		return ProcessWorkcenterField.ACTION.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.ACTION.getName();
+		return ProcessWorkcenterField.ACTION.getName();
 	}
 
 	@Override
