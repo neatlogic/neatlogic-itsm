@@ -3,33 +3,35 @@ package codedriver.module.process.workcenter.column.handler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.process.constvalue.ProcessWorkcenterCondition;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dao.cache.WorkcenterColumnDataCache;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
 @Component
-public class ProcessTaskOwnerColumn implements IWorkcenterColumn{
+public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
 
 	@Autowired
 	UserMapper userMapper;
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.OWNER.getValue();
+		return ProcessWorkcenterColumn.OWNER.getValueEs();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.OWNER.getName();
+		return ProcessWorkcenterColumn.OWNER.getName();
 	}
 
 	@Override
-	public Object getValue(MultiAttrsObject el) throws RuntimeException {
-		String userId = el.getString(this.getName());
+	public Object getMyValue(JSONObject json) throws RuntimeException {
+		String userId = json.getString(this.getName());
 		String cacheKey = GroupSearch.USER+"#"+userId;
 		String userName = (String) WorkcenterColumnDataCache.getItem(cacheKey);
 		if(userName == null) {
@@ -45,6 +47,11 @@ public class ProcessTaskOwnerColumn implements IWorkcenterColumn{
 	@Override
 	public Boolean allowSort() {
 		return false;
+	}
+	
+	@Override
+	public String getType() {
+		return ProcessWorkcenterColumnType.COMMON.getValue();
 	}
 
 }

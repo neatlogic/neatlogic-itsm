@@ -13,7 +13,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessExpression;
-import codedriver.framework.process.constvalue.ProcessWorkcenterCondition;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -70,10 +71,10 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 		for (Map.Entry<String, IWorkcenterCondition> entry : workcenterConditionMap.entrySet()) {
 			IWorkcenterCondition condition = entry.getValue();
 			//不支持endTime过滤，如果是简单模式 title、id、content 不返回，表单过滤不在这for循坏里返回，而是在表单条件里返回
-			if(conditionModel.equals(ProcessWorkcenterConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterCondition.TITLE.getValue())
-					||condition.getName().equals(ProcessWorkcenterCondition.ID.getValue())||condition.getName().equals(ProcessWorkcenterCondition.CONTENT.getValue()))
-					||condition.getName().equals(ProcessWorkcenterCondition.ENDTIME.getValue())
-					||condition.getName().equals(ProcessWorkcenterCondition.FORM.getValue())) {
+			if(conditionModel.equals(ProcessWorkcenterConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterColumn.TITLE.getValue())
+					||condition.getName().equals(ProcessWorkcenterColumn.ID.getValue())||condition.getName().equals(ProcessWorkcenterColumn.CONTENT.getValue()))
+					||condition.getName().equals(ProcessWorkcenterColumn.ENDTIME.getValue())
+					||condition.getName().equals(ProcessWorkcenterColumnType.FORM.getValue())) {
 				continue;
 			}
 			JSONObject commonObj = new JSONObject();

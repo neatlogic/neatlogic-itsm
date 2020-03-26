@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterCondition;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 
@@ -18,12 +18,12 @@ public class ProcessTaskActionColumn implements IWorkcenterColumn{
 	CatalogMapper catalogMapper;
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.ACTION.getValue();
+		return ProcessWorkcenterColumn.ACTION.getValue();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.ACTION.getName();
+		return ProcessWorkcenterColumn.ACTION.getName();
 	}
 
 	@Override
@@ -35,6 +35,12 @@ public class ProcessTaskActionColumn implements IWorkcenterColumn{
 	@Override
 	public Boolean allowSort() {
 		return false;
+	}
+
+	@Override
+	public String getType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

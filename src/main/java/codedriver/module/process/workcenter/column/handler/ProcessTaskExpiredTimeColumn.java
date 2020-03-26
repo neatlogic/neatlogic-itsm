@@ -2,33 +2,40 @@ package codedriver.module.process.workcenter.column.handler;
 
 import org.springframework.stereotype.Component;
 
-import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterCondition;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
 @Component
-public class ProcessTaskExpiredTimeColumn implements IWorkcenterColumn{
+public class ProcessTaskExpiredTimeColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.EXPIRED_TIME.getValue();
+		return ProcessWorkcenterColumn.EXPIRED_TIME.getValueEs();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.EXPIRED_TIME.getName();
+		return ProcessWorkcenterColumn.EXPIRED_TIME.getName();
 	}
 
 	@Override
-	public Object getValue(MultiAttrsObject el) throws RuntimeException {
-		String expiredTime = el.getString(this.getName());
+	public Object getMyValue(JSONObject json) throws RuntimeException {
+		String expiredTime = json.getString(this.getName());
 		return expiredTime;
 	}
 
 	@Override
 	public Boolean allowSort() {
 		return false;
+	}
+	
+	@Override
+	public String getType() {
+		return ProcessWorkcenterColumnType.COMMON.getValue();
 	}
 
 }

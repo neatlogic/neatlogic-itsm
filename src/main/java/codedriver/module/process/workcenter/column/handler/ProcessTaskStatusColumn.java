@@ -2,27 +2,29 @@ package codedriver.module.process.workcenter.column.handler;
 
 import org.springframework.stereotype.Component;
 
-import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterCondition;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
 @Component
-public class ProcessTaskStatusColumn implements IWorkcenterColumn{
+public class ProcessTaskStatusColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.STATUS.getValue();
+		return ProcessWorkcenterColumn.STATUS.getValueEs();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.STATUS.getName();
+		return ProcessWorkcenterColumn.STATUS.getName();
 	}
 
 	@Override
-	public Object getValue(MultiAttrsObject el) throws RuntimeException {
-		String status = el.getString(this.getName());
+	public Object getMyValue(JSONObject json) throws RuntimeException {
+		String status = json.getString(this.getName());
 		return status;
 	}
 
@@ -31,5 +33,8 @@ public class ProcessTaskStatusColumn implements IWorkcenterColumn{
 		return false;
 	}
 	
-
+	@Override
+	public String getType() {
+		return ProcessWorkcenterColumnType.COMMON.getValue();
+	}
 }

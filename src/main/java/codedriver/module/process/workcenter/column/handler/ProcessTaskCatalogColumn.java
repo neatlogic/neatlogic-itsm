@@ -3,31 +3,33 @@ package codedriver.module.process.workcenter.column.handler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterCondition;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dao.cache.WorkcenterColumnDataCache;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
+import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
 @Component
-public class ProcessTaskCatalogColumn implements IWorkcenterColumn{
+public class ProcessTaskCatalogColumn extends WorkcenterColumnBase  implements IWorkcenterColumn{
 	@Autowired
 	CatalogMapper catalogMapper;
 	@Override
 	public String getName() {
-		return ProcessWorkcenterCondition.CATALOG.getValue();
+		return ProcessWorkcenterColumn.CATALOG.getValueEs();
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterCondition.CATALOG.getName();
+		return ProcessWorkcenterColumn.CATALOG.getName();
 	}
 
 	@Override
-	public Object getValue(MultiAttrsObject el) throws RuntimeException {
-		String catalogUuid = el.getString(this.getName());
+	public Object getMyValue(JSONObject json) throws RuntimeException {
+		String catalogUuid = json.getString(this.getName());
 		String catalogName = (String) WorkcenterColumnDataCache.getItem(catalogUuid);
 		if(catalogName == null) {
 			CatalogVo catalogVo =catalogMapper.getCatalogByUuid(catalogUuid);
@@ -42,6 +44,11 @@ public class ProcessTaskCatalogColumn implements IWorkcenterColumn{
 	@Override
 	public Boolean allowSort() {
 		return false;
+	}
+
+	@Override
+	public String getType() {
+		return ProcessWorkcenterColumnType.COMMON.getValue();
 	}
 
 }

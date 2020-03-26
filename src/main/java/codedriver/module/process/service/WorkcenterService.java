@@ -26,7 +26,7 @@ import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
-import codedriver.framework.process.constvalue.ProcessWorkcenterConditionType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -87,7 +87,7 @@ public class WorkcenterService {
 		ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
 		while(it.hasNext()) {
 			WorkcenterTheadVo thead = it.next();
-			if(thead.getType().equals(ProcessWorkcenterConditionType.COMMON.getValue())) {
+			if(thead.getType().equals(ProcessWorkcenterColumnType.COMMON.getValue())) {
 				if(!columnComponentMap.containsKey(thead.getName())) {
 					it.remove();
 				}else {
