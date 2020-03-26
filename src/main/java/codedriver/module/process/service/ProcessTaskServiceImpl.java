@@ -349,10 +349,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
-			paramObj.put("minorUserId", processTaskStepSubtaskVo.getUserId());
-			paramObj.put("minorUserName", processTaskStepSubtaskVo.getUserName());
+			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
+			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+			processTaskStepUserVo.setProcessTaskId(processTaskStepSubtaskVo.getProcessTaskId());
+			processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
+			processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
+			processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
+			processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+			userList.add(processTaskStepUserVo);
+			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
+			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
 			currentProcessTaskStepVo.setParamObj(paramObj);
-			handler.updateProcessTaskStepUserAndWorker(currentProcessTaskStepVo);	
+			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.CREATESUBTASK);
 		}else {
@@ -388,14 +396,27 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			currentProcessTaskStepVo.setParamObj(paramObj);
 			String oldUserId = paramObj.getString("oldUserId");
 			if(!processTaskStepSubtaskVo.getUserId().equals(oldUserId)) {//更新了处理人
-				paramObj.put("minorUserId", processTaskStepSubtaskVo.getUserId());
-				paramObj.put("minorUserName", processTaskStepSubtaskVo.getUserName());
-				handler.updateProcessTaskStepUserAndWorker(currentProcessTaskStepVo);
 				
-				String oldUserName = paramObj.getString("oldUserName");
-				paramObj.put("minorUserId", oldUserId);
-				paramObj.put("minorUserName", oldUserName);
-				handler.updateProcessTaskStepUserAndWorker(currentProcessTaskStepVo);
+				List<ProcessTaskStepUserVo> userList = new ArrayList<>();
+				ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+				processTaskStepUserVo.setProcessTaskId(processTaskStepSubtaskVo.getProcessTaskId());
+				processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
+				processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
+				processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
+				processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+				userList.add(processTaskStepUserVo);
+				ProcessTaskStepUserVo oldUserVo = new ProcessTaskStepUserVo();
+				oldUserVo.setProcessTaskId(processTaskStepSubtaskVo.getProcessTaskId());
+				oldUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
+				oldUserVo.setUserId(oldUserId);
+				oldUserVo.setUserName(paramObj.getString("oldUserName"));
+				oldUserVo.setUserType(UserType.MINOR.getValue());
+				userList.add(oldUserVo);
+				
+				List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
+				workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
+				workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), oldUserId));
+				handler.updateProcessTaskStepUserAndWorker(workerList, userList);
 			}
 				
 			//记录活动
@@ -416,11 +437,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
-			JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
-			paramObj.put("minorUserId", processTaskStepSubtaskVo.getUserId());
-			paramObj.put("minorUserName", processTaskStepSubtaskVo.getUserName());
-			currentProcessTaskStepVo.setParamObj(paramObj);
-			handler.updateProcessTaskStepUserAndWorker(currentProcessTaskStepVo);	
+			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
+			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+			processTaskStepUserVo.setProcessTaskId(processTaskStepSubtaskVo.getProcessTaskId());
+			processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
+			processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
+			processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
+			processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+			userList.add(processTaskStepUserVo);
+			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
+			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
+			currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
+			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.REDOSUBTASK);
 		}else {
@@ -440,11 +468,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
-			JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
-			paramObj.put("minorUserId", processTaskStepSubtaskVo.getUserId());
-			paramObj.put("minorUserName", processTaskStepSubtaskVo.getUserName());
-			currentProcessTaskStepVo.setParamObj(paramObj);
-			handler.updateProcessTaskStepUserAndWorker(currentProcessTaskStepVo);	
+			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
+			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+			processTaskStepUserVo.setProcessTaskId(processTaskStepSubtaskVo.getProcessTaskId());
+			processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
+			processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
+			processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
+			processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+			userList.add(processTaskStepUserVo);
+			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
+			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
+			currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
+			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETESUBTASK);
 		}else {
@@ -465,11 +500,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
-			JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
-			paramObj.put("minorUserId", processTaskStepSubtaskVo.getUserId());
-			paramObj.put("minorUserName", processTaskStepSubtaskVo.getUserName());
-			currentProcessTaskStepVo.setParamObj(paramObj);
-			handler.updateProcessTaskStepUserAndWorker(currentProcessTaskStepVo);	
+			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
+			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+			processTaskStepUserVo.setProcessTaskId(processTaskStepSubtaskVo.getProcessTaskId());
+			processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
+			processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
+			processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
+			processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+			userList.add(processTaskStepUserVo);
+			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
+			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
+			currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
+			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORTSUBTASK);
 		}else {
