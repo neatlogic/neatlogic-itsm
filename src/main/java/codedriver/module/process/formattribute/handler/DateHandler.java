@@ -41,30 +41,30 @@ public class DateHandler implements IFormAttributeHandler {
 
 	@Override
 	public boolean valid(AttributeDataVo attributeDataVo,JSONObject jsonObj) throws AttributeValidException {
-		long value = Long.parseLong(attributeDataVo.getData());
+		long data = Long.parseLong(attributeDataVo.getData());
 		JSONObject configObj = jsonObj.getJSONObject("attributeConfig");
 		List<String> validTypeList = JSON.parseArray(configObj.getString("validType"), String.class);
 		if(CollectionUtils.isNotEmpty(validTypeList)) {
 			if(validTypeList.contains("workdate")) {
 				Long processTaskId = configObj.getLong("processTaskId");
 				String channelUuid = configObj.getString("channelUuid");
-				String worktime = null;
+				String worktimeUuid = null;
 				if(processTaskId != null) {
 					ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 					if(processTaskVo == null) {
 						throw new ProcessTaskNotFoundException(processTaskId.toString());
 					}
-					worktime = processTaskVo.getWorktimeUuid();
+					worktimeUuid = processTaskVo.getWorktimeUuid();
 				}else if(StringUtils.isNotBlank(channelUuid)){
 					ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);
 					if(channelVo == null) {
 						throw new ChannelNotFoundException(channelUuid);
 					}
-					worktime = channelVo.getWorktimeUuid();
+					worktimeUuid = channelVo.getWorktimeUuid();
 				}else {
 					throw new FormIllegalParameterException("config参数中必须包含'processTaskId'或'channelUuid'");
 				}
-				int count = worktimeMapper.checkIsWithinWorktimeRange(worktime, value);
+				int count = worktimeMapper.checkIsWithinWorktimeRange(worktimeUuid, data);
 				if(count > 0) {
 					return true;
 				}else {
