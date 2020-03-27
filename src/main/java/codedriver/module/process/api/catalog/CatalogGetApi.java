@@ -10,7 +10,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dto.AuthorityVo;
 import codedriver.framework.process.dto.CatalogVo;
+import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -24,6 +27,9 @@ public class CatalogGetApi extends ApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
+	
+	@Autowired
+	private ChannelMapper channelMapper;
 	
 	@Override
 	public String getToken() {
@@ -54,8 +60,15 @@ public class CatalogGetApi extends ApiComponentBase {
 		if(catalog == null) {
 			throw new CatalogNotFoundException(uuid);
 		}
-		List<String> roleNameList = catalogMapper.getCatalogRoleNameListByCatalogUuid(uuid);
-		catalog.setRoleNameList(roleNameList);
+		CatalogVo catalogVo = new CatalogVo();
+		catalogVo.setParentUuid(uuid);
+		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
+		ChannelVo channelVo = new ChannelVo();
+		channelVo.setParentUuid(uuid);
+		int count = channelMapper.searchChannelCount(channelVo);
+		catalog.setChildrenCount(count + catalogList.size());
+		List<AuthorityVo> authorityVoList = catalogMapper.getCatalogAuthorityListByCatalogUuid(uuid);
+		catalog.setAuthorityVoList(authorityVoList);
 		return catalog;
 	}
 
