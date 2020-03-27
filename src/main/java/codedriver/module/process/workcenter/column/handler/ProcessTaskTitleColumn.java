@@ -23,12 +23,7 @@ public class ProcessTaskTitleColumn extends WorkcenterColumnBase implements IWor
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
-		JSONObject titleJson = new JSONObject();
-		titleJson.put("title", json.getString(this.getName()));
-		JSONObject routeJson = new JSONObject();
-		routeJson.put("taskid", json.getLong("id"));
-		titleJson.put("route", routeJson);
-		return titleJson;
+		return json.getString(this.getName());
 	}
 
 	@Override

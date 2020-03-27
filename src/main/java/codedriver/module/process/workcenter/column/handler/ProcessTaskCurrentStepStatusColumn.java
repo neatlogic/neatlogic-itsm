@@ -34,7 +34,7 @@ public class ProcessTaskCurrentStepStatusColumn extends WorkcenterColumnBase imp
 		JSONArray stepArray = JSONArray.parseArray(currentStepArray.toJSONString());
 		for(Object currentStepObj: stepArray) {
 			JSONObject currentStepJson = (JSONObject)currentStepObj;
-			currentStepJson.put("statusName", ProcessTaskStatus.getText(currentStepJson.getString("status")));
+			currentStepJson.put("statusname", ProcessTaskStatus.getText(currentStepJson.getString("status")));
 			currentStepJson.remove("handlerlist");
 		}
 		return stepArray;
