@@ -53,7 +53,7 @@ public class ChannelDeleteApi extends ApiComponentBase {
 		channelMapper.deleteChannelWorktimeByChannelUuid(uuid);
 		channelMapper.deleteChannelUserByChannelUuid(uuid);
 		channelMapper.deleteChannelPriorityByChannelUuid(uuid);
-		
+		channelMapper.deleteChannelAuthorityByChannelUuid(uuid);
 		channelMapper.updateSortDecrement(existsChannel.getParentUuid(), existsChannel.getSort(), null);
 		return null;
 	}
