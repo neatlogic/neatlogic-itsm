@@ -16,6 +16,7 @@ import codedriver.framework.process.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessField;
+import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.restful.annotation.Description;
@@ -62,6 +63,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray resultArray = new JSONArray();
+		String conditionModel = ProcessWorkcenterConditionModel.CUSTOM.getValue();
 		//固定字段条件
 		Map<String, IWorkcenterCondition> workcenterConditionMap = WorkcenterConditionFactory.getConditionComponentMap();
 		for (Map.Entry<String, IWorkcenterCondition> entry : workcenterConditionMap.entrySet()) {
@@ -72,6 +74,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			JSONObject commonObj = new JSONObject();
 			commonObj.put("handler", condition.getName());
 			commonObj.put("handlerName", condition.getDisplayName());
+			commonObj.put("handlerType", condition.getHandler(conditionModel));
 			if(condition.getConfig() != null) {
 				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
 			}
@@ -94,6 +97,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
 				formAttributeVo.setType("form");
+				formAttributeVo.setConditionModel(conditionModel);
 				resultArray.add(formAttributeVo);
 			}
 		}

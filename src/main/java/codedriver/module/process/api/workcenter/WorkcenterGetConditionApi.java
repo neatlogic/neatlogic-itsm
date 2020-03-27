@@ -79,6 +79,7 @@ public class WorkcenterGetConditionApi extends ApiComponentBase {
 			JSONObject commonObj = new JSONObject();
 			commonObj.put("handler", condition.getName());
 			commonObj.put("handlerName", condition.getDisplayName());
+			commonObj.put("handlerType", condition.getHandler(conditionModel));
 			if(condition.getConfig() != null) {
 				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
 			}
@@ -103,6 +104,7 @@ public class WorkcenterGetConditionApi extends ApiComponentBase {
 			for(FormAttributeVo formAttributeVo : formAttrList) {
 				formAttributeVo.setConditionModel(conditionModel);
 				formAttributeVo.setType("form");
+				formAttributeVo.setConditionModel(conditionModel);
 				resultArray.add(formAttributeVo);
 			}
 		}
