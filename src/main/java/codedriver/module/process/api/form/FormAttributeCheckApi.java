@@ -50,7 +50,7 @@ public class FormAttributeCheckApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "form/attribute/check";
+		return "process/form/attribute/check";
 	}
 
 	@Override

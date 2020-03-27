@@ -1,6 +1,7 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,18 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -78,20 +79,17 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		if(!processTaskStepContentList.isEmpty()) {
 			oldContentHash = processTaskStepContentList.get(0).getContentHash();
 		}
-		
-		String content = jsonObj.getString("content");
-		if(oldContentHash == null && StringUtils.isBlank(content)) {
-			return null;
-		}
-		
+				
 		String newContentHash = null;
+		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
 			newContentHash = contentVo.getHash();
 			//如果新的上报描述内容和原来的上报描述内容不一样，则生成活动
-			if(!newContentHash.equals(oldContentHash)) {
+			if(!Objects.equals(newContentHash, oldContentHash)) {
 				processTaskMapper.replaceProcessTaskContent(contentVo);
 				processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, newContentHash));
+				jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), newContentHash);
 			}else {
 				return null;
 			}
@@ -99,11 +97,16 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		}else if(oldContentHash != null){
 			processTaskMapper.deleteProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, oldContentHash));
 		}
-		//生成活动
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.UPDATECONTENT.getValue());
-		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);		
-		processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.CONTENT.getValue(), oldContentHash, newContentHash));	
-		
+		//生成活动	
+		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		if(handler != null) {
+			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
+			currentProcessTaskStepVo.setParamObj(jsonObj);
+			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.UPDATECONTENT);
+		}else {
+			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+		}
 		return null;
 	}
 
