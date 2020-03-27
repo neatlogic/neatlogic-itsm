@@ -2,6 +2,7 @@ package codedriver.module.process.api.channel;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
+import codedriver.framework.process.dto.AuthorityVo;
 import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ITree;
@@ -78,7 +80,8 @@ public class ChannelSaveApi extends ApiComponentBase {
 		@Param(name = "help", type = ApiParamType.STRING, desc = "描述帮助"),
 		@Param(name = "defaultPriorityUuid", type = ApiParamType.STRING, isRequired = true, desc = "默认优先级uuid"),
 		@Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "关联优先级列表"),
-		@Param(name = "priorityUuidList[0]", type = ApiParamType.STRING, isRequired = false, desc = "优先级uuid")
+		@Param(name = "priorityUuidList[0]", type = ApiParamType.STRING, isRequired = false, desc = "优先级uuid"),
+		@Param(name = "workerList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userId\",\"team#teamUuid\",\"role#roleName\"]")
 		})
 	@Output({
 		@Param(name = "Return", type = ApiParamType.STRING, desc = "服务通道uuid")
@@ -107,6 +110,7 @@ public class ChannelSaveApi extends ApiComponentBase {
 			sort = channelMapper.getMaxSortByParentUuid(parentUuid) + 1;
 		}else {//修改
 			channelMapper.deleteChannelPriorityByChannelUuid(uuid);
+			channelMapper.deleteChannelAuthorityByChannelUuid(uuid);
 			sort = existedChannel.getSort();
 		}
 		channelVo.setSort(sort);
@@ -120,7 +124,6 @@ public class ChannelSaveApi extends ApiComponentBase {
 			throw new ChannelIllegalParameterException("工作时间窗口：'" + channelVo.getWorktimeUuid() + "'不存在");
 		}
 		channelMapper.replaceChannelWorktime(uuid, channelVo.getWorktimeUuid());
-		
 		String defaultPriorityUuid = channelVo.getDefaultPriorityUuid();
 		List<String> priorityUuidList = channelVo.getPriorityUuidList();
 		for(String priorityUuid : priorityUuidList) {
@@ -136,6 +139,12 @@ public class ChannelSaveApi extends ApiComponentBase {
 				channelPriority.setIsDefault(0);
 			}
 			channelMapper.insertChannelPriority(channelPriority);
+		}
+		List<AuthorityVo> authorityList = channelVo.getAuthorityList();
+		if(CollectionUtils.isNotEmpty(authorityList)) {
+			for(AuthorityVo authorityVo : authorityList) {
+				channelMapper.insertChannelAuthority(authorityVo);
+			}
 		}
 		return uuid;
 	}

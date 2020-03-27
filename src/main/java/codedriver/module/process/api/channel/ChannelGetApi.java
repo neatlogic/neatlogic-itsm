@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dto.AuthorityVo;
 import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
@@ -65,6 +66,8 @@ public class ChannelGetApi extends ApiComponentBase {
 			}
 		}
 		channel.setPriorityUuidList(priorityUuidList);
+		List<AuthorityVo> authorityList = channelMapper.getChannelAuthorityListByChannelUuid(uuid);
+		channel.setAuthorityList(authorityList);
 		return channel;
 	}
 

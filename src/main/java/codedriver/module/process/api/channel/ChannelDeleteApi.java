@@ -51,7 +51,6 @@ public class ChannelDeleteApi extends ApiComponentBase {
 		channelMapper.deleteChannelByUuid(uuid);
 		channelMapper.deleteChannelProcessByChannelUuid(uuid);
 		channelMapper.deleteChannelWorktimeByChannelUuid(uuid);
-		channelMapper.deleteChannelRoleByChannelUuid(uuid);
 		channelMapper.deleteChannelUserByChannelUuid(uuid);
 		channelMapper.deleteChannelPriorityByChannelUuid(uuid);
 		

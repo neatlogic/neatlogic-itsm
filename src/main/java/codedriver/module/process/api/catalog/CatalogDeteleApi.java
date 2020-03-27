@@ -71,7 +71,7 @@ public class CatalogDeteleApi extends ApiComponentBase {
 			throw new CatalogIllegalParameterException("服务目录：'" + uuid + "'还存在子通道");
 		}
 		catalogMapper.deleteCatalogByUuid(uuid);
-		catalogMapper.deleteCatalogRoleByUuid(uuid);
+		catalogMapper.deleteCatalogAuthorityByCatalogUuid(uuid);
 		catalogMapper.updateSortDecrement(existsCatalog.getParentUuid(), existsCatalog.getSort(), null);
 //		channelMapper.updateSortDecrement(existsCatalog.getSort(), null);
 		return null;

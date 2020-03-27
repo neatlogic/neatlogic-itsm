@@ -2,6 +2,7 @@ package codedriver.module.process.api.catalog;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,12 +12,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dto.AuthorityVo;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.exception.catalog.CatalogNameRepeatException;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
-import codedriver.framework.process.exception.channel.ChannelIllegalParameterException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -29,9 +29,6 @@ public class CatalogSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
-	
-	@Autowired
-	private RoleMapper roleMapper;
 	
 	@Override
 	public String getToken() {
@@ -56,8 +53,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		@Param(name = "icon", type = ApiParamType.STRING, isRequired= false, desc = "图标"),
 		@Param(name = "color", type = ApiParamType.STRING, isRequired= false, desc = "颜色"),
 		@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "描述", length = 200, xss = true),
-		@Param(name = "roleNameList", type = ApiParamType.JSONARRAY, isRequired= false, desc = "角色列表"),
-		@Param(name = "roleNameList[0]", type = ApiParamType.STRING, isRequired= false, desc = "角色名")
+		@Param(name = "workerList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userId\",\"team#teamUuid\",\"role#roleName\"]")
 		})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "服务目录uuid")
@@ -81,18 +77,15 @@ public class CatalogSaveApi extends ApiComponentBase {
 			catalogVo.setUuid(null);
 			sort = catalogMapper.getMaxSortByParentUuid(parentUuid) + 1;
 		}else {//修改
-			catalogMapper.deleteCatalogRoleByUuid(uuid);
+			catalogMapper.deleteCatalogAuthorityByCatalogUuid(uuid);
 			sort = existedCatalog.getSort();
 		}
 		catalogVo.setSort(sort);
 		catalogMapper.replaceCatalog(catalogVo);
-		List<String> roleNameList = catalogVo.getRoleNameList();
-		if(roleNameList != null && roleNameList.size() > 0) {
-			for(String roleName : roleNameList) {
-				if(roleMapper.getRoleByRoleName(roleName) == null) {
-					throw new ChannelIllegalParameterException("角色：'" + roleName + "'不存在");
-				}
-				catalogMapper.insertCatalogRole(uuid, roleName);
+		List<AuthorityVo> authorityList = catalogVo.getAuthorityList();
+		if(CollectionUtils.isNotEmpty(authorityList)) {
+			for(AuthorityVo authorityVo : authorityList) {
+				catalogMapper.insertCatalogAuthority(authorityVo);
 			}
 		}
 		return catalogVo.getUuid();
