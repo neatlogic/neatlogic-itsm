@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter.condition.handler;
+package codedriver.module.process.condition.handler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,24 +9,23 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.constvalue.ProcessExpression;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
-import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 
 @Component
 public class ProcessTaskIdCondition implements IWorkcenterCondition{
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.ID.getValue();
+		return "id";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.ID.getName();
+		return "工单id";
 	}
 
 	@Override
@@ -36,7 +35,7 @@ public class ProcessTaskIdCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 	@Override

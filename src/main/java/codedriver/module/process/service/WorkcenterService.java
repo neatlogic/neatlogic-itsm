@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
@@ -23,10 +24,16 @@ import com.techsure.multiattrsearch.util.ESQueryUtil;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
+import codedriver.framework.process.condition.core.IWorkcenterCondition;
+import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
+import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -37,20 +44,19 @@ import codedriver.framework.process.dto.condition.ConditionVo;
 import codedriver.framework.process.exception.workcenter.WorkcenterConditionException;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
-import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
-import codedriver.framework.process.workcenter.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
 import codedriver.framework.util.TimeUtil;
-import codedriver.module.process.workcenter.condition.handler.ProcessTaskContentCondition;
-import codedriver.module.process.workcenter.condition.handler.ProcessTaskIdCondition;
-import codedriver.module.process.workcenter.condition.handler.ProcessTaskTitleCondition;
+import codedriver.module.process.condition.handler.ProcessTaskContentCondition;
+import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
+import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 @Service
 public class WorkcenterService {
 	@Autowired
 	WorkcenterMapper workcenterMapper;
-	
+	@Autowired
+	ProcessTaskService processTaskService;
 	@Autowired
 	FormMapper formMapper;
 	
@@ -75,7 +81,7 @@ public class WorkcenterService {
 	public JSONObject doSearch(WorkcenterVo workcenterVo) {
 		JSONObject returnObj = new JSONObject();
 		//搜索es
-		QueryResult result = searchTask(workcenterVo);;
+		QueryResult result = searchTask(workcenterVo);
 		List<MultiAttrsObject> resultData = result.getData();
 		//返回的数据重新加工
 		List<JSONObject> dataList = new ArrayList<JSONObject>();
@@ -87,11 +93,12 @@ public class WorkcenterService {
 		ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
 		while(it.hasNext()) {
 			WorkcenterTheadVo thead = it.next();
-			if(thead.getType().equals(ProcessWorkcenterColumnType.COMMON.getValue())) {
+			if(thead.getType().equals(ProcessFieldType.COMMON.getValue())) {
 				if(!columnComponentMap.containsKey(thead.getName())) {
 					it.remove();
 				}else {
 					thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
+					thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
 				}
 			}else {
 				List<String> channelUuidList = workcenterVo.getChannelUuidList();
@@ -117,15 +124,20 @@ public class WorkcenterService {
 		if (!resultData.isEmpty()) {
             for (MultiAttrsObject el : resultData) {
             	JSONObject taskJson = new JSONObject();
-            	taskJson.put("taskId", el.getId());
+            	taskJson.put("taskid", el.getId());
             	for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
             		IWorkcenterColumn column = entry.getValue();
             		taskJson.put(column.getName(), column.getValue(el));
             	}
+            	//route 供前端跳转路由信息
+            	JSONObject routeJson = new JSONObject();
+            	routeJson.put("taskid", el.getId());
+            	taskJson.put("route", routeJson);
+            	//action 操作
+            	taskJson.put("action", getStepAction(el));
             	dataList.add(taskJson);
             }
         }
-
 		returnObj.put("theadList", theadList);
 		returnObj.put("tbodyList", dataList);
 		returnObj.put("rowNum", result.getTotal());
@@ -133,6 +145,53 @@ public class WorkcenterService {
 		returnObj.put("currentPage", workcenterVo.getCurrentPage());
 		returnObj.put("pageCount", PageUtil.getPageCount(result.getTotal(), workcenterVo.getPageSize()));
 		return returnObj;
+	}
+	
+	private Object getStepAction(MultiAttrsObject el) {
+		JSONArray actionArray = new JSONArray();
+		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
+		if(commonJson == null) {
+			return CollectionUtils.EMPTY_COLLECTION;
+		}
+		JSONArray currentStepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.CURRENT_STEP.getValue());
+		if(CollectionUtils.isEmpty(currentStepArray)) {
+			return CollectionUtils.EMPTY_COLLECTION;
+		}
+		for(Object currentStepObj: currentStepArray) {
+			JSONObject currentStepJson = (JSONObject)currentStepObj;
+			Long stepId = currentStepJson.getLong("id");
+			String stepName = currentStepJson.getString("name");
+			String stepStatus = currentStepJson.getString("status");
+			if(StringUtils.isNotBlank(stepStatus)&&(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())||stepStatus.equals(ProcessTaskStatus.RUNNING.getValue())||stepStatus.equals(ProcessTaskStatus.DRAFT.getValue()))) {
+				List<String> actionList = processTaskService.getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
+				
+				if(actionList.contains(ProcessTaskStepAction.COMPLETESUBTASK.getValue())||
+						actionList.contains(ProcessTaskStepAction.COMPLETE.getValue())||
+						actionList.contains(ProcessTaskStepAction.START.getValue())||
+						actionList.contains(ProcessTaskStepAction.STARTPROCESS.getValue())) {
+					JSONObject configJson = new JSONObject();
+					configJson.put("taskid", el.getId());
+					configJson.put("stepid", stepId);
+					configJson.put("stepName", stepName);
+					JSONObject actionJson = new JSONObject();
+					actionJson.put("name", "handle");
+					actionJson.put("text", String.format("处理:%s", stepName));
+					actionJson.put("config", configJson);
+					actionArray.add(actionJson);
+				}
+				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
+					JSONObject actionJson = new JSONObject();
+					JSONObject configJson = new JSONObject();
+					configJson.put("taskid", el.getId());
+					configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
+					actionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
+					actionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+					actionJson.put("config", configJson);
+					actionArray.add(actionJson);
+				}
+			}
+		}
+		return actionArray;
 	}
 	
 	/**
@@ -196,7 +255,8 @@ public class WorkcenterService {
 		JSONObject conditionGroup = new JSONObject();
 		JSONArray conditionList = new JSONArray();
 		JSONObject conditionObj = new JSONObject();
-		conditionObj.put("name", String.format("%s#%s",condition.getType(),condition.getName()));
+		conditionObj.put("name", condition.getName());
+		conditionObj.put("type", condition.getType());
 		JSONArray valueList = new JSONArray();
 		valueList.add(keyword);
 		conditionObj.put("valueList", valueList);
@@ -258,16 +318,16 @@ public class WorkcenterService {
 				IWorkcenterCondition workcenterCondition = WorkcenterConditionFactory.getHandler(condition.getName());
 				//Date 类型过滤条件特殊处理
 				if(workcenterCondition != null && workcenterCondition.getHandler(ProcessWorkcenterConditionModel.SIMPLE.getValue()).equals(ProcessFormHandlerType.DATE.toString())){
-					JSONArray dateJSONArray = JSONArray.parseArray(condition.getValueList().toString());
+					JSONArray dateJSONArray = JSONArray.parseArray(JSON.toJSONString(condition.getValueList()));
 					if(CollectionUtils.isNotEmpty(dateJSONArray)) {
 						JSONObject dateValue = (JSONObject) dateJSONArray.get(0);
 						SimpleDateFormat format = new SimpleDateFormat(TimeUtil.TIME_FORMAT);
 						String startTime = StringUtils.EMPTY;
 						String endTime = StringUtils.EMPTY;
 						String expression = condition.getExpression();
-						if(dateValue.containsKey("startTime")) {
-							startTime = format.format(new Date(dateValue.getLong("startTime")));
-							endTime = format.format(new Date(dateValue.getLong("endTime")));
+						if(dateValue.containsKey(ProcessWorkcenterField.STARTTIME.getValue())) {
+							startTime = format.format(new Date(dateValue.getLong(ProcessWorkcenterField.STARTTIME.getValue())));
+							endTime = format.format(new Date(dateValue.getLong(ProcessWorkcenterField.ENDTIME.getValue())));
 						}else {
 							startTime = TimeUtil.timeTransfer(dateValue.getInteger("timeRange"), dateValue.getString("timeUnit"));
 							endTime = TimeUtil.timeNow();
@@ -278,7 +338,7 @@ public class WorkcenterService {
 						}else if(StringUtils.isEmpty(endTime)) {
 							expression = ProcessExpression.GREATERTHAN.getExpression();
 						}
-						whereSb.append(String.format(ProcessExpression.getExpressionEs(expression),condition.getName(),startTime,endTime));
+						whereSb.append(String.format(ProcessExpression.getExpressionEs(expression),ProcessWorkcenterField.getConditionValue(condition.getName()),startTime,endTime));
 					}else {
 						throw new WorkcenterConditionException(condition.getName());
 					}
@@ -286,7 +346,7 @@ public class WorkcenterService {
 					if(condition.getValueList().size()>1) {
 						value = String.join("','",condition.getValueList());
 					}
-					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),condition.getName(),String.format("'%s'",  value)));
+					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(condition.getName()),String.format("'%s'",  value)));
 				}
 				fromConditionUuid = toConditionUuid;
 			}

@@ -7,25 +7,23 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.constvalue.ProcessExpression;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
-import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 
 @Component
-public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
-
+public class ProcessTaskUserWillDoCondition implements IWorkcenterCondition{
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.STEPUSER.getValue();
+		return "userwilldo";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.STEPUSER.getName();
+		return "用户待处理的";
 	}
 
 	@Override
@@ -35,34 +33,34 @@ public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 	@Override
 	public JSONObject getConfig() {
 		JSONObject returnObj = new JSONObject();
-		returnObj.put("isMultiple", true);
+		returnObj.put("isMultiple", false);
 		return returnObj;
 	}
 
 	@Override
 	public Integer getSort() {
-		return 4;
+		return 9;
 	}
 
 	@Override
 	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
+		return Arrays.asList(ProcessExpression.EQUAL);
 	}
-
+	
 	@Override
 	public ProcessExpression getDefaultExpression() {
-		return ProcessExpression.INCLUDE;
+		return ProcessExpression.EQUAL;
 	}
 
 	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo workcenterConditionVo) {
-		// 条件步骤没有处理人
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
 		return false;
 	}
+
 }

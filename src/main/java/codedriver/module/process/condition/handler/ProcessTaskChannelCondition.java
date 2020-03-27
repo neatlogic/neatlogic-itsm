@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter.condition.handler;
+package codedriver.module.process.condition.handler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -7,85 +7,59 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
-import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 
 @Component
-public class ProcessTaskStatusCondition implements IWorkcenterCondition{
-
+public class ProcessTaskChannelCondition implements IWorkcenterCondition{
+	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.STATUS.getValue();
+		return "channel";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.STATUS.getName();
+		return "服务";
 	}
 
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
-		if(ProcessWorkcenterConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-			return ProcessFormHandlerType.CHECKBOX.toString();
-		}else {
-			return ProcessFormHandlerType.SELECT.toString();
-		}
+		return ProcessFormHandlerType.SELECT.toString();
 	}
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 	@Override
 	public JSONObject getConfig() {
-		
-		JSONArray jsonList = new JSONArray();
-		
-		JSONObject jsonObj = new JSONObject();
-		jsonObj.put("value", ProcessTaskStatus.RUNNING.getValue());
-		jsonObj.put("text", ProcessTaskStatus.RUNNING.getText());
-		jsonList.add(jsonObj);
-		
-		JSONObject jsonObj1 = new JSONObject();
-		jsonObj1.put("value", ProcessTaskStatus.ABORTED.getValue());
-		jsonObj1.put("text", ProcessTaskStatus.ABORTED.getText());
-		jsonList.add(jsonObj1);
-		
-		JSONObject jsonObj2 = new JSONObject();
-		jsonObj2.put("value", ProcessTaskStatus.FAILED.getValue());
-		jsonObj2.put("text", ProcessTaskStatus.FAILED.getText());
-		jsonList.add(jsonObj2);
-		
-		JSONObject jsonObj3 = new JSONObject();
-		jsonObj3.put("value", ProcessTaskStatus.SUCCEED.getValue());
-		jsonObj3.put("text", ProcessTaskStatus.SUCCEED.getText());
-		jsonList.add(jsonObj3);
-		
 		JSONObject returnObj = new JSONObject();
-		returnObj.put("dataList", jsonList);
+		returnObj.put("url", "api/rest/process/channel/search");
 		returnObj.put("isMultiple", true);
+		returnObj.put("rootName", "channelList");
+		JSONObject mappingObj = new JSONObject();
+		mappingObj.put("value", "uuid");
+		mappingObj.put("text", "name");
+		returnObj.put("mapping", mappingObj);
 		return returnObj;
 	}
 
 	@Override
 	public Integer getSort() {
-		return 7;
+		return 9;
 	}
 
 	@Override
@@ -104,7 +78,7 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 		List<String> valueList = conditionVo.getValueList();
 		if(!CollectionUtils.isEmpty(valueList)) {
 			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
-			result = valueList.contains(processTask.getStatus());
+			result = valueList.contains(processTask.getChannelUuid());
 		}			
 		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
 			return result;

@@ -1,4 +1,4 @@
-package codedriver.module.process.api.process;
+package codedriver.module.process.api.workcenter;
 
 import java.util.List;
 import java.util.Map;
@@ -15,8 +15,8 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
-import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.restful.annotation.Description;
@@ -27,14 +27,14 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @Transactional
-public class ProcessGetConditionApi extends ApiComponentBase {
+public class WorkcenterGetConditionApi extends ApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;
 
 	@Override
 	public String getToken() {
-		return "process/condition/get";
+		return "workcenter/condition/get";
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "formUuid", type = ApiParamType.STRING, desc = "流程绑定表单的uuid")
+		@Param(name = "conditionModel", type = ApiParamType.STRING, desc = "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式;默认custom"),
 	})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "组件uuid"),
@@ -63,12 +63,17 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray resultArray = new JSONArray();
-		String conditionModel = ProcessWorkcenterConditionModel.CUSTOM.getValue();
+		String conditionModel = jsonObj.getString("conditionModel") == null?ProcessWorkcenterConditionModel.CUSTOM.getValue():jsonObj.getString("conditionModel");
 		//固定字段条件
 		Map<String, IWorkcenterCondition> workcenterConditionMap = WorkcenterConditionFactory.getConditionComponentMap();
 		for (Map.Entry<String, IWorkcenterCondition> entry : workcenterConditionMap.entrySet()) {
 			IWorkcenterCondition condition = entry.getValue();
-			if(ProcessField.getValue(condition.getName())== null) {
+			//不支持endTime过滤，如果是简单模式 title、id、content 不返回
+			if(conditionModel.equals(ProcessWorkcenterConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
+					||condition.getName().equals(ProcessWorkcenterField.ID.getValue())||condition.getName().equals(ProcessWorkcenterField.CONTENT.getValue()))
+					||condition.getName().equals(ProcessWorkcenterField.ENDTIME.getValue())
+					||ProcessWorkcenterField.getValue(condition.getName())== null
+					) {
 				continue;
 			}
 			JSONObject commonObj = new JSONObject();
@@ -78,6 +83,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			if(condition.getConfig() != null) {
 				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
 			}
+			commonObj.put("conditionModel", condition.getHandler(conditionModel));
 			commonObj.put("type", condition.getType());
 			commonObj.put("config", condition.getConfig().toJSONString());
 			commonObj.put("defaultExpression", condition.getDefaultExpression().getExpression());
@@ -96,6 +102,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			String formUuid = jsonObj.getString("formUuid");
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
+				formAttributeVo.setConditionModel(conditionModel);
 				formAttributeVo.setType("form");
 				formAttributeVo.setConditionModel(conditionModel);
 				resultArray.add(formAttributeVo);

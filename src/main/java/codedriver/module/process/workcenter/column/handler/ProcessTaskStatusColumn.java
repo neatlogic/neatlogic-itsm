@@ -4,8 +4,8 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
+import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
@@ -14,18 +14,18 @@ public class ProcessTaskStatusColumn extends WorkcenterColumnBase implements IWo
 
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.STATUS.getValueEs();
+		return "status";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.STATUS.getName();
+		return "工单状态";
 	}
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String status = json.getString(this.getName());
-		return status;
+		return ProcessTaskStatus.getText(status);
 	}
 
 	@Override
@@ -35,6 +35,17 @@ public class ProcessTaskStatusColumn extends WorkcenterColumnBase implements IWo
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
+	}
+
+	@Override
+	public String getClassName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Integer getSort() {
+		return 5;
 	}
 }

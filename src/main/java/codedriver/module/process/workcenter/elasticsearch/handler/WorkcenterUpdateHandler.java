@@ -2,6 +2,7 @@ package codedriver.module.process.workcenter.elasticsearch.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -32,7 +33,7 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterCommonBuilder;
+import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
 
 @Service
@@ -119,8 +120,9 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 List<ProcessTaskStepAuditVo> transferAuditList = processTaskAuditMapper.getProcessTaskAuditList(new ProcessTaskStepAuditVo(processTaskVo.getId(),ProcessTaskStepAction.TRANSFER.getValue()));
 			
 			 /** 获取工单当前步骤 **/
-			 List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskId(taskId);
-			 WorkcenterCommonBuilder builder = new WorkcenterCommonBuilder();
+			 @SuppressWarnings("serial")
+			List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());}});
+			 WorkcenterFieldBuilder builder = new WorkcenterFieldBuilder();
 			 //form
 			 JSONObject formJson = new JSONObject();
 			 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskId);
@@ -135,7 +137,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 }
 			
 			 //common
-			 JSONObject WorkcenterColumnCommonJson = builder
+			 JSONObject WorkcenterFieldJson = builder
 					.setTitle(processTaskVo.getTitle())
 			 		.setStatus(processTaskVo.getStatus())
 			 		.setPriority(processTaskVo.getPriorityUuid())
@@ -146,15 +148,16 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 		.setStartTime(processTaskVo.getStartTime())
 			 		.setEndTime(processTaskVo.getEndTime())
 			 		.setOwner(processTaskVo.getOwner())
-			 		.setReporter(processTaskVo.getReporter())
+			 		.setReporter(processTaskVo.getReporter(),processTaskVo.getOwner())
 			 		.setCurrentStepList(processTaskActiveStepList)
 			 		.setTransferFromUserList(transferAuditList)
 			 		.setWorktime(channel.getWorktimeUuid())
 			 		.setExpiredTime(processTaskVo.getExpireTime())
+			 		.setUserWillDo()
 			 		.build();
 			
 			 patch.set("form", formJson);
-			 patch.set("common", WorkcenterColumnCommonJson);
+			 patch.set("common", WorkcenterFieldJson);
 			 patch.commit();
 		 }else {
 			 ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME).delete(taskId.toString());

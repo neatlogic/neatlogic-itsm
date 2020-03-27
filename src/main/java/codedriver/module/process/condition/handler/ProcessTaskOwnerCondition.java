@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter.condition.handler;
+package codedriver.module.process.condition.handler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,15 +14,14 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.process.condition.core.IWorkcenterCondition;
 import codedriver.framework.process.constvalue.ProcessExpression;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
-import codedriver.framework.process.workcenter.condition.core.IWorkcenterCondition;
 
 @Component
 public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
@@ -35,12 +34,12 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getName() {
-		return ProcessWorkcenterColumn.OWNER.getValue();
+		return "owner";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return ProcessWorkcenterColumn.OWNER.getName();
+		return "上报人";
 	}
 
 	@Override
@@ -50,7 +49,7 @@ public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
 	
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
 	}
 
 	@Override

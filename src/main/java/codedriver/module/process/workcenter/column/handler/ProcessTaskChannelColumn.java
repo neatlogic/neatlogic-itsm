@@ -1,13 +1,12 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumn;
-import codedriver.framework.process.constvalue.ProcessWorkcenterColumnType;
-import codedriver.framework.process.dao.cache.WorkcenterColumnDataCache;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
@@ -20,24 +19,21 @@ public class ProcessTaskChannelColumn extends WorkcenterColumnBase  implements I
 	ChannelMapper channelMapper;
 	@Override
 	public String getName() {
-		return  ProcessWorkcenterColumn.CHANNEL.getValueEs();
+		return "channel";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return  ProcessWorkcenterColumn.CHANNEL.getName();
+		return  "服务";
 	}
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String channelUuid = json.getString(this.getName());
-		String channelName = (String) WorkcenterColumnDataCache.getItem(channelUuid);
-		if(channelName == null) {
-			ChannelVo channelVo =channelMapper.getChannelByUuid(channelUuid);
-			if(channelVo != null) {
-				channelName = channelVo.getName();
-				WorkcenterColumnDataCache.addItem(channelUuid, channelName);
-			}
+		String channelName = StringUtils.EMPTY;
+		ChannelVo channelVo =channelMapper.getChannelByUuid(channelUuid);
+		if(channelVo != null) {
+			channelName = channelVo.getName();
 		}
 		return channelName;
 	}
@@ -49,6 +45,17 @@ public class ProcessTaskChannelColumn extends WorkcenterColumnBase  implements I
 
 	@Override
 	public String getType() {
-		return ProcessWorkcenterColumnType.COMMON.getValue();
+		return ProcessFieldType.COMMON.getValue();
+	}
+
+	@Override
+	public String getClassName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Integer getSort() {
+		return 9;
 	}
 }

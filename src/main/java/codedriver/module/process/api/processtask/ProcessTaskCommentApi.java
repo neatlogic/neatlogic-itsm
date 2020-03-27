@@ -18,10 +18,13 @@ import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -58,7 +61,6 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name = "auditId", type = ApiParamType.LONG, desc = "活动id"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述"),
 		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
@@ -70,30 +72,23 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMMENT)) {
 			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMMENT.getText());
 		}
-		//删除暂存活动
-		Long auditId = jsonObj.getLong("auditId");
-		if(auditId != null) {
-			ProcessTaskStepAuditVo processTaskStepAuditVo = processTaskMapper.getProcessTaskStepAuditById(auditId);
-			if(processTaskStepAuditVo == null) {
-				throw new ProcessTaskRuntimeException("活动：'" + auditId + "'不存在");
-			}
-			if(!ProcessTaskStepAction.SAVE.getValue().equals(processTaskStepAuditVo.getAction())) {
-				throw new ProcessTaskRuntimeException("活动：'" + auditId + "'不是暂存活动");
-			}
-			if(!UserContext.get().getUserId(true).equals(processTaskStepAuditVo.getUserId())) {
-				throw new ProcessTaskRuntimeException("活动：'" + auditId + "'不是当前用户的暂存活动");
-			}
-			processTaskMapper.deleteProcessTaskStepAuditById(auditId);
-		}
-		//生成活动
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.COMMENT.getValue());
-		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
 		
+		//删除暂存活动
+		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
+		auditVo.setProcessTaskId(processTaskId);
+		auditVo.setProcessTaskStepId(processTaskStepId);
+		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+		auditVo.setUserId(UserContext.get().getUserId(true));
+		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
+		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
+		}
+
 		String content = jsonObj.getString("content");
 		ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
 		processTaskMapper.replaceProcessTaskContent(contentVo);
-		processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.CONTENT.getValue(), null, contentVo.getHash()));
-		
+		jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+				
 		String fileUuidListStr = jsonObj.getString("fileUuidList");
 		if(StringUtils.isNotBlank(fileUuidListStr)) {
 			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
@@ -103,8 +98,16 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 						throw new ProcessTaskRuntimeException("上传附件uuid:'" + fileUuid + "'不存在");
 					}
 				}
-				processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.FILE.getValue(), null, fileUuidListStr));
 			}
+		}
+		//生成活动	
+		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		if(handler != null) {
+			currentProcessTaskStepVo.setParamObj(jsonObj);
+			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.COMMENT);
+		}else {
+			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
 		return null;
 	}
