@@ -166,9 +166,6 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	private boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo) {
 		JSONObject paramObj = new JSONObject();
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
-		if(processTaskVo.getTitle() == null) {
-			throw new ProcessTaskRuntimeException("工单标题不能为空");
-		}
 		Pattern titlePattern = Pattern.compile("^[A-Za-z_\\d\\u4e00-\\u9fa5]+$");
 		if (!titlePattern.matcher(processTaskVo.getTitle()).matches()) {
 			throw new ProcessTaskRuntimeException("工单标题格式不对");

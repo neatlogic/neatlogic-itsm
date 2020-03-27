@@ -38,25 +38,26 @@ public class CopyWorkerPolicyHandler implements IWorkerPolicyHandler {
 	@Override
 	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
-		if (MapUtils.isNotEmpty(workerPolicyVo.getConfigObj())) {
-			String processStepUuid = workerPolicyVo.getConfigObj().getString("processStepUuidList");
-			if(StringUtils.isNotBlank(processStepUuid)) {
-				ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-				processTaskStepVo.setProcessStepUuid(processStepUuid);
-				processTaskStepVo.setNeedPage(false);
-				List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.searchProcessTaskStep(processTaskStepVo);
-				if(CollectionUtils.isNotEmpty(processTaskStepList)) {
-					for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
-						if(processTaskStep.getProcessTaskId().equals(currentProcessTaskStepVo.getProcessTaskId())) {
-							List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStep.getId(),UserType.MAJOR.getValue());
-							for (ProcessTaskStepUserVo user : userList) {
-								processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), user.getUserId(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
-							}
-						}
-					}
-				}
-			}
+		if (MapUtils.isEmpty(workerPolicyVo.getConfigObj())) {
+			return processTaskStepWorkerList;
 		}
+		String processStepUuidList = workerPolicyVo.getConfigObj().getString("processStepUuidList");
+		if(StringUtils.isBlank(processStepUuidList)) {
+			return processTaskStepWorkerList;
+		}
+		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+		processTaskStepVo.setProcessStepUuid(processStepUuidList);
+		processTaskStepVo.setNeedPage(false);
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.searchProcessTaskStep(processTaskStepVo);
+		if(CollectionUtils.isEmpty(processTaskStepList)) {
+			return processTaskStepWorkerList;
+		}
+		ProcessTaskStepVo prevStep = processTaskStepList.get(0);
+		List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(prevStep.getId(),UserType.MAJOR.getValue());
+		for (ProcessTaskStepUserVo user : userList) {
+			processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), user.getUserId(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
+		}
+		
 		return processTaskStepWorkerList;
 	}
 }
