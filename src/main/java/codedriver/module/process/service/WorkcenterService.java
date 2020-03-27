@@ -198,7 +198,8 @@ public class WorkcenterService {
 		JSONObject conditionGroup = new JSONObject();
 		JSONArray conditionList = new JSONArray();
 		JSONObject conditionObj = new JSONObject();
-		conditionObj.put("name", String.format("%s#%s",condition.getType(),condition.getName()));
+		conditionObj.put("name", condition.getName());
+		conditionObj.put("type", condition.getType());
 		JSONArray valueList = new JSONArray();
 		valueList.add(keyword);
 		conditionObj.put("valueList", valueList);

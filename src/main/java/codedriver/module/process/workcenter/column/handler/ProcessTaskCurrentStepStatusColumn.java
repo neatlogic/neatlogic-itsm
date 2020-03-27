@@ -56,4 +56,9 @@ public class ProcessTaskCurrentStepStatusColumn extends WorkcenterColumnBase imp
 		return null;
 	}
 
+	@Override
+	public Integer getSort() {
+		return 6;
+	}
+
 }

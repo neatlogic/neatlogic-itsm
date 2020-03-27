@@ -54,4 +54,9 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Integer getSort() {
+		return 5;
+	}
 }

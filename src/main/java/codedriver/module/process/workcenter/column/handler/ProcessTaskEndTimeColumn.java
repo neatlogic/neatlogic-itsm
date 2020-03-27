@@ -43,4 +43,9 @@ public class ProcessTaskEndTimeColumn extends WorkcenterColumnBase implements IW
 		return null;
 	}
 
+	@Override
+	public Integer getSort() {
+		return 13;
+	}
+
 }

@@ -53,4 +53,9 @@ public class ProcessTaskReporterColumn extends WorkcenterColumnBase implements I
 		return null;
 	}
 
+	@Override
+	public Integer getSort() {
+		return 4;
+	}
+
 }
