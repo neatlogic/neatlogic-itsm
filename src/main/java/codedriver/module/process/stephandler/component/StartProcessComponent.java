@@ -194,10 +194,6 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
 		if (CollectionUtils.isNotEmpty(processTaskStepContentList)) {
 			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskStepContentList.get(0).getContentHash());
-//			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
-//			if (processTaskContentVo != null && StringUtils.isNotBlank(processTaskContentVo.getContent())) {
-//				paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskContentVo.getContent());
-//			}
 		}
 		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
