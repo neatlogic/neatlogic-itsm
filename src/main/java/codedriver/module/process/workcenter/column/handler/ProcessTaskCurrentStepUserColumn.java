@@ -51,7 +51,7 @@ public class ProcessTaskCurrentStepUserColumn extends WorkcenterColumnBase imple
 		}
 		for(Object currentStepObj: currentStepArray) {
 			JSONObject currentStepJson = (JSONObject)currentStepObj;
-			currentStepJson.put("statusName", ProcessTaskStatus.getText(currentStepJson.getString("status")));
+			currentStepJson.put("statusname", ProcessTaskStatus.getText(currentStepJson.getString("status")));
 			JSONArray handlerList = currentStepJson.getJSONArray("handlerlist");
 			if(CollectionUtils.isEmpty(handlerList)) {
 				return CollectionUtils.EMPTY_COLLECTION;
@@ -63,13 +63,13 @@ public class ProcessTaskCurrentStepUserColumn extends WorkcenterColumnBase imple
 					UserVo userVo = userMapper.getUserByUserId(handler.replace(GroupSearch.USER.getValuePlugin(), ""));
 					if(userVo != null) {
 						handlerJson.put("handler", handler);
-						handlerJson.put("handlerName", userVo.getUserName());
+						handlerJson.put("handlername", userVo.getUserName());
 					}
 				}else if(handler.startsWith(GroupSearch.ROLE.getValuePlugin())){
 					RoleVo roleVo = roleMapper.getRoleByRoleName(handler.toString().replace(GroupSearch.ROLE.getValuePlugin(), ""));
 					if(roleVo != null) {
 						handlerJson.put("handler", handler);
-						handlerJson.put("handlerName", roleVo.getDescription());
+						handlerJson.put("handlername", roleVo.getDescription());
 					}
 					
 				}else if(handler.startsWith(GroupSearch.TEAM.getValuePlugin())){
