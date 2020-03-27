@@ -67,8 +67,8 @@ public class CatalogGetApi extends ApiComponentBase {
 		channelVo.setParentUuid(uuid);
 		int count = channelMapper.searchChannelCount(channelVo);
 		catalog.setChildrenCount(count + catalogList.size());
-		List<AuthorityVo> authorityList = catalogMapper.getCatalogAuthorityListByCatalogUuid(uuid);
-		catalog.setAuthorityList(authorityList);
+		List<AuthorityVo> authorityVoList = catalogMapper.getCatalogAuthorityListByCatalogUuid(uuid);
+		catalog.setAuthorityVoList(authorityVoList);
 		return catalog;
 	}
 

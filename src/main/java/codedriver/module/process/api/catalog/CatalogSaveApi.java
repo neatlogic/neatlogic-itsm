@@ -53,7 +53,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		@Param(name = "icon", type = ApiParamType.STRING, isRequired= false, desc = "图标"),
 		@Param(name = "color", type = ApiParamType.STRING, isRequired= false, desc = "颜色"),
 		@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "描述", length = 200, xss = true),
-		@Param(name = "workerList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userId\",\"team#teamUuid\",\"role#roleName\"]")
+		@Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userId\",\"team#teamUuid\",\"role#roleName\"]")
 		})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "服务目录uuid")
@@ -82,7 +82,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		}
 		catalogVo.setSort(sort);
 		catalogMapper.replaceCatalog(catalogVo);
-		List<AuthorityVo> authorityList = catalogVo.getAuthorityList();
+		List<AuthorityVo> authorityList = catalogVo.getAuthorityVoList();
 		if(CollectionUtils.isNotEmpty(authorityList)) {
 			for(AuthorityVo authorityVo : authorityList) {
 				catalogMapper.insertCatalogAuthority(authorityVo);

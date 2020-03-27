@@ -66,8 +66,8 @@ public class ChannelGetApi extends ApiComponentBase {
 			}
 		}
 		channel.setPriorityUuidList(priorityUuidList);
-		List<AuthorityVo> authorityList = channelMapper.getChannelAuthorityListByChannelUuid(uuid);
-		channel.setAuthorityList(authorityList);
+		List<AuthorityVo> authorityVoList = channelMapper.getChannelAuthorityListByChannelUuid(uuid);
+		channel.setAuthorityVoList(authorityVoList);
 		return channel;
 	}
 
