@@ -19,6 +19,7 @@ import codedriver.framework.attribute.core.IAttributeHandler;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.framework.process.constvalue.UserType;
@@ -248,13 +249,31 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
+		/** 保存描述内容 **/
+		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+		String content = paramObj.getString("content");
+		if (StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(contentVo);
+			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
+			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+		}
 		DataValid.formAttributeDataValid(currentProcessTaskStepVo);
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected int myRetreat(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		return 0;
+		/** 保存描述内容 **/
+		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+		String content = paramObj.getString("content");
+		if (StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(contentVo);
+			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
+			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+		}
+		return 1;
 	}
 
 	@Override
@@ -279,6 +298,15 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
+		/** 保存描述内容 **/
+		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+		String content = paramObj.getString("content");
+		if (StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(contentVo);
+			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
+			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+		}
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 

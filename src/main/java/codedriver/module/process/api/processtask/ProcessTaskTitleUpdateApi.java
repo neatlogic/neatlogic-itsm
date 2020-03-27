@@ -7,14 +7,15 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -59,7 +60,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.UPDATE.getText());
 		}
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-		String oldTile = processTaskVo.getTitle();
+		String oldTile = processTaskVo.getTitle();	
 		String title = jsonObj.getString("title");
 		//如果标题跟原来的标题一样，不生成活动
 		if(title.equals(oldTile)) {
@@ -68,11 +69,16 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 		//更新标题
 		processTaskVo.setTitle(title);
 		processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
-		//生成活动
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.UPDATETITLE.getValue());
-		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
-		
-		processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.TITLE.getValue(), oldTile, title));
+		//生成活动	
+		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		if(handler != null) {
+			jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTile);
+			currentProcessTaskStepVo.setParamObj(jsonObj);
+			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.UPDATETITLE);
+		}else {
+			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+		}
 		return null;
 	}
 }
