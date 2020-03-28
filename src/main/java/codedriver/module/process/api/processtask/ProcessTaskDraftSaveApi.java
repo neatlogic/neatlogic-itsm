@@ -1,18 +1,23 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
@@ -84,9 +89,7 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		}
 		
 		ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo();
-		startTaskStep.setHandler(ProcessStepHandler.START.getHandler());
 		startTaskStep.setProcessUuid(processUuid);
-		startTaskStep.setParamObj(jsonObj);
 		
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		if(processTaskId != null) {
@@ -94,15 +97,30 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 			if(processTaskVo == null) {
 				throw new ProcessTaskNotFoundException(processTaskId.toString());
 			}
-			startTaskStep.setProcessTaskId(processTaskId);
+			List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+			if(processTaskStepList.size() != 1) {
+				throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
+			}
+			startTaskStep = processTaskStepList.get(0);
+		}else {
+			List<ProcessStepVo> processStepList = processMapper.getProcessStepDetailByProcessUuid(processUuid);
+			if(CollectionUtils.isNotEmpty(processStepList)) {
+				for(ProcessStepVo processStepVo : processStepList) {
+					if(processStepVo.getType().equals(ProcessStepType.START.getValue())) {
+						startTaskStep.setHandler(processStepVo.getHandler());
+					}
+				}
+			}
 		}
 		
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(ProcessStepHandler.START.getHandler());
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startTaskStep.getHandler());
 		if(handler != null) {
+			startTaskStep.setParamObj(jsonObj);
 			handler.saveDraft(startTaskStep);
 		}else {
-			throw new ProcessStepHandlerNotFoundException(ProcessStepHandler.START.getHandler());
+			throw new ProcessStepHandlerNotFoundException(startTaskStep.getHandler());
 		}
+		
 		return startTaskStep.getProcessTaskId();
 	}
 

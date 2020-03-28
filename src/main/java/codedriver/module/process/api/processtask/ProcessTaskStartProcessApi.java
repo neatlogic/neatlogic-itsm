@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -62,15 +61,11 @@ public class ProcessTaskStartProcessApi extends ApiComponentBase {
 			throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 		}
 		
-		ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo();
-		startTaskStep.setHandler(ProcessStepHandler.START.getHandler());
-		startTaskStep.setId(processTaskStepList.get(0).getId());
-		startTaskStep.setProcessTaskId(processTaskId);
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(ProcessStepHandler.START.getHandler());
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepList.get(0).getHandler());
 		if(handler != null) {
-			handler.startProcess(startTaskStep);
+			handler.startProcess(processTaskStepList.get(0));
 		}else {
-			throw new ProcessStepHandlerNotFoundException(ProcessStepHandler.START.getHandler());
+			throw new ProcessStepHandlerNotFoundException(processTaskStepList.get(0).getHandler());
 		}
 		return null;
 	}
