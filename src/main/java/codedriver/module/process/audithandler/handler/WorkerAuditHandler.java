@@ -46,7 +46,7 @@ public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler{
 		}
 		String newContent = processTaskStepAuditDetailVo.getNewContent();
 		if(StringUtils.isNotBlank(newContent)) {
-			processTaskStepAuditDetailVo.setOldContent(parse(newContent));
+			processTaskStepAuditDetailVo.setNewContent(parse(newContent));
 		}
 	}
 

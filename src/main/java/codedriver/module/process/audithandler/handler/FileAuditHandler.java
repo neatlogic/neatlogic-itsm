@@ -30,7 +30,7 @@ public class FileAuditHandler implements IProcessTaskStepAuditDetailHandler{
 	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
-			processTaskStepAuditDetailVo.setNewContent(parse(oldContent));
+			processTaskStepAuditDetailVo.setOldContent(parse(oldContent));
 		}
 		String newContent = processTaskStepAuditDetailVo.getNewContent();
 		if(StringUtils.isNotBlank(newContent)) {
