@@ -53,4 +53,9 @@ public class ProcessTaskChannelColumn extends WorkcenterColumnBase  implements I
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Integer getSort() {
+		return 9;
+	}
 }

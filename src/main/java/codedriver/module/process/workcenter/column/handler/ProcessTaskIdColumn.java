@@ -9,22 +9,22 @@ import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
 @Component
-public class ProcessTaskStartTimeColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
+public class ProcessTaskIdColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
 
 	@Override
 	public String getName() {
-		return "starttime";
+		return "id";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "上报时间";
+		return "工单号";
 	}
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
-		String createTime = json.getString(this.getName());
-		return createTime;
+		String id = json.getString(this.getName());
+		return id;
 	}
 
 	@Override
@@ -39,13 +39,12 @@ public class ProcessTaskStartTimeColumn extends WorkcenterColumnBase implements 
 
 	@Override
 	public String getClassName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Integer getSort() {
-		return 10;
+		return 2;
 	}
 
 }

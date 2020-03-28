@@ -2,6 +2,7 @@ package codedriver.module.process.workcenter.elasticsearch.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -119,7 +120,8 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 List<ProcessTaskStepAuditVo> transferAuditList = processTaskAuditMapper.getProcessTaskAuditList(new ProcessTaskStepAuditVo(processTaskVo.getId(),ProcessTaskStepAction.TRANSFER.getValue()));
 			
 			 /** 获取工单当前步骤 **/
-			 List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskId(taskId);
+			 @SuppressWarnings("serial")
+			List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());}});
 			 WorkcenterFieldBuilder builder = new WorkcenterFieldBuilder();
 			 //form
 			 JSONObject formJson = new JSONObject();

@@ -43,4 +43,9 @@ public class ProcessTaskStatusColumn extends WorkcenterColumnBase implements IWo
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Integer getSort() {
+		return 5;
+	}
 }

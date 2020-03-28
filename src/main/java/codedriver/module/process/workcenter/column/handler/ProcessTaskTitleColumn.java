@@ -23,8 +23,7 @@ public class ProcessTaskTitleColumn extends WorkcenterColumnBase implements IWor
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
-		String title = json.getString(this.getName());
-		return title;
+		return json.getString(this.getName());
 	}
 
 	@Override
@@ -40,6 +39,11 @@ public class ProcessTaskTitleColumn extends WorkcenterColumnBase implements IWor
 	@Override
 	public String getClassName() {
 		return "fontBold";
+	}
+
+	@Override
+	public Integer getSort() {
+		return 1;
 	}
 
 }

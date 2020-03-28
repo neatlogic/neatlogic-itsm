@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
@@ -28,6 +29,9 @@ import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
+import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.FormMapper;
@@ -51,7 +55,8 @@ import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 public class WorkcenterService {
 	@Autowired
 	WorkcenterMapper workcenterMapper;
-	
+	@Autowired
+	ProcessTaskService processTaskService;
 	@Autowired
 	FormMapper formMapper;
 	
@@ -119,15 +124,20 @@ public class WorkcenterService {
 		if (!resultData.isEmpty()) {
             for (MultiAttrsObject el : resultData) {
             	JSONObject taskJson = new JSONObject();
-            	taskJson.put("taskId", el.getId());
+            	taskJson.put("taskid", el.getId());
             	for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
             		IWorkcenterColumn column = entry.getValue();
             		taskJson.put(column.getName(), column.getValue(el));
             	}
+            	//route 供前端跳转路由信息
+            	JSONObject routeJson = new JSONObject();
+            	routeJson.put("taskid", el.getId());
+            	taskJson.put("route", routeJson);
+            	//action 操作
+            	taskJson.put("action", getStepAction(el));
             	dataList.add(taskJson);
             }
         }
-
 		returnObj.put("theadList", theadList);
 		returnObj.put("tbodyList", dataList);
 		returnObj.put("rowNum", result.getTotal());
@@ -135,6 +145,53 @@ public class WorkcenterService {
 		returnObj.put("currentPage", workcenterVo.getCurrentPage());
 		returnObj.put("pageCount", PageUtil.getPageCount(result.getTotal(), workcenterVo.getPageSize()));
 		return returnObj;
+	}
+	
+	private Object getStepAction(MultiAttrsObject el) {
+		JSONArray actionArray = new JSONArray();
+		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
+		if(commonJson == null) {
+			return CollectionUtils.EMPTY_COLLECTION;
+		}
+		JSONArray currentStepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.CURRENT_STEP.getValue());
+		if(CollectionUtils.isEmpty(currentStepArray)) {
+			return CollectionUtils.EMPTY_COLLECTION;
+		}
+		for(Object currentStepObj: currentStepArray) {
+			JSONObject currentStepJson = (JSONObject)currentStepObj;
+			Long stepId = currentStepJson.getLong("id");
+			String stepName = currentStepJson.getString("name");
+			String stepStatus = currentStepJson.getString("status");
+			if(StringUtils.isNotBlank(stepStatus)&&(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())||stepStatus.equals(ProcessTaskStatus.RUNNING.getValue())||stepStatus.equals(ProcessTaskStatus.DRAFT.getValue()))) {
+				List<String> actionList = processTaskService.getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
+				
+				if(actionList.contains(ProcessTaskStepAction.COMPLETESUBTASK.getValue())||
+						actionList.contains(ProcessTaskStepAction.COMPLETE.getValue())||
+						actionList.contains(ProcessTaskStepAction.START.getValue())||
+						actionList.contains(ProcessTaskStepAction.STARTPROCESS.getValue())) {
+					JSONObject configJson = new JSONObject();
+					configJson.put("taskid", el.getId());
+					configJson.put("stepid", stepId);
+					configJson.put("stepName", stepName);
+					JSONObject actionJson = new JSONObject();
+					actionJson.put("name", "handle");
+					actionJson.put("text", String.format("处理:%s", stepName));
+					actionJson.put("config", configJson);
+					actionArray.add(actionJson);
+				}
+				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
+					JSONObject actionJson = new JSONObject();
+					JSONObject configJson = new JSONObject();
+					configJson.put("taskid", el.getId());
+					configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
+					actionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
+					actionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+					actionJson.put("config", configJson);
+					actionArray.add(actionJson);
+				}
+			}
+		}
+		return actionArray;
 	}
 	
 	/**
@@ -198,7 +255,8 @@ public class WorkcenterService {
 		JSONObject conditionGroup = new JSONObject();
 		JSONArray conditionList = new JSONArray();
 		JSONObject conditionObj = new JSONObject();
-		conditionObj.put("name", String.format("%s#%s",condition.getType(),condition.getName()));
+		conditionObj.put("name", condition.getName());
+		conditionObj.put("type", condition.getType());
 		JSONArray valueList = new JSONArray();
 		valueList.add(keyword);
 		conditionObj.put("valueList", valueList);
@@ -260,7 +318,7 @@ public class WorkcenterService {
 				IWorkcenterCondition workcenterCondition = WorkcenterConditionFactory.getHandler(condition.getName());
 				//Date 类型过滤条件特殊处理
 				if(workcenterCondition != null && workcenterCondition.getHandler(ProcessWorkcenterConditionModel.SIMPLE.getValue()).equals(ProcessFormHandlerType.DATE.toString())){
-					JSONArray dateJSONArray = JSONArray.parseArray(condition.getValueList().toString());
+					JSONArray dateJSONArray = JSONArray.parseArray(JSON.toJSONString(condition.getValueList()));
 					if(CollectionUtils.isNotEmpty(dateJSONArray)) {
 						JSONObject dateValue = (JSONObject) dateJSONArray.get(0);
 						SimpleDateFormat format = new SimpleDateFormat(TimeUtil.TIME_FORMAT);
