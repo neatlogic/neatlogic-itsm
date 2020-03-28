@@ -26,7 +26,9 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepWorkerAction;
 import codedriver.framework.process.constvalue.UserType;
+import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
@@ -48,6 +50,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private ProcessStepHandlerMapper processStepHandlerMapper;
 	
 	@Autowired
 	private TeamMapper teamMapper;
@@ -138,11 +143,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 			JSONObject stepConfigObj = JSON.parseObject(stepConfig);
 			authorityList = stepConfigObj.getJSONArray("authorityList");
+			//如果步骤自定义权限设置为空，则用组件的全局权限设置
+			if(CollectionUtils.isEmpty(authorityList)) {
+				ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+				if(processStepHandlerVo != null) {
+					JSONObject handlerConfigObj = JSON.parseObject(processStepHandlerVo.getConfig());
+					authorityList = handlerConfigObj.getJSONArray("authorityList");
+				}
+			}
 		}
-		//如果步骤自定义权限设置为空，则用组件的全局权限设置
-		if(CollectionUtils.isEmpty(authorityList)) {
-			//TODO linbq获取组件全局权限设置
-		}
+		
 		//目前只有四种权限可以设置：查看节点信息view、终止/恢复流程abort、转交transfer、修改上报内容update
 				
 		if(CollectionUtils.isNotEmpty(authorityList)) {
