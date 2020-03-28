@@ -28,7 +28,6 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
-import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
@@ -189,7 +188,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		baseInfoValid(currentProcessTaskStepVo);
-		DataValid.formAttributeDataValid(currentProcessTaskStepVo);
 		return 1;
 	}
 
@@ -214,7 +212,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
 			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
-		DataValid.formAttributeDataValid(currentProcessTaskStepVo);
 		return 1;
 	}
 
@@ -350,24 +347,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		processTaskVo.setOwner(paramObj.getString("owner"));
 		processTaskVo.setPriorityUuid(paramObj.getString("priorityUuid"));
 		processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
-
-		/** 写入当前步骤的表单属性值 **/
-		JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
-		if (formAttributeDataList != null && formAttributeDataList.size() > 0) {
-			for (int i = 0; i < formAttributeDataList.size(); i++) {
-				JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
-				ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
-				String dataList = formAttributeDataObj.getString("dataList");
-				if (StringUtils.isBlank(dataList)) {
-					continue;
-				}
-				attributeData.setData(dataList);
-				attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-				attributeData.setAttributeUuid(formAttributeDataObj.getString("attributeUuid"));
-				attributeData.setType(formAttributeDataObj.getString("handler"));
-				processTaskMapper.replaceProcessTaskFormAttributeData(attributeData);
-			}
-		}
 
 		/** 保存描述内容 **/
 		String content = paramObj.getString("content");
