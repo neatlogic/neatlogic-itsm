@@ -85,7 +85,7 @@ public class WorkcenterGetConditionApi extends ApiComponentBase {
 			}
 			commonObj.put("conditionModel", condition.getHandler(conditionModel));
 			commonObj.put("type", condition.getType());
-			commonObj.put("config", condition.getConfig().toJSONString());
+			commonObj.put("config", condition.getConfig() == null?"": condition.getConfig().toJSONString());
 			commonObj.put("defaultExpression", condition.getDefaultExpression().getExpression());
 			JSONArray expressiobArray = new JSONArray();
 			for(ProcessExpression expression:condition.getExpressionList()) {
