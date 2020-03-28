@@ -16,9 +16,12 @@ import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.UserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
@@ -114,6 +117,22 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 					}
 					processTaskStepVo.setProcessTaskStepAuditList(processTaskStepAuditList);
 				}
+				//子任务列表
+				ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
+				processTaskStepSubtaskVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
+				processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepVo.getId());
+				List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+				for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+					ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = processTaskMapper.getProcessTaskStepSubtaskContentById(processTaskStepSubtask.getId());
+					if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
+						ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepSubtaskContentVo.getContentHash());
+						if(processTaskContentVo != null) {
+							processTaskStepSubtask.setContent(processTaskContentVo.getContent());
+						}
+					}
+				}
+				processTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
+				
 				resultList.add(processTaskStepVo);
 			}
 		}

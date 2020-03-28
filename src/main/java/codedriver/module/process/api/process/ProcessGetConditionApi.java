@@ -77,9 +77,9 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			commonObj.put("handlerType", condition.getHandler(conditionModel));
 			if(condition.getConfig() != null) {
 				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
+				commonObj.put("config", condition.getConfig().toJSONString());
 			}
 			commonObj.put("type", condition.getType());
-			commonObj.put("config", condition.getConfig().toJSONString());
 			commonObj.put("defaultExpression", condition.getDefaultExpression().getExpression());
 			JSONArray expressiobArray = new JSONArray();
 			for(ProcessExpression expression:condition.getExpressionList()) {
