@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,8 +53,10 @@ import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.condition.handler.ProcessTaskContentCondition;
 import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
 import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
+import codedriver.module.process.workcenter.elasticsearch.handler.WorkcenterUpdateHandler;
 @Service
 public class WorkcenterService {
+	Logger logger = LoggerFactory.getLogger(WorkcenterService.class);
 	@Autowired
 	WorkcenterMapper workcenterMapper;
 	@Autowired
@@ -163,8 +167,12 @@ public class WorkcenterService {
 			String stepName = currentStepJson.getString("name");
 			String stepStatus = currentStepJson.getString("status");
 			if(StringUtils.isNotBlank(stepStatus)&&(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())||stepStatus.equals(ProcessTaskStatus.RUNNING.getValue())||stepStatus.equals(ProcessTaskStatus.DRAFT.getValue()))) {
-				List<String> actionList = processTaskService.getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
-				
+				List<String> actionList = new ArrayList<String>();
+				try {
+					actionList = processTaskService.getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
+				}catch(Exception ex) {
+					logger.error(ex.getMessage(),ex);
+				}
 				if(actionList.contains(ProcessTaskStepAction.COMPLETESUBTASK.getValue())||
 						actionList.contains(ProcessTaskStepAction.COMPLETE.getValue())||
 						actionList.contains(ProcessTaskStepAction.START.getValue())||
