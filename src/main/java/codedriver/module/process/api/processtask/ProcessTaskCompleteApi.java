@@ -1,14 +1,11 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -63,19 +60,11 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMPLETE)) {
 			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMPLETE.getText());
 		}
-		ProcessTaskStepVo processTaskStepVo = null;
-		if(processTaskStepId != null) {
-			processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		}else {
-			List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
-			if(processTaskStepList.size() != 1) {
-				throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
-			}
-			processTaskStepVo = processTaskStepList.get(0);
-		}
-		
-		Long nextStepId = jsonObj.getLong("nextStepId");
-		if(nextStepId != null) {
+
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);	
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+		if(handler != null) {
+			Long nextStepId = jsonObj.getLong("nextStepId");
 			ProcessTaskStepVo nextProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(nextStepId);
 			if(nextProcessTaskStepVo == null) {
 				throw new ProcessTaskStepNotFoundException(nextStepId.toString());
@@ -83,10 +72,7 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 			if(!processTaskId.equals(nextProcessTaskStepVo.getProcessTaskId())) {
 				throw new ProcessTaskRuntimeException("步骤：'" + nextStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
-		}
-		processTaskStepVo.setParamObj(jsonObj);
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		if(handler != null) {
+			processTaskStepVo.setParamObj(jsonObj);
 			handler.complete(processTaskStepVo);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
