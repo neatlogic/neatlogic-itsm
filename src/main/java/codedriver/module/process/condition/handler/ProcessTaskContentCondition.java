@@ -54,7 +54,7 @@ public class ProcessTaskContentCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 4;
+		return 3;
 	}
 
 	@Override
