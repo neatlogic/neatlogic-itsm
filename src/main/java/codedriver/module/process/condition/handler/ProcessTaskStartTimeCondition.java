@@ -51,7 +51,7 @@ public class ProcessTaskStartTimeCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 1;
+		return 4;
 	}
 
 	@Override

@@ -1,9 +1,9 @@
 package codedriver.module.process.api.workcenter;
 
-import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,6 @@ import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -87,6 +86,7 @@ public class WorkcenterGetConditionApi extends ApiComponentBase {
 			commonObj.put("type", condition.getType());
 			commonObj.put("config", condition.getConfig() == null?"": condition.getConfig().toJSONString());
 			commonObj.put("defaultExpression", condition.getDefaultExpression().getExpression());
+			commonObj.put("sort", condition.getSort());
 			JSONArray expressiobArray = new JSONArray();
 			for(ProcessExpression expression:condition.getExpressionList()) {
 				JSONObject expressionObj = new JSONObject();
@@ -97,17 +97,19 @@ public class WorkcenterGetConditionApi extends ApiComponentBase {
 			}
 			resultArray.add(commonObj);
 		}
-		//表单条件
-		if(jsonObj.containsKey("formUuid") && !StringUtils.isBlank(jsonObj.getString("formUuid"))) {
-			String formUuid = jsonObj.getString("formUuid");
-			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
-			for(FormAttributeVo formAttributeVo : formAttrList) {
-				formAttributeVo.setConditionModel(conditionModel);
-				formAttributeVo.setType("form");
-				formAttributeVo.setConditionModel(conditionModel);
-				resultArray.add(formAttributeVo);
+		Collections.sort(resultArray, new Comparator<Object>() {
+			@Override
+			public int compare(Object o1, Object o2) {
+				try {
+					JSONObject obj1 = (JSONObject) o1;
+					JSONObject obj2 = (JSONObject) o2;
+					return obj1.getIntValue("sort") - obj2.getIntValue("sort");
+				} catch (Exception ex) {
+
+				}
+				return 0;
 			}
-		}
+		});
 		return resultArray;
 	}
 

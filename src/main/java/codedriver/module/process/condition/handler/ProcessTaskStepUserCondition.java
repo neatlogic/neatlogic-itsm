@@ -46,7 +46,7 @@ public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 4;
+		return 5;
 	}
 
 	@Override
