@@ -31,7 +31,6 @@ import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
@@ -53,7 +52,6 @@ import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.condition.handler.ProcessTaskContentCondition;
 import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
 import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
-import codedriver.module.process.workcenter.elasticsearch.handler.WorkcenterUpdateHandler;
 @Service
 public class WorkcenterService {
 	Logger logger = LoggerFactory.getLogger(WorkcenterService.class);
@@ -328,7 +326,7 @@ public class WorkcenterService {
 				if(workcenterCondition != null && workcenterCondition.getHandler(ProcessWorkcenterConditionModel.SIMPLE.getValue()).equals(ProcessFormHandlerType.DATE.toString())){
 					JSONArray dateJSONArray = JSONArray.parseArray(JSON.toJSONString(condition.getValueList()));
 					if(CollectionUtils.isNotEmpty(dateJSONArray)) {
-						JSONObject dateValue = (JSONObject) dateJSONArray.get(0);
+						JSONObject dateValue = JSONObject.parseObject(dateJSONArray.get(0).toString());
 						SimpleDateFormat format = new SimpleDateFormat(TimeUtil.TIME_FORMAT);
 						String startTime = StringUtils.EMPTY;
 						String endTime = StringUtils.EMPTY;
