@@ -152,10 +152,11 @@ public class WorkcenterService {
 	private Object getStepAction(MultiAttrsObject el) {
 		JSONArray actionArray = new JSONArray();
 		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
+		Boolean isHasAbort = false;
 		if(commonJson == null) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		JSONArray currentStepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.CURRENT_STEP.getValue());
+		JSONArray currentStepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
 		if(CollectionUtils.isEmpty(currentStepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
@@ -188,12 +189,15 @@ public class WorkcenterService {
 				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
 					JSONObject actionJson = new JSONObject();
 					JSONObject configJson = new JSONObject();
-					configJson.put("taskid", el.getId());
-					configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
-					actionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
-					actionJson.put("text", ProcessTaskStepAction.ABORT.getText());
-					actionJson.put("config", configJson);
-					actionArray.add(actionJson);
+					if(!isHasAbort) {
+						configJson.put("taskid", el.getId());
+						configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
+						actionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
+						actionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+						actionJson.put("config", configJson);
+						actionArray.add(actionJson);
+						isHasAbort = true;
+					}
 				}
 			}
 		}

@@ -150,12 +150,10 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 		.setEndTime(processTaskVo.getEndTime())
 			 		.setOwner(processTaskVo.getOwner())
 			 		.setReporter(processTaskVo.getReporter(),processTaskVo.getOwner())
-			 		//.setCurrentStepList(processTaskActiveStepList)
 			 		.setStepList(processTaskStepList)
 			 		.setTransferFromUserList(transferAuditList)
 			 		.setWorktime(channel.getWorktimeUuid())
 			 		.setExpiredTime(processTaskVo.getExpireTime())
-			 		.setUserWillDo()
 			 		.build();
 			
 			 patch.set("form", formJson);
