@@ -6,8 +6,10 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.MatrixAttributeService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,6 +23,9 @@ import java.util.UUID;
  **/
 @Service
 public class MatrixAttributeSaveApi extends ApiComponentBase {
+
+    @Autowired
+    private MatrixAttributeService attributeService;
 
     @Override
     public String getToken() {
@@ -50,11 +55,13 @@ public class MatrixAttributeSaveApi extends ApiComponentBase {
             ProcessMatrixAttributeVo attributeVo = new ProcessMatrixAttributeVo();
             attributeVo.setMatrixUuid(matrixUuid);
             attributeVo.setName(attributeObj.getString("name"));
-            attributeVo.setUuid(UUID.randomUUID().toString().replace("-", ""));
+            if (attributeObj.containsKey("uuid")){
+                attributeVo.setUuid(attributeObj.getString("uuid"));
+            }
             attributeVo.setConfig(attributeObj.toString());
             attributeVoList.add(attributeVo);
         }
-
+        attributeService.saveMatrixAttribute(attributeVoList, matrixUuid);
         return "";
     }
 }

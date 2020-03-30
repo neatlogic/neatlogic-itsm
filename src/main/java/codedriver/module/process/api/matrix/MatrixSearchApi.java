@@ -44,7 +44,11 @@ public class MatrixSearchApi extends ApiComponentBase {
              @Param( name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
              @Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
              @Param( name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER)})
-    @Output({ @Param( name = "matrixList", desc = "矩阵数据源列表", explode = ProcessMatrixVo[].class)})
+    @Output({ @Param( name = "tbodyList", desc = "矩阵数据源列表", explode = ProcessMatrixVo[].class),
+            @Param( name = "pageCount", desc = "页码数", type = ApiParamType.INTEGER),
+            @Param( name = "rowNum", desc = "统计个数", type = ApiParamType.INTEGER),
+            @Param( name = "pageSize", desc = "页最大条数", type = ApiParamType.INTEGER),
+            @Param( name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER)})
     @Description(desc = "数据源矩阵检索")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -60,7 +64,13 @@ public class MatrixSearchApi extends ApiComponentBase {
         if (jsonObj.containsKey("pageSize")){
             matrix.setPageSize(jsonObj.getInteger("pageSize"));
         }
-        returnObj.put("matrixList", matrixService.searchMatrix(matrix));
+        returnObj.put("tbodyList", matrixService.searchMatrix(matrix));
+        if (matrix.getNeedPage()){
+            returnObj.put("pageCount", matrix.getPageCount());
+            returnObj.put("rowNum", matrix.getRowNum());
+            returnObj.put("pageSize", matrix.getPageSize());
+            returnObj.put("currentPage", matrix.getCurrentPage());
+        }
         return returnObj;
     }
 }
