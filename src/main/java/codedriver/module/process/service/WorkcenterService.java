@@ -31,7 +31,6 @@ import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
@@ -44,6 +43,7 @@ import codedriver.framework.process.dto.condition.ConditionGroupVo;
 import codedriver.framework.process.dto.condition.ConditionRelVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 import codedriver.framework.process.exception.workcenter.WorkcenterConditionException;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
@@ -53,7 +53,6 @@ import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.condition.handler.ProcessTaskContentCondition;
 import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
 import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
-import codedriver.module.process.workcenter.elasticsearch.handler.WorkcenterUpdateHandler;
 @Service
 public class WorkcenterService {
 	Logger logger = LoggerFactory.getLogger(WorkcenterService.class);
@@ -169,7 +168,7 @@ public class WorkcenterService {
 			if(StringUtils.isNotBlank(stepStatus)&&(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())||stepStatus.equals(ProcessTaskStatus.RUNNING.getValue())||stepStatus.equals(ProcessTaskStatus.DRAFT.getValue()))) {
 				List<String> actionList = new ArrayList<String>();
 				try {
-					actionList = processTaskService.getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
+					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
 				}catch(Exception ex) {
 					logger.error(ex.getMessage(),ex);
 				}

@@ -41,13 +41,14 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
 @Service
 public class ProcessTaskStepGetApi extends ApiComponentBase {
 	
@@ -55,9 +56,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
 	
 	@Autowired
 	private PriorityMapper priorityMapper;
@@ -99,13 +97,23 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW)) {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.VIEW.getText());
-		}
-		
 		//获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+		if(processTaskVo == null) {
+			throw new ProcessTaskNotFoundException(processTaskId.toString());
+		}
+		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+		if(processTaskStepId != null) {
+			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+			if(processTaskStepVo == null) {
+				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+			}
+			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
+				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
+			}
+		}
+		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW);
+		
 		//获取工单流程图信息
 		ProcessTaskConfigVo processTaskConfig = processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
 		if(processTaskConfig == null) {

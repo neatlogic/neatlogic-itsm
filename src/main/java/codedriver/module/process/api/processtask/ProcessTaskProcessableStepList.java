@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -15,17 +14,14 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
 @Service
 public class ProcessTaskProcessableStepList extends ApiComponentBase {
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
 
 	@Override
 	public String getToken() {
@@ -53,7 +49,7 @@ public class ProcessTaskProcessableStepList extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		List<ProcessTaskStepVo> processableStepList = processTaskService.getProcessableStepList(processTaskId);
+		List<ProcessTaskStepVo> processableStepList = ProcessStepHandlerFactory.getHandler().getProcessableStepList(processTaskId);
 		String action = jsonObj.getString("action");
 		if(StringUtils.isNotBlank(action)) {
 			Iterator<ProcessTaskStepVo> iterator = processableStepList.iterator();

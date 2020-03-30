@@ -12,18 +12,23 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
 @Service
 public class ProcessTaskStepActionListApi extends ApiComponentBase {
 	
 	@Autowired
-	private ProcessTaskService processTaskService;
+	private ProcessTaskMapper processTaskMapper;
 	
 	@Override
 	public String getToken() {
@@ -51,13 +56,22 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		List<String> actionList = processTaskService.getProcessTaskStepActionList(processTaskId, processTaskStepId);
-		if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())) {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.VIEW.getText());
+		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+		if(processTaskVo == null) {
+			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
-
+		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+		if(processTaskStepId != null) {
+			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+			if(processTaskStepVo == null) {
+				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+			}
+			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
+				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
+			}
+		}
 		List<ValueTextVo> resultList = new ArrayList<>();
+		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
 		for(String action : actionList) {
 			String text = ProcessTaskStepAction.getText(action);
 			if(StringUtils.isNotBlank(text)) {

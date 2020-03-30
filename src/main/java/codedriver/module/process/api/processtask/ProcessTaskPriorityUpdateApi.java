@@ -12,24 +12,22 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
 @Service
 @Transactional
 public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -54,31 +52,38 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE)) {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.UPDATE.getText());
-		}
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+		if(processTaskVo == null) {
+			throw new ProcessTaskNotFoundException(processTaskId.toString());
+		}
 		String oldPriorityUuid = processTaskVo.getPriorityUuid();
 		String priorityUuid = jsonObj.getString("priorityUuid");
-		//如果优先级跟原来的优先级一样，不生成活动
-		if(priorityUuid.equals(oldPriorityUuid)) {
-			return null;
-		}
-		//更新优先级
-		processTaskVo.setPriorityUuid(priorityUuid);
-		processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
-		
-		//生成活动	
-		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-		if(handler != null) {
+		//如果优先级跟原来的优先级不一样，生成活动
+		if(!priorityUuid.equals(oldPriorityUuid)) {
+			Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+			if(processTaskStepVo == null) {
+				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+			}
+			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
+				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
+			}
+
+			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+			if(handler == null) {
+				throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+			}
+			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
+			
+			//更新优先级
+			processTaskVo.setPriorityUuid(priorityUuid);
+			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
+			//生成活动	
 			jsonObj.put(ProcessTaskAuditDetailType.PRIORITY.getOldDataParamName(), oldPriorityUuid);
-			currentProcessTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.UPDATEPRIORITY);
-		}else {
-			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+			processTaskStepVo.setParamObj(jsonObj);
+			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.UPDATEPRIORITY);
 		}
+		
 		return null;
 	}
 
