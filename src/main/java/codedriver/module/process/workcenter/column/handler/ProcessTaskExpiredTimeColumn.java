@@ -43,4 +43,9 @@ public class ProcessTaskExpiredTimeColumn extends WorkcenterColumnBase implement
 		return null;
 	}
 
+	@Override
+	public Integer getSort() {
+		return 14;
+	}
+
 }

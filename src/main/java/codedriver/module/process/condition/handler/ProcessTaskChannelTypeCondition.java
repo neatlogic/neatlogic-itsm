@@ -63,7 +63,7 @@ public class ProcessTaskChannelTypeCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 1;
+		return 7;
 	}
 
 	@Override

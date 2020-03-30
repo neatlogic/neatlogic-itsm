@@ -53,4 +53,9 @@ public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWor
 		return null;
 	}
 
+	@Override
+	public Integer getSort() {
+		return 3;
+	}
+
 }

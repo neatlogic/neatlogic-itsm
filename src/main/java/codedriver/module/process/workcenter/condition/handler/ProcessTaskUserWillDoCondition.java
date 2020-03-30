@@ -1,4 +1,4 @@
-package codedriver.module.process.condition.handler;
+package codedriver.module.process.workcenter.condition.handler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,16 +15,15 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 
 @Component
-public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
-
+public class ProcessTaskUserWillDoCondition implements IWorkcenterCondition{
 	@Override
 	public String getName() {
-		return "stepuser";
+		return "userwilldo";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "步骤处理人";
+		return "待处理用户";
 	}
 
 	@Override
@@ -40,28 +39,28 @@ public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
 	@Override
 	public JSONObject getConfig() {
 		JSONObject returnObj = new JSONObject();
-		returnObj.put("isMultiple", true);
+		returnObj.put("isMultiple", false);
 		return returnObj;
 	}
 
 	@Override
 	public Integer getSort() {
-		return 5;
+		return 12;
 	}
 
 	@Override
 	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
+		return Arrays.asList(ProcessExpression.INCLUDE);
 	}
-
+	
 	@Override
 	public ProcessExpression getDefaultExpression() {
 		return ProcessExpression.INCLUDE;
 	}
 
 	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo workcenterConditionVo) {
-		// 条件步骤没有处理人
+	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
 		return false;
 	}
+
 }

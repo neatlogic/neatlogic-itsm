@@ -20,10 +20,13 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -109,14 +112,11 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		if(StringUtils.isBlank(content) && (StringUtils.isBlank(fileUuidListStr) || "[]".equals(fileUuidListStr))) {
 			return null;
 		}
-		//生成活动
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo(processTaskId, processTaskStepId, UserContext.get().getUserId(true), ProcessTaskStepAction.SAVE.getValue());
-		processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
-		
+
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
 			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.CONTENT.getValue(), null, contentVo.getHash()));
+			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
 		
 		if(StringUtils.isNotBlank(fileUuidListStr)) {
@@ -127,10 +127,18 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 						throw new ProcessTaskRuntimeException("上传附件uuid:'" + fileUuid + "'不存在");
 					}
 				}
-				processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), ProcessTaskAuditDetailType.FILE.getValue(), null, fileUuidListStr));
 			}
 		}
-		return processTaskStepAuditVo.getId();
+		//生成活动	
+		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		if(handler != null) {
+			currentProcessTaskStepVo.setParamObj(jsonObj);
+			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.SAVE);
+		}else {
+			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+		}
+		return null;
 	}
 
 }

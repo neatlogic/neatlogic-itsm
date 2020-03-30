@@ -93,7 +93,7 @@ public class ProcessTaskStepStatusCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 8;
+		return 11;
 	}
 
 	@Override

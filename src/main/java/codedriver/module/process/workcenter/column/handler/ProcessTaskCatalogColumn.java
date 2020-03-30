@@ -53,4 +53,9 @@ public class ProcessTaskCatalogColumn extends WorkcenterColumnBase  implements I
 		return null;
 	}
 
+	@Override
+	public Integer getSort() {
+		return 7;
+	}
+
 }

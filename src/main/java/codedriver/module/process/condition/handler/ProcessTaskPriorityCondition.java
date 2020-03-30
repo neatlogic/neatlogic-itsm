@@ -74,7 +74,7 @@ public class ProcessTaskPriorityCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 5;
+		return 6;
 	}
 
 	@Override

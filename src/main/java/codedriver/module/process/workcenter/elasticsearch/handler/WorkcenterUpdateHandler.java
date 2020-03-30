@@ -2,6 +2,7 @@ package codedriver.module.process.workcenter.elasticsearch.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -119,7 +120,8 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 List<ProcessTaskStepAuditVo> transferAuditList = processTaskAuditMapper.getProcessTaskAuditList(new ProcessTaskStepAuditVo(processTaskVo.getId(),ProcessTaskStepAction.TRANSFER.getValue()));
 			
 			 /** 获取工单当前步骤 **/
-			 List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskId(taskId);
+			 @SuppressWarnings("serial")
+			List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());}});
 			 WorkcenterFieldBuilder builder = new WorkcenterFieldBuilder();
 			 //form
 			 JSONObject formJson = new JSONObject();
@@ -135,7 +137,8 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 }
 			
 			 //common
-			 JSONObject WorkcenterColumnCommonJson = builder
+			 JSONObject WorkcenterFieldJson = builder
+					.setId(taskId.toString())
 					.setTitle(processTaskVo.getTitle())
 			 		.setStatus(processTaskVo.getStatus())
 			 		.setPriority(processTaskVo.getPriorityUuid())
@@ -146,15 +149,16 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 		.setStartTime(processTaskVo.getStartTime())
 			 		.setEndTime(processTaskVo.getEndTime())
 			 		.setOwner(processTaskVo.getOwner())
-			 		.setReporter(processTaskVo.getReporter())
+			 		.setReporter(processTaskVo.getReporter(),processTaskVo.getOwner())
 			 		.setCurrentStepList(processTaskActiveStepList)
 			 		.setTransferFromUserList(transferAuditList)
 			 		.setWorktime(channel.getWorktimeUuid())
 			 		.setExpiredTime(processTaskVo.getExpireTime())
+			 		.setUserWillDo()
 			 		.build();
 			
 			 patch.set("form", formJson);
-			 patch.set("common", WorkcenterColumnCommonJson);
+			 patch.set("common", WorkcenterFieldJson);
 			 patch.commit();
 		 }else {
 			 ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME).delete(taskId.toString());

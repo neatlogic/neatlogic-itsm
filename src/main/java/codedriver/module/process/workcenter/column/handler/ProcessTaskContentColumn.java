@@ -42,4 +42,9 @@ public class ProcessTaskContentColumn extends WorkcenterColumnBase implements IW
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Integer getSort() {
+		return 10;
+	}
 }
