@@ -43,7 +43,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取工单中心分类接口";
+		return "获取工单中心分类列表接口";
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 	@Output({
 		@Param(name="workcenter", explode = WorkcenterVo.class, desc="分类信息")
 	})
-	@Description(desc = "获取工单中心分类接口")
+	@Description(desc = "获取工单中心分类列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<WorkcenterVo>  workcenterList = workcenterMapper.getWorkcenter(new WorkcenterVo(UserContext.get().getUserId(),UserContext.get().getRoleNameList(),UserContext.get().getUserId()));
