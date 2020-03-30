@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -184,6 +185,7 @@ public class WorkcenterService {
 					actionJson.put("name", "handle");
 					actionJson.put("text", String.format("处理:%s", stepName));
 					actionJson.put("config", configJson);
+					actionJson.put("sort", 1);
 					actionArray.add(actionJson);
 				}
 				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
@@ -195,12 +197,14 @@ public class WorkcenterService {
 						actionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
 						actionJson.put("text", ProcessTaskStepAction.ABORT.getText());
 						actionJson.put("config", configJson);
+						actionJson.put("sort", 2);
 						actionArray.add(actionJson);
-						isHasAbort = true;
+						isHasAbort = true; 
 					}
 				}
 			}
 		}
+		actionArray.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("sort")));
 		return actionArray;
 	}
 	

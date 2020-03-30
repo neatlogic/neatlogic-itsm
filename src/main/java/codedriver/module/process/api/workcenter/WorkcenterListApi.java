@@ -1,7 +1,9 @@
 package codedriver.module.process.api.workcenter;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +79,8 @@ public class WorkcenterListApi extends ApiComponentBase {
 			//查询数量
 			workcenter.setCount(workcenterService.doSearchCount(new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()))));
 		}
-		return workcenterList;
+	    
+	    
+		return workcenterList.stream().sorted(Comparator.comparing(WorkcenterVo::getSort)).collect(Collectors.toList());
 	}
 }
