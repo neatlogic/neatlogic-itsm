@@ -50,12 +50,12 @@ public class ProcessTaskUserWillDoCondition implements IWorkcenterCondition{
 
 	@Override
 	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.EQUAL);
+		return Arrays.asList(ProcessExpression.INCLUDE);
 	}
 	
 	@Override
 	public ProcessExpression getDefaultExpression() {
-		return ProcessExpression.EQUAL;
+		return ProcessExpression.INCLUDE;
 	}
 
 	@Override

@@ -138,6 +138,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			
 			 //common
 			 JSONObject WorkcenterFieldJson = builder
+					.setId(taskId.toString())
 					.setTitle(processTaskVo.getTitle())
 			 		.setStatus(processTaskVo.getStatus())
 			 		.setPriority(processTaskVo.getPriorityUuid())

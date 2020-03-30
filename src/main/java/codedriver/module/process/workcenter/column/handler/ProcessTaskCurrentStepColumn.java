@@ -7,6 +7,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
@@ -25,18 +27,16 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
-		JSONArray currentStepArray = json.getJSONArray(this.getName());
+		JSONArray currentStepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterField.CURRENT_STEP.getValue());
 		if(CollectionUtils.isEmpty(currentStepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		JSONArray currentStepList = new JSONArray();
-		for(Object step : currentStepArray) {
-			JSONObject stepJson = new JSONObject();
-			stepJson.put("name", ((JSONObject)step).getString("name"));
-			stepJson.put("id", ((JSONObject)step).getString("id"));
-			currentStepList.add(stepJson);
+		JSONArray stepArray = JSONArray.parseArray(currentStepArray.toJSONString());
+		for(Object currentStepObj: stepArray) {
+			JSONObject currentStepJson = (JSONObject)currentStepObj;
+			currentStepJson.put("statusname", ProcessTaskStatus.getText(currentStepJson.getString("status")));
 		}
-		return currentStepList;
+		return stepArray;
 	}
 
 	@Override
