@@ -23,7 +23,7 @@ public class ProcessTaskUserWillDoCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getDisplayName() {
-		return "用户待处理的";
+		return "待处理用户";
 	}
 
 	@Override
