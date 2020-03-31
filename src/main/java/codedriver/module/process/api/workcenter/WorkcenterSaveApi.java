@@ -74,6 +74,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		workcenterVo.setUuid(uuid);
 		//保存、更新分类
 		JSONArray valueList = jsonObj.getJSONArray("valueList");
+		workcenterMapper.deleteWorkcenterOwnerByUuid(workcenterVo.getUuid());
 		if(CollectionUtils.isNotEmpty(valueList)) {
 			//判断是否有管理员权限
 			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,WORKCENTER_MODIFY.class.getSimpleName())))) {
@@ -81,7 +82,6 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 			}
 			workcenterVo.setType(ProcessWorkcenterType.SYSTEM.getValue());
 			workcenterMapper.deleteWorkcenterRoleByUuid(workcenterVo.getUuid());
-			workcenterMapper.deleteWorkcenterOwnerByUuid(workcenterVo.getUuid());
 			//更新角色
 			for(Object value:valueList) {
 				String[] roles = value.toString().split("#");
