@@ -1,10 +1,17 @@
 package codedriver.module.process.api.channeltype;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -14,6 +21,9 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 public class ChannelTypeSearchApi extends ApiComponentBase {
+
+	@Autowired
+	private ChannelMapper channelMapper;
 
 	@Override
 	public String getToken() {
@@ -47,7 +57,22 @@ public class ChannelTypeSearchApi extends ApiComponentBase {
 	@Description(desc = "服务类型列表搜索接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return null;
+		ChannelTypeVo channelTypeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelTypeVo>() {});
+		
+		JSONObject resultObj = new JSONObject();
+		if(channelTypeVo.getNeedPage()) {
+			int rowNum = channelMapper.searchChannelTypeCount(channelTypeVo);
+			int pageCount = PageUtil.getPageCount(rowNum, channelTypeVo.getPageSize());
+			channelTypeVo.setPageCount(pageCount);
+			channelTypeVo.setRowNum(rowNum);
+			resultObj.put("currentPage", channelTypeVo.getCurrentPage());
+			resultObj.put("pageSize", channelTypeVo.getPageSize());
+			resultObj.put("pageCount", pageCount);
+			resultObj.put("rowNum", rowNum);
+		}
+		List<ChannelTypeVo> channelTypeList = channelMapper.searchChannelTypeList(channelTypeVo);
+		resultObj.put("tbodyList", channelTypeList);
+		return resultObj;
 	}
 
 }
