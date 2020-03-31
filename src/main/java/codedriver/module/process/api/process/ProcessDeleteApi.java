@@ -60,7 +60,6 @@ public class ProcessDeleteApi extends ApiComponentBase {
 		processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
 		processMapper.deleteProcessStepRelByProcessUuid(uuid);
 		processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
-		processMapper.deleteProcessStepTimeoutPolicyByProcessUuid(uuid);
 		return uuid;
 	}
 

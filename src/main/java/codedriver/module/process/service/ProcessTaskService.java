@@ -1,9 +1,6 @@
 package codedriver.module.process.service;
 
 import java.util.List;
-import java.util.Set;
-
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -21,13 +18,6 @@ public interface ProcessTaskService {
 
 	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
 
-	public List<String> getProcessTaskStepActionList(Long processTaskId, Long processTaskStepId);
-	
-	public boolean verifyActionAuthoriy(Long processTaskId, Long processTaskStepId, ProcessTaskStepAction action);
-	
-	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTaskId(Long processTaskId);
-	
-	public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId);
 	/**
 	 * 
 	* @Description: 创建子任务 
