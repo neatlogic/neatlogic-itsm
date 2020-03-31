@@ -197,7 +197,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				if (MapUtils.isNotEmpty(stepConfigObj)) {
 					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
 					if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-						processTaskStepVo.setIsRequired(stepConfigObj.getInteger("isRequired"));
+						processTaskStepVo.setIsRequired(workerPolicyConfig.getInteger("isRequired"));
 					}
 				}
 			}
