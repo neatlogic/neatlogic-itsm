@@ -1,7 +1,9 @@
 package codedriver.module.process.api.workcenter;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +45,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取工单中心分类接口";
+		return "获取工单中心分类列表接口";
 	}
 
 	@Override
@@ -57,7 +59,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 	@Output({
 		@Param(name="workcenter", explode = WorkcenterVo.class, desc="分类信息")
 	})
-	@Description(desc = "获取工单中心分类接口")
+	@Description(desc = "获取工单中心分类列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<WorkcenterVo>  workcenterList = workcenterMapper.getWorkcenter(new WorkcenterVo(UserContext.get().getUserId(),UserContext.get().getRoleNameList(),UserContext.get().getUserId()));
@@ -77,6 +79,8 @@ public class WorkcenterListApi extends ApiComponentBase {
 			//查询数量
 			workcenter.setCount(workcenterService.doSearchCount(new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()))));
 		}
-		return workcenterList;
+	    
+	    
+		return workcenterList.stream().sorted(Comparator.comparing(WorkcenterVo::getSort)).collect(Collectors.toList());
 	}
 }

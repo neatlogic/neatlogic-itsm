@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -153,10 +154,11 @@ public class WorkcenterService {
 	private Object getStepAction(MultiAttrsObject el) {
 		JSONArray actionArray = new JSONArray();
 		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
+		Boolean isHasAbort = false;
 		if(commonJson == null) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		JSONArray currentStepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.CURRENT_STEP.getValue());
+		JSONArray currentStepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
 		if(CollectionUtils.isEmpty(currentStepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
@@ -184,20 +186,26 @@ public class WorkcenterService {
 					actionJson.put("name", "handle");
 					actionJson.put("text", String.format("处理:%s", stepName));
 					actionJson.put("config", configJson);
+					actionJson.put("sort", 1);
 					actionArray.add(actionJson);
 				}
 				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
 					JSONObject actionJson = new JSONObject();
 					JSONObject configJson = new JSONObject();
-					configJson.put("taskid", el.getId());
-					configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
-					actionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
-					actionJson.put("text", ProcessTaskStepAction.ABORT.getText());
-					actionJson.put("config", configJson);
-					actionArray.add(actionJson);
+					if(!isHasAbort) {
+						configJson.put("taskid", el.getId());
+						configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
+						actionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
+						actionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+						actionJson.put("config", configJson);
+						actionJson.put("sort", 2);
+						actionArray.add(actionJson);
+						isHasAbort = true; 
+					}
 				}
 			}
 		}
+		actionArray.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("sort")));
 		return actionArray;
 	}
 	
@@ -327,7 +335,7 @@ public class WorkcenterService {
 				if(workcenterCondition != null && workcenterCondition.getHandler(ProcessWorkcenterConditionModel.SIMPLE.getValue()).equals(ProcessFormHandlerType.DATE.toString())){
 					JSONArray dateJSONArray = JSONArray.parseArray(JSON.toJSONString(condition.getValueList()));
 					if(CollectionUtils.isNotEmpty(dateJSONArray)) {
-						JSONObject dateValue = (JSONObject) dateJSONArray.get(0);
+						JSONObject dateValue = JSONObject.parseObject(dateJSONArray.get(0).toString());
 						SimpleDateFormat format = new SimpleDateFormat(TimeUtil.TIME_FORMAT);
 						String startTime = StringUtils.EMPTY;
 						String endTime = StringUtils.EMPTY;

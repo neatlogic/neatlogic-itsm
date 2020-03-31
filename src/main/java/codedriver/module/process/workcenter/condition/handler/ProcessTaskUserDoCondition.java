@@ -15,15 +15,15 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 
 @Component
-public class ProcessTaskUserWillDoCondition implements IWorkcenterCondition{
+public class ProcessTaskUserDoCondition implements IWorkcenterCondition{
 	@Override
 	public String getName() {
-		return "userwilldo";
+		return "userdo";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "用户待处理的";
+		return "用户相关的";
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class ProcessTaskUserWillDoCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 12;
+		return 13;
 	}
 
 	@Override

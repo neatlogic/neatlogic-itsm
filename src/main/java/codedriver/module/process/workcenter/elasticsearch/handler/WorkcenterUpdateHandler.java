@@ -121,7 +121,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			
 			 /** 获取工单当前步骤 **/
 			 @SuppressWarnings("serial")
-			List<ProcessTaskStepVo>  processTaskActiveStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());}});
+			List<ProcessTaskStepVo>  processTaskStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());}},null);
 			 WorkcenterFieldBuilder builder = new WorkcenterFieldBuilder();
 			 //form
 			 JSONObject formJson = new JSONObject();
@@ -150,11 +150,10 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 		.setEndTime(processTaskVo.getEndTime())
 			 		.setOwner(processTaskVo.getOwner())
 			 		.setReporter(processTaskVo.getReporter(),processTaskVo.getOwner())
-			 		.setCurrentStepList(processTaskActiveStepList)
+			 		.setStepList(processTaskStepList)
 			 		.setTransferFromUserList(transferAuditList)
 			 		.setWorktime(channel.getWorktimeUuid())
 			 		.setExpiredTime(processTaskVo.getExpireTime())
-			 		.setUserWillDo()
 			 		.build();
 			
 			 patch.set("form", formJson);

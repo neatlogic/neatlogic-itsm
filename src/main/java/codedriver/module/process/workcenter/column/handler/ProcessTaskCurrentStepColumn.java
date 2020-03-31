@@ -1,5 +1,7 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import java.util.ListIterator;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -27,16 +29,32 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
-		JSONArray currentStepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterField.CURRENT_STEP.getValue());
-		if(CollectionUtils.isEmpty(currentStepArray)) {
+		JSONArray stepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		if(CollectionUtils.isEmpty(stepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		JSONArray stepArray = JSONArray.parseArray(currentStepArray.toJSONString());
-		for(Object currentStepObj: stepArray) {
-			JSONObject currentStepJson = (JSONObject)currentStepObj;
-			currentStepJson.put("statusname", ProcessTaskStatus.getText(currentStepJson.getString("status")));
+		JSONArray stepResultArray = JSONArray.parseArray(stepArray.toJSONString());
+		ListIterator<Object> stepIterator = stepResultArray.listIterator();
+		while(stepIterator.hasNext()) {
+			JSONObject currentStepJson = (JSONObject)stepIterator.next();
+			if(currentStepJson.getString("status").equals(ProcessTaskStatus.RUNNING.getValue())) {
+				currentStepJson.put("statusname", ProcessTaskStatus.getText(currentStepJson.getString("status")));
+				//去掉待处理,但未开始的user/role/team
+				JSONArray userTypeArray = currentStepJson.getJSONArray("usertypelist");
+				if(CollectionUtils.isNotEmpty(userTypeArray)) {
+					ListIterator<Object> userTypeIterator = userTypeArray.listIterator();
+					while(userTypeIterator.hasNext()) {
+						JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
+						if(userTypeJson.getString("usertype").equals("pending")) {
+							userTypeIterator.remove();
+						}
+					}
+				}
+			}else {
+				stepIterator.remove();
+			}
 		}
-		return stepArray;
+		return stepResultArray;
 	}
 
 	@Override
