@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -12,6 +13,9 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.UserType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
@@ -22,6 +26,9 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 public class ProcessTaskProcessableStepList extends ApiComponentBase {
+
+	@Autowired
+	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public String getToken() {
@@ -40,7 +47,7 @@ public class ProcessTaskProcessableStepList extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-		@Param(name = "action", type = ApiParamType.ENUM, rule = "start,complete", desc = "操作类型")
+		@Param(name = "action", type = ApiParamType.ENUM, rule = "accept,start,complete", desc = "操作类型")
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
@@ -55,10 +62,23 @@ public class ProcessTaskProcessableStepList extends ApiComponentBase {
 			Iterator<ProcessTaskStepVo> iterator = processableStepList.iterator();
 			while(iterator.hasNext()) {
 				ProcessTaskStepVo processTaskStepVo = iterator.next();
-				if(ProcessTaskStepAction.START.getValue().equals(action) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-					iterator.remove();
-				}else if(ProcessTaskStepAction.COMPLETE.getValue().equals(action) && ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
-					iterator.remove();
+				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), UserType.MAJOR.getValue());
+				if(ProcessTaskStepAction.ACCEPT.getValue().equals(action)) {
+					if(CollectionUtils.isNotEmpty(majorUserList)) {
+						iterator.remove();
+					}
+				}else if(ProcessTaskStepAction.START.getValue().equals(action)) {
+					if(CollectionUtils.isEmpty(majorUserList)) {
+						iterator.remove();
+					}else if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())){
+						iterator.remove();
+					}
+				}else if(ProcessTaskStepAction.COMPLETE.getValue().equals(action)) {
+					if(CollectionUtils.isEmpty(majorUserList)) {
+						iterator.remove();
+					}else if(ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())){
+						iterator.remove();
+					}
 				}
 			}
 			if(CollectionUtils.isEmpty(processableStepList)) {
