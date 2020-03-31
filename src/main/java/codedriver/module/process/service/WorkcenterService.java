@@ -44,6 +44,7 @@ import codedriver.framework.process.dto.condition.ConditionGroupVo;
 import codedriver.framework.process.dto.condition.ConditionRelVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 import codedriver.framework.process.exception.workcenter.WorkcenterConditionException;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
@@ -169,7 +170,7 @@ public class WorkcenterService {
 			if(StringUtils.isNotBlank(stepStatus)&&(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())||stepStatus.equals(ProcessTaskStatus.RUNNING.getValue())||stepStatus.equals(ProcessTaskStatus.DRAFT.getValue()))) {
 				List<String> actionList = new ArrayList<String>();
 				try {
-					actionList = processTaskService.getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
+					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
 				}catch(Exception ex) {
 					logger.error(ex.getMessage(),ex);
 				}
