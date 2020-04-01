@@ -74,7 +74,7 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
 		}
-		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW);
+//		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW);
 		
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
 		processTaskStepAuditVo.setProcessTaskId(processTaskId);
@@ -85,6 +85,13 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 		List<ProcessTaskStepAuditVo> resutlList = new ArrayList<>();
 		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
 			if(ProcessTaskStepAction.SAVE.getValue().equals(processTaskStepAudit.getAction())) {
+				continue;
+			}
+			//判断当前用户是否有权限查看该节点信息
+			List<String> verifyActionList = new ArrayList<>();
+			verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
+			List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
+			if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 				continue;
 			}
 			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
