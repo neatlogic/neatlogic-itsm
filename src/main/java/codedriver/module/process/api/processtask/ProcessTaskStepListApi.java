@@ -26,7 +26,6 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -55,8 +54,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "步骤信息列表")
@@ -69,17 +67,6 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(processTaskStepId != null) {
-			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-			if(processTaskStepVo == null) {
-				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
-			}
-			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
-				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
-			}
-		}
-//		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW);
 		
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
 		//开始步骤
