@@ -1,19 +1,14 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -55,11 +50,7 @@ public class ProcessTaskRetreatableStepList extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
-		Set<ProcessTaskStepVo> resultSet = ProcessStepHandlerFactory.getHandler().getRetractableStepList(processTaskId);
-		if(CollectionUtils.isEmpty(resultSet)) {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.RETREAT.getText());
-		}
-		return resultSet;
+		return ProcessStepHandlerFactory.getHandler().getRetractableStepList(processTaskId);
 	}
 
 }

@@ -17,7 +17,6 @@ import codedriver.framework.process.constvalue.UserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -80,9 +79,6 @@ public class ProcessTaskProcessableStepList extends ApiComponentBase {
 						iterator.remove();
 					}
 				}
-			}
-			if(CollectionUtils.isEmpty(processableStepList)) {
-				throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.getText(action));
 			}
 		}
 		return processableStepList;
