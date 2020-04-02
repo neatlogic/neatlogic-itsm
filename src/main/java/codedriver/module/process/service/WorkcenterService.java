@@ -162,6 +162,9 @@ public class WorkcenterService {
 		if(CollectionUtils.isEmpty(currentStepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
+		//handle
+		JSONObject handleActionJson = new JSONObject();
+		JSONArray handleArray = new JSONArray();
 		for(Object currentStepObj: currentStepArray) {
 			JSONObject currentStepJson = (JSONObject)currentStepObj;
 			Long stepId = currentStepJson.getLong("id");
@@ -186,25 +189,50 @@ public class WorkcenterService {
 					actionJson.put("name", "handle");
 					actionJson.put("text", String.format("处理:%s", stepName));
 					actionJson.put("config", configJson);
-					actionJson.put("sort", 1);
-					actionArray.add(actionJson);
+					handleArray.add(actionJson);
 				}
 				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
-					JSONObject actionJson = new JSONObject();
-					JSONObject configJson = new JSONObject();
-					if(!isHasAbort) {
-						configJson.put("taskid", el.getId());
-						configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
-						actionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
-						actionJson.put("text", ProcessTaskStepAction.ABORT.getText());
-						actionJson.put("config", configJson);
-						actionJson.put("sort", 2);
-						actionArray.add(actionJson);
-						isHasAbort = true; 
-					}
+					isHasAbort = true; 
 				}
 			}
 		}
+		
+		handleActionJson.put("name", "handle");
+		handleActionJson.put("text", "流转");
+		handleActionJson.put("sort", 2);
+		if(CollectionUtils.isNotEmpty(handleArray)) {
+			handleActionJson.put("handleList", handleArray);
+			handleActionJson.put("isEnable", 1);
+		}else {
+			handleActionJson.put("isEnable", 0);
+		} 
+		
+		actionArray.add(handleActionJson);
+		//abort
+		JSONObject abortActionJson = new JSONObject();
+		abortActionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
+		abortActionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+		abortActionJson.put("sort", 2);
+		if(isHasAbort) {
+			JSONObject configJson = new JSONObject();
+			configJson.put("taskid", el.getId());
+			configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
+			abortActionJson.put("config", configJson);
+			abortActionJson.put("isEnable", 1);
+		}else {
+			abortActionJson.put("isEnable", 0);
+		}
+		actionArray.add(abortActionJson);
+		//催办
+		JSONObject urgeActionJson = new JSONObject();
+		urgeActionJson.put("name", ProcessTaskStepAction.URGE.getValue());
+		urgeActionJson.put("text", ProcessTaskStepAction.URGE.getText());
+		urgeActionJson.put("sort", 3);
+		urgeActionJson.put("isEnable", 0);
+
+		actionArray.add(urgeActionJson);
+		
+		
 		actionArray.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("sort")));
 		return actionArray;
 	}
