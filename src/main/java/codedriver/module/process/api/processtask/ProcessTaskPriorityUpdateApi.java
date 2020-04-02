@@ -45,7 +45,7 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 	}
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
 		@Param(name = "priorityUuid", type = ApiParamType.STRING, isRequired = true, desc = "优先级uuid")
 	})
 	@Description(desc = "工单优先级更新接口")
