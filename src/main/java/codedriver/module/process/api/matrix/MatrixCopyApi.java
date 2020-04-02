@@ -36,11 +36,12 @@ public class MatrixCopyApi extends ApiComponentBase {
         return null;
     }
 
-    @Input({ @Param(name = "uuid", desc = "矩阵数据源uuid", isRequired = true, type = ApiParamType.STRING)})
+    @Input({ @Param(name = "uuid", desc = "矩阵数据源uuid", isRequired = true, type = ApiParamType.STRING),
+             @Param(name = "name", desc = "矩阵名称", type = ApiParamType.STRING)})
     @Description(desc = "矩阵数据源复制接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        matrixService.copyMatrix(jsonObj.getString("uuid"));
+        matrixService.copyMatrix(jsonObj.getString("uuid"), jsonObj.getString("name"));
         return null;
     }
 }

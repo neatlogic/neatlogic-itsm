@@ -13,7 +13,7 @@ import java.util.Map;
  **/
 public interface MatrixDataService {
 
-    public List<Map> searchDynamicTableData(ProcessMatrixDataVo dataVo);
+    public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo);
 
     public void saveDynamicTableData(JSONArray dataArray, String matrixUuid);
 

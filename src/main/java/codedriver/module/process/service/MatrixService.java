@@ -14,5 +14,5 @@ public interface MatrixService {
 
     public int updateMatrixName(ProcessMatrixVo matrixVo);
 
-    public int copyMatrix(String matrixUuid);
+    public int copyMatrix(String matrixUuid, String name);
 }

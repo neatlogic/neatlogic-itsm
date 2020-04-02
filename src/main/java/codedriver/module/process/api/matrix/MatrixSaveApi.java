@@ -25,7 +25,7 @@ public class MatrixSaveApi extends ApiComponentBase {
 
     @Override
     public String getToken() {
-        return "matirx/save";
+        return "matrix/save";
     }
 
     @Override
@@ -50,7 +50,7 @@ public class MatrixSaveApi extends ApiComponentBase {
         matrixVo.setName(jsonObj.getString("name"));
         matrixVo.setType(jsonObj.getString("type"));
         ProcessMatrixVo matrix = matrixService.saveMatrix(matrixVo);
-        returnObj.put("matirx", matrix);
+        returnObj.put("matrix", matrix);
         return returnObj;
     }
 }

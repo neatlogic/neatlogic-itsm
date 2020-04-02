@@ -11,6 +11,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,8 @@ import java.util.UUID;
  * @description:
  * @create: 2020-03-30 15:36
  **/
+@Transactional
+@Service
 public class MatrixDataServiceImpl implements MatrixDataService {
 
     @Autowired
@@ -60,7 +64,7 @@ public class MatrixDataServiceImpl implements MatrixDataService {
     }
 
     @Override
-    public List<Map> searchDynamicTableData(ProcessMatrixDataVo dataVo) {
+    public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo) {
         List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
         List<String> columnList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(attributeVoList)){

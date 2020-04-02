@@ -49,10 +49,10 @@ public class MatrixAttributeServiceImpl implements MatrixAttributeService {
                         //过滤新增属性
                         addAttributeList.add(attributeVo);
                         attributeVo.setUuid(UUID.randomUUID().toString().replace("-", ""));
-                        attributeMapper.insertMatirxAttribute(attributeVo);
+                        attributeMapper.insertMatrixAttribute(attributeVo);
                         iterator.remove();
                     }else {
-                        attributeMapper.insertMatirxAttribute(attributeVo);
+                        attributeMapper.insertMatrixAttribute(attributeVo);
                     }
                 }
                 List<ProcessMatrixAttributeVo> deleteAttributeList = matrixAttributeList.stream().filter(item -> !_attributeVoList.contains(item)).collect(toList());
@@ -72,7 +72,7 @@ public class MatrixAttributeServiceImpl implements MatrixAttributeService {
             }else {
                 for (ProcessMatrixAttributeVo attributeVo : _attributeVoList){
                     attributeVo.setUuid(UUID.randomUUID().toString().replace("-", ""));
-                    attributeMapper.insertMatirxAttribute(attributeVo);
+                    attributeMapper.insertMatrixAttribute(attributeVo);
                 }
                 attributeMapper.createMatrixDynamicTable(_attributeVoList, matrixUuid);
             }
