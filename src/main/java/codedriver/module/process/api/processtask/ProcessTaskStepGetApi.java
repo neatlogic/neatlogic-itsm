@@ -20,12 +20,13 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.constvalue.FormAttributeAction;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
-import codedriver.framework.process.constvalue.UserType;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
@@ -180,10 +181,10 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 						List<String> currentUserProcessUserTypeList = new ArrayList<>();
 						currentUserProcessUserTypeList.add(UserType.ALL.getValue());
 						if(UserContext.get().getUserId(true).equals(processTaskVo.getOwner())) {
-							currentUserProcessUserTypeList.add(UserType.OWNER.getValue());
+							currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
 						}
 						if(UserContext.get().getUserId(true).equals(processTaskVo.getReporter())) {
-							currentUserProcessUserTypeList.add(UserType.REPORTER.getValue());
+							currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
 						}
 						List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
 						for(int i = 0; i < controllerList.size(); i++) {
@@ -274,15 +275,15 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					}
 				}
 				//处理人列表
-				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MAJOR.getValue());
+				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 				if(CollectionUtils.isNotEmpty(majorUserList)) {
 					processTaskStepVo.setMajorUserList(majorUserList);
 				}
-				List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.MINOR.getValue());
+				List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
 				if(CollectionUtils.isNotEmpty(minorUserList)) {
 					processTaskStepVo.setMinorUserList(minorUserList);
 				}
-				List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, UserType.AGENT.getValue());
+				List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.AGENT.getValue());
 				if(CollectionUtils.isNotEmpty(agentUserList)) {
 					processTaskStepVo.setAgentUserList(agentUserList);
 				}

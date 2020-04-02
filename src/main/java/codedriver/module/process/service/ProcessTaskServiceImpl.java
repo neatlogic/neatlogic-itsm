@@ -13,7 +13,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
-import codedriver.framework.process.constvalue.UserType;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
@@ -90,7 +90,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
 			processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
 			processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
-			processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+			processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 			userList.add(processTaskStepUserVo);
 			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
 			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
@@ -138,14 +138,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
 				processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
 				processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
-				processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+				processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 				userList.add(processTaskStepUserVo);
 				ProcessTaskStepUserVo oldUserVo = new ProcessTaskStepUserVo();
 				oldUserVo.setProcessTaskId(processTaskStepSubtaskVo.getProcessTaskId());
 				oldUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
 				oldUserVo.setUserId(oldUserId);
 				oldUserVo.setUserName(paramObj.getString("oldUserName"));
-				oldUserVo.setUserType(UserType.MINOR.getValue());
+				oldUserVo.setUserType(ProcessUserType.MINOR.getValue());
 				userList.add(oldUserVo);
 				
 				List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
@@ -178,7 +178,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
 			processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
 			processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
-			processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+			processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 			userList.add(processTaskStepUserVo);
 			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
 			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
@@ -209,7 +209,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
 			processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
 			processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
-			processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+			processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 			userList.add(processTaskStepUserVo);
 			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
 			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
@@ -241,7 +241,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
 			processTaskStepUserVo.setUserId(processTaskStepSubtaskVo.getUserId());
 			processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
-			processTaskStepUserVo.setUserType(UserType.MINOR.getValue());
+			processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 			userList.add(processTaskStepUserVo);
 			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
 			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));

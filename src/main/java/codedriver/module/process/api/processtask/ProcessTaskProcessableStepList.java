@@ -13,7 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
-import codedriver.framework.process.constvalue.UserType;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -61,7 +61,7 @@ public class ProcessTaskProcessableStepList extends ApiComponentBase {
 			Iterator<ProcessTaskStepVo> iterator = processableStepList.iterator();
 			while(iterator.hasNext()) {
 				ProcessTaskStepVo processTaskStepVo = iterator.next();
-				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), UserType.MAJOR.getValue());
+				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
 				if(ProcessTaskStepAction.ACCEPT.getValue().equals(action)) {
 					if(CollectionUtils.isNotEmpty(majorUserList)) {
 						iterator.remove();
