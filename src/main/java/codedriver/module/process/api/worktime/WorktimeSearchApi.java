@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.WorktimeVo;
@@ -52,11 +53,8 @@ public class WorktimeSearchApi extends ApiComponentBase {
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
 	})
 	@Output({
-		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
-		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
-		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
-		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="worktimeList",explode=WorktimeVo[].class,desc="工作时间窗口列表")
+		@Param(explode = BasePageVo.class),
+		@Param(name = "tbodyList", explode = WorktimeVo[].class, desc = "工作时间窗口列表")
 	})
 	@Description(desc = "工作时间窗口列表接口")
 	@Override
@@ -105,7 +103,7 @@ public class WorktimeSearchApi extends ApiComponentBase {
 			worktime.setWorkingHoursSet(workingHoursSet);
 			worktime.setConfig(null);
 		}
-		resultObj.put("worktimeList", worktimeList);
+		resultObj.put("tbodyList", worktimeList);
 		return resultObj;
 	}
 
