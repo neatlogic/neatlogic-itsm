@@ -160,49 +160,60 @@ public class WorkcenterService {
 		JSONArray actionArray = new JSONArray();
 		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
 		Boolean isHasAbort = false;
+		Boolean isHasUrge = false;
 		if(commonJson == null) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		JSONArray currentStepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		JSONArray stepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
 		String processTaskStatus = commonJson.getString(ProcessWorkcenterField.STATUS.getValue());
-		if(CollectionUtils.isEmpty(currentStepArray)) {
+		if(CollectionUtils.isEmpty(stepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
 		JSONObject handleActionJson = new JSONObject();
 		JSONArray handleArray = new JSONArray();
-		for(Object currentStepObj: currentStepArray) {
-			JSONObject currentStepJson = (JSONObject)currentStepObj;
-			Long stepId = currentStepJson.getLong("id");
-			String stepName = currentStepJson.getString("name");
-			String stepStatus = currentStepJson.getString("status");		
-			Integer isActive =currentStepJson.getInteger("isactive");
+		for(Object stepObj: stepArray) {
+			JSONObject stepJson = (JSONObject)stepObj;
+			Long stepId = stepJson.getLong("id");
+			String stepName = stepJson.getString("name");
+			String stepStatus = stepJson.getString("status");		
+			Integer isActive =stepJson.getInteger("isactive");
 			if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)&&((ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&&isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {		
 				List<String> actionList = new ArrayList<String>();
 				try {
-					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"),new ArrayList<String>(){
+					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), stepJson.getLong("id"),new ArrayList<String>(){
 						private static final long serialVersionUID = 1L;
 					{
 						add(ProcessTaskStepAction.COMPLETESUBTASK.getValue());
 						add(ProcessTaskStepAction.COMPLETE.getValue());
 						add(ProcessTaskStepAction.START.getValue());
 						add(ProcessTaskStepAction.STARTPROCESS.getValue());
+						add(ProcessTaskStepAction.ABORT.getValue());
+						add(ProcessTaskStepAction.URGE.getValue());
 						}});
 				}catch(Exception ex) {
 					logger.error(ex.getMessage(),ex);
 				}
 				
+				if(actionList.contains(ProcessTaskStepAction.COMPLETESUBTASK.getValue())||
+						actionList.contains(ProcessTaskStepAction.COMPLETE.getValue())||
+						actionList.contains(ProcessTaskStepAction.STARTPROCESS.getValue())||
+						actionList.contains(ProcessTaskStepAction.START.getValue())
+				) { 
 				JSONObject configJson = new JSONObject();
-				configJson.put("taskid", el.getId());
-				configJson.put("stepid", stepId);
-				configJson.put("stepName", stepName);
-				JSONObject actionJson = new JSONObject();
-				actionJson.put("name", "handle");
-				actionJson.put("text", stepName);
-				actionJson.put("config", configJson);
-				handleArray.add(actionJson);
-				
+					configJson.put("taskid", el.getId());
+					configJson.put("stepid", stepId);
+					configJson.put("stepName", stepName);
+					JSONObject actionJson = new JSONObject();
+					actionJson.put("name", "handle");
+					actionJson.put("text", stepName);
+					actionJson.put("config", configJson);
+					handleArray.add(actionJson);
+				}
 				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
 					isHasAbort = true; 
+				}
+				if(actionList.contains(ProcessTaskStepAction.URGE.getValue())) {
+					isHasUrge = true; 
 				}
 			}
 		}
@@ -238,7 +249,15 @@ public class WorkcenterService {
 		urgeActionJson.put("name", ProcessTaskStepAction.URGE.getValue());
 		urgeActionJson.put("text", ProcessTaskStepAction.URGE.getText());
 		urgeActionJson.put("sort", 3);
-		urgeActionJson.put("isEnable", 0);
+		if(isHasUrge) {
+			JSONObject configJson = new JSONObject();
+			configJson.put("taskid", el.getId());
+			configJson.put("interfaceurl", "api/rest/processtask/urge?processTaskId="+el.getId());
+			abortActionJson.put("config", configJson);
+			abortActionJson.put("isEnable", 1);
+		}else {
+			abortActionJson.put("isEnable", 0);
+		}
 
 		actionArray.add(urgeActionJson);
 		
