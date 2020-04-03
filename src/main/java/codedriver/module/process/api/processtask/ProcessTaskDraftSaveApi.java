@@ -124,7 +124,7 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("processTaskId", startTaskStep.getProcessTaskId());
 		resultObj.put("processTaskStepId", startTaskStep.getId());
-		return startTaskStep.getProcessTaskId();
+		return resultObj;
 	}
 
 }
