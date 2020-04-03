@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
@@ -34,6 +35,8 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 	WorkcenterMapper workcenterMapper;
 	@Autowired
 	UserMapper userMapper;	
+	@Autowired
+	RoleMapper roleMapper;
 	
 	@Override
 	public String getToken() {
@@ -77,7 +80,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		workcenterMapper.deleteWorkcenterOwnerByUuid(workcenterVo.getUuid());
 		if(CollectionUtils.isNotEmpty(valueList)) {
 			//判断是否有管理员权限
-			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,WORKCENTER_MODIFY.class.getSimpleName())))) {
+			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,WORKCENTER_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByRoleNameList(UserContext.get().getRoleNameList()))) {
 				throw new WorkcenterNoAuthException("授权");
 			}
 			workcenterVo.setType(ProcessWorkcenterType.SYSTEM.getValue());
