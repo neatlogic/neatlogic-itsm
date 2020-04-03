@@ -454,7 +454,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 	
 	private boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo) {
-		JSONObject paramObj = new JSONObject();
+		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
 		if(processTaskVo.getTitle() == null) {
 			throw new ProcessTaskRuntimeException("工单标题格式不能为空");
