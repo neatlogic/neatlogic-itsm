@@ -15,6 +15,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -43,7 +44,8 @@ public class ProcessTaskStartProcessApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true)
+		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true),
+		//@Param(name = "nextStepId", type = ApiParamType.LONG, isRequired = true, desc = "激活下一步骤Id")
 	})
 	@Description(desc = "工单上报提交接口")
 	@Override
@@ -60,6 +62,15 @@ public class ProcessTaskStartProcessApi extends ApiComponentBase {
 		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepList.get(0).getHandler());
 		if(handler != null) {
+//			Long nextStepId = jsonObj.getLong("nextStepId");
+//			ProcessTaskStepVo nextProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(nextStepId);
+//			if(nextProcessTaskStepVo == null) {
+//				throw new ProcessTaskStepNotFoundException(nextStepId.toString());
+//			}
+//			if(!processTaskId.equals(nextProcessTaskStepVo.getProcessTaskId())) {
+//				throw new ProcessTaskRuntimeException("步骤：'" + nextStepId + "'不是工单：'" + processTaskId + "'的步骤");
+//			}
+//			processTaskStepList.get(0).setParamObj(jsonObj);
 			handler.startProcess(processTaskStepList.get(0));
 		}else {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepList.get(0).getHandler());

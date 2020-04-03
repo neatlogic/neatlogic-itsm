@@ -74,7 +74,8 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		@Param(name="fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
 	@Output({
-		@Param(name="Return", type = ApiParamType.LONG, desc="工单id")
+		@Param(name="processTaskId", type = ApiParamType.LONG, desc="工单id"),
+		@Param(name="processTaskStepId", type = ApiParamType.LONG, desc="步骤id")
 	})
 	@Description(desc = "工单上报暂存接口")
 	@Override
@@ -120,7 +121,10 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		}else {
 			throw new ProcessStepHandlerNotFoundException(startTaskStep.getHandler());
 		}
-		
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("processTaskId", startTaskStep.getProcessTaskId());
+		resultObj.put("processTaskStepId", startTaskStep.getId());
+//		return resultObj;
 		return startTaskStep.getProcessTaskId();
 	}
 
