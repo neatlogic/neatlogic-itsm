@@ -30,7 +30,7 @@ public class ProcessTaskPriorityColumn extends WorkcenterColumnBase implements I
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String priorityUuid = json.getString(this.getName());
 		JSONObject priorityJson = new JSONObject();
-		if(StringUtils.isBlank(priorityUuid)) {
+		if(StringUtils.isNotBlank(priorityUuid)) {
 			priorityJson.put("id", priorityUuid);
 			PriorityVo priority = priorityMapper.getPriorityByUuid(priorityUuid);
 			if(priority != null) {
