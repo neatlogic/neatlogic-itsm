@@ -151,6 +151,11 @@ public class WorkcenterService {
 		return returnObj;
 	}
 	
+	/**
+	 * 工单中心 获取操作按钮
+	 * @param MultiAttrsObject el
+	 * @return
+	 */
 	private Object getStepAction(MultiAttrsObject el) {
 		JSONArray actionArray = new JSONArray();
 		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
@@ -162,35 +167,38 @@ public class WorkcenterService {
 		if(CollectionUtils.isEmpty(currentStepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		//handle
 		JSONObject handleActionJson = new JSONObject();
 		JSONArray handleArray = new JSONArray();
 		for(Object currentStepObj: currentStepArray) {
 			JSONObject currentStepJson = (JSONObject)currentStepObj;
 			Long stepId = currentStepJson.getLong("id");
 			String stepName = currentStepJson.getString("name");
-			String stepStatus = currentStepJson.getString("status");
-			if(StringUtils.isNotBlank(stepStatus)&&(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())||stepStatus.equals(ProcessTaskStatus.RUNNING.getValue())||stepStatus.equals(ProcessTaskStatus.DRAFT.getValue()))) {
+			String stepStatus = currentStepJson.getString("status");		
+			if(StringUtils.isNotBlank(stepStatus)&&(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())||stepStatus.equals(ProcessTaskStatus.RUNNING.getValue())||stepStatus.equals(ProcessTaskStatus.DRAFT.getValue()))) {		
 				List<String> actionList = new ArrayList<String>();
 				try {
-					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
+					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"),new ArrayList<String>(){
+						private static final long serialVersionUID = 1L;
+					{
+						add(ProcessTaskStepAction.COMPLETESUBTASK.getValue());
+						add(ProcessTaskStepAction.COMPLETE.getValue());
+						add(ProcessTaskStepAction.START.getValue());
+						add(ProcessTaskStepAction.STARTPROCESS.getValue());
+						}});
 				}catch(Exception ex) {
 					logger.error(ex.getMessage(),ex);
 				}
-				if(actionList.contains(ProcessTaskStepAction.COMPLETESUBTASK.getValue())||
-						actionList.contains(ProcessTaskStepAction.COMPLETE.getValue())||
-						actionList.contains(ProcessTaskStepAction.START.getValue())||
-						actionList.contains(ProcessTaskStepAction.STARTPROCESS.getValue())) {
-					JSONObject configJson = new JSONObject();
-					configJson.put("taskid", el.getId());
-					configJson.put("stepid", stepId);
-					configJson.put("stepName", stepName);
-					JSONObject actionJson = new JSONObject();
-					actionJson.put("name", "handle");
-					actionJson.put("text", String.format("处理:%s", stepName));
-					actionJson.put("config", configJson);
-					handleArray.add(actionJson);
-				}
+				
+				JSONObject configJson = new JSONObject();
+				configJson.put("taskid", el.getId());
+				configJson.put("stepid", stepId);
+				configJson.put("stepName", stepName);
+				JSONObject actionJson = new JSONObject();
+				actionJson.put("name", "handle");
+				actionJson.put("text", String.format("处理:%s", stepName));
+				actionJson.put("config", configJson);
+				handleArray.add(actionJson);
+				
 				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
 					isHasAbort = true; 
 				}

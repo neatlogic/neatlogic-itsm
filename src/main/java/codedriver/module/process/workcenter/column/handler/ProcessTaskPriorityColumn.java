@@ -29,14 +29,16 @@ public class ProcessTaskPriorityColumn extends WorkcenterColumnBase implements I
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String priorityUuid = json.getString(this.getName());
-		String priorityName = StringUtils.EMPTY;
-		if(StringUtils.isBlank(priorityName)) {
+		JSONObject priorityJson = new JSONObject();
+		if(StringUtils.isBlank(priorityUuid)) {
+			priorityJson.put("id", priorityUuid);
 			PriorityVo priority = priorityMapper.getPriorityByUuid(priorityUuid);
 			if(priority != null) {
-				priorityName = priority.getName();
+				priorityJson.put("name", priority.getName());
+				priorityJson.put("color", priority.getColor());
 			}
 		}
-		return priorityName;
+		return priorityJson;
 	}
 
 	@Override
