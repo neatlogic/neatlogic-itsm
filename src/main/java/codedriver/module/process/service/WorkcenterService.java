@@ -164,6 +164,7 @@ public class WorkcenterService {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
 		JSONArray currentStepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		String processTaskStatus = commonJson.getString(ProcessWorkcenterField.STATUS.getValue());
 		if(CollectionUtils.isEmpty(currentStepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
@@ -174,7 +175,7 @@ public class WorkcenterService {
 			Long stepId = currentStepJson.getLong("id");
 			String stepName = currentStepJson.getString("name");
 			String stepStatus = currentStepJson.getString("status");		
-			if(StringUtils.isNotBlank(stepStatus)&&(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())||stepStatus.equals(ProcessTaskStatus.RUNNING.getValue())||stepStatus.equals(ProcessTaskStatus.DRAFT.getValue()))) {		
+			if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)&&(ProcessTaskStatus.PENDING.getValue().equals(stepStatus)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {		
 				List<String> actionList = new ArrayList<String>();
 				try {
 					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"),new ArrayList<String>(){
@@ -195,7 +196,7 @@ public class WorkcenterService {
 				configJson.put("stepName", stepName);
 				JSONObject actionJson = new JSONObject();
 				actionJson.put("name", "handle");
-				actionJson.put("text", String.format("处理:%s", stepName));
+				actionJson.put("text", stepName);
 				actionJson.put("config", configJson);
 				handleArray.add(actionJson);
 				

@@ -31,10 +31,10 @@ public class ProcessTaskPriorityColumn extends WorkcenterColumnBase implements I
 		String priorityUuid = json.getString(this.getName());
 		JSONObject priorityJson = new JSONObject();
 		if(StringUtils.isNotBlank(priorityUuid)) {
-			priorityJson.put("id", priorityUuid);
+			priorityJson.put("value", priorityUuid);
 			PriorityVo priority = priorityMapper.getPriorityByUuid(priorityUuid);
 			if(priority != null) {
-				priorityJson.put("name", priority.getName());
+				priorityJson.put("text", priority.getName());
 				priorityJson.put("color", priority.getColor());
 			}
 		}

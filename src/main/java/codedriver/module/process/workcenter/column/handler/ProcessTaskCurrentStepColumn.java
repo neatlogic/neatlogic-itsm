@@ -45,15 +45,20 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 		ListIterator<Object> stepIterator = stepResultArray.listIterator();
 		while(stepIterator.hasNext()) {
 			JSONObject currentStepJson = (JSONObject)stepIterator.next();
-			if(currentStepJson.getString("status").equals(ProcessTaskStatus.RUNNING.getValue())) {
-				currentStepJson.put("statusname", ProcessTaskStatus.getText(currentStepJson.getString("status")));
+			String stepStatus =currentStepJson.getString("status");
+			if(ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)) {
+				JSONObject stepStatusJson = new JSONObject();
+				stepStatusJson.put("name", stepStatus);
+				stepStatusJson.put("text", ProcessTaskStatus.getText(stepStatus));
+				stepStatusJson.put("color", ProcessTaskStatus.getColor(stepStatus));
+				currentStepJson.put("status", stepStatusJson);
 				//去掉待处理,但未开始的user/role/team
-				JSONArray userTypeArray = currentStepJson.getJSONArray("usertypelist");
+				JSONArray userTypeArray = currentStepJson.getJSONArray("usertypelist"); 
 				if(CollectionUtils.isNotEmpty(userTypeArray)) {
 					ListIterator<Object> userTypeIterator = userTypeArray.listIterator();
 					while(userTypeIterator.hasNext()) {
 						JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
-						if(userTypeJson.getString("usertype").equals("pending")) {
+						if(userTypeJson.getString("usertype").equals(ProcessTaskStatus.PENDING.getValue())) {
 							userTypeIterator.remove();
 						}else {
 							JSONArray userArray = userTypeJson.getJSONArray("userlist");
