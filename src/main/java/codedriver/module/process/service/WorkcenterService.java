@@ -175,7 +175,8 @@ public class WorkcenterService {
 			Long stepId = currentStepJson.getLong("id");
 			String stepName = currentStepJson.getString("name");
 			String stepStatus = currentStepJson.getString("status");		
-			if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)&&(ProcessTaskStatus.PENDING.getValue().equals(stepStatus)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {		
+			Integer isActive =currentStepJson.getInteger("isactive");
+			if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)&&((ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&&isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {		
 				List<String> actionList = new ArrayList<String>();
 				try {
 					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"),new ArrayList<String>(){
