@@ -46,7 +46,8 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 		while(stepIterator.hasNext()) {
 			JSONObject currentStepJson = (JSONObject)stepIterator.next();
 			String stepStatus =currentStepJson.getString("status");
-			if(ProcessTaskStatus.DRAFT.getValue().equals(stepStatus)||ProcessTaskStatus.PENDING.getValue().equals(stepStatus)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)) {
+			Integer isActive =currentStepJson.getInteger("isactive");
+			if(ProcessTaskStatus.DRAFT.getValue().equals(stepStatus)||(ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&& isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)) {
 				JSONObject stepStatusJson = new JSONObject();
 				stepStatusJson.put("name", stepStatus);
 				stepStatusJson.put("text", ProcessTaskStatus.getText(stepStatus));
