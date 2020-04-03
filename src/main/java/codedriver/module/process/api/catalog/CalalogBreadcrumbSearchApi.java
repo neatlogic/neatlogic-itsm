@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -30,8 +32,13 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
+	
 	@Autowired
 	private ChannelMapper channelMapper;
+	
+	@Autowired
+	private TeamMapper teamMapper;
+	
 	@Override
 	public String getToken() {
 		return "process/calalog/breadcrumb/search";
@@ -104,10 +111,13 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 			//排序
 			Collections.sort(catalogList);
 			
-			Set<String> hasActiveChannelCatalogUuidList = null;
+			List<String> hasActiveChannelCatalogUuidList = null;
 			if(keyword == null) {
+				List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
+				List<String> authorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
+				List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
 				//查出有激活通道的服务目录uuid
-				hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList();
+				hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(authorizedCatalogUuidList, authorizedChannelUuidList);
 			}
 						
 			for(CatalogVo catalogVo : catalogList) {
