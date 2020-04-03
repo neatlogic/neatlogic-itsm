@@ -2,12 +2,13 @@ package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
+import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
-import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
-import codedriver.framework.process.dto.ProcessMatrixDataVo;
-import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.dto.*;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class MatrixServiceImpl implements MatrixService {
     @Autowired
     private MatrixDataMapper matrixDataMapper;
 
+    @Autowired
+    private MatrixExternalMapper externalMapper;
+
     @Override
     public ProcessMatrixVo saveMatrix(ProcessMatrixVo matrixVo) {
         matrixVo.setLcu(UserContext.get().getUserId());
@@ -43,6 +47,9 @@ public class MatrixServiceImpl implements MatrixService {
             matrixVo.setFcu(UserContext.get().getUserId());
             matrixVo.setUuid(UUID.randomUUID().toString().replace("-", ""));
             matrixMapper.insertMatrix(matrixVo);
+        }
+        if (matrixVo.getType().equals(ProcessMatrixType.EXTERNAL.getValue())){
+            saveExternalMatrix(matrixVo);
         }
         return matrixVo;
     }
@@ -131,5 +138,14 @@ public class MatrixServiceImpl implements MatrixService {
                 }
             }
         }
+    }
+
+    public void saveExternalMatrix(ProcessMatrixVo matrixVo){
+        ProcessMatrixExternalVo externalVo = new ProcessMatrixExternalVo();
+        JSONObject externalObj = JSONObject.parseObject(matrixVo.getExternalConfig());
+        externalVo.setPlugin(externalObj.getString("plugin"));
+        externalVo.setConfig(externalObj.getJSONObject("config").toString());
+        externalMapper.deleteMatrixExternalByMatrixUuid(matrixVo.getUuid());
+        externalMapper.insertMatrixExternal(externalVo);
     }
 }
