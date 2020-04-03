@@ -78,6 +78,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 			}
 			//查询数量
 			workcenter.setCount(workcenterService.doSearchCount(new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()))));
+			workcenter.setConditionConfig(null);
 		}
 	    
 	    
