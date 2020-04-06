@@ -38,6 +38,7 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONArray stepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		String processTaskStatus = json.getString("status");
 		if(CollectionUtils.isEmpty(stepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
@@ -47,7 +48,7 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 			JSONObject currentStepJson = (JSONObject)stepIterator.next();
 			String stepStatus =currentStepJson.getString("status");
 			Integer isActive =currentStepJson.getInteger("isactive");
-			if(ProcessTaskStatus.DRAFT.getValue().equals(stepStatus)||(ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&& isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)) {
+			if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)&&(ProcessTaskStatus.DRAFT.getValue().equals(stepStatus)||(ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&& isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus))) {
 				JSONObject stepStatusJson = new JSONObject();
 				stepStatusJson.put("name", stepStatus);
 				stepStatusJson.put("text", ProcessTaskStatus.getText(stepStatus));
