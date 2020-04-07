@@ -36,16 +36,14 @@ public class MatrixExternalRequestApi extends ApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "url", desc = "访问地址", isRequired = true, type = ApiParamType.STRING),
-             @Param( name = "pluginId", desc = "插件id", isRequired = true, type = ApiParamType.STRING),
-             @Param( name = "root", desc = "根属性", type = ApiParamType.STRING, isRequired = true),
+    @Input({ @Param( name = "plugin", desc = "插件", isRequired = true, type = ApiParamType.STRING),
              @Param( name = "config", desc = "配置信息", type = ApiParamType.STRING)})
     @Description(desc = "矩阵外部数据源请求访问接口")
     @Output({ @Param(name = "attributeList", type = ApiParamType.JSONARRAY, desc = "属性集合")})
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject configObj = JSON.parseObject(jsonObj.getString("config"));
-        IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(jsonObj.getString("pluginId"));
-        return requestHandler.attributeHandler(configObj.getString("url"), jsonObj.getString("root"), configObj);
+        IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(jsonObj.getString("plugin"));
+        return requestHandler.attributeHandler(configObj.getString("url"), configObj.getString("root"), configObj);
     }
 }

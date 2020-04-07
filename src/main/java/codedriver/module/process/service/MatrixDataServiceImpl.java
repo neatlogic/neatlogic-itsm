@@ -1,11 +1,11 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.common.util.StringUtil;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
+import codedriver.module.process.util.UUIDUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @program: codedriver
@@ -46,7 +45,7 @@ public class MatrixDataServiceImpl implements MatrixDataService {
                 String data = dataObj.getString("value");
                 if (("uuid").equals(column)){
                     if (StringUtils.isBlank(data)){
-                        data = UUID.randomUUID().toString().replace("-", "");
+                        data = UUIDUtil.getUUID();
                     }else {
                         matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, data);
                     }

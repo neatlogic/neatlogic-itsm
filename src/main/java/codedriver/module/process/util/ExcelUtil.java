@@ -23,6 +23,11 @@ import java.util.Map;
  **/
 public class ExcelUtil {
 
+    /** 
+    * @Description: excel 导出 
+    * @Param: [headerList, columnList, columnSelectValueList, dataMapList, os] 
+    * @return: void  
+    */ 
     public static void exportExcel(List<String> headerList, List<String> columnList, List<List<String>> columnSelectValueList, List<Map<String, String>> dataMapList, OutputStream os)
     {
         HSSFWorkbook workbook = new HSSFWorkbook();
@@ -76,24 +81,25 @@ public class ExcelUtil {
         // 产生表格标题行
         HSSFRow row = sheet.createRow(0);
         int i = 0;
-        String[] textlists = {"test1","test2"};
         for (String header : headerList) {
             HSSFCell cell = row.createCell(i);
             cell.setAsActiveCell();
             cell.setCellStyle(style);
             HSSFRichTextString text = new HSSFRichTextString(header);
             cell.setCellValue(text);
-            List<String> defaultValueList = columnSelectValueList.get(i);
-            //行添加下拉框
-            if (CollectionUtils.isNotEmpty(defaultValueList)){
-                String[] values = new String[defaultValueList.size()];
-                defaultValueList.toArray(values);
-                CellRangeAddressList region = new CellRangeAddressList();
-                region.addCellRangeAddress(1, i, SpreadsheetVersion.EXCEL97.getLastRowIndex(), i);
-                DVConstraint constraint = DVConstraint.createExplicitListConstraint(values);
-                HSSFDataValidation data_validation_list = new HSSFDataValidation(region, constraint);
-                //将有效性验证添加到表单
-                sheet.addValidationData(data_validation_list);
+            if (CollectionUtils.isNotEmpty(columnSelectValueList)){
+                List<String> defaultValueList = columnSelectValueList.get(i);
+                //行添加下拉框
+                if (CollectionUtils.isNotEmpty(defaultValueList)){
+                    String[] values = new String[defaultValueList.size()];
+                    defaultValueList.toArray(values);
+                    CellRangeAddressList region = new CellRangeAddressList();
+                    region.addCellRangeAddress(1, i, SpreadsheetVersion.EXCEL97.getLastRowIndex(), i);
+                    DVConstraint constraint = DVConstraint.createExplicitListConstraint(values);
+                    HSSFDataValidation data_validation_list = new HSSFDataValidation(region, constraint);
+                    //将有效性验证添加到表单
+                    sheet.addValidationData(data_validation_list);
+                }
             }
             i++;
         }
@@ -132,7 +138,21 @@ public class ExcelUtil {
         }
     }
 
+    /** 
+    * @Description: 表头导出 
+    * @Param: [headerList, columnSelectValueList, os] 
+    * @return: void  
+    */ 
     public static void exportExcelHeaders(List<String> headerList, List<List<String>> columnSelectValueList, OutputStream os){
         exportExcel(headerList, null, columnSelectValueList, null, os);
+    }
+
+    /** 
+    * @Description: 不包含下拉框默认值导出 
+    * @Param: [headerList, columnList, dataMapList, os] 
+    * @return: void  
+    */ 
+    public static void exportExcel(List<String> headerList, List<String> columnList, List<Map<String, String>> dataMapList, OutputStream os){
+        exportExcel(headerList, columnList, null, dataMapList, os);
     }
 }

@@ -18,7 +18,7 @@ public class MatrixExternalPluginListApi extends ApiComponentBase {
 
     @Override
     public String getToken() {
-        return "matrix/external/plugin/List";
+        return "matrix/external/plugin/list";
     }
 
     @Override

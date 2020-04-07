@@ -39,7 +39,9 @@ public class MatrixSaveApi extends ApiComponentBase {
     }
 
     @Input({ @Param( name = "name", type = ApiParamType.STRING, desc = "矩阵名称", isRequired = true, xss = true),
-             @Param( name = "type", type = ApiParamType.STRING, desc = "矩阵类型", isRequired = true)})
+             @Param( name = "type", type = ApiParamType.STRING, desc = "矩阵类型", isRequired = true),
+             @Param( name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid"),
+             @Param( name = "externalConfig", type = ApiParamType.JSONOBJECT, desc = "矩阵外部数据源配置")})
     @Output({
             @Param( name = "matrix", explode = ProcessMatrixVo.class, desc = "矩阵数据源")
     })
@@ -49,6 +51,8 @@ public class MatrixSaveApi extends ApiComponentBase {
         ProcessMatrixVo matrixVo = new ProcessMatrixVo();
         matrixVo.setName(jsonObj.getString("name"));
         matrixVo.setType(jsonObj.getString("type"));
+        matrixVo.setExternalConfig(jsonObj.getJSONObject("externalConfig").toString());
+        matrixVo.setUuid(jsonObj.getString("uuid"));
         ProcessMatrixVo matrix = matrixService.saveMatrix(matrixVo);
         returnObj.put("matrix", matrix);
         return returnObj;

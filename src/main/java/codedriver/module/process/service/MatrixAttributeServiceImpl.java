@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
+import codedriver.module.process.util.UUIDUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 
@@ -48,7 +48,7 @@ public class MatrixAttributeServiceImpl implements MatrixAttributeService {
                     if (StringUtils.isBlank(attributeVo.getUuid())){
                         //过滤新增属性
                         addAttributeList.add(attributeVo);
-                        attributeVo.setUuid(UUID.randomUUID().toString().replace("-", ""));
+                        attributeVo.setUuid(UUIDUtil.getUUID());
                         attributeMapper.insertMatrixAttribute(attributeVo);
                         iterator.remove();
                     }else {
@@ -71,7 +71,7 @@ public class MatrixAttributeServiceImpl implements MatrixAttributeService {
 
             }else {
                 for (ProcessMatrixAttributeVo attributeVo : _attributeVoList){
-                    attributeVo.setUuid(UUID.randomUUID().toString().replace("-", ""));
+                    attributeVo.setUuid(UUIDUtil.getUUID());
                     attributeMapper.insertMatrixAttribute(attributeVo);
                 }
                 attributeMapper.createMatrixDynamicTable(_attributeVoList, matrixUuid);

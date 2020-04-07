@@ -3,6 +3,7 @@ package codedriver.module.process.util;
 import codedriver.framework.process.constvalue.RestfulType;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -31,7 +32,6 @@ import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
 
 /**
  * 在java中处理http请求.
@@ -77,9 +77,11 @@ public class HttpUtil {
 			connection = (HttpURLConnection) getUrl.openConnection();
 			String authorization = "";
 			String currentTime = Long.toString(System.currentTimeMillis());
-			if (authMode.equalsIgnoreCase("basic")) {
-				String sign = accessKey + ":" + accessSecret;
-				authorization = "Basic " + Base64.encodeBase64String(sign.getBytes("utf-8"));
+			if (StringUtils.isNotBlank(authMode)){
+				if (authMode.equalsIgnoreCase("basic")) {
+					String sign = accessKey + ":" + accessSecret;
+					authorization = "Basic " + Base64.encodeBase64String(sign.getBytes("utf-8"));
+				}
 			}
 			connection.setUseCaches(false);
 			connection.setRequestMethod(restfulType);
@@ -87,6 +89,7 @@ public class HttpUtil {
 				connection.setDoOutput(true);
 				connection.setDoInput(true);
 			}
+			connection.setRequestProperty("Tenant", "lixs");
 			connection.setRequestProperty("x-access-date", currentTime);
 			connection.setRequestProperty("Authorization", authorization);
 			connection.setRequestProperty("Content-Type", "application/json");

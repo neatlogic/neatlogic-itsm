@@ -6,6 +6,7 @@ import codedriver.framework.process.constvalue.RestfulType;
 import codedriver.framework.process.matrixrexternal.core.MatrixExternalRequestBase;
 import codedriver.module.process.util.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ public class RestfulHandler extends MatrixExternalRequestBase {
         List<RestfulType> restfulTypes = new ArrayList<>();
         restfulTypes.add(RestfulType.POST);
         restfulTypes.add(RestfulType.GET);
+        restfulTypes.add(RestfulType.PUT);
         return restfulTypes;
     }
 
@@ -49,9 +51,11 @@ public class RestfulHandler extends MatrixExternalRequestBase {
     public String myHandler(String url, String authType, String restfulType, String encodingType ,JSONObject config){
         String accessKey = "";
         String accessPassword = "";
-        if (AuthType.BASIC.getValue().equals(authType)){
-            accessKey = config.getString("accessKey");
-            accessPassword = config.getString("accessPassword");
+        if (StringUtils.isNotBlank(authType)){
+            if (AuthType.BASIC.getValue().equals(authType)){
+                accessKey = config.getString("accessKey");
+                accessPassword = config.getString("accessPassword");
+            }
         }
        return HttpUtil.getHttpConnectionData(url, authType, accessKey, accessPassword, restfulType, encodingType);
     }

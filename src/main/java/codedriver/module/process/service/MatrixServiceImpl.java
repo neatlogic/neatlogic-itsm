@@ -8,6 +8,10 @@ import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.matrixrexternal.core.IMatrixExternalRequestHandler;
+import codedriver.framework.process.matrixrexternal.core.MatrixExternalRequestFactory;
+import codedriver.module.process.util.UUIDUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -45,9 +49,10 @@ public class MatrixServiceImpl implements MatrixService {
             matrixMapper.updateMatrixNameAndLcu(matrixVo);
         }else {
             matrixVo.setFcu(UserContext.get().getUserId());
-            matrixVo.setUuid(UUID.randomUUID().toString().replace("-", ""));
+            matrixVo.setUuid(UUIDUtil.getUUID());
             matrixMapper.insertMatrix(matrixVo);
         }
+
         if (matrixVo.getType().equals(ProcessMatrixType.EXTERNAL.getValue())){
             saveExternalMatrix(matrixVo);
         }
@@ -87,11 +92,47 @@ public class MatrixServiceImpl implements MatrixService {
         }
         sourceMatrix.setFcu(UserContext.get().getUserId());
         sourceMatrix.setLcu(UserContext.get().getUserId());
-        String targetUuid = UUID.randomUUID().toString().replace("-", "");
+        String targetUuid = UUIDUtil.getUUID();
         sourceMatrix.setUuid(targetUuid);
         matrixMapper.insertMatrix(sourceMatrix);
         copyMatrixAttributeAndData(matrixUuid, targetUuid);
         return 0;
+    }
+
+    @Override
+    public JSONObject getMatrixExternalData(String matrixUuid) {
+        JSONObject returnObj = new JSONObject();
+        ProcessMatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
+        JSONObject externalObj = JSONObject.parseObject(externalVo.getConfig());
+        String plugin = externalVo.getPlugin();
+        String root = externalObj.getString("root");
+        String url = externalObj.getString("url");
+        IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(plugin);
+        JSONArray dataArray = requestHandler.dataHandler(url, root, externalObj);
+        if (CollectionUtils.isNotEmpty(dataArray)){
+            String columnConfig = externalObj.getString("columnConfig");
+            JSONArray columnArray = JSONArray.parseArray(columnConfig);
+            List<String> headerList = new ArrayList<>();
+            List<String> attributeList = new ArrayList<>();
+            for (int i = 0; i < columnArray.size(); i++){
+                JSONObject obj = columnArray.getJSONObject(i);
+                headerList.add(obj.getString("text"));
+                attributeList.add(obj.getString("attribute"));
+            }
+            List<Map<String, String>> dataMapList = new ArrayList<>();
+            for (int i = 0; i < dataArray.size(); i++){
+                JSONObject obj = dataArray.getJSONObject(i);
+                Map<String, String> map = new HashMap<>();
+                for (String attribute : attributeList){
+                    map.put(attribute, obj.getString(attribute));
+                }
+                dataMapList.add(map);
+            }
+            returnObj.put("headerList", headerList);
+            returnObj.put("columnList", attributeList);
+            returnObj.put("dataMapList", dataMapList);
+        }
+        return  returnObj;
     }
 
     public void copyMatrixAttributeAndData(String sourceMatrixUuid, String targetMatrixUuid){
@@ -102,7 +143,7 @@ public class MatrixServiceImpl implements MatrixService {
             Map<String, String> compareMap = new HashMap<>();
             for (ProcessMatrixAttributeVo attributeVo : attributeVoList){
                 String sourceUuid = attributeVo.getUuid();
-                String targetUuid = UUID.randomUUID().toString().replace("-", "");
+                String targetUuid = UUIDUtil.getUUID();
                 sourceColumnList.add(sourceUuid);
                 compareMap.put(sourceUuid, targetUuid);
                 attributeVo.setMatrixUuid(targetMatrixUuid);
@@ -123,7 +164,7 @@ public class MatrixServiceImpl implements MatrixService {
                     List<String> targetColumnList = new ArrayList<>();
                     List<String> targetDataList = new ArrayList<>();
                     targetColumnList.add("uuid");
-                    targetDataList.add(UUID.randomUUID().toString().replace("-", ""));
+                    targetDataList.add(UUIDUtil.getUUID());
                     Set set = sourceDataMap.entrySet();
                     Iterator iterator = set.iterator();
                     while (iterator.hasNext()){
@@ -143,9 +184,12 @@ public class MatrixServiceImpl implements MatrixService {
     public void saveExternalMatrix(ProcessMatrixVo matrixVo){
         ProcessMatrixExternalVo externalVo = new ProcessMatrixExternalVo();
         JSONObject externalObj = JSONObject.parseObject(matrixVo.getExternalConfig());
+        externalVo.setMatrixUuid(matrixVo.getUuid());
         externalVo.setPlugin(externalObj.getString("plugin"));
         externalVo.setConfig(externalObj.getJSONObject("config").toString());
-        externalMapper.deleteMatrixExternalByMatrixUuid(matrixVo.getUuid());
+        if (StringUtils.isNotBlank(matrixVo.getUuid())){
+            externalMapper.deleteMatrixExternalByMatrixUuid(matrixVo.getUuid());
+        }
         externalMapper.insertMatrixExternal(externalVo);
     }
 }

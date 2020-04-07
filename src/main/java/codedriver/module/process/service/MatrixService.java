@@ -1,6 +1,7 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface MatrixService {
     public int updateMatrixName(ProcessMatrixVo matrixVo);
 
     public int copyMatrix(String matrixUuid, String name);
+
+    public JSONObject getMatrixExternalData(String matrixUuid);
+
 }
