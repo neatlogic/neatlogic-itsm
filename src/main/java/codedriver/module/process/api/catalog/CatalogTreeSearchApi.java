@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -28,7 +27,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
-@Transactional
 public class CatalogTreeSearchApi extends ApiComponentBase {
 	
 	@Autowired
@@ -68,12 +66,12 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
-		
+
+		//查出所有已启用的目录
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
 		//
 		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
-		//查出所有已启用的目录
-		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
 		//已启用的目录uuid列表
 		List<String> activatedCatalogUuidList = catalogList.stream().map(CatalogVo::getUuid).collect(Collectors.toList());
 		//只留下已启用的目录uuid，去掉已禁用的
@@ -83,8 +81,7 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		//得到没有设置过授权的目录uuid列表，默认所有人都有权限
 		activatedCatalogUuidList.removeAll(authorizedCatalogUuidList);
 		currentUserAuthorizedCatalogUuidList.addAll(activatedCatalogUuidList);
-		
-		
+				
 		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
 		//查出所有已启用的服务
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
@@ -106,9 +103,9 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		
 		if(catalogList != null && catalogList.size() > 0) {
 			for(CatalogVo catalogVo : catalogList) {
-				if(hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
-					catalogVo.setChildrenCount(1);
-				}
+//				if(hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
+//					catalogVo.setChildrenCount(1);
+//				}
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 			}
 			
@@ -127,7 +124,8 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 				if(catalogVo.getUuid().equals(catalogUuid)) {
 					catalogVo.setSelectedCascade(true);
 				}
-				if(catalogVo.getChildrenCount() == 0) {
+				if(!currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())
+						|| (!hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid()) && catalogVo.getChildrenCount() == 0)) {
 					ITree parentCatalog = catalogVo.getParent();
 					if(parentCatalog != null) {
 						((CatalogVo)parentCatalog).removeChild(catalogVo);
