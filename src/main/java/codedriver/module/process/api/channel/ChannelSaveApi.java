@@ -81,7 +81,8 @@ public class ChannelSaveApi extends ApiComponentBase {
 		@Param(name = "defaultPriorityUuid", type = ApiParamType.STRING, isRequired = true, desc = "默认优先级uuid"),
 		@Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "关联优先级列表"),
 		@Param(name = "priorityUuidList[0]", type = ApiParamType.STRING, isRequired = false, desc = "优先级uuid"),
-		@Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userId\",\"team#teamUuid\",\"role#roleName\"]")
+		@Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userId\",\"team#teamUuid\",\"role#roleName\"]"),
+		@Param(name = "channelTypeUuid", type = ApiParamType.STRING, desc = "服务类型uuid")
 		})
 	@Output({
 		@Param(name = "Return", type = ApiParamType.STRING, desc = "服务通道uuid")

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.WorktimeVo;
@@ -52,11 +54,8 @@ public class WorktimeSearchApi extends ApiComponentBase {
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
 	})
 	@Output({
-		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
-		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
-		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
-		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="worktimeList",explode=WorktimeVo[].class,desc="工作时间窗口列表")
+		@Param(explode = BasePageVo.class),
+		@Param(name = "tbodyList", explode = WorktimeVo[].class, desc = "工作时间窗口列表")
 	})
 	@Description(desc = "工作时间窗口列表接口")
 	@Override
@@ -74,38 +73,33 @@ public class WorktimeSearchApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}
 		List<WorktimeVo> worktimeList = worktimeMapper.searchWorktimeList(worktimeVo);
-		String startTime = null;
-		String endTime = null;
-		JSONObject jsonObject = null;
-		JSONArray jsonArray = null;
-		Object value = null;
-		JSONObject config = null;
-		Set<String> workingHoursSet = null;
 		for(WorktimeVo worktime : worktimeList) {
-			workingHoursSet = new HashSet<>();
-			config = JSON.parseObject(worktime.getConfig());
-			for(Entry<String, Object> entry : config.entrySet()) {
-				value = entry.getValue();
-				if(value instanceof JSONArray) {
-					jsonArray = (JSONArray) value;
-					for(int i = 0; i < jsonArray.size(); i++) {
-						jsonObject = jsonArray.getJSONObject(i);
-						startTime = "undefine";
-						endTime = "undefine";
-						if(jsonObject.containsKey("startTime")) {
-							startTime = jsonObject.getString("startTime");
+			if(StringUtils.isNotBlank(worktime.getConfig())) {
+				JSONObject config = JSON.parseObject(worktime.getConfig());
+				Set<String> workingHoursSet = new HashSet<>();
+				for(Entry<String, Object> entry : config.entrySet()) {
+					Object value = entry.getValue();
+					if(value instanceof JSONArray) {
+						JSONArray jsonArray = (JSONArray) value;
+						for(int i = 0; i < jsonArray.size(); i++) {
+							JSONObject jsonObject = jsonArray.getJSONObject(i);
+							String startTime = "undefine";
+							String endTime = "undefine";
+							if(jsonObject.containsKey("startTime")) {
+								startTime = jsonObject.getString("startTime");
+							}
+							if(jsonObject.containsKey("endTime")) {
+								endTime = jsonObject.getString("endTime");
+							}						
+							workingHoursSet.add(startTime + " ~ " + endTime);
 						}
-						if(jsonObject.containsKey("endTime")) {
-							endTime = jsonObject.getString("endTime");
-						}						
-						workingHoursSet.add(startTime + " ~ " + endTime);
 					}
 				}
+				worktime.setWorkingHoursSet(workingHoursSet);
+				worktime.setConfig(null);
 			}
-			worktime.setWorkingHoursSet(workingHoursSet);
-			worktime.setConfig(null);
 		}
-		resultObj.put("worktimeList", worktimeList);
+		resultObj.put("tbodyList", worktimeList);
 		return resultObj;
 	}
 

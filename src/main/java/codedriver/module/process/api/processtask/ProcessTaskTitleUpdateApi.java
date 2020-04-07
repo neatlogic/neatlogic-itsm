@@ -12,24 +12,22 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
 @Service
 @Transactional
 public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -47,7 +45,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 	}
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
 		@Param(name = "title", type = ApiParamType.REGEX, rule="^[A-Za-z_\\d\\u4e00-\\u9fa5]+$",isRequired = true, desc = "标题")
 		//@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "标题")
 	})
@@ -55,30 +53,40 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE)) {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.UPDATE.getText());
-		}
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+		if(processTaskVo == null) {
+			throw new ProcessTaskNotFoundException(processTaskId.toString());
+		}
 		String oldTile = processTaskVo.getTitle();	
 		String title = jsonObj.getString("title");
-		//如果标题跟原来的标题一样，不生成活动
-		if(title.equals(oldTile)) {
-			return null;
-		}
-		//更新标题
-		processTaskVo.setTitle(title);
-		processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
-		//生成活动	
-		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-		if(handler != null) {
+		//如果标题跟原来的标题不一样，生成活动
+		if(!title.equals(oldTile)) {
+			Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+			
+			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+			if(processTaskStepVo == null) {
+				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+			}
+			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
+				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
+			}
+
+			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+			if(handler == null) {
+				throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+			}
+			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
+			
+			
+			//更新标题
+			processTaskVo.setTitle(title);
+			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
+			//生成活动	
 			jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTile);
-			currentProcessTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.UPDATETITLE);
-		}else {
-			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+			processTaskStepVo.setParamObj(jsonObj);
+			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.UPDATETITLE);
 		}
+		
 		return null;
 	}
 }

@@ -66,7 +66,7 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 	@Input({
 		@Param(name="processTaskId", type = ApiParamType.LONG, desc="工单id"),
 		@Param(name="channelUuid", type= ApiParamType.STRING, isRequired=true, desc="服务uuid"),
-		@Param(name="title", type=ApiParamType.REGEX, rule="^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "标题"),
+		@Param(name="title", type=ApiParamType.STRING, desc = "标题"),
 		@Param(name="owner", type=ApiParamType.STRING, desc="请求人"),
 		@Param(name="priorityUuid", type=ApiParamType.STRING, desc="优先级uuid"),
 		@Param(name="formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
@@ -74,7 +74,8 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		@Param(name="fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
 	@Output({
-		@Param(name="Return", type = ApiParamType.LONG, desc="工单id")
+		@Param(name="processTaskId", type = ApiParamType.LONG, desc="工单id"),
+		@Param(name="processTaskStepId", type = ApiParamType.LONG, desc="步骤id")
 	})
 	@Description(desc = "工单上报暂存接口")
 	@Override
@@ -120,8 +121,10 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		}else {
 			throw new ProcessStepHandlerNotFoundException(startTaskStep.getHandler());
 		}
-		
-		return startTaskStep.getProcessTaskId();
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("processTaskId", startTaskStep.getProcessTaskId());
+		resultObj.put("processTaskStepId", startTaskStep.getId());
+		return resultObj;
 	}
 
 }

@@ -22,7 +22,7 @@ import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
-import codedriver.framework.process.constvalue.UserType;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
@@ -393,7 +393,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				processTaskStepUserVo.setStatus(null);
 			}
 			String minorUserStatus = null;//userId是子任务处理人时的状态，null代表userId不是子任务处理人
-			List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepUserVo.getProcessTaskStepId(), UserType.MINOR.getValue());
+			List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepUserVo.getProcessTaskStepId(), ProcessUserType.MINOR.getValue());
 			for(ProcessTaskStepUserVo stepUser : processTaskStepUserList) {
 				if(processTaskStepUserVo.getUserId().equals(stepUser.getUserId())) {
 					minorUserStatus = stepUser.getStatus();
@@ -428,7 +428,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			}
 			
 			String majorUserStatus = null;//userId是主处理人时的状态，null代表userId不是主处理人
-			List<ProcessTaskStepUserVo> stepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepWorkerVo.getProcessTaskStepId(), UserType.MAJOR.getValue());
+			List<ProcessTaskStepUserVo> stepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepWorkerVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
 			for(ProcessTaskStepUserVo stepUser : stepMajorUserList) {
 				if(processTaskStepWorkerVo.getUserId().equals(stepUser.getUserId())) {
 					majorUserStatus = stepUser.getStatus();
@@ -454,7 +454,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 	
 	private boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo) {
-		JSONObject paramObj = new JSONObject();
+		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
 		if(processTaskVo.getTitle() == null) {
 			throw new ProcessTaskRuntimeException("工单标题格式不能为空");

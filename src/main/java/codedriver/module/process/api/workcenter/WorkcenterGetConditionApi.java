@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +16,6 @@ import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -27,9 +25,6 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
 public class WorkcenterGetConditionApi extends ApiComponentBase {
-
-	@Autowired
-	private FormMapper formMapper;
 
 	@Override
 	public String getToken() {

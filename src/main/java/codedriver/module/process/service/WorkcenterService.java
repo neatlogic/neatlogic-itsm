@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,7 @@ import codedriver.framework.process.dto.condition.ConditionGroupVo;
 import codedriver.framework.process.dto.condition.ConditionRelVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 import codedriver.framework.process.exception.workcenter.WorkcenterConditionException;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
@@ -149,54 +151,118 @@ public class WorkcenterService {
 		return returnObj;
 	}
 	
+	/**
+	 * 工单中心 获取操作按钮
+	 * @param MultiAttrsObject el
+	 * @return
+	 */
 	private Object getStepAction(MultiAttrsObject el) {
 		JSONArray actionArray = new JSONArray();
 		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
+		Boolean isHasAbort = false;
+		Boolean isHasUrge = false;
 		if(commonJson == null) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		JSONArray currentStepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.CURRENT_STEP.getValue());
-		if(CollectionUtils.isEmpty(currentStepArray)) {
+		JSONArray stepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		String processTaskStatus = commonJson.getString(ProcessWorkcenterField.STATUS.getValue());
+		if(CollectionUtils.isEmpty(stepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		for(Object currentStepObj: currentStepArray) {
-			JSONObject currentStepJson = (JSONObject)currentStepObj;
-			Long stepId = currentStepJson.getLong("id");
-			String stepName = currentStepJson.getString("name");
-			String stepStatus = currentStepJson.getString("status");
-			if(StringUtils.isNotBlank(stepStatus)&&(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())||stepStatus.equals(ProcessTaskStatus.RUNNING.getValue())||stepStatus.equals(ProcessTaskStatus.DRAFT.getValue()))) {
+		JSONObject handleActionJson = new JSONObject();
+		JSONArray handleArray = new JSONArray();
+		for(Object stepObj: stepArray) {
+			JSONObject stepJson = (JSONObject)stepObj;
+			Long stepId = stepJson.getLong("id");
+			String stepName = stepJson.getString("name");
+			String stepStatus = stepJson.getString("status");		
+			Integer isActive =stepJson.getInteger("isactive");
+			if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)&&((ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&&isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {		
 				List<String> actionList = new ArrayList<String>();
 				try {
-					actionList = processTaskService.getProcessTaskStepActionList(Long.valueOf(el.getId()), currentStepJson.getLong("id"));
+					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), stepJson.getLong("id"),new ArrayList<String>(){
+						private static final long serialVersionUID = 1L;
+					{
+						add(ProcessTaskStepAction.COMPLETESUBTASK.getValue());
+						add(ProcessTaskStepAction.COMPLETE.getValue());
+						add(ProcessTaskStepAction.START.getValue());
+						add(ProcessTaskStepAction.STARTPROCESS.getValue());
+						add(ProcessTaskStepAction.ABORT.getValue());
+						add(ProcessTaskStepAction.URGE.getValue());
+						}});
 				}catch(Exception ex) {
 					logger.error(ex.getMessage(),ex);
 				}
+				
 				if(actionList.contains(ProcessTaskStepAction.COMPLETESUBTASK.getValue())||
 						actionList.contains(ProcessTaskStepAction.COMPLETE.getValue())||
-						actionList.contains(ProcessTaskStepAction.START.getValue())||
-						actionList.contains(ProcessTaskStepAction.STARTPROCESS.getValue())) {
-					JSONObject configJson = new JSONObject();
+						actionList.contains(ProcessTaskStepAction.STARTPROCESS.getValue())||
+						actionList.contains(ProcessTaskStepAction.START.getValue())
+				) { 
+				JSONObject configJson = new JSONObject();
 					configJson.put("taskid", el.getId());
 					configJson.put("stepid", stepId);
 					configJson.put("stepName", stepName);
 					JSONObject actionJson = new JSONObject();
 					actionJson.put("name", "handle");
-					actionJson.put("text", String.format("处理:%s", stepName));
+					actionJson.put("text", stepName);
 					actionJson.put("config", configJson);
-					actionArray.add(actionJson);
+					handleArray.add(actionJson);
 				}
 				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
-					JSONObject actionJson = new JSONObject();
-					JSONObject configJson = new JSONObject();
-					configJson.put("taskid", el.getId());
-					configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
-					actionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
-					actionJson.put("text", ProcessTaskStepAction.ABORT.getText());
-					actionJson.put("config", configJson);
-					actionArray.add(actionJson);
+					isHasAbort = true; 
+				}
+				if(actionList.contains(ProcessTaskStepAction.URGE.getValue())) {
+					isHasUrge = true; 
 				}
 			}
 		}
+		
+		handleActionJson.put("name", "handle");
+		handleActionJson.put("text", "流转");
+		handleActionJson.put("sort", 2);
+		if(CollectionUtils.isNotEmpty(handleArray)) {
+			handleActionJson.put("handleList", handleArray);
+			handleActionJson.put("isEnable", 1);
+		}else {
+			handleActionJson.put("isEnable", 0);
+		} 
+		
+		actionArray.add(handleActionJson);
+		//abort
+		JSONObject abortActionJson = new JSONObject();
+		abortActionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
+		abortActionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+		abortActionJson.put("sort", 2);
+		if(isHasAbort) {
+			JSONObject configJson = new JSONObject();
+			configJson.put("taskid", el.getId());
+			configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
+			abortActionJson.put("config", configJson);
+			abortActionJson.put("isEnable", 1);
+		}else {
+			abortActionJson.put("isEnable", 0);
+		}
+		actionArray.add(abortActionJson);
+		//催办
+		JSONObject urgeActionJson = new JSONObject();
+		urgeActionJson.put("name", ProcessTaskStepAction.URGE.getValue());
+		urgeActionJson.put("text", ProcessTaskStepAction.URGE.getText());
+		urgeActionJson.put("sort", 3);
+		if(isHasUrge) {
+			JSONObject configJson = new JSONObject();
+			configJson.put("taskid", el.getId());
+			configJson.put("interfaceurl", "api/rest/processtask/urge?processTaskId="+el.getId());
+			abortActionJson.put("config", configJson);
+			abortActionJson.put("isEnable", 1);
+		}else {
+			abortActionJson.put("isEnable", 0);
+		}
+
+		actionArray.add(urgeActionJson);
+		
+		
+		actionArray.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("sort")));
 		return actionArray;
 	}
 	

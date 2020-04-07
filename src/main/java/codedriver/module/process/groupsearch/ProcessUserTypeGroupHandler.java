@@ -9,7 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
-import codedriver.framework.process.constvalue.UserType;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.restful.groupsearch.core.IGroupSearchHandler;
 @Service
 public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
@@ -27,7 +27,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 	@Override
 	public <T> List<T> search(JSONObject jsonObj) {
 		List<String> userTypeList = new ArrayList<String>();
-		for (UserType s : UserType.values()) {
+		for (ProcessUserType s : ProcessUserType.values()) {
 			userTypeList.add(s.getValue());
 		}
 		return (List<T>) userTypeList;
@@ -54,7 +54,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 		for(T userType : userTypeList) {
 			JSONObject userTypeTmp = new JSONObject();
 			userTypeTmp.put("value", getHeader()+userType);
-			userTypeTmp.put("text", UserType.getText(userType.toString()));
+			userTypeTmp.put("text", ProcessUserType.getText(userType.toString()));
 			userTypeArray.add(userTypeTmp);
 		}
 		userTypeObj.put("sort", getSort());
@@ -70,5 +70,10 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 	@Override
 	public Boolean isLimit() {
 		return false;
+	}
+
+	@Override
+	public JSONObject include(JSONObject json, List<String> includeList) {
+		return json;
 	}
 }

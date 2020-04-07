@@ -24,8 +24,12 @@ public class ProcessTaskStatusColumn extends WorkcenterColumnBase implements IWo
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
+		JSONObject statusJson = new JSONObject();
 		String status = json.getString(this.getName());
-		return ProcessTaskStatus.getText(status);
+		statusJson.put("value", status);
+		statusJson.put("text", ProcessTaskStatus.getText(status));
+		statusJson.put("color", ProcessTaskStatus.getColor(status));
+		return statusJson;
 	}
 
 	@Override

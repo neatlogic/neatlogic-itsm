@@ -20,8 +20,10 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -68,15 +70,18 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		//获取步骤信息
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		if(processTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 		}
 		Long processTaskId = processTaskStepVo.getProcessTaskId();
-		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.CREATESUBTASK)) {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.CREATESUBTASK.getText());
+
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+		if(handler == null) {
+			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
+		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.CREATESUBTASK);
+		
 		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
 		processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
 		processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);

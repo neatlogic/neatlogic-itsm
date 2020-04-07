@@ -1,10 +1,12 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -29,7 +31,7 @@ public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWor
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONObject userJson = new JSONObject();
 		String userId = json.getString(this.getName());
-		UserVo userVo =userMapper.getUserByUserId(userId);
+		UserVo userVo =userMapper.getUserByUserId(userId.replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 		if(userVo != null) {
 			userJson.put("username", userVo.getUserName());
 		}

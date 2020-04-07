@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSONArray;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStepWorkerAction;
-import codedriver.framework.process.constvalue.UserType;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -57,13 +57,13 @@ public class AssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 			String worker = workerList.getString(j);
 			String[] split = worker.split("#");
 			if(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
-				if(UserType.OWNER.getValue().equals(split[1])) {
+				if(ProcessUserType.OWNER.getValue().equals(split[1])) {
 					ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, processTaskVo.getOwner(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
-				}else if(UserType.REPORTER.getValue().equals(split[1])) {
+				}else if(ProcessUserType.REPORTER.getValue().equals(split[1])) {
 					ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, processTaskVo.getReporter(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
-				}else if(UserType.AGENT.getValue().equals(split[1])) {
+				}else if(ProcessUserType.AGENT.getValue().equals(split[1])) {
 					//TODO linbq代办人获取逻辑以后再实现
 				}
 			}else if(GroupSearch.USER.getValue().equals(split[0])) {

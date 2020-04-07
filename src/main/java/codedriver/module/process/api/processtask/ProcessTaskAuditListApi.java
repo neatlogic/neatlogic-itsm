@@ -16,21 +16,19 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
 @Service
 public class ProcessTaskAuditListApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -48,8 +46,7 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")
+		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "工单活动列表"),
@@ -59,9 +56,9 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(!processTaskService.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.VIEW)) {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.VIEW.getText());
+		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+		if(processTaskVo == null) {
+			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
 		
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
@@ -73,6 +70,13 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 		List<ProcessTaskStepAuditVo> resutlList = new ArrayList<>();
 		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
 			if(ProcessTaskStepAction.SAVE.getValue().equals(processTaskStepAudit.getAction())) {
+				continue;
+			}
+			//判断当前用户是否有权限查看该节点信息
+			List<String> verifyActionList = new ArrayList<>();
+			verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
+			List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
+			if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 				continue;
 			}
 			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
