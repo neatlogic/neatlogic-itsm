@@ -103,9 +103,6 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		
 		if(catalogList != null && catalogList.size() > 0) {
 			for(CatalogVo catalogVo : catalogList) {
-//				if(hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
-//					catalogVo.setChildrenCount(1);
-//				}
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 			}
 			

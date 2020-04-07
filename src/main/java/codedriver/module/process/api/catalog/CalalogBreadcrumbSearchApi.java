@@ -79,18 +79,7 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
-//		String keyword = null;
-//		Set<String> channelParentUuidList = null;
-//		if(jsonObj.containsKey("keyword")) {
-//			keyword = jsonObj.getString("keyword");
-//			ChannelVo channelVo = new ChannelVo();
-//			channelVo.setIsActive(1);
-//			channelVo.setKeyword(keyword);
-//			channelParentUuidList = channelMapper.searchChannelParentUuidList(channelVo);
-//			if(channelParentUuidList == null || channelParentUuidList.isEmpty()) {
-//				return null;
-//			}
-//		}
+
 		Set<String> channelParentUuidList = null;
 		String keyword = jsonObj.getString("keyword");
 		if(keyword != null) {
