@@ -89,7 +89,6 @@ public class HttpUtil {
 				connection.setDoOutput(true);
 				connection.setDoInput(true);
 			}
-			connection.setRequestProperty("Tenant", "lixs");
 			connection.setRequestProperty("x-access-date", currentTime);
 			connection.setRequestProperty("Authorization", authorization);
 			connection.setRequestProperty("Content-Type", "application/json");
