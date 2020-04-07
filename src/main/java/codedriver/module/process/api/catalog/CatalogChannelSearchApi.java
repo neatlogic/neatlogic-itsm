@@ -74,7 +74,7 @@ public class CatalogChannelSearchApi extends ApiComponentBase {
 		catalogChannelList.addAll(channelList);
 		Stream<ITree> treeStream = catalogChannelList.stream();
 		if(StringUtils.isNotBlank(keyword)) {
-			treeStream = treeStream.filter(tree -> !tree.getUuid().equals("0") && tree.getName().contains(keyword));
+			treeStream = treeStream.filter(tree -> !tree.getUuid().equals("0") && tree.getName().toUpperCase().contains(keyword.toUpperCase()));
 		}else {
 			treeStream = treeStream.filter(tree -> !tree.getUuid().equals("0"));
 		}
