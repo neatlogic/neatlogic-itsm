@@ -75,10 +75,11 @@ public class WorktimeSearchApi extends ApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
 		}
-		Map<String, List<Integer>> worktimeUuidYearListMap = new HashMap<>();
+		
 		List<WorktimeVo> worktimeList = worktimeMapper.searchWorktimeList(worktimeVo);
 		List<String> worktimeUuidList = worktimeList.stream().map(WorktimeVo::getUuid).collect(Collectors.toList());
 		List<WorktimeVo> worktimeUuidYearListList = worktimeMapper.getYearListByWorktimeUuidList(worktimeUuidList);
+		Map<String, List<Integer>> worktimeUuidYearListMap = new HashMap<>();
 		for(WorktimeVo worktime : worktimeUuidYearListList) {
 			worktimeUuidYearListMap.put(worktime.getUuid(), worktime.getYearList());
 		}
