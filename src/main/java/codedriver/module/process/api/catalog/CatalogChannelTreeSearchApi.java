@@ -4,19 +4,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ITree;
-import codedriver.framework.process.exception.catalog.CatalogIllegalParameterException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -47,21 +44,13 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({
-		@Param(name = "nodeUuid", type = ApiParamType.STRING, desc = "搜索树节点uuid")
-		})
+	@Input({})
 	@Output({
 		@Param(name="Return",explode=CatalogVo[].class,desc="服务目录及通道树")
 	})
 	@Description(desc = "服务目录及通道树查询接口")
 	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String nodeUuid = jsonObj.getString("nodeUuid");
-		if(StringUtils.isNotBlank(nodeUuid)) {
-			if(channelMapper.checkChannelIsExists(nodeUuid) == 0 && catalogMapper.checkCatalogIsExists(nodeUuid) == 0) {
-				throw new CatalogIllegalParameterException("节点nodeUuid:'" + nodeUuid + "'即不是目录uuid也不是服务uuid");
-			}
-		}				
+	public Object myDoService(JSONObject jsonObj) throws Exception {				
 		
 		Map<String, ITree> uuidKeyMap = new HashMap<>();
 		String parentUuid = null;
@@ -76,10 +65,6 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 				parent = uuidKeyMap.get(parentUuid);
 				if(parent != null) {
 					catalogVo.setParent(parent);
-					if(catalogVo.getUuid().equals(nodeUuid)) {
-						catalogVo.setSelected(true);
-						catalogVo.setOpenCascade(true);
-					}
 				}				
 			}
 		}
@@ -91,10 +76,6 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 				parent = uuidKeyMap.get(parentUuid);
 				if(parent != null) {
 					channelVo.setParent(parent);
-					if(channelVo.getUuid().equals(nodeUuid)) {
-						channelVo.setSelected(true);
-						channelVo.setOpenCascade(true);
-					}
 				}
 			}
 		}
