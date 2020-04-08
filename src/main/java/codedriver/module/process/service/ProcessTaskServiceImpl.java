@@ -1,16 +1,29 @@
 package codedriver.module.process.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.process.constvalue.FormAttributeAction;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
@@ -32,8 +45,13 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 @Service
 public class ProcessTaskServiceImpl implements ProcessTaskService {
 
+	private final static Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
+	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private TeamMapper teamMapper;
 	
 	@Override
 	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo){
@@ -251,6 +269,89 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORTSUBTASK);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+		}
+	}
+	
+	@Override
+	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode) {
+		String formConfig = processTaskVo.getFormConfig();
+		if(StringUtils.isNotBlank(formConfig)) {
+			try {
+				JSONObject formConfigObj = JSON.parseObject(formConfig);
+				if(MapUtils.isNotEmpty(formConfigObj)) {
+					JSONArray controllerList = formConfigObj.getJSONArray("controllerList");
+					if(CollectionUtils.isNotEmpty(controllerList)) {
+						List<String> currentUserProcessUserTypeList = new ArrayList<>();
+						List<String> currentUserTeamList = new ArrayList<>();
+						if(mode == 0) {					
+							currentUserProcessUserTypeList.add(UserType.ALL.getValue());
+							if(UserContext.get().getUserId(true).equals(processTaskVo.getOwner())) {
+								currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
+							}
+							if(UserContext.get().getUserId(true).equals(processTaskVo.getReporter())) {
+								currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
+							}
+							currentUserTeamList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
+						}else if(mode == 1){
+							if(formAttributeActionMap == null) {
+								formAttributeActionMap = new HashMap<>();
+							}
+						}
+						
+						for(int i = 0; i < controllerList.size(); i++) {
+							JSONObject attributeObj = controllerList.getJSONObject(i);
+							String action = null;
+							if(mode == 0) {
+								JSONObject config = attributeObj.getJSONObject("config");
+								if(MapUtils.isNotEmpty(config)) {
+									List<String> authorityList = JSON.parseArray(config.getString("authorityConfig"), String.class);
+									if(CollectionUtils.isNotEmpty(authorityList)) {
+										action = FormAttributeAction.HIDE.getValue();
+										for(String authority : authorityList) {
+											String[] split = authority.split("#");
+											if(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
+												if(currentUserProcessUserTypeList.contains(split[1])) {
+													action = FormAttributeAction.READ.getValue();
+													break;
+												}
+											}
+											if(GroupSearch.USER.getValue().equals(split[0])) {
+												if(UserContext.get().getUserId(true).equals(split[1])) {
+													action = FormAttributeAction.READ.getValue();
+													break;
+												}
+											}
+											if(GroupSearch.TEAM.getValue().equals(split[0])) {
+												if(currentUserTeamList.contains(split[1])) {
+													action = FormAttributeAction.READ.getValue();
+													break;
+												}
+											}
+											if(GroupSearch.ROLE.getValue().equals(split[0])) {
+												if(UserContext.get().getRoleNameList().contains(split[1])) {
+													action = FormAttributeAction.READ.getValue();
+													break;
+												}
+											}
+										}
+									}else {
+										action = FormAttributeAction.READ.getValue();
+									}
+								}
+							}else if(mode == 1){
+								action = formAttributeActionMap.get(attributeObj.getString("uuid"));
+							}
+							if(FormAttributeAction.READ.getValue().equals(action)) {
+								attributeObj.put("isReadonly", true);
+							}else if(FormAttributeAction.HIDE.getValue().equals(action)) {
+								attributeObj.put("isHide", true);
+							}
+						}
+					}
+				}
+			}catch(Exception ex) {
+				logger.error("表单配置不是合法的JSON格式", ex);
+			}
 		}
 		
 	}

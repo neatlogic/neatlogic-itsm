@@ -1,6 +1,8 @@
 package codedriver.module.process.service;
 
 import java.util.List;
+import java.util.Map;
+
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -53,4 +55,6 @@ public interface ProcessTaskService {
 	* @return void
 	 */
 	public void abortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
+	
+	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode);
 }
