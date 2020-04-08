@@ -165,7 +165,6 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				for(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
 					formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
 				}
-				processTaskVo.setFormAttributeActionMap(formAttributeActionMap);
 				processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
 			}
 			return processTaskVo;
@@ -211,7 +210,6 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 					for(ProcessStepFormAttributeVo processStepFormAttribute : processStepFormAttributeList) {
 						formAttributeActionMap.put(processStepFormAttribute.getAttributeUuid(), processStepFormAttribute.getAction());
 					}
-					processTaskVo.setFormAttributeActionMap(formAttributeActionMap);
 					processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
 				}
 			}

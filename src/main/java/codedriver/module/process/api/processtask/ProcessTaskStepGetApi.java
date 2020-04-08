@@ -167,66 +167,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		//获取工单表单信息
 		ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
 		if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
-//			try {
-//				JSONObject formConfig = JSON.parseObject(processTaskFormVo.getFormContent());
-//				if(MapUtils.isNotEmpty(formConfig)) {
-//					JSONArray controllerList = formConfig.getJSONArray("controllerList");
-//					if(CollectionUtils.isNotEmpty(controllerList)) {
-//						Map<String, String> formAttributeActionMap = new HashMap<>();
-//						List<String> currentUserProcessUserTypeList = new ArrayList<>();
-//						currentUserProcessUserTypeList.add(UserType.ALL.getValue());
-//						if(UserContext.get().getUserId(true).equals(processTaskVo.getOwner())) {
-//							currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
-//						}
-//						if(UserContext.get().getUserId(true).equals(processTaskVo.getReporter())) {
-//							currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
-//						}
-//						List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
-//						for(int i = 0; i < controllerList.size(); i++) {
-//							JSONObject attributeObj = controllerList.getJSONObject(i);
-//							JSONObject config = attributeObj.getJSONObject("config");
-//							if(MapUtils.isNotEmpty(config)) {
-//								List<String> authorityList = JSON.parseArray(config.getString("authorityConfig"), String.class);
-//								if(CollectionUtils.isNotEmpty(authorityList)) {
-//									formAttributeActionMap.put(attributeObj.getString("uuid"), FormAttributeAction.HIDE.getValue());
-//									for(String authority : authorityList) {
-//										String[] split = authority.split("#");
-//										if(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
-//											if(currentUserProcessUserTypeList.contains(split[1])) {
-//												formAttributeActionMap.put(attributeObj.getString("uuid"), FormAttributeAction.READ.getValue());
-//												break;
-//											}
-//										}
-//										if(GroupSearch.USER.getValue().equals(split[0])) {
-//											if(UserContext.get().getUserId(true).equals(split[1])) {
-//												formAttributeActionMap.put(attributeObj.getString("uuid"), FormAttributeAction.READ.getValue());
-//												break;
-//											}
-//										}
-//										if(GroupSearch.TEAM.getValue().equals(split[0])) {
-//											if(currentUserTeamList.contains(split[1])) {
-//												formAttributeActionMap.put(attributeObj.getString("uuid"), FormAttributeAction.READ.getValue());
-//												break;
-//											}
-//										}
-//										if(GroupSearch.ROLE.getValue().equals(split[0])) {
-//											if(UserContext.get().getRoleNameList().contains(split[1])) {
-//												formAttributeActionMap.put(attributeObj.getString("uuid"), FormAttributeAction.READ.getValue());
-//												break;
-//											}
-//										}
-//									}
-//								}else {
-//									formAttributeActionMap.put(attributeObj.getString("uuid"), FormAttributeAction.READ.getValue());
-//								}
-//							}
-//						}
-//						processTaskVo.setFormAttributeActionMap(formAttributeActionMap);
-//					}
-//				}
-//			}catch(Exception ex) {
-//				logger.error("hash为" + processTaskFormVo.getFormContentHash() + "的processtask_form_content内容不是合法的JSON格式", ex);
-//			}
 			processTaskVo.setFormConfig(processTaskFormVo.getFormContent());			
 			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
 			if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
