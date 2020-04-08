@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
@@ -56,8 +57,9 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 	@Input({
 		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid"),
 		@Param(name="name", type = ApiParamType.STRING, desc="分类名",isRequired = true,xss = true),
+		@Param(name="type", type = ApiParamType.STRING, desc="分类类型，system|custom 默认custom"),
 		@Param(name="conditionConfig", type = ApiParamType.JSONOBJECT, desc="分类过滤配置，json格式",isRequired = true),
-		@Param(name="valueList", type = ApiParamType.JSONARRAY, desc="授权列表", isRequired = false)
+		@Param(name="valueList", type = ApiParamType.JSONARRAY, desc="授权列表，如果是system,则必填", isRequired = false)
 	})
 	@Output({
 		
@@ -67,33 +69,30 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
 		String name = jsonObj.getString("name");
+		String type = StringUtils.isBlank(jsonObj.getString("type"))?ProcessWorkcenterType.CUSTOM.getValue():jsonObj.getString("type");
+		JSONArray valueList = jsonObj.getJSONArray("valueList");
 		String userId = UserContext.get().getUserId();
 		WorkcenterVo workcenterVo = new WorkcenterVo(name);
-		//重复name判断
-		/*workcenterVo.setUuid(uuid);
-		if(workcenterMapper.checkWorkcenterNameIsRepeat(name,uuid)>0) {
-			throw new WorkcenterNameRepeatException(name);
-		}*/
 		workcenterVo.setUuid(uuid);
-		//保存、更新分类
-		JSONArray valueList = jsonObj.getJSONArray("valueList");
 		workcenterMapper.deleteWorkcenterOwnerByUuid(workcenterVo.getUuid());
-		if(CollectionUtils.isNotEmpty(valueList)) {
+		if(type.equals(ProcessWorkcenterType.SYSTEM.getValue())) {
+			if(CollectionUtils.isEmpty(valueList)) {
+				throw new WorkcenterParamException("valueList");
+			}
 			//判断是否有管理员权限
 			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,WORKCENTER_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByRoleNameList(UserContext.get().getRoleNameList()))) {
-				throw new WorkcenterNoAuthException("授权");
+				throw new WorkcenterNoAuthException("管理");
 			}
 			workcenterVo.setType(ProcessWorkcenterType.SYSTEM.getValue());
 			workcenterMapper.deleteWorkcenterRoleByUuid(workcenterVo.getUuid());
 			//更新角色
 			for(Object value:valueList) {
-				String[] roles = value.toString().split("#");
 				WorkcenterRoleVo workcenterRoleVo = new WorkcenterRoleVo();
 				workcenterRoleVo.setWorkcenterUuid(workcenterVo.getUuid());
-				if(roles[0].equals("role")) {
-					workcenterRoleVo.setRoleName(roles[1]);
-				}else if(roles[0].equals("user")) {
-					workcenterRoleVo.setUserId(roles[1]);
+				if(value.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
+					workcenterRoleVo.setRoleName(value.toString().replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
+				}else if(value.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
+					workcenterRoleVo.setUserId(value.toString().replaceAll(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 				}else {
 					throw new WorkcenterParamException("valueList");
 				}
