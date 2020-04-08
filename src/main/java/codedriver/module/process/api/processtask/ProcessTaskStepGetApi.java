@@ -18,6 +18,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
@@ -32,6 +34,7 @@ import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
+import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
@@ -73,6 +76,9 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+	
+	@Autowired
+	private FileMapper fileMapper;
 	
 	@Override
 	public String getToken() {
@@ -137,6 +143,22 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			if(processTaskContentVo != null) {
 				processTaskVo.setContent(processTaskContentVo.getContent());
 			}
+		}
+		//附件
+		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
+		processTaskFileVo.setProcessTaskId(processTaskId);
+		processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
+		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
+		
+		if(processTaskFileList.size() > 0) {
+			List<String> fileUuidList = new ArrayList<>();
+			List<FileVo> fileList = new ArrayList<>();
+			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
+				fileUuidList.add(processTaskFile.getFileUuid());
+				FileVo fileVo = fileMapper.getFileByUuid(processTaskFile.getFileUuid());
+				fileList.add(fileVo);
+			}
+			processTaskVo.setFileList(fileList);
 		}
 		//优先级
 		PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());

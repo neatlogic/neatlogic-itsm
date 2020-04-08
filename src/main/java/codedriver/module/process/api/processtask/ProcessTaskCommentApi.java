@@ -59,7 +59,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述"),
+		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述"),
 		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
 	@Description(desc = "工单回复接口")
@@ -98,13 +98,16 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		}
 
 		String content = jsonObj.getString("content");
-		ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-		processTaskMapper.replaceProcessTaskContent(contentVo);
-		jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
-				
+		if(StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(contentVo);
+			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+		}
+		
+		List<String> fileUuidList = null;
 		String fileUuidListStr = jsonObj.getString("fileUuidList");
 		if(StringUtils.isNotBlank(fileUuidListStr)) {
-			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
+			fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
 			if(CollectionUtils.isNotEmpty(fileUuidList)) {
 				for(String fileUuid : fileUuidList) {
 					if(fileMapper.getFileByUuid(fileUuid) == null) {
@@ -113,9 +116,11 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 				}
 			}
 		}
-		//生成活动	
-		processTaskStepVo.setParamObj(jsonObj);
-		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
+		if(StringUtils.isNotBlank(content) || CollectionUtils.isNotEmpty(fileUuidList)) {
+			//生成活动	
+			processTaskStepVo.setParamObj(jsonObj);
+			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
+		}
 		
 		return null;
 	}
