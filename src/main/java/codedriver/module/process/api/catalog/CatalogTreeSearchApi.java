@@ -72,30 +72,32 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
 		//
 		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
+		List<String> catalogUuidList = new ArrayList<>(currentUserAuthorizedCatalogUuidList);
 		//已启用的目录uuid列表
 		List<String> activatedCatalogUuidList = catalogList.stream().map(CatalogVo::getUuid).collect(Collectors.toList());
 		//只留下已启用的目录uuid，去掉已禁用的
-		currentUserAuthorizedCatalogUuidList.retainAll(activatedCatalogUuidList);
+		catalogUuidList.retainAll(activatedCatalogUuidList);
 		//有设置过授权的目录uuid列表
 		List<String> authorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList();
 		//得到没有设置过授权的目录uuid列表，默认所有人都有权限
 		activatedCatalogUuidList.removeAll(authorizedCatalogUuidList);
-		currentUserAuthorizedCatalogUuidList.addAll(activatedCatalogUuidList);
+		catalogUuidList.addAll(activatedCatalogUuidList);
 				
 		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
+		List<String> channelUuidList = new ArrayList<>(currentUserAuthorizedChannelUuidList);
 		//查出所有已启用的服务
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
 		//已启用的服务uuid列表
 		List<String> activatedChannelUuidList = channelList.stream().map(ChannelVo::getUuid).collect(Collectors.toList());
 		//只留下已启用的服务uuid，去掉已禁用的
-		currentUserAuthorizedChannelUuidList.retainAll(activatedChannelUuidList);
+		channelUuidList.retainAll(activatedChannelUuidList);
 		//有设置过授权的服务uuid列表
 		List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList();
 		//得到没有设置过授权的服务uuid列表，默认所有人都有权限
 		activatedChannelUuidList.removeAll(authorizedChannelUuidList);
-		currentUserAuthorizedChannelUuidList.addAll(activatedChannelUuidList);
+		channelUuidList.addAll(activatedChannelUuidList);
 		//查出有激活通道的服务目录uuid
-		List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedCatalogUuidList, currentUserAuthorizedChannelUuidList);
+		List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(catalogUuidList, channelUuidList);
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 		String parentUuid = null;
