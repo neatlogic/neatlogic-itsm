@@ -1,9 +1,12 @@
 package codedriver.module.process.api.worktime;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +75,16 @@ public class WorktimeSearchApi extends ApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
 		}
+		
 		List<WorktimeVo> worktimeList = worktimeMapper.searchWorktimeList(worktimeVo);
+		List<String> worktimeUuidList = worktimeList.stream().map(WorktimeVo::getUuid).collect(Collectors.toList());
+		List<WorktimeVo> worktimeUuidYearListList = worktimeMapper.getYearListByWorktimeUuidList(worktimeUuidList);
+		Map<String, List<Integer>> worktimeUuidYearListMap = new HashMap<>();
+		for(WorktimeVo worktime : worktimeUuidYearListList) {
+			worktimeUuidYearListMap.put(worktime.getUuid(), worktime.getYearList());
+		}
 		for(WorktimeVo worktime : worktimeList) {
+			worktime.setYearList(worktimeUuidYearListMap.get(worktime.getUuid()));
 			if(StringUtils.isNotBlank(worktime.getConfig())) {
 				JSONObject config = JSON.parseObject(worktime.getConfig());
 				Set<String> workingHoursSet = new HashSet<>();

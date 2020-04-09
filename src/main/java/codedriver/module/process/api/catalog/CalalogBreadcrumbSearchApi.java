@@ -6,14 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -30,8 +34,13 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
+	
 	@Autowired
 	private ChannelMapper channelMapper;
+	
+	@Autowired
+	private TeamMapper teamMapper;
+	
 	@Override
 	public String getToken() {
 		return "process/calalog/breadcrumb/search";
@@ -70,15 +79,17 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
-		String keyword = null;
+
 		Set<String> channelParentUuidList = null;
-		if(jsonObj.containsKey("keyword")) {
-			keyword = jsonObj.getString("keyword");
+		String keyword = jsonObj.getString("keyword");
+		if(keyword != null) {
 			ChannelVo channelVo = new ChannelVo();
-			channelVo.setIsActive(1);
 			channelVo.setKeyword(keyword);
-			channelParentUuidList = channelMapper.searchChannelParentUuidList(channelVo);
-			if(channelParentUuidList == null || channelParentUuidList.isEmpty()) {
+			channelVo.setNeedPage(false);
+			List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);
+			if(CollectionUtils.isNotEmpty(channelList)) {
+				channelParentUuidList = channelList.stream().map(ChannelVo::getParentUuid).collect(Collectors.toSet());
+			}else {
 				return null;
 			}
 		}
@@ -104,12 +115,34 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 			//排序
 			Collections.sort(catalogList);
 			
-			Set<String> hasActiveChannelCatalogUuidList = null;
-			if(keyword == null) {
-				//查出有激活通道的服务目录uuid
-				hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList();
-			}
-						
+			List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
+			//
+			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
+			//已启用的目录uuid列表
+			List<String> activatedCatalogUuidList = catalogList.stream().map(CatalogVo::getUuid).collect(Collectors.toList());
+			//只留下已启用的目录uuid，去掉已禁用的
+			currentUserAuthorizedCatalogUuidList.retainAll(activatedCatalogUuidList);
+			//有设置过授权的目录uuid列表
+			List<String> authorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList();
+			//得到没有设置过授权的目录uuid列表，默认所有人都有权限
+			activatedCatalogUuidList.removeAll(authorizedCatalogUuidList);
+			currentUserAuthorizedCatalogUuidList.addAll(activatedCatalogUuidList);
+					
+			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
+			//查出所有已启用的服务
+			List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
+			//已启用的服务uuid列表
+			List<String> activatedChannelUuidList = channelList.stream().map(ChannelVo::getUuid).collect(Collectors.toList());
+			//只留下已启用的服务uuid，去掉已禁用的
+			currentUserAuthorizedChannelUuidList.retainAll(activatedChannelUuidList);
+			//有设置过授权的服务uuid列表
+			List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList();
+			//得到没有设置过授权的服务uuid列表，默认所有人都有权限
+			activatedChannelUuidList.removeAll(authorizedChannelUuidList);
+			currentUserAuthorizedChannelUuidList.addAll(activatedChannelUuidList);
+			//查出有激活通道的服务目录uuid
+			List<String>hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedCatalogUuidList, currentUserAuthorizedChannelUuidList);
+		
 			for(CatalogVo catalogVo : catalogList) {
 				if(ITree.ROOT_UUID.equals(catalogVo.getUuid())) {
 					continue;
@@ -117,14 +150,12 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 				if(!catalogVo.isAncestorOrSelf(catalogUuid)) {
 					continue;
 				}
-				if(keyword == null) {
-					if(!hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
-						continue;
-					}								
-				}else {
-					if(!channelParentUuidList.contains(catalogVo.getUuid())) {
-						continue;
-					}
+				if(keyword != null && !channelParentUuidList.contains(catalogVo.getUuid())) {
+					continue;
+				}
+				if(!currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())
+						|| !hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
+					continue;
 				}
 							
 				treePathMap = new HashMap<>();

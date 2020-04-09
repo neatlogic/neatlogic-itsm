@@ -1,10 +1,11 @@
 package codedriver.module.process.api.channel;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -13,6 +14,7 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.restful.annotation.Description;
@@ -21,11 +23,13 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
-@Transactional
 public class ChannelSearchApi extends ApiComponentBase {
 	
 	@Autowired
 	private ChannelMapper channelMapper;
+	
+	@Autowired
+	private TeamMapper teamMapper;
 	
 	@Override
 	public String getToken() {
@@ -47,6 +51,7 @@ public class ChannelSearchApi extends ApiComponentBase {
 		@Param(name = "parentUuid", type = ApiParamType.STRING, desc = "服务目录uuid"),
 		@Param(name = "isFavorite", type = ApiParamType.ENUM, desc = "是否只查询已收藏的数据，1：已收藏，0：全部", rule = "0,1"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
+		@Param(name = "isAuthenticate", type = ApiParamType.ENUM, desc = "是否需要鉴权", rule = "0,1"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
@@ -64,7 +69,25 @@ public class ChannelSearchApi extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
 		channelVo.setUserId(UserContext.get().getUserId());
-
+		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
+		if(isAuthenticate != null && isAuthenticate.intValue() == 1) {
+			List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
+			//查出当前用户已授权的服务
+			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());			
+			List<String> authorizedUuidList = new ArrayList<>(currentUserAuthorizedChannelUuidList);
+			//查出所有已启用的服务
+			List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
+			//已启用的服务uuid列表
+			List<String> activatedChannelUuidList = channelList.stream().map(ChannelVo::getUuid).collect(Collectors.toList());
+			//只留下已启用的服务uuid，去掉已禁用的
+			authorizedUuidList.retainAll(activatedChannelUuidList);
+			//有设置过授权的服务uuid列表
+			List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList();
+			//得到没有设置过授权的服务uuid列表，默认所有人都有权限
+			activatedChannelUuidList.removeAll(authorizedChannelUuidList);
+			authorizedUuidList.addAll(activatedChannelUuidList);
+			channelVo.setAuthorizedUuidList(authorizedUuidList);
+		}
 		if(channelVo.getNeedPage()) {
 			int rowNum = channelMapper.searchChannelCount(channelVo);
 			int pageCount = PageUtil.getPageCount(rowNum,channelVo.getPageSize());
