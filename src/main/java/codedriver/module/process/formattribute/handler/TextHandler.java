@@ -24,7 +24,7 @@ public class TextHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public String getValue(AttributeDataVo attributeDataVo) {
+	public String getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
 		return attributeDataVo.getData();
 	}
 

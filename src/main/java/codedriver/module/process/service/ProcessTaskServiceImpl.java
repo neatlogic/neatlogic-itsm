@@ -347,6 +347,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 								attributeObj.put("isHide", true);
 							}
 						}
+						processTaskVo.setFormConfig(formConfigObj.toJSONString());
 					}
 				}
 			}catch(Exception ex) {
