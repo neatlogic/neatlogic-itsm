@@ -21,6 +21,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -37,6 +38,7 @@ import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
@@ -253,8 +255,27 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
 				List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 				if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-					ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo(processTaskStepAuditList.get(0));
+					ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(0);
+					ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo(processTaskStepAudit);
 					processTaskStepVo.setComment(temporaryComment);
+					for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditVo.getAuditDetailList()) {
+						if(ProcessTaskAuditDetailType.FORM.getValue().equals(processTaskStepAuditDetailVo.getType())) {
+							List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(processTaskStepAuditDetailVo.getNewContent(), ProcessTaskFormAttributeDataVo.class);
+							if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+								Map<String, Object> formAttributeDataMap = new HashMap<>();
+								for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+									String data = processTaskFormAttributeDataVo.getData();
+									if(data.startsWith("[") && data.endsWith("]")) {
+										List<String> dataList = JSON.parseArray(data, String.class);
+										formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
+									}else {
+										formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
+									}
+								}
+								processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
+							}
+						}
+					}
 				}
 				resultObj.put("processTaskStep", processTaskStepVo);
 			}

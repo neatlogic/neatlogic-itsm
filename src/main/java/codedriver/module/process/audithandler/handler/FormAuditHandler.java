@@ -65,8 +65,13 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 			int maxSize = Math.max(oldDataSize, newDataSize);
 			List<String> oldContentList = new ArrayList<>(maxSize);
 			List<String> newContentList = new ArrayList<>(maxSize);
-			
-			ProcessTaskFormVo processTaskForm = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskFormAttributeDataList.get(0).getProcessTaskId());
+			Long processTaskId = null;
+			if(oldDataSize > 0) {
+				processTaskId = oldProcessTaskFormAttributeDataList.get(0).getProcessTaskId();
+			}else {
+				processTaskId = processTaskFormAttributeDataList.get(0).getProcessTaskId();
+			}
+			ProcessTaskFormVo processTaskForm = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
 			if(processTaskForm != null && StringUtils.isNotBlank(processTaskForm.getFormContent())) {
 				try {
 					JSONObject formConfig = JSON.parseObject(processTaskForm.getFormContent());
