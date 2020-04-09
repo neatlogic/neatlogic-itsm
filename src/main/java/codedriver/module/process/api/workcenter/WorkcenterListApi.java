@@ -73,7 +73,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 				workcenter.setIsCanEdit(1);
 				workcenter.setIsCanRole(1);
 			}else {
-				if(workcenter.getOwner().equalsIgnoreCase(UserContext.get().getUserId())) {
+				if(UserContext.get().getUserId().equalsIgnoreCase(workcenter.getOwner())) {
 					workcenter.setIsCanEdit(1);
 				}else {
 					workcenter.setIsCanEdit(0);
