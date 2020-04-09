@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -62,7 +63,7 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name="formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
+		@Param(name="formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "表单属性数据列表"),
 		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述"),
 		@Param(name="fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
@@ -92,22 +93,22 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
 		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.SAVE);
-		//写入当前步骤的表单属性值
+		//暂存时对表单属性值的修改不写入processtask_formattribute_data表，先保存在暂存活动中，等回复或流转操作时，再写入processtask_formattribute_data表
 		JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
 		if(CollectionUtils.isNotEmpty(formAttributeDataList)) {
+			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = new ArrayList<>(formAttributeDataList.size());
 			for(int i = 0; i < formAttributeDataList.size(); i++) {
 				JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
 				ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
 				String dataList = formAttributeDataObj.getString("dataList");
-				if(StringUtils.isBlank(dataList)) {
-					continue;
-				}
 				attributeData.setData(dataList);
 				attributeData.setProcessTaskId(processTaskId);
 				attributeData.setAttributeUuid(formAttributeDataObj.getString("attributeUuid"));
 				attributeData.setType(formAttributeDataObj.getString("handler"));
-				processTaskMapper.replaceProcessTaskFormAttributeData(attributeData);
+				processTaskFormAttributeDataList.add(attributeData);
 			}
+			processTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
+			jsonObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(processTaskFormAttributeDataList));
 		}
 		
 		//删除暂存活动

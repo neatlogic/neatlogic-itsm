@@ -16,11 +16,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ChannelPriorityVo;
@@ -28,6 +30,9 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
+import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
+import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
@@ -203,8 +208,44 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
-		/** 保存描述内容 **/
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+		//找出当前用户再当前步骤的所有暂存活动，一般只有一个
+		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
+		auditVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+		auditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+		auditVo.setUserId(UserContext.get().getUserId(true));
+		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
+		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+			//找出最后一次暂存活动
+			ProcessTaskStepAuditVo processTaskStepAuditVo = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
+			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAuditVo.getAuditDetailList();
+			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetail : processTaskStepAuditDetailList) {
+				paramObj.put(ProcessTaskAuditDetailType.getParamName(processTaskStepAuditDetail.getType()), processTaskStepAuditDetail.getNewContent());
+			}
+			//删除暂存活动
+			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+				processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
+			}
+		}
+		
+		//获取旧表单数据
+		List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+		if(CollectionUtils.isNotEmpty(oldProcessTaskFormAttributeDataList)) {
+			oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
+			paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
+		}
+		//写入新表单数据
+		Object formAttributeDataList = paramObj.get(ProcessTaskAuditDetailType.FORM.getParamName());
+		if(formAttributeDataList != null) {
+			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(formAttributeDataList.toString(), ProcessTaskFormAttributeDataVo.class);
+			if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+				for(ProcessTaskFormAttributeDataVo processTaskFromAttributeDataVo : processTaskFormAttributeDataList) {
+					processTaskMapper.replaceProcessTaskFormAttributeData(processTaskFromAttributeDataVo);
+				}
+			}
+		}
+		/** 保存描述内容 **/
 		String content = paramObj.getString("content");
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
