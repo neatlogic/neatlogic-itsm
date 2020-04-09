@@ -105,6 +105,7 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 				attributeData.setProcessTaskId(processTaskId);
 				attributeData.setAttributeUuid(formAttributeDataObj.getString("attributeUuid"));
 				attributeData.setType(formAttributeDataObj.getString("handler"));
+				attributeData.setSort(i);
 				processTaskFormAttributeDataList.add(attributeData);
 			}
 			processTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);

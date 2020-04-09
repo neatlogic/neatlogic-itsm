@@ -118,6 +118,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 				attributeData.setProcessTaskId(processTaskId);
 				attributeData.setAttributeUuid(formAttributeDataObj.getString("attributeUuid"));
 				attributeData.setType(formAttributeDataObj.getString("handler"));
+				attributeData.setSort(i);
 				processTaskMapper.replaceProcessTaskFormAttributeData(attributeData);
 				processTaskFormAttributeDataList.add(attributeData);
 			}
