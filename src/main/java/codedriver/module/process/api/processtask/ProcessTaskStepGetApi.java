@@ -258,7 +258,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(0);
 					ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo(processTaskStepAudit);
 					processTaskStepVo.setComment(temporaryComment);
-					for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditVo.getAuditDetailList()) {
+					for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
 						if(ProcessTaskAuditDetailType.FORM.getValue().equals(processTaskStepAuditDetailVo.getType())) {
 							List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(processTaskStepAuditDetailVo.getNewContent(), ProcessTaskFormAttributeDataVo.class);
 							if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
