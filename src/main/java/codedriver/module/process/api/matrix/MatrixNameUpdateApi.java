@@ -8,6 +8,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,9 +44,7 @@ public class MatrixNameUpdateApi extends ApiComponentBase {
     @Description( desc = "矩阵名称变更接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ProcessMatrixVo processMatrixVo = new ProcessMatrixVo();
-        processMatrixVo.setUuid(jsonObj.getString("uuid"));
-        processMatrixVo.setName(jsonObj.getString("name"));
+        ProcessMatrixVo processMatrixVo = JSON.toJavaObject(jsonObj, ProcessMatrixVo.class);
         matrixService.updateMatrixName(processMatrixVo);
         return null;
     }

@@ -9,6 +9,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,17 +52,7 @@ public class MatrixSearchApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        ProcessMatrixVo matrix = new ProcessMatrixVo();
-        matrix.setKeyword(jsonObj.getString("keyword"));
-        if (jsonObj.containsKey("currentPage")){
-            matrix.setCurrentPage(jsonObj.getInteger("currentPage"));
-        }
-        if (jsonObj.containsKey("needPage")){
-            matrix.setNeedPage(jsonObj.getBoolean("needPage"));
-        }
-        if (jsonObj.containsKey("pageSize")){
-            matrix.setPageSize(jsonObj.getInteger("pageSize"));
-        }
+        ProcessMatrixVo matrix = JSON.toJavaObject(jsonObj, ProcessMatrixVo.class);
         returnObj.put("tbodyList", matrixService.searchMatrix(matrix));
         if (matrix.getNeedPage()){
             returnObj.put("pageCount", matrix.getPageCount());

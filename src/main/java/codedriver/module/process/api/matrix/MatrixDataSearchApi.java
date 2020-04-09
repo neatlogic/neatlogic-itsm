@@ -1,6 +1,7 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -8,6 +9,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixDataService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,17 +50,12 @@ public class MatrixDataSearchApi extends ApiComponentBase {
              @Param( name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER)})
     @Output({ @Param( name = "tbodyList", desc = "矩阵数据集合"),
               @Param( name = "theadList", desc = "矩阵属性集合"),
-              @Param( name = "pageCount", desc = "页码数", type = ApiParamType.INTEGER),
-              @Param( name = "rowNum", desc = "统计个数", type = ApiParamType.INTEGER),
-              @Param( name = "pageSize", desc = "页最大条数", type = ApiParamType.INTEGER),
-              @Param( name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER)})
+              @Param( explode = BasePageVo.class)})
     @Description( desc = "矩阵数据检索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        ProcessMatrixDataVo dataVo = new ProcessMatrixDataVo();
-        dataVo.setKeyword(jsonObj.getString("keyword"));
-        dataVo.setMatrixUuid(jsonObj.getString("matrixUuid"));
+        ProcessMatrixDataVo dataVo = JSON.toJavaObject(jsonObj, ProcessMatrixDataVo.class);
         returnObj.put("tbodyList", dataService.searchDynamicTableData(dataVo));
         List<String> headList = new ArrayList<>();
         headList.add("id");

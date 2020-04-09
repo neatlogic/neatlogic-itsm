@@ -1,12 +1,10 @@
 package codedriver.module.process.api.matrix;
 
-import codedriver.framework.common.util.StringUtil;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
-import codedriver.framework.process.exception.process.MatrixImportException;
-import codedriver.framework.process.exception.process.ProcessImportException;
+import codedriver.framework.process.exception.process.*;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.process.service.MatrixAttributeService;
@@ -68,7 +66,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
         //获取所有导入文件
         Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
         if(multipartFileMap == null || multipartFileMap.isEmpty()) {
-            throw new MatrixImportException("没有导入文件");
+            throw new MatrixFileNotFoundException();
         }
         MultipartFile multipartFile = null;
         InputStream is = null;
@@ -80,7 +78,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                 String matrixName = name.substring(0, name.indexOf("."));
                 ProcessMatrixVo matrixVo = matrixMapper.getMatrixByName(matrixName);
                 if (matrixVo == null){
-                    throw new MatrixImportException("矩阵不存在");
+                    throw new MatrixNotFoundException(matrixName);
                 }
                 List<ProcessMatrixAttributeVo> attributeVoList = attributeService.searchMatrixAttribute(matrixVo.getUuid());
                 if (CollectionUtils.isNotEmpty(attributeVoList)){
@@ -97,7 +95,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                         int colNum = headerRow.getLastCellNum();
                         //attributeList 缺少uuid
                         if (colNum != attributeVoList.size() + 1){
-                            throw new MatrixImportException("矩阵头信息不匹配");
+                            throw new MatrixHeaderMisMatchException(matrixName);
                         }
                         int count = 0;
                         int uuidIndex = 0;
@@ -117,7 +115,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                             }
                         }
                         if (count != colNum){
-                            throw new MatrixImportException("矩阵头信息不匹配");
+                            throw new MatrixHeaderMisMatchException(matrixName);
                         }
                         //解析数据
                         for (int i = 1; i < rowNum + 1; i++){
@@ -145,7 +143,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                         }
                     }
                 }else {
-                    throw new MatrixImportException("矩阵数据不存在");
+                    throw new MatrixDataNotFoundException(matrixName);
                 }
             }
         }
@@ -155,7 +153,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
         return returnObj;
     }
 
-    public String getCellValue (Cell cell){
+    private String getCellValue (Cell cell){
         String value = "";
         if (cell != null){
             if (cell.getCellType() != Cell.CELL_TYPE_BLANK){

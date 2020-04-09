@@ -88,7 +88,7 @@ public class MatrixAttributeExportApi extends BinaryStreamApiComponentBase {
     }
 
     //解析config，抽取属性下拉框值
-    public void decodeDataConfig(ProcessMatrixAttributeVo attributeVo, List<String> selectValueList){
+    private void decodeDataConfig(ProcessMatrixAttributeVo attributeVo, List<String> selectValueList){
         if (StringUtils.isNotBlank(attributeVo.getConfig())){
             String config = attributeVo.getConfig();
             JSONObject configObj = JSONObject.parseObject(config);
