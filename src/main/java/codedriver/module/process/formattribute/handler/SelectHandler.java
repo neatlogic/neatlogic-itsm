@@ -1,6 +1,5 @@
 package codedriver.module.process.formattribute.handler;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,16 +54,17 @@ public class SelectHandler implements IFormAttributeHandler {
 					valueTextMap.put(data.getValue(), data.getText());
 				}
 				if(isMultiple) {
-					List<String> textList = new ArrayList<>();
+					StringBuilder result = new StringBuilder();
 					for(String key : valueList) {
+						result.append("、");
 						String text = valueTextMap.get(key);
 						if(text != null) {
-							textList.add(text);
+							result.append(text);
 						}else {
-							textList.add(key);
+							result.append(key);
 						}
 					}
-					return JSON.toJSONString(textList);
+					return result.toString().substring(1);
 				}else {
 					String text = valueTextMap.get(value);
 					if(text != null) {

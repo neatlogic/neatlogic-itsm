@@ -133,10 +133,9 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
 		
-		List<String> fileUuidList = null;
 		String fileUuidListStr = jsonObj.getString("fileUuidList");
 		if(StringUtils.isNotBlank(fileUuidListStr)) {
-			fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
+			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
 			if(CollectionUtils.isNotEmpty(fileUuidList)) {
 				for(String fileUuid : fileUuidList) {
 					if(fileMapper.getFileByUuid(fileUuid) == null) {
@@ -145,11 +144,9 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 				}
 			}
 		}
-		if(StringUtils.isNotBlank(content) || CollectionUtils.isNotEmpty(fileUuidList)) {
-			//生成活动	
-			processTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
-		}
+		//生成活动	
+		processTaskStepVo.setParamObj(jsonObj);
+		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
 		
 		return null;
 	}
