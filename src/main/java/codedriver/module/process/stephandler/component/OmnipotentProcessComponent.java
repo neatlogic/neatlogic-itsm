@@ -229,22 +229,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			}
 		}
 		
-		//获取旧表单数据
-		List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-		if(CollectionUtils.isNotEmpty(oldProcessTaskFormAttributeDataList)) {
-			oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
-			paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
-		}
-		//写入新表单数据
-		Object formAttributeDataList = paramObj.get(ProcessTaskAuditDetailType.FORM.getParamName());
-		if(formAttributeDataList != null) {
-			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(formAttributeDataList.toString(), ProcessTaskFormAttributeDataVo.class);
-			if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-				for(ProcessTaskFormAttributeDataVo processTaskFromAttributeDataVo : processTaskFormAttributeDataList) {
-					processTaskMapper.replaceProcessTaskFormAttributeData(processTaskFromAttributeDataVo);
-				}
-			}
-		}
 		/** 保存描述内容 **/
 		String content = paramObj.getString("content");
 		if (StringUtils.isNotBlank(content)) {
@@ -541,7 +525,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				}
 				fileUuidList.add(processTaskFile.getFileUuid());
 			}
-			paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), fileUuidList);
+			paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(fileUuidList));
 		}
 		currentProcessTaskStepVo.setParamObj(paramObj);
 		return true;
