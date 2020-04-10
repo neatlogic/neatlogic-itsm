@@ -122,18 +122,15 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
 			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
 		}
+		
 		String content = jsonObj.getString("content");
-		String fileUuidListStr = jsonObj.getString("fileUuidList");
-		if(StringUtils.isBlank(content) && (StringUtils.isBlank(fileUuidListStr) || "[]".equals(fileUuidListStr))) {
-			return null;
-		}
-
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
 			processTaskMapper.replaceProcessTaskContent(contentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
-		
+
+		String fileUuidListStr = jsonObj.getString("fileUuidList");
 		if(StringUtils.isNotBlank(fileUuidListStr)) {
 			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
 			if(CollectionUtils.isNotEmpty(fileUuidList)) {
@@ -144,7 +141,7 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 				}
 			}
 		}
-		//生成活动	
+		//生成活动
 		processTaskStepVo.setParamObj(jsonObj);
 		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.SAVE);
 		return null;
