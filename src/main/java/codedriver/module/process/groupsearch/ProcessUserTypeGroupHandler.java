@@ -64,16 +64,11 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 
 	@Override
 	public int getSort() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	public Boolean isLimit() {
 		return false;
-	}
-
-	@Override
-	public JSONObject include(JSONObject json, List<String> includeList) {
-		return json;
 	}
 }

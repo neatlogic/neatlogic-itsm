@@ -79,7 +79,9 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 			if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 				continue;
 			}
-			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
+			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
+			processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
+			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailList) {
 				IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
 				if(auditDetailHandler != null) {
 					auditDetailHandler.handle(processTaskStepAuditDetailVo);

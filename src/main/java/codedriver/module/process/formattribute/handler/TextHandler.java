@@ -4,9 +4,9 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.attribute.dto.AttributeDataVo;
 import codedriver.framework.attribute.exception.AttributeValidException;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 
 @Component
@@ -24,7 +24,7 @@ public class TextHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public String getValue(AttributeDataVo attributeDataVo) {
+	public String getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
 		return attributeDataVo.getData();
 	}
 
