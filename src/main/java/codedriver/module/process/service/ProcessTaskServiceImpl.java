@@ -93,7 +93,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
 		processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
 		processTaskMapper.replaceProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), processTaskContentVo.getHash()));
-		processTaskStepSubtaskVo.setContentHash(processTaskContentVo.getHash());
 
 		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
 		if(currentProcessTaskStepVo == null) {
@@ -113,7 +112,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
 			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
-			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getParamName(), JSON.toJSONString(processTaskStepSubtaskVo));
+			ProcessTaskStepSubtaskVo subtaskVo = new ProcessTaskStepSubtaskVo();
+			subtaskVo.setId(processTaskStepSubtaskVo.getId());
+			subtaskVo.setUserId(processTaskStepSubtaskVo.getUserId());
+			subtaskVo.setUserName(processTaskStepSubtaskVo.getUserName());
+			subtaskVo.setTargetTime(processTaskStepSubtaskVo.getTargetTime());
+			subtaskVo.setContentHash(processTaskContentVo.getHash());
+			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getParamName(), JSON.toJSONString(subtaskVo));
 			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.CREATESUBTASK);
 		}else {
@@ -175,8 +180,21 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			}
 				
 			//记录活动
-			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getParamName(), JSON.toJSONString(processTaskStepSubtaskVo));
-			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), JSON.toJSONString(oldProcessTaskStepSubtask));
+			ProcessTaskStepSubtaskVo subtaskVo = new ProcessTaskStepSubtaskVo();
+			subtaskVo.setId(processTaskStepSubtaskVo.getId());
+			subtaskVo.setUserId(processTaskStepSubtaskVo.getUserId());
+			subtaskVo.setUserName(processTaskStepSubtaskVo.getUserName());
+			subtaskVo.setTargetTime(processTaskStepSubtaskVo.getTargetTime());
+			subtaskVo.setContentHash(processTaskStepSubtaskVo.getContentHash());
+			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getParamName(), JSON.toJSONString(subtaskVo));
+			
+			ProcessTaskStepSubtaskVo oldSubtaskVo = new ProcessTaskStepSubtaskVo();
+			oldSubtaskVo.setId(oldProcessTaskStepSubtask.getId());
+			oldSubtaskVo.setUserId(oldProcessTaskStepSubtask.getUserId());
+			oldSubtaskVo.setUserName(oldProcessTaskStepSubtask.getUserName());
+			oldSubtaskVo.setTargetTime(oldProcessTaskStepSubtask.getTargetTime());
+			oldSubtaskVo.setContentHash(oldProcessTaskStepSubtask.getContentHash());
+			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), JSON.toJSONString(oldSubtaskVo));
 			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.EDITSUBTASK);
 		}else {

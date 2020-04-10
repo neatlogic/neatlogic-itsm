@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,14 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
+import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -44,7 +48,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单上报描述内容更新接口";
+		return "工单上报描述内容及附件更新接口";
 	}
 
 	@Override
@@ -54,9 +58,10 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
-		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述")
+		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述"),
+		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
-	@Description(desc = "工单上报描述内容更新接口")
+	@Description(desc = "工单上报描述内容及附件更新接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
@@ -91,29 +96,39 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
 		if(!processTaskStepContentList.isEmpty()) {
 			oldContentHash = processTaskStepContentList.get(0).getContentHash();
+			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
 		}
-				
+		//获取上传附件uuid
+		String newFileUuidListStr = jsonObj.getString("fileUuidList");
+		String oldFileUuidListStr = null;
+		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
+		processTaskFileVo.setProcessTaskId(processTaskId);
+		processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
+		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
+		if(processTaskFileList.size() > 0) {
+			List<String> oldFileUuidList = new ArrayList<>();
+			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
+				oldFileUuidList.add(processTaskFile.getFileUuid());
+			}
+			oldFileUuidListStr = JSON.toJSONString(oldFileUuidList);
+			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), oldFileUuidListStr);
+		}
 		String newContentHash = null;
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
 			newContentHash = contentVo.getHash();
-			//如果新的上报描述内容和原来的上报描述内容不一样，则生成活动
-			if(!Objects.equals(newContentHash, oldContentHash)) {
-				processTaskMapper.replaceProcessTaskContent(contentVo);
-				processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, newContentHash));
-				jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), newContentHash);
-			}else {
-				return null;
-			}
-			
+			processTaskMapper.replaceProcessTaskContent(contentVo);
+			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, newContentHash));
+			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), newContentHash);
 		}else if(oldContentHash != null){
 			processTaskMapper.deleteProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, oldContentHash));
 		}
-		//生成活动	
-		jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
-		processTaskStepVo.setParamObj(jsonObj);
-		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.UPDATECONTENT);
+		//生成活动
+		if(!Objects.equals(oldContentHash, newContentHash) || !Objects.equals(oldFileUuidListStr, newFileUuidListStr)) {
+			processTaskStepVo.setParamObj(jsonObj);
+			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.UPDATECONTENT);
+		}
 		return null;
 	}
 
