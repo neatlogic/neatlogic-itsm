@@ -48,7 +48,8 @@ public class ChannelMoveApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被移动的服务通道uuid"),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired = true, desc = "移动后的父级uuid"),
-		@Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "目标节点uuid")
+		@Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "目标节点uuid"),
+		@Param(name = "moveType", type = ApiParamType.ENUM, rule = "prev, next", isRequired = true, desc = "移动类型")
 	})
 	@Description(desc = "服务通道移动位置接口")
 	@Override
@@ -69,7 +70,6 @@ public class ChannelMoveApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
 		}
-		Integer oldSort = moveChannel.getSort();
 		Integer targetSort;
 		Integer newSort;
 		//通道只能移动到通道前面，不能移动到目录前面
@@ -95,20 +95,34 @@ public class ChannelMoveApi extends ApiComponentBase {
 			}
 			targetSort = targetChannel.getSort();
 		}
-		
+
+		Integer oldSort = moveChannel.getSort();
+		String moveType = jsonObj.getString("moveType");
 		//判断是否是在相同目录下移动
 		if(parentUuid.equals(moveChannel.getParentUuid())) {
 			//相同目录下移动
 			if(oldSort.compareTo(targetSort) == -1) {//往后移动, 移动前后两个位置直接的服务通道序号减一
-				newSort = targetSort;
+				if("prev".equals(moveType)) {
+					newSort = targetSort - 1;
+				}else{
+					newSort = targetSort;
+				}
 				channelMapper.updateSortDecrement(parentUuid, oldSort + 1, newSort);
 			}else {//往前移动, 移动前后两个位置直接的服务通道序号加一
-				newSort = targetSort + 1;
+				if("prev".equals(moveType)) {
+					newSort = targetSort;
+				}else{
+					newSort = targetSort + 1;
+				}
 				channelMapper.updateSortIncrement(parentUuid, newSort, oldSort - 1);
 			}
 		}else {
 			//不同同目录下移动
-			newSort = targetSort + 1;
+			if("prev".equals(moveType)) {
+				newSort = targetSort;
+			}else{
+				newSort = targetSort + 1;
+			}
 			//旧目录，被移动目录后面的兄弟节点序号减一
 			channelMapper.updateSortDecrement(moveChannel.getParentUuid(), oldSort + 1, null);
 			//新目录，目标目录后面的兄弟节点序号加一
@@ -121,7 +135,7 @@ public class ChannelMoveApi extends ApiComponentBase {
 		
 		//判断移动后是否会脱离根目录
 		String parentUuidTemp = parentUuid;
-		do {
+		while(!ITree.ROOT_UUID.equals(parentUuidTemp)) {
 			CatalogVo parent = catalogMapper.getCatalogByUuid(parentUuidTemp);
 			if(parent == null) {
 				throw new CatalogIllegalParameterException("将服务目录：" + uuid + "的parentUuid设置为：" + parentUuid + "会导致该目录脱离根目录");
@@ -130,7 +144,7 @@ public class ChannelMoveApi extends ApiComponentBase {
 			if(parentUuid.equals(parentUuidTemp)) {
 				throw new CatalogIllegalParameterException("将服务目录：" + uuid + "的parentUuid设置为：" + parentUuid + "会导致该目录脱离根目录");
 			}
-		}while(!ITree.ROOT_UUID.equals(parentUuidTemp));
+		}
 		return null;
 	}
 

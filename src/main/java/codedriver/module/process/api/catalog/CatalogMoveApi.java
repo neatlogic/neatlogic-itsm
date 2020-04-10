@@ -42,7 +42,8 @@ public class CatalogMoveApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被移动的服务目录uuid"),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired = true, desc = "移动后的父级uuid"),
-		@Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "目标节点uuid")
+		@Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "目标节点uuid"),
+		@Param(name = "moveType", type = ApiParamType.ENUM, rule = "inner, prev, next", isRequired = true, desc = "移动类型")
 	})
 	@Description(desc = "服务目录移动位置接口")
 	@Override
@@ -72,7 +73,7 @@ public class CatalogMoveApi extends ApiComponentBase {
 			//移进目标节点里面
 			targetSort = catalogMapper.getMaxSortByParentUuid(parentUuid);
 		}else {
-			//移动到目标节点后面
+			//移动到目标节点前面或后面
 			CatalogVo targetCatalog = catalogMapper.getCatalogByUuid(targetUuid);
 			//判断目标节点服务目录是否存在
 			if(targetCatalog == null) {
@@ -84,20 +85,32 @@ public class CatalogMoveApi extends ApiComponentBase {
 			targetSort = targetCatalog.getSort();
 		}
 		Integer oldSort = moveCatalog.getSort();
-		
+		String moveType = jsonObj.getString("moveType");
 		//判断是否是在相同目录下移动
 		if(parentUuid.equals(moveCatalog.getParentUuid())) {
 			//相同目录下移动
 			if(oldSort.compareTo(targetSort) == -1) {//往后移动, 移动前后两个位置直接的服务目录序号减一
-				newSort = targetSort;
+				if("prev".equals(moveType)) {
+					newSort = targetSort - 1;
+				}else{
+					newSort = targetSort;
+				}
 				catalogMapper.updateSortDecrement(parentUuid, oldSort + 1, newSort);
 			}else {//往前移动, 移动前后两个位置直接的服务目录序号加一
-				newSort = targetSort + 1;
+				if("prev".equals(moveType)) {
+					newSort = targetSort;
+				}else{
+					newSort = targetSort + 1;
+				}
 				catalogMapper.updateSortIncrement(parentUuid, newSort, oldSort - 1);
 			}
 		}else {
 			//不同同目录下移动
-			newSort = targetSort + 1;
+			if("prev".equals(moveType)) {
+				newSort = targetSort;
+			}else{
+				newSort = targetSort + 1;
+			}
 			//旧目录，被移动目录后面的兄弟节点序号减一
 			catalogMapper.updateSortDecrement(moveCatalog.getParentUuid(), oldSort + 1, null);
 			//新目录，目标目录后面的兄弟节点序号加一
