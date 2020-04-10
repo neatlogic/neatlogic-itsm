@@ -49,7 +49,7 @@ public class ChannelMoveApi extends ApiComponentBase {
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被移动的服务通道uuid"),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired = true, desc = "移动后的父级uuid"),
 		@Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "目标节点uuid"),
-		@Param(name = "moveType", type = ApiParamType.ENUM, rule = "prev, next", isRequired = true, desc = "移动类型")
+		@Param(name = "moveType", type = ApiParamType.ENUM, rule = "inner,prev,next", isRequired = true, desc = "移动类型")
 	})
 	@Description(desc = "服务通道移动位置接口")
 	@Override
