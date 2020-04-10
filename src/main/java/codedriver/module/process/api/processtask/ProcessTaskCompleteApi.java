@@ -1,12 +1,17 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -73,6 +78,13 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 			}
 			if(!processTaskId.equals(nextProcessTaskStepVo.getProcessTaskId())) {
 				throw new ProcessTaskRuntimeException("步骤：'" + nextStepId + "'不是工单：'" + processTaskId + "'的步骤");
+			}
+			List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
+			for(ProcessTaskStepUserVo minorUser : minorUserList) {
+				if(ProcessTaskStepUserStatus.DOING.getValue().equals(minorUser.getStatus())) {
+					//如果还有子任务未完成，该步骤不能流转
+					throw new ProcessTaskRuntimeException("请完成所有子任务后再流转");
+				}
 			}
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.complete(processTaskStepVo);
