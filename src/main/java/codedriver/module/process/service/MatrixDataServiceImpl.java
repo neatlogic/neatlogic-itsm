@@ -65,14 +65,10 @@ public class MatrixDataServiceImpl implements MatrixDataService {
     @Override
     public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo) {
         List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
-        String columnUuid = dataVo.getColumnUuid();
-        boolean columnIdExist = StringUtils.isNotBlank(columnUuid);
         List<String> columnList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(attributeVoList)){
             for (ProcessMatrixAttributeVo attributeVo : attributeVoList){
-                if ((columnIdExist && attributeVo.getUuid().equals(columnUuid)) || !columnIdExist){
-                    columnList.add(attributeVo.getUuid());
-                }
+                columnList.add(attributeVo.getUuid());
             }
             dataVo.setColumnList(columnList);
             if (dataVo.getNeedPage()){
@@ -81,6 +77,16 @@ public class MatrixDataServiceImpl implements MatrixDataService {
             }
             return matrixDataMapper.searchDynamicTableData(dataVo);
         }
+        return null;
+    }
+
+    @Override
+    public List<Map<String, String>> getDynamicTableColumnData(ProcessMatrixDataVo dataVo) {
+       return matrixDataMapper.getDynamicTableDataByColumn(dataVo);
+    }
+
+    @Override
+    public List<String> getExternalMatrixColumnData() {
         return null;
     }
 }
