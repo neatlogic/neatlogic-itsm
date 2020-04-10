@@ -46,6 +46,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 
 @Service
 public class ProcessTaskDraftGetApi extends ApiComponentBase {
@@ -64,6 +65,9 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 	
 	@Autowired
 	private FormMapper formMapper;
+	
+	@Autowired
+	private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -161,7 +165,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				for(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
 					formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
 				}
-				processTaskVo.setFormAttributeActionMap(formAttributeActionMap);
+				processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
 			}
 			return processTaskVo;
 		}else if(channelUuid != null){
@@ -206,10 +210,9 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 					for(ProcessStepFormAttributeVo processStepFormAttribute : processStepFormAttributeList) {
 						formAttributeActionMap.put(processStepFormAttribute.getAttributeUuid(), processStepFormAttribute.getAction());
 					}
-					processTaskVo.setFormAttributeActionMap(formAttributeActionMap);
+					processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
 				}
 			}
-			
 			return processTaskVo;
 		}else {
 			throw new ProcessTaskRuntimeException("参数'processTaskId'和'channelUuid'，至少要传一个");
