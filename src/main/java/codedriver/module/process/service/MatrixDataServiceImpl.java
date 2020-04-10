@@ -65,10 +65,14 @@ public class MatrixDataServiceImpl implements MatrixDataService {
     @Override
     public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo) {
         List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
+        String columnUuid = dataVo.getColumnUuid();
+        boolean columnIdExist = StringUtils.isNotBlank(columnUuid);
         List<String> columnList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(attributeVoList)){
             for (ProcessMatrixAttributeVo attributeVo : attributeVoList){
-                columnList.add(attributeVo.getUuid());
+                if ((columnIdExist && attributeVo.getUuid().equals(columnUuid)) || !columnIdExist){
+                    columnList.add(attributeVo.getUuid());
+                }
             }
             dataVo.setColumnList(columnList);
             if (dataVo.getNeedPage()){
