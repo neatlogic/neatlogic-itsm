@@ -1,6 +1,8 @@
 package codedriver.module.process.service;
 
 import java.util.List;
+import java.util.Map;
+
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -53,4 +55,13 @@ public interface ProcessTaskService {
 	* @return void
 	 */
 	public void abortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
+	/**
+	 * 
+	* @Description: 工单上报/查看/处理页面，返回表单formConfig时，设置属性只读/隐藏控制数据
+	* @param processTaskVo 工单信息
+	* @param formAttributeActionMap 处理页面时，表单属性只读/隐藏控制数据
+	* @param mode 0：查看页面，1：处理页面
+	* @return void
+	 */
+	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode);
 }
