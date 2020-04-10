@@ -3,6 +3,7 @@ package codedriver.module.process.api.processtask;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -69,6 +71,10 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 	@Description(desc = "子任务创建接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		String content = jsonObj.getString("content");
+		if(StringUtils.isBlank(content)) {
+			throw new ParamIrregularException("参数“" + content + "”长度不能为0");
+		}
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		if(processTaskStepVo == null) {
@@ -87,6 +93,7 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 		processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
 		processTaskStepSubtaskVo.setOwner(UserContext.get().getUserId(true));
 		List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
+		jsonObj.remove("workerList");
 		String[] split = workerList.get(0).split("#");
 		if(GroupSearch.USER.getValue().equals(split[0])) {
 			UserVo userVo = userMapper.getUserByUserId(split[1]);
