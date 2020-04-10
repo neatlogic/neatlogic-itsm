@@ -5,11 +5,12 @@ import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixDataService;
-import codedriver.module.process.service.MatrixService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,6 +52,8 @@ public class MatrixColumnDataGetApi extends ApiComponentBase {
              @Param( name = "targetColumn", desc = "目标属性ID", type = ApiParamType.STRING, isRequired = true),
              @Param( name = "sourceColumn", desc = "源属性ID", type = ApiParamType.STRING),
              @Param( name = "sourceColumnValue", desc = "源属性值", type = ApiParamType.STRING)})
+    @Description(desc = "矩阵属性数据获取接口")
+    @Output({ @Param( name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")})
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
