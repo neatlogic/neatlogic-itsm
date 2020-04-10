@@ -83,7 +83,7 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 			for(ProcessTaskStepUserVo minorUser : minorUserList) {
 				if(ProcessTaskStepUserStatus.DOING.getValue().equals(minorUser.getStatus())) {
 					//如果还有子任务未完成，该步骤不能流转
-					throw new ProcessTaskRuntimeException("有子任务未完成，不能流转");
+					throw new ProcessTaskRuntimeException("请完成所有子任务后再流转");
 				}
 			}
 			processTaskStepVo.setParamObj(jsonObj);
