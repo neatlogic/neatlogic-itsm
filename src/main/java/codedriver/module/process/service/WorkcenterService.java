@@ -264,7 +264,7 @@ public class WorkcenterService {
 			abortActionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
 			abortActionJson.put("text", ProcessTaskStepAction.ABORT.getText());
 			abortActionJson.put("sort", 2);
-			abortActionJson.put("isEnable", 1);
+			abortActionJson.put("isEnable", 0);
 			actionArray.add(abortActionJson);
 		}
 		
