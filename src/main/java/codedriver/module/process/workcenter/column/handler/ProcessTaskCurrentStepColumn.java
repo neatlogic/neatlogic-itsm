@@ -13,7 +13,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleVo;
+import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -25,6 +29,10 @@ import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
 	@Autowired
 	UserMapper userMapper;
+	@Autowired
+	RoleMapper roleMapper;
+	@Autowired
+	TeamMapper teamMapper;
 	@Override
 	public String getName() {
 		return "currentstep";
@@ -60,9 +68,49 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 					ListIterator<Object> userTypeIterator = userTypeArray.listIterator();
 					while(userTypeIterator.hasNext()) {
 						JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
-						/*if(userTypeJson.getString("usertype").equals(ProcessTaskStatus.PENDING.getValue())) {
-							userTypeIterator.remove();
-						}else {*/
+						if(userTypeJson.getString("usertype").equals(ProcessTaskStatus.PENDING.getValue())) {
+							//userTypeIterator.remove();
+							JSONArray userArray = userTypeJson.getJSONArray("userlist");
+							JSONArray userArrayTmp = new JSONArray();
+							if(CollectionUtils.isNotEmpty(userArray)) {
+								List<String> userList = userArray.stream().map(object -> object.toString()).collect(Collectors.toList());
+								for(String user :userList) {
+									if(StringUtils.isNotBlank(user.toString())) {
+										if(user.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
+											UserVo userVo =userMapper.getUserByUserId(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
+											if(userVo != null) {
+												JSONObject userJson = new JSONObject();
+												userJson.put("type", GroupSearch.USER.getValue());
+												userJson.put("worker", user);
+												userJson.put("workername", userVo.getUserName());
+												userArrayTmp.add(userJson);
+											}
+										}else if(user.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
+											RoleVo roleVo = roleMapper.getRoleByRoleName(user.toString().replaceFirst(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
+											if(roleVo != null) {
+												JSONObject roleJson = new JSONObject();
+												roleJson.put("type", GroupSearch.ROLE.getValue());
+												roleJson.put("worker", roleVo.getName());
+												roleJson.put("workername", roleVo.getDescription());
+												userArrayTmp.add(roleJson);
+											}
+										}else if(user.toString().startsWith(GroupSearch.TEAM.getValuePlugin())) {
+											TeamVo teamVo = teamMapper.getTeamByUuid(user.toString().replaceFirst(GroupSearch.TEAM.getValuePlugin(), StringUtils.EMPTY));
+											if(teamVo != null) {
+												JSONObject teamJson = new JSONObject();
+												teamJson.put("type", GroupSearch.TEAM.getValue());
+												teamJson.put("worker", teamVo.getUuid());
+												teamJson.put("workername", teamVo.getName());
+												userArrayTmp.add(teamJson);
+											}
+										}
+									}
+									
+								}
+								userTypeJson.put("workerlist", userArrayTmp);
+								userTypeJson.put("userlist", CollectionUtils.EMPTY_COLLECTION);
+							}
+						}else {
 							JSONArray userArray = userTypeJson.getJSONArray("userlist");
 							JSONArray userArrayTmp = new JSONArray();
 							if(CollectionUtils.isNotEmpty(userArray)) {
@@ -81,7 +129,7 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 								}
 								userTypeJson.put("userlist", userArrayTmp);
 							}
-						/*}*/
+						}
 					}
 				}
 			}else {
