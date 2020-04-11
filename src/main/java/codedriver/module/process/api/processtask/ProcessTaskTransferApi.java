@@ -11,7 +11,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.process.constvalue.ProcessTaskStepWorkerAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -81,12 +80,8 @@ public class ProcessTaskTransferApi extends ApiComponentBase {
 			List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
 			for(String worker : workerList) {	
 				String[] split = worker.split("#");
-				if(GroupSearch.USER.getValue().equals(split[0])) {
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
-				}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, null, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
-				}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, null, null, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
+				if(GroupSearch.getValue(split[0]) != null) {
+					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[0], split[1]));
 				}
 			}
 			handler.transfer(processTaskStepVo,processTaskStepWorkerList);
