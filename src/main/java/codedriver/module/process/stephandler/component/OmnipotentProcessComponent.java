@@ -461,7 +461,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			}
 			
 			List<ProcessTaskStepWorkerVo> processTaskWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepWorkerVo.getProcessTaskStepId());
-			List<String> userIdList = processTaskWorkerList.stream().filter(e -> e.getType() == GroupSearch.USER.getValue()).map(ProcessTaskStepWorkerVo::getUuid).collect(Collectors.toList());
+			List<String> userIdList = processTaskWorkerList.stream().filter(e -> GroupSearch.USER.getValue().equals(e.getType())).map(ProcessTaskStepWorkerVo::getUuid).collect(Collectors.toList());
 			
 			if(ProcessTaskStepUserStatus.DOING.getValue().equals(majorUserStatus) 
 					|| ProcessTaskStepUserStatus.DOING.getValue().equals(minorUserStatus)) {//如果userId是主处理人或子任务处理人，且状态时doing

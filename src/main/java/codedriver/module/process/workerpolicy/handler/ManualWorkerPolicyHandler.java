@@ -8,7 +8,7 @@ import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 
-//@Service
+//@Service //暂时未使用这个类
 public class ManualWorkerPolicyHandler implements IWorkerPolicyHandler {
 
 	@Override
