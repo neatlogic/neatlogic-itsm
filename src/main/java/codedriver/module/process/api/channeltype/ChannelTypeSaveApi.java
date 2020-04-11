@@ -44,7 +44,6 @@ public class ChannelTypeSaveApi extends ApiComponentBase {
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "服务类型uuid"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired=true, desc = "状态"),
-		@Param(name = "icon", type = ApiParamType.STRING, isRequired = true, desc = "图标"),
 		@Param(name = "color", type = ApiParamType.STRING, isRequired = true, desc = "颜色"),
 		@Param(name = "description", type = ApiParamType.STRING, xss = true, desc = "描述")
 	})
