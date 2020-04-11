@@ -143,7 +143,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 		.setStatus(processTaskVo.getStatus())
 			 		.setPriority(processTaskVo.getPriorityUuid())
 			 		.setCatalog(catalog.getUuid())
-			 		.setChannelType(channel.getType())
+			 		.setChannelType(channel.getChannelTypeUuid())
 			 		.setChannel(channel.getUuid())
 			 		.setContent(startContentVo)
 			 		.setStartTime(processTaskVo.getStartTime())

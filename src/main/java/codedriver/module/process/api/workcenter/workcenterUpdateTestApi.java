@@ -37,7 +37,7 @@ public class workcenterUpdateTestApi extends ApiComponentBase {
 	@Description(desc = "测试工单中心update接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		for(Integer i=400;i<1000;i++) {
+		for(Integer i=100;i<200;i++) {
 		MultiAttrsObjectPool  poll = ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME);
 		poll.checkout("techsure", null);
 		poll.delete(i.toString());
