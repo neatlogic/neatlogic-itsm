@@ -37,6 +37,7 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -90,12 +91,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		processTaskMapper.insertProcessTaskStepSubtask(processTaskStepSubtaskVo);
 		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
 		String content = paramObj.getString("content");
-		if(StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-			processTaskMapper.replaceProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), processTaskContentVo.getHash()));
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskContentVo.getHash());
-		}
+		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
+		processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+		processTaskMapper.replaceProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), processTaskContentVo.getHash()));
+
 		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
 		if(currentProcessTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
@@ -112,9 +111,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			userList.add(processTaskStepUserVo);
 			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
 			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), processTaskStepSubtaskVo.getUserId()));
-			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
+			ProcessTaskStepSubtaskVo subtaskVo = new ProcessTaskStepSubtaskVo();
+			subtaskVo.setId(processTaskStepSubtaskVo.getId());
+			subtaskVo.setUserId(processTaskStepSubtaskVo.getUserId());
+			subtaskVo.setUserName(processTaskStepSubtaskVo.getUserName());
+			subtaskVo.setTargetTime(processTaskStepSubtaskVo.getTargetTime());
+			subtaskVo.setContentHash(processTaskContentVo.getHash());
+			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getParamName(), JSON.toJSONString(subtaskVo));
+			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.CREATESUBTASK);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
@@ -124,29 +130,33 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	@Override
 	public void editSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
+		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
+		if(currentProcessTaskStepVo == null) {
+			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
+		}else if(currentProcessTaskStepVo.getIsActive().intValue() != 1){
+			throw new ProcessTaskRuntimeException("步骤未激活，不能处理子任务");
+		}
 		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
 		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
 		//TODO linbq查出旧数据
+		ProcessTaskStepSubtaskVo oldProcessTaskStepSubtask = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskVo.getId());
 		ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = processTaskMapper.getProcessTaskStepSubtaskContentById(processTaskStepSubtaskVo.getId());
 		if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), processTaskStepSubtaskContentVo.getContentHash());
+			oldProcessTaskStepSubtask.setContentHash(processTaskStepSubtaskContentVo.getContentHash());
 		}
 		String content = paramObj.getString("content");
-		if(StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-			processTaskMapper.replaceProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), processTaskContentVo.getHash()));
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskContentVo.getHash());
+		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
+		processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+		processTaskMapper.replaceProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), processTaskContentVo.getHash()));
+		processTaskStepSubtaskVo.setContentHash(processTaskContentVo.getHash());
+		
+		if(processTaskStepSubtaskVo.equals(oldProcessTaskStepSubtask)) {//如果子任务信息没有被修改，则不进行下面操作
+			return;
 		}
 		
-		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
-		if(currentProcessTaskStepVo == null) {
-			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
-		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
-			currentProcessTaskStepVo.setParamObj(paramObj);
 			String oldUserId = paramObj.getString("oldUserId");
 			if(!processTaskStepSubtaskVo.getUserId().equals(oldUserId)) {//更新了处理人
 				
@@ -173,6 +183,22 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			}
 				
 			//记录活动
+			ProcessTaskStepSubtaskVo subtaskVo = new ProcessTaskStepSubtaskVo();
+			subtaskVo.setId(processTaskStepSubtaskVo.getId());
+			subtaskVo.setUserId(processTaskStepSubtaskVo.getUserId());
+			subtaskVo.setUserName(processTaskStepSubtaskVo.getUserName());
+			subtaskVo.setTargetTime(processTaskStepSubtaskVo.getTargetTime());
+			subtaskVo.setContentHash(processTaskStepSubtaskVo.getContentHash());
+			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getParamName(), JSON.toJSONString(subtaskVo));
+			
+			ProcessTaskStepSubtaskVo oldSubtaskVo = new ProcessTaskStepSubtaskVo();
+			oldSubtaskVo.setId(oldProcessTaskStepSubtask.getId());
+			oldSubtaskVo.setUserId(oldProcessTaskStepSubtask.getUserId());
+			oldSubtaskVo.setUserName(oldProcessTaskStepSubtask.getUserName());
+			oldSubtaskVo.setTargetTime(oldProcessTaskStepSubtask.getTargetTime());
+			oldSubtaskVo.setContentHash(oldProcessTaskStepSubtask.getContentHash());
+			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), JSON.toJSONString(oldSubtaskVo));
+			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.EDITSUBTASK);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
@@ -181,13 +207,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	@Override
 	public void redoSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
-		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
-		
 		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
 		if(currentProcessTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
+		}else if(currentProcessTaskStepVo.getIsActive().intValue() != 1){
+			throw new ProcessTaskRuntimeException("步骤未激活，不能处理子任务");
 		}
+		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
+		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
@@ -212,13 +240,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	@Override
 	public void completeSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
-		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
-		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
-		
 		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
 		if(currentProcessTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
+		}else if(currentProcessTaskStepVo.getIsActive().intValue() != 1){
+			throw new ProcessTaskRuntimeException("步骤未激活，不能处理子任务");
 		}
+		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
+		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
+		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
@@ -243,14 +273,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	@Override
 	public void abortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
+		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
+		if(currentProcessTaskStepVo == null) {
+			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
+		}else if(currentProcessTaskStepVo.getIsActive().intValue() != 1){
+			throw new ProcessTaskRuntimeException("步骤未激活，不能处理子任务");
+		}
 		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.ABORTED.getValue());
 		processTaskStepSubtaskVo.setCancelUser(UserContext.get().getUserId(true));
 		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
 		
-		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
-		if(currentProcessTaskStepVo == null) {
-			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
-		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 			List<ProcessTaskStepUserVo> userList = new ArrayList<>();

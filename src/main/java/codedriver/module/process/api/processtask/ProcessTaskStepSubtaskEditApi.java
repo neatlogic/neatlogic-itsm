@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
@@ -60,12 +62,16 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
 		@Param(name = "workerList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "子任务处理人userId,单选,格式[\"user#userId\"]"),
 		@Param(name = "targetTime", type = ApiParamType.LONG, desc = "期望完成时间"),
-		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述")
+		@Param(name = "content", type = ApiParamType.STRING, xss = true, isRequired = true, desc = "描述")
 	})
 	@Output({})
 	@Description(desc = "子任务编辑接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		String content = jsonObj.getString("content");
+		if(StringUtils.isBlank(content)) {
+			throw new ParamIrregularException("参数“" + content + "”长度不能为0");
+		}
 		Long processTaskStepSubtaskId = jsonObj.getLong("processTaskStepSubtaskId");
 		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskId);
 		if(processTaskStepSubtaskVo == null) {
@@ -73,6 +79,7 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 		}
 		if(processTaskStepSubtaskVo.getIsEditable().intValue() == 1) {
 			List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
+			jsonObj.remove("workerList");
 			String[] split = workerList.get(0).split("#");
 			if(GroupSearch.USER.getValue().equals(split[0])) {
 				UserVo userVo = userMapper.getUserByUserId(split[1]);

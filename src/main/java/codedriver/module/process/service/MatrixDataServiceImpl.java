@@ -79,4 +79,19 @@ public class MatrixDataServiceImpl implements MatrixDataService {
         }
         return null;
     }
+
+    @Override
+    public List<Map<String, String>> getDynamicTableColumnData(ProcessMatrixDataVo dataVo) {
+       return matrixDataMapper.getDynamicTableDataByColumn(dataVo);
+    }
+
+    @Override
+    public List<Map<String, String>> getDynamicTableDataByColumnList(ProcessMatrixDataVo dataVo) {
+        return matrixDataMapper.getDynamicTableDataByColumnList(dataVo);
+    }
+
+    @Override
+    public List<String> getExternalMatrixColumnData() {
+        return null;
+    }
 }
