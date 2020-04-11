@@ -121,13 +121,13 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			
 			 /** 获取工单当前步骤 **/
 			 @SuppressWarnings("serial")
-			List<ProcessTaskStepVo>  processTaskStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());}},null);
+			List<ProcessTaskStepVo>  processTaskStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());add(ProcessStepType.START.getValue());}},null);
 			 WorkcenterFieldBuilder builder = new WorkcenterFieldBuilder();
 			 //form
 			 JSONObject formJson = new JSONObject();
 			 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskId);
 			 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
-				 if(attributeData.getData().startsWith("[")&&attributeData.getData().endsWith("]")){
+				 if(attributeData.getData() != null&&attributeData.getData().startsWith("[")&&attributeData.getData().endsWith("]")){
 					 Object obj = JSONArray.parse(attributeData.getData());
 					 formJson.put(attributeData.getAttributeUuid(),  JSONObject.parseArray(((JSONArray)obj).toJSONString(), String.class));
 				 }else {
