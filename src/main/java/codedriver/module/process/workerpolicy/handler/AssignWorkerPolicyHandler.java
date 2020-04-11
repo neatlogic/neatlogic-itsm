@@ -14,7 +14,6 @@ import com.alibaba.fastjson.JSONArray;
 
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
-import codedriver.framework.process.constvalue.ProcessTaskStepWorkerAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -59,19 +58,15 @@ public class AssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 			if(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
 				if(ProcessUserType.OWNER.getValue().equals(split[1])) {
 					ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, processTaskVo.getOwner(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
+					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, GroupSearch.USER.getValue(), processTaskVo.getOwner()));
 				}else if(ProcessUserType.REPORTER.getValue().equals(split[1])) {
 					ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, processTaskVo.getReporter(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
+					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, GroupSearch.USER.getValue(), processTaskVo.getReporter()));
 				}else if(ProcessUserType.AGENT.getValue().equals(split[1])) {
 					//TODO linbq代办人获取逻辑以后再实现
 				}
-			}else if(GroupSearch.USER.getValue().equals(split[0])) {
-				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
-			}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
-				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, null, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
-			}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
-				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, null, null, split[1], ProcessTaskStepWorkerAction.HANDLE.getValue()));
+			}else if(GroupSearch.getValue(split[0]) != null) {
+				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[0], split[1]));
 			}
 		}
 		return processTaskStepWorkerList;
