@@ -60,9 +60,9 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 					ListIterator<Object> userTypeIterator = userTypeArray.listIterator();
 					while(userTypeIterator.hasNext()) {
 						JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
-						if(userTypeJson.getString("usertype").equals(ProcessTaskStatus.PENDING.getValue())) {
+						/*if(userTypeJson.getString("usertype").equals(ProcessTaskStatus.PENDING.getValue())) {
 							userTypeIterator.remove();
-						}else {
+						}else {*/
 							JSONArray userArray = userTypeJson.getJSONArray("userlist");
 							JSONArray userArrayTmp = new JSONArray();
 							if(CollectionUtils.isNotEmpty(userArray)) {
@@ -81,7 +81,7 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 								}
 								userTypeJson.put("userlist", userArrayTmp);
 							}
-						}
+						/*}*/
 					}
 				}
 			}else {
