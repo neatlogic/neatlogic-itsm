@@ -57,6 +57,7 @@ public class MatrixColumnDataSearchApi extends ApiComponentBase {
         }
         ProcessMatrixDataVo dataVo = new ProcessMatrixDataVo();
         dataVo.setColumnList(targetColumnList);
+        dataVo.setMatrixUuid(jsonObj.getString("matrixUuid"));
         ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(jsonObj.getString("matrixUuid"));
         if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
             List<Map<String, String>> dataMapList = matrixDataService.getDynamicTableDataByColumnList(dataVo);
