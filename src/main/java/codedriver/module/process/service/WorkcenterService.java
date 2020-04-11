@@ -160,6 +160,7 @@ public class WorkcenterService {
 		JSONArray actionArray = new JSONArray();
 		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
 		Boolean isHasAbort = false;
+		Boolean isHasRecover = false;
 		Boolean isHasUrge = false;
 		if(commonJson == null) {
 			return CollectionUtils.EMPTY_COLLECTION;
@@ -188,6 +189,7 @@ public class WorkcenterService {
 						add(ProcessTaskStepAction.START.getValue());
 						add(ProcessTaskStepAction.STARTPROCESS.getValue());
 						add(ProcessTaskStepAction.ABORT.getValue());
+						add(ProcessTaskStepAction.RECOVER.getValue());
 						add(ProcessTaskStepAction.URGE.getValue());
 						}});
 				}catch(Exception ex) {
@@ -212,6 +214,9 @@ public class WorkcenterService {
 				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
 					isHasAbort = true; 
 				}
+				if(actionList.contains(ProcessTaskStepAction.RECOVER.getValue())) {
+					isHasRecover = true; 
+				}
 				if(actionList.contains(ProcessTaskStepAction.URGE.getValue())) {
 					isHasUrge = true; 
 				}
@@ -229,21 +234,40 @@ public class WorkcenterService {
 		} 
 		
 		actionArray.add(handleActionJson);
-		//abort
-		JSONObject abortActionJson = new JSONObject();
-		abortActionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
-		abortActionJson.put("text", ProcessTaskStepAction.ABORT.getText());
-		abortActionJson.put("sort", 2);
-		if(isHasAbort) {
-			JSONObject configJson = new JSONObject();
-			configJson.put("taskid", el.getId());
-			configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
-			abortActionJson.put("config", configJson);
-			abortActionJson.put("isEnable", 1);
+		//abort|recover
+		if(isHasAbort||isHasRecover) {
+			if(isHasAbort) {
+				JSONObject abortActionJson = new JSONObject();
+				abortActionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
+				abortActionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+				abortActionJson.put("sort", 2);
+				JSONObject configJson = new JSONObject();
+				configJson.put("taskid", el.getId());
+				configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId="+el.getId());
+				abortActionJson.put("config", configJson);
+				abortActionJson.put("isEnable", 1);
+				actionArray.add(abortActionJson);
+			}else {
+				JSONObject recoverActionJson = new JSONObject();
+				recoverActionJson.put("name", ProcessTaskStepAction.RECOVER.getValue());
+				recoverActionJson.put("text", ProcessTaskStepAction.RECOVER.getText());
+				recoverActionJson.put("sort", 2);
+				JSONObject configJson = new JSONObject();
+				configJson.put("taskid", el.getId());
+				configJson.put("interfaceurl", "api/rest/processtask/recover?processTaskId="+el.getId());
+				recoverActionJson.put("config", configJson);
+				recoverActionJson.put("isEnable", 1);
+				actionArray.add(recoverActionJson);
+			}
 		}else {
-			abortActionJson.put("isEnable", 0);
+			JSONObject abortActionJson = new JSONObject();
+			abortActionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
+			abortActionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+			abortActionJson.put("sort", 2);
+			abortActionJson.put("isEnable", 1);
+			actionArray.add(abortActionJson);
 		}
-		actionArray.add(abortActionJson);
+		
 		//催办
 		JSONObject urgeActionJson = new JSONObject();
 		urgeActionJson.put("name", ProcessTaskStepAction.URGE.getValue());
@@ -253,10 +277,10 @@ public class WorkcenterService {
 			JSONObject configJson = new JSONObject();
 			configJson.put("taskid", el.getId());
 			configJson.put("interfaceurl", "api/rest/processtask/urge?processTaskId="+el.getId());
-			abortActionJson.put("config", configJson);
-			abortActionJson.put("isEnable", 1);
+			urgeActionJson.put("config", configJson);
+			urgeActionJson.put("isEnable", 1);
 		}else {
-			abortActionJson.put("isEnable", 0);
+			urgeActionJson.put("isEnable", 0);
 		}
 
 		actionArray.add(urgeActionJson);
