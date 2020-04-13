@@ -197,11 +197,13 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				Map<String, Object> formAttributeDataMap = new HashMap<>();
 				for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
 					String data = processTaskFormAttributeDataVo.getData();
-					if(data.startsWith("[") && data.endsWith("]")) {
-						List<String> dataList = JSON.parseArray(data, String.class);
-						formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
-					}else {
-						formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
+					if(data != null) {
+						if(data.startsWith("[") && data.endsWith("]")) {
+							List<String> dataList = JSON.parseArray(data, String.class);
+							formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
+						}else {
+							formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
+						}
 					}
 				}
 				processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
