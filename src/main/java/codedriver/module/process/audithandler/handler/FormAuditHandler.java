@@ -58,6 +58,8 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 				oldProcessTaskFormAttributeDataList.remove(index);
 			}
 		}
+		processTaskStepAuditDetailVo.setOldContent(null);
+		processTaskStepAuditDetailVo.setNewContent(null);
 		if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
 			Map<String, JSONObject> attributeConfigMap = new HashMap<>();
 			Long processTaskId = processTaskFormAttributeDataList.get(0).getProcessTaskId();
@@ -101,8 +103,6 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 				}
 				contentList.add(content);
 			}
-
-			processTaskStepAuditDetailVo.setOldContent(null);
 			processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(contentList));
 		}
 	}
