@@ -77,7 +77,7 @@ public class MatrixColumnDataGetApi extends ApiComponentBase {
             List<Map<String, String>> dataMapList = matrixDataService.getDynamicTableColumnData(dataVo);
             if (CollectionUtils.isNotEmpty(dataMapList)){
                 for (Map<String, String> map : dataMapList){
-                    columnDataSet.add(map.get(jsonObj.getString(dataVo.getTargetColumn())));
+                    columnDataSet.add(map.get(dataVo.getTargetColumn()));
                 }
             }
         }else {
