@@ -84,7 +84,7 @@ public class ProcessTaskStatusCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 10;
+		return 7;
 	}
 
 	@Override
