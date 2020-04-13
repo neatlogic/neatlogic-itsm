@@ -330,11 +330,30 @@ public class WorkcenterService {
 			JSONObject titleObj = new JSONObject();
 			JSONArray titleDataList = new JSONArray();
             for (MultiAttrsObject titleEl : titleData) {
-            	titleDataList.add(WorkcenterColumnFactory.getHandler(condition.getName()).getValue(titleEl));
+            	String data = WorkcenterColumnFactory.getHandler(condition.getName()).getValue(titleEl).toString();
+            	//前后各截取值 长度15
+            	int subLength = 15;
+            	int index = data.indexOf(keyword);
+            	String dataPre = StringUtils.EMPTY;
+            	String dataAft = StringUtils.EMPTY;
+            	int keywordIndex = index+keyword.length();
+            	if(keywordIndex >subLength) {
+            		dataPre = "..."+data.substring(keywordIndex-subLength, keywordIndex);
+            	}else {
+            		dataPre = data.substring(0, keywordIndex);
+            	}
+            	
+            	if(data.length() - keywordIndex >subLength+1) {
+            		dataAft = data.substring(keywordIndex,index+subLength)+"...";
+            	}else {
+            		dataAft = data.substring(keywordIndex,data.length());
+            	}
+            	titleDataList.add(dataPre+dataAft);
             }
             titleObj.put("dataList", titleDataList);
             titleObj.put("value", condition.getName());
             titleObj.put("text",condition.getDisplayName());
+            titleObj.put("color","#e42332");
             returnArray.add(titleObj);
 		}
 		return returnArray;
