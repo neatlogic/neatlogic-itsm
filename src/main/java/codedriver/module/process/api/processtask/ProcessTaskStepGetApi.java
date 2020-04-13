@@ -255,6 +255,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
 				List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 				if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+					System.out.println("processTaskStepAuditList.size():" + processTaskStepAuditList.size());
 					ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(0);					
 					for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
 						if(ProcessTaskAuditDetailType.FORM.getValue().equals(processTaskStepAuditDetailVo.getType())) {
@@ -274,8 +275,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 							}
 						}
 					}
-					ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo(processTaskStepAudit);
-					processTaskStepVo.setComment(temporaryComment);
+					processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
 				}
 				resultObj.put("processTaskStep", processTaskStepVo);
 			}
