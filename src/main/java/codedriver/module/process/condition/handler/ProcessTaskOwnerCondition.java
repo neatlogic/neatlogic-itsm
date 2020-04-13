@@ -14,7 +14,8 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.process.condition.core.IWorkcenterCondition;
+import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
@@ -24,7 +25,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 
 @Component
-public class ProcessTaskOwnerCondition implements IWorkcenterCondition{
+public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;

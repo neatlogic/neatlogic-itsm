@@ -11,8 +11,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.condition.core.IWorkcenterCondition;
-import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
+import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
@@ -59,9 +59,9 @@ public class WorkcenterGetConditionApi extends ApiComponentBase {
 		JSONArray resultArray = new JSONArray();
 		String conditionModel = jsonObj.getString("conditionModel") == null?ProcessWorkcenterConditionModel.CUSTOM.getValue():jsonObj.getString("conditionModel");
 		//固定字段条件
-		Map<String, IWorkcenterCondition> workcenterConditionMap = WorkcenterConditionFactory.getConditionComponentMap();
-		for (Map.Entry<String, IWorkcenterCondition> entry : workcenterConditionMap.entrySet()) {
-			IWorkcenterCondition condition = entry.getValue();
+		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
+		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
+			IProcessTaskCondition condition = entry.getValue();
 			//不支持endTime过滤，如果是简单模式 title、id、content 不返回
 			if(conditionModel.equals(ProcessWorkcenterConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
 					||condition.getName().equals(ProcessWorkcenterField.ID.getValue())||condition.getName().equals(ProcessWorkcenterField.CONTENT.getValue()))

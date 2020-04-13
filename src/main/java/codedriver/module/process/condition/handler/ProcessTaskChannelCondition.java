@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.condition.core.IWorkcenterCondition;
+import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -19,7 +20,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
 
 @Component
-public class ProcessTaskChannelCondition implements IWorkcenterCondition{
+public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;

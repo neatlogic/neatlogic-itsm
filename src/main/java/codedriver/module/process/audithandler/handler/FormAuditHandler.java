@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -59,65 +58,52 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 				oldProcessTaskFormAttributeDataList.remove(index);
 			}
 		}
-		if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList) || CollectionUtils.isNotEmpty(oldProcessTaskFormAttributeDataList)) {
-			int oldDataSize = oldProcessTaskFormAttributeDataList.size();
-			int newDataSize = processTaskFormAttributeDataList.size();
-			int maxSize = Math.max(oldDataSize, newDataSize);
-			List<String> oldContentList = new ArrayList<>(maxSize);
-			List<String> newContentList = new ArrayList<>(maxSize);
-			Long processTaskId = null;
-			if(oldDataSize > 0) {
-				processTaskId = oldProcessTaskFormAttributeDataList.get(0).getProcessTaskId();
-			}else {
-				processTaskId = processTaskFormAttributeDataList.get(0).getProcessTaskId();
-			}
+		if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+			Map<String, JSONObject> attributeConfigMap = new HashMap<>();
+			Long processTaskId = processTaskFormAttributeDataList.get(0).getProcessTaskId();
 			ProcessTaskFormVo processTaskForm = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
 			if(processTaskForm != null && StringUtils.isNotBlank(processTaskForm.getFormContent())) {
 				try {
 					JSONObject formConfig = JSON.parseObject(processTaskForm.getFormContent());
 					JSONArray controllerList = formConfig.getJSONArray("controllerList");
 					if(CollectionUtils.isNotEmpty(controllerList)) {
-						Map<String, JSONObject> attributeConfigMap = new HashMap<>();
 						for(int i = 0; i < controllerList.size(); i++) {
 							JSONObject attributeObj = controllerList.getJSONObject(i);
 							attributeConfigMap.put(attributeObj.getString("uuid"), attributeObj.getJSONObject("config"));
-						}
-						
-						for(ProcessTaskFormAttributeDataVo attributeDataVo : oldProcessTaskFormAttributeDataList) {
-							IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
-							if(handler != null) {
-								oldContentList.add(handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())));
-							}else {
-								oldContentList.add(attributeDataVo.getData());
-							}
-						}
-						for(ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataList) {
-							IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
-							if(handler != null) {
-								newContentList.add(handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())));
-							}else {
-								newContentList.add(attributeDataVo.getData());
-							}
 						}
 					}
 				}catch(Exception ex) {
 					logger.error("hash为" + processTaskForm.getFormContentHash() + "的processtask_form内容不是合法的JSON格式", ex);
 				}
-				
-			}else {
-				oldContentList = oldProcessTaskFormAttributeDataList.stream().map(ProcessTaskFormAttributeDataVo::getData).collect(Collectors.toList());
-				newContentList = processTaskFormAttributeDataList.stream().map(ProcessTaskFormAttributeDataVo::getData).collect(Collectors.toList());
 			}
 
-			for(int i = oldContentList.size(); i < maxSize; i++) {
-				oldContentList.add("");
+			Map<String, String> oldContentMap = new HashMap<>();
+			for(ProcessTaskFormAttributeDataVo attributeDataVo : oldProcessTaskFormAttributeDataList) {
+				IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
+				if(handler != null) {
+					oldContentMap.put(attributeDataVo.getAttributeUuid(), handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())));
+				}else {
+					oldContentMap.put(attributeDataVo.getAttributeUuid(), attributeDataVo.getData());
+				}
 			}
-			processTaskStepAuditDetailVo.setOldContent(JSON.toJSONString(oldContentList));
+			JSONArray contentList = new JSONArray();
+			for(ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataList) {
+				JSONObject content  = new JSONObject();
+				String oldContent = oldContentMap.get(attributeDataVo.getAttributeUuid());
+				if(oldContent != null) {
+					content.put("oldContent", oldContent);
+				}
+				IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
+				if(handler != null) {
+					content.put("newContent", handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())));
+				}else {
+					content.put("newContent", attributeDataVo.getData());
+				}
+				contentList.add(content);
+			}
 
-			for(int i = newContentList.size(); i < maxSize; i++) {
-				newContentList.add("");
-			}
-			processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(newContentList));
+			processTaskStepAuditDetailVo.setOldContent(null);
+			processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(contentList));
 		}
 	}
 
