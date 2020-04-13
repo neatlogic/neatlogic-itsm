@@ -35,7 +35,6 @@ public class SubtaskAuditHandler implements IProcessTaskStepAuditDetailHandler {
 			if(processTaskContentVo != null) {
 				oldProcessTaskStepSubtaskVo.setContent(processTaskContentVo.getContent());
 			}
-			processTaskStepAuditDetailVo.setOldContent(JSON.toJSONString(oldProcessTaskStepSubtaskVo));
 		}
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
 			ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});
