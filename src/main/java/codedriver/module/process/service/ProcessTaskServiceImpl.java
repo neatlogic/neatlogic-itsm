@@ -332,42 +332,41 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 						
 						for(int i = 0; i < controllerList.size(); i++) {
 							JSONObject attributeObj = controllerList.getJSONObject(i);
-							String action = null;
+							String action = FormAttributeAction.HIDE.getValue();
 							if(mode == 0) {
 								JSONObject config = attributeObj.getJSONObject("config");
 								if(MapUtils.isNotEmpty(config)) {
 									List<String> authorityList = JSON.parseArray(config.getString("authorityConfig"), String.class);
 									if(CollectionUtils.isNotEmpty(authorityList)) {
-										action = FormAttributeAction.HIDE.getValue();
 										for(String authority : authorityList) {
 											String[] split = authority.split("#");
-											if(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
+											if(GroupSearch.COMMON.getValue().equals(split[0])) {
 												if(currentUserProcessUserTypeList.contains(split[1])) {
 													action = FormAttributeAction.READ.getValue();
 													break;
 												}
-											}
-											if(GroupSearch.USER.getValue().equals(split[0])) {
+											}else if(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
+												if(currentUserProcessUserTypeList.contains(split[1])) {
+													action = FormAttributeAction.READ.getValue();
+													break;
+												}
+											}else if(GroupSearch.USER.getValue().equals(split[0])) {
 												if(UserContext.get().getUserId(true).equals(split[1])) {
 													action = FormAttributeAction.READ.getValue();
 													break;
 												}
-											}
-											if(GroupSearch.TEAM.getValue().equals(split[0])) {
+											}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
 												if(currentUserTeamList.contains(split[1])) {
 													action = FormAttributeAction.READ.getValue();
 													break;
 												}
-											}
-											if(GroupSearch.ROLE.getValue().equals(split[0])) {
+											}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
 												if(UserContext.get().getRoleNameList().contains(split[1])) {
 													action = FormAttributeAction.READ.getValue();
 													break;
 												}
 											}
 										}
-									}else {
-										action = FormAttributeAction.READ.getValue();
 									}
 								}
 							}else if(mode == 1){
