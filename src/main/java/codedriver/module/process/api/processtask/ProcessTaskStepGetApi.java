@@ -274,8 +274,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 							}
 						}
 					}
-					ProcessTaskStepCommentVo temporaryComment = new ProcessTaskStepCommentVo(processTaskStepAudit);
-					processTaskStepVo.setComment(temporaryComment);
+					processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
 				}
 				resultObj.put("processTaskStep", processTaskStepVo);
 			}

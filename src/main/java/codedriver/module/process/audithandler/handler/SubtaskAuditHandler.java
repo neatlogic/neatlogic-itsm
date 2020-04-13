@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
@@ -26,13 +28,13 @@ public class SubtaskAuditHandler implements IProcessTaskStepAuditDetailHandler {
 
 	@Override
 	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+		ProcessTaskStepSubtaskVo oldProcessTaskStepSubtaskVo = null;
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getOldContent())) {
-			ProcessTaskStepSubtaskVo oldProcessTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getOldContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});		
+			oldProcessTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getOldContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});		
 			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(oldProcessTaskStepSubtaskVo.getContentHash());
 			if(processTaskContentVo != null) {
 				oldProcessTaskStepSubtaskVo.setContent(processTaskContentVo.getContent());
 			}
-			processTaskStepAuditDetailVo.setOldContent(JSON.toJSONString(oldProcessTaskStepSubtaskVo));
 		}
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
 			ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});
@@ -40,7 +42,27 @@ public class SubtaskAuditHandler implements IProcessTaskStepAuditDetailHandler {
 			if(processTaskContentVo != null) {
 				processTaskStepSubtaskVo.setContent(processTaskContentVo.getContent());
 			}
-			processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(processTaskStepSubtaskVo));
+			JSONArray subtask = new JSONArray();
+			JSONObject content = new JSONObject();
+			content.put("newContent", processTaskStepSubtaskVo.getContent());
+			if(oldProcessTaskStepSubtaskVo != null) {
+				content.put("oldContent", oldProcessTaskStepSubtaskVo.getContent());
+			}
+			subtask.add(content);
+			JSONObject targetTime = new JSONObject();
+			content.put("newTargetTime", processTaskStepSubtaskVo.getTargetTime());
+			if(oldProcessTaskStepSubtaskVo != null) {
+				content.put("oldTargetTime", oldProcessTaskStepSubtaskVo.getTargetTime());
+			}
+			subtask.add(targetTime);
+			JSONObject userName = new JSONObject();
+			content.put("newUserName", processTaskStepSubtaskVo.getUserName());
+			if(oldProcessTaskStepSubtaskVo != null) {
+				content.put("oldUserName", oldProcessTaskStepSubtaskVo.getUserName());
+			}
+			subtask.add(userName);
+			processTaskStepAuditDetailVo.setOldContent(null);
+			processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(subtask));
 		}
 	}
 
