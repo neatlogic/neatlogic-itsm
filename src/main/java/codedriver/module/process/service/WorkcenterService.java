@@ -27,8 +27,8 @@ import com.techsure.multiattrsearch.util.ESQueryUtil;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
-import codedriver.framework.process.condition.core.IWorkcenterCondition;
-import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
+import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
@@ -322,7 +322,7 @@ public class WorkcenterService {
 	 * @param keyword
 	 * @return
 	 */
-	private JSONArray getKeywordOption(IWorkcenterCondition condition, String keyword,Integer pageSize) {
+	private JSONArray getKeywordOption(IProcessTaskCondition condition, String keyword,Integer pageSize) {
 		JSONArray returnArray = new JSONArray();
 		WorkcenterVo workcenter = getKeywordCondition(condition,keyword);
 		workcenter.setPageSize(pageSize);
@@ -365,7 +365,7 @@ public class WorkcenterService {
 	 * @param type 搜索内容类型
 	 * @return 
 	 */
-	private WorkcenterVo getKeywordCondition(IWorkcenterCondition condition,String keyword) {
+	private WorkcenterVo getKeywordCondition(IProcessTaskCondition condition,String keyword) {
 		JSONObject  searchObj = new JSONObject();
 		JSONArray conditionGroupList = new JSONArray();
 		JSONObject conditionGroup = new JSONObject();
@@ -430,40 +430,8 @@ public class WorkcenterService {
 					toConditionUuid = condition.getUuid();
 					whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
 				}
-				Object value = condition.getValueList().get(0);
-				IWorkcenterCondition workcenterCondition = WorkcenterConditionFactory.getHandler(condition.getName());
-				//Date 类型过滤条件特殊处理
-				if(workcenterCondition != null && workcenterCondition.getHandler(ProcessWorkcenterConditionModel.SIMPLE.getValue()).equals(ProcessFormHandlerType.DATE.toString())){
-					JSONArray dateJSONArray = JSONArray.parseArray(JSON.toJSONString(condition.getValueList()));
-					if(CollectionUtils.isNotEmpty(dateJSONArray)) {
-						JSONObject dateValue = JSONObject.parseObject(dateJSONArray.get(0).toString());
-						SimpleDateFormat format = new SimpleDateFormat(TimeUtil.TIME_FORMAT);
-						String startTime = StringUtils.EMPTY;
-						String endTime = StringUtils.EMPTY;
-						String expression = condition.getExpression();
-						if(dateValue.containsKey(ProcessWorkcenterField.STARTTIME.getValue())) {
-							startTime = format.format(new Date(dateValue.getLong(ProcessWorkcenterField.STARTTIME.getValue())));
-							endTime = format.format(new Date(dateValue.getLong(ProcessWorkcenterField.ENDTIME.getValue())));
-						}else {
-							startTime = TimeUtil.timeTransfer(dateValue.getInteger("timeRange"), dateValue.getString("timeUnit"));
-							endTime = TimeUtil.timeNow();
-						}
-						if(StringUtils.isEmpty(startTime)) {
-							expression = ProcessExpression.LESSTHAN.getExpression();
-							startTime = endTime;
-						}else if(StringUtils.isEmpty(endTime)) {
-							expression = ProcessExpression.GREATERTHAN.getExpression();
-						}
-						whereSb.append(String.format(ProcessExpression.getExpressionEs(expression),ProcessWorkcenterField.getConditionValue(condition.getName()),startTime,endTime));
-					}else {
-						throw new WorkcenterConditionException(condition.getName());
-					}
-				}else {
-					if(condition.getValueList().size()>1) {
-						value = String.join("','",condition.getValueList());
-					}
-					whereSb.append(String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(condition.getName()),String.format("'%s'",  value)));
-				}
+				IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler(condition.getName());
+				whereSb.append(workcenterCondition.getEsWhere(condition, conditionList));
 				fromConditionUuid = toConditionUuid;
 			}
 			

@@ -12,8 +12,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.condition.core.IWorkcenterCondition;
-import codedriver.framework.process.condition.core.WorkcenterConditionFactory;
+import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
@@ -65,9 +65,9 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 		JSONArray resultArray = new JSONArray();
 		String conditionModel = ProcessWorkcenterConditionModel.CUSTOM.getValue();
 		//固定字段条件
-		Map<String, IWorkcenterCondition> workcenterConditionMap = WorkcenterConditionFactory.getConditionComponentMap();
-		for (Map.Entry<String, IWorkcenterCondition> entry : workcenterConditionMap.entrySet()) {
-			IWorkcenterCondition condition = entry.getValue();
+		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
+		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
+			IProcessTaskCondition condition = entry.getValue();
 			if(ProcessField.getValue(condition.getName())== null) {
 				continue;
 			}
