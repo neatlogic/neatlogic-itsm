@@ -337,8 +337,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 						for(int i = 0; i < controllerList.size(); i++) {
 							JSONObject attributeObj = controllerList.getJSONObject(i);
 							String action = FormAttributeAction.HIDE.getValue();
+							JSONObject config = attributeObj.getJSONObject("config");
 							if(mode == 0) {
-								JSONObject config = attributeObj.getJSONObject("config");
 								if(MapUtils.isNotEmpty(config)) {
 									List<String> authorityList = JSON.parseArray(config.getString("authorityConfig"), String.class);
 									if(CollectionUtils.isNotEmpty(authorityList)) {
@@ -381,6 +381,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 							}else if(FormAttributeAction.HIDE.getValue().equals(action)) {
 								attributeObj.put("isHide", true);
 								formAttributeDataMap.remove(attributeObj.getString("uuid"));//对于隐藏属性，不返回值
+								if(config != null) {
+									config.remove("value");
+									config.remove("defaultValueList");//对于隐藏属性，不返回默认值
+								}
 							}
 						}
 						processTaskVo.setFormConfig(formConfigObj.toJSONString());
