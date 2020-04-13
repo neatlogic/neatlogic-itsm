@@ -15,8 +15,6 @@ public interface MatrixDataService {
 
     public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo);
 
-    public List<Map<String, String>> getDynamicTableColumnData(ProcessMatrixDataVo dataVo);
-
     public List<Map<String, String>> getDynamicTableDataByColumnList(ProcessMatrixDataVo dataVo);
 
     public List<String> getExternalMatrixColumnData();

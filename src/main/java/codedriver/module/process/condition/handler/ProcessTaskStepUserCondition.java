@@ -24,7 +24,7 @@ public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
 
 	@Override
 	public String getDisplayName() {
-		return "步骤处理人";
+		return "处理人";
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class ProcessTaskStepUserCondition implements IWorkcenterCondition{
 
 	@Override
 	public Integer getSort() {
-		return 5;
+		return 10;
 	}
 
 	@Override

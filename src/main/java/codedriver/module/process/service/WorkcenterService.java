@@ -73,7 +73,7 @@ public class WorkcenterService {
 	private  QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
-		String orderBy = "order by createTime desc";
+		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from techsure %s %s limit %d,%d", selectColumn,where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
 		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
 	}
@@ -178,7 +178,8 @@ public class WorkcenterService {
 			String stepName = stepJson.getString("name");
 			String stepStatus = stepJson.getString("status");		
 			Integer isActive =stepJson.getInteger("isactive");
-			if((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)||ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus))&&((ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&&isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {		
+			if((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)||ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)||ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus))
+					&&((ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&&isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {		
 				List<String> actionList = new ArrayList<String>();
 				try {
 					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), stepJson.getLong("id"),new ArrayList<String>(){
@@ -330,11 +331,30 @@ public class WorkcenterService {
 			JSONObject titleObj = new JSONObject();
 			JSONArray titleDataList = new JSONArray();
             for (MultiAttrsObject titleEl : titleData) {
-            	titleDataList.add(WorkcenterColumnFactory.getHandler(condition.getName()).getValue(titleEl));
+            	String data = WorkcenterColumnFactory.getHandler(condition.getName()).getValue(titleEl).toString();
+            	//前后各截取值 长度15
+            	int subLength = 15;
+            	int index = data.indexOf(keyword);
+            	String dataPre = StringUtils.EMPTY;
+            	String dataAft = StringUtils.EMPTY;
+            	int keywordIndex = index+keyword.length();
+            	if(keywordIndex >subLength) {
+            		dataPre = "..."+data.substring(keywordIndex-subLength, keywordIndex);
+            	}else {
+            		dataPre = data.substring(0, keywordIndex);
+            	}
+            	
+            	if(data.length() - keywordIndex >subLength+1) {
+            		dataAft = data.substring(keywordIndex,index+subLength)+"...";
+            	}else {
+            		dataAft = data.substring(keywordIndex,data.length());
+            	}
+            	titleDataList.add(dataPre+dataAft);
             }
             titleObj.put("dataList", titleDataList);
             titleObj.put("value", condition.getName());
             titleObj.put("text",condition.getDisplayName());
+            titleObj.put("color","#e42332");
             returnArray.add(titleObj);
 		}
 		return returnArray;
