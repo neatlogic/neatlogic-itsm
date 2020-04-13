@@ -306,6 +306,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	
 	@Override
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode) {
+		Map<String, Object> formAttributeDataMap = processTaskVo.getFormAttributeDataMap();
+		if(formAttributeDataMap == null) {
+			formAttributeDataMap = new HashMap<>();
+		}
 		String formConfig = processTaskVo.getFormConfig();
 		if(StringUtils.isNotBlank(formConfig)) {
 			try {
@@ -376,6 +380,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 								attributeObj.put("isReadonly", true);
 							}else if(FormAttributeAction.HIDE.getValue().equals(action)) {
 								attributeObj.put("isHide", true);
+								formAttributeDataMap.remove(attributeObj.getString("uuid"));//对于隐藏属性，不返回值
 							}
 						}
 						processTaskVo.setFormConfig(formConfigObj.toJSONString());
