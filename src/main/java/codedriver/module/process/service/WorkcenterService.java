@@ -1,9 +1,7 @@
 package codedriver.module.process.service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -17,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
@@ -31,10 +28,8 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
-import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
@@ -43,14 +38,12 @@ import codedriver.framework.process.dto.condition.ConditionGroupRelVo;
 import codedriver.framework.process.dto.condition.ConditionGroupVo;
 import codedriver.framework.process.dto.condition.ConditionRelVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
-import codedriver.framework.process.exception.workcenter.WorkcenterConditionException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
 import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
-import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.condition.handler.ProcessTaskContentCondition;
 import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
 import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
@@ -331,7 +324,11 @@ public class WorkcenterService {
 			JSONObject titleObj = new JSONObject();
 			JSONArray titleDataList = new JSONArray();
             for (MultiAttrsObject titleEl : titleData) {
-            	String data = WorkcenterColumnFactory.getHandler(condition.getName()).getValue(titleEl).toString();
+            	IWorkcenterColumn column = WorkcenterColumnFactory.getHandler(condition.getName());
+            	if(column == null) {
+            		continue;
+            	}
+            	String data = column.getValue(titleEl).toString();
             	//前后各截取值 长度15
             	int subLength = 15;
             	int index = data.indexOf(keyword);
