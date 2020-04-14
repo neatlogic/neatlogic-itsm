@@ -1,25 +1,29 @@
 package codedriver.module.process.api.matrix;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.matrix.MatrixColumnDataRepeatException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixDataService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 @Service
 public class MatrixColumnDataSearchApi extends ApiComponentBase {
@@ -37,7 +41,7 @@ public class MatrixColumnDataSearchApi extends ApiComponentBase {
 
     @Override
     public String getName() {
-        return "矩阵属性数据查询接口";
+        return "矩阵属性数据查询-下拉级联接口";
     }
 
     @Override
@@ -46,34 +50,45 @@ public class MatrixColumnDataSearchApi extends ApiComponentBase {
     }
 
     @Input({ @Param( name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
-            @Param( name = "targetColumnList", desc = "目标属性ID", type = ApiParamType.JSONARRAY, isRequired = true),
+            @Param( name = "value", desc = "作为值的目标属性", type = ApiParamType.STRING, isRequired = true),
+            @Param( name = "text", desc = "作为显示文字的目标属性", type = ApiParamType.STRING, isRequired = true),
             @Param( name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY)})
-    @Description(desc = "矩阵属性数据查询接口")
+    @Description(desc = "矩阵属性数据查询-下拉级联接口")
     @Output({ @Param( name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")})
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        JSONArray columnArray = jsonObj.getJSONArray("targetColumnList");
-        List<String> targetColumnList = new ArrayList<>();
-        for (int i = 0; i < columnArray.size(); i++){
-            targetColumnList.add(columnArray.getString(i));
-        }
+        String matrixUuid = jsonObj.getString("matrixUuid");
+        String value = jsonObj.getString("value");
+        String text = jsonObj.getString("value");
+        List<String> valueList = new ArrayList<>();
         ProcessMatrixDataVo dataVo = new ProcessMatrixDataVo();
-        dataVo.setColumnList(targetColumnList);
-        dataVo.setMatrixUuid(jsonObj.getString("matrixUuid"));
-        List<ProcessMatrixColumnVo> sourceColumnVoList = new ArrayList<>();
         if (jsonObj.containsKey("sourceColumnList")){
-            JSONArray sourceArray = jsonObj.getJSONArray("sourceColumnList");
+        	List<ProcessMatrixColumnVo> sourceColumnVoList = new ArrayList<>();
+        	JSONArray sourceArray = jsonObj.getJSONArray("sourceColumnList");
             for (int i = 0; i < sourceArray.size(); i++){
                 JSONObject sourceObj = sourceArray.getJSONObject(i);
                 ProcessMatrixColumnVo sourceColumn = JSON.toJavaObject(sourceObj, ProcessMatrixColumnVo.class);
                 sourceColumnVoList.add(sourceColumn);
             }
+            dataVo.setSourceColumnList(sourceColumnVoList);
         }
-        dataVo.setSourceColumnList(sourceColumnVoList);
-        ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(jsonObj.getString("matrixUuid"));
+        List<String> targetColumnList = new ArrayList<>();
+        targetColumnList.add(value);
+        targetColumnList.add(text);
+        dataVo.setColumnList(targetColumnList);
+        dataVo.setMatrixUuid(matrixUuid);
+        ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
         if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
             List<Map<String, String>> dataMapList = matrixDataService.getDynamicTableDataByColumnList(dataVo);
+            for(Map<String,String> dataMap : dataMapList){
+            	String valueTmp = dataMap.get(value);
+            	if(valueList.contains(valueTmp)) {
+            		throw new MatrixColumnDataRepeatException();
+            	}else {
+            		valueList.add(valueTmp);
+            	}
+            }
             returnObj.put("columnDataList", dataMapList);
         }else {
             //外部数据源矩阵  暂未实现
