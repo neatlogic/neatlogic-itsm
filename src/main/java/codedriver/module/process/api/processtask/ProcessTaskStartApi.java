@@ -46,7 +46,7 @@ public class ProcessTaskStartApi extends ApiComponentBase {
 	@Input({
 		@Param(name="processTaskId", type = ApiParamType.LONG, isRequired = true, desc="工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤Id"),
-		@Param(name = "action", type = ApiParamType.ENUM, rule = "accept,start", desc = "操作类型")
+		@Param(name = "action", type = ApiParamType.ENUM, rule = "accept,start", isRequired = true, desc = "操作类型")
 	})
 	@Description(desc = "工单步骤开始接口")
 	@Override
