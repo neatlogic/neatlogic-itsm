@@ -25,7 +25,6 @@ import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -64,13 +63,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		List<String> verifyActionList = new ArrayList<>();
-		verifyActionList.add(ProcessTaskStepAction.POCESSTASKVIEW.getValue());
-		verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
-		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, null, verifyActionList);
-		if(!actionList.removeAll(verifyActionList)) {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.POCESSTASKVIEW.getText());
-		}
+		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
@@ -105,9 +98,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 					continue;
 				}
 				//判断当前用户是否有权限查看该节点信息
-				verifyActionList = new ArrayList<>();
+				List<String> verifyActionList = new ArrayList<>();
 				verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-				actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), verifyActionList);
+				List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), verifyActionList);
 				if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 					processTaskStepVo.setIsView(1);
 					processTaskStepVo.setMajorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
