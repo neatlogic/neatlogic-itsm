@@ -1,8 +1,6 @@
 package codedriver.module.process.api.channel;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,20 +71,9 @@ public class ChannelSearchApi extends ApiComponentBase {
 		if(isAuthenticate != null && isAuthenticate.intValue() == 1) {
 			List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
 			//查出当前用户已授权的服务
-			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());			
-			List<String> authorizedUuidList = new ArrayList<>(currentUserAuthorizedChannelUuidList);
-			//查出所有已启用的服务
-			List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
-			//已启用的服务uuid列表
-			List<String> activatedChannelUuidList = channelList.stream().map(ChannelVo::getUuid).collect(Collectors.toList());
-			//只留下已启用的服务uuid，去掉已禁用的
-			authorizedUuidList.retainAll(activatedChannelUuidList);
-			//有设置过授权的服务uuid列表
-			List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList();
-			//得到没有设置过授权的服务uuid列表，默认所有人都有权限
-			activatedChannelUuidList.removeAll(authorizedChannelUuidList);
-			authorizedUuidList.addAll(activatedChannelUuidList);
-			channelVo.setAuthorizedUuidList(authorizedUuidList);
+			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList(), null);
+			channelVo.setAuthorizedUuidList(currentUserAuthorizedChannelUuidList);
+			channelVo.setIsActive(1);
 		}
 		if(channelVo.getNeedPage()) {
 			int rowNum = channelMapper.searchChannelCount(channelVo);
