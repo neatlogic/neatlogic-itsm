@@ -181,6 +181,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				}
 			}
 			processTaskVo.setChannelPath(channelPath.toString());
+			processTaskVo.setChannelType(channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid()));
 		}
 		//耗时
 		if(processTaskVo.getEndTime() != null) {
