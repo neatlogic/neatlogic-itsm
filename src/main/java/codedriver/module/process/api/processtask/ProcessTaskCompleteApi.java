@@ -55,7 +55,6 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 	@Description(desc = "工单完成接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		System.out.println("工单完成接口开始...");
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		if(processTaskVo == null) {
@@ -92,7 +91,6 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 		}else {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
-		System.out.println("工单完成接口结束...");
 		return null;
 	}
 

@@ -76,7 +76,6 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 	@Description(desc = "工单步骤暂存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		System.out.println("工单步骤暂存接口开始...");
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		if(processTaskVo == null) {
@@ -161,7 +160,6 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		//生成活动
 		processTaskStepVo.setParamObj(jsonObj);
 		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.SAVE);
-		System.out.println("工单步骤暂存接口结束...");
 		return null;
 	}
 
