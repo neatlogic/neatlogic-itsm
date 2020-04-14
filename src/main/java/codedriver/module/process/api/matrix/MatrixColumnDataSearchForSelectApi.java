@@ -26,7 +26,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixDataService;
 
 @Service
-public class MatrixColumnDataSearchApi extends ApiComponentBase {
+public class MatrixColumnDataSearchForSelectApi extends ApiComponentBase {
 
     @Autowired
     private MatrixMapper matrixMapper;
@@ -36,7 +36,7 @@ public class MatrixColumnDataSearchApi extends ApiComponentBase {
 
     @Override
     public String getToken() {
-        return "matrix/column/data/search";
+        return "matrix/column/data/search/forselect";
     }
 
     @Override
