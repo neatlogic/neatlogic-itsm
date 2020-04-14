@@ -1,7 +1,10 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -22,6 +25,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -100,9 +104,25 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
 			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
 		}
+		//表单属性显示控制
+		Map<String, String> formAttributeActionMap = new HashMap<>();
+		List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
+		if(processTaskStepFormAttributeList.size() > 0) {
+			for(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
+				formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
+			}
+		}
 		//获取旧表单数据
 		List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
 		if(CollectionUtils.isNotEmpty(oldProcessTaskFormAttributeDataList)) {
+			Iterator<ProcessTaskFormAttributeDataVo> iterator = oldProcessTaskFormAttributeDataList.iterator();
+			while(iterator.hasNext()) {
+				ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo = iterator.next();
+				String attributeUuid = processTaskFormAttributeDataVo.getAttributeUuid();
+				if(formAttributeActionMap.get(attributeUuid) != null) {//只读或隐藏
+					iterator.remove();
+				}
+			}
 			oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
 			jsonObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
 		}
@@ -112,6 +132,10 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = new ArrayList<>(formAttributeDataList.size());
 			for(int i = 0; i < formAttributeDataList.size(); i++) {
 				JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+				String attributeUuid = formAttributeDataObj.getString("attributeUuid");
+				if(formAttributeActionMap.get(attributeUuid) != null) {//对于只读或隐藏的属性，当前用户不能修改，不更新数据库中的值，不进行修改前后对比
+					continue;
+				}
 				ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
 				String dataList = formAttributeDataObj.getString("dataList");
 				attributeData.setData(dataList);
