@@ -17,6 +17,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -56,6 +57,13 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
+		List<String> verifyActionList = new ArrayList<>();
+		verifyActionList.add(ProcessTaskStepAction.POCESSTASKVIEW.getValue());
+		verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
+		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, null, verifyActionList);
+		if(!actionList.removeAll(verifyActionList)) {
+			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.POCESSTASKVIEW.getText());
+		}
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
@@ -73,9 +81,9 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 				continue;
 			}
 			//判断当前用户是否有权限查看该节点信息
-			List<String> verifyActionList = new ArrayList<>();
+			verifyActionList = new ArrayList<>();
 			verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-			List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
+			actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
 			if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 				continue;
 			}
