@@ -100,7 +100,7 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		ITree parent = null;
 		//
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
-		if(catalogList != null && catalogList.size() > 0) {
+		if(CollectionUtils.isNotEmpty(catalogList)) {
 			for(CatalogVo catalogVo : catalogList) {
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 			}
@@ -116,53 +116,28 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 			Collections.sort(catalogList);
 			
 			List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
-			//
-			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
-			//已启用的目录uuid列表
-			List<String> activatedCatalogUuidList = catalogList.stream().map(CatalogVo::getUuid).collect(Collectors.toList());
-			//只留下已启用的目录uuid，去掉已禁用的
-			currentUserAuthorizedCatalogUuidList.retainAll(activatedCatalogUuidList);
-			//有设置过授权的目录uuid列表
-			List<String> authorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList();
-			//得到没有设置过授权的目录uuid列表，默认所有人都有权限
-			activatedCatalogUuidList.removeAll(authorizedCatalogUuidList);
-			currentUserAuthorizedCatalogUuidList.addAll(activatedCatalogUuidList);
-					
-			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
-			//查出所有已启用的服务
-			List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
-			//已启用的服务uuid列表
-			List<String> activatedChannelUuidList = channelList.stream().map(ChannelVo::getUuid).collect(Collectors.toList());
-			//只留下已启用的服务uuid，去掉已禁用的
-			currentUserAuthorizedChannelUuidList.retainAll(activatedChannelUuidList);
-			//有设置过授权的服务uuid列表
-			List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList();
-			//得到没有设置过授权的服务uuid列表，默认所有人都有权限
-			activatedChannelUuidList.removeAll(authorizedChannelUuidList);
-			currentUserAuthorizedChannelUuidList.addAll(activatedChannelUuidList);
-			//查出有激活通道的服务目录uuid
-			List<String>hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedCatalogUuidList, currentUserAuthorizedChannelUuidList);
+			//已授权的目录uuid
+			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList(), null);
+			//已授权的服务uuid
+			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList(), null);
+			//查出有已启用且有授权服务的目录uuid
+			List<String>hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedChannelUuidList);
 		
 			for(CatalogVo catalogVo : catalogList) {
-				if(ITree.ROOT_UUID.equals(catalogVo.getUuid())) {
-					continue;
+				if(!ITree.ROOT_UUID.equals(catalogVo.getUuid())) {//root根目录不返回
+					if(catalogVo.isAncestorOrSelf(catalogUuid)) {//只返回catalogUuid的本身及子目录
+						if(keyword == null || channelParentUuidList.contains(catalogVo.getUuid())) {//符合搜索条件
+							if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())//有权限
+									&& hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {//有已启用且有授权服务
+								treePathMap = new HashMap<>();
+								treePathMap.put("uuid", catalogVo.getUuid());
+								treePathMap.put("path", catalogVo.getNameList());
+								treePathMap.put("keyword", keyword);
+								calalogBreadcrumbList.add(treePathMap);
+							}
+						}
+					}
 				}
-				if(!catalogVo.isAncestorOrSelf(catalogUuid)) {
-					continue;
-				}
-				if(keyword != null && !channelParentUuidList.contains(catalogVo.getUuid())) {
-					continue;
-				}
-				if(!currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())
-						|| !hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
-					continue;
-				}
-							
-				treePathMap = new HashMap<>();
-				treePathMap.put("uuid", catalogVo.getUuid());
-				treePathMap.put("path", catalogVo.getNameList());
-				treePathMap.put("keyword", keyword);
-				calalogBreadcrumbList.add(treePathMap);
 			}
 		}
 		

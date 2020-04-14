@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
-import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -70,47 +68,22 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		//查出所有已启用的目录
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
-		//
-		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
-		List<String> catalogUuidList = new ArrayList<>(currentUserAuthorizedCatalogUuidList);
-		//已启用的目录uuid列表
-		List<String> activatedCatalogUuidList = catalogList.stream().map(CatalogVo::getUuid).collect(Collectors.toList());
-		//只留下已启用的目录uuid，去掉已禁用的
-		catalogUuidList.retainAll(activatedCatalogUuidList);
-		//有设置过授权的目录uuid列表
-		List<String> authorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList();
-		//得到没有设置过授权的目录uuid列表，默认所有人都有权限
-		activatedCatalogUuidList.removeAll(authorizedCatalogUuidList);
-		catalogUuidList.addAll(activatedCatalogUuidList);
-				
-		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList());
-		List<String> channelUuidList = new ArrayList<>(currentUserAuthorizedChannelUuidList);
-		//查出所有已启用的服务
-		List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
-		//已启用的服务uuid列表
-		List<String> activatedChannelUuidList = channelList.stream().map(ChannelVo::getUuid).collect(Collectors.toList());
-		//只留下已启用的服务uuid，去掉已禁用的
-		channelUuidList.retainAll(activatedChannelUuidList);
-		//有设置过授权的服务uuid列表
-		List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList();
-		//得到没有设置过授权的服务uuid列表，默认所有人都有权限
-		activatedChannelUuidList.removeAll(authorizedChannelUuidList);
-		channelUuidList.addAll(activatedChannelUuidList);
-		//查出有激活通道的服务目录uuid
-		List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(catalogUuidList, channelUuidList);
+		//已授权的目录uuid
+		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList(), null);
+		//已授权的服务uuid
+		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList(), null);
+		//查出有已启用且有授权服务的目录uuid
+		List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedChannelUuidList);
 		
-		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
-		String parentUuid = null;
-		CatalogVo parent = null;
-		
+		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();		
 		if(catalogList != null && catalogList.size() > 0) {
 			for(CatalogVo catalogVo : catalogList) {
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 			}
 			
 			for(CatalogVo catalogVo : catalogList) {
-				parentUuid = catalogVo.getParentUuid();
-				parent = uuidKeyMap.get(parentUuid);
+				String parentUuid = catalogVo.getParentUuid();
+				CatalogVo parent = uuidKeyMap.get(parentUuid);
 				if(parent != null) {
 					catalogVo.setParent(parent);
 				}				
@@ -131,7 +104,6 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 					}
 				}
 			}
-			
 		}
 		
 		ITree root = uuidKeyMap.get(ITree.ROOT_UUID);
