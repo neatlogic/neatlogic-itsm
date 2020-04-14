@@ -13,7 +13,6 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -60,19 +59,19 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 		String priorityUuid = jsonObj.getString("priorityUuid");
 		//如果优先级跟原来的优先级不一样，生成活动
 		if(!priorityUuid.equals(oldPriorityUuid)) {
+			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 			Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-			if(processTaskStepVo == null) {
-				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+			if(processTaskStepId != null) {
+				processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+				if(processTaskStepVo == null) {
+					throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+				}
+				if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
+					throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
+				}
 			}
-			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
-				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
-			}
-
-			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-			if(handler == null) {
-				throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
-			}
+			
+			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
 			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
 			
 			//更新优先级
