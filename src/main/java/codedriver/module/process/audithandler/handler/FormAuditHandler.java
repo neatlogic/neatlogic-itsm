@@ -62,6 +62,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 		processTaskStepAuditDetailVo.setNewContent(null);
 		if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
 			Map<String, JSONObject> attributeConfigMap = new HashMap<>();
+			Map<String, String> attributeLabelMap = new HashMap<>();
 			Long processTaskId = processTaskFormAttributeDataList.get(0).getProcessTaskId();
 			ProcessTaskFormVo processTaskForm = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
 			if(processTaskForm != null && StringUtils.isNotBlank(processTaskForm.getFormContent())) {
@@ -71,6 +72,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 					if(CollectionUtils.isNotEmpty(controllerList)) {
 						for(int i = 0; i < controllerList.size(); i++) {
 							JSONObject attributeObj = controllerList.getJSONObject(i);
+							attributeLabelMap.put(attributeObj.getString("uuid"), attributeObj.getString("label"));
 							attributeConfigMap.put(attributeObj.getString("uuid"), attributeObj.getJSONObject("config"));
 						}
 					}
@@ -91,6 +93,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 			JSONArray contentList = new JSONArray();
 			for(ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataList) {
 				JSONObject content  = new JSONObject();
+				content.put("label", attributeLabelMap.get(attributeDataVo.getAttributeUuid()));
 				String oldContent = oldContentMap.get(attributeDataVo.getAttributeUuid());
 				if(oldContent != null) {
 					content.put("oldContent", oldContent);

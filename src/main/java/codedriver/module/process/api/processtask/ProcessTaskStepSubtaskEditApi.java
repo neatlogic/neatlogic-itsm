@@ -17,7 +17,6 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -86,7 +85,6 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 				if(userVo != null) {
 					List<String> oldWorkerList = new ArrayList<>();
 					oldWorkerList.add(GroupSearch.USER.getValuePlugin() + processTaskStepSubtaskVo.getUserId());
-					jsonObj.put(ProcessTaskAuditDetailType.WORKER.getOldDataParamName(), JSON.toJSONString(oldWorkerList));
 					jsonObj.put("oldUserId", processTaskStepSubtaskVo.getUserId());
 					jsonObj.put("oldUserName", processTaskStepSubtaskVo.getUserName());
 					processTaskStepSubtaskVo.setUserId(userVo.getUserId());

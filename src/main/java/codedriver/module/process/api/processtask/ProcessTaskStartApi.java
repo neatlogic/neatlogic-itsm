@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -44,7 +45,8 @@ public class ProcessTaskStartApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name="processTaskId", type = ApiParamType.LONG, isRequired = true, desc="工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤Id")
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤Id"),
+		@Param(name = "action", type = ApiParamType.ENUM, rule = "accept,start", isRequired = true, desc = "操作类型")
 	})
 	@Description(desc = "工单步骤开始接口")
 	@Override
@@ -64,7 +66,10 @@ public class ProcessTaskStartApi extends ApiComponentBase {
 		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		if(handler != null) {
-			handler.accept(processTaskStepVo);
+			String action = jsonObj.getString("action");
+			if(ProcessTaskStepAction.ACCEPT.getValue().equals(action)) {
+				handler.accept(processTaskStepVo);
+			}
 			handler.start(processTaskStepVo);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
