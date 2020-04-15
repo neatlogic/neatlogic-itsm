@@ -44,18 +44,21 @@ public class SubtaskAuditHandler implements IProcessTaskStepAuditDetailHandler {
 			}
 			JSONArray subtask = new JSONArray();
 			JSONObject content = new JSONObject();
+			content.put("type", "content");
 			content.put("newContent", processTaskStepSubtaskVo.getContent());
 			if(oldProcessTaskStepSubtaskVo != null) {
 				content.put("oldContent", oldProcessTaskStepSubtaskVo.getContent());
 			}
 			subtask.add(content);
 			JSONObject targetTime = new JSONObject();
+			targetTime.put("type", "targetTime");
 			targetTime.put("newContent", processTaskStepSubtaskVo.getTargetTime());
 			if(oldProcessTaskStepSubtaskVo != null) {
 				targetTime.put("oldContent", oldProcessTaskStepSubtaskVo.getTargetTime());
 			}
 			subtask.add(targetTime);
 			JSONObject userName = new JSONObject();
+			userName.put("type", "userName");
 			userName.put("newContent", processTaskStepSubtaskVo.getUserName());
 			if(oldProcessTaskStepSubtaskVo != null) {
 				userName.put("oldContent", oldProcessTaskStepSubtaskVo.getUserName());

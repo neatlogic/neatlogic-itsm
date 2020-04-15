@@ -110,11 +110,13 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
+		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
 		//获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
+
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(processTaskStepId != null) {
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
@@ -181,6 +183,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				}
 			}
 			processTaskVo.setChannelPath(channelPath.toString());
+			processTaskVo.setChannelType(channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid()));
 		}
 		//耗时
 		if(processTaskVo.getEndTime() != null) {

@@ -136,15 +136,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}else if(currentProcessTaskStepVo.getIsActive().intValue() != 1){
 			throw new ProcessTaskRuntimeException("步骤未激活，不能处理子任务");
 		}
-		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
-		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
+		
+
 		//TODO linbq查出旧数据
 		ProcessTaskStepSubtaskVo oldProcessTaskStepSubtask = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskVo.getId());
 		ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = processTaskMapper.getProcessTaskStepSubtaskContentById(processTaskStepSubtaskVo.getId());
 		if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
 			oldProcessTaskStepSubtask.setContentHash(processTaskStepSubtaskContentVo.getContentHash());
 		}
+		
+		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
+		
+		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
 		String content = paramObj.getString("content");
 		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
 		processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
