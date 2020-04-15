@@ -17,7 +17,6 @@ import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
-import codedriver.framework.process.exception.matrix.MatrixColumnDataRepeatException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -84,11 +83,13 @@ public class MatrixColumnDataSearchForSelectApi extends ApiComponentBase {
             for(Map<String,String> dataMap : dataMapList){
             	String valueTmp = dataMap.get(value);
             	if(valueList.contains(valueTmp)) {
-            		throw new MatrixColumnDataRepeatException();
+            		returnObj.put("isRepeat", true);
+            		return returnObj;
             	}else {
             		valueList.add(valueTmp);
             	}
             }
+            returnObj.put("isRepeat", false);
             returnObj.put("columnDataList", dataMapList);
         }else {
             //外部数据源矩阵  暂未实现
