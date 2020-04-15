@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,6 +28,7 @@ import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.matrix.MatrixRepeatException;
 import codedriver.framework.process.matrixrexternal.core.IMatrixExternalRequestHandler;
 import codedriver.framework.process.matrixrexternal.core.MatrixExternalRequestFactory;
 import codedriver.module.process.util.UUIDUtil;
@@ -94,6 +96,12 @@ public class MatrixServiceImpl implements MatrixService {
 
     @Override
     public int copyMatrix(String matrixUuid, String name) {
+    	//判断name是否存在
+    	ProcessMatrixVo processMatrixVo = new ProcessMatrixVo();
+    	processMatrixVo.setKeyword(name);
+    	if(matrixMapper.searchMatrixCount(processMatrixVo)>0){
+    		throw new MatrixRepeatException(name);
+    	}
         ProcessMatrixVo sourceMatrix = matrixMapper.getMatrixByUuid(matrixUuid);
         if (StringUtils.isNotBlank(name)){
             sourceMatrix.setName(name);
@@ -170,15 +178,15 @@ public class MatrixServiceImpl implements MatrixService {
             sourceDataVo.setColumnList(sourceColumnList);
             List<Map<String, String>> sourceMatrixDataMapList = matrixDataMapper.searchDynamicTableData(sourceDataVo);
             if (CollectionUtils.isNotEmpty(sourceMatrixDataMapList)){
-                for (Map sourceDataMap : sourceMatrixDataMapList){
+                for (Map<String,String> sourceDataMap : sourceMatrixDataMapList){
                     List<String> targetColumnList = new ArrayList<>();
                     List<String> targetDataList = new ArrayList<>();
                     targetColumnList.add("uuid");
                     targetDataList.add(UUIDUtil.getUUID());
-                    Set set = sourceDataMap.entrySet();
-                    Iterator iterator = set.iterator();
+                    Set<Entry<String, String>> set = sourceDataMap.entrySet();
+                    Iterator<Entry<String, String>> iterator = set.iterator();
                     while (iterator.hasNext()){
-                        Map.Entry<String, String> entry = (Map.Entry)iterator.next();
+                        Map.Entry<String, String> entry = iterator.next();
                         String key = entry.getKey();
                         if (compareMap.containsKey(key)){
                             targetColumnList.add(compareMap.get(key));
