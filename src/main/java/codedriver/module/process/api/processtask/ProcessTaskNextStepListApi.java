@@ -1,5 +1,8 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +47,8 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 	
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id")
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
+		@Param(name = "action", type = ApiParamType.ENUM, rule = "complete,back", isRequired = true, desc = "操作类型"),
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "下一可流转步骤列表")
@@ -71,7 +75,19 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 		if(handler == null) {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
-		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMPLETE);
+		String action = jsonObj.getString("action");
+		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.getProcessTaskStepAction(action));
+		List<ProcessTaskStepVo> resultList = new ArrayList<>();
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
+		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
+			if(processTaskStep.getIsActive() != null) {
+				if(ProcessTaskStepAction.COMPLETE.getValue().equals(action) && processTaskStep.getIsActive().intValue() == 0) {
+					resultList.add(processTaskStep);
+				}else if(ProcessTaskStepAction.BACK.getValue().equals(action) && processTaskStep.getIsActive().intValue() != 0){
+					resultList.add(processTaskStep);
+				}
+			}
+		}
 		return processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
 	}
 
