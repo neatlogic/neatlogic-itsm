@@ -6,10 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,8 +49,6 @@ import codedriver.module.process.service.ProcessTaskService;
 
 @Service
 public class ProcessTaskDraftGetApi extends ApiComponentBase {
-	
-	private final static Logger logger = LoggerFactory.getLogger(ProcessTaskDraftGetApi.class);
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -116,23 +111,26 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			if(processTaskStepList.size() != 1) {
 				throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 			}
-			Long startProcessTaskStepId = processTaskStepList.get(0).getId();
+			ProcessTaskStepVo processTaskStepVo = processTaskStepList.get(0);
 			//获取步骤配置信息
-			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepList.get(0).getConfigHash());
-			if(StringUtils.isNotBlank(stepConfig)) {
-				JSONObject stepConfigObj = null;
-				try {
-					stepConfigObj = JSONObject.parseObject(stepConfig);
-				} catch (Exception ex) {
-					logger.error("hash为"+processTaskStepList.get(0).getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
-				}
-				if (MapUtils.isNotEmpty(stepConfigObj)) {
-					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-					if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-						processTaskVo.setIsRequired(workerPolicyConfig.getInteger("isRequired"));
-					}
-				}
-			}
+			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			processTaskStepVo.setConfig(stepConfig);
+			processTaskVo.setIsRequired(processTaskStepVo.getIsRequired());
+//			if(StringUtils.isNotBlank(stepConfig)) {
+//				JSONObject stepConfigObj = null;
+//				try {
+//					stepConfigObj = JSONObject.parseObject(stepConfig);
+//				} catch (Exception ex) {
+//					logger.error("hash为"+processTaskStepList.get(0).getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
+//				}
+//				if (MapUtils.isNotEmpty(stepConfigObj)) {
+//					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+//					if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+//						processTaskVo.setIsRequired(workerPolicyConfig.getInteger("isRequired"));
+//					}
+//				}
+//			}
+			Long startProcessTaskStepId = processTaskStepList.get(0).getId();
 			//获取上报描述内容
 			List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
 			if(!processTaskStepContentList.isEmpty()) {
@@ -227,20 +225,23 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				throw new ProcessTaskRuntimeException("流程：'" + channel.getProcessUuid() + "'有" + processStepList.size() + "个开始步骤");
 			}
 			String stepConfig = processStepList.get(0).getConfig();
-			if(StringUtils.isNotBlank(stepConfig)) {
-				JSONObject stepConfigObj = null;
-				try {
-					stepConfigObj = JSONObject.parseObject(stepConfig);
-				} catch (Exception ex) {
-					logger.error("process_step表uuid为"+processStepList.get(0).getUuid()+"的config内容不是合法的JSON格式", ex);
-				}
-				if (MapUtils.isNotEmpty(stepConfigObj)) {
-					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-					if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-						processTaskVo.setIsRequired(workerPolicyConfig.getInteger("isRequired"));
-					}
-				}
-			}
+			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+			processTaskStepVo.setConfig(stepConfig);
+			processTaskVo.setIsRequired(processTaskStepVo.getIsRequired());
+//			if(StringUtils.isNotBlank(stepConfig)) {
+//				JSONObject stepConfigObj = null;
+//				try {
+//					stepConfigObj = JSONObject.parseObject(stepConfig);
+//				} catch (Exception ex) {
+//					logger.error("process_step表uuid为"+processStepList.get(0).getUuid()+"的config内容不是合法的JSON格式", ex);
+//				}
+//				if (MapUtils.isNotEmpty(stepConfigObj)) {
+//					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+//					if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+//						processTaskVo.setIsRequired(workerPolicyConfig.getInteger("isRequired"));
+//					}
+//				}
+//			}
 			if(StringUtils.isNotBlank(processVo.getFormUuid())) {
 				FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());
 				if(formVersion == null) {
