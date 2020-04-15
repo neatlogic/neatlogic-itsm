@@ -98,10 +98,10 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
         if(jsonObj.containsKey("searchColumnList")) {
         	JSONArray searchColumnDetailList = new JSONArray();
         	List<String> searchColumnList =JSONObject.parseArray(jsonObj.getJSONArray("searchColumnList").toJSONString(), String.class);
-        	List<ProcessMatrixAttributeVo> matrixAttributeSearchList =  matrixAttributeMapper.getMatrixAttributeByMatrixUuidList(searchColumnList);
+        	List<ProcessMatrixAttributeVo> matrixAttributeSearchList =  matrixAttributeMapper.getMatrixAttributeByMatrixUuidList(searchColumnList,matrixUuid);
         	for(String column :searchColumnList) {
         		for(ProcessMatrixAttributeVo matrixAttributeSearch:matrixAttributeSearchList) {
-            		if(matrixAttributeSearch.getMatrixUuid().equals(column)) {
+            		if(matrixAttributeSearch.getUuid().equals(column)) {
             			searchColumnDetailList.add(matrixAttributeSearch);
             		}
             	}
@@ -110,10 +110,10 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
         }
         //theadList
     	JSONArray theadList = new JSONArray();
-    	List<ProcessMatrixAttributeVo> matrixAttributeTheadList =  matrixAttributeMapper.getMatrixAttributeByMatrixUuidList(targetColumnList);
+    	List<ProcessMatrixAttributeVo> matrixAttributeTheadList =  matrixAttributeMapper.getMatrixAttributeByMatrixUuidList(targetColumnList,matrixUuid);
     	for(String column :targetColumnList) {
     		for(ProcessMatrixAttributeVo matrixAttributeSearch:matrixAttributeTheadList) {
-        		if(matrixAttributeSearch.getMatrixUuid().equals(column)) {
+        		if(matrixAttributeSearch.getUuid().equals(column)) {
         			theadList.add(matrixAttributeSearch);
         		}
         	}
