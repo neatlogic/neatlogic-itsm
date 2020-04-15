@@ -48,7 +48,7 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
-		@Param(name = "action", type = ApiParamType.ENUM, rule = "complete,back", isRequired = true, desc = "操作类型"),
+		@Param(name = "action", type = ApiParamType.ENUM, rule = "complete,back", desc = "操作类型"),
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessTaskStepVo[].class, desc = "下一可流转步骤列表")
@@ -76,6 +76,9 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
 		String action = jsonObj.getString("action");
+		if(action == null) {
+			action = ProcessTaskStepAction.COMPLETE.getValue();
+		}
 		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.getProcessTaskStepAction(action));
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
