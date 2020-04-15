@@ -60,7 +60,7 @@ public class MatrixColumnDataSearchForSelectApi extends ApiComponentBase {
         JSONObject returnObj = new JSONObject();
         String matrixUuid = jsonObj.getString("matrixUuid");
         String value = jsonObj.getString("value");
-        String text = jsonObj.getString("value");
+        String text = jsonObj.getString("text");
         List<String> valueList = new ArrayList<>();
         ProcessMatrixDataVo dataVo = new ProcessMatrixDataVo();
         if (jsonObj.containsKey("sourceColumnList")){
