@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -174,15 +173,16 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
 					Map<String, Object> formAttributeDataMap = new HashMap<>();
 					for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-						String data = processTaskFormAttributeDataVo.getData();
-						if(data != null) {
-							if(data.startsWith("[") && data.endsWith("]")) {
-								List<String> dataList = JSON.parseArray(data, String.class);
-								formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
-							}else {
-								formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
-							}
-						}
+						formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+//						String data = processTaskFormAttributeDataVo.getData();
+//						if(data != null) {
+//							if(data.startsWith("[") && data.endsWith("]")) {
+//								List<String> dataList = JSON.parseArray(data, String.class);
+//								formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
+//							}else {
+//								formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
+//							}
+//						}
 					}
 					processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 				}

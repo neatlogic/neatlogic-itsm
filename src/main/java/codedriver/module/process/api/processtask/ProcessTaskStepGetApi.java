@@ -199,15 +199,16 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
 				Map<String, Object> formAttributeDataMap = new HashMap<>();
 				for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-					String data = processTaskFormAttributeDataVo.getData();
-					if(data != null) {
-						if(data.startsWith("[") && data.endsWith("]")) {
-							List<String> dataList = JSON.parseArray(data, String.class);
-							formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
-						}else {
-							formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
-						}
-					}
+					formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+//					String data = processTaskFormAttributeDataVo.getData();
+//					if(data != null) {
+//						if(data.startsWith("[") && data.endsWith("]")) {
+//							List<String> dataList = JSON.parseArray(data, String.class);
+//							formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
+//						}else {
+//							formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
+//						}
+//					}
 				}
 				processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 			}
@@ -267,13 +268,14 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 							if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
 								Map<String, Object> formAttributeDataMap = new HashMap<>();
 								for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-									String data = processTaskFormAttributeDataVo.getData();
-									if(data.startsWith("[") && data.endsWith("]")) {
-										List<String> dataList = JSON.parseArray(data, String.class);
-										formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
-									}else {
-										formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
-									}
+									formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+//									String data = processTaskFormAttributeDataVo.getData();
+//									if(data.startsWith("[") && data.endsWith("]")) {
+//										List<String> dataList = JSON.parseArray(data, String.class);
+//										formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
+//									}else {
+//										formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
+//									}
 								}
 								processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 							}
