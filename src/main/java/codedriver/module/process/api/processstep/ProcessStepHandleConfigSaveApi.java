@@ -7,9 +7,14 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessStepHandlerService;
+
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @program: codedriver
@@ -17,6 +22,7 @@ import org.springframework.stereotype.Service;
  * @create: 2020-03-18 15:26
  **/
 @Service
+@Transactional
 public class ProcessStepHandleConfigSaveApi extends ApiComponentBase {
 
     @Autowired
@@ -42,11 +48,7 @@ public class ProcessStepHandleConfigSaveApi extends ApiComponentBase {
     @Description(desc = "流程节点组件配置保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ProcessStepHandlerVo handlerVo = new ProcessStepHandlerVo();
-        handlerVo.setHandler(jsonObj.getString("handler"));
-        if (jsonObj.containsKey("config")){
-            handlerVo.setConfig(jsonObj.getJSONObject("config").toString());
-        }
+    	ProcessStepHandlerVo handlerVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessStepHandlerVo>() {});
         stepHandlerService.saveStepHandlerConfig(handlerVo);
         return null;
     }
