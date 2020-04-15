@@ -116,21 +116,8 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 			processTaskStepVo.setConfig(stepConfig);
 			processTaskVo.setIsRequired(processTaskStepVo.getIsRequired());
-//			if(StringUtils.isNotBlank(stepConfig)) {
-//				JSONObject stepConfigObj = null;
-//				try {
-//					stepConfigObj = JSONObject.parseObject(stepConfig);
-//				} catch (Exception ex) {
-//					logger.error("hash为"+processTaskStepList.get(0).getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
-//				}
-//				if (MapUtils.isNotEmpty(stepConfigObj)) {
-//					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-//					if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-//						processTaskVo.setIsRequired(workerPolicyConfig.getInteger("isRequired"));
-//					}
-//				}
-//			}
-			Long startProcessTaskStepId = processTaskStepList.get(0).getId();
+
+			Long startProcessTaskStepId = processTaskStepVo.getId();
 			//获取上报描述内容
 			List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
 			if(!processTaskStepContentList.isEmpty()) {
@@ -172,15 +159,6 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 					Map<String, Object> formAttributeDataMap = new HashMap<>();
 					for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
 						formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-//						String data = processTaskFormAttributeDataVo.getData();
-//						if(data != null) {
-//							if(data.startsWith("[") && data.endsWith("]")) {
-//								List<String> dataList = JSON.parseArray(data, String.class);
-//								formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
-//							}else {
-//								formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
-//							}
-//						}
 					}
 					processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 				}
@@ -228,20 +206,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 			processTaskStepVo.setConfig(stepConfig);
 			processTaskVo.setIsRequired(processTaskStepVo.getIsRequired());
-//			if(StringUtils.isNotBlank(stepConfig)) {
-//				JSONObject stepConfigObj = null;
-//				try {
-//					stepConfigObj = JSONObject.parseObject(stepConfig);
-//				} catch (Exception ex) {
-//					logger.error("process_step表uuid为"+processStepList.get(0).getUuid()+"的config内容不是合法的JSON格式", ex);
-//				}
-//				if (MapUtils.isNotEmpty(stepConfigObj)) {
-//					JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-//					if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-//						processTaskVo.setIsRequired(workerPolicyConfig.getInteger("isRequired"));
-//					}
-//				}
-//			}
+
 			if(StringUtils.isNotBlank(processVo.getFormUuid())) {
 				FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());
 				if(formVersion == null) {

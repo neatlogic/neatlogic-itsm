@@ -195,15 +195,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				Map<String, Object> formAttributeDataMap = new HashMap<>();
 				for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
 					formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-//					String data = processTaskFormAttributeDataVo.getData();
-//					if(data != null) {
-//						if(data.startsWith("[") && data.endsWith("]")) {
-//							List<String> dataList = JSON.parseArray(data, String.class);
-//							formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
-//						}else {
-//							formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
-//						}
-//					}
 				}
 				processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 			}
@@ -221,20 +212,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 				processTaskStepVo.setConfig(stepConfig);
-//				if(StringUtils.isNotBlank(stepConfig)) {
-//					JSONObject stepConfigObj = null;
-//					try {
-//						stepConfigObj = JSONObject.parseObject(stepConfig);
-//					} catch (Exception ex) {
-//						logger.error("hash为"+processTaskStepVo.getConfigHash()+"的processtask_step_config内容不是合法的JSON格式", ex);
-//					}
-//					if (MapUtils.isNotEmpty(stepConfigObj)) {
-//						JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-//						if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-//							processTaskStepVo.setIsRequired(workerPolicyConfig.getInteger("isRequired"));
-//						}
-//					}
-//				}
+				
 				//处理人列表
 				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 				if(CollectionUtils.isNotEmpty(majorUserList)) {
@@ -265,13 +243,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 								Map<String, Object> formAttributeDataMap = new HashMap<>();
 								for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
 									formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-//									String data = processTaskFormAttributeDataVo.getData();
-//									if(data.startsWith("[") && data.endsWith("]")) {
-//										List<String> dataList = JSON.parseArray(data, String.class);
-//										formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), dataList);
-//									}else {
-//										formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), data);
-//									}
 								}
 								processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 							}

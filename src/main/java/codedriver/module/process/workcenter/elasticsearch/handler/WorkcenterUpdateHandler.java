@@ -126,14 +126,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 JSONObject formJson = new JSONObject();
 			 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskId);
 			 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
-				 formJson.put(attributeData.getAttributeUuid(), attributeData.getDataObj());
-//				 if(attributeData.getData() != null&&attributeData.getData().startsWith("[")&&attributeData.getData().endsWith("]")){
-//					 Object obj = JSONArray.parse(attributeData.getData());
-//					 formJson.put(attributeData.getAttributeUuid(),  JSONObject.parseArray(((JSONArray)obj).toJSONString(), String.class));
-//				 }else {
-//					 formJson.put(attributeData.getAttributeUuid(), attributeData.getData());
-//				 }
-				 
+				 formJson.put(attributeData.getAttributeUuid(), attributeData.getDataObj());				 
 			 }
 			
 			 //common
