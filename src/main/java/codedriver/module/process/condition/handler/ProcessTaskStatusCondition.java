@@ -114,5 +114,10 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
 			return false;
 		}
 	}
+	
+	@Override
+	protected String getMyEsWhere(ConditionVo condition,List<ConditionVo> conditionList) {
+		return null;
+	}
 
 }

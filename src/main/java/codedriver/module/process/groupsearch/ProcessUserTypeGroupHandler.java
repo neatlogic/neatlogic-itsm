@@ -28,7 +28,9 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 	public <T> List<T> search(JSONObject jsonObj) {
 		List<String> userTypeList = new ArrayList<String>();
 		for (ProcessUserType s : ProcessUserType.values()) {
-			userTypeList.add(s.getValue());
+			if(s.getText().contains(jsonObj.getString("keyword"))) {
+				userTypeList.add(s.getValue());
+			}
 		}
 		return (List<T>) userTypeList;
 	}
