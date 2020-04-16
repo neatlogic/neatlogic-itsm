@@ -94,7 +94,7 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 				}
 			}
 		}
-		return processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
+		return resultList;
 	}
 
 }
