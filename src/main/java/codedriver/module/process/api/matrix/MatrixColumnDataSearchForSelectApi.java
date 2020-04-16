@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -61,17 +60,9 @@ public class MatrixColumnDataSearchForSelectApi extends ApiComponentBase {
         String value = jsonObj.getString("value");
         String text = jsonObj.getString("text");
         List<String> valueList = new ArrayList<>();
+        List<ProcessMatrixColumnVo> sourceColumnList = JSON.parseArray(jsonObj.getString("sourceColumnList"), ProcessMatrixColumnVo.class);
         ProcessMatrixDataVo dataVo = new ProcessMatrixDataVo();
-        if (jsonObj.containsKey("sourceColumnList")){
-        	List<ProcessMatrixColumnVo> sourceColumnVoList = new ArrayList<>();
-        	JSONArray sourceArray = jsonObj.getJSONArray("sourceColumnList");
-            for (int i = 0; i < sourceArray.size(); i++){
-                JSONObject sourceObj = sourceArray.getJSONObject(i);
-                ProcessMatrixColumnVo sourceColumn = JSON.toJavaObject(sourceObj, ProcessMatrixColumnVo.class);
-                sourceColumnVoList.add(sourceColumn);
-            }
-            dataVo.setSourceColumnList(sourceColumnVoList);
-        }
+        dataVo.setSourceColumnList(sourceColumnList);
         List<String> targetColumnList = new ArrayList<>();
         targetColumnList.add(value);
         targetColumnList.add(text);
