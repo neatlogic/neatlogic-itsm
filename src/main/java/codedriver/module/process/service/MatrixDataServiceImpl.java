@@ -4,6 +4,7 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
+import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.module.process.util.UUIDUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -65,12 +66,15 @@ public class MatrixDataServiceImpl implements MatrixDataService {
     @Override
     public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo) {
         List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
-        List<String> columnList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(attributeVoList)){
+        	List<String> columnList = new ArrayList<>();
+            List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
             for (ProcessMatrixAttributeVo attributeVo : attributeVoList){
                 columnList.add(attributeVo.getUuid());
+                sourceColumnList.add(new ProcessMatrixColumnVo(attributeVo.getUuid(), attributeVo.getName()));
             }
             dataVo.setColumnList(columnList);
+            dataVo.setSourceColumnList(sourceColumnList);
             if (dataVo.getNeedPage()){
                 int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo);
                 dataVo.setRowNum(rowNum);

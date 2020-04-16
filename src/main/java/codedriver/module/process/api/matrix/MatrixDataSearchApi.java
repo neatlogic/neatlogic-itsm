@@ -2,6 +2,7 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -10,7 +11,10 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixDataService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,11 +61,45 @@ public class MatrixDataSearchApi extends ApiComponentBase {
         JSONObject returnObj = new JSONObject();
         ProcessMatrixDataVo dataVo = JSON.toJavaObject(jsonObj, ProcessMatrixDataVo.class);
         returnObj.put("tbodyList", dataService.searchDynamicTableData(dataVo));
-        List<String> headList = new ArrayList<>();
-        headList.add("id");
-        headList.add("uuid");
-        headList.addAll(dataVo.getColumnList());
-        returnObj.put("theadList", headList);
+//        List<String> headList = new ArrayList<>();
+//        headList.add("id");
+//        headList.add("uuid");
+//        headList.addAll(dataVo.getColumnList());
+        List<ProcessMatrixColumnVo> processMatrixColumnList = dataVo.getSourceColumnList();
+        if(CollectionUtils.isNotEmpty(processMatrixColumnList)) {
+        	JSONArray headList = new JSONArray();
+            JSONObject selectionObj = new JSONObject();
+            selectionObj.put("type", "selection");
+            selectionObj.put("width", 60);
+            headList.add(selectionObj);
+            
+            JSONObject idObj = new JSONObject();
+            idObj.put("title", "id");
+            idObj.put("key", "id");
+            headList.add(idObj);
+            
+            JSONObject uuidObj = new JSONObject();
+            uuidObj.put("title", "uuid");
+            uuidObj.put("key", "uuid");
+            headList.add(uuidObj);
+            
+            for(ProcessMatrixColumnVo processMatrixColumnVo : processMatrixColumnList) {
+            	JSONObject columnObj = new JSONObject();
+            	columnObj.put("title", processMatrixColumnVo.getValue());
+            	columnObj.put("key", processMatrixColumnVo.getColumn());
+                headList.add(columnObj);
+            }
+            
+            JSONObject actionObj = new JSONObject();
+            actionObj.put("title", "");
+            actionObj.put("key", "action");
+            actionObj.put("align", "right");
+            actionObj.put("width", 10);
+            headList.add(actionObj);
+            
+            returnObj.put("theadList", headList);
+        }
+        
         if (dataVo.getNeedPage()){
             returnObj.put("pageCount", dataVo.getPageCount());
             returnObj.put("rowNum", dataVo.getRowNum());
