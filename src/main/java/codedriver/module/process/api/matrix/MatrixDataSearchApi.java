@@ -18,7 +18,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,10 +60,6 @@ public class MatrixDataSearchApi extends ApiComponentBase {
         JSONObject returnObj = new JSONObject();
         ProcessMatrixDataVo dataVo = JSON.toJavaObject(jsonObj, ProcessMatrixDataVo.class);
         returnObj.put("tbodyList", dataService.searchDynamicTableData(dataVo));
-//        List<String> headList = new ArrayList<>();
-//        headList.add("id");
-//        headList.add("uuid");
-//        headList.addAll(dataVo.getColumnList());
         List<ProcessMatrixColumnVo> processMatrixColumnList = dataVo.getSourceColumnList();
         if(CollectionUtils.isNotEmpty(processMatrixColumnList)) {
         	JSONArray headList = new JSONArray();
