@@ -61,8 +61,8 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
         JSONObject returnObj = new JSONObject();
         String matrixUuid = jsonObj.getString("matrixUuid");
         //tbodyList
-        List<String> targetColumnList =  JSONObject.parseArray(jsonObj.getJSONArray("targetColumnList").toJSONString(), String.class);
-        List<String> dataUuidList =  JSONObject.parseArray(jsonObj.getJSONArray("dataUuidList").toJSONString(), String.class);
+        List<String> targetColumnList =  JSONObject.parseArray(jsonObj.getString("targetColumnList"), String.class);
+        List<String> dataUuidList =  JSONObject.parseArray(jsonObj.getString("dataUuidList"), String.class);
         ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
         if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
             List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByDataUuidList(dataUuidList,targetColumnList,matrixUuid);
