@@ -54,7 +54,7 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
     	@Param( name = "targetColumnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true),
         @Param( name = "dataUuidList", desc = "需要回显的数据uuid集合", type = ApiParamType.JSONARRAY)
     })
-    @Description(desc = "矩阵属性数据查询-table接口")
+    @Description(desc = "矩阵属性数据回显-table接口")
     @Output({ @Param( name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")})
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
