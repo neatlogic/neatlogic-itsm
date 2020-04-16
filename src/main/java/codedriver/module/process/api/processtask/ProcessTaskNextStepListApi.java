@@ -75,11 +75,14 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 		if(handler == null) {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
+		ProcessTaskStepAction processTaskStepAction = ProcessTaskStepAction.COMPLETE;
 		String action = jsonObj.getString("action");
-		if(action == null) {
+		if(ProcessTaskStepAction.BACK.getValue().equals(action)) {
+			processTaskStepAction = ProcessTaskStepAction.BACK;
+		}else {
 			action = ProcessTaskStepAction.COMPLETE.getValue();
 		}
-		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.getProcessTaskStepAction(action));
+		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, processTaskStepAction);
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
 		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
