@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 
@@ -127,13 +126,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 JSONObject formJson = new JSONObject();
 			 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskId);
 			 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
-				 if(attributeData.getData() != null&&attributeData.getData().startsWith("[")&&attributeData.getData().endsWith("]")){
-					 Object obj = JSONArray.parse(attributeData.getData());
-					 formJson.put(attributeData.getAttributeUuid(),  JSONObject.parseArray(((JSONArray)obj).toJSONString(), String.class));
-				 }else {
-					 formJson.put(attributeData.getAttributeUuid(), attributeData.getData());
-				 }
-				 
+				 formJson.put(attributeData.getAttributeUuid(), attributeData.getDataObj());				 
 			 }
 			
 			 //common
