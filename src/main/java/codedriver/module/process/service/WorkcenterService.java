@@ -44,7 +44,6 @@ import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFacto
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
-import codedriver.module.process.condition.handler.ProcessTaskContentCondition;
 import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
 import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 @Service
@@ -305,8 +304,6 @@ public class WorkcenterService {
 		JSONArray returnArray = getKeywordOption(new ProcessTaskTitleCondition(),keyword,pageSize);
 		//搜索ID
 		returnArray.addAll(getKeywordOption(new ProcessTaskIdCondition(),keyword,pageSize));
-		//搜索内容
-		returnArray.addAll(getKeywordOption(new ProcessTaskContentCondition(),keyword,pageSize));
 		return returnArray;
 	}
 	
@@ -319,39 +316,20 @@ public class WorkcenterService {
 		JSONArray returnArray = new JSONArray();
 		WorkcenterVo workcenter = getKeywordCondition(condition,keyword);
 		workcenter.setPageSize(pageSize);
-		List<MultiAttrsObject> titleData = searchTask(workcenter).getData();
-		if (!titleData.isEmpty()) {
+		List<MultiAttrsObject> dataList = searchTask(workcenter).getData();
+		if (!dataList.isEmpty()) {
 			JSONObject titleObj = new JSONObject();
 			JSONArray titleDataList = new JSONArray();
-            for (MultiAttrsObject titleEl : titleData) {
+            for (MultiAttrsObject titleEl : dataList) {
             	IWorkcenterColumn column = WorkcenterColumnFactory.getHandler(condition.getName());
             	if(column == null) {
             		continue;
             	}
-            	String data = column.getValue(titleEl).toString();
-            	//前后各截取值 长度15
-            	int subLength = 15;
-            	int index = data.indexOf(keyword);
-            	String dataPre = StringUtils.EMPTY;
-            	String dataAft = StringUtils.EMPTY;
-            	int keywordIndex = index+keyword.length();
-            	if(keywordIndex >subLength) {
-            		dataPre = "..."+data.substring(keywordIndex-subLength, keywordIndex);
-            	}else {
-            		dataPre = data.substring(0, keywordIndex);
-            	}
-            	
-            	if(data.length() - keywordIndex >subLength+1) {
-            		dataAft = data.substring(keywordIndex,index+subLength)+"...";
-            	}else {
-            		dataAft = data.substring(keywordIndex,data.length());
-            	}
-            	titleDataList.add(dataPre+dataAft);
+            	titleDataList.add(column.getValue(titleEl));
             }
             titleObj.put("dataList", titleDataList);
             titleObj.put("value", condition.getName());
             titleObj.put("text",condition.getDisplayName());
-            titleObj.put("color","#e42332");
             returnArray.add(titleObj);
 		}
 		return returnArray;
