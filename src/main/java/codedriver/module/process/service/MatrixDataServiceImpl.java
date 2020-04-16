@@ -73,6 +73,7 @@ public class MatrixDataServiceImpl implements MatrixDataService {
             dataVo.setColumnList(columnList);
             if (dataVo.getNeedPage()){
                 int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo);
+                dataVo.setRowNum(rowNum);
                 dataVo.setPageCount(PageUtil.getPageCount(rowNum, dataVo.getPageSize()));
             }
             return matrixDataMapper.searchDynamicTableData(dataVo);
