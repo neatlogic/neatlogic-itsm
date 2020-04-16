@@ -423,15 +423,17 @@ public class WorkcenterService {
 			String fromConditionUuid = null;
 			String toConditionUuid = conditionList.get(0).getUuid();
 			for(ConditionVo condition : conditionList) {
-				if(fromConditionUuid != null) {
-					toConditionUuid = condition.getUuid();
-					whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
-				}
 				IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler(condition.getName());
-				whereSb.append(workcenterCondition.getEsWhere(condition, conditionList));
+				String conditionWhere = workcenterCondition.getEsWhere(condition, conditionList);
+				if(StringUtils.isNotBlank(conditionWhere)) {
+					if(fromConditionUuid != null) {
+						toConditionUuid = condition.getUuid();
+						whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
+					}
+					whereSb.append(conditionWhere);
+				}
 				fromConditionUuid = toConditionUuid;
 			}
-			
 			whereSb.append(")");
 			fromGroupUuid = toGroupUuid;
 		}

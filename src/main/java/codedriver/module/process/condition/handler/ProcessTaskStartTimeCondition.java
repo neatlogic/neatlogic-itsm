@@ -94,7 +94,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 	
 	@Override
 	protected String getMyEsWhere(ConditionVo condition,List<ConditionVo> conditionList) {
-		return getDateWhere(condition,conditionList);
+		return getDateEsWhere(condition,conditionList);
 	}
 
 }

@@ -2,6 +2,7 @@ package codedriver.module.process.condition.handler;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
@@ -117,5 +119,14 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 		}else {
 			return false;
 		}
+	}
+	
+	@Override
+	protected String getMyEsWhere(ConditionVo condition,List<ConditionVo> conditionList) {
+		List<ConditionVo> stepStatusConditionList = conditionList.stream().filter(con->con.getName().equals(ProcessWorkcenterField.STEP_USER.getValue())).collect(Collectors.toList());
+		if(CollectionUtils.isNotEmpty(stepStatusConditionList)) {
+			return " "; //如果同时存“处理人”和“步骤状态”两个过滤条件，则在“处理人”拼接条件，“步骤状态”不需要条件
+		}
+		return null;
 	}
 }

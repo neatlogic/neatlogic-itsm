@@ -15,7 +15,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Transactional
 @Service
-public class workcenterUpdateTestApi extends ApiComponentBase {
+public class WorkcenterProcessTaskDeleteForTestApi extends ApiComponentBase {
 
 	@Autowired
 	ProcessTaskMapper processTaskMapper;
@@ -26,7 +26,7 @@ public class workcenterUpdateTestApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "测试工单中心update接口";
+		return "测试工单中心数据删除delete接口";
 	}
 
 	@Override
@@ -34,10 +34,10 @@ public class workcenterUpdateTestApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Description(desc = "测试工单中心update接口")
+	@Description(desc = "测试工单中心数据删除delete接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		for(Integer i=200;i<300;i++) {
+		for(Integer i=jsonObj.getInteger("from");i<jsonObj.getInteger("to");i++) {
 		MultiAttrsObjectPool  poll = ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME);
 		poll.checkout("techsure", null);
 		poll.delete(i.toString());
