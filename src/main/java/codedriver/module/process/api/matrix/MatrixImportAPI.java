@@ -73,7 +73,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
         for(Map.Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
             multipartFile = entry.getValue();
             is = multipartFile.getInputStream();
-            String name = multipartFile.getName();
+            String name = multipartFile.getOriginalFilename();
             if (StringUtils.isNotBlank(name)){
                 String matrixName = name.substring(0, name.indexOf("."));
                 ProcessMatrixVo matrixVo = matrixMapper.getMatrixByName(matrixName);
