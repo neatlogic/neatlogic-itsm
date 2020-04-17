@@ -65,9 +65,9 @@ public class MatrixServiceImpl implements MatrixService {
             matrixMapper.insertMatrix(matrixVo);
         }
 
-        if (matrixVo.getType().equals(ProcessMatrixType.EXTERNAL.getValue())){
-            saveExternalMatrix(matrixVo);
-        }
+//        if (matrixVo.getType().equals(ProcessMatrixType.EXTERNAL.getValue())){
+//            saveExternalMatrix(matrixVo);
+//        }
         return matrixVo;
     }
 

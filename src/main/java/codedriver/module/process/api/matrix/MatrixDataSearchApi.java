@@ -107,10 +107,11 @@ public class MatrixDataSearchApi extends ApiComponentBase {
             returnObj.put("pageSize", dataVo.getPageSize());
             returnObj.put("currentPage", dataVo.getCurrentPage());
         }
-        
-        returnObj.put("dispatcherVoList", matrixMapper.getMatrixDispatcherByMatrixUuid(dataVo.getMatrixUuid()));
-        returnObj.put("componentVoList", matrixMapper.getMatrixFormComponentByMatrixUuid(dataVo.getMatrixUuid()));
-        
+        List<ProcessMatrixDispatcherVo> dispatcherVoList = matrixMapper.getMatrixDispatcherByMatrixUuid(dataVo.getMatrixUuid());
+        returnObj.put("dispatcherVoList", dispatcherVoList);
+        List<ProcessMatrixFormComponentVo> componentVoList = matrixMapper.getMatrixFormComponentByMatrixUuid(dataVo.getMatrixUuid());
+        returnObj.put("componentVoList", componentVoList);
+        returnObj.put("usedCount", dispatcherVoList.size() + componentVoList.size());
         return returnObj;
     }
 }
