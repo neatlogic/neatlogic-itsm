@@ -1,6 +1,8 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.dao.mapper.MatrixMapper;
+import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -20,6 +22,9 @@ public class MatrixCopyApi extends ApiComponentBase {
 
     @Autowired
     private MatrixService matrixService;
+
+    @Autowired
+    private MatrixMapper matrixMapper;
 
     @Override
     public String getToken() {
@@ -41,7 +46,11 @@ public class MatrixCopyApi extends ApiComponentBase {
     @Description(desc = "矩阵数据源复制接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        matrixService.copyMatrix(jsonObj.getString("uuid"), jsonObj.getString("name"));
+    	String uuid = jsonObj.getString("uuid");
+    	if(matrixMapper.checkMatrixIsExists(uuid) == 0) {
+    		throw new MatrixNotFoundException(uuid);
+    	}
+        matrixService.copyMatrix(uuid, jsonObj.getString("name"));
         return null;
     }
 }

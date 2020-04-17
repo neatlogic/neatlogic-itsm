@@ -18,8 +18,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
@@ -64,34 +62,8 @@ public class MatrixServiceImpl implements MatrixService {
             matrixVo.setUuid(UUIDUtil.getUUID());
             matrixMapper.insertMatrix(matrixVo);
         }
-
-        if (matrixVo.getType().equals(ProcessMatrixType.EXTERNAL.getValue())){
-            saveExternalMatrix(matrixVo);
-        }
+        
         return matrixVo;
-    }
-
-    @Override
-    public List<ProcessMatrixVo> searchMatrix(ProcessMatrixVo matrixVo) {
-        if (matrixVo.getNeedPage()){
-            int rowNum = matrixMapper.searchMatrixCount(matrixVo);
-            matrixVo.setRowNum(rowNum);
-            matrixVo.setPageCount(PageUtil.getPageCount(rowNum, matrixVo.getPageSize()));
-        }
-        return matrixMapper.searchMatrix(matrixVo);
-    }
-
-    @Override
-    public int deleteMatrix(String uuid) {
-        matrixMapper.deleteMatrixByUuid(uuid);
-        return 0;
-    }
-
-    @Override
-    public int updateMatrixName(ProcessMatrixVo matrixVo) {
-        matrixVo.setLcu(UserContext.get().getUserId());
-        matrixMapper.updateMatrixNameAndLcu(matrixVo);
-        return 0;
     }
 
     @Override
@@ -199,15 +171,4 @@ public class MatrixServiceImpl implements MatrixService {
         }
     }
 
-    public void saveExternalMatrix(ProcessMatrixVo matrixVo){
-        ProcessMatrixExternalVo externalVo = new ProcessMatrixExternalVo();
-        JSONObject externalObj = JSONObject.parseObject(matrixVo.getExternalConfig());
-        externalVo.setMatrixUuid(matrixVo.getUuid());
-        externalVo.setPlugin(externalObj.getString("plugin"));
-        externalVo.setConfig(externalObj.getJSONObject("config").toString());
-        if (StringUtils.isNotBlank(matrixVo.getUuid())){
-            externalMapper.deleteMatrixExternalByMatrixUuid(matrixVo.getUuid());
-        }
-        externalMapper.insertMatrixExternal(externalVo);
-    }
 }

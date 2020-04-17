@@ -1,5 +1,6 @@
 package codedriver.module.process.api.matrix;
 
+import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
@@ -7,7 +8,6 @@ import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.process.*;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.module.process.service.MatrixAttributeService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +37,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
     private MatrixMapper matrixMapper;
 
     @Autowired
-    private MatrixAttributeService attributeService;
+    private MatrixAttributeMapper attributeMapper;
 
     @Autowired
     private MatrixDataMapper dataMapper;
@@ -80,7 +80,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                 if (matrixVo == null){
                     throw new MatrixNotFoundException(matrixName);
                 }
-                List<ProcessMatrixAttributeVo> attributeVoList = attributeService.searchMatrixAttribute(matrixVo.getUuid());
+                List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixVo.getUuid());
                 if (CollectionUtils.isNotEmpty(attributeVoList)){
                     Map<String, String> headerMap = new HashMap<>();
                     for (ProcessMatrixAttributeVo attributeVo : attributeVoList){

@@ -3,6 +3,7 @@ package codedriver.module.process.api.matrix;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
@@ -52,6 +53,9 @@ public class MatrixExternalExportApi extends BinaryStreamApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(paramObj.getString("matrixUuid"));
+        if(matrixVo == null) {
+        	throw new MatrixNotFoundException(paramObj.getString("matrixUuid"));
+        }
         JSONObject dataObj = matrixService.getMatrixExternalData(paramObj.getString("matrixUuid"));
         List<String> headerList = dataObj.getJSONArray("headerList").toJavaList(String.class);
         List<String> columnList = dataObj.getJSONArray("columnList").toJavaList(String.class);

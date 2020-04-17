@@ -8,13 +8,14 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.MatrixService;
 
 /**
  * @program: codedriver
@@ -25,7 +26,7 @@ import codedriver.module.process.service.MatrixService;
 public class MatrixSearchApi extends ApiComponentBase {
 
     @Autowired
-    private MatrixService matrixService;
+    private MatrixMapper matrixMapper;
 
     @Override
     public String getToken() {
@@ -53,13 +54,15 @@ public class MatrixSearchApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         ProcessMatrixVo matrix = JSON.toJavaObject(jsonObj, ProcessMatrixVo.class);
-        returnObj.put("tbodyList", matrixService.searchMatrix(matrix));
         if (matrix.getNeedPage()){
+            int rowNum = matrixMapper.searchMatrixCount(matrix);
+            matrix.setPageCount(PageUtil.getPageCount(rowNum, matrix.getPageSize()));
             returnObj.put("pageCount", matrix.getPageCount());
-            returnObj.put("rowNum", matrix.getRowNum());
+            returnObj.put("rowNum", rowNum);
             returnObj.put("pageSize", matrix.getPageSize());
             returnObj.put("currentPage", matrix.getCurrentPage());
         }
+        returnObj.put("tbodyList", matrixMapper.searchMatrix(matrix));
         return returnObj;
     }
 }

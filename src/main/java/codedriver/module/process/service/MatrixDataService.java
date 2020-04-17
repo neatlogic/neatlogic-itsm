@@ -15,11 +15,7 @@ public interface MatrixDataService {
 
     public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo);
 
-    public List<Map<String, String>> getDynamicTableDataByColumnList(ProcessMatrixDataVo dataVo);
-
     public List<String> getExternalMatrixColumnData();
 
     public void saveDynamicTableData(JSONArray dataArray, String matrixUuid);
-
-    public void deleteDynamicTableData(String uuid, String matrixUuid);
 }

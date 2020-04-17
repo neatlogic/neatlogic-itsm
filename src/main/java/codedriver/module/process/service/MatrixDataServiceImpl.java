@@ -59,11 +59,6 @@ public class MatrixDataServiceImpl implements MatrixDataService {
     }
 
     @Override
-    public void deleteDynamicTableData(String uuid, String matrixUuid) {
-        matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuid);
-    }
-
-    @Override
     public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo) {
         List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
         if (CollectionUtils.isNotEmpty(attributeVoList)){
@@ -83,11 +78,6 @@ public class MatrixDataServiceImpl implements MatrixDataService {
             return matrixDataMapper.searchDynamicTableData(dataVo);
         }
         return null;
-    }
-
-    @Override
-    public List<Map<String, String>> getDynamicTableDataByColumnList(ProcessMatrixDataVo dataVo) {
-        return matrixDataMapper.getDynamicTableDataByColumnList(dataVo);
     }
 
     @Override

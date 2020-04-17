@@ -85,8 +85,4 @@ public class MatrixAttributeServiceImpl implements MatrixAttributeService {
         }
     }
 
-    @Override
-    public List<ProcessMatrixAttributeVo> searchMatrixAttribute(String matrixUuid) {
-        return attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-    }
 }
