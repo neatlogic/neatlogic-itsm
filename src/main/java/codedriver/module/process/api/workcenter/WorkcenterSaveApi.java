@@ -17,9 +17,9 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.dto.AuthorityVo;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
-import codedriver.framework.process.workcenter.dto.WorkcenterRoleVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -84,19 +84,20 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 				throw new WorkcenterNoAuthException("管理");
 			}
 			workcenterVo.setType(ProcessWorkcenterType.SYSTEM.getValue());
-			workcenterMapper.deleteWorkcenterRoleByUuid(workcenterVo.getUuid());
+			workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());
 			//更新角色
 			for(Object value:valueList) {
-				WorkcenterRoleVo workcenterRoleVo = new WorkcenterRoleVo();
-				workcenterRoleVo.setWorkcenterUuid(workcenterVo.getUuid());
+				AuthorityVo authorityVo = new AuthorityVo();
 				if(value.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
-					workcenterRoleVo.setRoleName(value.toString().replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
+					authorityVo.setType(GroupSearch.ROLE.getValue());
+					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
 				}else if(value.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
-					workcenterRoleVo.setUserId(value.toString().replaceAll(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
+					authorityVo.setType(GroupSearch.USER.getValue());
+					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 				}else {
 					throw new WorkcenterParamException("valueList");
 				}
-				workcenterMapper.insertWorkcenterRole(workcenterRoleVo);
+				workcenterMapper.insertWorkcenterAuthority(authorityVo,workcenterVo.getUuid());
 			}
 		}else {
 			workcenterVo.setType(ProcessWorkcenterType.CUSTOM.getValue());

@@ -47,7 +47,7 @@ public class WorkcenterDeleteApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		workcenterMapper.deleteWorkcenterRoleByUuid(uuid);
+		workcenterMapper.deleteWorkcenterAuthorityByUuid(uuid);
 		workcenterMapper.deleteWorkcenterByUuid(uuid);
 		workcenterMapper.deleteWorkcenterThead(new WorkcenterTheadVo(uuid,null));
 		return null;

@@ -85,7 +85,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		List<AuthorityVo> authorityList = catalogVo.getAuthorityVoList();
 		if(CollectionUtils.isNotEmpty(authorityList)) {
 			for(AuthorityVo authorityVo : authorityList) {
-				catalogMapper.insertCatalogAuthority(authorityVo);
+				catalogMapper.insertCatalogAuthority(authorityVo,catalogVo.getUuid());
 			}
 		}
 		return catalogVo.getUuid();

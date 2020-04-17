@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
@@ -32,8 +33,12 @@ public class WorkcenterListApi extends ApiComponentBase {
 
 	@Autowired
 	WorkcenterMapper workcenterMapper;
+	
 	@Autowired
 	UserMapper userMapper;
+	
+	@Autowired
+	TeamMapper teamMapper;
 	
 	@Autowired
 	WorkcenterService workcenterService;
@@ -62,7 +67,8 @@ public class WorkcenterListApi extends ApiComponentBase {
 	@Description(desc = "获取工单中心分类列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		List<WorkcenterVo>  workcenterList = workcenterMapper.getWorkcenter(new WorkcenterVo(UserContext.get().getUserId(),UserContext.get().getRoleNameList(),UserContext.get().getUserId()));
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
+		List<WorkcenterVo>  workcenterList = workcenterMapper.getAuthorizedWorkcenterList(UserContext.get().getUserId(),teamUuidList,UserContext.get().getRoleNameList());
 		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),WORKCENTER_MODIFY.class.getSimpleName()));
 		Iterator<WorkcenterVo> it =workcenterList.iterator();
 	    while (it.hasNext()) {

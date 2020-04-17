@@ -144,7 +144,7 @@ public class ChannelSaveApi extends ApiComponentBase {
 		List<AuthorityVo> authorityList = channelVo.getAuthorityVoList();
 		if(CollectionUtils.isNotEmpty(authorityList)) {
 			for(AuthorityVo authorityVo : authorityList) {
-				channelMapper.insertChannelAuthority(authorityVo);
+				channelMapper.insertChannelAuthority(authorityVo,channelVo.getUuid());
 			}
 		}
 		return uuid;
