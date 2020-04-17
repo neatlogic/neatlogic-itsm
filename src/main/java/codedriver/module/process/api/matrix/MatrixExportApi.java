@@ -2,15 +2,16 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.attribute.constvalue.AttributeHandler;
+import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.module.process.service.MatrixAttributeService;
 import codedriver.module.process.service.MatrixDataService;
 
 import codedriver.module.process.util.ExcelUtil;
@@ -39,7 +40,7 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
 
 
     @Autowired
-    private MatrixAttributeService attributeService;
+    private MatrixAttributeMapper attributeMapper;
 
     @Autowired
     private MatrixDataService dataService;
@@ -66,8 +67,12 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
     @Description( desc = "矩阵导出接口")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(paramObj.getString("matrixUuid"));
-        List<ProcessMatrixAttributeVo> attributeVoList = attributeService.searchMatrixAttribute(paramObj.getString("matrixUuid"));
+    	String matrixUuid = paramObj.getString("matrixUuid");
+        ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+        if(matrixVo == null) {
+        	throw new MatrixNotFoundException(matrixUuid);
+        }
+        List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
         if (CollectionUtils.isNotEmpty(attributeVoList)){
             List<String> headerList = new ArrayList<>();
             List<String> columnList = new ArrayList<>();

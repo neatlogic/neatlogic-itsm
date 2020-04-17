@@ -1,11 +1,13 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.dao.mapper.MatrixDataMapper;
+import codedriver.framework.process.dao.mapper.MatrixMapper;
+import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.MatrixDataService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,10 @@ import org.springframework.stereotype.Service;
 public class MatrixDataDeleteApi extends ApiComponentBase {
 
     @Autowired
-    private MatrixDataService dataService;
+    private MatrixDataMapper dataMapper;
+
+    @Autowired
+    private MatrixMapper matrixMapper;
 
     @Override
     public String getToken() {
@@ -41,7 +46,11 @@ public class MatrixDataDeleteApi extends ApiComponentBase {
     @Description(desc = "矩阵数据删除接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        dataService.deleteDynamicTableData(jsonObj.getString("uuid"), jsonObj.getString("matrixUuid"));
+    	String matrixUuid = jsonObj.getString("matrixUuid");
+		if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
+			throw new MatrixNotFoundException(matrixUuid);
+		}
+        dataMapper.deleteDynamicTableDataByUuid(jsonObj.getString("uuid"), matrixUuid);
         return null;
     }
 }

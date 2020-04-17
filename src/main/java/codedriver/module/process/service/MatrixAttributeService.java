@@ -12,6 +12,4 @@ import java.util.List;
 public interface MatrixAttributeService {
 
     public void saveMatrixAttribute(List<ProcessMatrixAttributeVo> attributeVoList, String matrixUuid);
-
-    public List<ProcessMatrixAttributeVo> searchMatrixAttribute(String matrixUuid);
 }

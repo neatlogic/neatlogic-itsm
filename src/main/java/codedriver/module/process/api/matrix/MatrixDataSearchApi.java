@@ -7,6 +7,7 @@ import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixDispatcherVo;
 import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
+import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -65,6 +66,9 @@ public class MatrixDataSearchApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         ProcessMatrixDataVo dataVo = JSON.toJavaObject(jsonObj, ProcessMatrixDataVo.class);
+    	if(matrixMapper.checkMatrixIsExists(dataVo.getMatrixUuid()) == 0) {
+    		throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+    	}
         returnObj.put("tbodyList", dataService.searchDynamicTableData(dataVo));
         List<ProcessMatrixColumnVo> processMatrixColumnList = dataVo.getSourceColumnList();
         if(CollectionUtils.isNotEmpty(processMatrixColumnList)) {

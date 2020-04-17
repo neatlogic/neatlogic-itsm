@@ -16,6 +16,7 @@ import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -60,10 +61,13 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         String matrixUuid = jsonObj.getString("matrixUuid");
+        ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+        if(matrixVo == null) {
+        	throw new MatrixNotFoundException(matrixUuid);
+        }
         //tbodyList
         List<String> targetColumnList =  JSONObject.parseArray(jsonObj.getString("targetColumnList"), String.class);
         List<String> dataUuidList =  JSONObject.parseArray(jsonObj.getString("dataUuidList"), String.class);
-        ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
         if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
             List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByDataUuidList(dataUuidList,targetColumnList,matrixUuid);
             returnObj.put("tbodyList", dataMapList);

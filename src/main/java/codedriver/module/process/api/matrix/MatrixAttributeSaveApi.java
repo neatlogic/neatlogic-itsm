@@ -1,7 +1,9 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
+import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -26,6 +28,9 @@ public class MatrixAttributeSaveApi extends ApiComponentBase {
     @Autowired
     private MatrixAttributeService attributeService;
 
+    @Autowired
+    private MatrixMapper matrixMapper;
+
     @Override
     public String getToken() {
         return "matrix/attribute/save";
@@ -48,6 +53,9 @@ public class MatrixAttributeSaveApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ProcessMatrixAttributeVo> attributeVoList = new ArrayList<>();
         String matrixUuid = jsonObj.getString("matrixUuid");
+    	if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
+    		throw new MatrixNotFoundException(matrixUuid);
+    	}
         JSONArray attributeArray = jsonObj.getJSONArray("attributeArray");
         for (int i = 0;i < attributeArray.size(); i++){
             JSONObject attributeObj = attributeArray.getJSONObject(i);

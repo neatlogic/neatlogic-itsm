@@ -8,7 +8,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
+import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
+import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -19,6 +21,9 @@ public class MatrixExternalSaveApi extends ApiComponentBase {
 
     @Autowired
     private MatrixExternalMapper externalMapper;
+
+    @Autowired
+    private MatrixMapper matrixMapper;
 
     @Override
     public String getToken() {
@@ -46,6 +51,9 @@ public class MatrixExternalSaveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessMatrixExternalVo externalVo = JSON.toJavaObject(jsonObj, ProcessMatrixExternalVo.class);
+        if(matrixMapper.checkMatrixIsExists(externalVo.getMatrixUuid()) == 0) {
+    		throw new MatrixNotFoundException(externalVo.getMatrixUuid());
+    	}
         if(externalVo.getId() != null) {
         	externalMapper.updateMatrixExternal(externalVo);
         }else {
