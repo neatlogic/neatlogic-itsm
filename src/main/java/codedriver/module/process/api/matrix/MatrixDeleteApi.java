@@ -41,11 +41,7 @@ public class MatrixDeleteApi extends ApiComponentBase {
     @Description(desc = "矩阵删除接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-    	String uuid = jsonObj.getString("uuid");
-    	if(matrixMapper.checkMatrixIsExists(uuid) == 0) {
-    		throw new MatrixNotFoundException(uuid);
-    	}
-    	matrixMapper.deleteMatrixByUuid(uuid);
+    	matrixMapper.deleteMatrixByUuid(jsonObj.getString("uuid"));
         return null;
     }
 }
