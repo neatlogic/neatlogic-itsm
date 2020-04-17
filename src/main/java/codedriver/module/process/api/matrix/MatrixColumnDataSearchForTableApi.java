@@ -1,6 +1,5 @@
 package codedriver.module.process.api.matrix;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -73,17 +72,9 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         String matrixUuid = jsonObj.getString("matrixUuid");
+        List<ProcessMatrixColumnVo> sourceColumnList = JSON.parseArray(jsonObj.getString("searchValueList"), ProcessMatrixColumnVo.class);
         ProcessMatrixDataVo dataVo = new ProcessMatrixDataVo();
-        if (jsonObj.containsKey("searchValueList")){
-        	List<ProcessMatrixColumnVo> sourceColumnVoList = new ArrayList<>();
-        	JSONArray sourceArray = jsonObj.getJSONArray("searchValueList");
-            for (int i = 0; i < sourceArray.size(); i++){
-                JSONObject sourceObj = sourceArray.getJSONObject(i);
-                ProcessMatrixColumnVo sourceColumn = JSON.toJavaObject(sourceObj, ProcessMatrixColumnVo.class);
-                sourceColumnVoList.add(sourceColumn);
-            }
-            dataVo.setSourceColumnList(sourceColumnVoList);
-        }
+        dataVo.setSourceColumnList(sourceColumnList);
         List<String> targetColumnList =  JSONObject.parseArray(jsonObj.getJSONArray("targetColumnList").toJSONString(), String.class);
         dataVo.setColumnList(targetColumnList);
         dataVo.setMatrixUuid(matrixUuid);
@@ -97,7 +88,7 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
         }
         if(jsonObj.containsKey("searchColumnList")) {
         	JSONArray searchColumnDetailList = new JSONArray();
-        	List<String> searchColumnList =JSONObject.parseArray(jsonObj.getJSONArray("searchColumnList").toJSONString(), String.class);
+        	List<String> searchColumnList =JSONObject.parseArray(jsonObj.getString("searchColumnList"), String.class);
         	List<ProcessMatrixAttributeVo> matrixAttributeSearchList =  matrixAttributeMapper.getMatrixAttributeByMatrixUuidList(searchColumnList,matrixUuid);
         	for(String column :searchColumnList) {
         		for(ProcessMatrixAttributeVo matrixAttributeSearch:matrixAttributeSearchList) {

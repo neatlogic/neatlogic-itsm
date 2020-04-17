@@ -1,13 +1,16 @@
 package codedriver.module.process.api.matrix;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,19 +36,16 @@ public class MatrixTypeApi extends ApiComponentBase {
         return null;
     }
 
-    @Output({ @Param( name = "typeList", desc = "矩阵类型返回列表", type = ApiParamType.JSONARRAY)})
+    @Output({ @Param( name = "typeList", desc = "矩阵类型返回列表", explode = ValueTextVo[].class)})
     @Description(desc = "矩阵类型返回接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        JSONArray typeArray = new JSONArray();
+        List<ValueTextVo> typeList = new ArrayList<>();
         for (ProcessMatrixType type : ProcessMatrixType.values()){
-            JSONObject typeObj = new JSONObject();
-            typeObj.put("text", type.getName());
-            typeObj.put("value", type.getValue());
-            typeArray.add(typeObj);
+        	typeList.add(new ValueTextVo(type.getValue(), type.getName()));
         }
-        returnObj.put("typeList", typeArray);
+        returnObj.put("typeList", typeList);
         return returnObj;
     }
 }
