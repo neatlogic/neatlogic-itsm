@@ -404,13 +404,14 @@ public class WorkcenterService {
 				IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler(condition.getName());
 				String conditionWhere = workcenterCondition.getEsWhere(condition, conditionList);
 				if(StringUtils.isNotBlank(conditionWhere)) {
+					toConditionUuid = condition.getUuid();
 					if(fromConditionUuid != null) {
-						toConditionUuid = condition.getUuid();
 						whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
 					}
 					whereSb.append(conditionWhere);
+					fromConditionUuid = toConditionUuid;
 				}
-				fromConditionUuid = toConditionUuid;
+				
 			}
 			whereSb.append(")");
 			fromGroupUuid = toGroupUuid;
