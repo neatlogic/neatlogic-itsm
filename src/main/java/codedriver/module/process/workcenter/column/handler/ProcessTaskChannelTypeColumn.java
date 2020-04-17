@@ -30,11 +30,15 @@ public class ProcessTaskChannelTypeColumn extends WorkcenterColumnBase implement
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String channelTypeUuid = json.getString(this.getName());
+		JSONObject channelTypeJson = new JSONObject();
 		ChannelTypeVo channelType = channelMapper.getChannelTypeByUuid(channelTypeUuid);
+		channelTypeJson.put("value", channelTypeUuid);
 		if(channelType != null) {
-			return channelType.getName();
+			channelTypeJson.put("text", channelType.getName());
+			channelTypeJson.put("color", channelType.getColor());
+
 		}
-		return channelTypeUuid;
+		return channelTypeJson;
 	}
 
 	@Override

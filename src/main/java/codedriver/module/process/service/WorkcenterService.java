@@ -177,10 +177,7 @@ public class WorkcenterService {
 					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), stepJson.getLong("id"),new ArrayList<String>(){
 						private static final long serialVersionUID = 1L;
 					{
-						add(ProcessTaskStepAction.COMPLETESUBTASK.getValue());
-						add(ProcessTaskStepAction.COMPLETE.getValue());
-						add(ProcessTaskStepAction.START.getValue());
-						add(ProcessTaskStepAction.STARTPROCESS.getValue());
+						add(ProcessTaskStepAction.WORK.getValue());
 						add(ProcessTaskStepAction.ABORT.getValue());
 						add(ProcessTaskStepAction.RECOVER.getValue());
 						add(ProcessTaskStepAction.URGE.getValue());
@@ -189,11 +186,7 @@ public class WorkcenterService {
 					logger.error(ex.getMessage(),ex);
 				}
 				
-				if(actionList.contains(ProcessTaskStepAction.COMPLETESUBTASK.getValue())||
-						actionList.contains(ProcessTaskStepAction.COMPLETE.getValue())||
-						actionList.contains(ProcessTaskStepAction.STARTPROCESS.getValue())||
-						actionList.contains(ProcessTaskStepAction.START.getValue())
-				) { 
+				if(actionList.contains(ProcessTaskStepAction.WORK.getValue())) { 
 				JSONObject configJson = new JSONObject();
 					configJson.put("taskid", el.getId());
 					configJson.put("stepid", stepId);
@@ -217,7 +210,7 @@ public class WorkcenterService {
 		}
 		
 		handleActionJson.put("name", "handle");
-		handleActionJson.put("text", "流转");
+		handleActionJson.put("text", "处理");
 		handleActionJson.put("sort", 2);
 		if(CollectionUtils.isNotEmpty(handleArray)) {
 			handleActionJson.put("handleList", handleArray);
@@ -404,13 +397,15 @@ public class WorkcenterService {
 				IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler(condition.getName());
 				String conditionWhere = workcenterCondition.getEsWhere(condition, conditionList);
 				if(StringUtils.isNotBlank(conditionWhere)) {
+					toConditionUuid = condition.getUuid();
 					if(fromConditionUuid != null) {
-						toConditionUuid = condition.getUuid();
-						whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
+						String type = conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid);
+						whereSb.append(type);
 					}
 					whereSb.append(conditionWhere);
 				}
 				fromConditionUuid = toConditionUuid;
+				
 			}
 			whereSb.append(")");
 			fromGroupUuid = toGroupUuid;
