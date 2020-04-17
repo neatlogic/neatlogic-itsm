@@ -16,6 +16,7 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
@@ -96,5 +97,23 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
 		}else {
 			return false;
 		}
+	}
+	
+	@Override
+	protected String getMyEsWhere(ConditionVo condition,List<ConditionVo> conditionList) {
+		String where = "(";
+		if(condition.getValueList().size() == 1) {
+			Object value = condition.getValueList().get(0);
+			where += String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CONTENT.getValue()),String.format("'%s'",  value));
+		}else {
+			List<String> keywordList = condition.getValueList();
+			for(int i=0;i<keywordList.size();i++) {
+				if(i!=0) {
+					where += " or ";
+				}
+				where += String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CONTENT.getValue()),String.format("'%s'",  keywordList.get(i)));
+			}
+		}
+		return where+")";
 	}
 }
