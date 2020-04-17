@@ -2,8 +2,11 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
+import codedriver.framework.process.dto.ProcessMatrixDispatcherVo;
+import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -31,6 +34,9 @@ public class MatrixDataSearchApi extends ApiComponentBase {
     @Autowired
     private MatrixDataService dataService;
 
+    @Autowired
+    private MatrixMapper matrixMapper;
+    
     @Override
     public String getToken() {
         return "matrix/data/search";
@@ -101,6 +107,10 @@ public class MatrixDataSearchApi extends ApiComponentBase {
             returnObj.put("pageSize", dataVo.getPageSize());
             returnObj.put("currentPage", dataVo.getCurrentPage());
         }
+        
+        returnObj.put("dispatcherVoList", matrixMapper.getMatrixDispatcherByMatrixUuid(dataVo.getMatrixUuid()));
+        returnObj.put("componentVoList", matrixMapper.getMatrixFormComponentByMatrixUuid(dataVo.getMatrixUuid()));
+        
         return returnObj;
     }
 }
