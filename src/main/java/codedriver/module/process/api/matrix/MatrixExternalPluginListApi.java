@@ -2,11 +2,12 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.process.dto.MatrixExternalRequestVo;
 import codedriver.framework.process.matrixrexternal.core.MatrixExternalRequestFactory;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @program: codedriver
@@ -23,7 +24,7 @@ public class MatrixExternalPluginListApi extends ApiComponentBase {
 
     @Override
     public String getName() {
-        return "矩阵外部数据源请求插件集合";
+        return "矩阵外部数据源请求插件列表接口";
     }
 
     @Override
@@ -31,11 +32,12 @@ public class MatrixExternalPluginListApi extends ApiComponentBase {
         return null;
     }
 
+    @Output({
+    	@Param(name = "Return", explode = MatrixExternalRequestVo[].class, desc = "矩阵外部数据源请求插件列表")
+    })
+    @Description(desc = "矩阵外部数据源请求插件列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONObject returnObj = new JSONObject();
-        List<MatrixExternalRequestVo> requestVos = MatrixExternalRequestFactory.getRequestList();
-        returnObj.put("pluginList", requestVos);
-        return returnObj;
+        return MatrixExternalRequestFactory.getRequestList();
     }
 }

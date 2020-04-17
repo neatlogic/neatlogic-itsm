@@ -70,7 +70,7 @@ public class MatrixDataSearchApi extends ApiComponentBase {
         if(CollectionUtils.isNotEmpty(processMatrixColumnList)) {
         	JSONArray headList = new JSONArray();
             JSONObject selectionObj = new JSONObject();
-            selectionObj.put("type", "selection");
+            selectionObj.put("key", "selection");
             selectionObj.put("width", 60);
             headList.add(selectionObj);
             
