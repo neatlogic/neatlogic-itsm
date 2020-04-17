@@ -19,7 +19,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
@@ -199,15 +198,15 @@ public class MatrixServiceImpl implements MatrixService {
         }
     }
 
-    public void saveExternalMatrix(ProcessMatrixVo matrixVo){
-        ProcessMatrixExternalVo externalVo = new ProcessMatrixExternalVo();
-        JSONObject externalObj = JSONObject.parseObject(matrixVo.getExternalConfig());
-        externalVo.setMatrixUuid(matrixVo.getUuid());
-        externalVo.setPlugin(externalObj.getString("plugin"));
-        externalVo.setConfig(externalObj.getJSONObject("config").toString());
-        if (StringUtils.isNotBlank(matrixVo.getUuid())){
-            externalMapper.deleteMatrixExternalByMatrixUuid(matrixVo.getUuid());
-        }
-        externalMapper.insertMatrixExternal(externalVo);
-    }
+//    public void saveExternalMatrix(ProcessMatrixVo matrixVo){
+//        ProcessMatrixExternalVo externalVo = new ProcessMatrixExternalVo();
+//        JSONObject externalObj = JSONObject.parseObject(matrixVo.getExternalConfig());
+//        externalVo.setMatrixUuid(matrixVo.getUuid());
+//        externalVo.setPlugin(externalObj.getString("plugin"));
+//        externalVo.setConfig(externalObj.getJSONObject("config").toString());
+//        if (StringUtils.isNotBlank(matrixVo.getUuid())){
+//            externalMapper.deleteMatrixExternalByMatrixUuid(matrixVo.getUuid());
+//        }
+//        externalMapper.insertMatrixExternal(externalVo);
+//    }
 }

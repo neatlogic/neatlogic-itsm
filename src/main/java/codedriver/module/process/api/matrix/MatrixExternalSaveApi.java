@@ -3,6 +3,7 @@ package codedriver.module.process.api.matrix;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -35,17 +36,21 @@ public class MatrixExternalSaveApi extends ApiComponentBase {
     }
 
     @Input({
+    	@Param( name = "id", type = ApiParamType.LONG, desc = "外部矩阵数据源id"),
     	@Param( name = "matrixUuid", type = ApiParamType.STRING, isRequired = true, desc = "矩阵uuid"),
     	@Param( name = "plugin", type = ApiParamType.STRING, isRequired = true, desc = "插件"),
         @Param( name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "矩阵外部数据源配置")
     })
-    @Output({ @Param( name = "id", type = ApiParamType.LONG, desc = "外部矩阵数据源id")})
+    @Output({ @Param( name = "Return", type = ApiParamType.LONG, desc = "外部矩阵数据源id")})
     @Description(desc = "外部数据源矩阵保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONObject returnObj = new JSONObject();
-        ProcessMatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(jsonObj.getString("matrixUuid"));
-        returnObj.put("matrixExternal", externalVo);
-        return returnObj;
+        ProcessMatrixExternalVo externalVo = JSON.toJavaObject(jsonObj, ProcessMatrixExternalVo.class);
+        if(externalVo.getId() != null) {
+        	externalMapper.updateMatrixExternal(externalVo);
+        }else {
+        	externalMapper.insertMatrixExternal(externalVo);
+        }
+        return externalVo.getId();
     }
 }
