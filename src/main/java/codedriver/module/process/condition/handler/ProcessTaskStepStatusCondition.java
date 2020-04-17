@@ -2,7 +2,6 @@ package codedriver.module.process.condition.handler;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,16 +122,11 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	
 	@Override
 	protected String getMyEsWhere(ConditionVo condition,List<ConditionVo> conditionList) {
-		List<ConditionVo> stepStatusConditionList = conditionList.stream().filter(con->con.getName().equals(ProcessWorkcenterField.STEP_USER.getValue())).collect(Collectors.toList());
-		if(CollectionUtils.isNotEmpty(stepStatusConditionList)) {
-			return " "; //如果同时存“处理人”和“步骤状态”两个过滤条件，则在“处理人”拼接条件，“步骤状态”不需要条件
-		}else {
-			Object value = condition.getValueList().get(0);
-			if(condition.getValueList().size()>1) {
-				value = String.join("','",condition.getValueList());
-			}
-			String where = String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
-			return where;
+		Object value = condition.getValueList().get(0);
+		if(condition.getValueList().size()>1) {
+			value = String.join("','",condition.getValueList());
 		}
+		String where = String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
+		return where;
 	}
 }

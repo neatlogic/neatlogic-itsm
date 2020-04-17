@@ -399,11 +399,12 @@ public class WorkcenterService {
 				if(StringUtils.isNotBlank(conditionWhere)) {
 					toConditionUuid = condition.getUuid();
 					if(fromConditionUuid != null) {
-						whereSb.append(conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid));
+						String type = conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid);
+						whereSb.append(type);
 					}
 					whereSb.append(conditionWhere);
-					fromConditionUuid = toConditionUuid;
 				}
+				fromConditionUuid = toConditionUuid;
 				
 			}
 			whereSb.append(")");
