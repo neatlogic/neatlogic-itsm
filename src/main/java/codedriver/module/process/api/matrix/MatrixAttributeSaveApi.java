@@ -49,11 +49,10 @@ public class MatrixAttributeSaveApi extends ApiComponentBase {
     @Input({ 
     	@Param( name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
         @Param( name = "matrixAttributeList", desc = "属性数据列表", type = ApiParamType.JSONARRAY, isRequired = true),
-        @Param( name = "matrixAttributeList[x].matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
-        @Param( name = "matrixAttributeList[x].uuid", desc = "属性uuid", type = ApiParamType.STRING, isRequired = true),
-        @Param( name = "matrixAttributeList[x].name", desc = "属性名", type = ApiParamType.STRING, isRequired = true),
-        @Param( name = "matrixAttributeList[x].type", desc = "属性类型", type = ApiParamType.STRING, isRequired = true),
-        @Param( name = "matrixAttributeList[x].config", desc = "属性配置", type = ApiParamType.JSONOBJECT, isRequired = true),
+        @Param( name = "matrixAttributeList[x].uuid", desc = "属性uuid", type = ApiParamType.STRING),
+        @Param( name = "matrixAttributeList[x].name", desc = "属性名", type = ApiParamType.STRING),
+        @Param( name = "matrixAttributeList[x].type", desc = "属性类型", type = ApiParamType.STRING),
+        @Param( name = "matrixAttributeList[x].config", desc = "属性配置", type = ApiParamType.JSONOBJECT),
     })
     @Description( desc = "矩阵属性保存接口")
     @Override

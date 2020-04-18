@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -41,36 +40,60 @@ public class MatrixAttributeServiceImpl implements MatrixAttributeService {
                 //数据对比
                 //删除数据
                 //调整表
-                List<ProcessMatrixAttributeVo> addAttributeList = new ArrayList<>();
-                Iterator<ProcessMatrixAttributeVo> iterator = _attributeVoList.iterator();
-                while (iterator.hasNext()){
-                    ProcessMatrixAttributeVo attributeVo = iterator.next();
-                    if (StringUtils.isBlank(attributeVo.getUuid())){
-                        //过滤新增属性
-                        addAttributeList.add(attributeVo);
+                //List<ProcessMatrixAttributeVo> addAttributeList = new ArrayList<>();
+                List<String> addAttributeUuidList = new ArrayList<>();
+                List<String> existedAttributeUuidList = new ArrayList<>();
+//                Iterator<ProcessMatrixAttributeVo> iterator = _attributeVoList.iterator();
+//                while (iterator.hasNext()){
+//                    ProcessMatrixAttributeVo attributeVo = iterator.next();
+//                    if (StringUtils.isBlank(attributeVo.getUuid())){
+//                        //过滤新增属性
+//                        //addAttributeList.add(attributeVo);
+//                        attributeVo.setUuid(UUIDUtil.getUUID());
+//                        attributeMapper.insertMatrixAttribute(attributeVo);
+//                        addAttributeUuidList.add(attributeVo.getUuid());
+//                        iterator.remove();
+//                    }else {
+//                        attributeMapper.insertMatrixAttribute(attributeVo);
+//                        existedAttributeUuidList.add(attributeVo.getUuid());
+//                    }
+//                }
+                for(ProcessMatrixAttributeVo attributeVo : _attributeVoList) {
+                	attributeVo.setMatrixUuid(matrixUuid);
+                	if (StringUtils.isBlank(attributeVo.getUuid())){
+                        //过滤新增属性uuid
                         attributeVo.setUuid(UUIDUtil.getUUID());
                         attributeMapper.insertMatrixAttribute(attributeVo);
-                        iterator.remove();
+                        addAttributeUuidList.add(attributeVo.getUuid());
                     }else {
                         attributeMapper.insertMatrixAttribute(attributeVo);
+                        existedAttributeUuidList.add(attributeVo.getUuid());
                     }
                 }
-                List<ProcessMatrixAttributeVo> deleteAttributeList = matrixAttributeList.stream().filter(item -> !_attributeVoList.contains(item)).collect(toList());
+//                List<ProcessMatrixAttributeVo> deleteAttributeList = matrixAttributeList.stream().filter(item -> !_attributeVoList.contains(item)).collect(toList());
+                List<String> deleteAttributeUuidList = matrixAttributeList.stream().filter(item -> !existedAttributeUuidList.contains(item.getUuid())).map(ProcessMatrixAttributeVo::getUuid).collect(toList());
 
                 //添加新增字段
-                if (CollectionUtils.isNotEmpty(addAttributeList)){
-                    for (ProcessMatrixAttributeVo attributeVo : addAttributeList){
-                        attributeMapper.addMatrixDynamicTableColumn(attributeVo.getUuid(), matrixUuid);
-                    }
+//                if (CollectionUtils.isNotEmpty(addAttributeList)){
+//                    for (ProcessMatrixAttributeVo attributeVo : addAttributeList){
+//                        attributeMapper.addMatrixDynamicTableColumn(attributeVo.getUuid(), matrixUuid);
+//                    }
+//                }
+                for(String attributeUuid : addAttributeUuidList) {
+                	attributeMapper.addMatrixDynamicTableColumn(attributeUuid, matrixUuid);
                 }
-                if (CollectionUtils.isNotEmpty(deleteAttributeList)){
-                    for (ProcessMatrixAttributeVo attributeVo : deleteAttributeList){
-                        attributeMapper.dropMatrixDynamicTableColumn(attributeVo.getUuid(), matrixUuid);
-                    }
+                for(String attributeUuid : deleteAttributeUuidList) {
+                	attributeMapper.dropMatrixDynamicTableColumn(attributeUuid, matrixUuid);
                 }
+//                if (CollectionUtils.isNotEmpty(deleteAttributeList)){
+//                    for (ProcessMatrixAttributeVo attributeVo : deleteAttributeList){
+//                        attributeMapper.dropMatrixDynamicTableColumn(attributeVo.getUuid(), matrixUuid);
+//                    }
+//                }
 
             }else {
                 for (ProcessMatrixAttributeVo attributeVo : _attributeVoList){
+                	attributeVo.setMatrixUuid(matrixUuid);
                     attributeVo.setUuid(UUIDUtil.getUUID());
                     attributeMapper.insertMatrixAttribute(attributeVo);
                 }
