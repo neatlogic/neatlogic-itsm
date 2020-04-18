@@ -35,27 +35,24 @@ public class MatrixDataServiceImpl implements MatrixDataService {
     private MatrixDataMapper matrixDataMapper;
 
     @Override
-    public void saveDynamicTableData(JSONArray collection, String matrixUuid) {
-        for (int i = 0; i < collection.size(); i++){
-            JSONArray array = collection.getJSONArray(i);
-            List<String> columnList = new ArrayList<>();
-            List<String> dataList = new ArrayList<>();
-            for (int j = 0; j < array.size(); j++){
-                JSONObject dataObj = array.getJSONObject(j);
-                String column = dataObj.getString("key");
-                String data = dataObj.getString("value");
-                if (("uuid").equals(column)){
-                    if (StringUtils.isBlank(data)){
-                        data = UUIDUtil.getUUID();
-                    }else {
-                        matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, data);
-                    }
+    public void saveDynamicTableData(JSONArray rowData, String matrixUuid) {
+        List<String> columnList = new ArrayList<>();
+        List<String> dataList = new ArrayList<>();
+        for (int j = 0; j < rowData.size(); j++){
+            JSONObject dataObj = rowData.getJSONObject(j);
+            String column = dataObj.getString("column");
+            String value = dataObj.getString("value");
+            if (("uuid").equals(column)){
+                if (StringUtils.isBlank(value)){
+                	value = UUIDUtil.getUUID();
+                }else {
+                    matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, value);
                 }
-                columnList.add(column);
-                dataList.add(data);
             }
-            matrixDataMapper.insertDynamicTableData(columnList, dataList, matrixUuid);
+            columnList.add(column);
+            dataList.add(value);
         }
+        matrixDataMapper.insertDynamicTableData(columnList, dataList, matrixUuid);
     }
 
     @Override
