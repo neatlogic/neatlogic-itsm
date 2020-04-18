@@ -80,9 +80,6 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
     			Map<String, List<String>> attributeDataListMap = new HashMap<>();
     			for(Map<String, String> rowData : matrixRowDataList) {
         			for(Entry<String, String> columnData : rowData.entrySet()) {
-        				if("id".equals(columnData.getKey())) {
-        					continue;
-        				}
         				if(StringUtils.isNotBlank(columnData.getValue())) {
         					List<String> attributeDataList = attributeDataListMap.get(columnData.getKey());
         					if(attributeDataList == null) {
