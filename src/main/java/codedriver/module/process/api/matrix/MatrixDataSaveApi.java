@@ -29,9 +29,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class MatrixDataSaveApi extends ApiComponentBase {
 
-//    @Autowired
-//    private MatrixDataService matrixDataService;
-
     @Autowired
     private MatrixMapper matrixMapper;
 
@@ -91,7 +88,6 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     	}else {
     		matrixDataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid);
     	}
-        //matrixDataService.saveDynamicTableData(jsonObj.getJSONArray("rowData"), matrixUuid);
         return null;
     }
 }
