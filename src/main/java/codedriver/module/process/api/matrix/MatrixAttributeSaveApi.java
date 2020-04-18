@@ -53,6 +53,7 @@ public class MatrixAttributeSaveApi extends ApiComponentBase {
         @Param( name = "matrixAttributeList[x].name", desc = "属性名", type = ApiParamType.STRING),
         @Param( name = "matrixAttributeList[x].type", desc = "属性类型", type = ApiParamType.STRING),
         @Param( name = "matrixAttributeList[x].isRequired", desc = "属性是否必填", type = ApiParamType.ENUM, rule = "0,1"),
+        @Param( name = "matrixAttributeList[x].sort", desc = "属性排序", type = ApiParamType.INTEGER),
         @Param( name = "matrixAttributeList[x].config", desc = "属性配置", type = ApiParamType.JSONOBJECT)
     })
     @Description( desc = "矩阵属性保存接口")
