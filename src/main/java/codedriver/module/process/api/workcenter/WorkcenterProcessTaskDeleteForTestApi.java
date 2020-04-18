@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPool;
 
@@ -37,10 +38,18 @@ public class WorkcenterProcessTaskDeleteForTestApi extends ApiComponentBase {
 	@Description(desc = "测试工单中心数据删除delete接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		for(Integer i=jsonObj.getInteger("from");i<jsonObj.getInteger("to");i++) {
+		JSONArray taskIdList = jsonObj.getJSONArray("taskIdList");
+		Integer from = jsonObj.getInteger("from");
+		Integer to = jsonObj.getInteger("to");
 		MultiAttrsObjectPool  poll = ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME);
 		poll.checkout("techsure", null);
-		poll.delete(i.toString());
+		if(from != null && to != null) {
+			for(Integer i=from;i<to;i++) {
+				poll.delete(i.toString());
+			}
+		}
+		for(Object taskId : taskIdList) {
+			poll.delete(taskId.toString());
 		}
 		return "OK";
 	}

@@ -65,6 +65,12 @@ public class WorkcenterService {
 	private  QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
+		if(StringUtils.isBlank(where)) {
+			where += " where ";
+		}else {
+			where += " and ";
+		}
+		where += " ( not common.istest = 1)";
 		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from techsure %s %s limit %d,%d", selectColumn,where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
 		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
@@ -157,7 +163,13 @@ public class WorkcenterService {
 		if(commonJson == null) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		JSONArray stepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		//TODO 临时测试
+		JSONArray stepArray = null;
+		try {
+		   stepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		}catch(Exception ex){
+			return "";
+		}
 		String processTaskStatus = commonJson.getString(ProcessWorkcenterField.STATUS.getValue());
 		if(CollectionUtils.isEmpty(stepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
