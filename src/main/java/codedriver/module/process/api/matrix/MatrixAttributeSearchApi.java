@@ -14,7 +14,6 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,21 +76,19 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
     		
     		List<Map<String, String>> matrixRowDataList = matrixDataMapper.searchDynamicTableData(dataVo);
     		if(CollectionUtils.isNotEmpty(matrixRowDataList)) {
-    			Map<String, List<String>> attributeDataListMap = new HashMap<>();
+    			Map<String, Boolean> attributeDataIsExistMap = new HashMap<>();
     			for(Map<String, String> rowData : matrixRowDataList) {
         			for(Entry<String, String> columnData : rowData.entrySet()) {
+        				if(Boolean.TRUE.equals(attributeDataIsExistMap.get(columnData.getKey()))) {
+        					continue;
+        				}
         				if(StringUtils.isNotBlank(columnData.getValue())) {
-        					List<String> attributeDataList = attributeDataListMap.get(columnData.getKey());
-        					if(attributeDataList == null) {
-        						attributeDataList = new ArrayList<>();
-        						attributeDataListMap.put(columnData.getKey(), attributeDataList);
-        					}
-        					attributeDataList.add(columnData.getValue());
+        					attributeDataIsExistMap.put(columnData.getKey(), true);
         				}
         			}
         		}
     			for(ProcessMatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
-    				if(CollectionUtils.isNotEmpty(attributeDataListMap.get(processMatrixAttributeVo.getUuid()))) {
+    				if(attributeDataIsExistMap.containsKey(processMatrixAttributeVo.getUuid())) {
     					processMatrixAttributeVo.setIsDeletable(0);
     				}
     			}
