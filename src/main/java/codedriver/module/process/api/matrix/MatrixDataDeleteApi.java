@@ -50,7 +50,7 @@ public class MatrixDataDeleteApi extends ApiComponentBase {
 		if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
 			throw new MatrixNotFoundException(matrixUuid);
 		}
-        dataMapper.deleteDynamicTableDataByUuid(jsonObj.getString("uuid"), matrixUuid);
+        dataMapper.deleteDynamicTableDataByUuid(matrixUuid, jsonObj.getString("uuid"));
         return null;
     }
 }
