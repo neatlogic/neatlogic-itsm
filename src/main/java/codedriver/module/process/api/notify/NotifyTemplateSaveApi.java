@@ -29,7 +29,7 @@ public class NotifyTemplateSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/template/delete";
+		return "notify/template/save";
 	}
 
 	@Override
