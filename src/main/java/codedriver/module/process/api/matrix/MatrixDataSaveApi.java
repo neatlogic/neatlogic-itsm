@@ -11,11 +11,11 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.util.UUIDUtil;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +52,7 @@ public class MatrixDataSaveApi extends ApiComponentBase {
 
     @Input({ 
     	@Param( name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
-        @Param( name = "rowData", desc = "矩阵数据中的一行数据", type = ApiParamType.JSONARRAY, isRequired = true),
-        @Param( name = "rowData[x].column", desc = "列uuid", type = ApiParamType.STRING),
-        @Param( name = "rowData[x].value", desc = "列数据", type = ApiParamType.STRING)
+        @Param( name = "rowData", desc = "矩阵数据中的一行数据", type = ApiParamType.JSONOBJECT, isRequired = true)
     	
     })
     @Description(desc = "矩阵数据保存接口")
@@ -66,22 +64,39 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     	}
     	boolean isNewRow = false;
     	ProcessMatrixColumnVo uuidColumn = null;
-    	List<ProcessMatrixColumnVo> rowData = JSON.parseArray(jsonObj.getString("rowData"), ProcessMatrixColumnVo.class);
-    	Iterator<ProcessMatrixColumnVo> iterator = rowData.iterator();
-    	while(iterator.hasNext()) {
-    		ProcessMatrixColumnVo processMatrixColumnVo = iterator.next();
-    		if("uuid".equals(processMatrixColumnVo.getColumn())) {
-    			if(StringUtils.isBlank(processMatrixColumnVo.getValue())) {
-    				processMatrixColumnVo.setValue(UUIDUtil.getUUID());
+    	List<ProcessMatrixColumnVo> rowData = new ArrayList<>();
+    	JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
+    	for(Entry<String, Object> entry : rowDataObj.entrySet()) {
+    		String column = entry.getKey();
+    		String value = entry.getKey();
+    		if("uuid".equals(column)) {
+    			if(StringUtils.isBlank(value)) {
+    				value = UUIDUtil.getUUID();
     				isNewRow = true;
     			}else {
-    				uuidColumn = processMatrixColumnVo;
-    				iterator.remove();
+    				uuidColumn = new ProcessMatrixColumnVo(column, value);
+    				continue;
     			}
-    		}else if("id".equals(processMatrixColumnVo.getColumn())) {
-    			iterator.remove();
+    		}else if("id".equals(column)) {
+				continue;
     		}
+    		rowData.add(new ProcessMatrixColumnVo(column, value));
     	}
+//    	Iterator<ProcessMatrixColumnVo> iterator = rowData.iterator();
+//    	while(iterator.hasNext()) {
+//    		ProcessMatrixColumnVo processMatrixColumnVo = iterator.next();
+//    		if("uuid".equals(processMatrixColumnVo.getColumn())) {
+//    			if(StringUtils.isBlank(processMatrixColumnVo.getValue())) {
+//    				processMatrixColumnVo.setValue(UUIDUtil.getUUID());
+//    				isNewRow = true;
+//    			}else {
+//    				uuidColumn = processMatrixColumnVo;
+//    				iterator.remove();
+//    			}
+//    		}else if("id".equals(processMatrixColumnVo.getColumn())) {
+//    			iterator.remove();
+//    		}
+//    	}
     		
     	if(isNewRow) {
     		matrixDataMapper.insertDynamicTableData2(rowData, matrixUuid);
