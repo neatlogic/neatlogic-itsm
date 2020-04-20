@@ -45,7 +45,13 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
-		JSONArray stepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		//TODO 临时测试
+		JSONArray stepArray = null;
+		try {
+		 stepArray = (JSONArray) json.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		}catch(Exception ex){
+			return "";
+		}
 		String processTaskStatus = json.getString("status");
 		if(CollectionUtils.isEmpty(stepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;

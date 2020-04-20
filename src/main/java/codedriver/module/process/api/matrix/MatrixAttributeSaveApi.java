@@ -49,34 +49,22 @@ public class MatrixAttributeSaveApi extends ApiComponentBase {
     @Input({ 
     	@Param( name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
         @Param( name = "matrixAttributeList", desc = "属性数据列表", type = ApiParamType.JSONARRAY, isRequired = true),
-        @Param( name = "matrixAttributeList[x].matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
-        @Param( name = "matrixAttributeList[x].uuid", desc = "属性uuid", type = ApiParamType.STRING, isRequired = true),
-        @Param( name = "matrixAttributeList[x].name", desc = "属性名", type = ApiParamType.STRING, isRequired = true),
-        @Param( name = "matrixAttributeList[x].type", desc = "属性类型", type = ApiParamType.STRING, isRequired = true),
-        @Param( name = "matrixAttributeList[x].config", desc = "属性配置", type = ApiParamType.JSONOBJECT, isRequired = true),
+        @Param( name = "matrixAttributeList[x].uuid", desc = "属性uuid", type = ApiParamType.STRING),
+        @Param( name = "matrixAttributeList[x].name", desc = "属性名", type = ApiParamType.STRING),
+        @Param( name = "matrixAttributeList[x].type", desc = "类型", type = ApiParamType.STRING),
+        @Param( name = "matrixAttributeList[x].isRequired", desc = "是否必填", type = ApiParamType.ENUM, rule = "0,1"),
+        @Param( name = "matrixAttributeList[x].sort", desc = "排序", type = ApiParamType.INTEGER),
+        @Param( name = "matrixAttributeList[x].config", desc = "配置信息", type = ApiParamType.JSONOBJECT)
     })
     @Description( desc = "矩阵属性保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-//        List<ProcessMatrixAttributeVo> attributeVoList = new ArrayList<>();
         String matrixUuid = jsonObj.getString("matrixUuid");
     	if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
     		throw new MatrixNotFoundException(matrixUuid);
     	}
-//        JSONArray attributeArray = jsonObj.getJSONArray("attributeArray");
-//        for (int i = 0;i < attributeArray.size(); i++){
-//            JSONObject attributeObj = attributeArray.getJSONObject(i);
-//            ProcessMatrixAttributeVo attributeVo = new ProcessMatrixAttributeVo();
-//            attributeVo.setMatrixUuid(matrixUuid);
-//            attributeVo.setName(attributeObj.getString("name"));
-//            if (attributeObj.containsKey("uuid")){
-//                attributeVo.setUuid(attributeObj.getString("uuid"));
-//            }
-//            attributeVo.setConfig(attributeObj.toString());
-//            attributeVoList.add(attributeVo);
-//        }
     	List<ProcessMatrixAttributeVo> attributeVoList = JSON.parseArray(jsonObj.getString("matrixAttributeList"), ProcessMatrixAttributeVo.class);
         attributeService.saveMatrixAttribute(attributeVoList, matrixUuid);
-        return "";
+        return null;
     }
 }
