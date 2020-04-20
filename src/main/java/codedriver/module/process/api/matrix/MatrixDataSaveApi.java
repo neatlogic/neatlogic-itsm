@@ -68,19 +68,19 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     	JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
     	for(Entry<String, Object> entry : rowDataObj.entrySet()) {
     		String column = entry.getKey();
-    		String value = entry.getKey();
+    		Object value = entry.getValue();
     		if("uuid".equals(column)) {
-    			if(StringUtils.isBlank(value)) {
+    			if(value != null && StringUtils.isBlank(value.toString())) {
     				value = UUIDUtil.getUUID();
     				isNewRow = true;
     			}else {
-    				uuidColumn = new ProcessMatrixColumnVo(column, value);
+    				uuidColumn = new ProcessMatrixColumnVo(column, value.toString());
     				continue;
     			}
     		}else if("id".equals(column)) {
 				continue;
     		}
-    		rowData.add(new ProcessMatrixColumnVo(column, value));
+    		rowData.add(new ProcessMatrixColumnVo(column, value.toString()));
     	}
 //    	Iterator<ProcessMatrixColumnVo> iterator = rowData.iterator();
 //    	while(iterator.hasNext()) {
