@@ -62,7 +62,7 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     	if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
     		throw new MatrixNotFoundException(matrixUuid);
     	}
-    	boolean isNewRow = false;
+    	boolean isNewRow = true;
     	ProcessMatrixColumnVo uuidColumn = null;
     	List<ProcessMatrixColumnVo> rowData = new ArrayList<>();
     	JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
@@ -70,11 +70,9 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     		String column = entry.getKey();
     		Object value = entry.getValue();
     		if("uuid".equals(column)) {
-    			if(value != null && StringUtils.isBlank(value.toString())) {
-    				value = UUIDUtil.getUUID();
-    				isNewRow = true;
-    			}else {
+    			if(value != null && StringUtils.isNotBlank(value.toString())) {
     				uuidColumn = new ProcessMatrixColumnVo(column, value.toString());
+    				isNewRow = false;
     				continue;
     			}
     		}else if("id".equals(column)) {
@@ -99,6 +97,7 @@ public class MatrixDataSaveApi extends ApiComponentBase {
 //    	}
     		
     	if(isNewRow) {
+    		rowData.add(new ProcessMatrixColumnVo("uuid", UUIDUtil.getUUID()));
     		matrixDataMapper.insertDynamicTableData2(rowData, matrixUuid);
     	}else {
     		matrixDataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid);
