@@ -2,11 +2,9 @@ package codedriver.module.process.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +21,7 @@ import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
+import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
@@ -151,21 +150,15 @@ public class MatrixServiceImpl implements MatrixService {
             List<Map<String, String>> sourceMatrixDataMapList = matrixDataMapper.searchDynamicTableData(sourceDataVo);
             if (CollectionUtils.isNotEmpty(sourceMatrixDataMapList)){
                 for (Map<String,String> sourceDataMap : sourceMatrixDataMapList){
-                    List<String> targetColumnList = new ArrayList<>();
-                    List<String> targetDataList = new ArrayList<>();
-                    targetColumnList.add("uuid");
-                    targetDataList.add(UUIDUtil.getUUID());
-                    Set<Entry<String, String>> set = sourceDataMap.entrySet();
-                    Iterator<Entry<String, String>> iterator = set.iterator();
-                    while (iterator.hasNext()){
-                        Map.Entry<String, String> entry = iterator.next();
-                        String key = entry.getKey();
-                        if (compareMap.containsKey(key)){
-                            targetColumnList.add(compareMap.get(key));
-                            targetDataList.add(entry.getValue());
-                        }
-                    }
-                    matrixDataMapper.insertDynamicTableData(targetColumnList, targetDataList, targetMatrixUuid);
+                	List<ProcessMatrixColumnVo> rowData = new ArrayList<>();
+                	rowData.add(new ProcessMatrixColumnVo("uuid", UUIDUtil.getUUID()));
+                	for(Entry<String, String> entry : sourceDataMap.entrySet()) {
+                		String column = compareMap.get(entry.getKey());
+                		if(StringUtils.isNotBlank(column)) {
+                			rowData.add(new ProcessMatrixColumnVo(column, entry.getValue()));
+                		}
+                	}
+                	matrixDataMapper.insertDynamicTableData2(rowData, targetMatrixUuid);
                 }
             }
         }
