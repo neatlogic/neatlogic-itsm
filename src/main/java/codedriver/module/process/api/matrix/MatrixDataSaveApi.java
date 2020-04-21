@@ -83,21 +83,6 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     		}
     		rowData.add(new ProcessMatrixColumnVo(column, value.toString()));
     	}
-//    	Iterator<ProcessMatrixColumnVo> iterator = rowData.iterator();
-//    	while(iterator.hasNext()) {
-//    		ProcessMatrixColumnVo processMatrixColumnVo = iterator.next();
-//    		if("uuid".equals(processMatrixColumnVo.getColumn())) {
-//    			if(StringUtils.isBlank(processMatrixColumnVo.getValue())) {
-//    				processMatrixColumnVo.setValue(UUIDUtil.getUUID());
-//    				isNewRow = true;
-//    			}else {
-//    				uuidColumn = processMatrixColumnVo;
-//    				iterator.remove();
-//    			}
-//    		}else if("id".equals(processMatrixColumnVo.getColumn())) {
-//    			iterator.remove();
-//    		}
-//    	}
     		
     	if(isNewRow) {
     		rowData.add(new ProcessMatrixColumnVo("uuid", UUIDUtil.getUUID()));

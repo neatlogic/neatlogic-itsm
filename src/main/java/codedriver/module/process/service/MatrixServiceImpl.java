@@ -150,21 +150,6 @@ public class MatrixServiceImpl implements MatrixService {
             List<Map<String, String>> sourceMatrixDataMapList = matrixDataMapper.searchDynamicTableData(sourceDataVo);
             if (CollectionUtils.isNotEmpty(sourceMatrixDataMapList)){
                 for (Map<String,String> sourceDataMap : sourceMatrixDataMapList){
-//                    List<String> targetColumnList = new ArrayList<>();
-//                    List<String> targetDataList = new ArrayList<>();
-//                    targetColumnList.add("uuid");
-//                    targetDataList.add(UUIDUtil.getUUID());
-//                    Set<Entry<String, String>> set = sourceDataMap.entrySet();
-//                    Iterator<Entry<String, String>> iterator = set.iterator();
-//                    while (iterator.hasNext()){
-//                        Map.Entry<String, String> entry = iterator.next();
-//                        String key = entry.getKey();
-//                        if (compareMap.containsKey(key)){
-//                            targetColumnList.add(compareMap.get(key));
-//                            targetDataList.add(entry.getValue());
-//                        }
-//                    }
-//                    matrixDataMapper.insertDynamicTableData(targetColumnList, targetDataList, targetMatrixUuid);
                 	List<ProcessMatrixColumnVo> rowData = new ArrayList<>();
                 	rowData.add(new ProcessMatrixColumnVo("uuid", UUIDUtil.getUUID()));
                 	for(Entry<String, String> entry : sourceDataMap.entrySet()) {
@@ -173,6 +158,7 @@ public class MatrixServiceImpl implements MatrixService {
                 			rowData.add(new ProcessMatrixColumnVo(column, entry.getValue()));
                 		}
                 	}
+                	matrixDataMapper.insertDynamicTableData2(rowData, targetMatrixUuid);
                 }
             }
         }
