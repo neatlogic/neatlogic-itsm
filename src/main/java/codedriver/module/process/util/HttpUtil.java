@@ -86,15 +86,17 @@ public class HttpUtil {
 			connection.connect();
 			
 			if (connection != null) {
-	            try (DataOutputStream out = new DataOutputStream(connection.getOutputStream());) {
-	            	if (queryString != null) {
-	            		out.write(queryString.getBytes("utf-8"));
+				if(connection.getDoOutput() == true) {
+					try (DataOutputStream out = new DataOutputStream(connection.getOutputStream());) {
+		            	if (queryString != null) {
+		            		out.write(queryString.getBytes("utf-8"));
+			            }
+		                out.flush();
+		            } catch (Exception e) {
+		                logger.error("http error :" + e.getMessage(), e);
 		            }
-	                out.flush();
-	            } catch (Exception e) {
-	                logger.error("http error :" + e.getMessage(), e);
-	            }
-
+				}
+	            
 	            try {
 	                int code = connection.getResponseCode();
 	                
