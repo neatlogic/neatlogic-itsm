@@ -9,7 +9,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
-import codedriver.framework.process.notify.dto.NotifyTemplateVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
@@ -37,7 +36,7 @@ public class NotifyTriggerListApi extends ApiComponentBase {
 
 	@Description(desc = "通知触发点列表接口")
 	@Output({
-			@Param(explode = NotifyTemplateVo[].class,
+			@Param(explode = ValueTextVo[].class,
 					desc = "通知触发点列表") })
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
