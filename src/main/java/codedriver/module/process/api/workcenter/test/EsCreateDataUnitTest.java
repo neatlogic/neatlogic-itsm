@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.junit.Test;
+//import org.junit.Test;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -30,7 +30,7 @@ public class EsCreateDataUnitTest {
 			 }
 
 	}
-	@Test
+	//@Test
 	public void test() {
 		MyThread thread1 = new MyThread(1);
 		thread1.start();
