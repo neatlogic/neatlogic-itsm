@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.process.constvalue.ProcessTaskStepWorkerAction;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -69,12 +69,12 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
 				}
 				for(String userId : dataList) {
 					if(userMapper.getUserByUserId(userId) != null) {
-						processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), userId, ProcessTaskStepWorkerAction.HANDLE.getValue()));
+						processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), userId));
 					}
 				}
 			}else {
 				if(userMapper.getUserByUserId(data) != null) {
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), data, ProcessTaskStepWorkerAction.HANDLE.getValue()));				
+					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), data));				
 				}
 			}
 			return processTaskStepWorkerList;
