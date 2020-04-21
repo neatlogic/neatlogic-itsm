@@ -99,14 +99,15 @@ public class MatrixServiceImpl implements MatrixService {
         IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(plugin);
         JSONArray dataArray = requestHandler.dataHandler(url, root, externalObj);
         if (CollectionUtils.isNotEmpty(dataArray)){
-            String columnConfig = externalObj.getString("columnConfig");
-            JSONArray columnArray = JSONArray.parseArray(columnConfig);
+//            String columnConfig = externalObj.getString("columnConfig");
+//            JSONArray columnArray = JSONArray.parseArray(columnConfig);
+        	JSONArray columnArray = externalObj.getJSONArray("columnList");
             List<String> headerList = new ArrayList<>();
             List<String> attributeList = new ArrayList<>();
             for (int i = 0; i < columnArray.size(); i++){
                 JSONObject obj = columnArray.getJSONObject(i);
                 headerList.add(obj.getString("text"));
-                attributeList.add(obj.getString("attribute"));
+                attributeList.add(obj.getString("value"));
             }
             List<Map<String, String>> dataMapList = new ArrayList<>();
             for (int i = 0; i < dataArray.size(); i++){

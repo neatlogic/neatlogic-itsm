@@ -73,7 +73,7 @@ public class HttpUtil {
 				}
 			}
 			connection.setUseCaches(false);
-			connection.setRequestMethod(restfulType);
+			connection.setRequestMethod(restfulType.toUpperCase());
 			if (RestfulType.POST.getValue().equals(restfulType)){
 				connection.setDoOutput(true);
 				connection.setDoInput(true);
