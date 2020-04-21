@@ -94,7 +94,7 @@ public class MatrixServiceImpl implements MatrixService {
         ProcessMatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
         JSONObject externalObj = JSONObject.parseObject(externalVo.getConfig());
         String plugin = externalVo.getPlugin();
-        String root = externalObj.getString("root");
+        String root = externalObj.getString("rootName");
         String url = externalObj.getString("url");
         IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(plugin);
         JSONArray dataArray = requestHandler.dataHandler(url, root, externalObj);
