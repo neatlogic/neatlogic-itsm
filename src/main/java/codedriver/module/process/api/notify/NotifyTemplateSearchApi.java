@@ -63,7 +63,7 @@ public class NotifyTemplateSearchApi extends ApiComponentBase {
 					desc = "页大小") })
 	@Output({
 			@Param(explode = BasePageVo.class),
-			@Param(name = "notifyTemplateList",
+			@Param(name = "tbodyList",
 					explode = NotifyTemplateVo[].class,
 					desc = "通知模板列表") })
 	@Description(desc = "通知模板列表查询接口")
@@ -81,7 +81,7 @@ public class NotifyTemplateSearchApi extends ApiComponentBase {
 		}
 
 		List<NotifyTemplateVo> notifyTemplateList = notifyMapper.searchNotifyTemplate(notifyTemplateVo);
-		resultObj.put("notifyTemplateList", notifyTemplateList);
+		resultObj.put("tbodyList", notifyTemplateList);
 		return resultObj;
 	}
 

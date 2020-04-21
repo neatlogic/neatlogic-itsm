@@ -43,11 +43,11 @@ public class NotifyTemplateSaveApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "通知模板uuid"),
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "通知模板uuid"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
 		@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "标题"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "内容"),
-		@Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "类型")
+		@Param(name = "type", type = ApiParamType.STRING, desc = "类型")
 	})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "通知模板uuid")
