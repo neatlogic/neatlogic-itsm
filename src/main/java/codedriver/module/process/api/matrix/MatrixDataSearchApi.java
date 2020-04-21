@@ -78,16 +78,6 @@ public class MatrixDataSearchApi extends ApiComponentBase {
             selectionObj.put("width", 60);
             headList.add(selectionObj);
             
-            JSONObject idObj = new JSONObject();
-            idObj.put("title", "id");
-            idObj.put("key", "id");
-            headList.add(idObj);
-            
-            JSONObject uuidObj = new JSONObject();
-            uuidObj.put("title", "uuid");
-            uuidObj.put("key", "uuid");
-            headList.add(uuidObj);
-            
             for(ProcessMatrixColumnVo processMatrixColumnVo : processMatrixColumnList) {
             	JSONObject columnObj = new JSONObject();
             	columnObj.put("title", processMatrixColumnVo.getValue());
