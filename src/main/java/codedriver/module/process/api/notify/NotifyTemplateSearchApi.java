@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
 import codedriver.framework.process.notify.dto.NotifyTemplateVo;
@@ -61,27 +62,15 @@ public class NotifyTemplateSearchApi extends ApiComponentBase {
 					isRequired = false,
 					desc = "页大小") })
 	@Output({
-			@Param(name = "currentPage",
-					type = ApiParamType.INTEGER,
-					desc = "当前页码"),
-			@Param(name = "pageSize",
-					type = ApiParamType.INTEGER,
-					desc = "页大小"),
-			@Param(name = "pageCount",
-					type = ApiParamType.INTEGER,
-					desc = "总页数"),
-			@Param(name = "rowNum",
-					type = ApiParamType.INTEGER,
-					desc = "总行数"),
-			@Param(name = "notifyTemplateList",
+			@Param(explode = BasePageVo.class),
+			@Param(name = "tbodyList",
 					explode = NotifyTemplateVo[].class,
 					desc = "通知模板列表") })
 	@Description(desc = "通知模板列表查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
-		NotifyTemplateVo notifyTemplateVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<NotifyTemplateVo>() {
-		});
+		NotifyTemplateVo notifyTemplateVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<NotifyTemplateVo>() {});
 		if (notifyTemplateVo.getNeedPage()) {
 			int rowNum = notifyMapper.searchNotifyTemplateCount(notifyTemplateVo);
 			int pageCount = PageUtil.getPageCount(rowNum, notifyTemplateVo.getPageSize());
@@ -92,7 +81,7 @@ public class NotifyTemplateSearchApi extends ApiComponentBase {
 		}
 
 		List<NotifyTemplateVo> notifyTemplateList = notifyMapper.searchNotifyTemplate(notifyTemplateVo);
-		resultObj.put("notifyTemplateList", notifyTemplateList);
+		resultObj.put("tbodyList", notifyTemplateList);
 		return resultObj;
 	}
 
