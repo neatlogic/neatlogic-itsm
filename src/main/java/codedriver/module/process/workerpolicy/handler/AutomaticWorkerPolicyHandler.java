@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessTaskStepWorkerAction;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
@@ -61,7 +61,7 @@ public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {
 			if (StringUtils.isBlank(userId)) {
 				continue;
 			}
-			ProcessTaskStepWorkerVo workerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), userId, ProcessTaskStepWorkerAction.HANDLE.getValue());
+			ProcessTaskStepWorkerVo workerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), userId);
 			if (!processTaskStepWorkerList.contains(workerVo)) {
 				processTaskStepWorkerList.add(workerVo);
 			}
