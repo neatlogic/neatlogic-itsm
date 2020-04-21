@@ -58,7 +58,7 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
     }
 
     @Input({ @Param( name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true)})
-    @Output( {@Param( name = "Return",  desc = "矩阵属性集合", explode = ProcessMatrixAttributeVo[].class)})
+    @Output( {@Param( name = "Return", desc = "矩阵属性集合", explode = ProcessMatrixAttributeVo[].class)})
     @Description( desc = "矩阵属性检索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
