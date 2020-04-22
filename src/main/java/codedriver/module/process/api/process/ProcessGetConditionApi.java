@@ -16,6 +16,7 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessField;
+import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -96,9 +97,15 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			String formUuid = jsonObj.getString("formUuid");
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
+				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
+					continue;
+				}
 				formAttributeVo.setType("form");
 				formAttributeVo.setConditionModel(conditionModel);
-				resultArray.add(formAttributeVo);
+				resultArray.add(JSONObject.toJSON(formAttributeVo));
 			}
 		}
 		return resultArray;
