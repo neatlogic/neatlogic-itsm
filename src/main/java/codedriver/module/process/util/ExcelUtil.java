@@ -77,30 +77,33 @@ public class ExcelUtil {
         // 产生表格标题行
         HSSFRow row = sheet.createRow(0);
         int i = 0;
-        for (String header : headerList) {
-            HSSFCell cell = row.createCell(i);
-            cell.setAsActiveCell();
-            cell.setCellStyle(style);
-            HSSFRichTextString text = new HSSFRichTextString(header);
-            cell.setCellValue(text);
-            if (CollectionUtils.isNotEmpty(columnSelectValueList)){
-                List<String> defaultValueList = columnSelectValueList.get(i);
-                //行添加下拉框
-                if (CollectionUtils.isNotEmpty(defaultValueList)){
-                    String[] values = new String[defaultValueList.size()];
-                    defaultValueList.toArray(values);
-                    CellRangeAddressList region = new CellRangeAddressList();
-                    region.addCellRangeAddress(1, i, SpreadsheetVersion.EXCEL97.getLastRowIndex(), i);
-                    DVConstraint constraint = DVConstraint.createExplicitListConstraint(values);
-                    HSSFDataValidation data_validation_list = new HSSFDataValidation(region, constraint);
-                    //将有效性验证添加到表单
-                    sheet.addValidationData(data_validation_list);
+        if(CollectionUtils.isNotEmpty(headerList)) {
+        	for (String header : headerList) {
+                HSSFCell cell = row.createCell(i);
+                cell.setAsActiveCell();
+                cell.setCellStyle(style);
+                HSSFRichTextString text = new HSSFRichTextString(header);
+                cell.setCellValue(text);
+                if (CollectionUtils.isNotEmpty(columnSelectValueList)){
+                    List<String> defaultValueList = columnSelectValueList.get(i);
+                    //行添加下拉框
+                    if (CollectionUtils.isNotEmpty(defaultValueList)){
+                        String[] values = new String[defaultValueList.size()];
+                        defaultValueList.toArray(values);
+                        CellRangeAddressList region = new CellRangeAddressList();
+                        region.addCellRangeAddress(1, i, SpreadsheetVersion.EXCEL97.getLastRowIndex(), i);
+                        DVConstraint constraint = DVConstraint.createExplicitListConstraint(values);
+                        HSSFDataValidation data_validation_list = new HSSFDataValidation(region, constraint);
+                        //将有效性验证添加到表单
+                        sheet.addValidationData(data_validation_list);
+                    }
                 }
+                i++;
             }
-            i++;
         }
+        
 
-        if (CollectionUtils.isNotEmpty(dataMapList)){
+        if (CollectionUtils.isNotEmpty(dataMapList) && CollectionUtils.isNotEmpty(columnList)){
             int index = 0;
             for (Map<String, String> dataMap : dataMapList){
                 index++;

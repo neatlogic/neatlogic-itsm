@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixExternalRequestHandlerNotFoundException;
 import codedriver.framework.process.exception.matrix.MatrixRepeatException;
 import codedriver.framework.process.matrixrexternal.core.IMatrixExternalRequestHandler;
 import codedriver.framework.process.matrixrexternal.core.MatrixExternalRequestFactory;
@@ -92,34 +95,44 @@ public class MatrixServiceImpl implements MatrixService {
     public JSONObject getMatrixExternalData(String matrixUuid) {
         JSONObject returnObj = new JSONObject();
         ProcessMatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
-        JSONObject externalObj = JSONObject.parseObject(externalVo.getConfig());
+        if(externalVo == null) {
+        	throw new MatrixExternalNotFoundException(matrixUuid);
+        }
         String plugin = externalVo.getPlugin();
-        String root = externalObj.getString("root");
-        String url = externalObj.getString("url");
         IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(plugin);
-        JSONArray dataArray = requestHandler.dataHandler(url, root, externalObj);
-        if (CollectionUtils.isNotEmpty(dataArray)){
-            String columnConfig = externalObj.getString("columnConfig");
-            JSONArray columnArray = JSONArray.parseArray(columnConfig);
-            List<String> headerList = new ArrayList<>();
-            List<String> attributeList = new ArrayList<>();
-            for (int i = 0; i < columnArray.size(); i++){
-                JSONObject obj = columnArray.getJSONObject(i);
-                headerList.add(obj.getString("text"));
-                attributeList.add(obj.getString("attribute"));
-            }
-            List<Map<String, String>> dataMapList = new ArrayList<>();
-            for (int i = 0; i < dataArray.size(); i++){
-                JSONObject obj = dataArray.getJSONObject(i);
-                Map<String, String> map = new HashMap<>();
-                for (String attribute : attributeList){
-                    map.put(attribute, obj.getString(attribute));
+        if(requestHandler == null) {
+        	throw new MatrixExternalRequestHandlerNotFoundException(plugin);
+        }
+        JSONObject externalObj = JSONObject.parseObject(externalVo.getConfig());
+        if(MapUtils.isNotEmpty(externalObj)) {
+            String url = externalObj.getString("url");
+            if(StringUtils.isNotBlank(url)) {
+            	String rootName = externalObj.getString("rootName");
+                JSONObject dataObj = requestHandler.dataHandler(url, rootName, externalObj);
+                JSONArray dataArray = dataObj.getJSONArray("tbodyList");
+                if (CollectionUtils.isNotEmpty(dataArray)){
+                	JSONArray columnList = externalObj.getJSONArray("columnList");
+                    List<String> headerList = new ArrayList<>();
+                    List<String> attributeList = new ArrayList<>();
+                    for (int i = 0; i < columnList.size(); i++){
+                        JSONObject obj = columnList.getJSONObject(i);
+                        headerList.add(obj.getString("title"));
+                        attributeList.add(obj.getString("targetColumn"));
+                    }
+                    List<Map<String, String>> dataMapList = new ArrayList<>();
+                    for (int i = 0; i < dataArray.size(); i++){
+                        JSONObject obj = dataArray.getJSONObject(i);
+                        Map<String, String> map = new HashMap<>();
+                        for (String attribute : attributeList){
+                            map.put(attribute, obj.getString(attribute));
+                        }
+                        dataMapList.add(map);
+                    }
+                    returnObj.put("headerList", headerList);
+                    returnObj.put("columnList", attributeList);
+                    returnObj.put("dataMapList", dataMapList);
                 }
-                dataMapList.add(map);
             }
-            returnObj.put("headerList", headerList);
-            returnObj.put("columnList", attributeList);
-            returnObj.put("dataMapList", dataMapList);
         }
         return  returnObj;
     }

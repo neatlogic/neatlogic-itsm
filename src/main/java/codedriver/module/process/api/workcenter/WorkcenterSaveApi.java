@@ -1,5 +1,7 @@
 package codedriver.module.process.api.workcenter;
 
+import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,18 +75,25 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		JSONArray valueList = jsonObj.getJSONArray("valueList");
 		String userId = UserContext.get().getUserId();
 		WorkcenterVo workcenterVo = new WorkcenterVo(name);
-		workcenterVo.setUuid(uuid);
-		workcenterMapper.deleteWorkcenterOwnerByUuid(workcenterVo.getUuid());
-		if(type.equals(ProcessWorkcenterType.SYSTEM.getValue())) {
-			if(CollectionUtils.isEmpty(valueList)) {
-				throw new WorkcenterParamException("valueList");
-			}
+		List<WorkcenterVo> workcenterList = null;
+		if(StringUtils.isNotBlank(uuid)) {
+			workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
+		}
+		if((CollectionUtils.isNotEmpty(workcenterList)&&ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterList.get(0).getType()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
 			//判断是否有管理员权限
 			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,WORKCENTER_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByRoleNameList(UserContext.get().getRoleNameList()))) {
 				throw new WorkcenterNoAuthException("管理");
 			}
+			if(CollectionUtils.isNotEmpty(workcenterList)) {
+				workcenterVo = workcenterList.get(0);
+				workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());
+			}
+		}
+		if(type.equals(ProcessWorkcenterType.SYSTEM.getValue())) {
+			if(CollectionUtils.isEmpty(valueList)) {
+				throw new WorkcenterParamException("valueList");
+			}
 			workcenterVo.setType(ProcessWorkcenterType.SYSTEM.getValue());
-			workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());
 			//更新角色
 			for(Object value:valueList) {
 				AuthorityVo authorityVo = new AuthorityVo();
@@ -101,7 +110,9 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 			}
 		}else {
 			workcenterVo.setType(ProcessWorkcenterType.CUSTOM.getValue());
-			workcenterMapper.insertWorkcenterOwner(userId, workcenterVo.getUuid());
+			if(StringUtils.isBlank(workcenterVo.getOwner())) {
+				workcenterMapper.insertWorkcenterOwner(userId, workcenterVo.getUuid());
+			}
 		}
 		if(StringUtils.isBlank(uuid)) {
 			workcenterVo.setConditionConfig(jsonObj.getString("conditionConfig"));

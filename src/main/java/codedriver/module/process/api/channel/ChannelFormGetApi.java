@@ -1,6 +1,7 @@
 package codedriver.module.process.api.channel;
 
 import java.util.List;
+import java.util.ListIterator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -85,7 +87,16 @@ public class ChannelFormGetApi extends ApiComponentBase {
 		}
 		String conditionModel = jsonObj.getString("conditionModel");
 		List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
-		for(FormAttributeVo formAttributeVo : formAttributeList) {
+		ListIterator<FormAttributeVo> formiterator =  formAttributeList.listIterator();
+		while(formiterator.hasNext()) {
+			FormAttributeVo formAttributeVo = formiterator.next();
+			if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+					||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
+					||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+					||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
+				formiterator.remove();
+				continue;
+			}
 			formAttributeVo.setConditionModel(conditionModel);
 		}
 		return formAttributeList;

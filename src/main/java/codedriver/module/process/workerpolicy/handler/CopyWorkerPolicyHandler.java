@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.process.constvalue.ProcessTaskStepWorkerAction;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -50,7 +50,7 @@ public class CopyWorkerPolicyHandler implements IWorkerPolicyHandler {
 						if(processTaskStep.getProcessTaskId().equals(currentProcessTaskStepVo.getProcessTaskId())) {
 							List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStep.getId(),ProcessUserType.MAJOR.getValue());
 							for (ProcessTaskStepUserVo user : userList) {
-								processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), user.getUserId(), ProcessTaskStepWorkerAction.HANDLE.getValue()));
+								processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), user.getUserId()));
 							}
 						}
 					}

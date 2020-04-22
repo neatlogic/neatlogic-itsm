@@ -6,11 +6,7 @@ import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
-import codedriver.module.process.util.UUIDUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,27 +29,6 @@ public class MatrixDataServiceImpl implements MatrixDataService {
 
     @Autowired
     private MatrixDataMapper matrixDataMapper;
-
-    @Override
-    public void saveDynamicTableData(JSONArray rowData, String matrixUuid) {
-        List<String> columnList = new ArrayList<>();
-        List<String> dataList = new ArrayList<>();
-        for (int j = 0; j < rowData.size(); j++){
-            JSONObject dataObj = rowData.getJSONObject(j);
-            String column = dataObj.getString("column");
-            String value = dataObj.getString("value");
-            if (("uuid").equals(column)){
-                if (StringUtils.isBlank(value)){
-                	value = UUIDUtil.getUUID();
-                }else {
-                    matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, value);
-                }
-            }
-            columnList.add(column);
-            dataList.add(value);
-        }
-        matrixDataMapper.insertDynamicTableData(columnList, dataList, matrixUuid);
-    }
 
     @Override
     public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo) {
