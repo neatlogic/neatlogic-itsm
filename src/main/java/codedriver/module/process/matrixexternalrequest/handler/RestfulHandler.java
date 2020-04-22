@@ -49,14 +49,14 @@ public class RestfulHandler extends MatrixExternalRequestBase {
 
     @Override
     public String myHandler(String url, String authType, String restfulType, String encodingType ,JSONObject config){
-        String accessKey = "";
-        String accessPassword = "";
+        String AccessKeyId = "";
+        String AccessKeySecret = "";
         if (StringUtils.isNotBlank(authType)){
             if (AuthType.BASIC.getValue().equals(authType)){
-                accessKey = config.getString("accessKey");
-                accessPassword = config.getString("accessPassword");
+            	AccessKeyId = config.getString("AccessKeyId");
+                AccessKeySecret = config.getString("AccessKeySecret");
             }
         }
-       return HttpUtil.getHttpConnectionData(url, authType, accessKey, accessPassword, restfulType, encodingType);
+       return HttpUtil.getHttpConnectionData(url, authType, AccessKeyId, AccessKeySecret, restfulType, encodingType);
     }
 }
