@@ -19,7 +19,7 @@ import codedriver.module.process.util.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -75,7 +75,7 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(matrixUuid);
         }
-        if(ProcessMatrixType.CUSTOM.equals(matrixVo.getType())) {
+        if(ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
         	List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
             if (CollectionUtils.isNotEmpty(attributeVoList)){
                 List<String> headerList = new ArrayList<>();
@@ -132,15 +132,27 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
         if (StringUtils.isNotBlank(attributeVo.getConfig())){
             String config = attributeVo.getConfig();
             JSONObject configObj = JSONObject.parseObject(config);
-            if (AttributeHandler.SELECT.getValue().equals(configObj.getString("handler"))){
-                if (configObj.containsKey("config")){
-                    JSONArray configArray = configObj.getJSONArray("config");
-                    for (int i = 0; i < configArray.size(); i++){
-                        JSONObject param = configArray.getJSONObject(i);
-                        selectValueList.add(param.getString("value"));
-                    }
-                }
+            JSONArray dataList = configObj.getJSONArray("dataList");
+            if(CollectionUtils.isNotEmpty(dataList)) {
+            	for(int i = 0; i < dataList.size(); i++) {
+            		JSONObject dataObj = dataList.getJSONObject(i);
+            		if(MapUtils.isNotEmpty(dataObj)) {
+            			String value = dataObj.getString("value");
+            			if(StringUtils.isNotBlank(value)) {
+                    		selectValueList.add(value);
+            			}
+            		}
+            	}
             }
+//            if (AttributeHandler.SELECT.getValue().equals(configObj.getString("handler"))){
+//                if (configObj.containsKey("config")){
+//                    JSONArray configArray = configObj.getJSONArray("config");
+//                    for (int i = 0; i < configArray.size(); i++){
+//                        JSONObject param = configArray.getJSONObject(i);
+//                        selectValueList.add(param.getString("value"));
+//                    }
+//                }
+//            }
         }
     }
 }
