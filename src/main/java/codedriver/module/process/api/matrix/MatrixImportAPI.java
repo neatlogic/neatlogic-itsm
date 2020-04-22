@@ -71,7 +71,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
 	    if(matrixVo == null) {
 	    	throw new MatrixNotFoundException(matrixUuid);
 	    }
-	    if(ProcessMatrixType.CUSTOM.equals(matrixVo.getType())) {
+	    if(ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
 	    	JSONObject returnObj = new JSONObject();
 	        int update = 0, insert = 0, unExist = 0;
 	        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
