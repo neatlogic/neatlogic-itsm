@@ -90,34 +90,44 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
         }
         JSONObject externalObj = JSONObject.parseObject(externalVo.getConfig());
         if(MapUtils.isNotEmpty(externalObj)) {
-            String url = externalObj.getString("url");
-            if(StringUtils.isNotBlank(url)) {
-            	String rootName = externalObj.getString("rootName");
-            	//TODO url拼接分页参数
-                JSONArray dataArray = requestHandler.dataHandler(url, rootName, externalObj);
-                if (CollectionUtils.isNotEmpty(dataArray)){
-                	JSONArray columnList = externalObj.getJSONArray("columnList");
-                    List<String> headerList = new ArrayList<>();
-                    List<String> attributeList = new ArrayList<>();
-                    for (int i = 0; i < columnList.size(); i++){
-                        JSONObject obj = columnList.getJSONObject(i);
-                        headerList.add(obj.getString("text"));
-                        attributeList.add(obj.getString("value"));
-                    }
-                    List<Map<String, String>> dataMapList = new ArrayList<>();
-                    for (int i = 0; i < dataArray.size(); i++){
-                        JSONObject obj = dataArray.getJSONObject(i);
-                        Map<String, String> map = new HashMap<>();
-                        for (String attribute : attributeList){
-                            map.put(attribute, obj.getString(attribute));
+        	JSONArray columnList = externalObj.getJSONArray("columnList");
+        	if(CollectionUtils.isNotEmpty(columnList)) {
+        		String url = externalObj.getString("url");
+                if(StringUtils.isNotBlank(url)) {
+                	String rootName = externalObj.getString("rootName");
+                	//TODO url拼接分页参数
+                	if(externalObj.getBooleanValue("needPage")) {
+                    	String currentPage = externalObj.getString("currentPage");
+                    	String pageCount = externalObj.getString("pageCount");
+                		
+                	}
+                    JSONArray dataArray = requestHandler.dataHandler(url, rootName, externalObj);
+                    if (CollectionUtils.isNotEmpty(dataArray)){
+                        JSONObject returnObj = new JSONObject();
+                        //returnObj.put("tbodyList", value);
+                        //returnObj.put("theadList", value);
+                        List<String> headerList = new ArrayList<>();
+                        List<String> attributeList = new ArrayList<>();
+                        for (int i = 0; i < columnList.size(); i++){
+                            JSONObject obj = columnList.getJSONObject(i);
+                            headerList.add(obj.getString("text"));
+                            attributeList.add(obj.getString("value"));
                         }
-                        dataMapList.add(map);
+                        List<Map<String, String>> dataMapList = new ArrayList<>();
+                        for (int i = 0; i < dataArray.size(); i++){
+                            JSONObject obj = dataArray.getJSONObject(i);
+                            Map<String, String> map = new HashMap<>();
+                            for (String attribute : attributeList){
+                                map.put(attribute, obj.getString(attribute));
+                            }
+                            dataMapList.add(map);
+                        }
+//                        returnObj.put("headerList", headerList);
+//                        returnObj.put("columnList", attributeList);
+//                        returnObj.put("dataMapList", dataMapList);
                     }
-//                    returnObj.put("headerList", headerList);
-//                    returnObj.put("columnList", attributeList);
-//                    returnObj.put("dataMapList", dataMapList);
                 }
-            }
+        	}            
         }
 		return null;
 	}
