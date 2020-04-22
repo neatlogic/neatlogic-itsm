@@ -108,15 +108,16 @@ public class MatrixServiceImpl implements MatrixService {
             String url = externalObj.getString("url");
             if(StringUtils.isNotBlank(url)) {
             	String rootName = externalObj.getString("rootName");
-                JSONArray dataArray = requestHandler.dataHandler(url, rootName, externalObj);
+                JSONObject dataObj = requestHandler.dataHandler(url, rootName, externalObj);
+                JSONArray dataArray = dataObj.getJSONArray("tbodyList");
                 if (CollectionUtils.isNotEmpty(dataArray)){
                 	JSONArray columnList = externalObj.getJSONArray("columnList");
                     List<String> headerList = new ArrayList<>();
                     List<String> attributeList = new ArrayList<>();
                     for (int i = 0; i < columnList.size(); i++){
                         JSONObject obj = columnList.getJSONObject(i);
-                        headerList.add(obj.getString("text"));
-                        attributeList.add(obj.getString("value"));
+                        headerList.add(obj.getString("title"));
+                        attributeList.add(obj.getString("targetColumn"));
                     }
                     List<Map<String, String>> dataMapList = new ArrayList<>();
                     for (int i = 0; i < dataArray.size(); i++){
