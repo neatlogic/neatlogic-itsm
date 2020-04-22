@@ -76,7 +76,7 @@ public class MatrixAttributeExportApi extends BinaryStreamApiComponentBase {
                 decodeDataConfig(attributeVo, selectValueList);
                 columnSelectValueList.add(selectValueList);
             }
-            String fileNameEncode = matrixVo.getName() + ".xls";
+            String fileNameEncode = matrixVo.getName() + "_模板.xls";
             Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
             if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
                 fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器

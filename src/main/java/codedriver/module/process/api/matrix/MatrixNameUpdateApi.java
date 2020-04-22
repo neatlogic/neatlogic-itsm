@@ -40,8 +40,10 @@ public class MatrixNameUpdateApi extends ApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "name", desc = "矩阵名称", type = ApiParamType.STRING, isRequired = true),
-             @Param( name = "uuid", desc = "uuid", type = ApiParamType.STRING, isRequired = true)})
+    @Input({
+    	@Param( name = "name", desc = "矩阵名称", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, length = 50),
+        @Param( name = "uuid", desc = "uuid", type = ApiParamType.STRING, isRequired = true)
+    })
     @Description( desc = "矩阵名称变更接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
