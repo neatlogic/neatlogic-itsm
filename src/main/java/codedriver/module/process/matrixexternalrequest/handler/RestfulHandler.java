@@ -57,12 +57,6 @@ public class RestfulHandler extends MatrixExternalRequestBase {
                 AccessKeySecret = config.getString("AccessKeySecret");
             }
         }
-//        String queryString = null;
-//        if(url.contains("?")) {
-//        	String[] split = url.split("\\?");
-//        	url = split[0];
-//        	queryString = split[1];
-//        }
        return HttpUtil.getHttpConnectionData(url, authType, AccessKeyId, AccessKeySecret, restfulType, encodingType);
     }
 }
