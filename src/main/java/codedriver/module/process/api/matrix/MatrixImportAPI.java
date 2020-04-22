@@ -1,5 +1,7 @@
 package codedriver.module.process.api.matrix;
 
+import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
@@ -7,6 +9,8 @@ import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.process.*;
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -56,30 +60,39 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
     public String getConfig() {
         return null;
     }
-
+    @Input({ 
+    	@Param( name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true)
+    })
     @Description(desc = "矩阵导入接口")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        JSONObject returnObj = new JSONObject();
-        int update = 0, insert = 0, unExist = 0;
-        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-        //获取所有导入文件
-        Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
-        if(multipartFileMap == null || multipartFileMap.isEmpty()) {
-            throw new MatrixFileNotFoundException();
-        }
-        MultipartFile multipartFile = null;
-        InputStream is = null;
-        for(Map.Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
-            multipartFile = entry.getValue();
-            is = multipartFile.getInputStream();
-            String name = multipartFile.getOriginalFilename();
-            if (StringUtils.isNotBlank(name)){
-                String matrixName = name.substring(0, name.indexOf("."));
-                ProcessMatrixVo matrixVo = matrixMapper.getMatrixByName(matrixName);
-                if (matrixVo == null){
-                    throw new MatrixNotFoundException(matrixName);
+    	String matrixUuid = paramObj.getString("matrixUuid");
+	    ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+	    if(matrixVo == null) {
+	    	throw new MatrixNotFoundException(matrixUuid);
+	    }
+	    if(ProcessMatrixType.CUSTOM.equals(matrixVo.getType())) {
+	    	JSONObject returnObj = new JSONObject();
+	        int update = 0, insert = 0, unExist = 0;
+	        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+	        //获取所有导入文件
+	        Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
+	        if(multipartFileMap == null || multipartFileMap.isEmpty()) {
+	            throw new MatrixFileNotFoundException();
+	        }
+	        MultipartFile multipartFile = null;
+	        InputStream is = null;
+	        for(Map.Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
+	        	multipartFile = entry.getValue();
+	        	is = multipartFile.getInputStream();
+	            String originalFilename = multipartFile.getOriginalFilename();
+	            if(originalFilename.indexOf(".") != -1) {
+	            	originalFilename = originalFilename.substring(0, originalFilename.indexOf("."));
+	            }   
+                if(!originalFilename.equals(matrixVo.getName())) {
+                	throw new MatrixImportException("文件的名称与矩阵名称不相同，不能导入");
                 }
+
                 List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixVo.getUuid());
                 if (CollectionUtils.isNotEmpty(attributeVoList)){
                     Map<String, String> headerMap = new HashMap<>();
@@ -95,7 +108,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                         int colNum = headerRow.getLastCellNum();
                         //attributeList 缺少uuid
                         if (colNum != attributeVoList.size() + 1){
-                            throw new MatrixHeaderMisMatchException(matrixName);
+                            throw new MatrixHeaderMisMatchException(originalFilename);
                         }
                         int count = 0;
                         int uuidIndex = 0;
@@ -115,7 +128,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                             }
                         }
                         if (count != colNum){
-                            throw new MatrixHeaderMisMatchException(matrixName);
+                            throw new MatrixHeaderMisMatchException(originalFilename);
                         }
                         //解析数据
                         for (int i = 1; i < rowNum + 1; i++){
@@ -143,14 +156,16 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                         }
                     }
                 }else {
-                    throw new MatrixDataNotFoundException(matrixName);
+                    throw new MatrixDataNotFoundException(originalFilename);
                 }
-            }
-        }
-        returnObj.put("insert", insert);
-        returnObj.put("update", update);
-        returnObj.put("unExist", unExist);
-        return returnObj;
+	        }
+	        returnObj.put("insert", insert);
+	        returnObj.put("update", update);
+	        returnObj.put("unExist", unExist);
+	        return returnObj;
+	    }else {
+	    	throw new MatrixImportException("外部数据源不支持导入");
+	    }       
     }
 
     private String getCellValue (Cell cell){
