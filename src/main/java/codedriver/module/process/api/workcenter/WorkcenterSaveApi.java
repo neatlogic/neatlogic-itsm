@@ -75,16 +75,20 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		JSONArray valueList = jsonObj.getJSONArray("valueList");
 		String userId = UserContext.get().getUserId();
 		WorkcenterVo workcenterVo = new WorkcenterVo(name);
-		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
+		List<WorkcenterVo> workcenterList = null;
+		if(StringUtils.isNotBlank(uuid)) {
+			workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
+		}
 		if((CollectionUtils.isNotEmpty(workcenterList)&&ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterList.get(0).getType()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
 			//判断是否有管理员权限
 			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,WORKCENTER_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByRoleNameList(UserContext.get().getRoleNameList()))) {
 				throw new WorkcenterNoAuthException("管理");
 			}
-			workcenterVo = workcenterList.get(0);
-			workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());
+			if(CollectionUtils.isNotEmpty(workcenterList)) {
+				workcenterVo = workcenterList.get(0);
+				workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());
+			}
 		}
-		workcenterVo.setUuid(uuid);
 		if(type.equals(ProcessWorkcenterType.SYSTEM.getValue())) {
 			if(CollectionUtils.isEmpty(valueList)) {
 				throw new WorkcenterParamException("valueList");
@@ -105,7 +109,6 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 				workcenterMapper.insertWorkcenterAuthority(authorityVo,workcenterVo.getUuid());
 			}
 		}else {
-			workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());
 			workcenterVo.setType(ProcessWorkcenterType.CUSTOM.getValue());
 			if(StringUtils.isBlank(workcenterVo.getOwner())) {
 				workcenterMapper.insertWorkcenterOwner(userId, workcenterVo.getUuid());
