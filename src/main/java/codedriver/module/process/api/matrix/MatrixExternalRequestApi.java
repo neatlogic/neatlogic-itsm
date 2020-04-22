@@ -1,6 +1,7 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.exception.matrix.MatrixExternalRequestHandlerNotFoundException;
 import codedriver.framework.process.matrixrexternal.core.IMatrixExternalRequestHandler;
 import codedriver.framework.process.matrixrexternal.core.MatrixExternalRequestFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -48,6 +49,9 @@ public class MatrixExternalRequestApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject configObj = JSON.parseObject(jsonObj.getString("config"));
         IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(configObj.getString("plugin"));
+        if(requestHandler == null) {
+        	throw new MatrixExternalRequestHandlerNotFoundException(configObj.getString("plugin"));
+        }
         return requestHandler.attributeHandler(configObj.getString("url"), configObj.getString("rootName"), configObj);
     }
 }

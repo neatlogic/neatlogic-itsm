@@ -41,10 +41,10 @@ public class HttpUtil {
 		}
 	} };
 
-	public static String getHttpConnectionData(String url, String queryString, String authMode, String accessKey, String accessSecret, String restfulType, String encodingType){
+	public static String getHttpConnectionData(String url, String authMode, String accessKey, String accessSecret, String restfulType, String encodingType){
 		HttpURLConnection connection = null;
 		InputStream is = null;
-		OutputStream os = null;
+		//OutputStream os = null;
 		BufferedReader br = null;
 		StringBuffer result = new StringBuffer();
 		try {
@@ -62,10 +62,10 @@ public class HttpUtil {
 			String authorization = "";
 			String currentTime = Long.toString(System.currentTimeMillis());
 			if (StringUtils.isNotBlank(authMode)){
-//				if (authMode.equalsIgnoreCase("basic")) {
-//					String sign = accessKey + ":" + accessSecret;
-//					authorization = "Basic " + Base64.encodeBase64String(sign.getBytes("utf-8"));
-//				}
+				if (authMode.equalsIgnoreCase("basic")) {
+					String sign = accessKey + ":" + accessSecret;
+					authorization = "Basic " + Base64.encodeBase64String(sign.getBytes("utf-8"));
+				}
 				//TODO linbq这是临时给前端测试用的，后面要删
 				if (authMode.equalsIgnoreCase("basic")) {
 					connection.setRequestProperty("Tenant", "techsure");
@@ -85,18 +85,7 @@ public class HttpUtil {
 			connection.setRequestProperty("Accept", "text/plain, application/json, */*");
 			connection.connect();
 			
-			if (connection != null) {
-				if(connection.getDoOutput() == true) {
-					try (DataOutputStream out = new DataOutputStream(connection.getOutputStream());) {
-		            	if (queryString != null) {
-		            		out.write(queryString.getBytes("utf-8"));
-			            }
-		                out.flush();
-		            } catch (Exception e) {
-		                logger.error("http error :" + e.getMessage(), e);
-		            }
-				}
-	            
+			if (connection != null) {	            
 	            try {
 	                int code = connection.getResponseCode();
 	                
@@ -119,7 +108,7 @@ public class HttpUtil {
 	                        result.append(lines);
 	                    }
 	                }
-	                logger.info(url + " rest return status:" + code + ",param is " + queryString + ",data is:" + result.toString());
+	                logger.info(url + " rest return status:" + code + ",url is " + url + ",data is:" + result.toString());
 	            } catch (Exception e) {
 	                logger.error(e.getMessage(), e);
 	            }
