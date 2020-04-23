@@ -50,6 +50,7 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
 		@Param(name = "nextStepId", type = ApiParamType.LONG, isRequired = true, desc = "激活下一步骤Id"),
+		//@Param(name = "action", type = ApiParamType.ENUM, rule = "complete,back", desc = "操作类型"),
 		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "原因")
 	})
 	@Description(desc = "工单完成接口")
@@ -87,6 +88,13 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 				}
 			}
 			processTaskStepVo.setParamObj(jsonObj);
+//			ProcessTaskStepAction processTaskStepAction = ProcessTaskStepAction.COMPLETE;
+//			String action = jsonObj.getString("action");
+//			if(ProcessTaskStepAction.BACK.getValue().equals(action)) {
+//				processTaskStepAction = ProcessTaskStepAction.BACK;
+//			}else {
+//				action = ProcessTaskStepAction.COMPLETE.getValue();
+//			}
 			handler.complete(processTaskStepVo);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
