@@ -10,8 +10,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.restful.annotation.Description;
@@ -57,13 +57,15 @@ public class ProcessTaskStepSubtaskListApi extends ApiComponentBase {
 		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessTaskStepSubtaskVo>() {});
 		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
 		for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-			ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = processTaskMapper.getProcessTaskStepSubtaskContentById(processTaskStepSubtask.getId());
-			if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-				ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepSubtaskContentVo.getContentHash());
-				if(processTaskContentVo != null) {
-					processTaskStepSubtask.setContent(processTaskContentVo.getContent());
+			List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
+			for(ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo : processTaskStepSubtaskContentList) {
+				if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
+					if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+						processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
+					}
 				}
 			}
+			processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
 		}
 		return processTaskStepSubtaskList;
 	}

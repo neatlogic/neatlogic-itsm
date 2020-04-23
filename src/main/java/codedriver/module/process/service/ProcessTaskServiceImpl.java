@@ -93,7 +93,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		String content = paramObj.getString("content");
 		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
 		processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-		processTaskMapper.replaceProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), processTaskContentVo.getHash()));
+		processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.CREATESUBTASK.getValue(), processTaskContentVo.getHash()));
 
 		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
 		if(currentProcessTaskStepVo == null) {
@@ -137,23 +137,26 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			throw new ProcessTaskRuntimeException("步骤未激活，不能处理子任务");
 		}
 		
-
-		//TODO linbq查出旧数据
-		ProcessTaskStepSubtaskVo oldProcessTaskStepSubtask = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskVo.getId());
-		ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = processTaskMapper.getProcessTaskStepSubtaskContentById(processTaskStepSubtaskVo.getId());
-		if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-			oldProcessTaskStepSubtask.setContentHash(processTaskStepSubtaskContentVo.getContentHash());
-		}
-		
-		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
-		
 		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
 		String content = paramObj.getString("content");
 		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
 		processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-		processTaskMapper.replaceProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), processTaskContentVo.getHash()));
 		processTaskStepSubtaskVo.setContentHash(processTaskContentVo.getHash());
+		
+		//TODO linbq查出旧数据
+		ProcessTaskStepSubtaskVo oldProcessTaskStepSubtask = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskVo.getId());
+		List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
+		for(ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo : processTaskStepSubtaskContentList) {
+			if(processTaskStepSubtaskContentVo != null 
+					&& processTaskStepSubtaskContentVo.getContentHash() != null 
+					&& ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+				oldProcessTaskStepSubtask.setContentHash(processTaskStepSubtaskContentVo.getContentHash());
+				processTaskMapper.updateProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskContentVo.getId(), processTaskContentVo.getHash()));
+			}
+		}
+		
+		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
 		
 		if(processTaskStepSubtaskVo.equals(oldProcessTaskStepSubtask)) {//如果子任务信息没有被修改，则不进行下面操作
 			return;
