@@ -17,7 +17,6 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
@@ -122,11 +121,6 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	
 	@Override
 	protected String getMyEsWhere(ConditionVo condition,List<ConditionVo> conditionList) {
-		Object value = condition.getValueList().get(0);
-		if(condition.getValueList().size()>1) {
-			value = String.join("','",condition.getValueList());
-		}
-		String where = String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
-		return where;
+		return null;
 	}
 }

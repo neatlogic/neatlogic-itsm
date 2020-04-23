@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 
@@ -123,10 +124,17 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			List<ProcessTaskStepVo>  processTaskStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());add(ProcessStepType.START.getValue());}},null);
 			 WorkcenterFieldBuilder builder = new WorkcenterFieldBuilder();
 			 //form
-			 JSONObject formJson = new JSONObject();
+			 JSONArray formArray = new JSONArray();
 			 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskId);
 			 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
-				 formJson.put(attributeData.getAttributeUuid(), attributeData.getDataObj());				 
+				 JSONObject formJson = new JSONObject();
+				 formJson.put("key", attributeData.getAttributeUuid());
+				 Object dataObj = attributeData.getDataObj();
+				 if(dataObj == null) {
+					 continue;
+				 }
+				 formJson.put("value_"+dataObj.getClass().getSimpleName().toString().toLowerCase(),dataObj);
+				 formArray.add(formJson);
 			 }
 			
 			 //common
@@ -149,7 +157,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 		.setExpiredTime(processTaskVo.getExpireTime())
 			 		.build();
 			
-			 patch.set("form", formJson);
+			 patch.set("form", formArray);
 			 patch.set("common", WorkcenterFieldJson);
 			 patch.commit();
 		 }else {
