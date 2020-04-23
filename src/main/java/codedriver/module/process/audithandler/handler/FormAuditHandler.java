@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -56,6 +57,8 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 			if(index != -1) {
 				iterator.remove();
 				oldProcessTaskFormAttributeDataList.remove(index);
+			}else if(ProcessFormHandler.FORMDIVIDER.getHandler().equals(processTaskFormAttributeDataVo.getType())) {//删除分割线
+				iterator.remove();
 			}
 		}
 		processTaskStepAuditDetailVo.setOldContent(null);
