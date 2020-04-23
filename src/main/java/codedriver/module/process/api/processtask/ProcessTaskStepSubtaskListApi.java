@@ -65,6 +65,7 @@ public class ProcessTaskStepSubtaskListApi extends ApiComponentBase {
 					}
 				}
 			}
+			processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
 		}
 		return processTaskStepSubtaskList;
 	}

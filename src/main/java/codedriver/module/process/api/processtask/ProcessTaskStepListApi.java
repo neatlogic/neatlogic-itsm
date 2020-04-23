@@ -139,6 +139,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 								}
 							}
 						}
+						processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
 						if(processTaskStepVo.getIsActive().intValue() != 1) {
 							processTaskStepSubtask.setIsAbortable(0);
 							processTaskStepSubtask.setIsCompletable(0);
