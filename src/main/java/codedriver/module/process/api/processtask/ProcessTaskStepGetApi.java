@@ -256,8 +256,9 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 
 		Map<String, String> formAttributeActionMap = new HashMap<>();
 		List<String> verifyActionList = new ArrayList<>();
-		verifyActionList.add(ProcessTaskStepAction.COMPLETE.getValue());
-		verifyActionList.add(ProcessTaskStepAction.BACK.getValue());
+//		verifyActionList.add(ProcessTaskStepAction.COMPLETE.getValue());
+//		verifyActionList.add(ProcessTaskStepAction.BACK.getValue());
+		verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
 		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
 		if(actionList.removeAll(verifyActionList)) {//有处理权限
 			//表单属性显示控制
