@@ -1,12 +1,18 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -60,6 +66,7 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
+		Map<String, String> customButtonMap = new HashMap<>();
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(processTaskStepId != null) {
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
@@ -69,11 +76,25 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
 				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
+			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			JSONObject stepConfigObj = JSON.parseObject(stepConfig);
+			if(MapUtils.isNotEmpty(stepConfigObj)) {
+				JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
+				if(CollectionUtils.isNotEmpty(customButtonList)) {
+					for(int i = 0; i < customButtonList.size(); i++) {
+						JSONObject customButton = customButtonList.getJSONObject(i);
+						customButtonMap.put(customButton.getString("name"), customButton.getString("value"));
+					}
+				}
+			}
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
 		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
 		for(String action : actionList) {
-			String text = ProcessTaskStepAction.getText(action);
+			String text = customButtonMap.get(action);//自定义优先
+			if(StringUtils.isBlank(text)) {
+				text = ProcessTaskStepAction.getText(action);
+			}
 			if(StringUtils.isNotBlank(text)) {
 				ValueTextVo valueText = new ValueTextVo();
 				valueText.setValue(action);

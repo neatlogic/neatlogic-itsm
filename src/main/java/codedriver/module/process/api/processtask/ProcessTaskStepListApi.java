@@ -151,6 +151,8 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 				}else {
 					processTaskStepVo.setIsView(0);
 				}
+				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+				processTaskStepVo.setConfig(stepConfig);
 				resultList.add(processTaskStepVo);
 			}
 		}
