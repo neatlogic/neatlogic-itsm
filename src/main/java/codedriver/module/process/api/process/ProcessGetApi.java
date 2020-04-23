@@ -46,6 +46,8 @@ public class ProcessGetApi extends ApiComponentBase {
 		if(processVo == null) {
 			throw new ProcessNotFoundException(uuid);
 		}
+		int count = processMapper.getProcessReferenceCount(uuid);
+		processVo.setReferenceCount(count);
 		return processVo;
 	}
 
