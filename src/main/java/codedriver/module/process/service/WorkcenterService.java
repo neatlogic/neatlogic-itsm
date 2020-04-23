@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,12 +64,6 @@ public class WorkcenterService {
 	private  QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
-		if(StringUtils.isBlank(where)) {
-			where += " where ";
-		}else {
-			where += " and ";
-		}
-		where += " ( not common.istest = 1)";
 		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from techsure %s %s limit %d,%d", selectColumn,where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
 		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
@@ -295,7 +288,7 @@ public class WorkcenterService {
 	 */
 	public Integer doSearchCount(WorkcenterVo workcenterVo) {
 		//搜索es
-		QueryResult result = searchTask(workcenterVo);;
+		QueryResult result = searchTask(workcenterVo);
 		return result.getTotal();
 	}
 	
@@ -408,16 +401,13 @@ public class WorkcenterService {
 			for(ConditionVo condition : conditionList) {
 				IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler(condition.getName());
 				String conditionWhere = workcenterCondition.getEsWhere(condition, conditionList);
-				if(StringUtils.isNotBlank(conditionWhere)) {
-					toConditionUuid = condition.getUuid();
-					if(fromConditionUuid != null) {
-						String type = conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid);
-						whereSb.append(type);
-					}
-					whereSb.append(conditionWhere);
+				toConditionUuid = condition.getUuid();
+				if(fromConditionUuid != null) {
+					String type = conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid);
+					whereSb.append(type);
 				}
+				whereSb.append(conditionWhere);
 				fromConditionUuid = toConditionUuid;
-				
 			}
 			whereSb.append(")");
 			fromGroupUuid = toGroupUuid;
