@@ -78,8 +78,9 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
 	}
 	
 	@Override
-	protected String getMyEsWhere(ConditionVo condition,List<ConditionVo> conditionList) {
-		String where = "(";
+	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
+		ConditionVo condition = conditionList.get(index);
+		String where = StringUtils.EMPTY;
 		if(condition.getValueList().size() == 1) {
 			Object value = condition.getValueList().get(0);
 			where += String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.ID.getValue()),String.format("'%s'",  value));
@@ -92,6 +93,6 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
 				where += String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.ID.getValue()),String.format("'%s'",  keywordList.get(i)));
 			}
 		}
-		return where+")";
+		return where;
 	}
 }

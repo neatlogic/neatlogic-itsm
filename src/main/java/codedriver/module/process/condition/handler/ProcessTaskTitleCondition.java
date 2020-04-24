@@ -77,7 +77,8 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
 	}
 	
 	@Override
-	protected String getMyEsWhere(ConditionVo condition,List<ConditionVo> conditionList) {
+	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
+		ConditionVo condition = conditionList.get(index);
 		String where = "(";
 		if(condition.getValueList().size() == 1) {
 			Object value = condition.getValueList().get(0);

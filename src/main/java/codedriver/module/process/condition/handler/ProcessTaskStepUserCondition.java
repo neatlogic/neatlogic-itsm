@@ -69,9 +69,4 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 		// 条件步骤没有处理人
 		return false;
 	}
-	
-	@Override
-	protected String getMyEsWhere(ConditionVo condition,List<ConditionVo> conditionList) {
-		return null;
-	}
 }

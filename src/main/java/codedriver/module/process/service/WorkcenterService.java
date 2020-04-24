@@ -1,6 +1,7 @@
 package codedriver.module.process.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -364,6 +365,7 @@ public class WorkcenterService {
 	 * @param workcenterVo
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private static String assembleWhere(WorkcenterVo workcenterVo) {
 		Map<String,String> groupRelMap = new HashMap<String,String>();
 		StringBuilder whereSb = new StringBuilder();
@@ -396,19 +398,89 @@ public class WorkcenterService {
 				}
 			}
 			List<ConditionVo> conditionList = group.getConditionList();
-			String fromConditionUuid = null;
-			String toConditionUuid = conditionList.get(0).getUuid();
-			for(ConditionVo condition : conditionList) {
-				IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler(condition.getName());
-				String conditionWhere = workcenterCondition.getEsWhere(condition, conditionList);
-				toConditionUuid = condition.getUuid();
-				if(fromConditionUuid != null) {
-					String type = conditionRelMap.get(fromConditionUuid+"_"+toConditionUuid);
-					whereSb.append(type);
+			//按es and 组合
+			ConditionVo fromCondition = null;
+			ArrayList<ConditionVo> andConditionList = new ArrayList<ConditionVo>();
+			JSONArray conditionRelationArray = new JSONArray();
+			//统计 common.step 开头的condition count
+			int stepConditionCount = 0;
+			for(int i = 0;i<conditionList.size();i++) {
+				ConditionVo condition = conditionList.get(i);
+				if(ProcessWorkcenterField.getConditionValue(condition.getName()).startsWith(ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue()))) {
+					stepConditionCount++;
 				}
-				whereSb.append(conditionWhere);
-				fromConditionUuid = toConditionUuid;
+				if(fromCondition == null) {
+					fromCondition = condition;
+					if(conditionList.size() == 1) {
+						JSONObject conditionRelationJson = new JSONObject();
+						andConditionList.add(condition);
+						conditionRelationJson.put("list", andConditionList);
+						conditionRelationJson.put("isNested", false);
+						conditionRelationArray.add(conditionRelationJson);
+					}
+					continue;
+				}
+				String conditionUuid = condition.getUuid();
+				String conditionType = conditionRelMap.get(fromCondition.getUuid()+"_"+conditionUuid);
+				if(conditionType.equals("and")) {
+					andConditionList.add(fromCondition);
+				}
+				
+				if(i == conditionList.size()-1||conditionType.equals("or")) {
+					andConditionList.add(condition);
+					Collections.sort(andConditionList, new Comparator<Object>() {
+						@Override
+						public int compare(Object o1, Object o2) {
+							try {
+								ConditionVo obj1 = (ConditionVo) o1;
+								ConditionVo obj2 = (ConditionVo) o2;
+								return obj1.getConditionValue().compareTo(obj2.getConditionValue());
+							} catch (Exception ex) {
+
+							}
+							return 0;
+						}
+					});
+					ArrayList<ConditionVo> tmpConditionList = new ArrayList<ConditionVo>();
+					tmpConditionList.addAll(andConditionList);
+					JSONObject conditionRelationJson = new JSONObject();
+					conditionRelationJson.put("list", tmpConditionList);
+					if(stepConditionCount >1) {
+						conditionRelationJson.put("isNested", true);
+					}else {
+						conditionRelationJson.put("isNested", true);
+					}
+					conditionRelationArray.add(conditionRelationJson);
+					andConditionList = new ArrayList<ConditionVo>();
+					stepConditionCount = 0;
+				}
+				fromCondition = condition;
 			}
+			for(int orIndex =0;orIndex<conditionRelationArray.size();orIndex++) {
+				Object conditionRelation = conditionRelationArray.get(orIndex);
+				JSONObject conditionRelationJson  = (JSONObject) JSONObject.toJSON(conditionRelation);
+				ArrayList<ConditionVo> andConditionTmpList = (ArrayList<ConditionVo>) conditionRelationJson.get("list");
+				Boolean isNested = (Boolean) conditionRelationJson.get("isNested");
+				if(isNested) {
+					whereSb.append(" [");
+				}
+				for(int andIndex =0;andIndex<andConditionTmpList.size();andIndex++) {
+					ConditionVo condition = andConditionTmpList.get(andIndex);
+					IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler(condition.getName());
+					String conditionWhere = workcenterCondition.getEsWhere(andConditionTmpList,andIndex);
+					whereSb.append(conditionWhere);
+					if(andIndex != andConditionTmpList.size()-1) {
+						whereSb.append(" and ");
+					}
+				}
+				if(isNested) {
+					whereSb.append(" ]");
+				}
+				if(orIndex != conditionRelationArray.size()-1) {
+					whereSb.append(" or ");
+				}
+			}
+
 			whereSb.append(")");
 			fromGroupUuid = toGroupUuid;
 		}
