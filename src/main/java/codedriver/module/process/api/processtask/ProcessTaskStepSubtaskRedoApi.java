@@ -45,7 +45,8 @@ public class ProcessTaskStepSubtaskRedoApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id")
+		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
+		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
 	})
 	@Output({})
 	@Description(desc = "子任务打回重做接口")

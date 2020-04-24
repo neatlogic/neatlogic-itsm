@@ -202,30 +202,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 			}
 		}
-		//获取当前用户有权限的所有子任务
-		//子任务列表
-		List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
-		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
-		processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
-		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
-		for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-			if(processTaskStepSubtask.getIsCommentable().intValue() == 1) {
-				ProcessTaskStepVo processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtask.getProcessTaskStepId());
-				if(processTaskStep.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStep.getStatus())) {
-					List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
-					for(ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo : processTaskStepSubtaskContentList) {
-						if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-							if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
-								processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
-							}
-						}
-					}
-					processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
-					subtaskList.add(processTaskStepSubtask);
-				}
-			}
-		}
-		processTaskVo.setProcessTaskStepSubtaskList(subtaskList);
+		
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("processTask", processTaskVo);
 		
@@ -276,6 +253,31 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					}
 					processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
 				}
+				//获取当前用户有权限的所有子任务
+				//子任务列表
+				List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
+				ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
+				processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
+				processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
+				List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+				for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+					if(processTaskStepSubtask.getIsCommentable().intValue() == 1) {
+						ProcessTaskStepVo processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtask.getProcessTaskStepId());
+						if(processTaskStep.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStep.getStatus())) {
+							List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
+							for(ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo : processTaskStepSubtaskContentList) {
+								if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
+									if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+										processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
+									}
+								}
+							}
+							processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
+							subtaskList.add(processTaskStepSubtask);
+						}
+					}
+				}
+				processTaskStepVo.setProcessTaskStepSubtaskList(subtaskList);
 				resultObj.put("processTaskStep", processTaskStepVo);
 			}
 		}

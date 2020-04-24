@@ -222,7 +222,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
-		
+		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
+		String content = paramObj.getString("content");
+		if(StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+			processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.REDOSUBTASK.getValue(), processTaskContentVo.getHash()));
+		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
