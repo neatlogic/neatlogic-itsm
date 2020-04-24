@@ -18,9 +18,10 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
+
 @Service
 @Transactional
-public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
+public class ProcessTaskStepSubtaskCommentApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -30,19 +31,18 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "processtask/step/subtask/complete";
+		return "processtask/step/subtask/comment";
 	}
 
 	@Override
 	public String getName() {
-		return "子任务完成接口";
+		return "子任务回复接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-
 	@Input({
 		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述")
@@ -56,9 +56,9 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 		if(processTaskStepSubtaskVo == null) {
 			throw new ProcessTaskStepSubtaskNotFoundException(processTaskStepSubtaskId.toString());
 		}
-		if(processTaskStepSubtaskVo.getIsCompletable().intValue() == 1) {
+		if(processTaskStepSubtaskVo.getIsCommentable().intValue() == 1) {
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
-			processTaskService.completeSubtask(processTaskStepSubtaskVo);
+			processTaskService.commentSubtask(processTaskStepSubtaskVo);
 		}else {
 			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMPLETESUBTASK.getText());
 		}

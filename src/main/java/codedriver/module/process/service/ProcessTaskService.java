@@ -57,6 +57,13 @@ public interface ProcessTaskService {
 	public void abortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
 	/**
 	 * 
+	* @Description: 回复子任务 
+	* @param processTaskStepSubtaskVo 
+	* @return void
+	 */
+	public void commentSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
+	/**
+	 * 
 	* @Description: 工单上报/查看/处理页面，返回表单formConfig时，设置属性只读/隐藏控制数据
 	* @param processTaskVo 工单信息
 	* @param formAttributeActionMap 处理页面时，表单属性只读/隐藏控制数据

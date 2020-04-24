@@ -19,6 +19,7 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -40,6 +41,8 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -199,7 +202,30 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 			}
 		}
-		
+		//获取当前用户有权限的所有子任务
+		//子任务列表
+		List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
+		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
+		processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
+		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+		for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+			if(processTaskStepSubtask.getIsCommentable().intValue() == 1) {
+				ProcessTaskStepVo processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtask.getProcessTaskStepId());
+				if(processTaskStep.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStep.getStatus())) {
+					List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
+					for(ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo : processTaskStepSubtaskContentList) {
+						if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
+							if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+								processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
+							}
+						}
+					}
+					processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
+					subtaskList.add(processTaskStepSubtask);
+				}
+			}
+		}
+		processTaskVo.setProcessTaskStepSubtaskList(subtaskList);
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("processTask", processTaskVo);
 		

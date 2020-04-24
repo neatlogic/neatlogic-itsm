@@ -140,12 +140,11 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 							}
 						}
 						processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
-						if(processTaskStepVo.getIsActive().intValue() != 1) {
-							processTaskStepSubtask.setIsAbortable(0);
-							processTaskStepSubtask.setIsCompletable(0);
-							processTaskStepSubtask.setIsEditable(0);
-							processTaskStepSubtask.setIsRedoable(0);
-						}
+						processTaskStepSubtask.setIsAbortable(0);
+						processTaskStepSubtask.setIsCompletable(0);
+						processTaskStepSubtask.setIsEditable(0);
+						processTaskStepSubtask.setIsRedoable(0);
+						
 					}
 					processTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
 				}else {
