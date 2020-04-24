@@ -110,7 +110,17 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 			}
 			oldFileUuidListStr = JSON.toJSONString(oldFileUuidList);
 			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), oldFileUuidListStr);
+			processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
 		}
+		/** 保存新附件uuid **/
+		if (StringUtils.isNotBlank(newFileUuidListStr)) {
+			List<String> fileUuidList = JSON.parseArray(newFileUuidListStr, String.class);
+			for (String fileUuid : fileUuidList) {
+				processTaskFileVo.setFileUuid(fileUuid);
+				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
+			}
+		}
+		
 		String newContentHash = null;
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {

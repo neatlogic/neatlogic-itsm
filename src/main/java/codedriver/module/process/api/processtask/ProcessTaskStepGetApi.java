@@ -255,15 +255,14 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				}
 				//获取当前用户有权限的所有子任务
 				//子任务列表
-				List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
-				ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
-				processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
-				processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
-				List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
-				for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-					if(processTaskStepSubtask.getIsCommentable().intValue() == 1) {
-						ProcessTaskStepVo processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtask.getProcessTaskStepId());
-						if(processTaskStep.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStep.getStatus())) {
+				if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+					List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
+					ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
+					processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
+					processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
+					List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+					for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+						if(processTaskStepSubtask.getIsCommentable().intValue() == 1) {
 							List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
 							for(ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo : processTaskStepSubtaskContentList) {
 								if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
@@ -276,8 +275,8 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 							subtaskList.add(processTaskStepSubtask);
 						}
 					}
+					processTaskStepVo.setProcessTaskStepSubtaskList(subtaskList);
 				}
-				processTaskStepVo.setProcessTaskStepSubtaskList(subtaskList);
 				resultObj.put("processTaskStep", processTaskStepVo);
 			}
 		}
