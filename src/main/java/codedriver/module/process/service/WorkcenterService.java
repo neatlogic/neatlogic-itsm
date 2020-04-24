@@ -399,15 +399,15 @@ public class WorkcenterService {
 			}
 			List<ConditionVo> conditionList = group.getConditionList();
 			//按es and 组合
+			JSONArray conditionRelationArray = new JSONArray();
 			ConditionVo fromCondition = null;
 			ArrayList<ConditionVo> andConditionList = new ArrayList<ConditionVo>();
-			JSONArray conditionRelationArray = new JSONArray();
 			//统计 common.step 开头的condition count
-			int stepConditionCount = 0;
+			int nestedBasisCount = 0;
 			for(int i = 0;i<conditionList.size();i++) {
 				ConditionVo condition = conditionList.get(i);
-				if(ProcessWorkcenterField.getConditionValue(condition.getName()).startsWith(ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue()))) {
-					stepConditionCount++;
+				if(!condition.getType().equals("form")&&ProcessWorkcenterField.getConditionValue(condition.getName()).startsWith(ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue()))) {
+					nestedBasisCount++;
 				}
 				if(fromCondition == null) {
 					fromCondition = condition;
@@ -445,14 +445,14 @@ public class WorkcenterService {
 					tmpConditionList.addAll(andConditionList);
 					JSONObject conditionRelationJson = new JSONObject();
 					conditionRelationJson.put("list", tmpConditionList);
-					if(stepConditionCount >1) {
+					if(nestedBasisCount >1) {
 						conditionRelationJson.put("isNested", true);
 					}else {
-						conditionRelationJson.put("isNested", true);
+						conditionRelationJson.put("isNested", false);
 					}
 					conditionRelationArray.add(conditionRelationJson);
 					andConditionList = new ArrayList<ConditionVo>();
-					stepConditionCount = 0;
+					nestedBasisCount = 0;
 				}
 				fromCondition = condition;
 			}
@@ -460,21 +460,39 @@ public class WorkcenterService {
 				Object conditionRelation = conditionRelationArray.get(orIndex);
 				JSONObject conditionRelationJson  = (JSONObject) JSONObject.toJSON(conditionRelation);
 				ArrayList<ConditionVo> andConditionTmpList = (ArrayList<ConditionVo>) conditionRelationJson.get("list");
+				ArrayList<ConditionVo> formConditionList = new ArrayList<ConditionVo>();
 				Boolean isNested = (Boolean) conditionRelationJson.get("isNested");
 				if(isNested) {
 					whereSb.append(" [");
 				}
+				
 				for(int andIndex =0;andIndex<andConditionTmpList.size();andIndex++) {
 					ConditionVo condition = andConditionTmpList.get(andIndex);
 					IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler(condition.getName());
-					String conditionWhere = workcenterCondition.getEsWhere(andConditionTmpList,andIndex);
-					whereSb.append(conditionWhere);
-					if(andIndex != andConditionTmpList.size()-1) {
-						whereSb.append(" and ");
+					if(condition.getType().equals("form")) {
+						formConditionList.add(condition);
+					}else {
+						String conditionWhere = workcenterCondition.getEsWhere(andConditionTmpList,andIndex);
+						whereSb.append(conditionWhere);
+						if(andIndex != andConditionTmpList.size()-1&&!andConditionTmpList.get(andIndex+1).getType().equals("form")) {
+							whereSb.append(" and ");
+						}
 					}
 				}
 				if(isNested) {
 					whereSb.append(" ]");
+				}
+				//form
+				if(formConditionList.size()>0 && andConditionTmpList.size() != formConditionList.size()) {
+					whereSb.append(" and ");
+				}
+				for(int formIndex =0;formIndex<formConditionList.size();formIndex++) {
+					IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler("form");
+					String conditionWhere = workcenterCondition.getEsWhere(formConditionList,formIndex);
+					whereSb.append(conditionWhere);
+					if(formIndex != formConditionList.size()-1) {
+						whereSb.append(" and ");
+					}
 				}
 				if(orIndex != conditionRelationArray.size()-1) {
 					whereSb.append(" or ");

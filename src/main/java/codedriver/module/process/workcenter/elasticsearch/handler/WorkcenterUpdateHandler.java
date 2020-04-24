@@ -17,6 +17,7 @@ import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
+import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -127,13 +128,19 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 JSONArray formArray = new JSONArray();
 			 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskId);
 			 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
+				 if(attributeData.getType().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+							||attributeData.getType().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
+							||attributeData.getType().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+							||attributeData.getType().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
+					 continue;
+				 }
 				 JSONObject formJson = new JSONObject();
 				 formJson.put("key", attributeData.getAttributeUuid());
 				 Object dataObj = attributeData.getDataObj();
 				 if(dataObj == null) {
 					 continue;
 				 }
-				 formJson.put("value_"+dataObj.getClass().getSimpleName().toString().toLowerCase(),dataObj);
+				 formJson.put("value_"+ProcessFormHandler.getDataType(attributeData.getType()),dataObj);
 				 formArray.add(formJson);
 			 }
 			

@@ -15,6 +15,7 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -128,5 +129,19 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 				return false;
 		}
 	}
-
+	
+	@Override
+	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
+		ConditionVo condition = conditionList.get(index);
+		String where = "(";
+		String formKey = condition.getUuid();
+		String formValueKey = "value_"+ProcessFormHandler.getDataType(condition.getName()).toLowerCase();
+		Object value = condition.getValueList().get(0);
+		if(condition.getValueList().size()>1) {
+			value = String.join("','",condition.getValueList());
+		}
+		where += String.format(" [ key = '%s' and "+ProcessExpression.getExpressionEs(condition.getExpression())+" ] ", formKey,formValueKey,String.format("'%s'",  value));
+		return where+")";
+	}
+	
 }
