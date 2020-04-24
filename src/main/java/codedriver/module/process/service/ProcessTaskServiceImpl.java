@@ -222,7 +222,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
-		
+		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
+		String content = paramObj.getString("content");
+		if(StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+			processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.REDOSUBTASK.getValue(), processTaskContentVo.getHash()));
+		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
@@ -255,7 +261,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
 		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
-		
+		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
+		String content = paramObj.getString("content");
+		if(StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+			processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.COMPLETESUBTASK.getValue(), processTaskContentVo.getHash()));
+		}
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
@@ -309,6 +321,24 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}else {
 			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
+	}
+
+	@Override
+	public void commentSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
+		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
+		if(currentProcessTaskStepVo == null) {
+			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
+		}else if(currentProcessTaskStepVo.getIsActive().intValue() != 1){
+			throw new ProcessTaskRuntimeException("步骤未激活，不能回复子任务");
+		}
+		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
+		String content = paramObj.getString("content");
+		if(StringUtils.isNotBlank(content)) {
+			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+			processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.COMPLETESUBTASK.getValue(), processTaskContentVo.getHash()));
+		}
+		
 	}
 	
 	@Override
