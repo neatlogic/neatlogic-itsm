@@ -43,7 +43,7 @@ public class ProcessDraftSaveApi extends ApiComponentBase {
 	}
 
 	@Input({ @Param(name = "processUuid", type = ApiParamType.STRING, desc = "流程uuid", isRequired = true),
-			@Param(name = "name", type = ApiParamType.STRING, xss = true, isRequired = false, length = 50, desc = "流程名称"),
+			@Param(name = "name", type = ApiParamType.STRING, xss = true, isRequired = false, maxLength = 50, desc = "流程名称"),
 			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "流程配置内容", isRequired = true) })
 	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "草稿uuid") })
 	@Description(desc = "流程草稿保存接口")

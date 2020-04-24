@@ -50,7 +50,7 @@ public class ProcessCopyApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被复制流程的uuid"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, length = 50, desc = "新流程名称")
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, maxLength = 50, desc = "新流程名称")
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessVo.class, desc = "新流程信息")

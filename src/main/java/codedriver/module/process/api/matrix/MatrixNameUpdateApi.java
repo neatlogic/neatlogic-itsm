@@ -41,7 +41,7 @@ public class MatrixNameUpdateApi extends ApiComponentBase {
     }
 
     @Input({
-    	@Param( name = "name", desc = "矩阵名称", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, length = 50),
+    	@Param( name = "name", desc = "矩阵名称", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, maxLength = 50),
         @Param( name = "uuid", desc = "uuid", type = ApiParamType.STRING, isRequired = true)
     })
     @Description( desc = "矩阵名称变更接口")

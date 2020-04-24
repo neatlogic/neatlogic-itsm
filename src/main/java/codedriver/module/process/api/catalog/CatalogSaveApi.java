@@ -47,12 +47,12 @@ public class CatalogSaveApi extends ApiComponentBase {
 	
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "服务目录uuid"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, length = 50, desc = "服务目录名称"),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, maxLength = 50, desc = "服务目录名称"),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired= true, desc = "父级uuid"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, isRequired= true, desc = "是否激活", rule = "0,1"),
 		@Param(name = "icon", type = ApiParamType.STRING, isRequired= false, desc = "图标"),
 		@Param(name = "color", type = ApiParamType.STRING, isRequired= false, desc = "颜色"),
-		@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "描述", length = 200, xss = true),
+		@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "描述", maxLength = 200, xss = true),
 		@Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userId\",\"team#teamUuid\",\"role#roleName\"]")
 		})
 	@Output({
