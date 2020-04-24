@@ -98,6 +98,7 @@ public class ChannelFormGetApi extends ApiComponentBase {
 				continue;
 			}
 			formAttributeVo.setConditionModel(conditionModel);
+			formAttributeVo.setType("form");
 		}
 		return formAttributeList;
 	}
