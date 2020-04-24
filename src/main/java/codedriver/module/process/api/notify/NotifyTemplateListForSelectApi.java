@@ -41,7 +41,7 @@ public class NotifyTemplateListForSelectApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<ValueTextVo> notifyTemplateList = notifyMapper.getNotifyTemplateListForSelect();
-		notifyTemplateList.add(new ValueTextVo("default","默认"));
+		//notifyTemplateList.add(new ValueTextVo("default","默认"));
 		return notifyTemplateList;
 	}
 
