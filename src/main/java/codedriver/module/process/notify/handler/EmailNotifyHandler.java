@@ -1,5 +1,6 @@
 package codedriver.module.process.notify.handler;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.HtmlEmail;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class EmailNotifyHandler extends NotifyHandlerBase {
 
 
 	private void sendEmail(NotifyVo notifyVo) {
-		if (notifyVo.getToUserList().size() > 0) {
+		if (CollectionUtils.isNotEmpty(notifyVo.getToUserList())) {
 			try {
 				MailServerVo mailServerVo = mailServerMapper.getActiveMailServer();
 				if (mailServerVo != null && StringUtils.isNotBlank(mailServerVo.getHost()) && mailServerVo.getPort() != null) {
