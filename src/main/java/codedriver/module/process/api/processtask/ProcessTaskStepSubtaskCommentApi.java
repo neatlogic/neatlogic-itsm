@@ -21,7 +21,7 @@ import codedriver.module.process.service.ProcessTaskService;
 
 @Service
 @Transactional
-public class ProcessTaskStepSubtaskRedoApi extends ApiComponentBase {
+public class ProcessTaskStepSubtaskCommentApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -31,25 +31,24 @@ public class ProcessTaskStepSubtaskRedoApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "processtask/step/subtask/redo";
+		return "processtask/step/subtask/comment";
 	}
 
 	@Override
 	public String getName() {
-		return "子任务打回重做接口";
+		return "子任务回复接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-
 	@Input({
 		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
 	})
 	@Output({})
-	@Description(desc = "子任务打回重做接口")
+	@Description(desc = "子任务回复接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepSubtaskId = jsonObj.getLong("processTaskStepSubtaskId");
@@ -57,11 +56,11 @@ public class ProcessTaskStepSubtaskRedoApi extends ApiComponentBase {
 		if(processTaskStepSubtaskVo == null) {
 			throw new ProcessTaskStepSubtaskNotFoundException(processTaskStepSubtaskId.toString());
 		}
-		if(processTaskStepSubtaskVo.getIsRedoable().intValue() == 1) {
+		if(processTaskStepSubtaskVo.getIsCommentable().intValue() == 1) {
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
-			processTaskService.redoSubtask(processTaskStepSubtaskVo);
+			processTaskService.commentSubtask(processTaskStepSubtaskVo);
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.REDOSUBTASK.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMPLETESUBTASK.getText());
 		}
 		return null;
 	}

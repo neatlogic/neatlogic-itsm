@@ -58,6 +58,7 @@ public class ProcessTaskStepStatusListApi extends ApiComponentBase {
 			processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
 			processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
 			processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
+			processTaskStepVo.setConfig(processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash()));
 		}
 		return processTaskStepList;
 	}
