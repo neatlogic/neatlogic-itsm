@@ -12,6 +12,7 @@ import codedriver.framework.dao.mapper.MailServerMapper;
 import codedriver.framework.dto.MailServerVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.notify.core.NotifyHandlerBase;
+import codedriver.framework.process.notify.core.NotifyHandlerType;
 import codedriver.framework.process.notify.dto.NotifyVo;
 import codedriver.module.process.notify.exception.EmailServerNotFoundException;
 
@@ -89,6 +90,12 @@ public class EmailNotifyHandler extends NotifyHandlerBase {
 
 	@Override
 	public String getName() {
-		return "邮件通知";
+		return NotifyHandlerType.EMAIL.getText();
+	}
+
+
+	@Override
+	public String getType() {
+		return NotifyHandlerType.EMAIL.getValue();
 	}
 }

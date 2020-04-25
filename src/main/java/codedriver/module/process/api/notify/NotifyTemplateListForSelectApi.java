@@ -7,11 +7,12 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
 import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
-import codedriver.framework.process.notify.dto.NotifyTemplateVo;
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -36,6 +37,11 @@ public class NotifyTemplateListForSelectApi extends ApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
+	
+	@Input({
+		@Param(name = "notifyHandlerType", type = ApiParamType.STRING, isRequired = false, desc = "插件类型"),
+		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = false, desc = "触发类型")
+		})
 	@Output({
 		@Param(name = "Return", explode = ValueTextVo[].class, desc = "通知模板列表")
 	})
@@ -43,9 +49,7 @@ public class NotifyTemplateListForSelectApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<ValueTextVo> notifyTemplateList = notifyMapper.getNotifyTemplateListForSelect();
-		for(NotifyTemplateVo notifyTemplateVo : NotifyDefaultTemplateFactory.getDefaultTemplateList()) {
-			notifyTemplateList.add(new ValueTextVo(notifyTemplateVo.getUuid(), notifyTemplateVo.getName()));
-		}
+		notifyTemplateList.add(new ValueTextVo(NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_UUID_PREFIX, NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_TYPE));
 		return notifyTemplateList;
 	}
 

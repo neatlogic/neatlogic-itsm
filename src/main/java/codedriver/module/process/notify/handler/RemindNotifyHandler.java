@@ -1,6 +1,7 @@
 package codedriver.module.process.notify.handler;
 
 import codedriver.framework.process.notify.core.NotifyHandlerBase;
+import codedriver.framework.process.notify.core.NotifyHandlerType;
 import codedriver.framework.process.notify.dto.NotifyVo;
 import codedriver.framework.reminder.core.GlobalReminderFactory;
 import codedriver.framework.reminder.core.IGlobalReminder;
@@ -39,6 +40,11 @@ public class RemindNotifyHandler extends NotifyHandlerBase {
 
     @Override
     public String getName() {
-        return "消息通知";
+        return NotifyHandlerType.REMIND.getText();
     }
+
+	@Override
+	public String getType() {
+		return NotifyHandlerType.REMIND.getValue();
+	}
 }
