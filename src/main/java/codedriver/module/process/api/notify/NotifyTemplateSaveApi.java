@@ -12,6 +12,7 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
+import codedriver.framework.process.exception.notify.NotifyTemplateNameRepeatException;
 import codedriver.framework.process.exception.notify.NotifyTemplateNotFoundException;
 import codedriver.framework.process.notify.dto.NotifyTemplateVo;
 import codedriver.framework.restful.annotation.Description;
@@ -58,6 +59,9 @@ public class NotifyTemplateSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		NotifyTemplateVo notifyTemplate = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<NotifyTemplateVo>() {});
+		if(notifyMapper.checkNotifyTemplateNameIsRepeat(notifyTemplate) > 0) {
+			throw new NotifyTemplateNameRepeatException(notifyTemplate.getName());
+		}
 		String uuid = jsonObj.getString("uuid");
 		if(StringUtils.isBlank(uuid)) {
 			notifyTemplate.setFcu(UserContext.get().getUserId(true));
