@@ -1,5 +1,6 @@
 package codedriver.module.process.api.workcenter.test;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,9 +49,10 @@ public class WorkcenterProcessTaskDeleteForTestApi extends ApiComponentBase {
 				poll.delete(i.toString());
 			}
 		}
+		if(CollectionUtils.isNotEmpty(taskIdList)) {
 		for(Object taskId : taskIdList) {
 			poll.delete(taskId.toString());
-		}
+		}}
 		return "OK";
 	}
 
