@@ -42,7 +42,7 @@ public class NotifyTemplateListForSelectApi extends ApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "notifyHandlerType", type = ApiParamType.STRING, isRequired = false, desc = "插件类型"),
+		@Param(name = "notifyHandler", type = ApiParamType.STRING, isRequired = false, desc = "插件"),
 		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = false, desc = "触发类型")
 		})
 	@Output({

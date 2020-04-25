@@ -45,7 +45,7 @@ public class NotifyTemplateSearchApi extends ApiComponentBase {
 
 	@Input({
 			@Param(name = "keyword", type = ApiParamType.STRING, isRequired = false, desc = "模板名称模糊匹配"),
-			@Param(name = "notifyHandlerType", type = ApiParamType.STRING, isRequired = false, desc = "插件类型"),
+			@Param(name = "notifyHandler", type = ApiParamType.STRING, isRequired = false, desc = "插件"),
 			@Param(name = "trigger", type = ApiParamType.STRING, isRequired = false, desc = "触发类型"),
 			@Param(name = "type", type = ApiParamType.STRING, isRequired = false, desc = "自定义类型"),
 			@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
