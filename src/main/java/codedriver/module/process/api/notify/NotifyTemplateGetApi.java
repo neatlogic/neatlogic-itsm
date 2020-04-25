@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
 import codedriver.framework.process.exception.notify.NotifyTemplateNotFoundException;
+import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
 import codedriver.framework.process.notify.dto.NotifyTemplateVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -46,11 +47,16 @@ public class NotifyTemplateGetApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		NotifyTemplateVo notifyTemplate = notifyMapper.getNotifyTemplateByUuid(uuid);
-		if(notifyTemplate == null) {
+		NotifyTemplateVo notifyTemplateVo = null;
+		if(uuid.startsWith(NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_UUID_PREFIX)) {
+			notifyTemplateVo = NotifyDefaultTemplateFactory.getDefaultTemplateByUuid(uuid);
+		}else {
+			notifyTemplateVo = notifyMapper.getNotifyTemplateByUuid(uuid);
+		}
+		if(notifyTemplateVo == null) {
 			throw new NotifyTemplateNotFoundException(uuid);
 		}
-		return notifyTemplate;
+		return notifyTemplateVo;
 	}
 
 }
