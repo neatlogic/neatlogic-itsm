@@ -93,7 +93,7 @@ public class NotifyTemplateSearchApi extends ApiComponentBase {
 				toIndex = toIndex < defaultTemplateList.size() ? toIndex : defaultTemplateList.size();
 				notifyTemplateList.addAll(defaultTemplateList.subList(0, toIndex));
 			}else {
-				int toIndex = count + notifyTemplateVo.getPageSize();
+				int toIndex = Math.abs(count) + notifyTemplateVo.getPageSize();
 				toIndex = toIndex < defaultTemplateList.size() ? toIndex : defaultTemplateList.size();
 				notifyTemplateList.addAll(defaultTemplateList.subList(Math.abs(count), toIndex));
 			}
