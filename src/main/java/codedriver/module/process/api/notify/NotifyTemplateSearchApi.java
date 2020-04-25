@@ -90,11 +90,11 @@ public class NotifyTemplateSearchApi extends ApiComponentBase {
 			}else if(count > 0 && count < notifyTemplateVo.getPageSize()) {
 				notifyTemplateList = notifyMapper.searchNotifyTemplate(notifyTemplateVo);
 				int toIndex = notifyTemplateVo.getPageSize() - count;
-				toIndex = toIndex > defaultTemplateList.size() ? toIndex : defaultTemplateList.size();
+				toIndex = toIndex < defaultTemplateList.size() ? toIndex : defaultTemplateList.size();
 				notifyTemplateList.addAll(defaultTemplateList.subList(0, toIndex));
 			}else {
 				int toIndex = count + notifyTemplateVo.getPageSize();
-				toIndex = toIndex > defaultTemplateList.size() ? toIndex : defaultTemplateList.size();
+				toIndex = toIndex < defaultTemplateList.size() ? toIndex : defaultTemplateList.size();
 				notifyTemplateList.addAll(defaultTemplateList.subList(Math.abs(count), toIndex));
 			}
 		}else {
