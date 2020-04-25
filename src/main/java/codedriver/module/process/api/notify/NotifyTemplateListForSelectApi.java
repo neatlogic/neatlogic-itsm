@@ -5,12 +5,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
 import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
+import codedriver.framework.process.notify.dto.NotifyTemplateVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -48,7 +51,8 @@ public class NotifyTemplateListForSelectApi extends ApiComponentBase {
 	@Description(desc = "通知模板列表接口（下拉框专用）")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		List<ValueTextVo> notifyTemplateList = notifyMapper.getNotifyTemplateListForSelect();
+		NotifyTemplateVo notifyTemplateVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<NotifyTemplateVo>() {});
+		List<ValueTextVo> notifyTemplateList = notifyMapper.getNotifyTemplateListForSelect(notifyTemplateVo);
 		notifyTemplateList.add(new ValueTextVo(NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_UUID_PREFIX, NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_TYPE));
 		return notifyTemplateList;
 	}
