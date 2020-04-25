@@ -1,8 +1,10 @@
 package codedriver.module.process.api.channel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +56,7 @@ public class ChannelFormGetApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid"),
+		@Param(name = "channelUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "服务uuidList"),
 		@Param(name = "conditionModel", type = ApiParamType.ENUM, rule = "simple,custom", isRequired = true, desc = "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式、条件分流和sla条件;默认custom"),
 	})
 	@Output({
@@ -63,44 +65,48 @@ public class ChannelFormGetApi extends ApiComponentBase {
 	@Description(desc = "服务绑定的表单属性信息获取接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String channelUuid = jsonObj.getString("channelUuid");
-		ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
-		if(channel == null) {
-			throw new ChannelNotFoundException(channelUuid);
+		List<String> channelUuidList = JSONObject.parseArray(jsonObj.getJSONArray("channelUuidList").toJSONString(), String.class);
+		List<ChannelVo> channelList = channelMapper.getChannelByUuidList(channelUuidList);
+		if(CollectionUtils.isEmpty(channelList)) {
+			throw new ChannelNotFoundException(channelList.toString());
 		}
-		String processUuid = channel.getProcessUuid();
-		if(processUuid == null) {
-			throw new FormIllegalParameterException("服务:'" + channelUuid + "'没有绑定流程图");
-		}
-		ProcessVo process = processMapper.getProcessByUuid(processUuid);
-		if(process == null) {
-			throw new ProcessNotFoundException(processUuid);
-		}
-		String formUuid = process.getFormUuid();
-		if(formUuid == null) {
-			return null;
-		}
-		FormVo formVo = formMapper.getFormByUuid(formUuid);
-		//判断表单是否存在
-		if (formVo == null) {
-			throw new FormNotFoundException(formUuid);
-		}
-		String conditionModel = jsonObj.getString("conditionModel");
-		List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
-		ListIterator<FormAttributeVo> formiterator =  formAttributeList.listIterator();
-		while(formiterator.hasNext()) {
-			FormAttributeVo formAttributeVo = formiterator.next();
-			if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
-					||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-					||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
-					||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
-				formiterator.remove();
-				continue;
+		List<FormAttributeVo> allFormAttributeList = new ArrayList<FormAttributeVo>();
+		for(ChannelVo channel: channelList) {
+			String processUuid = channel.getProcessUuid();
+			if(processUuid == null) {
+				throw new FormIllegalParameterException("服务:'" + channel.getUuid() + "'没有绑定流程图");
 			}
-			formAttributeVo.setConditionModel(conditionModel);
-			formAttributeVo.setType("form");
+			ProcessVo process = processMapper.getProcessByUuid(processUuid);
+			if(process == null) {
+				throw new ProcessNotFoundException(processUuid);
+			}
+			String formUuid = process.getFormUuid();
+			if(formUuid == null) {
+				return null;
+			}
+			FormVo formVo = formMapper.getFormByUuid(formUuid);
+			//判断表单是否存在
+			if (formVo == null) {
+				throw new FormNotFoundException(formUuid);
+			}
+			String conditionModel = jsonObj.getString("conditionModel");
+			List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
+			ListIterator<FormAttributeVo> formiterator =  formAttributeList.listIterator();
+			while(formiterator.hasNext()) {
+				FormAttributeVo formAttributeVo = formiterator.next();
+				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
+					formiterator.remove();
+					continue;
+				}
+				formAttributeVo.setConditionModel(conditionModel);
+				formAttributeVo.setType("form");
+			}
+			allFormAttributeList.addAll(formAttributeList);
 		}
-		return formAttributeList;
+		return allFormAttributeList;
 	}
 
 }
