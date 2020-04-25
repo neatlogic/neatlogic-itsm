@@ -9,6 +9,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
+import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
+import codedriver.framework.process.notify.dto.NotifyTemplateVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -41,7 +43,9 @@ public class NotifyTemplateListForSelectApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<ValueTextVo> notifyTemplateList = notifyMapper.getNotifyTemplateListForSelect();
-		//notifyTemplateList.add(new ValueTextVo("default","默认"));
+		for(NotifyTemplateVo notifyTemplateVo : NotifyDefaultTemplateFactory.getDefaultTemplateList()) {
+			notifyTemplateList.add(new ValueTextVo(notifyTemplateVo.getUuid(), notifyTemplateVo.getName()));
+		}
 		return notifyTemplateList;
 	}
 
