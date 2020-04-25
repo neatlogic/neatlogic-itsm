@@ -134,8 +134,8 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
 		String where = "(";
-		String formKey = condition.getUuid();
-		String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getName()).toLowerCase();
+		String formKey = condition.getName();
+		String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getHandler()).toLowerCase();
 		Object value = condition.getValueList().get(0);
 		if(condition.getValueList().size()>1) {
 			value = String.join("','",condition.getValueList());
