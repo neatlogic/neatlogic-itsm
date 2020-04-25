@@ -91,7 +91,9 @@ public class NotifyTemplateSearchApi extends ApiComponentBase {
 				notifyTemplateList = notifyMapper.searchNotifyTemplate(notifyTemplateVo);
 				notifyTemplateList.addAll(defaultTemplateList.subList(0, notifyTemplateVo.getPageSize() - count));
 			}else {
-				notifyTemplateList.addAll(defaultTemplateList.subList(Math.abs(count), count + notifyTemplateVo.getPageSize()));
+				int toIndex = count + notifyTemplateVo.getPageSize();
+				toIndex = toIndex > defaultTemplateList.size() ? toIndex : defaultTemplateList.size();
+				notifyTemplateList.addAll(defaultTemplateList.subList(Math.abs(count), toIndex));
 			}
 		}else {
 			notifyTemplateList = notifyMapper.searchNotifyTemplate(notifyTemplateVo);
