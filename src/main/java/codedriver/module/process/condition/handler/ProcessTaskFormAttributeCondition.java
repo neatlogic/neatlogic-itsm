@@ -135,12 +135,12 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 		ConditionVo condition = conditionList.get(index);
 		String where = "(";
 		String formKey = condition.getUuid();
-		String formValueKey = "value_"+ProcessFormHandler.getDataType(condition.getName()).toLowerCase();
+		String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getName()).toLowerCase();
 		Object value = condition.getValueList().get(0);
 		if(condition.getValueList().size()>1) {
 			value = String.join("','",condition.getValueList());
 		}
-		where += String.format(" [ key = '%s' and "+ProcessExpression.getExpressionEs(condition.getExpression())+" ] ", formKey,formValueKey,String.format("'%s'",  value));
+		where += String.format(" [ form.key = '%s' and "+ProcessExpression.getExpressionEs(condition.getExpression())+" ] ", formKey,formValueKey,String.format("'%s'",  value));
 		return where+")";
 	}
 	
