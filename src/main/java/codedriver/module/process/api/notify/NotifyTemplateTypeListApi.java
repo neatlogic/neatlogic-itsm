@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
+import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -45,6 +46,7 @@ public class NotifyTemplateTypeListApi extends ApiComponentBase{
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<ValueTextVo> resultObj = new ArrayList<>();
 		resultObj.add(new ValueTextVo("", "所有"));
+		resultObj.add(new ValueTextVo(NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_UUID_PREFIX, NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_TYPE));
 		List<String> typeList = notifyMapper.getNotifyTemplateTypeList();
 		for(String type : typeList) {
 			if(StringUtils.isNotBlank(type)) {
