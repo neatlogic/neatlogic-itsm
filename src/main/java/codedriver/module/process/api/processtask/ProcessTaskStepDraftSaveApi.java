@@ -23,6 +23,7 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -97,37 +98,42 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		}
 		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.SAVE);
 
-		//表单属性显示控制
-		Map<String, String> formAttributeActionMap = new HashMap<>();
-		List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
-		if(processTaskStepFormAttributeList.size() > 0) {
-			for(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
-				formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
-			}
-		}
-		//暂存时对表单属性值的修改不写入processtask_formattribute_data表，先保存在暂存活动中，等回复或流转操作时，再写入processtask_formattribute_data表
-		JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
-		if(CollectionUtils.isNotEmpty(formAttributeDataList)) {
-			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = new ArrayList<>(formAttributeDataList.size());
-			for(int i = 0; i < formAttributeDataList.size(); i++) {
-				JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
-				String attributeUuid = formAttributeDataObj.getString("attributeUuid");
-				if(formAttributeActionMap.get(attributeUuid) != null) {//对于只读或隐藏的属性，当前用户不能修改，不更新数据库中的值，不进行修改前后对比
-					continue;
+		ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+		if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
+			//表单属性显示控制
+			Map<String, String> formAttributeActionMap = new HashMap<>();
+			List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
+			if(processTaskStepFormAttributeList.size() > 0) {
+				for(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
+					formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
 				}
-				ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
-				String dataList = formAttributeDataObj.getString("dataList");
-				attributeData.setData(dataList);
-				attributeData.setProcessTaskId(processTaskId);
-				attributeData.setAttributeUuid(attributeUuid);
-				attributeData.setType(formAttributeDataObj.getString("handler"));
-				attributeData.setSort(i);
-				processTaskFormAttributeDataList.add(attributeData);
 			}
-			processTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
-			jsonObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(processTaskFormAttributeDataList));
+			//暂存时对表单属性值的修改不写入processtask_formattribute_data表，先保存在暂存活动中，等回复或流转操作时，再写入processtask_formattribute_data表
+			JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
+			if(CollectionUtils.isNotEmpty(formAttributeDataList)) {
+				List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = new ArrayList<>(formAttributeDataList.size());
+				for(int i = 0; i < formAttributeDataList.size(); i++) {
+					JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+					String attributeUuid = formAttributeDataObj.getString("attributeUuid");
+					if(formAttributeActionMap.get(attributeUuid) != null) {//对于只读或隐藏的属性，当前用户不能修改，不更新数据库中的值，不进行修改前后对比
+						continue;
+					}
+					ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
+					String dataList = formAttributeDataObj.getString("dataList");
+					attributeData.setData(dataList);
+					attributeData.setProcessTaskId(processTaskId);
+					attributeData.setAttributeUuid(attributeUuid);
+					attributeData.setType(formAttributeDataObj.getString("handler"));
+					attributeData.setSort(i);
+					processTaskFormAttributeDataList.add(attributeData);
+				}
+				processTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
+				jsonObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(processTaskFormAttributeDataList));
+			}else {
+				return null;
+			}
 		}
-		
+			
 		//删除暂存活动
 		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
 		auditVo.setProcessTaskId(processTaskId);
