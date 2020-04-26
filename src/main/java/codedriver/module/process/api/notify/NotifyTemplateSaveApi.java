@@ -12,6 +12,7 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
+import codedriver.framework.process.exception.notify.NotifyTemplateNameRepeatException;
 import codedriver.framework.process.exception.notify.NotifyTemplateNotFoundException;
 import codedriver.framework.process.notify.dto.NotifyTemplateVo;
 import codedriver.framework.restful.annotation.Description;
@@ -47,7 +48,9 @@ public class NotifyTemplateSaveApi extends ApiComponentBase {
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
 		@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "标题"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "内容"),
-		@Param(name = "type", type = ApiParamType.STRING, desc = "类型")
+		@Param(name = "type", type = ApiParamType.STRING, desc = "类型"),
+		@Param(name = "notifyHandler", type = ApiParamType.STRING, isRequired = true, desc = "插件"),
+		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "触发类型"),
 	})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "通知模板uuid")
@@ -56,6 +59,9 @@ public class NotifyTemplateSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		NotifyTemplateVo notifyTemplate = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<NotifyTemplateVo>() {});
+		if(notifyMapper.checkNotifyTemplateNameIsRepeat(notifyTemplate) > 0) {
+			throw new NotifyTemplateNameRepeatException(notifyTemplate.getName());
+		}
 		String uuid = jsonObj.getString("uuid");
 		if(StringUtils.isBlank(uuid)) {
 			notifyTemplate.setFcu(UserContext.get().getUserId(true));
