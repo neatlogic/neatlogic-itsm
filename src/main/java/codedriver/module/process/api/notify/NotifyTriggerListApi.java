@@ -42,6 +42,9 @@ public class NotifyTriggerListApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<ValueTextVo> returnList = new ArrayList<>();
 		for (NotifyTriggerType notifyTriggerType : NotifyTriggerType.values()) {
+			if(NotifyTriggerType.TIMEOUT == notifyTriggerType) {
+				continue;
+			}
 			returnList.add(new ValueTextVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText()));
 		}
 		return returnList;
