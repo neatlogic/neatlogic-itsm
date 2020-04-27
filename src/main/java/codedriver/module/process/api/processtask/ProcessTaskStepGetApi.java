@@ -266,7 +266,8 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
 					for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
 						String currentUser = UserContext.get().getUserId(true);
-						if(currentUser.equals(processTaskStepSubtask.getOwner()) || currentUser.equals(processTaskStepSubtask.getUserId())) {
+						if((currentUser.equals(processTaskStepSubtask.getOwner()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
+								|| (currentUser.equals(processTaskStepSubtask.getUserId()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
 							List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
 							Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
 							while(iterator.hasNext()) {
