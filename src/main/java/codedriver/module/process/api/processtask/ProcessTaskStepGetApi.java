@@ -2,6 +2,7 @@ package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
@@ -45,6 +47,7 @@ import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
@@ -262,12 +265,16 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
 					List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
 					for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-						if(processTaskStepSubtask.getIsCommentable().intValue() == 1) {
+						String currentUser = UserContext.get().getUserId(true);
+						if(currentUser.equals(processTaskStepSubtask.getOwner()) || currentUser.equals(processTaskStepSubtask.getUserId())) {
 							List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
-							for(ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo : processTaskStepSubtaskContentList) {
+							Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
+							while(iterator.hasNext()) {
+								ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
 								if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
 									if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
 										processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
+										iterator.remove();
 									}
 								}
 							}
@@ -277,14 +284,36 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					}
 					processTaskStepVo.setProcessTaskStepSubtaskList(subtaskList);
 				}
+				
+				//获取可分配处理人的步骤列表				
+				ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
+				processTaskStepWorkerPolicyVo.setProcessTaskId(processTaskId);
+				List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
+				if(CollectionUtils.isNotEmpty(processTaskStepWorkerPolicyList)) {
+					List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
+					for(ProcessTaskStepWorkerPolicyVo workerPolicyVo : processTaskStepWorkerPolicyList) {
+						if(WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
+							List<String> processStepUuidList = JSON.parseArray(workerPolicyVo.getConfigObj().getString("processStepUuidList"), String.class);
+							for(String processStepUuid : processStepUuidList) {
+								if(processTaskStepVo.getProcessStepUuid().equals(processStepUuid)) {
+									List<ProcessTaskStepUserVo> majorList = processTaskMapper.getProcessTaskStepUserByStepId(workerPolicyVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
+									if(CollectionUtils.isEmpty(majorList)) {
+										ProcessTaskStepVo assignableWorkerStep = processTaskMapper.getProcessTaskStepBaseInfoById(workerPolicyVo.getProcessTaskStepId());
+										assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
+										assignableWorkerStepList.add(assignableWorkerStep);
+									}
+								}
+							}
+						}
+					}
+					processTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
+				}
 				resultObj.put("processTaskStep", processTaskStepVo);
 			}
 		}
 
 		Map<String, String> formAttributeActionMap = new HashMap<>();
 		List<String> verifyActionList = new ArrayList<>();
-//		verifyActionList.add(ProcessTaskStepAction.COMPLETE.getValue());
-//		verifyActionList.add(ProcessTaskStepAction.BACK.getValue());
 		verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
 		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
 		if(actionList.removeAll(verifyActionList)) {//有处理权限

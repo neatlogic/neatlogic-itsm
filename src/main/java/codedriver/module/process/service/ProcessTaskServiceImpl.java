@@ -336,7 +336,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
 			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-			processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.COMPLETESUBTASK.getValue(), processTaskContentVo.getHash()));
+			processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.COMMENTSUBTASK.getValue(), processTaskContentVo.getHash()));
 		}
 		
 	}
