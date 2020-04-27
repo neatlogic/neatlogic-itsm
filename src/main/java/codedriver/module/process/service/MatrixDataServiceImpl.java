@@ -1,19 +1,24 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
+import codedriver.framework.process.matrixattribute.core.MatrixAttributeHandlerFactory;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @program: codedriver
@@ -56,4 +61,32 @@ public class MatrixDataServiceImpl implements MatrixDataService {
     public List<String> getExternalMatrixColumnData() {
         return null;
     }
+
+	@Override
+	public List<Map<String, Object>> matrixValueHandle(List<ProcessMatrixAttributeVo> ProcessMatrixAttributeList, List<Map<String, String>> valueList) {
+		if(CollectionUtils.isNotEmpty(ProcessMatrixAttributeList)) {
+			Map<String, ProcessMatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
+			for(ProcessMatrixAttributeVo processMatrixAttributeVo : ProcessMatrixAttributeList) {
+				processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
+			}
+			if(CollectionUtils.isNotEmpty(valueList)) {
+				List<Map<String, Object>> resultList = new ArrayList<>(valueList.size());
+				for(Map<String, String> valueMap : valueList) {
+					Map<String, Object> resultMap = new HashMap<>();
+					for(Entry<String, String> entry : valueMap.entrySet()) {
+						String attributeUuid = entry.getKey();
+						ProcessMatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(attributeUuid);
+						if(processMatrixAttribute != null) {
+							resultMap.put(attributeUuid, MatrixAttributeHandlerFactory.getHandler(processMatrixAttribute.getType()).getData(processMatrixAttribute, entry.getValue()));
+						}else {
+							resultMap.put(attributeUuid, MatrixAttributeHandlerFactory.getHandler(ProcessMatrixAttributeType.FORMINPUT.getValue()).getData(processMatrixAttribute, entry.getValue()));
+						}
+					}
+					resultList.add(resultMap);
+				}
+				return resultList;
+			}
+		}
+		return null;
+	}
 }
