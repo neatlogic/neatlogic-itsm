@@ -60,7 +60,7 @@ public class ProcessTaskStepSubtaskCommentApi extends ApiComponentBase {
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
 			processTaskService.commentSubtask(processTaskStepSubtaskVo);
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMPLETESUBTASK.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMMENTSUBTASK.getText());
 		}
 		return null;
 	}
