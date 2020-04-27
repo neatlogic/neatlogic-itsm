@@ -12,13 +12,13 @@ public class DateMatrixHandler implements IMatrixAttributeHandler{
 
 	@Override
 	public String getType() {
-		return ProcessMatrixAttributeType.FORMDATE.getValue();
+		return ProcessMatrixAttributeType.DATE.getValue();
 	}
 
 	@Override
 	public JSONObject getData(ProcessMatrixAttributeVo processMatrixAttributeVo, String value) {
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("type", ProcessMatrixAttributeType.FORMDATE.getValue());
+		resultObj.put("type", ProcessMatrixAttributeType.DATE.getValue());
 		resultObj.put("value", value);
 		resultObj.put("text", value);
 		return resultObj;

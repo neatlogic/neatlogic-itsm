@@ -79,7 +79,7 @@ public class MatrixDataServiceImpl implements MatrixDataService {
 						if(processMatrixAttribute != null) {
 							resultMap.put(attributeUuid, MatrixAttributeHandlerFactory.getHandler(processMatrixAttribute.getType()).getData(processMatrixAttribute, entry.getValue()));
 						}else {
-							resultMap.put(attributeUuid, MatrixAttributeHandlerFactory.getHandler(ProcessMatrixAttributeType.FORMINPUT.getValue()).getData(processMatrixAttribute, entry.getValue()));
+							resultMap.put(attributeUuid, MatrixAttributeHandlerFactory.getHandler(ProcessMatrixAttributeType.INPUT.getValue()).getData(processMatrixAttribute, entry.getValue()));
 						}
 					}
 					resultList.add(resultMap);

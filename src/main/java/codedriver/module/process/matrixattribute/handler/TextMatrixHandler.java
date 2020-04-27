@@ -12,13 +12,13 @@ public class TextMatrixHandler implements IMatrixAttributeHandler {
 
 	@Override
 	public String getType() {
-		return ProcessMatrixAttributeType.FORMINPUT.getValue();
+		return ProcessMatrixAttributeType.INPUT.getValue();
 	}
 
 	@Override
 	public JSONObject getData(ProcessMatrixAttributeVo processMatrixAttributeVo, String value) {
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("type", ProcessMatrixAttributeType.FORMINPUT.getValue());
+		resultObj.put("type", ProcessMatrixAttributeType.INPUT.getValue());
 		resultObj.put("value", value);
 		resultObj.put("text", value);
 		return resultObj;

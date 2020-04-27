@@ -18,13 +18,13 @@ public class SelectMatrixHandler implements IMatrixAttributeHandler {
 
 	@Override
 	public String getType() {
-		return ProcessMatrixAttributeType.FORMSELECT.getValue();
+		return ProcessMatrixAttributeType.SELECT.getValue();
 	}
 
 	@Override
 	public JSONObject getData(ProcessMatrixAttributeVo processMatrixAttributeVo, String value) {
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("type", ProcessMatrixAttributeType.FORMSELECT.getValue());
+		resultObj.put("type", ProcessMatrixAttributeType.SELECT.getValue());
 		resultObj.put("value", value);
 		String config = processMatrixAttributeVo.getConfig();
 		if(StringUtils.isNotBlank(config)) {
