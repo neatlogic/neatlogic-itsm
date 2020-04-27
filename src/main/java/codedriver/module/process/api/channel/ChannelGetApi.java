@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dto.AuthorityVo;
 import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;

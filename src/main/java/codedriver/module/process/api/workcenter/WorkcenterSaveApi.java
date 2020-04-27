@@ -16,10 +16,10 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.dto.AuthorityVo;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -58,7 +58,7 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid"),
-		@Param(name="name", type = ApiParamType.STRING, desc="分类名",isRequired = true,xss = true),
+		@Param(name="name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc="分类名",isRequired = true,xss = true),
 		@Param(name="type", type = ApiParamType.STRING, desc="分类类型，system|custom 默认custom"),
 		@Param(name="conditionConfig", type = ApiParamType.JSONOBJECT, desc="分类过滤配置，json格式",isRequired = true),
 		@Param(name="valueList", type = ApiParamType.JSONARRAY, desc="授权列表，如果是system,则必填", isRequired = false)
