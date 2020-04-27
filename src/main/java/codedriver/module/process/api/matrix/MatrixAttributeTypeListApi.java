@@ -30,8 +30,9 @@ public class MatrixAttributeTypeListApi extends ApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
+	
 	@Output({ @Param( name = "Return", desc = "矩阵属性类型列表", explode = ValueTextVo[].class)})
-    @Description(desc = "矩阵属性类型列表接口")
+	@Description(desc = "矩阵属性类型列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		 List<ValueTextVo> typeList = new ArrayList<>();
