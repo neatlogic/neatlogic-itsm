@@ -1,14 +1,12 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.Date;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -63,7 +61,7 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name = "workerList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "子任务处理人userId,单选,格式[\"user#userId\"]"),
+		@Param(name = "workerList", type = ApiParamType.STRING, isRequired = true, desc = "子任务处理人userId,单选,格式user#userId"),
 		@Param(name = "targetTime", type = ApiParamType.LONG, desc = "期望完成时间"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述")
 	})
@@ -94,9 +92,9 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 		processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
 		processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
 		processTaskStepSubtaskVo.setOwner(UserContext.get().getUserId(true));
-		List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
+		String workerList = jsonObj.getString("workerList");
 		jsonObj.remove("workerList");
-		String[] split = workerList.get(0).split("#");
+		String[] split = workerList.split("#");
 		if(GroupSearch.USER.getValue().equals(split[0])) {
 			UserVo userVo = userMapper.getUserByUserId(split[1]);
 			if(userVo != null) {
