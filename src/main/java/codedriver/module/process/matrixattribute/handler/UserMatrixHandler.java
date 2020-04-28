@@ -1,11 +1,7 @@
 package codedriver.module.process.matrixattribute.handler;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.dao.mapper.UserMapper;
@@ -28,10 +24,6 @@ public class UserMatrixHandler implements IMatrixAttributeHandler {
 	public JSONObject getData(ProcessMatrixAttributeVo processMatrixAttributeVo, String value) {
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("type", ProcessMatrixAttributeType.USER.getValue());
-		if(value.startsWith("[") && value.endsWith("]")) {
-			List<String> list = JSON.parseArray(value, String.class);
-			value = list.get(0);
-		}
 		String[] split = value.split("#");
 		resultObj.put("value", split[1]);
 		UserVo userVo = userMapper.getUserBaseInfoByUserId(split[1]);

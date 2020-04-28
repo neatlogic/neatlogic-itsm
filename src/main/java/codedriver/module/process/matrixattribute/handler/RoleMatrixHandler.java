@@ -1,11 +1,8 @@
 package codedriver.module.process.matrixattribute.handler;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.dao.mapper.RoleMapper;
@@ -28,10 +25,6 @@ public class RoleMatrixHandler implements IMatrixAttributeHandler {
 	public JSONObject getData(ProcessMatrixAttributeVo processMatrixAttributeVo, String value) {
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("type", ProcessMatrixAttributeType.ROLE.getValue());
-		if(value.startsWith("[") && value.endsWith("]")) {
-			List<String> list = JSON.parseArray(value, String.class);
-			value = list.get(0);
-		}
 		String[] split = value.split("#");
 		resultObj.put("value", split[1]);
 		RoleVo roleVo = roleMapper.getRoleByRoleName(split[1]);
