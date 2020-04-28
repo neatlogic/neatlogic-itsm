@@ -12,8 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
-import codedriver.framework.process.dto.AuthorityVo;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.exception.catalog.CatalogNameRepeatException;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;

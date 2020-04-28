@@ -98,7 +98,8 @@ public class WorkcenterListApi extends ApiComponentBase {
 	        WorkcenterVo workcenter = it.next();
 			if(workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
 				workcenter.setIsCanEdit(0);
-			}else if(CollectionUtils.isNotEmpty(userAuthList)){
+			}if(workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue())
+					&& CollectionUtils.isEmpty(userAuthList)) {
 				workcenter.setIsCanEdit(1);
 				workcenter.setIsCanRole(1);
 			}else {
@@ -109,6 +110,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 				}
 				workcenter.setIsCanRole(0);
 			}
+			
 			//查询数量
 			workcenter.setCount(workcenterService.doSearchCount(new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()))));
 			workcenter.setConditionConfig(null);
