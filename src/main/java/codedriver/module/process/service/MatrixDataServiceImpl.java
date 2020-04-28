@@ -75,12 +75,12 @@ public class MatrixDataServiceImpl implements MatrixDataService {
 					Map<String, Object> resultMap = new HashMap<>();
 					for(Entry<String, String> entry : valueMap.entrySet()) {
 						String attributeUuid = entry.getKey();
+						String type = ProcessMatrixAttributeType.INPUT.getValue();
 						ProcessMatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(attributeUuid);
 						if(processMatrixAttribute != null) {
-							resultMap.put(attributeUuid, MatrixAttributeHandlerFactory.getHandler(processMatrixAttribute.getType()).getData(processMatrixAttribute, entry.getValue()));
-						}else {
-							resultMap.put(attributeUuid, MatrixAttributeHandlerFactory.getHandler(ProcessMatrixAttributeType.INPUT.getValue()).getData(processMatrixAttribute, entry.getValue()));
+							type = processMatrixAttribute.getType();
 						}
+						resultMap.put(attributeUuid, MatrixAttributeHandlerFactory.getHandler(type).getData(processMatrixAttribute, entry.getValue()));
 					}
 					resultList.add(resultMap);
 				}
