@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @program: codedriver
@@ -77,8 +76,9 @@ public class MatrixDataSearchApi extends ApiComponentBase {
     	}
     	List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
         if (CollectionUtils.isNotEmpty(attributeVoList)){
-        	List<Map<String, String>> tbodyList = dataService.searchDynamicTableData(dataVo);
-        	returnObj.put("tbodyList", dataService.matrixValueHandle(attributeVoList, tbodyList));
+//        	List<Map<String, String>> tbodyList = dataService.searchDynamicTableData(dataVo);
+//        	returnObj.put("tbodyList", dataService.matrixValueHandle(attributeVoList, tbodyList));
+        	returnObj.put("tbodyList", dataService.searchDynamicTableData(dataVo));
             List<ProcessMatrixColumnVo> processMatrixColumnList = dataVo.getSourceColumnList();
             if(CollectionUtils.isNotEmpty(processMatrixColumnList)) {
             	JSONArray headList = new JSONArray();
