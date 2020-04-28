@@ -27,9 +27,13 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.MatrixDataService;
 
 @Service
 public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
+
+	@Autowired
+	private MatrixDataService matrixDataService;
 
     @Autowired
     private MatrixMapper matrixMapper;
@@ -75,18 +79,26 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         ProcessMatrixDataVo dataVo = JSON.toJavaObject(jsonObj, ProcessMatrixDataVo.class);
-//        String matrixUuid = jsonObj.getString("matrixUuid");
         ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(dataVo.getMatrixUuid());
         }
-//        List<ProcessMatrixColumnVo> sourceColumnList = JSON.parseArray(jsonObj.getString("searchValueList"), ProcessMatrixColumnVo.class);
-//        List<String> targetColumnList =  JSONObject.parseArray(jsonObj.getJSONArray("targetColumnList").toJSONString(), String.class);
-//        dataVo.setSourceColumnList(sourceColumnList);
-//        dataVo.setColumnList(targetColumnList);
+        //theadList
+    	JSONArray theadList = new JSONArray();
+    	List<ProcessMatrixAttributeVo> matrixAttributeTheadList = matrixAttributeMapper.getMatrixAttributeByMatrixUuidList(dataVo.getColumnList(), dataVo.getMatrixUuid());
+    	for(String column : dataVo.getColumnList()) {
+    		for(ProcessMatrixAttributeVo matrixAttributeSearch:matrixAttributeTheadList) {
+        		if(matrixAttributeSearch.getUuid().equals(column)) {
+        			theadList.add(matrixAttributeSearch);
+        		}
+        	}
+    	}
+    	returnObj.put("theadList", theadList);
+
         if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
             List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList(dataVo);
-            returnObj.put("tbodyList", dataMapList);
+            List<Map<String, Object>> tbodyList = matrixDataService.matrixValueHandle(matrixAttributeTheadList, dataMapList);
+            returnObj.put("tbodyList", tbodyList);
         }else {
             //外部数据源矩阵  暂未实现
             return null;
@@ -105,17 +117,7 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
         	}
         	 returnObj.put("searchColumnDetailList", searchColumnDetailList);
         }
-        //theadList
-    	JSONArray theadList = new JSONArray();
-    	List<ProcessMatrixAttributeVo> matrixAttributeTheadList = matrixAttributeMapper.getMatrixAttributeByMatrixUuidList(dataVo.getColumnList(), dataVo.getMatrixUuid());
-    	for(String column : dataVo.getColumnList()) {
-    		for(ProcessMatrixAttributeVo matrixAttributeSearch:matrixAttributeTheadList) {
-        		if(matrixAttributeSearch.getUuid().equals(column)) {
-        			theadList.add(matrixAttributeSearch);
-        		}
-        	}
-    	}
-    	returnObj.put("theadList", theadList);
+        
  
         if(dataVo.getNeedPage()) {
 			int rowNum = matrixDataMapper.getDynamicTableDataByColumnCount(dataVo);

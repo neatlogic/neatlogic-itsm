@@ -26,10 +26,14 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.MatrixDataService;
 
 @Service
 public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 
+	@Autowired
+	private MatrixDataService matrixDataService;
+	
     @Autowired
     private MatrixMapper matrixMapper;
     
@@ -72,20 +76,9 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         ProcessMatrixDataVo dataVo = JSON.toJavaObject(jsonObj, ProcessMatrixDataVo.class);
-//        String matrixUuid = jsonObj.getString("matrixUuid");
         ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(dataVo.getMatrixUuid());
-        }
-        //tbodyList
-//        List<String> targetColumnList =  JSONObject.parseArray(jsonObj.getString("targetColumnList"), String.class);
-//        List<String> dataUuidList =  JSONObject.parseArray(jsonObj.getString("dataUuidList"), String.class);
-        if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
-            List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByUuidList(dataVo);
-            returnObj.put("tbodyList", dataMapList);
-        }else {
-            //外部数据源矩阵  暂未实现
-            return null;
         }
         //theadList
     	JSONArray theadList = new JSONArray();
@@ -98,6 +91,16 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
         	}
     	}
     	returnObj.put("theadList", theadList);
+        //tbodyList
+        if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
+            List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByUuidList(dataVo);
+            List<Map<String, Object>> tbodyList = matrixDataService.matrixValueHandle(matrixAttributeTheadList, dataMapList);
+            returnObj.put("tbodyList", tbodyList);
+        }else {
+            //外部数据源矩阵  暂未实现
+            return null;
+        }
+        
     	if(dataVo.getNeedPage()) {
 			int rowNum = matrixDataMapper.getDynamicTableDataByUuidCount(dataVo);
 			int pageCount = PageUtil.getPageCount(rowNum, dataVo.getPageSize());
