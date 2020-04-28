@@ -2,7 +2,9 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
+import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixDispatcherVo;
@@ -37,6 +39,9 @@ public class MatrixDataSearchApi extends ApiComponentBase {
 
     @Autowired
     private MatrixMapper matrixMapper;
+
+    @Autowired
+    private MatrixAttributeMapper attributeMapper;
     
     @Override
     public String getToken() {
@@ -69,38 +74,44 @@ public class MatrixDataSearchApi extends ApiComponentBase {
     	if(matrixMapper.checkMatrixIsExists(dataVo.getMatrixUuid()) == 0) {
     		throw new MatrixNotFoundException(dataVo.getMatrixUuid());
     	}
-        returnObj.put("tbodyList", dataService.searchDynamicTableData(dataVo));
-        List<ProcessMatrixColumnVo> processMatrixColumnList = dataVo.getSourceColumnList();
-        if(CollectionUtils.isNotEmpty(processMatrixColumnList)) {
-        	JSONArray headList = new JSONArray();
-            JSONObject selectionObj = new JSONObject();
-            selectionObj.put("key", "selection");
-            selectionObj.put("width", 60);
-            headList.add(selectionObj);
-            
-            for(ProcessMatrixColumnVo processMatrixColumnVo : processMatrixColumnList) {
-            	JSONObject columnObj = new JSONObject();
-            	columnObj.put("title", processMatrixColumnVo.getValue());
-            	columnObj.put("key", processMatrixColumnVo.getColumn());
-                headList.add(columnObj);
+    	List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
+        if (CollectionUtils.isNotEmpty(attributeVoList)){
+//        	List<Map<String, String>> tbodyList = dataService.searchDynamicTableData(dataVo);
+//        	returnObj.put("tbodyList", dataService.matrixValueHandle(attributeVoList, tbodyList));
+        	returnObj.put("tbodyList", dataService.searchDynamicTableData(dataVo));
+            List<ProcessMatrixColumnVo> processMatrixColumnList = dataVo.getSourceColumnList();
+            if(CollectionUtils.isNotEmpty(processMatrixColumnList)) {
+            	JSONArray headList = new JSONArray();
+                JSONObject selectionObj = new JSONObject();
+                selectionObj.put("key", "selection");
+                selectionObj.put("width", 60);
+                headList.add(selectionObj);
+                
+                for(ProcessMatrixColumnVo processMatrixColumnVo : processMatrixColumnList) {
+                	JSONObject columnObj = new JSONObject();
+                	columnObj.put("title", processMatrixColumnVo.getValue());
+                	columnObj.put("key", processMatrixColumnVo.getColumn());
+                    headList.add(columnObj);
+                }
+                
+                JSONObject actionObj = new JSONObject();
+                actionObj.put("title", "");
+                actionObj.put("key", "action");
+                actionObj.put("align", "right");
+                actionObj.put("width", 10);
+                headList.add(actionObj);
+                
+                returnObj.put("theadList", headList);
             }
             
-            JSONObject actionObj = new JSONObject();
-            actionObj.put("title", "");
-            actionObj.put("key", "action");
-            actionObj.put("align", "right");
-            actionObj.put("width", 10);
-            headList.add(actionObj);
-            
-            returnObj.put("theadList", headList);
+            if (dataVo.getNeedPage()){
+                returnObj.put("pageCount", dataVo.getPageCount());
+                returnObj.put("rowNum", dataVo.getRowNum());
+                returnObj.put("pageSize", dataVo.getPageSize());
+                returnObj.put("currentPage", dataVo.getCurrentPage());
+            }
         }
         
-        if (dataVo.getNeedPage()){
-            returnObj.put("pageCount", dataVo.getPageCount());
-            returnObj.put("rowNum", dataVo.getRowNum());
-            returnObj.put("pageSize", dataVo.getPageSize());
-            returnObj.put("currentPage", dataVo.getCurrentPage());
-        }
         List<ProcessMatrixDispatcherVo> dispatcherVoList = matrixMapper.getMatrixDispatcherByMatrixUuid(dataVo.getMatrixUuid());
         returnObj.put("dispatcherVoList", dispatcherVoList);
         List<ProcessMatrixFormComponentVo> componentVoList = matrixMapper.getMatrixFormComponentByMatrixUuid(dataVo.getMatrixUuid());

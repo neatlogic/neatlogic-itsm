@@ -95,7 +95,6 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
                 dataVo.setNeedPage(false);
                 dataVo.setMatrixUuid(paramObj.getString("matrixUuid"));
                 List<Map<String, String>> dataMapList = dataService.searchDynamicTableData(dataVo);
-
                 String fileNameEncode = matrixVo.getName() + ".xls";
                 Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
                 if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {

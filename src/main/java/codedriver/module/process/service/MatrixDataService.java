@@ -1,5 +1,6 @@
 package codedriver.module.process.service;
 
+import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface MatrixDataService {
     public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo);
 
     public List<String> getExternalMatrixColumnData();
+    
+    public List<Map<String, Object>> matrixValueHandle(List<ProcessMatrixAttributeVo> attributeVoList, List<Map<String, String>> valueList);
 }
