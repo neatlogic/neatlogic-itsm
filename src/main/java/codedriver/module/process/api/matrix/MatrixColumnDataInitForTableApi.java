@@ -60,8 +60,8 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 
     @Input({
     	@Param( name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
-    	@Param( name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回，参数名由“targetColumnList”改为“columnList”", type = ApiParamType.JSONARRAY, isRequired = true),
-        @Param( name = "uuidList", desc = "需要回显的数据uuid集合，参数名由“dataUuidList”改为“uuidList”", type = ApiParamType.JSONARRAY),
+    	@Param( name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true),
+        @Param( name = "uuidList", desc = "需要回显的数据uuid集合", type = ApiParamType.JSONARRAY),
     	@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")

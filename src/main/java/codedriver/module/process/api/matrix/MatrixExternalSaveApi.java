@@ -40,7 +40,6 @@ public class MatrixExternalSaveApi extends ApiComponentBase {
     }
 
     @Input({
-    	//@Param( name = "id", type = ApiParamType.LONG, desc = "外部矩阵数据源id"),
     	@Param( name = "matrixUuid", type = ApiParamType.STRING, isRequired = true, desc = "矩阵uuid"),
     	@Param( name = "plugin", type = ApiParamType.STRING, isRequired = true, desc = "插件"),
         @Param( name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "矩阵外部数据源配置")
