@@ -106,11 +106,9 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                         Workbook wb = WorkbookFactory.create(is);
                         Sheet sheet = wb.getSheetAt(0);
                         int rowNum = sheet.getLastRowNum();
-                        System.out.println("rowNum=" + rowNum);
                         //获取头栏位
                         Row headerRow = sheet.getRow(0);
                         int colNum = headerRow.getLastCellNum();
-                        System.out.println("colNum=" + colNum);
                         //attributeList 缺少uuid
                         if (colNum != attributeVoList.size() + 1){
                             throw new MatrixHeaderMisMatchException(originalFilename);
