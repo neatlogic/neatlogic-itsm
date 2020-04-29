@@ -60,9 +60,7 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
 		return null;
 	}
 	@Input({ 
-		//@Param( name = "keyword", desc = "关键字", type = ApiParamType.STRING),
         @Param( name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
-        //@Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
         @Param( name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
         @Param( name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER)
 	})
