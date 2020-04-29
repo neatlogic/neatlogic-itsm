@@ -1,6 +1,7 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -132,10 +133,13 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 					List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
 					for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
 						List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
-						for(ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo : processTaskStepSubtaskContentList) {
+						Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
+						while(iterator.hasNext()) {
+							ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
 							if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
 								if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
 									processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
+									iterator.remove();
 								}
 							}
 						}

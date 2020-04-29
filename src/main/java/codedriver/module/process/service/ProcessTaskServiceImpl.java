@@ -90,6 +90,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		processTaskMapper.insertProcessTaskStepSubtask(processTaskStepSubtaskVo);
 		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
+		paramObj.put("processTaskStepSubtaskId", processTaskStepSubtaskVo.getId());
 		String content = paramObj.getString("content");
 		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
 		processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
