@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.constvalue.ProcessStepType;
-import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessDraftVo;
 import codedriver.framework.process.dto.ProcessFormVo;
@@ -20,15 +19,13 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
+import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
 
 @Service
 public class ProcessServiceImpl implements ProcessService {
 
 	@Autowired
 	private ProcessMapper processMapper;
-
-	@Autowired
-	private FormMapper formMapper;
 
 	@Override
 	public ProcessVo getProcessByUuid(String processUuid) {
@@ -126,7 +123,9 @@ public class ProcessServiceImpl implements ProcessService {
 				}
 				if (stepVo.getTemplateUuidList() != null && stepVo.getTemplateUuidList().size() > 0) {
 					for (String templateUuid : stepVo.getTemplateUuidList()) {
-						processMapper.insertProcessStepNotifyTemplate(new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
+						if(!NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_UUID_PREFIX.equals(templateUuid)) {
+							processMapper.replaceProcessStepNotifyTemplate(new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
+						}
 					}
 				}
 			}
