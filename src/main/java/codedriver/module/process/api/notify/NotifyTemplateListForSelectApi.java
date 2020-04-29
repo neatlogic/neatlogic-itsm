@@ -12,8 +12,8 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
-import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
 import codedriver.framework.process.notify.dto.NotifyTemplateVo;
+import codedriver.framework.process.notify.template.IDefaultTemplate;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -53,7 +53,7 @@ public class NotifyTemplateListForSelectApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		NotifyTemplateVo notifyTemplateVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<NotifyTemplateVo>() {});
 		List<ValueTextVo> notifyTemplateList = notifyMapper.getNotifyTemplateListForSelect(notifyTemplateVo);
-		notifyTemplateList.add(new ValueTextVo(NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_UUID_PREFIX, NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_TYPE));
+		notifyTemplateList.add(new ValueTextVo(IDefaultTemplate.DEFAULT_TEMPLATE_UUID_PREFIX, IDefaultTemplate.DEFAULT_TEMPLATE_TYPE));
 		return notifyTemplateList;
 	}
 

@@ -10,6 +10,7 @@ import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
 import codedriver.framework.process.exception.notify.NotifyTemplateNotFoundException;
 import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
 import codedriver.framework.process.notify.dto.NotifyTemplateVo;
+import codedriver.framework.process.notify.template.IDefaultTemplate;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -48,7 +49,7 @@ public class NotifyTemplateGetApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
 		NotifyTemplateVo notifyTemplateVo = null;
-		if(uuid.startsWith(NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_UUID_PREFIX)) {
+		if(uuid.startsWith(IDefaultTemplate.DEFAULT_TEMPLATE_UUID_PREFIX)) {
 			notifyTemplateVo = NotifyDefaultTemplateFactory.getDefaultTemplateByUuid(uuid);
 		}else {
 			notifyTemplateVo = notifyMapper.getNotifyTemplateByUuid(uuid);

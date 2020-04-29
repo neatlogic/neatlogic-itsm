@@ -19,7 +19,7 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
-import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
+import codedriver.framework.process.notify.template.IDefaultTemplate;
 
 @Service
 public class ProcessServiceImpl implements ProcessService {
@@ -123,7 +123,7 @@ public class ProcessServiceImpl implements ProcessService {
 				}
 				if (stepVo.getTemplateUuidList() != null && stepVo.getTemplateUuidList().size() > 0) {
 					for (String templateUuid : stepVo.getTemplateUuidList()) {
-						if(!NotifyDefaultTemplateFactory.DEFAULT_TEMPLATE_UUID_PREFIX.equals(templateUuid)) {
+						if(!IDefaultTemplate.DEFAULT_TEMPLATE_UUID_PREFIX.equals(templateUuid)) {
 							processMapper.replaceProcessStepNotifyTemplate(new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
 						}
 					}
