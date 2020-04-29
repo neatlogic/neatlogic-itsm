@@ -1,11 +1,13 @@
 package codedriver.module.process.api.matrix;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -51,11 +53,11 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	@Input({
         @Param( name = "matrixUuid", type = ApiParamType.STRING, isRequired = true, desc = "矩阵uuid"),
         @Param( name = "sourceColumn", type = ApiParamType.STRING, isRequired = true, desc = "源列属性uuid"),
-        @Param( name = "sourceColumnValue", type = ApiParamType.STRING, isRequired = true, desc = "源列属性值"),
+        @Param( name = "sourceColumnValueList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "源列属性值列表"),
         @Param( name = "targetColumn", type = ApiParamType.STRING, isRequired = true, desc = "目标列属性uuid")
     })
 	@Output({ 
-		@Param( name = "Return", type = ApiParamType.STRING, desc = "目标单元格值")
+		@Param( name = "Return", type = ApiParamType.JSONARRAY, desc = "目标列属性值列表")
 	})
 	@Description( desc = "矩阵单元格数据获取接口")
 	@Override
@@ -74,9 +76,16 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 		if(!attributeUuidList.contains(targetColumn)) {
 			throw new MatrixAttributeNotFoundException(matrixUuid, targetColumn);
 		}
-		String sourceColumnValue = jsonObj.getString("sourceColumnValue");
-		ProcessMatrixColumnVo sourceColumnVo = new ProcessMatrixColumnVo(sourceColumn, sourceColumnValue);
-		return matrixDataMapper.getDynamicTableCellData(matrixUuid, sourceColumnVo, targetColumn);
+		
+		List<String> resultObj = new ArrayList<>();
+		ProcessMatrixColumnVo sourceColumnVo = new ProcessMatrixColumnVo();
+		sourceColumnVo.setColumn(sourceColumn);
+		List<String> sourceColumnValueList = JSON.parseArray(jsonObj.getString("sourceColumnValueList"), String.class);
+		for(String sourceColumnValue : sourceColumnValueList) {
+			sourceColumnVo.setValue(sourceColumnValue);
+			resultObj.add(matrixDataMapper.getDynamicTableCellData(matrixUuid, sourceColumnVo, targetColumn));
+		}	
+		return resultObj;
 	}
 
 }
