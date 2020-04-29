@@ -28,7 +28,7 @@ import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
 import codedriver.framework.process.exception.matrix.MatrixExternalRequestHandlerNotFoundException;
-import codedriver.framework.process.exception.matrix.MatrixRepeatException;
+import codedriver.framework.process.exception.matrix.MatrixNameRepeatException;
 import codedriver.framework.process.matrixrexternal.core.IMatrixExternalRequestHandler;
 import codedriver.framework.process.matrixrexternal.core.MatrixExternalRequestFactory;
 import codedriver.module.process.util.UUIDUtil;
@@ -58,10 +58,16 @@ public class MatrixServiceImpl implements MatrixService {
     public ProcessMatrixVo saveMatrix(ProcessMatrixVo matrixVo) {
         matrixVo.setLcu(UserContext.get().getUserId());
         if (StringUtils.isNotBlank(matrixVo.getUuid())){
+        	if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+        		throw new MatrixNameRepeatException(matrixVo.getName());
+        	}
             matrixMapper.updateMatrixNameAndLcu(matrixVo);
         }else {
             matrixVo.setFcu(UserContext.get().getUserId());
             matrixVo.setUuid(UUIDUtil.getUUID());
+            if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+            	throw new MatrixNameRepeatException(matrixVo.getName());
+        	}
             matrixMapper.insertMatrix(matrixVo);
         }
         
@@ -74,7 +80,7 @@ public class MatrixServiceImpl implements MatrixService {
     	ProcessMatrixVo processMatrixVo = new ProcessMatrixVo();
     	processMatrixVo.setKeyword(name);
     	if(matrixMapper.searchMatrixCount(processMatrixVo)>0){
-    		throw new MatrixRepeatException(name);
+    		throw new MatrixNameRepeatException(name);
     	}
         ProcessMatrixVo sourceMatrix = matrixMapper.getMatrixByUuid(matrixUuid);
         if (StringUtils.isNotBlank(name)){
@@ -160,6 +166,7 @@ public class MatrixServiceImpl implements MatrixService {
             ProcessMatrixDataVo sourceDataVo = new ProcessMatrixDataVo();
             sourceDataVo.setMatrixUuid(sourceMatrixUuid);
             sourceDataVo.setColumnList(sourceColumnList);
+            sourceDataVo.setNeedPage(false);
             List<Map<String, String>> sourceMatrixDataMapList = matrixDataMapper.searchDynamicTableData(sourceDataVo);
             if (CollectionUtils.isNotEmpty(sourceMatrixDataMapList)){
                 for (Map<String,String> sourceDataMap : sourceMatrixDataMapList){
