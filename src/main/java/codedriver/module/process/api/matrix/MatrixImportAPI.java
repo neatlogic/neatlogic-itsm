@@ -6,12 +6,15 @@ import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
+import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.process.*;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
+import codedriver.module.process.util.UUIDUtil;
+
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -110,48 +113,40 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                         if (colNum != attributeVoList.size() + 1){
                             throw new MatrixHeaderMisMatchException(originalFilename);
                         }
-                        int count = 0;
-                        int uuidIndex = 0;
-                        List<String> columnList = new ArrayList<>();
-                        //获取头name集合，排好顺序
-                        for (int i = 0; i < colNum; i ++){
-                            Cell cell = headerRow.getCell(i);
-                            String columnName = cell.getStringCellValue();
-                            if (("uuid").equals(columnName)){
-                                columnList.add("uuid");
-                                uuidIndex = count;
-                                count++;
-                            }
-                            if (headerMap.containsKey(columnName)){
-                                columnList.add(headerMap.get(columnName));
-                                count++;
-                            }
-                        }
-                        if (count != colNum){
-                            throw new MatrixHeaderMisMatchException(originalFilename);
-                        }
                         //解析数据
-                        for (int i = 1; i < rowNum + 1; i++){
+                        for (int i = 1; i <= rowNum; i++){
                             Row row = sheet.getRow(i);
-                            List<String> dataList = new ArrayList<>();
+                            boolean isNew = false;
+                            ProcessMatrixColumnVo uuidColumn = null;
+                            List<ProcessMatrixColumnVo> rowData = new ArrayList<>();
                             for (int j = 0; j < colNum; j++){
-                                Cell cell = row.getCell(j);
-                                String value = getCellValue(cell);
-                                dataList.add(StringUtils.isBlank(value)?UUID.randomUUID().toString().replace("-", ""):value);
-                            }
-                            //获取数据uuid
-                            String uuid = getCellValue(row.getCell(uuidIndex));
-                            if(StringUtils.isNotBlank(uuid)){
-                                if (dataMapper.getDynamicTableDataCountByUuid(uuid, matrixVo.getUuid()) == 1){
-                                    dataMapper.deleteDynamicTableDataByUuid(matrixVo.getUuid(), uuid);
-                                    dataMapper.insertDynamicTableData(columnList, dataList, matrixVo.getUuid());
-                                    update++;
+                                Cell tbodycell = row.getCell(j);
+                                String value = getCellValue(tbodycell);
+                                String attributeUuid = null;
+                            	Cell theadCell = headerRow.getCell(j);
+                                String columnName = theadCell.getStringCellValue();
+                                if (("uuid").equals(columnName)){
+                                	attributeUuid = "uuid";
+                                	if(StringUtils.isBlank(value) || dataMapper.getDynamicTableDataCountByUuid(value, matrixVo.getUuid()) == 0) {
+                                		value = UUIDUtil.getUUID();
+                                		isNew = true;
+                                		rowData.add(new ProcessMatrixColumnVo(attributeUuid, value));
+                                	}else {
+                                		uuidColumn = new ProcessMatrixColumnVo(attributeUuid, value);
+                                	}
                                 }else {
-                                    unExist++;
+                                	attributeUuid = headerMap.get(columnName);
+                                	if(StringUtils.isNotBlank(attributeUuid)) {
+                                        rowData.add(new ProcessMatrixColumnVo(attributeUuid, value));
+                                    }
                                 }
+                            }
+                            if(isNew) {
+                            	dataMapper.insertDynamicTableData2(rowData, matrixUuid);
+                            	insert++;
+                            	update++;
                             }else {
-                                dataMapper.insertDynamicTableData(columnList, dataList, matrixVo.getUuid());
-                                insert++;
+                            	dataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid);
                             }
                         }
                     }
