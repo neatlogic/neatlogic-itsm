@@ -21,6 +21,7 @@ import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.query.QueryResult;
 import com.techsure.multiattrsearch.util.ESQueryUtil;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
@@ -66,7 +67,7 @@ public class WorkcenterService {
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
 		String orderBy = "order by common.starttime desc";
-		String sql = String.format("select %s from techsure %s %s limit %d,%d", selectColumn,where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
+		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
 		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
 	}
 	/**
