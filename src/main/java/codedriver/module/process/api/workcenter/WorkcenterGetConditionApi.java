@@ -14,7 +14,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessExpression;
-import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
+import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -57,13 +57,13 @@ public class WorkcenterGetConditionApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray resultArray = new JSONArray();
-		String conditionModel = jsonObj.getString("conditionModel") == null?ProcessWorkcenterConditionModel.CUSTOM.getValue():jsonObj.getString("conditionModel");
+		String conditionModel = jsonObj.getString("conditionModel") == null?ProcessConditionModel.CUSTOM.getValue():jsonObj.getString("conditionModel");
 		//固定字段条件
 		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
 		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
 			IProcessTaskCondition condition = entry.getValue();
 			//不支持endTime过滤，如果是简单模式 title、id、content 不返回
-			if(conditionModel.equals(ProcessWorkcenterConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
+			if(conditionModel.equals(ProcessConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
 					||condition.getName().equals(ProcessWorkcenterField.ID.getValue())||condition.getName().equals(ProcessWorkcenterField.CONTENT.getValue()))
 					||condition.getName().equals(ProcessWorkcenterField.ENDTIME.getValue())
 					||ProcessWorkcenterField.getValue(condition.getName())== null

@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.dashboard.core.DashboardChartBase;
 import codedriver.framework.dashboard.core.DashboardChartFactory;
 import codedriver.framework.dashboard.core.DashboardHandlerBase;
-import codedriver.framework.dashboard.core.DashboardChartBase;
-import codedriver.framework.dashboard.dto.ChartDataVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.service.WorkcenterService;
 
 @Component
@@ -25,31 +25,15 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 		return "processtask";
 	}
 
-	/*
-	 * 
-	 * { "groupField":"urgency", "aggregate":"count",
-	 * "subGroupField":"","valueField":"", "displaycolumn":["owner","title"],
-	 * "sort":"createTime", "limit":10 }
-	 */
-
 	@Override
 	protected JSONArray myGetData(DashboardWidgetVo widgetVo) {
 
 		DashboardChartBase chart = DashboardChartFactory.getChart(widgetVo.getChartType());
-
+		JSONObject jsonObj = new JSONObject();
 		if (chart != null) {
-			// JSONObject resultObj = workcenterService.doSearch(new WorkcenterVo());
-			// JSONArray dataList = resultObj.getJSONArray("tbodyList");
-			JSONArray dataList = new JSONArray();
-			String[] workers = new String[] { "chenqw", "admin", "wangtc", "wenhb", "wugq" };
-			String[] urgencys = new String[] { "紧急", "普通" };
-			for (int i = 0; i < 100; i++) {
-				JSONObject jsonObj = new JSONObject();
-				jsonObj.put("worker", workers[(int) (Math.random() * 100 % 5)]);
-				jsonObj.put("processTaskId", Math.random() * 100);
-				jsonObj.put("urgency", urgencys[(int) (Math.random() * 100 % 2)]);
-				dataList.add(jsonObj);
-			}
+			jsonObj = JSONObject.parseObject(widgetVo.getConditionConfig());
+			JSONObject resultObj = workcenterService.doSearch(new WorkcenterVo(jsonObj));
+			JSONArray dataList = resultObj.getJSONArray("tbodyList");
 			if (CollectionUtils.isNotEmpty(dataList)) {
 				return chart.getData(dataList, widgetVo.getChartConfigObj());
 			}

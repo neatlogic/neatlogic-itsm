@@ -14,7 +14,7 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterConditionModel;
+import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -38,7 +38,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
-		if(ProcessWorkcenterConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
+		if(ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
 			return ProcessFormHandlerType.CHECKBOX.toString();
 		}else {
 			return ProcessFormHandlerType.SELECT.toString();
