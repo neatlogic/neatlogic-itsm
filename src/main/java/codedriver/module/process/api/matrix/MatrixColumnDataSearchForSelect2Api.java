@@ -48,7 +48,7 @@ public class MatrixColumnDataSearchForSelect2Api extends ApiComponentBase {
 
     @Override
     public String getToken() {
-        return "matrix/column/data/search/forselect2";
+        return "matrix/column/data/search/forselect/new";
     }
 
     @Override
@@ -66,9 +66,7 @@ public class MatrixColumnDataSearchForSelect2Api extends ApiComponentBase {
     	@Param( name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), 
     	@Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING, isRequired = true),           
     	@Param( name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true),
-        //@Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
-        @Param( name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
-        //@Param( name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER)
+        @Param( name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER)
     	})
     @Description(desc = "矩阵属性数据查询-下拉级联接口")
     @Output({ @Param( name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")})
