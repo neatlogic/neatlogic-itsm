@@ -32,7 +32,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixDataService;
 
 @Service
-public class MatrixColumnDataSearchForSelect2Api extends ApiComponentBase {
+public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 	
 	@Autowired
 	private MatrixDataService matrixDataService;
