@@ -1,5 +1,6 @@
 package codedriver.module.process.service;
 
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -83,7 +84,7 @@ public class MatrixDataServiceImpl implements MatrixDataService {
     }
 
 	@Override
-	public List<Map<String, Object>> matrixValueHandle(List<ProcessMatrixAttributeVo> ProcessMatrixAttributeList, List<Map<String, String>> valueList) {
+	public List<Map<String, Object>> matrixTableDataValueHandle(List<ProcessMatrixAttributeVo> ProcessMatrixAttributeList, List<Map<String, String>> valueList) {
 		if(CollectionUtils.isNotEmpty(ProcessMatrixAttributeList)) {
 			Map<String, ProcessMatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
 			for(ProcessMatrixAttributeVo processMatrixAttributeVo : ProcessMatrixAttributeList) {
@@ -94,73 +95,105 @@ public class MatrixDataServiceImpl implements MatrixDataService {
 				for(Map<String, String> valueMap : valueList) {
 					Map<String, Object> resultMap = new HashMap<>();
 					for(Entry<String, String> entry : valueMap.entrySet()) {
-						String attributeUuid = entry.getKey();
-						String type = ProcessMatrixAttributeType.INPUT.getValue();
-						ProcessMatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(attributeUuid);
-						if(processMatrixAttribute != null) {
-							type = processMatrixAttribute.getType();
-						}
-						String value = entry.getValue();
-						JSONObject resultObj = new JSONObject();
-						resultObj.put("type", type);
-						if(ProcessMatrixAttributeType.SELECT.getValue().equals(type)) {
-							resultObj.put("value", value);
-							resultObj.put("text", value);
-							if(processMatrixAttribute != null) {
-								String config = processMatrixAttribute.getConfig();
-								if(StringUtils.isNotBlank(config)) {
-									JSONObject configObj = JSON.parseObject(config);
-									JSONArray dataList = configObj.getJSONArray("dataList");
-									if(CollectionUtils.isNotEmpty(dataList)) {
-										for(int i = 0; i < dataList.size(); i++) {
-											JSONObject data = dataList.getJSONObject(i);
-											if(Objects.equals(value, data.getString("value"))) {
-												resultObj.put("text", data.getString("text"));
-											}
-										}
-									}
-								}
-							}
-						}else if(ProcessMatrixAttributeType.USER.getValue().equals(type)) {
-							String[] split = value.split("#");
-							resultObj.put("value", split[1]);
-							UserVo userVo = userMapper.getUserBaseInfoByUserId(split[1]);
-							if(userVo != null) {
-								resultObj.put("text", userVo.getUserName());
-							}else {
-								resultObj.put("text", split[1]);
-							}
-						}else if(ProcessMatrixAttributeType.TEAM.getValue().equals(type)) {
-							String[] split = value.split("#");
-							resultObj.put("value", split[1]);
-							TeamVo teamVo = teamMapper.getTeamByUuid(split[1]);
-							if(teamVo != null) {
-								resultObj.put("text", teamVo.getName());
-							}else {
-								resultObj.put("text", split[1]);
-							}
-						}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(type)) {
-							String[] split = value.split("#");
-							resultObj.put("value", split[1]);
-							RoleVo roleVo = roleMapper.getRoleByRoleName(split[1]);
-							if(roleVo != null) {
-								resultObj.put("text", roleVo.getDescription());
-							}else {
-								resultObj.put("text", split[1]);
-							}
-						}else if(ProcessMatrixAttributeType.DATE.getValue().equals(type)) {
-							resultObj.put("value", value);
-							resultObj.put("text", value);
-						}else {
-							resultObj.put("value", value);
-							resultObj.put("text", value);
-						}
-						resultMap.put(attributeUuid, resultObj);
+						String attributeUuid = entry.getKey();					
+						resultMap.put(attributeUuid, matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
 					}
 					resultList.add(resultMap);
 				}
 				return resultList;
 			}
+		}
+		return null;
+	}
+
+	@Override
+	public JSONObject matrixAttributeValueHandle(ProcessMatrixAttributeVo processMatrixAttribute, String value) {
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("value", value);
+		String type = ProcessMatrixAttributeType.INPUT.getValue();
+		if(processMatrixAttribute != null) {
+			type = processMatrixAttribute.getType();
+		}
+		resultObj.put("type", type);
+		if(ProcessMatrixAttributeType.SELECT.getValue().equals(type)) {
+			resultObj.put("text", value);
+			if(processMatrixAttribute != null) {
+				String config = processMatrixAttribute.getConfig();
+				if(StringUtils.isNotBlank(config)) {
+					JSONObject configObj = JSON.parseObject(config);
+					JSONArray dataList = configObj.getJSONArray("dataList");
+					if(CollectionUtils.isNotEmpty(dataList)) {
+						for(int i = 0; i < dataList.size(); i++) {
+							JSONObject data = dataList.getJSONObject(i);
+							if(Objects.equals(value, data.getString("value"))) {
+								resultObj.put("text", data.getString("text"));
+							}
+						}
+					}
+				}
+			}
+		}else if(ProcessMatrixAttributeType.USER.getValue().equals(type)) {
+			UserVo userVo = userMapper.getUserBaseInfoByUserId(value);
+			if(userVo != null) {
+				resultObj.put("text", userVo.getUserName());
+			}else {
+				resultObj.put("text", value);
+			}
+		}else if(ProcessMatrixAttributeType.TEAM.getValue().equals(type)) {
+			TeamVo teamVo = teamMapper.getTeamByUuid(value);
+			if(teamVo != null) {
+				resultObj.put("text", teamVo.getName());
+			}else {
+				resultObj.put("text", value);
+			}
+		}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(type)) {
+			RoleVo roleVo = roleMapper.getRoleByRoleName(value);
+			if(roleVo != null) {
+				resultObj.put("text", roleVo.getDescription());
+			}else {
+				resultObj.put("text", value);
+			}
+		}else if(ProcessMatrixAttributeType.DATE.getValue().equals(type)) {
+			resultObj.put("text", value);
+		}else {
+			resultObj.put("text", value);
+		}
+		return resultObj;
+	}
+
+	@Override
+	public List<String> matrixAttributeValueKeyWordSearch(ProcessMatrixAttributeVo processMatrixAttribute, String keyword, int pageSize) {
+		pageSize *= 2; 
+		String type = processMatrixAttribute.getType();
+		if(ProcessMatrixAttributeType.SELECT.getValue().equals(type)) {
+			if(processMatrixAttribute != null) {
+				String config = processMatrixAttribute.getConfig();
+				if(StringUtils.isNotBlank(config)) {
+					JSONObject configObj = JSON.parseObject(config);
+					List<ValueTextVo> dataList = JSON.parseArray(configObj.getString("dataList"), ValueTextVo.class);
+					if(CollectionUtils.isNotEmpty(dataList)) {
+						List<String> valueList = new ArrayList<>();
+						for(ValueTextVo data : dataList) {
+							if(data.getText().contains(keyword)) {
+								valueList.add(data.getValue());
+							}
+						}
+						if(CollectionUtils.isNotEmpty(valueList)) {
+							return matrixDataMapper.getUuidListByAttributeValueListForSelectType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), valueList, pageSize);
+						}
+					}
+				}
+			}
+		}else if(ProcessMatrixAttributeType.USER.getValue().equals(type)) {
+			return matrixDataMapper.getUuidListByKeywordForUserType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
+		}else if(ProcessMatrixAttributeType.TEAM.getValue().equals(type)) {
+			return matrixDataMapper.getUuidListByKeywordForTeamType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
+		}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(type)) {
+			return matrixDataMapper.getUuidListByKeywordForRoleType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
+		}else if(ProcessMatrixAttributeType.DATE.getValue().equals(type)) {
+			return matrixDataMapper.getUuidListByKeywordForDateType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
+		}else {
+			return matrixDataMapper.getUuidListByKeywordForInputType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
 		}
 		return null;
 	}

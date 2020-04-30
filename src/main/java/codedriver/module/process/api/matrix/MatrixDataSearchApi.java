@@ -62,7 +62,8 @@ public class MatrixDataSearchApi extends ApiComponentBase {
              @Param( name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
              @Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
              @Param( name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
-             @Param( name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER)})
+             @Param( name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER)
+    })
     @Output({ @Param( name = "tbodyList", desc = "矩阵数据集合"),
               @Param( name = "theadList", desc = "矩阵属性集合"),
               @Param( explode = BasePageVo.class)})

@@ -97,7 +97,7 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
 
         if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
             List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList(dataVo);
-            List<Map<String, Object>> tbodyList = matrixDataService.matrixValueHandle(matrixAttributeTheadList, dataMapList);
+            List<Map<String, Object>> tbodyList = matrixDataService.matrixTableDataValueHandle(matrixAttributeTheadList, dataMapList);
             returnObj.put("tbodyList", tbodyList);
         }else {
             //外部数据源矩阵  暂未实现

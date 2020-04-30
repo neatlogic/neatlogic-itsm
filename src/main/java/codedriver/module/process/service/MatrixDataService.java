@@ -6,6 +6,8 @@ import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * @program: codedriver
  * @description:
@@ -17,5 +19,9 @@ public interface MatrixDataService {
 
     public List<String> getExternalMatrixColumnData();
     
-    public List<Map<String, Object>> matrixValueHandle(List<ProcessMatrixAttributeVo> attributeVoList, List<Map<String, String>> valueList);
+    public List<Map<String, Object>> matrixTableDataValueHandle(List<ProcessMatrixAttributeVo> attributeVoList, List<Map<String, String>> valueList);
+    
+    public JSONObject matrixAttributeValueHandle(ProcessMatrixAttributeVo processMatrixAttributeVo, String value);
+    
+    public List<String> matrixAttributeValueKeyWordSearch(ProcessMatrixAttributeVo processMatrixAttributeVo, String keyword, int pageSize);
 }
