@@ -101,11 +101,11 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     				throw new MatrixAttributeNotFoundException(matrixUuid, column);
     			}
     			if(ProcessMatrixAttributeType.USER.getValue().equals(processMatrixAttributeVo.getType())) {
-    				value = value.toString().split("#")[0];
+    				value = value.toString().split("#")[1];
     			}else if(ProcessMatrixAttributeType.TEAM.getValue().equals(processMatrixAttributeVo.getType())) {
-    				value = value.toString().split("#")[0];
+    				value = value.toString().split("#")[1];
     			}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(processMatrixAttributeVo.getType())) {
-    				value = value.toString().split("#")[0];
+    				value = value.toString().split("#")[1];
     			}
         		rowData.add(new ProcessMatrixColumnVo(column, value.toString()));
     		}
