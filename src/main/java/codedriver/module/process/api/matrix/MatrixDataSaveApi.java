@@ -1,9 +1,13 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
+import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
+import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
+import codedriver.framework.process.exception.matrix.MatrixAttributeNotFoundException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -14,7 +18,9 @@ import codedriver.module.process.util.UUIDUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +37,9 @@ public class MatrixDataSaveApi extends ApiComponentBase {
 
     @Autowired
     private MatrixMapper matrixMapper;
+    
+    @Autowired
+    private MatrixAttributeMapper matrixAttributeMapper;
 
     @Autowired
     private MatrixDataMapper matrixDataMapper;
@@ -62,7 +71,13 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     	if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
     		throw new MatrixNotFoundException(matrixUuid);
     	}
-    	boolean isNewRow = true;
+
+    	Map<String, ProcessMatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
+    	List<ProcessMatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
+    	for(ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
+    		processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
+    	}
+        boolean isNewRow = true;
     	ProcessMatrixColumnVo uuidColumn = null;
     	List<ProcessMatrixColumnVo> rowData = new ArrayList<>();
     	JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
@@ -80,8 +95,20 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     			}
     		}else if("id".equals(column)) {
 				continue;
+    		}else {
+    			ProcessMatrixAttributeVo processMatrixAttributeVo = processMatrixAttributeMap.get(column);
+    			if(processMatrixAttributeVo == null) {
+    				throw new MatrixAttributeNotFoundException(matrixUuid, column);
+    			}
+    			if(ProcessMatrixAttributeType.USER.getValue().equals(processMatrixAttributeVo.getType())) {
+    				value = value.toString().split("#")[0];
+    			}else if(ProcessMatrixAttributeType.TEAM.getValue().equals(processMatrixAttributeVo.getType())) {
+    				value = value.toString().split("#")[0];
+    			}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(processMatrixAttributeVo.getType())) {
+    				value = value.toString().split("#")[0];
+    			}
+        		rowData.add(new ProcessMatrixColumnVo(column, value.toString()));
     		}
-    		rowData.add(new ProcessMatrixColumnVo(column, value.toString()));
     	}
     		
     	if(isNewRow) {
