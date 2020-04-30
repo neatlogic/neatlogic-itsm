@@ -1,7 +1,6 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.attribute.constvalue.AttributeHandler;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
@@ -96,7 +95,7 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
                 dataVo.setMatrixUuid(paramObj.getString("matrixUuid"));
                 List<Map<String, String>> dataMapList = dataService.searchDynamicTableData(dataVo);
                 String fileNameEncode = matrixVo.getName() + ".xls";
-                Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
+                Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
                 if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
                     fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
                 } else {
@@ -112,7 +111,7 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
             List<String> columnList = dataObj.getJSONArray("columnList").toJavaList(String.class);
             List<Map<String, String>> dataMapList= (List<Map<String,String>>) dataObj.get("dataMapList");
             String fileNameEncode = matrixVo.getName() + ".xls";
-            Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
+            Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
             if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
                 fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
             } else {
