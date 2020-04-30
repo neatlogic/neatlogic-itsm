@@ -96,7 +96,7 @@ public class ChannelFormGetApi extends ApiComponentBase {
 				FormAttributeVo formAttributeVo = formiterator.next();
 				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
 						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
 						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
 					formiterator.remove();
 					continue;

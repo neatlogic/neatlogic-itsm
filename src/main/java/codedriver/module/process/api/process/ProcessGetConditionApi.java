@@ -99,7 +99,7 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			for(FormAttributeVo formAttributeVo : formAttrList) {
 				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
 						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
 						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
 					continue;
 				}
