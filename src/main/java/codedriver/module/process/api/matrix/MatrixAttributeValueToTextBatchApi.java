@@ -53,6 +53,14 @@ public class MatrixAttributeValueToTextBatchApi extends ApiComponentBase {
 		return null;
 	}
 	
+//	{
+//		"matrixUuid":"f84ec0ec15be473bbd7ba148a9d4bbcc",
+//		"attributeData":{
+//			"4fc1508850fe4da4bda0028613053399":["1","2","3"],
+//			"b694710424cf4176926c51b7c38bc803":["a","b","c"],
+//			"0886a741675e4c4b956157aec7144a89":["x","y","z"]
+//		}
+//	}
 	@Input({ 
 		@Param(name = "matrixUuid", type = ApiParamType.STRING, isRequired = true, desc = "矩阵uuid"),
 		@Param(name = "attributeData", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "矩阵属性数据")
