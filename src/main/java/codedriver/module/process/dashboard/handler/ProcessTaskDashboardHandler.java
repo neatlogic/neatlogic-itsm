@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.QueryResultSet;
 
 import codedriver.framework.dashboard.core.DashboardChartBase;
 import codedriver.framework.dashboard.core.DashboardChartFactory;
@@ -32,11 +33,15 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 		JSONObject jsonObj = new JSONObject();
 		if (chart != null) {
 			jsonObj = JSONObject.parseObject(widgetVo.getConditionConfig());
-			JSONObject resultObj = workcenterService.doSearch(new WorkcenterVo(jsonObj));
-			JSONArray dataList = resultObj.getJSONArray("tbodyList");
-			if (CollectionUtils.isNotEmpty(dataList)) {
-				return chart.getData(dataList, widgetVo.getChartConfigObj());
+			QueryResultSet resultSet = workcenterService.searchTaskIterate(new WorkcenterVo(jsonObj));
+			JSONObject preDatas = new JSONObject();
+			while(resultSet.hasMoreResults()) {
+				JSONArray nextDataList = workcenterService.getSearchIterate(resultSet).getJSONArray("tbodyList");
+				if (CollectionUtils.isNotEmpty(nextDataList)) {
+					preDatas = chart.getDataMap(nextDataList, widgetVo.getChartConfigObj(),preDatas);
+				}
 			}
+			return chart.getData(preDatas);
 		}
 
 		return null;
