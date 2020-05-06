@@ -172,7 +172,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			//processTaskVo.setFileList(fileList);
 		}
 		startProcessTaskStepVo.setComment(comment);
-		processTaskVo.setStartProcessTaskStepVo(startProcessTaskStepVo);
+		processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 		
 		//优先级
 		PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
@@ -319,7 +319,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					}
 					processTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
 				}
-				processTaskVo.setCurrentProcessTaskStepVo(processTaskStepVo);
+				processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
 				//resultObj.put("processTaskStep", processTaskStepVo);
 			}
 		}

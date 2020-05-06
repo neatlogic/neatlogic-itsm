@@ -179,7 +179,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				}
 				startProcessTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
 			}
-			processTaskVo.setStartProcessTaskStepVo(startProcessTaskStepVo);
+			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 			
 			//获取工单流程图信息
 			ProcessTaskConfigVo processTaskConfig = processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
@@ -261,7 +261,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				startProcessTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
 			}
 			
-			processTaskVo.setStartProcessTaskStepVo(startProcessTaskStepVo);
+			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
 			if(StringUtils.isNotBlank(processVo.getFormUuid())) {
 				FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());
