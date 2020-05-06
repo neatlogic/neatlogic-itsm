@@ -28,6 +28,7 @@ import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
@@ -239,6 +240,27 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				throw new ProcessTaskRuntimeException("流程：'" + channel.getProcessUuid() + "'有" + processStepList.size() + "个开始步骤");
 			}
 			ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(processStepList.get(0));
+			
+			//获取可分配处理人的步骤列表	
+			List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = processMapper.getProcessStepWorkerPolicyListByProcessUuid(channel.getProcessUuid());
+			if(CollectionUtils.isNotEmpty(processStepWorkerPolicyList)) {
+				List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
+				for(ProcessStepWorkerPolicyVo workerPolicyVo : processStepWorkerPolicyList) {
+					if(WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
+						List<String> processStepUuidList = JSON.parseArray(workerPolicyVo.getConfigObj().getString("processStepUuidList"), String.class);
+						for(String processStepUuid : processStepUuidList) {
+							if(startProcessTaskStepVo.getProcessStepUuid().equals(processStepUuid)) {
+								ProcessStepVo processStep = processMapper.getProcessStepByUuid(workerPolicyVo.getProcessStepUuid());
+								ProcessTaskStepVo assignableWorkerStep = new ProcessTaskStepVo(processStep);
+								assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
+								assignableWorkerStepList.add(assignableWorkerStep);
+							}
+						}
+					}
+				}
+				startProcessTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
+			}
+			
 			processTaskVo.setStartProcessTaskStepVo(startProcessTaskStepVo);
 
 			if(StringUtils.isNotBlank(processVo.getFormUuid())) {
