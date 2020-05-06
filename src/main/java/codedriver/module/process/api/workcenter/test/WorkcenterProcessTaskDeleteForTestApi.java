@@ -43,7 +43,7 @@ public class WorkcenterProcessTaskDeleteForTestApi extends ApiComponentBase {
 		Integer from = jsonObj.getInteger("from");
 		Integer to = jsonObj.getInteger("to");
 		MultiAttrsObjectPool  poll = ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME);
-		poll.checkout("techsure", null);
+		poll.checkout("techsure");
 		if(from != null && to != null) {
 			for(Integer i=from;i<to;i++) {
 				poll.delete(i.toString());

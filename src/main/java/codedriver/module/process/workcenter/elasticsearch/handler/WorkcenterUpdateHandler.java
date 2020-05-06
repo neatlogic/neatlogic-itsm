@@ -97,7 +97,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 	public void doService(JSONObject paramJson) {
 		 Long taskId = paramJson.getLong("taskId");
 		 String tenantUuid = paramJson.getString("tenantUuid");
-		 getObjectPool().checkout(tenantUuid, null);
+		 getObjectPool().checkout(tenantUuid);
 		 MultiAttrsObjectPatch patch = getObjectPool().save(taskId.toString());
 		 /** 获取工单信息 **/
 		 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(taskId);

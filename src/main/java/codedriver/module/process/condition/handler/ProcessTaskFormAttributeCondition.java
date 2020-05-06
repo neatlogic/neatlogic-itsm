@@ -133,15 +133,21 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 	@Override
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
-		if(condition !=null&&StringUtils.isNotBlank(condition.getName())&&StringUtils.isNotBlank(condition.getHandler())&&CollectionUtils.isNotEmpty(condition.getValueList())) {
+		if(condition !=null&&StringUtils.isNotBlank(condition.getName())) {
 			String where = "(";
 			String formKey = condition.getName();
-			String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getHandler()).toLowerCase();
-			Object value = condition.getValueList().get(0);
+			String formValueKey = "form.value_"+ProcessFormHandler.getDataType(formKey).toLowerCase();
+			Object value = StringUtils.EMPTY;
+			if(CollectionUtils.isNotEmpty(condition.getValueList())) {
+				value = condition.getValueList().get(0);
+			}
 			if(condition.getValueList().size()>1) {
 				value = String.join("','",condition.getValueList());
 			}
-			where += String.format(" [ form.key = '%s' and "+ProcessExpression.getExpressionEs(condition.getExpression())+" ] ", formKey,formValueKey,String.format("'%s'",  value));
+			if(StringUtils.isNotBlank(value.toString())) {
+				value = String.format("'%s'",  value);
+			}
+			where += String.format(" [ form.key = '%s' and "+ProcessExpression.getExpressionEs(condition.getExpression())+" ] ", formKey,formValueKey,value);
 			return where+")";
 		}
 		return null;
