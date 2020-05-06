@@ -10,12 +10,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -30,9 +33,12 @@ import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
@@ -111,19 +117,21 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			if(processTaskStepList.size() != 1) {
 				throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 			}
-			ProcessTaskStepVo processTaskStepVo = processTaskStepList.get(0);
+			ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
 			//获取步骤配置信息
-			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-			processTaskStepVo.setConfig(stepConfig);
-			processTaskVo.setIsRequired(processTaskStepVo.getIsRequired());
+			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
+			startProcessTaskStepVo.setConfig(stepConfig);
+			//processTaskVo.setIsRequired(processTaskStepVo.getIsRequired());
 
-			Long startProcessTaskStepId = processTaskStepVo.getId();
+			Long startProcessTaskStepId = startProcessTaskStepVo.getId();
+			ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
 			//获取上报描述内容
 			List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
 			if(!processTaskStepContentList.isEmpty()) {
 				ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
 				if(processTaskContentVo != null) {
-					processTaskVo.setContent(processTaskContentVo.getContent());
+					comment.setContent(processTaskContentVo.getContent());
+					//processTaskVo.setContent(processTaskContentVo.getContent());
 				}
 			}
 			//获取上传附件uuid
@@ -142,8 +150,36 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 						fileList.add(fileVo);
 					}
 				}
-				processTaskVo.setFileList(fileList);
+				comment.setFileList(fileList);
+				//processTaskVo.setFileList(fileList);
 			}
+			startProcessTaskStepVo.setComment(comment);
+			
+			//获取可分配处理人的步骤列表				
+			ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
+			processTaskStepWorkerPolicyVo.setProcessTaskId(processTaskId);
+			List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
+			if(CollectionUtils.isNotEmpty(processTaskStepWorkerPolicyList)) {
+				List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
+				for(ProcessTaskStepWorkerPolicyVo workerPolicyVo : processTaskStepWorkerPolicyList) {
+					if(WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
+						List<String> processStepUuidList = JSON.parseArray(workerPolicyVo.getConfigObj().getString("processStepUuidList"), String.class);
+						for(String processStepUuid : processStepUuidList) {
+							if(startProcessTaskStepVo.getProcessStepUuid().equals(processStepUuid)) {
+								List<ProcessTaskStepUserVo> majorList = processTaskMapper.getProcessTaskStepUserByStepId(workerPolicyVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
+								if(CollectionUtils.isEmpty(majorList)) {
+									ProcessTaskStepVo assignableWorkerStep = processTaskMapper.getProcessTaskStepBaseInfoById(workerPolicyVo.getProcessTaskStepId());
+									assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
+									assignableWorkerStepList.add(assignableWorkerStep);
+								}
+							}
+						}
+					}
+				}
+				startProcessTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
+			}
+			processTaskVo.setStartProcessTaskStepVo(startProcessTaskStepVo);
+			
 			//获取工单流程图信息
 			ProcessTaskConfigVo processTaskConfig = processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
 			if(processTaskConfig == null) {
@@ -202,10 +238,8 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			if(processStepList.size() != 1) {
 				throw new ProcessTaskRuntimeException("流程：'" + channel.getProcessUuid() + "'有" + processStepList.size() + "个开始步骤");
 			}
-			String stepConfig = processStepList.get(0).getConfig();
-			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-			processTaskStepVo.setConfig(stepConfig);
-			processTaskVo.setIsRequired(processTaskStepVo.getIsRequired());
+			ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(processStepList.get(0));
+			processTaskVo.setStartProcessTaskStepVo(startProcessTaskStepVo);
 
 			if(StringUtils.isNotBlank(processVo.getFormUuid())) {
 				FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());
