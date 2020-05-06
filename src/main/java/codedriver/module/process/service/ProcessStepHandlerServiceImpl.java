@@ -40,10 +40,11 @@ public class ProcessStepHandlerServiceImpl implements ProcessStepHandlerService 
             	if(ProcessStepType.PROCESS.getValue().equals(handler.getType())) {
             		if(StringUtils.isBlank(name) || handler.getName().contains(name)) {
             			ProcessStepHandlerVo handlerConfig = handlerConfigMap.get(handler.getHandler());
-            			if(handlerConfig != null) {
-            				handlerConfig.setName(handler.getName());
-            				resultList.add(handlerConfig);
+            			if(handlerConfig == null) {
+            				handlerConfig = new ProcessStepHandlerVo();
             			}
+            			handlerConfig.setName(handler.getName());
+        				resultList.add(handlerConfig);
             		}
             	}
             }
