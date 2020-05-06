@@ -122,7 +122,6 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			//获取步骤配置信息
 			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
 			startProcessTaskStepVo.setConfig(stepConfig);
-			//processTaskVo.setIsRequired(processTaskStepVo.getIsRequired());
 
 			Long startProcessTaskStepId = startProcessTaskStepVo.getId();
 			ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
@@ -132,7 +131,6 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
 				if(processTaskContentVo != null) {
 					comment.setContent(processTaskContentVo.getContent());
-					//processTaskVo.setContent(processTaskContentVo.getContent());
 				}
 			}
 			//获取上传附件uuid
@@ -152,7 +150,6 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 					}
 				}
 				comment.setFileList(fileList);
-				//processTaskVo.setFileList(fileList);
 			}
 			startProcessTaskStepVo.setComment(comment);
 			

@@ -81,7 +81,6 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		if(CollectionUtils.isNotEmpty(startStepMajorUserList)) {
 			startStepVo.setMajorUser(startStepMajorUserList.get(0));
 		}
-		//startStepVo.setMajorUserList(processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.MAJOR.getValue()));
 		startStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.AGENT.getValue()));
 		//上报描述内容和附件
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();

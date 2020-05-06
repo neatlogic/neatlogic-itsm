@@ -151,7 +151,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
 			if(processTaskContentVo != null) {
 				comment.setContent(processTaskContentVo.getContent());
-				//processTaskVo.setContent(processTaskContentVo.getContent());
 			}
 		}
 		//附件
@@ -169,7 +168,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				fileList.add(fileVo);
 			}
 			comment.setFileList(fileList);
-			//processTaskVo.setFileList(fileList);
 		}
 		startProcessTaskStepVo.setComment(comment);
 		processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
@@ -231,7 +229,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				//处理人列表
 				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 				if(CollectionUtils.isNotEmpty(majorUserList)) {
-					//processTaskStepVo.setMajorUserList(majorUserList);
 					processTaskStepVo.setMajorUser(majorUserList.get(0));
 				}
 				List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
@@ -320,7 +317,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					processTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
 				}
 				processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
-				//resultObj.put("processTaskStep", processTaskStepVo);
 			}
 		}
 
