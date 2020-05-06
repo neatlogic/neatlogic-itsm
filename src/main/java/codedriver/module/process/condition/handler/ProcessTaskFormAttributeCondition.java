@@ -136,7 +136,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 		if(condition !=null&&StringUtils.isNotBlank(condition.getName())) {
 			String where = "(";
 			String formKey = condition.getName();
-			String formValueKey = "form.value_"+ProcessFormHandler.getDataType(formKey).toLowerCase();
+			String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getHandler()).toLowerCase();
 			Object value = StringUtils.EMPTY;
 			if(CollectionUtils.isNotEmpty(condition.getValueList())) {
 				value = condition.getValueList().get(0);
