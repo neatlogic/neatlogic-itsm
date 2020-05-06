@@ -231,7 +231,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				//处理人列表
 				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 				if(CollectionUtils.isNotEmpty(majorUserList)) {
-					processTaskStepVo.setMajorUserList(majorUserList);
+					//processTaskStepVo.setMajorUserList(majorUserList);
 					processTaskStepVo.setMajorUser(majorUserList.get(0));
 				}
 				List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());

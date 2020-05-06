@@ -22,6 +22,7 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -76,7 +77,11 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 			throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 		}
 		ProcessTaskStepVo startStepVo = processTaskStepList.get(0);
-		startStepVo.setMajorUserList(processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.MAJOR.getValue()));
+		List<ProcessTaskStepUserVo> startStepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.MAJOR.getValue());
+		if(CollectionUtils.isNotEmpty(startStepMajorUserList)) {
+			startStepVo.setMajorUser(startStepMajorUserList.get(0));
+		}
+		//startStepVo.setMajorUserList(processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.MAJOR.getValue()));
 		startStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.AGENT.getValue()));
 		//上报描述内容和附件
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
@@ -103,7 +108,10 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 				List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), verifyActionList);
 				if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 					processTaskStepVo.setIsView(1);
-					processTaskStepVo.setMajorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue()));
+					List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+					if(CollectionUtils.isNotEmpty(majorUserList)) {
+						processTaskStepVo.setMajorUser(majorUserList.get(0));
+					}
 					processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
 					processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
 					processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
