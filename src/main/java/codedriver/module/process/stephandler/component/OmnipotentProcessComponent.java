@@ -103,51 +103,53 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 
-		if (StringUtils.isBlank(stepConfig)) {
-			return 1;
-		}
-		JSONObject stepConfigObj = null;
+		JSONObject workerPolicyConfig = null;
 		try {
-			stepConfigObj = JSONObject.parseObject(stepConfig);
+			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
 			currentProcessTaskStepVo.setParamObj(stepConfigObj);
+			if (MapUtils.isNotEmpty(stepConfigObj)) {
+				workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+			}
 		} catch (Exception ex) {
 			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
 		}
-		if (MapUtils.isEmpty(stepConfigObj)) {
-			return 1;
+		if(workerPolicyConfig == null) {
+			workerPolicyConfig = new JSONObject();
 		}
-		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (MapUtils.isEmpty(workerPolicyConfig)) {
-			return 1;
-		}
-		ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
-		processTaskStepWorkerPolicyVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
-		if (CollectionUtils.isEmpty(workerPolicyList)) {
-			return 1;
-		}
-		for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
-			IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
-			if (workerPolicyHandler == null) {
-				continue;
+		
+		/** 如果已经存在过处理人，则继续使用旧处理人，否则启用分派 **/
+		List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+		if (oldUserList.size() > 0) {
+			ProcessTaskStepUserVo oldUserVo = oldUserList.get(0);
+			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserId()));
+		} else {
+			/** 分配处理人 **/
+			ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
+			processTaskStepWorkerPolicyVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+			List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
+			if (CollectionUtils.isNotEmpty(workerPolicyList)) {
+				for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
+					IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
+					if (workerPolicyHandler != null) {
+						List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
+						/** 顺序分配处理人 **/
+						if ("sort".equals(workerPolicyConfig.getString("executeMode")) && tmpWorkerList.size() > 0) {
+							// 找到处理人，则退出
+							workerList.addAll(tmpWorkerList);
+							break;
+						} else if ("batch".equals(workerPolicyConfig.getString("executeMode"))) {
+							// 去重取并集
+							tmpWorkerList.removeAll(workerList);
+							workerList.addAll(tmpWorkerList);
+						}
+					}
+				}
 			}
-			List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
-			/** 顺序分配处理人 **/
-			if ("sort".equals(workerPolicyConfig.getString("executeMode")) && tmpWorkerList.size() > 0) {
-				// 找到处理人，则退出
-				workerList.addAll(tmpWorkerList);
-				break;
-			} else if ("batch".equals(workerPolicyConfig.getString("executeMode"))) {
-				// 去重取并集
-				tmpWorkerList.removeAll(workerList);
-				workerList.addAll(tmpWorkerList);
-			}
 		}
-
-		String autoStart = workerPolicyConfig.getString("autoStart");
-		if ("1".equals(autoStart) && workerList.size() == 1) {
+		if (workerList.size() == 1) {
+			String autoStart = workerPolicyConfig.getString("autoStart");
 			/** 设置当前步骤状态为处理中 **/
-			if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
+			if ("1".equals(autoStart) && StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
 				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
 				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
@@ -158,7 +160,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 			}
 		}
-
 		return 1;
 	}
 
