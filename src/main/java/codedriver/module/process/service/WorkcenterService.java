@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.techsure.multiattrsearch.MultiAttrsQuery;
+import com.techsure.multiattrsearch.QueryResultSet;
+import com.techsure.multiattrsearch.query.QueryParser;
 import com.techsure.multiattrsearch.query.QueryResult;
 import com.techsure.multiattrsearch.util.ESQueryUtil;
 
@@ -70,6 +74,7 @@ public class WorkcenterService {
 		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
 		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
 	}
+	
 	/**
 	 * 工单中心根据条件获取工单列表数据
 	 * @param workcenterVo
@@ -505,5 +510,50 @@ public class WorkcenterService {
 		}
 		return whereSb.toString();
 	}
-
+	
+	/**
+	 *   流式搜索工单
+	 * @param workcenterVo
+	 * @return 
+	 */
+	public  QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo){
+		String selectColumn = "*";
+		String where = assembleWhere(workcenterVo);
+		String orderBy = "order by common.starttime desc";
+		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
+		QueryParser parser =ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME).createQueryParser();
+		MultiAttrsQuery query = parser.parse(sql);
+		return query.iterate();
+	}
+	
+	/**
+	 * 流式分批获取并处理数据
+	 */
+	public JSONObject getSearchIterate(QueryResultSet resultSet){
+		JSONObject returnObj = new JSONObject();
+		List<JSONObject> dataList = new ArrayList<JSONObject>();
+		Map<String, IWorkcenterColumn> columnComponentMap = WorkcenterColumnFactory.columnComponentMap;
+		if(resultSet.hasMoreResults()) {
+			QueryResult result = resultSet.fetchResult();
+			if(!result.getData().isEmpty()) {
+				for(MultiAttrsObject el : result.getData()) {
+					JSONObject taskJson = new JSONObject();
+	            	taskJson.put("taskid", el.getId());
+	            	for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
+	            		IWorkcenterColumn column = entry.getValue();
+	            		String value =column.getValue(el) == null ? StringUtils.EMPTY:column.getValue(el).toString();
+	            		if(value.startsWith("{")&&value.endsWith("}")) {
+	    					JSONObject groupJson = ((JSONObject)JSONObject.parse(value));
+	    					taskJson.put(column.getName(),groupJson.getString("text"));
+	    				}else {
+	    					taskJson.put(column.getName(), column.getValue(el));
+	    				}
+	            	}
+	            	dataList.add(taskJson);
+				}
+			}
+		}
+		returnObj.put("tbodyList", dataList);
+		return returnObj;
+	}
 }

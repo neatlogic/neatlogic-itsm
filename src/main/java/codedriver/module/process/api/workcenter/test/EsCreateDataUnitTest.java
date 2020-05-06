@@ -98,7 +98,7 @@ public class EsCreateDataUnitTest {
 				 stepJson1.put("usertypelist", usertypelist1);
 				 stepArray.add(stepJson1);
 				 String id = String.valueOf(i);
-				 workcenterObjectPool.checkout("local-dev", null);
+				 workcenterObjectPool.checkout("local-dev");
 				 MultiAttrsObjectPatch patch = workcenterObjectPool.save(id);
 				 JSONObject WorkcenterFieldJson = new JSONObject();
 				 WorkcenterFieldJson.put("title", "标题"+id);
