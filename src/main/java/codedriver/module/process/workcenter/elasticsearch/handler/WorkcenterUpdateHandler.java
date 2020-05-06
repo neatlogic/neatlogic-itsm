@@ -130,7 +130,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
 				 if(attributeData.getType().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
 							||attributeData.getType().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-							||attributeData.getType().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+							||attributeData.getType().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
 							||attributeData.getType().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
 					 continue;
 				 }
