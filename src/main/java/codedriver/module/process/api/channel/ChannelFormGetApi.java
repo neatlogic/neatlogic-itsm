@@ -82,7 +82,7 @@ public class ChannelFormGetApi extends ApiComponentBase {
 			}
 			String formUuid = process.getFormUuid();
 			if(formUuid == null) {
-				return null;
+				continue;
 			}
 			FormVo formVo = formMapper.getFormByUuid(formUuid);
 			//判断表单是否存在
