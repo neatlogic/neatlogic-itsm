@@ -39,7 +39,7 @@ public class MatrixDataGetApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "matrix/data/search";
+		return "matrix/data/get";
 	}
 
 	@Override
