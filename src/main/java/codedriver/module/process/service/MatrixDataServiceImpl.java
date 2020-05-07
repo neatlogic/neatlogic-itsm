@@ -163,7 +163,7 @@ public class MatrixDataServiceImpl implements MatrixDataService {
 
 	@Override
 	public List<String> matrixAttributeValueKeyWordSearch(ProcessMatrixAttributeVo processMatrixAttribute, String keyword, int pageSize) {
-		pageSize *= 2; 
+		pageSize *= 10; 
 		String type = processMatrixAttribute.getType();
 		if(ProcessMatrixAttributeType.SELECT.getValue().equals(type)) {
 			if(processMatrixAttribute != null) {

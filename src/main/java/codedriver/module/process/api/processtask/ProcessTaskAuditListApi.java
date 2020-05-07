@@ -1,6 +1,7 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -12,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
@@ -82,10 +84,19 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 			}
 			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
 			processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
-			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailList) {
+			Iterator<ProcessTaskStepAuditDetailVo> iterator = processTaskStepAuditDetailList.iterator();
+			while(iterator.hasNext()) {
+				ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo = iterator.next();
+				if(ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
+					processTaskStepAudit.setNextStepId(Long.parseLong(processTaskStepAuditDetailVo.getNewContent()));
+				}
 				IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
 				if(auditDetailHandler != null) {
 					auditDetailHandler.handle(processTaskStepAuditDetailVo);
+				}
+				if(ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
+					processTaskStepAudit.setNextStepName(processTaskStepAuditDetailVo.getNewContent());
+					iterator.remove();
 				}
 			}
 			resutlList.add(processTaskStepAudit);
