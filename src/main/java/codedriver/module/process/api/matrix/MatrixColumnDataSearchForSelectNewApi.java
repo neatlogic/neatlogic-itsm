@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,8 +65,9 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
     @Input({
     	@Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true),
     	@Param( name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), 
-    	@Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING, isRequired = true),           
+    	@Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),           
     	@Param( name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true),
+        @Param( name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
         @Param( name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER)
     	})
     @Description(desc = "矩阵属性数据查询-下拉级联接口")
@@ -93,25 +95,27 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
             		}
             	}
             	String keywordColumn = jsonObj.getString("keywordColumn");
-            	ProcessMatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(keywordColumn);
-            	if(processMatrixAttribute == null) {
-            		throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
-            	}
-            	List<String> uuidList = matrixDataService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, dataVo.getKeyword(), dataVo.getPageSize());
-            	if(CollectionUtils.isNotEmpty(uuidList)) {
-            		dataVo.setUuidList(uuidList);
-                	List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
-                	List<Map<String, Object>> resultList = new ArrayList<>(dataMapList.size());
-                	for(Map<String, String> dataMap : dataMapList) {
-                		Map<String, Object> resultMap = new HashMap<>(dataMap.size());
-                		for(Entry<String, String> entry : dataMap.entrySet()) {
-                			String attributeUuid = entry.getKey();
-                			resultMap.put(attributeUuid, matrixDataService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
-                		}
-                		resultList.add(resultMap);
+            	if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
+            		ProcessMatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(keywordColumn);
+                	if(processMatrixAttribute == null) {
+                		throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
                 	}
-                    returnObj.put("columnDataList", resultList);
+                	List<String> uuidList = matrixDataService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, dataVo.getKeyword(), dataVo.getPageSize());
+                	if(CollectionUtils.isNotEmpty(uuidList)) {
+                		dataVo.setUuidList(uuidList);                	
+                	}
+            	}          	
+            	List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
+            	List<Map<String, Object>> resultList = new ArrayList<>(dataMapList.size());
+            	for(Map<String, String> dataMap : dataMapList) {
+            		Map<String, Object> resultMap = new HashMap<>(dataMap.size());
+            		for(Entry<String, String> entry : dataMap.entrySet()) {
+            			String attributeUuid = entry.getKey();
+            			resultMap.put(attributeUuid, matrixDataService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
+            		}
+            		resultList.add(resultMap);
             	}
+                returnObj.put("columnDataList", resultList);
             }
             return returnObj;
             
