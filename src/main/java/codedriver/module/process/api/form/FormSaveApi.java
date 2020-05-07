@@ -2,6 +2,7 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.FormVo;
+import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNameRepeatException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
@@ -35,6 +38,9 @@ public class FormSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;
+	
+	@Autowired
+	private MatrixMapper matrixMapper;
 
 	@Override
 	public String getToken() {
@@ -109,9 +115,15 @@ public class FormSaveApi extends ApiComponentBase {
 		//更新表单属性信息
 		formMapper.deleteFormAttributeByFormUuid(formVo.getUuid());
 		List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-		if (formAttributeList != null && formAttributeList.size() > 0) {
+		if (CollectionUtils.isNotEmpty(formAttributeList)) {
 			for (FormAttributeVo formAttributeVo : formAttributeList) {
 				formMapper.insertFormAttribute(formAttributeVo);
+			}
+		}
+		List<ProcessMatrixFormComponentVo> processMatrixFormComponentList = formVersionVo.getProcessMatrixFormComponentList();
+		if(CollectionUtils.isNotEmpty(processMatrixFormComponentList)) {
+			for(ProcessMatrixFormComponentVo processMatrixFormComponentVo : processMatrixFormComponentList) {
+				matrixMapper.insertMatrixFormComponent(processMatrixFormComponentVo);
 			}
 		}
 		JSONObject resultObj = new JSONObject();
