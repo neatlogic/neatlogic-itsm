@@ -99,7 +99,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
             	}
             	List<String> uuidList = matrixDataService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, dataVo.getKeyword(), dataVo.getPageSize());
             	if(CollectionUtils.isNotEmpty(uuidList)) {
-            		dataVo.setuuidList(uuidList);
+            		dataVo.setUuidList(uuidList);
                 	List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
                 	List<Map<String, Object>> resultList = new ArrayList<>(dataMapList.size());
                 	for(Map<String, String> dataMap : dataMapList) {
