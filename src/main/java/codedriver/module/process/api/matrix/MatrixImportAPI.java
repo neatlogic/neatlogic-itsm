@@ -142,7 +142,7 @@ public class MatrixImportAPI extends BinaryStreamApiComponentBase {
                                 }
                             }
                             if(isNew) {
-                            	dataMapper.insertDynamicTableData2(rowData, matrixUuid);
+                            	dataMapper.insertDynamicTableData(rowData, matrixUuid);
                             	insert++;
                             	update++;
                             }else {
