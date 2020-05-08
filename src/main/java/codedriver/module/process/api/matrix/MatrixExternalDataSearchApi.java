@@ -1,22 +1,22 @@
 package codedriver.module.process.api.matrix;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.integration.core.IIntegrationHandler;
+import codedriver.framework.integration.core.IntegrationHandlerFactory;
+import codedriver.framework.integration.dao.mapper.IntegrationMapper;
+import codedriver.framework.integration.dto.IntegrationResultVo;
+import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixDispatcherVo;
@@ -24,10 +24,7 @@ import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
-import codedriver.framework.process.exception.matrix.MatrixExternalRequestHandlerNotFoundException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
-import codedriver.framework.process.matrixrexternal.core.IMatrixExternalRequestHandler;
-import codedriver.framework.process.matrixrexternal.core.MatrixExternalRequestFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -38,7 +35,9 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
 
 //    @Autowired
 //    private MatrixService matrixService;
-
+	@Autowired
+	private IntegrationMapper integrationMapper;
+	
     @Autowired
     private MatrixMapper matrixMapper;
 
@@ -79,67 +78,80 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
         if(externalVo == null) {
         	throw new MatrixExternalNotFoundException(matrixUuid);
         }
-        String plugin = externalVo.getPlugin();
-        IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(plugin);
-        if(requestHandler == null) {
-        	throw new MatrixExternalRequestHandlerNotFoundException(plugin);
-        }
-        JSONObject returnObj = new JSONObject();
-        JSONObject externalObj = JSONObject.parseObject(externalVo.getConfig());
-        if(MapUtils.isNotEmpty(externalObj)) {
-        	JSONArray columnList = externalObj.getJSONArray("columnList");
-        	if(CollectionUtils.isNotEmpty(columnList)) {
-        		String url = externalObj.getString("url");
-                if(StringUtils.isNotBlank(url)) {
-                	String rootName = externalObj.getString("rootName");
-                	if(externalObj.getBooleanValue("needPage")) {
-                    	String currentPageKey = externalObj.getString("currentPage");
-                    	String pageSizeKey = externalObj.getString("pageSize");
-                    	Integer currentPage = jsonObj.getInteger("currentPage");
-                    	currentPage = currentPage == null ? 1 : currentPage;
-                    	Integer pageSize = jsonObj.getInteger("pageSize");
-                    	pageSize = pageSize == null ? 10 : pageSize;
-                    	if(url.contains("?")) {
-                    		url = url + "&" + currentPageKey + "=" + currentPage + "&" + pageSizeKey + "=" + pageSize;
-                    	}else {
-                    		url = url + "?" + currentPageKey + "=" + currentPage + "&" + pageSizeKey + "=" + pageSize;
-                    	}
-                	}
-                    JSONObject result = requestHandler.dataHandler(url, rootName, externalObj);
-                    JSONArray dataArray = result.getJSONArray("tbodyList");
-                    if (CollectionUtils.isNotEmpty(dataArray)){
-                        JSONArray theadList = new JSONArray();
-                        Map<String, String> targetAndSourceColumnMap = new HashMap<>();
-                        for (int i = 0; i < columnList.size(); i++){
-                            JSONObject obj = columnList.getJSONObject(i);
-                            JSONObject theadObj = new JSONObject();
-                            String sourceColumn = obj.getString("sourceColumn");
-                            String targetColumn = obj.getString("targetColumn");
-                            theadObj.put("title", obj.getString("title"));
-                            theadObj.put("key", targetColumn);
-                            theadList.add(theadObj);
-                            if(!Objects.equals(sourceColumn, targetColumn)) {
-                            	targetAndSourceColumnMap.put(targetColumn, sourceColumn);
-                            }
-                        }
-                        returnObj.put("theadList", theadList);
-                        for (int i = 0; i < dataArray.size(); i++){
-                            JSONObject dataObj = dataArray.getJSONObject(i);
-                            for(Entry<String, String> entry : targetAndSourceColumnMap.entrySet()) {
-                            	dataObj.put(entry.getKey(), dataObj.get(entry.getValue()));
-                            }
-                        }
-                        returnObj.put("tbodyList", dataArray);
-                    }
-                    if(externalObj.getBooleanValue("needPage")){
-                    	returnObj.put("rowNum", result.getString("rowNum"));
-                    	returnObj.put("pageCount", result.getString("pageCount"));
-                    	returnObj.put("currentPage", result.getString("currentPage"));
-                    	returnObj.put("pageSize", result.getString("pageSize"));
-                    }
-                }
-        	}            
-        }
+        IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
+        IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+		if (handler == null) {
+			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+		}
+		JSONObject returnObj = new JSONObject();
+		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+			if(MapUtils.isNotEmpty(transformedResult)) {
+				returnObj.putAll(transformedResult);
+			}
+		}
+//        String plugin = externalVo.getPlugin();
+//        IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(plugin);
+//        if(requestHandler == null) {
+//        	throw new MatrixExternalRequestHandlerNotFoundException(plugin);
+//        }
+//        JSONObject returnObj = new JSONObject();
+//        JSONObject externalObj = JSONObject.parseObject(externalVo.getConfig());
+//        if(MapUtils.isNotEmpty(externalObj)) {
+//        	JSONArray columnList = externalObj.getJSONArray("columnList");
+//        	if(CollectionUtils.isNotEmpty(columnList)) {
+//        		String url = externalObj.getString("url");
+//                if(StringUtils.isNotBlank(url)) {
+//                	String rootName = externalObj.getString("rootName");
+//                	if(externalObj.getBooleanValue("needPage")) {
+//                    	String currentPageKey = externalObj.getString("currentPage");
+//                    	String pageSizeKey = externalObj.getString("pageSize");
+//                    	Integer currentPage = jsonObj.getInteger("currentPage");
+//                    	currentPage = currentPage == null ? 1 : currentPage;
+//                    	Integer pageSize = jsonObj.getInteger("pageSize");
+//                    	pageSize = pageSize == null ? 10 : pageSize;
+//                    	if(url.contains("?")) {
+//                    		url = url + "&" + currentPageKey + "=" + currentPage + "&" + pageSizeKey + "=" + pageSize;
+//                    	}else {
+//                    		url = url + "?" + currentPageKey + "=" + currentPage + "&" + pageSizeKey + "=" + pageSize;
+//                    	}
+//                	}
+//                    JSONObject result = requestHandler.dataHandler(url, rootName, externalObj);
+//                    JSONArray dataArray = result.getJSONArray("tbodyList");
+//                    if (CollectionUtils.isNotEmpty(dataArray)){
+//                        JSONArray theadList = new JSONArray();
+//                        Map<String, String> targetAndSourceColumnMap = new HashMap<>();
+//                        for (int i = 0; i < columnList.size(); i++){
+//                            JSONObject obj = columnList.getJSONObject(i);
+//                            JSONObject theadObj = new JSONObject();
+//                            String sourceColumn = obj.getString("sourceColumn");
+//                            String targetColumn = obj.getString("targetColumn");
+//                            theadObj.put("title", obj.getString("title"));
+//                            theadObj.put("key", targetColumn);
+//                            theadList.add(theadObj);
+//                            if(!Objects.equals(sourceColumn, targetColumn)) {
+//                            	targetAndSourceColumnMap.put(targetColumn, sourceColumn);
+//                            }
+//                        }
+//                        returnObj.put("theadList", theadList);
+//                        for (int i = 0; i < dataArray.size(); i++){
+//                            JSONObject dataObj = dataArray.getJSONObject(i);
+//                            for(Entry<String, String> entry : targetAndSourceColumnMap.entrySet()) {
+//                            	dataObj.put(entry.getKey(), dataObj.get(entry.getValue()));
+//                            }
+//                        }
+//                        returnObj.put("tbodyList", dataArray);
+//                    }
+//                    if(externalObj.getBooleanValue("needPage")){
+//                    	returnObj.put("rowNum", result.getString("rowNum"));
+//                    	returnObj.put("pageCount", result.getString("pageCount"));
+//                    	returnObj.put("currentPage", result.getString("currentPage"));
+//                    	returnObj.put("pageSize", result.getString("pageSize"));
+//                    }
+//                }
+//        	}            
+//        }
         List<ProcessMatrixDispatcherVo> dispatcherVoList = matrixMapper.getMatrixDispatcherByMatrixUuid(matrixUuid);
         returnObj.put("dispatcherVoList", dispatcherVoList);
         List<ProcessMatrixFormComponentVo> componentVoList = matrixMapper.getMatrixFormComponentByMatrixUuid(matrixUuid);

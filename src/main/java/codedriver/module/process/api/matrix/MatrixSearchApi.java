@@ -43,12 +43,17 @@ public class MatrixSearchApi extends ApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "keyword", desc = "关键字", type = ApiParamType.STRING),
-             @Param( name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
-             @Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
-             @Param( name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER)})
-    @Output({ @Param( name = "tbodyList", desc = "矩阵数据源列表", explode = ProcessMatrixVo[].class),
-            @Param( explode = BasePageVo.class)})
+    @Input({ 
+    	@Param( name = "keyword", desc = "关键字", type = ApiParamType.STRING),
+    	@Param( name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external"),
+        @Param( name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
+        @Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
+        @Param( name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER)
+    })
+    @Output({ 
+    	@Param( name = "tbodyList", desc = "矩阵数据源列表", explode = ProcessMatrixVo[].class),
+        @Param( explode = BasePageVo.class)
+    })
     @Description(desc = "数据源矩阵检索")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
