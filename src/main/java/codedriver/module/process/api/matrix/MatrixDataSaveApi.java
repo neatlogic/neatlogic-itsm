@@ -95,7 +95,7 @@ public class MatrixDataSaveApi extends ApiComponentBase {
             		rowData.add(new ProcessMatrixColumnVo(processMatrixAttributeVo.getUuid(), value));
     			}
     		}
-    		matrixDataMapper.insertDynamicTableData2(rowData, matrixUuid);
+    		matrixDataMapper.insertDynamicTableData(rowData, matrixUuid);
     	}else {
     		ProcessMatrixColumnVo uuidColumn = new ProcessMatrixColumnVo("uuid", uuidValue);
     		for(ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
