@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -22,8 +21,6 @@ import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
-import codedriver.framework.process.dto.ProcessMatrixColumnVo;
-import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
@@ -148,12 +145,12 @@ public class MatrixServiceImpl implements MatrixService {
         if (CollectionUtils.isNotEmpty(attributeVoList)){
             //属性拷贝
             List<String> sourceColumnList = new ArrayList<>();
-            Map<String, String> compareMap = new HashMap<>();
+            List<String> targetColumnList = new ArrayList<>();
             for (ProcessMatrixAttributeVo attributeVo : attributeVoList){
                 String sourceUuid = attributeVo.getUuid();
                 String targetUuid = UUIDUtil.getUUID();
                 sourceColumnList.add(sourceUuid);
-                compareMap.put(sourceUuid, targetUuid);
+                targetColumnList.add(targetUuid);
                 attributeVo.setMatrixUuid(targetMatrixUuid);
                 attributeVo.setUuid(targetUuid);
                 matrixAttributeMapper.insertMatrixAttribute(attributeVo);
@@ -163,24 +160,7 @@ public class MatrixServiceImpl implements MatrixService {
                 matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid);
             }
             //数据拷贝
-            ProcessMatrixDataVo sourceDataVo = new ProcessMatrixDataVo();
-            sourceDataVo.setMatrixUuid(sourceMatrixUuid);
-            sourceDataVo.setColumnList(sourceColumnList);
-            sourceDataVo.setNeedPage(false);
-            List<Map<String, String>> sourceMatrixDataMapList = matrixDataMapper.searchDynamicTableData(sourceDataVo);
-            if (CollectionUtils.isNotEmpty(sourceMatrixDataMapList)){
-                for (Map<String,String> sourceDataMap : sourceMatrixDataMapList){
-                	List<ProcessMatrixColumnVo> rowData = new ArrayList<>();
-                	rowData.add(new ProcessMatrixColumnVo("uuid", UUIDUtil.getUUID()));
-                	for(Entry<String, String> entry : sourceDataMap.entrySet()) {
-                		String column = compareMap.get(entry.getKey());
-                		if(StringUtils.isNotBlank(column)) {
-                			rowData.add(new ProcessMatrixColumnVo(column, entry.getValue()));
-                		}
-                	}
-                	matrixDataMapper.insertDynamicTableData2(rowData, targetMatrixUuid);
-                }
-            }
+            matrixDataMapper.insertDynamicTableDataForCopy(sourceMatrixUuid, sourceColumnList, targetMatrixUuid, targetColumnList);
         }
     }
 
