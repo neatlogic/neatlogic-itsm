@@ -1,9 +1,7 @@
 package codedriver.module.process.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -16,6 +14,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.integration.core.IIntegrationHandler;
+import codedriver.framework.integration.core.IntegrationHandlerFactory;
+import codedriver.framework.integration.dao.mapper.IntegrationMapper;
+import codedriver.framework.integration.dto.IntegrationResultVo;
+import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
@@ -24,10 +28,7 @@ import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
-import codedriver.framework.process.exception.matrix.MatrixExternalRequestHandlerNotFoundException;
 import codedriver.framework.process.exception.matrix.MatrixNameRepeatException;
-import codedriver.framework.process.matrixrexternal.core.IMatrixExternalRequestHandler;
-import codedriver.framework.process.matrixrexternal.core.MatrixExternalRequestFactory;
 import codedriver.module.process.util.UUIDUtil;
 
 /**
@@ -38,6 +39,9 @@ import codedriver.module.process.util.UUIDUtil;
 @Service
 @Transactional
 public class MatrixServiceImpl implements MatrixService {
+	
+	@Autowired
+	private IntegrationMapper integrationMapper;
 
     @Autowired
     private MatrixMapper matrixMapper;
@@ -96,47 +100,39 @@ public class MatrixServiceImpl implements MatrixService {
 
     @Override
     public JSONObject getMatrixExternalData(String matrixUuid) {
-        JSONObject returnObj = new JSONObject();
         ProcessMatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
         if(externalVo == null) {
         	throw new MatrixExternalNotFoundException(matrixUuid);
         }
-        String plugin = externalVo.getPlugin();
-        IMatrixExternalRequestHandler requestHandler = MatrixExternalRequestFactory.getHandler(plugin);
-        if(requestHandler == null) {
-        	throw new MatrixExternalRequestHandlerNotFoundException(plugin);
-        }
-        JSONObject externalObj = JSONObject.parseObject(externalVo.getConfig());
-        if(MapUtils.isNotEmpty(externalObj)) {
-            String url = externalObj.getString("url");
-            if(StringUtils.isNotBlank(url)) {
-            	String rootName = externalObj.getString("rootName");
-                JSONObject dataObj = requestHandler.dataHandler(url, rootName, externalObj);
-                JSONArray dataArray = dataObj.getJSONArray("tbodyList");
-                if (CollectionUtils.isNotEmpty(dataArray)){
-                	JSONArray columnList = externalObj.getJSONArray("columnList");
-                    List<String> headerList = new ArrayList<>();
-                    List<String> attributeList = new ArrayList<>();
-                    for (int i = 0; i < columnList.size(); i++){
-                        JSONObject obj = columnList.getJSONObject(i);
-                        headerList.add(obj.getString("title"));
-                        attributeList.add(obj.getString("targetColumn"));
-                    }
-                    List<Map<String, String>> dataMapList = new ArrayList<>();
-                    for (int i = 0; i < dataArray.size(); i++){
-                        JSONObject obj = dataArray.getJSONObject(i);
-                        Map<String, String> map = new HashMap<>();
-                        for (String attribute : attributeList){
-                            map.put(attribute, obj.getString(attribute));
-                        }
-                        dataMapList.add(map);
-                    }
-                    returnObj.put("headerList", headerList);
-                    returnObj.put("columnList", attributeList);
-                    returnObj.put("dataMapList", dataMapList);
-                }
-            }
-        }
+        IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
+        IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+		if (handler == null) {
+			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+		}
+
+        JSONObject returnObj = new JSONObject();
+        IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+			if(MapUtils.isNotEmpty(transformedResult)) {
+				JSONArray theadList = transformedResult.getJSONArray("theadList");
+				if (CollectionUtils.isNotEmpty(theadList)){
+					List<String> headerList = new ArrayList<>();
+					List<String> columnList = new ArrayList<>();
+					for (int i = 0; i < theadList.size(); i++){
+						JSONObject obj = theadList.getJSONObject(i);
+						headerList.add(obj.getString("title"));
+						columnList.add(obj.getString("key"));
+					}
+					returnObj.put("headerList", headerList);
+					returnObj.put("columnList", columnList);
+				}
+				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");				
+				if (CollectionUtils.isNotEmpty(tbodyList)){				
+					returnObj.put("dataMapList", tbodyList);
+				}
+			}
+		}
         return  returnObj;
     }
 
