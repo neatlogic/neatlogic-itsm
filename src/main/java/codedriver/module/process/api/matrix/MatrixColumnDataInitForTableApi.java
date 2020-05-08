@@ -3,6 +3,8 @@ package codedriver.module.process.api.matrix;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +15,22 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.integration.core.IIntegrationHandler;
+import codedriver.framework.integration.core.IntegrationHandlerFactory;
+import codedriver.framework.integration.dao.mapper.IntegrationMapper;
+import codedriver.framework.integration.dto.IntegrationResultVo;
+import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
+import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
+import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -42,6 +53,12 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
     
     @Autowired
     private MatrixAttributeMapper matrixAttributeMapper;
+
+    @Autowired
+    private MatrixExternalMapper matrixExternalMapper;
+    
+	@Autowired
+	private IntegrationMapper integrationMapper;
 
     @Override
     public String getToken() {
@@ -80,35 +97,50 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(dataVo.getMatrixUuid());
         }
-        //theadList
-    	JSONArray theadList = new JSONArray();
-    	List<ProcessMatrixAttributeVo> matrixAttributeTheadList =  matrixAttributeMapper.getMatrixAttributeByMatrixUuidList(dataVo.getColumnList(), dataVo.getMatrixUuid());
-    	for(String column :dataVo.getColumnList()) {
-    		for(ProcessMatrixAttributeVo matrixAttributeSearch:matrixAttributeTheadList) {
-        		if(matrixAttributeSearch.getUuid().equals(column)) {
-        			theadList.add(matrixAttributeSearch);
-        		}
-        	}
-    	}
-    	returnObj.put("theadList", theadList);
-        //tbodyList
+              
         if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
+        	//theadList
+        	JSONArray theadList = new JSONArray();
+        	List<ProcessMatrixAttributeVo> matrixAttributeTheadList =  matrixAttributeMapper.getMatrixAttributeByMatrixUuidList(dataVo.getColumnList(), dataVo.getMatrixUuid());
+        	for(String column :dataVo.getColumnList()) {
+        		for(ProcessMatrixAttributeVo matrixAttributeSearch:matrixAttributeTheadList) {
+            		if(matrixAttributeSearch.getUuid().equals(column)) {
+            			theadList.add(matrixAttributeSearch);
+            		}
+            	}
+        	}
+        	returnObj.put("theadList", theadList);
+        	//tbodyList
             List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByUuidList(dataVo);
             List<Map<String, Object>> tbodyList = matrixDataService.matrixTableDataValueHandle(matrixAttributeTheadList, dataMapList);
             returnObj.put("tbodyList", tbodyList);
+            if(dataVo.getNeedPage()) {
+    			int rowNum = matrixDataMapper.getDynamicTableDataByUuidCount(dataVo);
+    			int pageCount = PageUtil.getPageCount(rowNum, dataVo.getPageSize());
+    			returnObj.put("currentPage", dataVo.getCurrentPage());
+    			returnObj.put("pageSize", dataVo.getPageSize());
+    			returnObj.put("pageCount", pageCount);
+    			returnObj.put("rowNum", rowNum);
+    		}
         }else {
-            //TODO 外部数据源矩阵  暂未实现
-            return null;
+        	ProcessMatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(dataVo.getMatrixUuid());
+            if(externalVo == null) {
+            	throw new MatrixExternalNotFoundException(dataVo.getMatrixUuid());
+            }
+            IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
+            IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+    		if (handler == null) {
+    			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+    		}
+    		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+    		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+    			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+    			if(MapUtils.isNotEmpty(transformedResult)) {
+    				returnObj.putAll(transformedResult);
+    			}
+    		}
         }
-        
-    	if(dataVo.getNeedPage()) {
-			int rowNum = matrixDataMapper.getDynamicTableDataByUuidCount(dataVo);
-			int pageCount = PageUtil.getPageCount(rowNum, dataVo.getPageSize());
-			returnObj.put("currentPage", dataVo.getCurrentPage());
-			returnObj.put("pageSize", dataVo.getPageSize());
-			returnObj.put("pageCount", pageCount);
-			returnObj.put("rowNum", rowNum);
-		}
+    	
         return returnObj;
     }
 }

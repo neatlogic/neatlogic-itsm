@@ -15,9 +15,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
+import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
+import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -72,29 +75,46 @@ public class MatrixAttributeValueToTextBatchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String matrixUuid = jsonObj.getString("matrixUuid");
-		if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
+		ProcessMatrixVo matrixVo =  matrixMapper.getMatrixByUuid(matrixUuid);
+		if(matrixVo == null) {
 			throw new MatrixNotFoundException(matrixUuid);
 		}
-    	JSONObject attributeData = jsonObj.getJSONObject("attributeData");
-		List<ProcessMatrixAttributeVo> attributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-        if (MapUtils.isNotEmpty(attributeData) && CollectionUtils.isNotEmpty(attributeList)){
-        	Map<String, ProcessMatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
-        	for(ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
-        		processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
-        	}
-        	Map<String, Object> resultMap = new HashMap<>(attributeData.size());
+		JSONObject attributeData = jsonObj.getJSONObject("attributeData");
+		Map<String, Object> resultMap = new HashMap<>(attributeData.size());
+		if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
+			List<ProcessMatrixAttributeVo> attributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
+	        if (MapUtils.isNotEmpty(attributeData) && CollectionUtils.isNotEmpty(attributeList)){
+	        	Map<String, ProcessMatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
+	        	for(ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
+	        		processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
+	        	}
+
+	        	for(Entry<String, Object> entry : attributeData.entrySet()) {
+	        		String attributeUuid = entry.getKey();        		
+	        		List<String> attributeValueList = JSON.parseArray(entry.getValue().toString(), String.class);
+	        		JSONArray attributeArray = new JSONArray(attributeValueList.size());
+	        		for(String value : attributeValueList) {
+						attributeArray.add(matrixDataService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), value));
+	        		}
+	        		resultMap.put(attributeUuid, attributeArray);
+	        	}
+	        }
+		}else {
         	for(Entry<String, Object> entry : attributeData.entrySet()) {
         		String attributeUuid = entry.getKey();        		
         		List<String> attributeValueList = JSON.parseArray(entry.getValue().toString(), String.class);
         		JSONArray attributeArray = new JSONArray(attributeValueList.size());
         		for(String value : attributeValueList) {
-					attributeArray.add(matrixDataService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), value));
+        			JSONObject valueObj = new JSONObject();
+        			valueObj.put("value", value);
+        			valueObj.put("text", value);
+        			valueObj.put("type", ProcessMatrixAttributeType.INPUT.getValue());
+					attributeArray.add(valueObj);
         		}
         		resultMap.put(attributeUuid, attributeArray);
         	}
-        	return resultMap;
-        }
-		return null;
+		}		
+		return resultMap;
 	}
 
 }
