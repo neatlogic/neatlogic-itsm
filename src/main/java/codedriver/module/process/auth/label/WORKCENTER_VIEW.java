@@ -1,7 +1,7 @@
 package codedriver.module.process.auth.label;
 
 import codedriver.framework.auth.core.AuthBase;
-import codedriver.framework.common.constvalue.ModuleEnum;
+import codedriver.framework.process.constvalue.ModuleEnum;
 
 public class WORKCENTER_VIEW extends AuthBase {
 
