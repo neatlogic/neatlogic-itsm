@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -25,14 +24,12 @@ import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
-import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
@@ -87,21 +84,21 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
     }
 
     @Input({
-    	@Param( name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
-    	@Param( name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true),
-    	@Param( name = "searchColumnList ", desc = "搜索属性集合", type = ApiParamType.JSONARRAY),
-        @Param( name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),
+    	@Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
+    	@Param(name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true),
+    	@Param(name = "searchColumnList ", desc = "搜索属性集合", type = ApiParamType.JSONARRAY),
+        @Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),
     	@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
     })
     @Description(desc = "矩阵属性数据查询-table接口")
     @Output({ 
-    	@Param( name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"),
-    	@Param( name = "theadList", type = ApiParamType.JSONARRAY, desc = "属性列名集合"),
-    	@Param( name = "searchColumnDetailList", type = ApiParamType.JSONARRAY, desc = "搜索属性详情集合"),
+    	@Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"),
+    	@Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "属性列名集合"),
+    	@Param(name = "searchColumnDetailList", type = ApiParamType.JSONARRAY, desc = "搜索属性详情集合"),
     	@Param(explode = BasePageVo.class)
-    	})
+    })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
@@ -199,6 +196,7 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
             	}
             	 returnObj.put("searchColumnDetailList", searchColumnDetailList);
             }
+        	integrationVo.getParamObj().putAll(jsonObj);
     		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
     		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
     			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
@@ -209,33 +207,12 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
     					List<Map<String, Object>> resultList = new ArrayList<>();
     					for(int i = 0; i < tbodyList.size(); i++) {
     						JSONObject rowData = tbodyList.getJSONObject(i);
-    						List<ProcessMatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
-    						if(CollectionUtils.isNotEmpty(sourceColumnList)) {
-    							for(ProcessMatrixColumnVo sourceColumnVo : sourceColumnList) {
-    								String sourceColumnValue = rowData.getString(sourceColumnVo.getColumn());
-    								if(ProcessExpression.LIKE.getExpression().equals(sourceColumnVo.getExpression())) {
-    									if(StringUtils.isBlank(sourceColumnValue) || !sourceColumnValue.toLowerCase().contains(sourceColumnVo.getValue().toLowerCase())) {
-    	        							continue;
-    	        						}
-    								}else {
-    									if(!Objects.equals(sourceColumnValue, sourceColumnVo.getValue())) {
-    										continue;
-    									}
-    								}
-    							}
-    						}
 							Map<String, Object> resultMap = new HashMap<>(dataVo.getColumnList().size());
     						for(String column : dataVo.getColumnList()) {
     							String columnValue = rowData.getString(column);
     							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
     						}
     						resultList.add(resultMap);
-							if(resultList.size() >= dataVo.getPageSize()) {
-								break;
-							}
-    					}
-    					if(resultList.size() < dataVo.getPageSize()) {
-    						//TODO linbq
     					}
     		    		returnObj.put("tbodyList", resultList);
     				}

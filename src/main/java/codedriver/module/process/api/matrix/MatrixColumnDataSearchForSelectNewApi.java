@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -89,14 +88,16 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 
     @Input({
     	@Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true),
-    	@Param( name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), 
+    	@Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), 
     	@Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),           
-    	@Param( name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true),
-        @Param( name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
-        @Param( name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER)
+    	@Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true),
+        @Param(name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
+        @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER)
     	})
     @Description(desc = "矩阵属性数据查询-下拉级联接口")
-    @Output({ @Param( name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")})
+    @Output({ 
+    	@Param(name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")
+    })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	ProcessMatrixDataVo dataVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessMatrixDataVo>() {});
@@ -171,6 +172,19 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
             		throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
             	}
         	}
+        	if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
+        		ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo();
+        		processMatrixColumnVo.setColumn(keywordColumn);
+        		processMatrixColumnVo.setExpression(ProcessExpression.LIKE.getExpression());
+        		processMatrixColumnVo.setValue(dataVo.getKeyword());
+        		List<ProcessMatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
+				if(CollectionUtils.isEmpty(sourceColumnList)) {
+					sourceColumnList = new ArrayList<>();
+				}
+				sourceColumnList.add(processMatrixColumnVo);
+				jsonObj.put("sourceColumnList", sourceColumnList);
+			}
+        	integrationVo.getParamObj().putAll(jsonObj);
         	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
     		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
     			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
@@ -179,39 +193,12 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
     				if(CollectionUtils.isNotEmpty(tbodyList)) {
     					for(int i = 0; i < tbodyList.size(); i++) {
     						JSONObject rowData = tbodyList.getJSONObject(i);
-    						if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
-    							String keywordColumnValue = rowData.getString("keywordColumn");
-    							if(StringUtils.isBlank(keywordColumnValue) || !keywordColumnValue.toLowerCase().contains(dataVo.getKeyword().toLowerCase())) {
-        							continue;
-        						}
-    						}
-    						List<ProcessMatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
-    						if(CollectionUtils.isNotEmpty(sourceColumnList)) {
-    							for(ProcessMatrixColumnVo sourceColumnVo : sourceColumnList) {
-    								String sourceColumnValue = rowData.getString(sourceColumnVo.getColumn());
-    								if(ProcessExpression.LIKE.getExpression().equals(sourceColumnVo.getExpression())) {
-    									if(StringUtils.isBlank(sourceColumnValue) || !sourceColumnValue.toLowerCase().contains(sourceColumnVo.getValue().toLowerCase())) {
-    	        							continue;
-    	        						}
-    								}else {
-    									if(!Objects.equals(sourceColumnValue, sourceColumnVo.getValue())) {
-    										continue;
-    									}
-    								}
-    							}
-    						}
 							Map<String, Object> resultMap = new HashMap<>(columnList.size());
     						for(String column : columnList) {
     							String columnValue = rowData.getString(column);
     							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
     						}
     						resultList.add(resultMap);
-							if(resultList.size() >= dataVo.getPageSize()) {
-								break;
-							}
-    					}
-    					if(resultList.size() < dataVo.getPageSize()) {
-    						//TODO linbq
     					}
     				}
     			}
