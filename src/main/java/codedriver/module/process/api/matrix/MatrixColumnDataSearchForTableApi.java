@@ -19,6 +19,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
@@ -107,7 +108,10 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(dataVo.getMatrixUuid());
         }
-
+        List<String> columnList = dataVo.getColumnList();
+    	if(CollectionUtils.isEmpty(columnList)) {
+    		throw new ParamIrregularException("参数“columnList”不符合格式要求");
+    	}
         List<String> searchColumnList =JSONObject.parseArray(jsonObj.getString("searchColumnList"), String.class);
         if (ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())){
         	Map<String, ProcessMatrixAttributeVo> attributeMap = new HashMap<>();

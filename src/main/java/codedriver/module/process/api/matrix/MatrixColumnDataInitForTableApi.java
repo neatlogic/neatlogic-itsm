@@ -1,9 +1,11 @@
 package codedriver.module.process.api.matrix;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,17 +19,20 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
+import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
+import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
@@ -85,6 +90,7 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
     	@Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
     	@Param(name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true),
         @Param(name = "uuidList", desc = "需要回显的数据uuid集合", type = ApiParamType.JSONARRAY),
+        @Param(name = "uuidColumn", desc = "uuid对应的属性", type = ApiParamType.STRING),
     	@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
@@ -103,7 +109,10 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(dataVo.getMatrixUuid());
         }
-              
+        List<String> columnList = dataVo.getColumnList();
+    	if(CollectionUtils.isEmpty(columnList)) {
+    		throw new ParamIrregularException("参数“columnList”不符合格式要求");
+    	}      
         if (ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())){
         	Map<String, ProcessMatrixAttributeVo> attributeMap = new HashMap<>();
         	List<ProcessMatrixAttributeVo> processMatrixAttributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
@@ -166,14 +175,73 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
         			throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
         		}
         	}
-        	integrationVo.getParamObj().putAll(jsonObj);
-    		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-    		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-    			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-    			if(MapUtils.isNotEmpty(transformedResult)) {
-    				returnObj.putAll(transformedResult);
-    			}
-    		}
+        	String uuidColumn = jsonObj.getString("uuidColumn");
+        	if(!attributeMap.containsKey(uuidColumn)) {
+        		throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), uuidColumn);
+        	}
+    		integrationVo.getParamObj().putAll(jsonObj);
+        	List<String> uuidList = dataVo.getUuidList();
+        	if(CollectionUtils.isNotEmpty(uuidList)) {
+				List<Map<String, Object>> resultList = new ArrayList<>();
+        		List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
+	    		ProcessMatrixColumnVo sourceColumnVo = new ProcessMatrixColumnVo();
+	    		sourceColumnVo.setColumn(uuidColumn);
+        		for(String uuidValue : uuidList) {
+        			sourceColumnVo.setValue(uuidValue);
+	    			sourceColumnVo.setExpression(ProcessExpression.EQUAL.getExpression());
+	    			sourceColumnList.clear();
+	    			sourceColumnList.add(sourceColumnVo);
+	    			integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
+	            	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+	        		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+	        			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+	        			if(MapUtils.isNotEmpty(transformedResult)) {
+	        				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
+	        				if(CollectionUtils.isNotEmpty(tbodyList)) {
+	        					for(int i = 0; i < tbodyList.size(); i++) {
+	        						JSONObject rowData = tbodyList.getJSONObject(i);
+	    							Map<String, Object> resultMap = new HashMap<>(dataVo.getColumnList().size());
+	        						for(String column : dataVo.getColumnList()) {
+	        							String columnValue = rowData.getString(column);
+	        							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
+	        						}
+	        						resultList.add(resultMap);
+	        						if(resultList.size() >= dataVo.getPageSize()) {
+	        							break;
+	        						}
+	        					}
+	        				}
+	        			}
+	        		}
+        		}
+	    		returnObj.put("tbodyList", resultList);
+        	}else {
+        		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+        		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+        			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+        			if(MapUtils.isNotEmpty(transformedResult)) {
+        				returnObj.putAll(transformedResult);
+        				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
+        				if(CollectionUtils.isNotEmpty(tbodyList)) {
+        					List<Map<String, Object>> resultList = new ArrayList<>();
+        					for(int i = 0; i < tbodyList.size(); i++) {
+        						JSONObject rowData = tbodyList.getJSONObject(i);
+    							Map<String, Object> resultMap = new HashMap<>(dataVo.getColumnList().size());
+        						for(String column : dataVo.getColumnList()) {
+        							String columnValue = rowData.getString(column);
+        							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
+        						}
+        						resultList.add(resultMap);
+        						if(resultList.size() >= dataVo.getPageSize()) {
+        							break;
+        						}
+        					}
+        		    		returnObj.put("tbodyList", resultList);
+        				}
+        			}
+        		}
+        	}        	
+    		returnObj.put("theadList", theadList);
         }
     	
         return returnObj;
