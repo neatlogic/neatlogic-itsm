@@ -1,7 +1,6 @@
 package codedriver.module.process.auth.label;
 
 import codedriver.framework.auth.core.AuthBase;
-import codedriver.framework.process.constvalue.ModuleEnum;
 public class SLA_MODIFY extends AuthBase {
 
 	@Override
@@ -16,7 +15,7 @@ public class SLA_MODIFY extends AuthBase {
 
 	@Override
 	public String getAuthGroup() {
-		return ModuleEnum.PROCESS.getValue();
+		return "process";
 	}
 
 }
