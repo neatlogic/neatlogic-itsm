@@ -113,7 +113,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
     	String keywordColumn = jsonObj.getString("keywordColumn");
     	List<Map<String, Object>> resultList = new ArrayList<>();
         JSONObject returnObj = new JSONObject();
-        if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
+        if (ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())){
             List<ProcessMatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
             if (CollectionUtils.isNotEmpty(attributeList)){
             	Map<String, ProcessMatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
