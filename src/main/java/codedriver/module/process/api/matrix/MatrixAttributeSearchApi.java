@@ -152,6 +152,8 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
                     				processMatrixAttributeVo.setIsDeletable(0);
                     				processMatrixAttributeVo.setSort(i);
                     				processMatrixAttributeVo.setIsRequired(0);
+                    				Integer isSearchable = theadObj.getInteger("isSearchable");
+                    				processMatrixAttributeVo.setIsSearchable((isSearchable == null || isSearchable.intValue() != 1) ? 0 : 1);
                     				processMatrixAttributeList.add(processMatrixAttributeVo);
                     			}
                     			return processMatrixAttributeList;
