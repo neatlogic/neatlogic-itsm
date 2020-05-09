@@ -6,7 +6,6 @@ import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
@@ -23,13 +22,10 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.util.FreemarkerUtil;
+import codedriver.module.process.service.MatrixAttributeService;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +33,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +44,9 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 public class MatrixAttributeSearchApi extends ApiComponentBase {
+
+    @Autowired
+    private MatrixAttributeService attributeService;
 
     @Autowired
     private MatrixAttributeMapper attributeMapper;
@@ -131,36 +129,7 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
         		if (handler == null) {
         			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
         		}
-        		JSONObject config = integrationVo.getConfig();
-        		if(MapUtils.isNotEmpty(config)) {
-        			JSONObject output = config.getJSONObject("output");
-        			if(MapUtils.isNotEmpty(output)) {
-        				String content = output.getString("content");
-        				content = FreemarkerUtil.transform(null, content);
-        				JSONObject contentObj = JSON.parseObject(content);
-        				if(MapUtils.isNotEmpty(contentObj)) {
-        					JSONArray theadList = contentObj.getJSONArray("theadList");
-                    		if(CollectionUtils.isNotEmpty(theadList)) {
-                    			List<ProcessMatrixAttributeVo> processMatrixAttributeList = new ArrayList<>();
-                    			for(int i = 0; i < theadList.size(); i++) {
-                    				JSONObject theadObj = theadList.getJSONObject(i);
-                    				ProcessMatrixAttributeVo processMatrixAttributeVo = new ProcessMatrixAttributeVo();
-                    				processMatrixAttributeVo.setMatrixUuid(matrixUuid);
-                    				processMatrixAttributeVo.setUuid(theadObj.getString("key"));
-                    				processMatrixAttributeVo.setName(theadObj.getString("title"));
-                    				processMatrixAttributeVo.setType(ProcessMatrixAttributeType.INPUT.getValue());
-                    				processMatrixAttributeVo.setIsDeletable(0);
-                    				processMatrixAttributeVo.setSort(i);
-                    				processMatrixAttributeVo.setIsRequired(0);
-                    				Integer isSearchable = theadObj.getInteger("isSearchable");
-                    				processMatrixAttributeVo.setIsSearchable((isSearchable == null || isSearchable.intValue() != 1) ? 0 : 1);
-                    				processMatrixAttributeList.add(processMatrixAttributeVo);
-                    			}
-                    			return processMatrixAttributeList;
-                    		}
-        				}
-        			}
-        		}
+        		return attributeService.getExternalMatrixAttributeList(matrixUuid, integrationVo);        		
             }
             return null;
     	}    	

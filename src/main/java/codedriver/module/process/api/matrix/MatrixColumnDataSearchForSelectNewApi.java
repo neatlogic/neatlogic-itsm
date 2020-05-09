@@ -45,11 +45,14 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.util.FreemarkerUtil;
+import codedriver.module.process.service.MatrixAttributeService;
 import codedriver.module.process.service.MatrixDataService;
 
 @Service
 public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
+
+    @Autowired
+    private MatrixAttributeService attributeService;
 	
 	@Autowired
 	private MatrixDataService matrixDataService;
@@ -153,23 +156,9 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
     			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
     		}
     		List<String> attributeList = new ArrayList<>();
-    		JSONObject config = integrationVo.getConfig();
-    		if(MapUtils.isNotEmpty(config)) {
-    			JSONObject output = config.getJSONObject("output");
-    			if(MapUtils.isNotEmpty(output)) {
-    				String content = output.getString("content");
-    				content = FreemarkerUtil.transform(null, content);
-    				JSONObject contentObj = JSON.parseObject(content);
-    				if(MapUtils.isNotEmpty(contentObj)) {
-    					JSONArray theadList = contentObj.getJSONArray("theadList");
-                		if(CollectionUtils.isNotEmpty(theadList)) {
-                			for(int i = 0; i < theadList.size(); i++) {
-                				JSONObject theadObj = theadList.getJSONObject(i);
-                				attributeList.add(theadObj.getString("key"));
-                			}
-                		}
-    				}
-    			}
+    		List<ProcessMatrixAttributeVo> processMatrixAttributeList = attributeService.getExternalMatrixAttributeList(dataVo.getMatrixUuid(), integrationVo);
+    		for(ProcessMatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
+    			attributeList.add(processMatrixAttributeVo.getUuid());
     		}
     		
         	for(String column : columnList) {
