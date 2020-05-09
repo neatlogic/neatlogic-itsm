@@ -107,12 +107,17 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
 					List<Map<String, Object>> tbodyList = new ArrayList<>();
 					for(int i = 0; i < tbodyArray.size(); i++) {
 						JSONObject rowData = tbodyArray.getJSONObject(i);
+						Integer pageSize = jsonObj.getInteger("pageSize");
+						pageSize = pageSize == null ? 10 : pageSize;
 						if(MapUtils.isNotEmpty(rowData)) {
 							Map<String, Object> rowDataMap = new HashMap<>();
 							for(Entry<String, Object> entry : rowData.entrySet()) {
 								rowDataMap.put(entry.getKey(), dataService.matrixAttributeValueHandle(entry.getValue()));
 							}
 							tbodyList.add(rowDataMap);
+							if(tbodyList.size() >= pageSize) {
+    							break;
+    						}
 						}
 					}
 					returnObj.put("tbodyList", tbodyList);

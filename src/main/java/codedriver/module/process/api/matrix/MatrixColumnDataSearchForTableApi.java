@@ -213,6 +213,9 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
     							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
     						}
     						resultList.add(resultMap);
+    						if(resultList.size() >= dataVo.getPageSize()) {
+    							break;
+    						}
     					}
     		    		returnObj.put("tbodyList", resultList);
     				}
