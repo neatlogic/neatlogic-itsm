@@ -21,6 +21,7 @@ import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
+import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
@@ -147,6 +148,7 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	    		sourceColumnVo.setColumn(sourceColumn);
 	    		for(String sourceColumnValue : sourceColumnValueList) {
 	    			sourceColumnVo.setValue(sourceColumnValue);
+	    			sourceColumnVo.setExpression(ProcessExpression.EQUAL.getExpression());
 	    			String targetColumnValue = null;
 	    			sourceColumnList.clear();
 	    			sourceColumnList.add(sourceColumnVo);
