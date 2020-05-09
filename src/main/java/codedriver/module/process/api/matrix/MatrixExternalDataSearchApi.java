@@ -1,12 +1,18 @@
 package codedriver.module.process.api.matrix;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -30,8 +36,12 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.MatrixDataService;
 @Service
 public class MatrixExternalDataSearchApi extends ApiComponentBase {
+
+    @Autowired
+    private MatrixDataService dataService;
 
 //    @Autowired
 //    private MatrixService matrixService;
@@ -89,6 +99,21 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
 			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
 			if(MapUtils.isNotEmpty(transformedResult)) {
 				returnObj.putAll(transformedResult);
+				JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
+				if(CollectionUtils.isNotEmpty(tbodyArray)) {
+					List<Map<String, Object>> tbodyList = new ArrayList<>();
+					for(int i = 0; i < tbodyArray.size(); i++) {
+						JSONObject rowData = tbodyArray.getJSONObject(i);
+						if(MapUtils.isNotEmpty(rowData)) {
+							Map<String, Object> rowDataMap = new HashMap<>();
+							for(Entry<String, Object> entry : rowData.entrySet()) {
+								rowDataMap.put(entry.getKey(), dataService.matrixAttributeValueHandle(entry.getValue()));
+							}
+							tbodyList.add(rowDataMap);
+						}
+					}
+					returnObj.put("tbodyList", tbodyList);
+				}
 			}
 		}
 //        String plugin = externalVo.getPlugin();

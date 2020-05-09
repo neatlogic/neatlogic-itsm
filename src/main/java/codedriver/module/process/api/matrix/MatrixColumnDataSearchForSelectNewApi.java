@@ -45,6 +45,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.util.FreemarkerUtil;
 import codedriver.module.process.service.MatrixDataService;
 
 @Service
@@ -153,13 +154,24 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
     		}
     		List<String> attributeList = new ArrayList<>();
     		JSONObject config = integrationVo.getConfig();
-    		JSONArray theadList = config.getJSONArray("theadList");
-    		if(CollectionUtils.isNotEmpty(theadList)) {
-    			for(int i = 0; i < theadList.size(); i++) {
-    				JSONObject theadObj = theadList.getJSONObject(i);   				
-    				attributeList.add(theadObj.getString("key"));
+    		if(MapUtils.isNotEmpty(config)) {
+    			JSONObject output = config.getJSONObject("output");
+    			if(MapUtils.isNotEmpty(output)) {
+    				String content = output.getString("content");
+    				content = FreemarkerUtil.transform(null, content);
+    				JSONObject contentObj = JSON.parseObject(content);
+    				if(MapUtils.isNotEmpty(contentObj)) {
+    					JSONArray theadList = contentObj.getJSONArray("theadList");
+                		if(CollectionUtils.isNotEmpty(theadList)) {
+                			for(int i = 0; i < theadList.size(); i++) {
+                				JSONObject theadObj = theadList.getJSONObject(i);
+                				attributeList.add(theadObj.getString("key"));
+                			}
+                		}
+    				}
     			}
     		}
+    		
         	for(String column : columnList) {
         		if(!attributeList.contains(column)) {
         			throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
@@ -202,7 +214,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 							Map<String, Object> resultMap = new HashMap<>(columnList.size());
     						for(String column : columnList) {
     							String columnValue = rowData.getString(column);
-    							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(null, columnValue)); 							
+    							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
     						}
     						resultList.add(resultMap);
 							if(resultList.size() >= dataVo.getPageSize()) {

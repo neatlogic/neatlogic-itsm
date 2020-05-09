@@ -15,7 +15,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
@@ -105,11 +104,7 @@ public class MatrixAttributeValueToTextBatchApi extends ApiComponentBase {
         		List<String> attributeValueList = JSON.parseArray(entry.getValue().toString(), String.class);
         		JSONArray attributeArray = new JSONArray(attributeValueList.size());
         		for(String value : attributeValueList) {
-        			JSONObject valueObj = new JSONObject();
-        			valueObj.put("value", value);
-        			valueObj.put("text", value);
-        			valueObj.put("type", ProcessMatrixAttributeType.INPUT.getValue());
-					attributeArray.add(valueObj);
+					attributeArray.add(matrixDataService.matrixAttributeValueHandle(value));
         		}
         		resultMap.put(attributeUuid, attributeArray);
         	}

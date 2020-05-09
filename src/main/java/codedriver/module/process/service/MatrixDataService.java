@@ -21,7 +21,9 @@ public interface MatrixDataService {
     
     public List<Map<String, Object>> matrixTableDataValueHandle(List<ProcessMatrixAttributeVo> attributeVoList, List<Map<String, String>> valueList);
     
-    public JSONObject matrixAttributeValueHandle(ProcessMatrixAttributeVo processMatrixAttributeVo, String value);
+    public JSONObject matrixAttributeValueHandle(ProcessMatrixAttributeVo processMatrixAttributeVo, Object value);
+    
+    public JSONObject matrixAttributeValueHandle(Object value);
     
     public List<String> matrixAttributeValueKeyWordSearch(ProcessMatrixAttributeVo processMatrixAttributeVo, String keyword, int pageSize);
 }

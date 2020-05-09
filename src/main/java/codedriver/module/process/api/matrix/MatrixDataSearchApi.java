@@ -80,7 +80,6 @@ public class MatrixDataSearchApi extends ApiComponentBase {
         if (CollectionUtils.isNotEmpty(attributeVoList)){
         	List<Map<String, String>> tbodyList = dataService.searchDynamicTableData(dataVo);
         	returnObj.put("tbodyList", dataService.matrixTableDataValueHandle(attributeVoList, tbodyList));
-//        	returnObj.put("tbodyList", dataService.searchDynamicTableData(dataVo));
             List<ProcessMatrixColumnVo> processMatrixColumnList = dataVo.getSourceColumnList();
             if(CollectionUtils.isNotEmpty(processMatrixColumnList)) {
             	JSONArray headList = new JSONArray();
