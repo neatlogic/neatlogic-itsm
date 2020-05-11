@@ -81,8 +81,9 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
     @Input({ 
     	@Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true)
     })
-    @Output( 
-    	{@Param(name = "Return", desc = "矩阵属性集合", explode = ProcessMatrixAttributeVo[].class)
+    @Output({
+    	@Param(name = "processMatrixAttributeList", desc = "矩阵属性集合", explode = ProcessMatrixAttributeVo[].class),
+    	@Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external")
     })
     @Description( desc = "矩阵属性检索接口")
     @Override
