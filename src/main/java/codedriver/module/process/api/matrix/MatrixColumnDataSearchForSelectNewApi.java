@@ -7,13 +7,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
@@ -111,7 +109,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
     		throw new ParamIrregularException("参数“columnList”不符合格式要求");
     	}
     	String keywordColumn = jsonObj.getString("keywordColumn");
-    	List<Map<String, Object>> resultList = new ArrayList<>();
+    	List<Map<String, JSONObject>> resultList = new ArrayList<>();
         JSONObject returnObj = new JSONObject();
         if (ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())){
             List<ProcessMatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
@@ -137,7 +135,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
             	}          	
             	List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
             	for(Map<String, String> dataMap : dataMapList) {
-            		Map<String, Object> resultMap = new HashMap<>(dataMap.size());
+            		Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
             		for(Entry<String, String> entry : dataMap.entrySet()) {
             			String attributeUuid = entry.getKey();
             			resultMap.put(attributeUuid, matrixDataService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
@@ -186,26 +184,27 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 			}
         	integrationVo.getParamObj().putAll(jsonObj);
         	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-    		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-    			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-    			if(MapUtils.isNotEmpty(transformedResult)) {
-    				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
-    				if(CollectionUtils.isNotEmpty(tbodyList)) {
-    					for(int i = 0; i < tbodyList.size(); i++) {
-    						JSONObject rowData = tbodyList.getJSONObject(i);
-							Map<String, Object> resultMap = new HashMap<>(columnList.size());
-    						for(String column : columnList) {
-    							String columnValue = rowData.getString(column);
-    							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
-    						}
-    						resultList.add(resultMap);
-    						if(resultList.size() >= dataVo.getPageSize()) {
-    							break;
-    						}
-    					}
-    				}
-    			}
-    		}
+//    		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+//    			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+//    			if(MapUtils.isNotEmpty(transformedResult)) {
+//    				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
+//    				if(CollectionUtils.isNotEmpty(tbodyList)) {
+//    					for(int i = 0; i < tbodyList.size(); i++) {
+//    						JSONObject rowData = tbodyList.getJSONObject(i);
+//							Map<String, Object> resultMap = new HashMap<>(columnList.size());
+//    						for(String column : columnList) {
+//    							String columnValue = rowData.getString(column);
+//    							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
+//    						}
+//    						resultList.add(resultMap);
+//    						if(resultList.size() >= dataVo.getPageSize()) {
+//    							break;
+//    						}
+//    					}
+//    				}
+//    			}
+//    		}
+    		resultList = matrixDataService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null);
         }
         returnObj.put("columnDataList", resultList);
         return returnObj;

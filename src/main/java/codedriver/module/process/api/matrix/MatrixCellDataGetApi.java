@@ -2,16 +2,14 @@ package codedriver.module.process.api.matrix;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -40,8 +38,12 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixAttributeService;
+import codedriver.module.process.service.MatrixDataService;
 @Service
 public class MatrixCellDataGetApi extends ApiComponentBase {
+
+	@Autowired
+	private MatrixDataService matrixDataService;
 
     @Autowired
     private MatrixAttributeService attributeService;
@@ -146,6 +148,8 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
     			List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
 	    		ProcessMatrixColumnVo sourceColumnVo = new ProcessMatrixColumnVo();
 	    		sourceColumnVo.setColumn(sourceColumn);
+	    		List<String> columnList = new ArrayList<>();
+	    		columnList.add(targetColumn);
 	    		for(String sourceColumnValue : sourceColumnValueList) {
 	    			sourceColumnVo.setValue(sourceColumnValue);
 	    			sourceColumnVo.setExpression(ProcessExpression.EQUAL.getExpression());
@@ -154,16 +158,20 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	    			sourceColumnList.add(sourceColumnVo);
 	    			integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
 	            	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-	        		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-	        			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-	        			if(MapUtils.isNotEmpty(transformedResult)) {
-	        				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
-	        				if(CollectionUtils.isNotEmpty(tbodyList)) {
-	        					JSONObject rowData = tbodyList.getJSONObject(0);
-	        					targetColumnValue = rowData.getString(targetColumn);
-	        				}
-	        			}
-	        		}
+//	        		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+//	        			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+//	        			if(MapUtils.isNotEmpty(transformedResult)) {
+//	        				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
+//	        				if(CollectionUtils.isNotEmpty(tbodyList)) {
+//	        					JSONObject rowData = tbodyList.getJSONObject(0);
+//	        					targetColumnValue = rowData.getString(targetColumn);
+//	        				}
+//	        			}
+//	        		}
+	            	List<Map<String, JSONObject>> tbodyList = matrixDataService.getExternalDataTbodyList(resultVo, columnList, 1, null);
+	            	if(CollectionUtils.isNotEmpty(tbodyList)) {
+	            		targetColumnValue = tbodyList.get(0).get(targetColumn).getString("value");
+	            	}
 	    			resultObj.add(targetColumnValue);
 	    		}
 	        }

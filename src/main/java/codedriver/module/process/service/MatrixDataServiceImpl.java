@@ -8,6 +8,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
@@ -16,6 +17,7 @@ import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -194,6 +196,39 @@ public class MatrixDataServiceImpl implements MatrixDataService {
 			return matrixDataMapper.getUuidListByKeywordForDateType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
 		}else {
 			return matrixDataMapper.getUuidListByKeywordForInputType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
+		}
+		return null;
+	}
+
+	@Override
+	public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, int pageSize, JSONObject resultObj) {
+		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+			if(MapUtils.isNotEmpty(transformedResult)) {
+				if(resultObj != null) {
+					resultObj.putAll(transformedResult);
+				}
+				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
+				if(CollectionUtils.isNotEmpty(tbodyList)) {
+					List<Map<String, JSONObject>> resultList = new ArrayList<>();
+					for(int i = 0; i < tbodyList.size(); i++) {
+						JSONObject rowData = tbodyList.getJSONObject(i);
+						Map<String, JSONObject> resultMap = new HashMap<>(columnList.size());
+						for(String column : columnList) {
+							String columnValue = rowData.getString(column);
+							resultMap.put(column, matrixAttributeValueHandle(columnValue)); 							
+						}
+						resultList.add(resultMap);
+						if(resultList.size() >= pageSize) {
+							break;
+						}
+					}
+					if(resultObj != null) {
+						resultObj.put("tbodyList", resultList);
+					}
+					return resultList;
+				}
+			}
 		}
 		return null;
 	}
