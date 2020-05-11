@@ -78,17 +78,23 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true)})
-    @Output( {@Param( name = "Return", desc = "矩阵属性集合", explode = ProcessMatrixAttributeVo[].class)})
+    @Input({ 
+    	@Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true)
+    })
+    @Output( 
+    	{@Param(name = "Return", desc = "矩阵属性集合", explode = ProcessMatrixAttributeVo[].class)
+    })
     @Description( desc = "矩阵属性检索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+    	JSONObject resultObj = new JSONObject();
         String matrixUuid = jsonObj.getString("matrixUuid");
         ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
     	if(matrixVo == null) {
     		throw new MatrixNotFoundException(matrixUuid);
     	}
     	if (matrixVo.getType().equals(ProcessMatrixType.CUSTOM.getValue())){
+    		resultObj.put("type", ProcessMatrixType.CUSTOM.getValue());
     		List<ProcessMatrixAttributeVo> processMatrixAttributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
         	if(CollectionUtils.isNotEmpty(processMatrixAttributeList)) {
         		List<String> columnList = processMatrixAttributeList.stream().map(ProcessMatrixAttributeVo :: getUuid).collect(Collectors.toList());
@@ -117,8 +123,9 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
         			}
         		}
         	}
-            return processMatrixAttributeList;
+            resultObj.put("processMatrixAttributeList", processMatrixAttributeList);
     	}else {
+    		resultObj.put("type", ProcessMatrixType.EXTERNAL.getValue());
     		ProcessMatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
             if(externalVo == null) {
             	throw new MatrixExternalNotFoundException(matrixUuid);
@@ -129,9 +136,9 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
         		if (handler == null) {
         			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
         		}
-        		return attributeService.getExternalMatrixAttributeList(matrixUuid, integrationVo);        		
+        		resultObj.put("processMatrixAttributeList", attributeService.getExternalMatrixAttributeList(matrixUuid, integrationVo));       		
             }
-            return null;
-    	}    	
+    	}
+    	return resultObj;
     }
 }
