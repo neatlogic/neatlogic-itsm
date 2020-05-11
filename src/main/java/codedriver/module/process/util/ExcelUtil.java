@@ -65,6 +65,10 @@ public class ExcelUtil {
         font2.setBoldweight(HSSFFont.BOLDWEIGHT_NORMAL);
         // 把字体应用到当前的样式
         style2.setFont(font2);
+        
+        HSSFFont font3 = workbook.createFont();
+        font3.setColor(HSSFColor.BLUE.index);
+        
 //        // 声明一个画图的顶级管理器
 //        HSSFPatriarch patriarch = sheet.createDrawingPatriarch();
 //        // 定义注释的大小和位置,详见文档
@@ -113,8 +117,6 @@ public class ExcelUtil {
                     HSSFCell cell = row.createCell(j);
                     cell.setCellStyle(style2);
                     HSSFRichTextString richString = new HSSFRichTextString(dataMap.get(column));
-                    HSSFFont font3 = workbook.createFont();
-                    font3.setColor(HSSFColor.BLUE.index);
                     richString.applyFont(font3);
                     cell.setCellValue(richString);
                     j++;
