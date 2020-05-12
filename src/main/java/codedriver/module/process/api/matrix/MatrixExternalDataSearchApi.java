@@ -29,7 +29,6 @@ import codedriver.framework.process.dto.ProcessMatrixDispatcherVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
-import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -87,44 +86,44 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
         	throw new MatrixNotFoundException(matrixUuid);
         }
         ProcessMatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
-        if(externalVo == null) {
-        	throw new MatrixExternalNotFoundException(matrixUuid);
-        }
-        IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
-        IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
-		if (handler == null) {
-			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
-		}
-		JSONObject returnObj = new JSONObject();
-    	integrationVo.getParamObj().putAll(jsonObj);
-		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-			if(MapUtils.isNotEmpty(transformedResult)) {
-				returnObj.putAll(transformedResult);
-				JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
-				if(CollectionUtils.isNotEmpty(tbodyArray)) {
-					List<Map<String, Object>> tbodyList = new ArrayList<>();
-					for(int i = 0; i < tbodyArray.size(); i++) {
-						JSONObject rowData = tbodyArray.getJSONObject(i);
-						Integer pageSize = jsonObj.getInteger("pageSize");
-						pageSize = pageSize == null ? 10 : pageSize;
-						if(MapUtils.isNotEmpty(rowData)) {
-							Map<String, Object> rowDataMap = new HashMap<>();
-							for(Entry<String, Object> entry : rowData.entrySet()) {
-								rowDataMap.put(entry.getKey(), dataService.matrixAttributeValueHandle(entry.getValue()));
-							}
-							tbodyList.add(rowDataMap);
-							if(tbodyList.size() >= pageSize) {
-    							break;
+        JSONObject returnObj = new JSONObject();
+        if(externalVo != null) {
+        	IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
+            IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+    		if (handler == null) {
+    			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+    		}
+    		
+        	integrationVo.getParamObj().putAll(jsonObj);
+    		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+    		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+    			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+    			if(MapUtils.isNotEmpty(transformedResult)) {
+    				returnObj.putAll(transformedResult);
+    				JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
+    				if(CollectionUtils.isNotEmpty(tbodyArray)) {
+    					List<Map<String, Object>> tbodyList = new ArrayList<>();
+    					for(int i = 0; i < tbodyArray.size(); i++) {
+    						JSONObject rowData = tbodyArray.getJSONObject(i);
+    						Integer pageSize = jsonObj.getInteger("pageSize");
+    						pageSize = pageSize == null ? 10 : pageSize;
+    						if(MapUtils.isNotEmpty(rowData)) {
+    							Map<String, Object> rowDataMap = new HashMap<>();
+    							for(Entry<String, Object> entry : rowData.entrySet()) {
+    								rowDataMap.put(entry.getKey(), dataService.matrixAttributeValueHandle(entry.getValue()));
+    							}
+    							tbodyList.add(rowDataMap);
+    							if(tbodyList.size() >= pageSize) {
+        							break;
+        						}
     						}
-						}
-					}
-					returnObj.put("tbodyList", tbodyList);
-				}
-			}
-		}
-
+    					}
+    					returnObj.put("tbodyList", tbodyList);
+    				}
+    			}
+    		}
+        }
+        
         List<ProcessMatrixDispatcherVo> dispatcherVoList = matrixMapper.getMatrixDispatcherByMatrixUuid(matrixUuid);
         returnObj.put("dispatcherVoList", dispatcherVoList);
         List<ProcessMatrixFormComponentVo> componentVoList = matrixMapper.getMatrixFormComponentByMatrixUuid(matrixUuid);
