@@ -36,6 +36,7 @@ import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixAttributeNotFoundException;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
+import codedriver.framework.process.exception.process.MatrixExternalException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -204,7 +205,11 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 //    				}
 //    			}
 //    		}
-    		resultList = matrixDataService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null);
+        	if(StringUtils.isNotBlank(resultVo.getError())) {
+        		throw new MatrixExternalException(resultVo.getError());
+        	}else {
+        		resultList = matrixDataService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null);
+        	}
         }
         returnObj.put("columnDataList", resultList);
         return returnObj;

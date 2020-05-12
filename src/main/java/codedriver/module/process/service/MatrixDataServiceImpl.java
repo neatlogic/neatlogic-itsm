@@ -202,6 +202,7 @@ public class MatrixDataServiceImpl implements MatrixDataService {
 
 	@Override
 	public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, int pageSize, JSONObject resultObj) {
+		List<Map<String, JSONObject>> resultList = new ArrayList<>();
 		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
 			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
 			if(MapUtils.isNotEmpty(transformedResult)) {
@@ -210,7 +211,6 @@ public class MatrixDataServiceImpl implements MatrixDataService {
 				}
 				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
 				if(CollectionUtils.isNotEmpty(tbodyList)) {
-					List<Map<String, JSONObject>> resultList = new ArrayList<>();
 					for(int i = 0; i < tbodyList.size(); i++) {
 						JSONObject rowData = tbodyList.getJSONObject(i);
 						Map<String, JSONObject> resultMap = new HashMap<>(columnList.size());
@@ -226,10 +226,9 @@ public class MatrixDataServiceImpl implements MatrixDataService {
 					if(resultObj != null) {
 						resultObj.put("tbodyList", resultList);
 					}
-					return resultList;
 				}
 			}
 		}
-		return null;
+		return resultList;
 	}
 }

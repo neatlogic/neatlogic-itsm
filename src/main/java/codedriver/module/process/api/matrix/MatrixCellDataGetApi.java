@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixAttributeNotFoundException;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
+import codedriver.framework.process.exception.process.MatrixExternalException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -168,9 +170,13 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 //	        				}
 //	        			}
 //	        		}
-	            	List<Map<String, JSONObject>> tbodyList = matrixDataService.getExternalDataTbodyList(resultVo, columnList, 1, null);
-	            	if(CollectionUtils.isNotEmpty(tbodyList)) {
-	            		targetColumnValue = tbodyList.get(0).get(targetColumn).getString("value");
+	            	if(StringUtils.isNotBlank(resultVo.getError())) {
+	            		throw new MatrixExternalException(resultVo.getError());
+	            	}else {
+		            	List<Map<String, JSONObject>> tbodyList = matrixDataService.getExternalDataTbodyList(resultVo, columnList, 1, null);
+		            	if(CollectionUtils.isNotEmpty(tbodyList)) {
+		            		targetColumnValue = tbodyList.get(0).get(targetColumn).getString("value");
+		            	}
 	            	}
 	    			resultObj.add(targetColumnValue);
 	    		}
