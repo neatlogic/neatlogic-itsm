@@ -1,8 +1,10 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
+import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
@@ -12,7 +14,6 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.module.process.service.MatrixDataService;
 import codedriver.module.process.service.MatrixService;
 import codedriver.module.process.util.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -20,10 +21,14 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -45,11 +50,11 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
     private MatrixAttributeMapper attributeMapper;
 
     @Autowired
-    private MatrixDataService dataService;
-
-    @Autowired
     private MatrixMapper matrixMapper;
 
+    @Autowired
+    private MatrixDataMapper matrixDataMapper;
+    
     @Override
     public String getToken() {
         return "matrix/export";
@@ -74,6 +79,8 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(matrixUuid);
         }
+
+        HSSFWorkbook workbook = null;
         if(ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
         	List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
             if (CollectionUtils.isNotEmpty(attributeVoList)){
@@ -91,37 +98,47 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
                     columnSelectValueList.add(selectValueList);
                 }
                 ProcessMatrixDataVo dataVo = new ProcessMatrixDataVo();
-                dataVo.setNeedPage(false);
                 dataVo.setMatrixUuid(paramObj.getString("matrixUuid"));
-                List<Map<String, String>> dataMapList = dataService.searchDynamicTableData(dataVo);
-                String fileNameEncode = matrixVo.getName() + ".xls";
-                Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-                if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-                    fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-                } else {
-                    fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-                }
-                response.setContentType("application/vnd.ms-excel;charset=utf-8");
-                response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
-                ExcelUtil.exportExcel( headerList, columnList, columnSelectValueList, dataMapList, response.getOutputStream());
+                dataVo.setColumnList(columnList);
+                
+                int currentPage = 1;
+                dataVo.setPageSize(1000);
+                int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo);
+                System.out.println("rowNum:" + rowNum);
+                int pageCount = PageUtil.getPageCount(rowNum, dataVo.getPageSize());
+                System.out.println("pageCount:" + pageCount);
+                while(currentPage <= pageCount) {
+                    dataVo.setCurrentPage(currentPage);
+                    dataVo.setStartNum(null);
+                    System.out.println("currentPage:" + currentPage);
+                	List<Map<String, String>> dataMapList = matrixDataMapper.searchDynamicTableData(dataVo);
+                	workbook = ExcelUtil.createExcel(workbook, headerList, columnList, columnSelectValueList, dataMapList);
+                	currentPage++;
+                }              
             }
         }else {
         	JSONObject dataObj = matrixService.getMatrixExternalData(paramObj.getString("matrixUuid"));
             List<String> headerList = dataObj.getJSONArray("headerList").toJavaList(String.class);
             List<String> columnList = dataObj.getJSONArray("columnList").toJavaList(String.class);
-            List<Map<String, String>> dataMapList= (List<Map<String,String>>) dataObj.get("dataMapList");
-            String fileNameEncode = matrixVo.getName() + ".xls";
-            Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-            if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-                fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-            } else {
-                fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-            }
-            response.setContentType("application/vnd.ms-excel;charset=utf-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
-            ExcelUtil.exportExcel( headerList, columnList, dataMapList, response.getOutputStream());
+            List<Map<String, String>> dataMapList= (List<Map<String,String>>) dataObj.get("dataMapList");            
+        	workbook = ExcelUtil.createExcel(workbook, headerList, columnList, null, dataMapList);
         }
         
+        String fileNameEncode = matrixVo.getName() + ".xls";
+        Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+        if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+            fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
+        } else {
+            fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+        }
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+
+        try (OutputStream os = response.getOutputStream();){               	
+            workbook.write(os);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }      
         return null;
     }
 
