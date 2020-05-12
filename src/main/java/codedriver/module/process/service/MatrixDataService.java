@@ -1,5 +1,6 @@
 package codedriver.module.process.service;
 
+import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 
@@ -21,7 +22,11 @@ public interface MatrixDataService {
     
     public List<Map<String, Object>> matrixTableDataValueHandle(List<ProcessMatrixAttributeVo> attributeVoList, List<Map<String, String>> valueList);
     
-    public JSONObject matrixAttributeValueHandle(ProcessMatrixAttributeVo processMatrixAttributeVo, String value);
+    public JSONObject matrixAttributeValueHandle(ProcessMatrixAttributeVo processMatrixAttributeVo, Object value);
+    
+    public JSONObject matrixAttributeValueHandle(Object value);
     
     public List<String> matrixAttributeValueKeyWordSearch(ProcessMatrixAttributeVo processMatrixAttributeVo, String keyword, int pageSize);
+    
+    public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, int pageSize, JSONObject resultObj);
 }
