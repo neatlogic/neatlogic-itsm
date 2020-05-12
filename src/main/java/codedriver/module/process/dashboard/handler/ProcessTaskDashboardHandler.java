@@ -29,7 +29,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 	}
 
 	@Override
-	protected JSONArray myGetData(DashboardWidgetVo widgetVo) {
+	protected JSONObject myGetData(DashboardWidgetVo widgetVo) {
 		DashboardChartBase chart = DashboardChartFactory.getChart(widgetVo.getChartType());
 		JSONObject jsonObj = new JSONObject();
 		if (chart != null) {
