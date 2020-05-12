@@ -12,7 +12,6 @@ import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
-import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
@@ -26,14 +25,11 @@ import codedriver.module.process.service.MatrixAttributeService;
 
 import com.alibaba.fastjson.JSONObject;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -98,30 +94,11 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
     		resultObj.put("type", ProcessMatrixType.CUSTOM.getValue());
     		List<ProcessMatrixAttributeVo> processMatrixAttributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
         	if(CollectionUtils.isNotEmpty(processMatrixAttributeList)) {
-        		List<String> columnList = processMatrixAttributeList.stream().map(ProcessMatrixAttributeVo :: getUuid).collect(Collectors.toList());
-        		ProcessMatrixDataVo dataVo = new ProcessMatrixDataVo();
-        		dataVo.setMatrixUuid(matrixUuid);
-        		dataVo.setColumnList(columnList);
-        		dataVo.setNeedPage(false);
-        		
-        		List<Map<String, String>> matrixRowDataList = matrixDataMapper.searchDynamicTableData(dataVo);
-        		if(CollectionUtils.isNotEmpty(matrixRowDataList)) {
-        			Map<String, Boolean> attributeDataIsExistMap = new HashMap<>();
-        			for(Map<String, String> rowData : matrixRowDataList) {
-            			for(Entry<String, String> columnData : rowData.entrySet()) {
-            				if(Boolean.TRUE.equals(attributeDataIsExistMap.get(columnData.getKey()))) {
-            					continue;
-            				}
-            				if(StringUtils.isNotBlank(columnData.getValue())) {
-            					attributeDataIsExistMap.put(columnData.getKey(), true);
-            				}
-            			}
-            		}
-        			for(ProcessMatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
-        				if(attributeDataIsExistMap.containsKey(processMatrixAttributeVo.getUuid())) {
-        					processMatrixAttributeVo.setIsDeletable(0);
-        				}
-        			}
+        		List<String> attributeUuidList = processMatrixAttributeList.stream().map(ProcessMatrixAttributeVo :: getUuid).collect(Collectors.toList());
+    			Map<String, Long> attributeDataCountMap = matrixDataMapper.checkMatrixAttributeHasDataByAttributeUuidList(matrixUuid, attributeUuidList);
+        		for(ProcessMatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
+        			long count = attributeDataCountMap.get(processMatrixAttributeVo.getUuid());
+        			processMatrixAttributeVo.setIsDeletable(count == 0 ? 1 : 0);
         		}
         	}
             resultObj.put("processMatrixAttributeList", processMatrixAttributeList);
