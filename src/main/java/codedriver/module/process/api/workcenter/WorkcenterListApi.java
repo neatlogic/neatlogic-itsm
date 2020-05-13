@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -63,7 +64,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 	}
 
 	@Input({
-		
+		@Param(name = "isAll", type = ApiParamType.INTEGER, desc = "获取类型，1:返回所有，用于定时更新; 0:仅返回列表", isRequired = true)
 	})
 	@Output({
 		@Param(name="workcenter", explode = WorkcenterVo.class, desc="分类信息")
@@ -71,6 +72,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 	@Description(desc = "获取工单中心分类列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		Integer isAll = jsonObj.getInteger("isAll");
 		JSONObject workcenterJson = new JSONObject();
 		String userId = UserContext.get().getUserId(true);
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(userId);
@@ -116,7 +118,12 @@ public class WorkcenterListApi extends ApiComponentBase {
 			}
 			
 			//查询数量
-			workcenter.setCount(workcenterService.doSearchCount(new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()))));
+			if(isAll == 1) {
+				WorkcenterVo wc = new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()));
+				wc.setPageSize(100);
+				Integer workcenterCount  = workcenterService.doSearchCount(wc);
+				workcenter.setCount(workcenterCount>99?"99+":workcenterCount.toString());
+			}
 			workcenter.setConditionConfig(null);
 			//排序 用户设置的排序优先
 		    if(workcenterUserSortMap.containsKey(workcenter.getUuid())) {
