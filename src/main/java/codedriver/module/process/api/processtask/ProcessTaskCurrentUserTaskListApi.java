@@ -1,6 +1,5 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +13,6 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -61,15 +59,11 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 		List<String> roleNameList = UserContext.get().getRoleNameList();
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
 		
-		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerList(userId, teamUuidList, roleNameList);
-		if(CollectionUtils.isEmpty(processTaskStepWorkerList)) {
+		List<Long> processTaskStepIdList = processTaskMapper.getProcessTaskStepIdList(userId, teamUuidList, roleNameList);
+		if(CollectionUtils.isEmpty(processTaskStepIdList)) {
 			return null;
 		}
-		
-		List<Long> processTaskStepIdList = new ArrayList<>();
-		for(ProcessTaskStepWorkerVo processTaskStepWorkerVo : processTaskStepWorkerList) {
-			processTaskStepIdList.add(processTaskStepWorkerVo.getProcessTaskStepId());
-		}
+
 		String keyword = jsonObj.getString("keyword");
 		List<Map<String, Object>> taskList = processTaskMapper.getProcessTaskActiveStepListByStepIdList(keyword, processTaskStepIdList);
 		return taskList;

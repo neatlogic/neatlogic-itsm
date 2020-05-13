@@ -29,6 +29,7 @@ import codedriver.framework.process.dto.ProcessMatrixDispatcherVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.process.MatrixExternalException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -96,7 +97,9 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
     		
         	integrationVo.getParamObj().putAll(jsonObj);
     		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-    		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+    		if(StringUtils.isNotBlank(resultVo.getError())) {
+        		throw new MatrixExternalException(resultVo.getError());
+        	}else if(StringUtils.isNotBlank(resultVo.getTransformedResult())) {
     			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
     			if(MapUtils.isNotEmpty(transformedResult)) {
     				returnObj.putAll(transformedResult);
