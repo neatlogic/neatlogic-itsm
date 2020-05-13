@@ -12,6 +12,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -58,9 +59,9 @@ public class WorkcenterGetApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
 		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
-		if(CollectionUtils.isNotEmpty(workcenterList)) {
-			return workcenterList.get(0);
+		if(CollectionUtils.isEmpty(workcenterList)) {
+			throw new WorkcenterNotFoundException(uuid);
 		}
-		return null;
+		return workcenterList.get(0);
 	}
 }
