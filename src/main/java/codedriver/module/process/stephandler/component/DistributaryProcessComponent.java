@@ -1,5 +1,6 @@
 package codedriver.module.process.stephandler.component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.dto.ProcessStepVo;
@@ -74,7 +76,14 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
-		return processTaskMapper.getToProcessTaskStepByFromId(currentProcessTaskStepVo.getId());
+		List<ProcessTaskStepVo> resultList = new ArrayList<>();
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(currentProcessTaskStepVo.getId());
+		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
+			if(ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
+				resultList.add(processTaskStep);
+			}
+		}
+		return resultList;
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessTaskFlowDirection;
+import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -89,18 +89,18 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
 		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
 			if(processTaskStep.getIsActive() != null) {
-				if(ProcessTaskStepAction.COMPLETE.getValue().equals(action) && processTaskStep.getIsActive().intValue() == 0) {
+				if(ProcessTaskStepAction.COMPLETE.getValue().equals(action) && ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
 					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
 						processTaskStep.setName(processTaskStep.getAliasName());
 					}else {
-						processTaskStep.setFlowDirection(ProcessTaskFlowDirection.FORWARD.getText());
+						processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
 					}
 					resultList.add(processTaskStep);
-				}else if(ProcessTaskStepAction.BACK.getValue().equals(action) && processTaskStep.getIsActive().intValue() != 0){
+				}else if(ProcessTaskStepAction.BACK.getValue().equals(action) && ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
 					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
 						processTaskStep.setName(processTaskStep.getAliasName());
 					}else {
-						processTaskStep.setFlowDirection(ProcessTaskFlowDirection.BACKWARD.getText());
+						processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
 					}
 					resultList.add(processTaskStep);
 				}
