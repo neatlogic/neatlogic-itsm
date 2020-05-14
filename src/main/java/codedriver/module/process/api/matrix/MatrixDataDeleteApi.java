@@ -1,8 +1,11 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
+import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.process.MatrixExternalException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -54,13 +57,19 @@ public class MatrixDataDeleteApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	String matrixUuid = jsonObj.getString("matrixUuid");
-		if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
+    	ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+		if(matrixVo == null) {
 			throw new MatrixNotFoundException(matrixUuid);
 		}
-		List<String> uuidList = JSON.parseArray(jsonObj.getString("uuidList"), String.class);
-		for(String uuid : uuidList) {
-	        dataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuid);
+		if(ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+			List<String> uuidList = JSON.parseArray(jsonObj.getString("uuidList"), String.class);
+			for(String uuid : uuidList) {
+		        dataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuid);
+			}
+		}else {
+			throw new MatrixExternalException("矩阵外部数据源没有删除数据操作");
 		}
+		
         return null;
     }
 }

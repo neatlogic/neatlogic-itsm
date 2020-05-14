@@ -8,9 +8,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
+import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.process.MatrixExternalException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -49,13 +52,19 @@ public class MatrixExternalSaveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessMatrixExternalVo externalVo = JSON.toJavaObject(jsonObj, ProcessMatrixExternalVo.class);
-        if(matrixMapper.checkMatrixIsExists(externalVo.getMatrixUuid()) == 0) {
-    		throw new MatrixNotFoundException(externalVo.getMatrixUuid());
-    	}
-        if(externalMapper.getMatrixExternalIsExists(externalVo.getMatrixUuid()) == 0) {
-        	externalMapper.insertMatrixExternal(externalVo);
+        ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(externalVo.getMatrixUuid());
+        if(matrixVo == null) {
+        	throw new MatrixNotFoundException(externalVo.getMatrixUuid());
+        }
+        
+        if(ProcessMatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+            if(externalMapper.getMatrixExternalIsExists(externalVo.getMatrixUuid()) == 0) {
+            	externalMapper.insertMatrixExternal(externalVo);
+            }else {
+            	externalMapper.updateMatrixExternal(externalVo);
+            }
         }else {
-        	externalMapper.updateMatrixExternal(externalVo);
+        	throw new MatrixExternalException("矩阵:'" + externalVo.getMatrixUuid() + "'不是外部数据源类型");
         }
         return null;
     }

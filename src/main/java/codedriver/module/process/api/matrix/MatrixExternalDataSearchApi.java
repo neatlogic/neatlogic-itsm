@@ -38,6 +38,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixService;
 @Service
+@Deprecated
 public class MatrixExternalDataSearchApi extends ApiComponentBase {
 
     @Autowired

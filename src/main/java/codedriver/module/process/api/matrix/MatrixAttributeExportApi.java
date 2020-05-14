@@ -2,10 +2,12 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.attribute.constvalue.AttributeHandler;
+import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.process.MatrixExternalException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -64,29 +66,35 @@ public class MatrixAttributeExportApi extends BinaryStreamApiComponentBase {
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(matrixUuid);
         }
-        List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-        if (CollectionUtils.isNotEmpty(attributeVoList)){
-            List<String> headerList = new ArrayList<>();
-            List<List<String>> columnSelectValueList = new ArrayList<>();
-            headerList.add("uuid");
-            columnSelectValueList.add(new ArrayList<>());
-            for (ProcessMatrixAttributeVo attributeVo : attributeVoList){
-                headerList.add(attributeVo.getName());
-                List<String> selectValueList = new ArrayList<>();
-                decodeDataConfig(attributeVo, selectValueList);
-                columnSelectValueList.add(selectValueList);
+        
+        if(ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+        	List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
+            if (CollectionUtils.isNotEmpty(attributeVoList)){
+                List<String> headerList = new ArrayList<>();
+                List<List<String>> columnSelectValueList = new ArrayList<>();
+                headerList.add("uuid");
+                columnSelectValueList.add(new ArrayList<>());
+                for (ProcessMatrixAttributeVo attributeVo : attributeVoList){
+                    headerList.add(attributeVo.getName());
+                    List<String> selectValueList = new ArrayList<>();
+                    decodeDataConfig(attributeVo, selectValueList);
+                    columnSelectValueList.add(selectValueList);
+                }
+                String fileNameEncode = matrixVo.getName() + "_模板.xls";
+                Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+                if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+                    fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
+                } else {
+                    fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+                }
+                response.setContentType("application/vnd.ms-excel;charset=utf-8");
+                response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+                ExcelUtil.exportExcelHeaders( headerList, columnSelectValueList, response.getOutputStream());
             }
-            String fileNameEncode = matrixVo.getName() + "_模板.xls";
-            Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-            if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-                fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-            } else {
-                fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-            }
-            response.setContentType("application/vnd.ms-excel;charset=utf-8");
-            response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
-            ExcelUtil.exportExcelHeaders( headerList, columnSelectValueList, response.getOutputStream());
+        }else {
+        	throw new MatrixExternalException("矩阵外部数据源没有导出模板操作");
         }
+        
         return null;
     }
 

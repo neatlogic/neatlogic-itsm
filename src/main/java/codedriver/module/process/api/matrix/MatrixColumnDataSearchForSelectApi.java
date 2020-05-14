@@ -25,6 +25,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
+@Deprecated
 public class MatrixColumnDataSearchForSelectApi extends ApiComponentBase {
 
     @Autowired
