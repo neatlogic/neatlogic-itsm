@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @program: codedriver
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
  * @create: 2020-03-30 16:29
  **/
 @Service
+@Transactional
 public class MatrixDataDeleteApi extends ApiComponentBase {
 
     @Autowired

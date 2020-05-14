@@ -21,7 +21,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.MatrixAttributeService;
+import codedriver.module.process.service.MatrixService;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
 public class MatrixAttributeSearchApi extends ApiComponentBase {
 
     @Autowired
-    private MatrixAttributeService attributeService;
+    private MatrixService matrixService;
 
     @Autowired
     private MatrixAttributeMapper attributeMapper;
@@ -114,7 +114,7 @@ public class MatrixAttributeSearchApi extends ApiComponentBase {
         		if (handler == null) {
         			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
         		}
-        		resultObj.put("processMatrixAttributeList", attributeService.getExternalMatrixAttributeList(matrixUuid, integrationVo));       		
+        		resultObj.put("processMatrixAttributeList", matrixService.getExternalMatrixAttributeList(matrixUuid, integrationVo));       		
             }
     	}
     	return resultObj;

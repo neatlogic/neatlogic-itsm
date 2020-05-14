@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
  * @create: 2020-03-26 19:07
  **/
 @Service
+@Transactional
 public class MatrixAttributeSaveApi extends ApiComponentBase {
 
     @Autowired

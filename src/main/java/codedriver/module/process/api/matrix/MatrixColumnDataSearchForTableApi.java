@@ -41,17 +41,13 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.MatrixAttributeService;
-import codedriver.module.process.service.MatrixDataService;
+import codedriver.module.process.service.MatrixService;
 
 @Service
 public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
 
     @Autowired
-    private MatrixAttributeService attributeService;
-
-	@Autowired
-	private MatrixDataService matrixDataService;
+    private MatrixService matrixService;
 
     @Autowired
     private MatrixMapper matrixMapper;
@@ -133,7 +129,7 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
         	}
         	returnObj.put("theadList", theadList);
             List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList(dataVo);
-            List<Map<String, Object>> tbodyList = matrixDataService.matrixTableDataValueHandle(processMatrixAttributeList, dataMapList);
+            List<Map<String, Object>> tbodyList = matrixService.matrixTableDataValueHandle(processMatrixAttributeList, dataMapList);
             returnObj.put("tbodyList", tbodyList);
             
             if(CollectionUtils.isNotEmpty(searchColumnList)) {
@@ -168,7 +164,7 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
     			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
     		}
     		Map<String, ProcessMatrixAttributeVo> attributeMap = new HashMap<>();
-    		List<ProcessMatrixAttributeVo> processMatrixAttributeList = attributeService.getExternalMatrixAttributeList(dataVo.getMatrixUuid(), integrationVo);
+    		List<ProcessMatrixAttributeVo> processMatrixAttributeList = matrixService.getExternalMatrixAttributeList(dataVo.getMatrixUuid(), integrationVo);
     		for(ProcessMatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
     			attributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
     		}
@@ -204,7 +200,7 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
     		if(StringUtils.isNotBlank(resultVo.getError())) {
         		throw new MatrixExternalException(resultVo.getError());
         	}else {
-        		matrixDataService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
+        		matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
         	}
     		returnObj.put("theadList", theadList);
         }       

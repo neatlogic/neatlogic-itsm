@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixVo;
@@ -25,6 +26,7 @@ import codedriver.framework.process.exception.matrix.MatrixNameRepeatException;
  * @create: 2020-03-26 19:02
  **/
 @Service
+@Transactional
 public class MatrixSaveApi extends ApiComponentBase {
 
     @Autowired

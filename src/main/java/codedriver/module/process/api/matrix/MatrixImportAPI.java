@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -36,6 +37,7 @@ import java.util.*;
  * @create: 2020-04-01 16:32
  **/
 @Service
+@Transactional
 public class MatrixImportAPI extends BinaryStreamApiComponentBase {
 
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

@@ -39,16 +39,12 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.MatrixAttributeService;
-import codedriver.module.process.service.MatrixDataService;
+import codedriver.module.process.service.MatrixService;
 @Service
 public class MatrixCellDataGetApi extends ApiComponentBase {
 
-	@Autowired
-	private MatrixDataService matrixDataService;
-
     @Autowired
-    private MatrixAttributeService attributeService;
+    private MatrixService matrixService;
 
 	@Autowired
 	private MatrixMapper matrixMapper;
@@ -135,7 +131,7 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	    			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
 	    		}
 	    		List<String> attributeUuidList = new ArrayList<>();
-	    		List<ProcessMatrixAttributeVo> processMatrixAttributeList = attributeService.getExternalMatrixAttributeList(matrixUuid, integrationVo);
+	    		List<ProcessMatrixAttributeVo> processMatrixAttributeList = matrixService.getExternalMatrixAttributeList(matrixUuid, integrationVo);
 	    		for(ProcessMatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
 	    			attributeUuidList.add(processMatrixAttributeVo.getUuid());
 	    		}
@@ -163,7 +159,7 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	            	if(StringUtils.isNotBlank(resultVo.getError())) {
 	            		throw new MatrixExternalException(resultVo.getError());
 	            	}else {
-		            	List<Map<String, JSONObject>> tbodyList = matrixDataService.getExternalDataTbodyList(resultVo, columnList, 1, null);
+		            	List<Map<String, JSONObject>> tbodyList = matrixService.getExternalDataTbodyList(resultVo, columnList, 1, null);
 		            	if(CollectionUtils.isNotEmpty(tbodyList)) {
 		            		targetColumnValue = tbodyList.get(0).get(targetColumn).getString("value");
 		            	}
