@@ -116,13 +116,10 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
                 int currentPage = 1;
                 dataVo.setPageSize(1000);
                 int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo);
-                System.out.println("rowNum:" + rowNum);
                 int pageCount = PageUtil.getPageCount(rowNum, dataVo.getPageSize());
-                System.out.println("pageCount:" + pageCount);
                 while(currentPage <= pageCount) {
                     dataVo.setCurrentPage(currentPage);
                     dataVo.setStartNum(null);
-                    System.out.println("currentPage:" + currentPage);
                 	List<Map<String, String>> dataMapList = matrixDataMapper.searchDynamicTableData(dataVo);
                 	workbook = ExcelUtil.createExcel(workbook, headerList, columnList, columnSelectValueList, dataMapList);
                 	currentPage++;
