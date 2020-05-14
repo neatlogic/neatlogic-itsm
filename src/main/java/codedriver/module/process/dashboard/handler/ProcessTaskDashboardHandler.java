@@ -12,6 +12,7 @@ import codedriver.framework.common.constvalue.dashboard.DashboardShowConfig;
 import codedriver.framework.dashboard.core.DashboardChartBase;
 import codedriver.framework.dashboard.core.DashboardChartFactory;
 import codedriver.framework.dashboard.core.DashboardHandlerBase;
+import codedriver.framework.dashboard.dto.DashboardShowConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -49,7 +50,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 	}
 
 	@Override
-	public JSONObject getChartConfig(DashboardWidgetVo widgetVo) {
+	public JSONObject myGetConfig(DashboardWidgetVo widgetVo) {
 		DashboardChartBase chart = DashboardChartFactory.getChart(widgetVo.getChartType());
 		JSONObject processTaskChartConfig = new JSONObject();
 		JSONArray processTaskShowChartConfigArray = new JSONArray();
@@ -57,41 +58,37 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 		if (chart != null) {
 			chartConfig = chart.getChartConfig();
 			if(chartConfig.containsKey("showConfig")) {
-				JSONArray showConfigArray = chartConfig.getJSONArray("showConfig");
-				for(Object showConfigObj : showConfigArray) {
-					JSONObject showConfigJson = (JSONObject)showConfigObj;
-					if(showConfigJson.containsKey(DashboardShowConfig.AGGREGATE.getValue())) {
-						JSONObject showAggregateJson = showConfigJson.getJSONObject(DashboardShowConfig.AGGREGATE.getValue());
-						processTaskShowChartConfigArray.add(showAggregateJson);
-					}
-					if(showConfigJson.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
-						JSONObject groupFieldJson = showConfigJson.getJSONObject(DashboardShowConfig.GROUPFIELD.getValue());
-						JSONArray groupFieldDataArray = groupFieldJson.getJSONArray("dataList");
-						groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.PRIORITY.getValue(),ProcessWorkcenterField.PRIORITY.getName())));
-						groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.STATUS.getValue(),ProcessWorkcenterField.STATUS.getName())));
-						processTaskShowChartConfigArray.add(groupFieldJson);
-					}
-					if(showConfigJson.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())) {
-						JSONObject subGroupFieldJson = showConfigJson.getJSONObject(DashboardShowConfig.SUBGROUPFIELD.getValue());
-						JSONArray subGroupFieldDataArray = subGroupFieldJson.getJSONArray("dataList");
-						subGroupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.PRIORITY.getValue(),ProcessWorkcenterField.PRIORITY.getName())));
-						subGroupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.STATUS.getValue(),ProcessWorkcenterField.STATUS.getName())));
-						processTaskShowChartConfigArray.add(subGroupFieldJson);
-					}
-					if(showConfigJson.containsKey(DashboardShowConfig.MAXGROUP.getValue())) {
-						JSONObject maxGroupJson = showConfigJson.getJSONObject(DashboardShowConfig.MAXGROUP.getValue());
-						processTaskShowChartConfigArray.add(maxGroupJson);
-					}
-					if(showConfigJson.containsKey(DashboardShowConfig.REFRESHTIME.getValue())) {
-						JSONObject refreshTimeJson = showConfigJson.getJSONObject(DashboardShowConfig.REFRESHTIME.getValue());
-						processTaskShowChartConfigArray.add(refreshTimeJson);
-					}
+				JSONObject showConfigJson = chartConfig.getJSONObject("showConfig");
+				if(showConfigJson.containsKey(DashboardShowConfig.AGGREGATE.getValue())) {
+					DashboardShowConfigVo aggregateShowConfig = (DashboardShowConfigVo)showConfigJson.get(DashboardShowConfig.AGGREGATE.getValue());
+					processTaskShowChartConfigArray.add(aggregateShowConfig);
 				}
-				
+				if(showConfigJson.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
+					DashboardShowConfigVo groupShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.GROUPFIELD.getValue());
+					JSONArray groupFieldDataArray = groupShowConfig.getDataList();
+					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.PRIORITY.getValue(),ProcessWorkcenterField.PRIORITY.getName())));
+					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.STATUS.getValue(),ProcessWorkcenterField.STATUS.getName())));
+					processTaskShowChartConfigArray.add(groupShowConfig);
+				}
+				if(showConfigJson.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())) {
+					DashboardShowConfigVo subGroupShowConfig = (DashboardShowConfigVo)showConfigJson.get(DashboardShowConfig.SUBGROUPFIELD.getValue());
+					JSONArray subGroupFieldDataArray = subGroupShowConfig.getDataList();
+					subGroupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.PRIORITY.getValue(),ProcessWorkcenterField.PRIORITY.getName())));
+					subGroupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.STATUS.getValue(),ProcessWorkcenterField.STATUS.getName())));
+					processTaskShowChartConfigArray.add(subGroupShowConfig);
+				}
+				if(showConfigJson.containsKey(DashboardShowConfig.MAXGROUP.getValue())) {
+					DashboardShowConfigVo maxGroupShowConfig = (DashboardShowConfigVo)showConfigJson.get(DashboardShowConfig.MAXGROUP.getValue());
+					processTaskShowChartConfigArray.add(maxGroupShowConfig);
+				}
+				if(showConfigJson.containsKey(DashboardShowConfig.REFRESHTIME.getValue())) {
+					DashboardShowConfigVo refreshTimeShowConfig = (DashboardShowConfigVo)showConfigJson.get(DashboardShowConfig.REFRESHTIME.getValue());
+					processTaskShowChartConfigArray.add(refreshTimeShowConfig);
+				}
 			}
 		}
 		processTaskChartConfig.put("showConfig", processTaskShowChartConfigArray);
-		return null;
+		return processTaskChartConfig;
 	}
 
 	@Override
