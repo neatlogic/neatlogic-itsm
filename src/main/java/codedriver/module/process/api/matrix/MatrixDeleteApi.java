@@ -1,7 +1,11 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessMatrixType;
+import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
+import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
+import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -9,6 +13,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @program: codedriver
@@ -16,10 +21,17 @@ import org.springframework.stereotype.Service;
  * @create: 2020-03-26 19:03
  **/
 @Service
+@Transactional
 public class MatrixDeleteApi extends ApiComponentBase {
 
     @Autowired
     private MatrixMapper matrixMapper;
+    
+    @Autowired
+    private MatrixExternalMapper matrixExternalMapper;
+    
+    @Autowired
+    private MatrixAttributeMapper matrixAttributeMapper;
 
     @Override
     public String getToken() {
@@ -40,7 +52,17 @@ public class MatrixDeleteApi extends ApiComponentBase {
     @Description(desc = "矩阵删除接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-    	matrixMapper.deleteMatrixByUuid(jsonObj.getString("uuid"));
+    	String uuid = jsonObj.getString("uuid");
+    	ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(uuid);
+    	if(matrixVo != null) {
+        	matrixMapper.deleteMatrixByUuid(uuid);
+        	if(ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+        		matrixAttributeMapper.deleteAttributeByMatrixUuid(uuid);
+        		matrixAttributeMapper.dropMatrixDynamicTable(uuid);
+        	}else {
+        		matrixExternalMapper.deleteMatrixExternalByMatrixUuid(uuid);
+        	}
+    	}
         return null;
     }
 }

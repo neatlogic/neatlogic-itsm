@@ -36,25 +36,21 @@ import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixAttributeNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
-import codedriver.framework.process.exception.process.MatrixExternalException;
-import codedriver.framework.process.exception.process.MatrixNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.MatrixAttributeService;
-import codedriver.module.process.service.MatrixDataService;
+import codedriver.module.process.service.MatrixService;
 
 @Service
 public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 
     @Autowired
-    private MatrixAttributeService attributeService;
-
-	@Autowired
-	private MatrixDataService matrixDataService;
+    private MatrixService matrixService;
 	
     @Autowired
     private MatrixMapper matrixMapper;
@@ -135,7 +131,7 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
         	returnObj.put("theadList", theadList);
         	//tbodyList
             List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByUuidList(dataVo);
-            List<Map<String, Object>> tbodyList = matrixDataService.matrixTableDataValueHandle(processMatrixAttributeList, dataMapList);
+            List<Map<String, Object>> tbodyList = matrixService.matrixTableDataValueHandle(processMatrixAttributeList, dataMapList);
             returnObj.put("tbodyList", tbodyList);
             if(dataVo.getNeedPage()) {
     			int rowNum = matrixDataMapper.getDynamicTableDataByUuidCount(dataVo);
@@ -157,7 +153,7 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
     		}
     		
     		Map<String, ProcessMatrixAttributeVo> attributeMap = new HashMap<>();
-    		List<ProcessMatrixAttributeVo> processMatrixAttributeList = attributeService.getExternalMatrixAttributeList(dataVo.getMatrixUuid(), integrationVo);
+    		List<ProcessMatrixAttributeVo> processMatrixAttributeList = matrixService.getExternalMatrixAttributeList(dataVo.getMatrixUuid(), integrationVo);
     		for(ProcessMatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
     			attributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
     		}
@@ -193,59 +189,16 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 	    			sourceColumnList.add(sourceColumnVo);
 	    			integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
 	            	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-//	        		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-//	        			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-//	        			if(MapUtils.isNotEmpty(transformedResult)) {
-//	        				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
-//	        				if(CollectionUtils.isNotEmpty(tbodyList)) {
-//	        					for(int i = 0; i < tbodyList.size(); i++) {
-//	        						JSONObject rowData = tbodyList.getJSONObject(i);
-//	    							Map<String, Object> resultMap = new HashMap<>(dataVo.getColumnList().size());
-//	        						for(String column : dataVo.getColumnList()) {
-//	        							String columnValue = rowData.getString(column);
-//	        							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
-//	        						}
-//	        						resultList.add(resultMap);
-//	        						if(resultList.size() >= dataVo.getPageSize()) {
-//	        							break;
-//	        						}
-//	        					}
-//	        				}
-//	        			}
-//	        		}
 	            	if(StringUtils.isNotBlank(resultVo.getError())) {
 	            		throw new MatrixExternalException(resultVo.getError());
 	            	}else {
-		        		resultList.addAll(matrixDataService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), null));
+		        		resultList.addAll(matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), null));
 	            	}
         		}
 	    		returnObj.put("tbodyList", resultList);
         	}else {
         		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-//        		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-//        			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-//        			if(MapUtils.isNotEmpty(transformedResult)) {
-//        				returnObj.putAll(transformedResult);
-//        				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
-//        				if(CollectionUtils.isNotEmpty(tbodyList)) {
-//        					List<Map<String, Object>> resultList = new ArrayList<>();
-//        					for(int i = 0; i < tbodyList.size(); i++) {
-//        						JSONObject rowData = tbodyList.getJSONObject(i);
-//    							Map<String, Object> resultMap = new HashMap<>(dataVo.getColumnList().size());
-//        						for(String column : dataVo.getColumnList()) {
-//        							String columnValue = rowData.getString(column);
-//        							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
-//        						}
-//        						resultList.add(resultMap);
-//        						if(resultList.size() >= dataVo.getPageSize()) {
-//        							break;
-//        						}
-//        					}
-//        		    		returnObj.put("tbodyList", resultList);
-//        				}
-//        			}
-//        		}
-        		matrixDataService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
+        		matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
         	}        	
     		returnObj.put("theadList", theadList);
         }

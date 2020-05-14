@@ -29,22 +29,20 @@ import codedriver.framework.process.dto.ProcessMatrixDispatcherVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
-import codedriver.framework.process.exception.process.MatrixExternalException;
-import codedriver.framework.process.exception.process.MatrixNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixExternalException;
+import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.MatrixDataService;
+import codedriver.module.process.service.MatrixService;
 @Service
+@Deprecated
 public class MatrixExternalDataSearchApi extends ApiComponentBase {
 
     @Autowired
-    private MatrixDataService dataService;
-
-//    @Autowired
-//    private MatrixService matrixService;
+    private MatrixService matrixService;
 	@Autowired
 	private IntegrationMapper integrationMapper;
 	
@@ -113,7 +111,7 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
     						if(MapUtils.isNotEmpty(rowData)) {
     							Map<String, Object> rowDataMap = new HashMap<>();
     							for(Entry<String, Object> entry : rowData.entrySet()) {
-    								rowDataMap.put(entry.getKey(), dataService.matrixAttributeValueHandle(entry.getValue()));
+    								rowDataMap.put(entry.getKey(), matrixService.matrixAttributeValueHandle(entry.getValue()));
     							}
     							tbodyList.add(rowDataMap);
     							if(tbodyList.size() >= pageSize) {

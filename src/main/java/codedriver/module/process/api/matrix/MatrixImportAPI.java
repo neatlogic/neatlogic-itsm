@@ -8,6 +8,11 @@ import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.matrix.MatrixDataNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixFileNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixHeaderMisMatchException;
+import codedriver.framework.process.exception.matrix.MatrixImportException;
+import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.process.exception.process.*;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -21,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -36,6 +42,7 @@ import java.util.*;
  * @create: 2020-04-01 16:32
  **/
 @Service
+@Transactional
 public class MatrixImportAPI extends BinaryStreamApiComponentBase {
 
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

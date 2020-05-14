@@ -31,24 +31,20 @@ import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixAttributeNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
-import codedriver.framework.process.exception.process.MatrixExternalException;
-import codedriver.framework.process.exception.process.MatrixNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.MatrixAttributeService;
-import codedriver.module.process.service.MatrixDataService;
+import codedriver.module.process.service.MatrixService;
 @Service
 public class MatrixCellDataGetApi extends ApiComponentBase {
 
-	@Autowired
-	private MatrixDataService matrixDataService;
-
     @Autowired
-    private MatrixAttributeService attributeService;
+    private MatrixService matrixService;
 
 	@Autowired
 	private MatrixMapper matrixMapper;
@@ -135,7 +131,7 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	    			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
 	    		}
 	    		List<String> attributeUuidList = new ArrayList<>();
-	    		List<ProcessMatrixAttributeVo> processMatrixAttributeList = attributeService.getExternalMatrixAttributeList(matrixUuid, integrationVo);
+	    		List<ProcessMatrixAttributeVo> processMatrixAttributeList = matrixService.getExternalMatrixAttributeList(matrixUuid, integrationVo);
 	    		for(ProcessMatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
 	    			attributeUuidList.add(processMatrixAttributeVo.getUuid());
 	    		}
@@ -160,20 +156,10 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	    			sourceColumnList.add(sourceColumnVo);
 	    			integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
 	            	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-//	        		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-//	        			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-//	        			if(MapUtils.isNotEmpty(transformedResult)) {
-//	        				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
-//	        				if(CollectionUtils.isNotEmpty(tbodyList)) {
-//	        					JSONObject rowData = tbodyList.getJSONObject(0);
-//	        					targetColumnValue = rowData.getString(targetColumn);
-//	        				}
-//	        			}
-//	        		}
 	            	if(StringUtils.isNotBlank(resultVo.getError())) {
 	            		throw new MatrixExternalException(resultVo.getError());
 	            	}else {
-		            	List<Map<String, JSONObject>> tbodyList = matrixDataService.getExternalDataTbodyList(resultVo, columnList, 1, null);
+		            	List<Map<String, JSONObject>> tbodyList = matrixService.getExternalDataTbodyList(resultVo, columnList, 1, null);
 		            	if(CollectionUtils.isNotEmpty(tbodyList)) {
 		            		targetColumnValue = tbodyList.get(0).get(targetColumn).getString("value");
 		            	}

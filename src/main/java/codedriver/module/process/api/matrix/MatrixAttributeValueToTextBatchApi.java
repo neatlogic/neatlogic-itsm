@@ -20,19 +20,19 @@ import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
-import codedriver.framework.process.exception.process.MatrixNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.MatrixDataService;
+import codedriver.module.process.service.MatrixService;
 
 @Service
 public class MatrixAttributeValueToTextBatchApi extends ApiComponentBase {
 	
 	@Autowired
-	private MatrixDataService matrixDataService;
+	private MatrixService matrixService;
 	
 	@Autowired
     private MatrixMapper matrixMapper;
@@ -93,7 +93,7 @@ public class MatrixAttributeValueToTextBatchApi extends ApiComponentBase {
 	        		List<String> attributeValueList = JSON.parseArray(entry.getValue().toString(), String.class);
 	        		JSONArray attributeArray = new JSONArray(attributeValueList.size());
 	        		for(String value : attributeValueList) {
-						attributeArray.add(matrixDataService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), value));
+						attributeArray.add(matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), value));
 	        		}
 	        		resultMap.put(attributeUuid, attributeArray);
 	        	}
@@ -104,7 +104,7 @@ public class MatrixAttributeValueToTextBatchApi extends ApiComponentBase {
         		List<String> attributeValueList = JSON.parseArray(entry.getValue().toString(), String.class);
         		JSONArray attributeArray = new JSONArray(attributeValueList.size());
         		for(String value : attributeValueList) {
-					attributeArray.add(matrixDataService.matrixAttributeValueHandle(value));
+					attributeArray.add(matrixService.matrixAttributeValueHandle(value));
         		}
         		resultMap.put(attributeUuid, attributeArray);
         	}

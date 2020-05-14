@@ -4,7 +4,8 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixVo;
-import codedriver.framework.process.exception.process.MatrixNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixNameRepeatException;
+import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -13,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @program: codedriver
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
  * @create: 2020-03-27 17:49
  **/
 @Service
+@Transactional
 public class MatrixNameUpdateApi extends ApiComponentBase {
 
     @Autowired
@@ -50,6 +53,9 @@ public class MatrixNameUpdateApi extends ApiComponentBase {
         ProcessMatrixVo processMatrixVo = JSON.toJavaObject(jsonObj, ProcessMatrixVo.class);
     	if(matrixMapper.checkMatrixIsExists(processMatrixVo.getUuid()) == 0) {
     		throw new MatrixNotFoundException(processMatrixVo.getUuid());
+    	}
+    	if(matrixMapper.checkMatrixNameIsRepeat(processMatrixVo) > 0){
+    		throw new MatrixNameRepeatException(processMatrixVo.getName());
     	}
         processMatrixVo.setLcu(UserContext.get().getUserId());
         matrixMapper.updateMatrixNameAndLcu(processMatrixVo);

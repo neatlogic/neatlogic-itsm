@@ -1,10 +1,14 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
-import codedriver.framework.process.exception.process.MatrixNotFoundException;
+import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.matrix.MatrixExternalException;
+import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -49,9 +53,19 @@ public class MatrixExternalGetApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	String matrixUuid = jsonObj.getString("matrixUuid");
-    	if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
-    		throw new MatrixNotFoundException(matrixUuid);
-    	}
-        return externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
+    	ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+        if(matrixVo == null) {
+        	throw new MatrixNotFoundException(matrixUuid);
+        }
+        
+        if(ProcessMatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+        	ProcessMatrixExternalVo processMatrixExternalVo = externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
+        	if(processMatrixExternalVo == null) {
+        		throw new MatrixExternalNotFoundException(matrixUuid);
+        	}
+            return processMatrixExternalVo;
+        }else {
+        	throw new MatrixExternalException("矩阵:'" + matrixUuid + "'不是外部数据源类型");
+        }
     }
 }

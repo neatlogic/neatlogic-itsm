@@ -2,13 +2,16 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
+import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
+import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixAttributeNotFoundException;
-import codedriver.framework.process.exception.process.MatrixNotFoundException;
+import codedriver.framework.process.exception.matrix.MatrixExternalException;
+import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @program: codedriver
@@ -30,6 +34,7 @@ import org.springframework.stereotype.Service;
  * @create: 2020-03-30 15:26
  **/
 @Service
+@Transactional
 public class MatrixDataSaveApi extends ApiComponentBase {
 
     @Autowired
@@ -65,54 +70,59 @@ public class MatrixDataSaveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	String matrixUuid = jsonObj.getString("matrixUuid");
-    	if(matrixMapper.checkMatrixIsExists(matrixUuid) == 0) {
-    		throw new MatrixNotFoundException(matrixUuid);
-    	}
+    	ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+		if(matrixVo == null) {
+			throw new MatrixNotFoundException(matrixUuid);
+		}
+		if(ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+			List<ProcessMatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
+	    	List<String> attributeUuidList = attributeList.stream().map(ProcessMatrixAttributeVo::getUuid).collect(Collectors.toList());
+	    	List<ProcessMatrixColumnVo> rowData = new ArrayList<>();
+	    	JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
+	    	for(String columnUuid : rowDataObj.keySet()) {
+	    		if(!"uuid".equals(columnUuid) && !"id".equals(columnUuid) && !attributeUuidList.contains(columnUuid)) {
+	    			throw new MatrixAttributeNotFoundException(matrixUuid, columnUuid);
+	    		}
+	    	}
 
-    	List<ProcessMatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-    	List<String> attributeUuidList = attributeList.stream().map(ProcessMatrixAttributeVo::getUuid).collect(Collectors.toList());
-    	List<ProcessMatrixColumnVo> rowData = new ArrayList<>();
-    	JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
-    	for(String columnUuid : rowDataObj.keySet()) {
-    		if(!"uuid".equals(columnUuid) && !"id".equals(columnUuid) && !attributeUuidList.contains(columnUuid)) {
-    			throw new MatrixAttributeNotFoundException(matrixUuid, columnUuid);
-    		}
-    	}
-
-    	String uuidValue = rowDataObj.getString("uuid");
-    	if(uuidValue == null) {
-    		rowData.add(new ProcessMatrixColumnVo("uuid", UUIDUtil.getUUID()));
-    		for(ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
-    			String value = rowDataObj.getString(processMatrixAttributeVo.getUuid());
-    			if(value != null ) {
-    				if(ProcessMatrixAttributeType.USER.getValue().equals(processMatrixAttributeVo.getType())) {
-        				value = value.split("#")[1];
-        			}else if(ProcessMatrixAttributeType.TEAM.getValue().equals(processMatrixAttributeVo.getType())) {
-        				value = value.split("#")[1];
-        			}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(processMatrixAttributeVo.getType())) {
-        				value = value.split("#")[1];
-        			}
-            		rowData.add(new ProcessMatrixColumnVo(processMatrixAttributeVo.getUuid(), value));
-    			}
-    		}
-    		matrixDataMapper.insertDynamicTableData(rowData, matrixUuid);
-    	}else {
-    		ProcessMatrixColumnVo uuidColumn = new ProcessMatrixColumnVo("uuid", uuidValue);
-    		for(ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
-    			String value = rowDataObj.getString(processMatrixAttributeVo.getUuid());
-    			if(value != null ) {
-    				if(ProcessMatrixAttributeType.USER.getValue().equals(processMatrixAttributeVo.getType())) {
-        				value = value.split("#")[1];
-        			}else if(ProcessMatrixAttributeType.TEAM.getValue().equals(processMatrixAttributeVo.getType())) {
-        				value = value.split("#")[1];
-        			}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(processMatrixAttributeVo.getType())) {
-        				value = value.split("#")[1];
-        			}
-    			}
-    			rowData.add(new ProcessMatrixColumnVo(processMatrixAttributeVo.getUuid(), value));
-    		}
-    		matrixDataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid);
-    	}
+	    	String uuidValue = rowDataObj.getString("uuid");
+	    	if(uuidValue == null) {
+	    		rowData.add(new ProcessMatrixColumnVo("uuid", UUIDUtil.getUUID()));
+	    		for(ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
+	    			String value = rowDataObj.getString(processMatrixAttributeVo.getUuid());
+	    			if(value != null ) {
+	    				if(ProcessMatrixAttributeType.USER.getValue().equals(processMatrixAttributeVo.getType())) {
+	        				value = value.split("#")[1];
+	        			}else if(ProcessMatrixAttributeType.TEAM.getValue().equals(processMatrixAttributeVo.getType())) {
+	        				value = value.split("#")[1];
+	        			}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(processMatrixAttributeVo.getType())) {
+	        				value = value.split("#")[1];
+	        			}
+	            		rowData.add(new ProcessMatrixColumnVo(processMatrixAttributeVo.getUuid(), value));
+	    			}
+	    		}
+	    		matrixDataMapper.insertDynamicTableData(rowData, matrixUuid);
+	    	}else {
+	    		ProcessMatrixColumnVo uuidColumn = new ProcessMatrixColumnVo("uuid", uuidValue);
+	    		for(ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
+	    			String value = rowDataObj.getString(processMatrixAttributeVo.getUuid());
+	    			if(value != null ) {
+	    				if(ProcessMatrixAttributeType.USER.getValue().equals(processMatrixAttributeVo.getType())) {
+	        				value = value.split("#")[1];
+	        			}else if(ProcessMatrixAttributeType.TEAM.getValue().equals(processMatrixAttributeVo.getType())) {
+	        				value = value.split("#")[1];
+	        			}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(processMatrixAttributeVo.getType())) {
+	        				value = value.split("#")[1];
+	        			}
+	    			}
+	    			rowData.add(new ProcessMatrixColumnVo(processMatrixAttributeVo.getUuid(), value));
+	    		}
+	    		matrixDataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid);
+	    	}
+		}else {
+			throw new MatrixExternalException("矩阵外部数据源没有保存一行数据操作");
+		}
+    	
         return null;
     }
 }
