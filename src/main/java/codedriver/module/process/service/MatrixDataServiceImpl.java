@@ -1,7 +1,6 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -10,11 +9,8 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
-import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
-import codedriver.framework.process.dto.ProcessMatrixColumnVo;
-import codedriver.framework.process.dto.ProcessMatrixDataVo;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -44,9 +40,6 @@ import java.util.Map.Entry;
 public class MatrixDataServiceImpl implements MatrixDataService {
 
     @Autowired
-    private MatrixAttributeMapper attributeMapper;
-
-    @Autowired
     private MatrixDataMapper matrixDataMapper;
     
     @Autowired
@@ -57,33 +50,6 @@ public class MatrixDataServiceImpl implements MatrixDataService {
     
     @Autowired
 	private RoleMapper roleMapper;
-
-    @Override
-    public List<Map<String, String>> searchDynamicTableData(ProcessMatrixDataVo dataVo) {
-        List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
-        if (CollectionUtils.isNotEmpty(attributeVoList)){
-        	List<String> columnList = new ArrayList<>();
-            List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
-            for (ProcessMatrixAttributeVo attributeVo : attributeVoList){
-                columnList.add(attributeVo.getUuid());
-                sourceColumnList.add(new ProcessMatrixColumnVo(attributeVo.getUuid(), attributeVo.getName()));
-            }
-            dataVo.setColumnList(columnList);
-            dataVo.setSourceColumnList(sourceColumnList);
-            if (dataVo.getNeedPage()){
-                int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo);
-                dataVo.setRowNum(rowNum);
-                dataVo.setPageCount(PageUtil.getPageCount(rowNum, dataVo.getPageSize()));
-            }
-            return matrixDataMapper.searchDynamicTableData(dataVo);
-        }
-        return null;
-    }
-
-    @Override
-    public List<String> getExternalMatrixColumnData() {
-        return null;
-    }
 
 	@Override
 	public List<Map<String, Object>> matrixTableDataValueHandle(List<ProcessMatrixAttributeVo> ProcessMatrixAttributeList, List<Map<String, String>> valueList) {

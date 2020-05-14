@@ -2,13 +2,23 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.integration.core.IIntegrationHandler;
+import codedriver.framework.integration.core.IntegrationHandlerFactory;
+import codedriver.framework.integration.dao.mapper.IntegrationMapper;
+import codedriver.framework.integration.dto.IntegrationResultVo;
+import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
+import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
+import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
+import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
+import codedriver.framework.process.exception.process.MatrixExternalException;
 import codedriver.framework.process.exception.process.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -44,9 +54,6 @@ import java.util.Map;
 public class MatrixExportApi extends BinaryStreamApiComponentBase {
 
     @Autowired
-    private MatrixService matrixService;
-
-    @Autowired
     private MatrixAttributeMapper attributeMapper;
 
     @Autowired
@@ -54,6 +61,12 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
 
     @Autowired
     private MatrixDataMapper matrixDataMapper;
+	
+	@Autowired
+	private IntegrationMapper integrationMapper;
+
+    @Autowired
+    private MatrixExternalMapper externalMapper;
     
     @Override
     public String getToken() {
@@ -117,13 +130,41 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
                 }              
             }
         }else {
-        	JSONObject dataObj = matrixService.getMatrixExternalData(paramObj.getString("matrixUuid"));
-            List<String> headerList = dataObj.getJSONArray("headerList").toJavaList(String.class);
-            List<String> columnList = dataObj.getJSONArray("columnList").toJavaList(String.class);
-            List<Map<String, String>> dataMapList= (List<Map<String,String>>) dataObj.get("dataMapList");            
-        	workbook = ExcelUtil.createExcel(workbook, headerList, columnList, null, dataMapList);
+        	ProcessMatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
+            if(externalVo == null) {
+            	throw new MatrixExternalNotFoundException(matrixUuid);
+            }
+            IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
+            IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+    		if (handler == null) {
+    			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+    		}
+
+            IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+            if(StringUtils.isNotBlank(resultVo.getError())) {
+        		throw new MatrixExternalException(resultVo.getError());
+        	}else if(StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+    			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+    			if(MapUtils.isNotEmpty(transformedResult)) {
+    				List<String> headerList = new ArrayList<>();
+    				List<String> columnList = new ArrayList<>();
+    				JSONArray theadList = transformedResult.getJSONArray("theadList");
+    				if (CollectionUtils.isNotEmpty(theadList)){
+    					for (int i = 0; i < theadList.size(); i++){
+    						JSONObject obj = theadList.getJSONObject(i);
+    						headerList.add(obj.getString("title"));
+    						columnList.add(obj.getString("key"));
+    					}
+    				}
+    				List<Map<String, String>> dataMapList = (List<Map<String, String>>) transformedResult.get("tbodyList");
+    				workbook = ExcelUtil.createExcel(workbook, headerList, columnList, null, dataMapList);
+    			}
+    		}
         }
         
+        if(workbook == null) {
+        	workbook = new HSSFWorkbook();
+        }
         String fileNameEncode = matrixVo.getName() + ".xls";
         Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
         if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {

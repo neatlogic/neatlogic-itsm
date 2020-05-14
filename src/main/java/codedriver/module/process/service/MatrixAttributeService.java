@@ -13,7 +13,5 @@ import java.util.List;
  **/
 public interface MatrixAttributeService {
 
-    public void saveMatrixAttribute(List<ProcessMatrixAttributeVo> attributeVoList, String matrixUuid);
-
 	public List<ProcessMatrixAttributeVo> getExternalMatrixAttributeList(String matrixUuid, IntegrationVo integrationVo) throws FreemarkerTransformException;
 }
