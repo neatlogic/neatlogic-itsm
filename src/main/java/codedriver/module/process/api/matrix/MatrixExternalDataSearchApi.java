@@ -42,9 +42,6 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
 
     @Autowired
     private MatrixDataService dataService;
-
-//    @Autowired
-//    private MatrixService matrixService;
 	@Autowired
 	private IntegrationMapper integrationMapper;
 	

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -61,7 +60,7 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
-		@Param(name = "workerList", type = ApiParamType.STRING, isRequired = true, desc = "子任务处理人userId,单选,格式[\"user#userId\"]"),
+		@Param(name = "workerList", type = ApiParamType.STRING, isRequired = true, desc = "子任务处理人userId,单选,格式user#userId"),
 		@Param(name = "targetTime", type = ApiParamType.LONG, desc = "期望完成时间"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述")
 	})
@@ -79,9 +78,9 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 			throw new ProcessTaskStepSubtaskNotFoundException(processTaskStepSubtaskId.toString());
 		}
 		if(processTaskStepSubtaskVo.getIsEditable().intValue() == 1) {
-			List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
+			String workerList = jsonObj.getString("workerList");
 			jsonObj.remove("workerList");
-			String[] split = workerList.get(0).split("#");
+			String[] split = workerList.split("#");
 			if(GroupSearch.USER.getValue().equals(split[0])) {
 				UserVo userVo = userMapper.getUserByUserId(split[1]);
 				if(userVo != null) {

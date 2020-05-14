@@ -160,16 +160,6 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	    			sourceColumnList.add(sourceColumnVo);
 	    			integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
 	            	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-//	        		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-//	        			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-//	        			if(MapUtils.isNotEmpty(transformedResult)) {
-//	        				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
-//	        				if(CollectionUtils.isNotEmpty(tbodyList)) {
-//	        					JSONObject rowData = tbodyList.getJSONObject(0);
-//	        					targetColumnValue = rowData.getString(targetColumn);
-//	        				}
-//	        			}
-//	        		}
 	            	if(StringUtils.isNotBlank(resultVo.getError())) {
 	            		throw new MatrixExternalException(resultVo.getError());
 	            	}else {

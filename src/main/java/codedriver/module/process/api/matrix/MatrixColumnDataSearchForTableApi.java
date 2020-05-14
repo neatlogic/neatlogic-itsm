@@ -201,29 +201,6 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
             }
         	integrationVo.getParamObj().putAll(jsonObj);
     		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-//    		if(resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-//    			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-//    			if(MapUtils.isNotEmpty(transformedResult)) {
-//    				returnObj.putAll(transformedResult);
-//    				JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
-//    				if(CollectionUtils.isNotEmpty(tbodyList)) {
-//    					List<Map<String, Object>> resultList = new ArrayList<>();
-//    					for(int i = 0; i < tbodyList.size(); i++) {
-//    						JSONObject rowData = tbodyList.getJSONObject(i);
-//							Map<String, Object> resultMap = new HashMap<>(dataVo.getColumnList().size());
-//    						for(String column : dataVo.getColumnList()) {
-//    							String columnValue = rowData.getString(column);
-//    							resultMap.put(column, matrixDataService.matrixAttributeValueHandle(columnValue)); 							
-//    						}
-//    						resultList.add(resultMap);
-//    						if(resultList.size() >= dataVo.getPageSize()) {
-//    							break;
-//    						}
-//    					}
-//    		    		returnObj.put("tbodyList", resultList);
-//    				}
-//    			}
-//    		}
     		if(StringUtils.isNotBlank(resultVo.getError())) {
         		throw new MatrixExternalException(resultVo.getError());
         	}else {
