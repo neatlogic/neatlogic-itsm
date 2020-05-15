@@ -14,6 +14,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -98,7 +99,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
 			for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-				if(processTaskStepVo.getIsActive().intValue() == 0) {
+				if(ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
 					continue;
 				}
 				//判断当前用户是否有权限查看该节点信息
