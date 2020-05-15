@@ -11,14 +11,11 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
-import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -122,17 +119,20 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 					processTaskStepAuditVo.setAction(ProcessTaskStepAction.COMMENT.getValue());
 					processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 					if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+//						for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+//							List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
+//							processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
+//							for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailList) {
+//								IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
+//								if(auditDetailHandler != null) {
+//									auditDetailHandler.handle(processTaskStepAuditDetailVo);
+//								}
+//							}
+//						}
+//						processTaskStepVo.setProcessTaskStepAuditList(processTaskStepAuditList);
 						for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-							List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
-							processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
-							for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailList) {
-								IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
-								if(auditDetailHandler != null) {
-									auditDetailHandler.handle(processTaskStepAuditDetailVo);
-								}
-							}
+							processTaskStepVo.getCommentList().add(new ProcessTaskStepCommentVo(processTaskStepAudit));
 						}
-						processTaskStepVo.setProcessTaskStepAuditList(processTaskStepAuditList);
 					}
 					//子任务列表
 					ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
