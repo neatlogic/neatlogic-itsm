@@ -25,6 +25,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -36,6 +37,7 @@ import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
@@ -66,9 +68,12 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name="formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "表单属性数据列表"),
+		@Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "表单属性数据列表"),
 		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述"),
 		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
+	})
+	@Output({
+		@Param(name = "commentList", explode = ProcessTaskStepCommentVo[].class, desc = "当前步骤评论列表")
 	})
 	@Description(desc = "工单回复接口")
 	@Override
@@ -171,8 +176,22 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		//生成活动	
 		processTaskStepVo.setParamObj(jsonObj);
 		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
+		JSONObject resultObj = new JSONObject();
+		//步骤评论列表
+		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
+		processTaskStepAuditVo.setProcessTaskId(processTaskId);
+		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
+		processTaskStepAuditVo.setAction(ProcessTaskStepAction.COMMENT.getValue());
+		processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
+		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+			List<ProcessTaskStepCommentVo> commentList = new ArrayList<>();
+			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+				commentList.add(new ProcessTaskStepCommentVo(processTaskStepAudit));
+			}
+			resultObj.put("commentList", commentList);
+		}
 		
-		return null;
+		return resultObj;
 	}
 
 }
