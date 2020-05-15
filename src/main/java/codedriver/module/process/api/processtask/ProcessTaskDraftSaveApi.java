@@ -3,6 +3,7 @@ package codedriver.module.process.api.processtask;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -89,7 +90,11 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		if(processMapper.checkProcessIsExists(processUuid) == 0) {
 			throw new ProcessNotFoundException(processUuid);
 		}
-		
+		String owner = jsonObj.getString("owner");
+		if(StringUtils.isNotBlank(owner) && owner.contains("#")) {
+			owner = owner.split("#")[1];
+			jsonObj.put("owner", owner);
+		}
 		ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo();
 		startTaskStep.setProcessUuid(processUuid);
 		
