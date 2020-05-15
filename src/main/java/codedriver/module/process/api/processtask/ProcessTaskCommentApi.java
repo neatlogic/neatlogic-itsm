@@ -1,7 +1,6 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -164,13 +163,9 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		processTaskStepCommentVo.setProcessTaskId(processTaskId);
 		processTaskStepCommentVo.setProcessTaskStepId(processTaskStepId);
 		processTaskStepCommentVo.setFcu(UserContext.get().getUserId(true));
-		ProcessTaskStepCommentVo commentVo = new ProcessTaskStepCommentVo();
-		commentVo.setFcd(new Date());
-		commentVo.setFcu(UserContext.get().getUserId(true));
-		commentVo.setFcuName(UserContext.get().getUserName());
+		
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
-			commentVo.setContent(content);
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
 			processTaskMapper.replaceProcessTaskContent(contentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
@@ -185,8 +180,6 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 					FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
 					if(fileVo == null) {
 						throw new ProcessTaskRuntimeException("上传附件uuid:'" + fileUuid + "'不存在");
-					}else {
-						commentVo.getFileList().add(fileVo);
 					}
 				}
 				ProcessTaskContentVo fileUuidListContentVo = new ProcessTaskContentVo(fileUuidListStr);
@@ -204,19 +197,6 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		processTaskStepVo.setParamObj(jsonObj);
 		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
 		JSONObject resultObj = new JSONObject();
-		List<ProcessTaskStepCommentVo> commentList = new ArrayList<>();
-		//步骤评论列表
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-		processTaskStepAuditVo.setProcessTaskId(processTaskId);
-		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepAuditVo.setAction(ProcessTaskStepAction.COMMENT.getValue());
-		processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-				commentList.add(new ProcessTaskStepCommentVo(processTaskStepAudit));
-			}
-		}
-		commentList.add(commentVo);
 		resultObj.put("commentList", processTaskStepCommentList);
 		return resultObj;
 	}

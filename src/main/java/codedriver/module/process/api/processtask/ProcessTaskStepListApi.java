@@ -121,27 +121,6 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 					for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
 						processTaskService.parseProcessTaskStepComment(processTaskStepComment);
 					}
-					processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-					processTaskStepAuditVo.setProcessTaskId(processTaskId);
-					processTaskStepAuditVo.setProcessTaskStepId(processTaskStepVo.getId());
-					processTaskStepAuditVo.setAction(ProcessTaskStepAction.COMMENT.getValue());
-					processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-					if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-//						for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-//							List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
-//							processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
-//							for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailList) {
-//								IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
-//								if(auditDetailHandler != null) {
-//									auditDetailHandler.handle(processTaskStepAuditDetailVo);
-//								}
-//							}
-//						}
-//						processTaskStepVo.setProcessTaskStepAuditList(processTaskStepAuditList);
-						for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-							processTaskStepVo.getCommentList().add(new ProcessTaskStepCommentVo(processTaskStepAudit));
-						}
-					}
 					//子任务列表
 					ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
 					processTaskStepSubtaskVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
