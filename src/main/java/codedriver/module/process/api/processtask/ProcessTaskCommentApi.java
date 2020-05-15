@@ -19,7 +19,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -177,8 +176,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
 			if(CollectionUtils.isNotEmpty(fileUuidList)) {
 				for(String fileUuid : fileUuidList) {
-					FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
-					if(fileVo == null) {
+					if(fileMapper.getFileByUuid(fileUuid) == null) {
 						throw new ProcessTaskRuntimeException("上传附件uuid:'" + fileUuid + "'不存在");
 					}
 				}
