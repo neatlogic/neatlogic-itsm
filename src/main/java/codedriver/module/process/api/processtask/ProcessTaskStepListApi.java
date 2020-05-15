@@ -31,11 +31,15 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 @Service
 public class ProcessTaskStepListApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -113,6 +117,10 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 					processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
 					processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
 					//步骤评论列表
+					List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepVo.getId());
+					for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
+						processTaskService.parseProcessTaskStepComment(processTaskStepComment);
+					}
 					processTaskStepAuditVo = new ProcessTaskStepAuditVo();
 					processTaskStepAuditVo.setProcessTaskId(processTaskId);
 					processTaskStepAuditVo.setProcessTaskStepId(processTaskStepVo.getId());

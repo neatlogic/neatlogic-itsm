@@ -265,6 +265,10 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				}
 				
 				//步骤评论列表
+				List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
+				for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
+					processTaskService.parseProcessTaskStepComment(processTaskStepComment);
+				}
 				processTaskStepAuditVo = new ProcessTaskStepAuditVo();
 				processTaskStepAuditVo.setProcessTaskId(processTaskId);
 				processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
