@@ -1,6 +1,7 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -154,9 +156,13 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			processTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
 			jsonObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(processTaskFormAttributeDataList));
 		}
-		
+		ProcessTaskStepCommentVo commentVo = new ProcessTaskStepCommentVo();
+		commentVo.setFcd(new Date());
+		commentVo.setFcu(UserContext.get().getUserId(true));
+		commentVo.setFcuName(UserContext.get().getUserName());
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
+			commentVo.setContent(content);
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
 			processTaskMapper.replaceProcessTaskContent(contentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
@@ -167,8 +173,11 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
 			if(CollectionUtils.isNotEmpty(fileUuidList)) {
 				for(String fileUuid : fileUuidList) {
-					if(fileMapper.getFileByUuid(fileUuid) == null) {
+					FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+					if(fileVo == null) {
 						throw new ProcessTaskRuntimeException("上传附件uuid:'" + fileUuid + "'不存在");
+					}else {
+						commentVo.getFileList().add(fileVo);
 					}
 				}
 			}
@@ -177,6 +186,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		processTaskStepVo.setParamObj(jsonObj);
 		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
 		JSONObject resultObj = new JSONObject();
+		List<ProcessTaskStepCommentVo> commentList = new ArrayList<>();
 		//步骤评论列表
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
 		processTaskStepAuditVo.setProcessTaskId(processTaskId);
@@ -184,13 +194,12 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		processTaskStepAuditVo.setAction(ProcessTaskStepAction.COMMENT.getValue());
 		processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-			List<ProcessTaskStepCommentVo> commentList = new ArrayList<>();
 			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
 				commentList.add(new ProcessTaskStepCommentVo(processTaskStepAudit));
 			}
-			resultObj.put("commentList", commentList);
 		}
-		
+		commentList.add(commentVo);
+		resultObj.put("commentList", commentList);
 		return resultObj;
 	}
 
