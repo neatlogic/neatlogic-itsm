@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -41,7 +41,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
-		return ProcessFormHandlerType.USERSELECT.toString();
+		return FormHandlerType.USERSELECT.toString();
 	}
 	
 	@Override
