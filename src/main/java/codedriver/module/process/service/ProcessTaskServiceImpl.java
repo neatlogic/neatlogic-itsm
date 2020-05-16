@@ -21,6 +21,10 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.FormAttributeAction;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
@@ -30,6 +34,7 @@ import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -52,7 +57,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	private ProcessTaskMapper processTaskMapper;
 	
 	@Autowired
+	private UserMapper userMapper;
+	
+	@Autowired
 	private TeamMapper teamMapper;
+	
+	@Autowired
+	private FileMapper fileMapper;
 	
 	@Override
 	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo){
@@ -433,5 +444,40 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			}
 		}
 		
+	}
+
+	@Override
+	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepComment) {
+		if(StringUtils.isNotBlank(processTaskStepComment.getContentHash())) {
+			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getContentHash());
+			if(contentVo != null) {
+				processTaskStepComment.setContent(contentVo.getContent());
+			}
+		}
+		if(StringUtils.isNotBlank(processTaskStepComment.getFileUuidListHash())) {
+			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getFileUuidListHash());
+			if(contentVo != null) {
+				List<String> fileUuidList = JSON.parseArray(contentVo.getContent(), String.class);
+				if(CollectionUtils.isNotEmpty(fileUuidList)) {
+					processTaskStepComment.setFileUuidList(fileUuidList);
+					for(String fileUuid : fileUuidList) {
+						FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+						if(fileVo != null) {
+							processTaskStepComment.getFileList().add(fileVo);
+						}
+					}
+				}
+			}
+		}			
+		if(StringUtils.isNotBlank(processTaskStepComment.getLcu())) {
+			UserVo user = userMapper.getUserBaseInfoByUserId(processTaskStepComment.getLcu());
+			if(user != null) {
+				processTaskStepComment.setLcuName(user.getUserName());
+			}
+		}
+		UserVo user = userMapper.getUserBaseInfoByUserId(processTaskStepComment.getFcu());
+		if(user != null) {
+			processTaskStepComment.setFcuName(user.getUserName());
+		}
 	}
 }

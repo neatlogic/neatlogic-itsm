@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessStepType;
@@ -112,6 +113,13 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			if(channel == null) {
 				throw new ChannelNotFoundException(channelUuid);
 			}
+			
+			String owner = processTaskVo.getOwner();
+			if(StringUtils.isNotBlank(owner)) {
+				owner = GroupSearch.USER.getValuePlugin() + owner;
+				processTaskVo.setOwner(owner);				
+			}
+			
 			processTaskVo.setChannelType(channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid()));
 			//获取开始步骤信息
 			List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
