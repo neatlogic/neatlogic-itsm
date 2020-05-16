@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
@@ -39,9 +39,9 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
 		if(ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-			return ProcessFormHandlerType.CHECKBOX.toString();
+			return FormHandlerType.CHECKBOX.toString();
 		}else {
-			return ProcessFormHandlerType.SELECT.toString();
+			return FormHandlerType.SELECT.toString();
 		}
 	}
 	
