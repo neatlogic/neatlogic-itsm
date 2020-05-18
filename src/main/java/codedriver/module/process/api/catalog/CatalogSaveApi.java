@@ -53,7 +53,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		@Param(name = "icon", type = ApiParamType.STRING, isRequired= false, desc = "图标"),
 		@Param(name = "color", type = ApiParamType.STRING, isRequired= false, desc = "颜色"),
 		@Param(name = "desc", type = ApiParamType.STRING, isRequired= false, desc = "描述", maxLength = 200, xss = true),
-		@Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleName\"]")
+		@Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]")
 		})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired= true, desc = "服务目录uuid")
