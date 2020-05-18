@@ -92,7 +92,7 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 												userArrayTmp.add(userJson);
 											}
 										}else if(user.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
-											RoleVo roleVo = roleMapper.getRoleByRoleName(user.toString().replaceFirst(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
+											RoleVo roleVo = roleMapper.getRoleByUuid(user.toString().replaceFirst(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
 											if(roleVo != null) {
 												JSONObject roleJson = new JSONObject();
 												roleJson.put("type", GroupSearch.ROLE.getValue());

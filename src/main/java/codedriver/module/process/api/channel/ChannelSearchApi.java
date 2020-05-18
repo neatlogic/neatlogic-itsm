@@ -71,7 +71,7 @@ public class ChannelSearchApi extends ApiComponentBase {
 		if(isAuthenticate != null && isAuthenticate.intValue() == 1) {
 			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
 			//查出当前用户已授权的服务
-			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleNameList(), null);
+			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 			channelVo.setAuthorizedUuidList(currentUserAuthorizedChannelUuidList);
 			channelVo.setIsActive(1);
 		}

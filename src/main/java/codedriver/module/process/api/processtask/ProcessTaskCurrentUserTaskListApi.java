@@ -56,10 +56,10 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String userUuid = UserContext.get().getUserUuid(true);
-		List<String> roleNameList = UserContext.get().getRoleNameList();
+		List<String> roleUuidList = UserContext.get().getRoleUuidList();
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
 		
-		List<Long> processTaskStepIdList = processTaskMapper.getProcessTaskStepIdList(userUuid, teamUuidList, roleNameList);
+		List<Long> processTaskStepIdList = processTaskMapper.getProcessTaskStepIdList(userUuid, teamUuidList, roleUuidList);
 		if(CollectionUtils.isEmpty(processTaskStepIdList)) {
 			return null;
 		}

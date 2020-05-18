@@ -153,7 +153,7 @@ public class MatrixServiceImpl implements MatrixService {
 				resultObj.put("text", teamVo.getName());
 			}
 		}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(type)) {
-			RoleVo roleVo = roleMapper.getRoleByRoleName(value);
+			RoleVo roleVo = roleMapper.getRoleByUuid(value);
 			if(roleVo != null) {
 				resultObj.put("text", roleVo.getDescription());
 			}

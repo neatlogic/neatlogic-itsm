@@ -76,7 +76,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 		JSONObject workcenterJson = new JSONObject();
 		String userUuid = UserContext.get().getUserUuid(true);
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-		List<String>  workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid,teamUuidList,UserContext.get().getRoleNameList());
+		List<String>  workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid,teamUuidList,UserContext.get().getRoleUuidList());
 		List<WorkcenterVo> workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
 		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid,WORKCENTER_MODIFY.class.getSimpleName()));
 		WorkcenterUserProfileVo userProfile= workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);

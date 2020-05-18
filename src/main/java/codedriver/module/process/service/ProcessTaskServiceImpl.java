@@ -414,7 +414,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 													break;
 												}
 											}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
-												if(UserContext.get().getRoleNameList().contains(split[1])) {
+												if(UserContext.get().getRoleUuidList().contains(split[1])) {
 													action = FormAttributeAction.READ.getValue();
 													break;
 												}
