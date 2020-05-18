@@ -2,7 +2,6 @@ package codedriver.module.process.counter.handler;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.reminder.core.GlobalReminderFactory;
-import codedriver.framework.reminder.core.GlobalReminderMessageHandler;
 import codedriver.framework.reminder.core.IGlobalReminder;
 import codedriver.framework.reminder.dto.ReminderMessageVo;
 import codedriver.framework.restful.annotation.Input;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @program: codedriver
@@ -50,15 +48,15 @@ public class RemindItsmTestApi extends ApiComponentBase {
         message.setTitle(jsonObj.getString("title"));
         message.setContent(jsonObj.getString("title"));
         message.setFromUser(jsonObj.getString("fromUser"));
-        String userIdStr = jsonObj.getString("receiverIdStr");
-        List<String> userIdList = new ArrayList<>();
-        for (String userId : userIdStr.split(",")){
-            userIdList.add(userId);
+        String userUuidStr = jsonObj.getString("receiverIdStr");
+        List<String> userUuidList = new ArrayList<>();
+        for (String userUuid : userUuidStr.split(",")){
+        	userUuidList.add(userUuid);
         }
         if (jsonObj.containsKey("paramObj")){
             message.setParamObj(jsonObj.getJSONObject("paramObj"));
         }
-        message.setReceiverList(userIdList);
+        message.setReceiverList(userUuidList);
         IGlobalReminder reminder = GlobalReminderFactory.getReminder(ProcessTaskRemindHandler.class.getName());
         reminder.send(message);
         return new JSONObject();

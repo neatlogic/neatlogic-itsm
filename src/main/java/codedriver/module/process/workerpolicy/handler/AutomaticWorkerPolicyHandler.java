@@ -57,44 +57,15 @@ public class AutomaticWorkerPolicyHandler implements IWorkerPolicyHandler {
 		if(CollectionUtils.isEmpty(workerList)) {
 			return processTaskStepWorkerList;
 		}
-		for(String userId : workerList) {
-			if (StringUtils.isBlank(userId)) {
+		for(String userUuid : workerList) {
+			if (StringUtils.isBlank(userUuid)) {
 				continue;
 			}
-			ProcessTaskStepWorkerVo workerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), userId);
+			ProcessTaskStepWorkerVo workerVo = new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), userUuid);
 			if (!processTaskStepWorkerList.contains(workerVo)) {
 				processTaskStepWorkerList.add(workerVo);
 			}
 		}
 		return processTaskStepWorkerList;
-//		List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
-//		if (workerPolicyVo.getConfigObj() != null) {
-//			String handler = workerPolicyVo.getConfigObj().getString("handler");
-//			JSONObject config = workerPolicyVo.getConfigObj().getJSONObject("config");
-//			if (StringUtils.isNotBlank(handler)) {
-//				IWorkerDispatcher dispatcher = WorkerDispatcherFactory.getDispatcher(handler);
-//				if (dispatcher != null) {
-//					try {
-//						List<String> workers = dispatcher.getWorker(currentProcessTaskStepVo, config);
-//						if (workers != null && workers.size() > 0) {
-//							for (String worker : workers) {
-//								if (StringUtils.isNotBlank(worker)) {
-//									ProcessTaskStepWorkerVo workerVo = new ProcessTaskStepWorkerVo();
-//									workerVo.setUserId(worker);
-//									workerVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-//									workerVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-//									if (!workerList.contains(workerVo)) {
-//										workerList.add(workerVo);
-//									}
-//								}
-//							}
-//						}
-//					} catch (Exception ex) {
-//						logger.error(ex.getMessage(), ex);
-//					}
-//				}
-//			}
-//		}
-//		return workerList;
 	}
 }

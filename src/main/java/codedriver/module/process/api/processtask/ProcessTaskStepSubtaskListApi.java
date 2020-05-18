@@ -44,7 +44,7 @@ public class ProcessTaskStepSubtaskListApi extends ApiComponentBase {
 		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
 		@Param(name = "id", type = ApiParamType.LONG, desc = "子任务id"),
-		@Param(name = "userId", type = ApiParamType.STRING, desc = "子任务处理人"),
+		@Param(name = "userUuid", type = ApiParamType.STRING, desc = "子任务处理人"),
 		@Param(name = "owner", type = ApiParamType.STRING, desc = "子任务创建人"),
 		@Param(name = "status", type = ApiParamType.ENUM, rule = "running,succeed,aborted", desc = "状态")
 	})

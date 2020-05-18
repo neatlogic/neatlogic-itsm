@@ -58,7 +58,7 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
-		@Param(name = "workerList", type = ApiParamType.STRING, isRequired = true, desc = "子任务处理人userId,单选,格式user#userId"),
+		@Param(name = "workerList", type = ApiParamType.STRING, isRequired = true, desc = "子任务处理人userUuid,单选,格式user#userUuid"),
 		@Param(name = "targetTime", type = ApiParamType.LONG, desc = "期望完成时间"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述")
 	})
