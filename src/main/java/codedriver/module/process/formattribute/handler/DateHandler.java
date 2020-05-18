@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.attribute.exception.AttributeValidException;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -25,6 +24,7 @@ import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import codedriver.framework.attribute.dao.mapper.AttributeMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -31,9 +30,6 @@ public class AttributeWorkerPolicyHandler implements IWorkerPolicyHandler {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-
-	@Autowired
-	private AttributeMapper attributeMapper;
 
 	@Autowired
 	private UserMapper userMapper;
