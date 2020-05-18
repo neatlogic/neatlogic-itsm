@@ -30,15 +30,15 @@ public class ProcessTaskReporterColumn extends WorkcenterColumnBase implements I
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONObject userJson = new JSONObject();
-		String userId = json.getString(this.getName());
-		if(StringUtils.isNotBlank(userId)) {
-			userId =userId.replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY);
+		String userUuid = json.getString(this.getName());
+		if(StringUtils.isNotBlank(userUuid)) {
+			userUuid =userUuid.replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY);
 		}
-		UserVo userVo =userMapper.getUserBaseInfoByUuid(userId);
+		UserVo userVo =userMapper.getUserBaseInfoByUuid(userUuid);
 		if(userVo != null) {
 			userJson.put("username", userVo.getUserName());
 		}
-		userJson.put("userid", userId);
+		userJson.put("userid", userUuid);
 		return userJson;
 	}
 

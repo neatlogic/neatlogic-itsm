@@ -30,12 +30,12 @@ public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWor
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONObject userJson = new JSONObject();
-		String userId = json.getString(this.getName());
-		UserVo userVo =userMapper.getUserBaseInfoByUuid(userId.replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
+		String userUuid = json.getString(this.getName());
+		UserVo userVo =userMapper.getUserBaseInfoByUuid(userUuid.replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 		if(userVo != null) {
 			userJson.put("username", userVo.getUserName());
 		}
-		userJson.put("userid", userId);
+		userJson.put("userid", userUuid);
 		return userJson;
 	}
 
