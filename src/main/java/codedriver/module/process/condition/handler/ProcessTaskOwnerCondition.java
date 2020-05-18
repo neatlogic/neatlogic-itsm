@@ -99,7 +99,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 				if(userIdList.contains(processTaskVo.getOwner())) {
 					return true;
 				}
-				UserVo user = userMapper.getUserByUserId(processTaskVo.getOwner());
+				UserVo user = userMapper.getUserByUuid(processTaskVo.getOwner());
 				if(roleNameList.removeAll(user.getRoleNameList())) {
 					return true;
 				}

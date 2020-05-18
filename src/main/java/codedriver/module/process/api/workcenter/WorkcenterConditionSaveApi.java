@@ -63,7 +63,7 @@ public class WorkcenterConditionSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		String userId = UserContext.get().getUserId();
+		String userUuid = UserContext.get().getUserUuid(true);
 		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
 		if(CollectionUtils.isEmpty(workcenterList)) {
 			throw new WorkcenterNotFoundException(uuid);
@@ -71,9 +71,9 @@ public class WorkcenterConditionSaveApi extends ApiComponentBase {
 		WorkcenterVo workcenterVo = workcenterList.get(0);
 		if(ProcessWorkcenterType.FACTORY.getValue().equals(workcenterVo.getType())) {
 			throw new WorkcenterNoAuthException("修改出厂分类");
-		}else if(ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterVo.getType())&&CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,WORKCENTER_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByRoleNameList(UserContext.get().getRoleNameList()))) {
+		}else if(ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterVo.getType())&&CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid,WORKCENTER_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByRoleNameList(UserContext.get().getRoleNameList()))) {
 			throw new WorkcenterNoAuthException("管理");
-		}else if(ProcessWorkcenterType.CUSTOM.getValue().equals(workcenterVo.getType())&&!workcenterVo.getOwner().equalsIgnoreCase(UserContext.get().getUserId())) {
+		}else if(ProcessWorkcenterType.CUSTOM.getValue().equals(workcenterVo.getType())&&!workcenterVo.getOwner().equalsIgnoreCase(userUuid)) {
 			throw new WorkcenterNoAuthException("修改个人分类");
 		}
 		workcenterVo.setConditionConfig(jsonObj.getString("conditionConfig"));

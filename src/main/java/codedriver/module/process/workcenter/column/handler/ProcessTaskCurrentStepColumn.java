@@ -83,7 +83,7 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 								for(String user :userList) {
 									if(StringUtils.isNotBlank(user.toString())) {
 										if(user.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
-											UserVo userVo =userMapper.getUserByUserId(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
+											UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 											if(userVo != null) {
 												JSONObject userJson = new JSONObject();
 												userJson.put("type", GroupSearch.USER.getValue());
@@ -123,7 +123,7 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 								List<String> userList = userArray.stream().map(object -> object.toString()).collect(Collectors.toList());
 								for(String user :userList) {
 									if(StringUtils.isNotBlank(user.toString())) {
-										UserVo userVo =userMapper.getUserByUserId(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
+										UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 										if(userVo != null) {
 											JSONObject userJson = new JSONObject();
 											userJson.put("userid", user);

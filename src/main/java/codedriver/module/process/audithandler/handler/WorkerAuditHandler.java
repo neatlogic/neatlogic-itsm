@@ -56,11 +56,11 @@ public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler{
 		for(String worker : workerList) {
 			String[] split = worker.split("#");
 			if(GroupSearch.USER.getValue().equals(split[0])) {
-				UserVo userVo = userMapper.getUserByUserId(split[1]);
+				UserVo userVo = userMapper.getUserBaseInfoByUuid(split[1]);
 				if(userVo != null) {
 					Map<String, String> userMap = new HashMap<>();
 					userMap.put("type", GroupSearch.USER.getValue());
-					userMap.put("value", userVo.getUserId());
+					userMap.put("value", userVo.getUuid());
 					userMap.put("text", userVo.getUserName());
 					resultList.add(userMap);
 				}

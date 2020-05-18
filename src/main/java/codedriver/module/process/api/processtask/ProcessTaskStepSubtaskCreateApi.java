@@ -91,14 +91,14 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
 		processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
 		processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepSubtaskVo.setOwner(UserContext.get().getUserId(true));
+		processTaskStepSubtaskVo.setOwner(UserContext.get().getUserUuid(true));
 		String workerList = jsonObj.getString("workerList");
 		jsonObj.remove("workerList");
 		String[] split = workerList.split("#");
 		if(GroupSearch.USER.getValue().equals(split[0])) {
-			UserVo userVo = userMapper.getUserByUserId(split[1]);
+			UserVo userVo = userMapper.getUserBaseInfoByUuid(split[1]);
 			if(userVo != null) {
-				processTaskStepSubtaskVo.setUserId(userVo.getUserId());
+				processTaskStepSubtaskVo.setUserUuid(userVo.getUuid());
 				processTaskStepSubtaskVo.setUserName(userVo.getUserName());
 			}else {
 				throw new UserNotFoundException(split[1]);

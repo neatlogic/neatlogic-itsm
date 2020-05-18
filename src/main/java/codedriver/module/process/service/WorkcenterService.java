@@ -89,7 +89,7 @@ public class WorkcenterService {
 		List<JSONObject> dataList = new ArrayList<JSONObject>();
 		Map<String, IWorkcenterColumn> columnComponentMap = WorkcenterColumnFactory.columnComponentMap;
 		//获取用户历史自定义theadList
-		List<WorkcenterTheadVo> theadList = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(),UserContext.get().getUserId()));
+		List<WorkcenterTheadVo> theadList = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(),UserContext.get().getUserUuid()));
 		//矫正theadList 或存在表单属性或固定字段增删
 		//多删
 		ListIterator<WorkcenterTheadVo> it = theadList.listIterator();

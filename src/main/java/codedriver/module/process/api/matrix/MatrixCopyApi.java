@@ -81,8 +81,8 @@ public class MatrixCopyApi extends ApiComponentBase {
         	if(matrixMapper.checkMatrixNameIsRepeat(sourceMatrix) > 0){
         		throw new MatrixNameRepeatException(name);
         	}
-            sourceMatrix.setFcu(UserContext.get().getUserId());
-            sourceMatrix.setLcu(UserContext.get().getUserId());
+            sourceMatrix.setFcu(UserContext.get().getUserUuid(true));
+            sourceMatrix.setLcu(UserContext.get().getUserUuid(true));
             matrixMapper.insertMatrix(sourceMatrix);
 
             List<ProcessMatrixAttributeVo> attributeVoList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(uuid);

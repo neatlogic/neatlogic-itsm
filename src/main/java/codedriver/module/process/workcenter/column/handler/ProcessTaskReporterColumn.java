@@ -34,7 +34,7 @@ public class ProcessTaskReporterColumn extends WorkcenterColumnBase implements I
 		if(StringUtils.isNotBlank(userId)) {
 			userId =userId.replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY);
 		}
-		UserVo userVo =userMapper.getUserByUserId(userId);
+		UserVo userVo =userMapper.getUserBaseInfoByUuid(userId);
 		if(userVo != null) {
 			userJson.put("username", userVo.getUserName());
 		}

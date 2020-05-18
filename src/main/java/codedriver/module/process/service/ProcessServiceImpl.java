@@ -82,13 +82,13 @@ public class ProcessServiceImpl implements ProcessService {
 			processMapper.deleteProcessSlaByProcessUuid(uuid);
 			processMapper.updateProcess(processVo);
 		} else {
-			processVo.setFcu(UserContext.get().getUserId());
+			processVo.setFcu(UserContext.get().getUserUuid(true));
 			processMapper.insertProcess(processVo);
 		}
 		// 删除草稿
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();
 		processDraftVo.setProcessUuid(uuid);
-		processDraftVo.setFcu(UserContext.get().getUserId());
+		processDraftVo.setFcu(UserContext.get().getUserUuid(true));
 		processMapper.deleteProcessDraft(processDraftVo);
 
 		String formUuid = processVo.getFormUuid();

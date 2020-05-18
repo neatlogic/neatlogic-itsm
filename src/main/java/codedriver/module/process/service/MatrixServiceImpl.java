@@ -143,7 +143,7 @@ public class MatrixServiceImpl implements MatrixService {
 				}
 			}
 		}else if(ProcessMatrixAttributeType.USER.getValue().equals(type)) {
-			UserVo userVo = userMapper.getUserBaseInfoByUserId(value);
+			UserVo userVo = userMapper.getUserBaseInfoByUuid(value);
 			if(userVo != null) {
 				resultObj.put("text", userVo.getUserName());
 			}

@@ -64,7 +64,7 @@ public class NotifyTemplateSaveApi extends ApiComponentBase {
 		}
 		String uuid = jsonObj.getString("uuid");
 		if(StringUtils.isBlank(uuid)) {
-			notifyTemplate.setFcu(UserContext.get().getUserId(true));
+			notifyTemplate.setFcu(UserContext.get().getUserUuid(true));
 			notifyMapper.insertNotifyTemplate(notifyTemplate);
 		}else {
 			NotifyTemplateVo oldNotifyTemplate = notifyMapper.getNotifyTemplateByUuid(uuid);
@@ -72,7 +72,7 @@ public class NotifyTemplateSaveApi extends ApiComponentBase {
 				throw new NotifyTemplateNotFoundException(uuid);
 			}
 			if(!oldNotifyTemplate.equals(notifyTemplate)) {
-				notifyTemplate.setLcu(UserContext.get().getUserId(true));
+				notifyTemplate.setLcu(UserContext.get().getUserUuid(true));
 				notifyMapper.updateNotifyTemplateByUuid(notifyTemplate);
 			}
 		}

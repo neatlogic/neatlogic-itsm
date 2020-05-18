@@ -60,7 +60,7 @@ public class WorkcenterTheadSaveApi extends ApiComponentBase {
 		String uuid = jsonObj.getString("uuid");
 		JSONArray theadArray = jsonObj.getJSONArray("theadList");
 		if(CollectionUtils.isNotEmpty(theadArray)) {
-			workcenterMapper.deleteWorkcenterThead(new WorkcenterTheadVo(uuid,UserContext.get().getUserId()));
+			workcenterMapper.deleteWorkcenterThead(new WorkcenterTheadVo(uuid,UserContext.get().getUserUuid(true)));
 			for(Object thead : theadArray) {
 				WorkcenterTheadVo workcenterTheadVo = new WorkcenterTheadVo((JSONObject)thead);
 				workcenterTheadVo.setWorkcenterUuid(uuid);

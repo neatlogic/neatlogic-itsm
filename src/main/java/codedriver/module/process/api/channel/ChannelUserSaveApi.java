@@ -48,11 +48,11 @@ public class ChannelUserSaveApi extends ApiComponentBase {
 			throw new ChannelNotFoundException(channelUuid);
 		}
 		int action = jsonObj.getIntValue("action");
-		String userId = UserContext.get().getUserId();
+		String userUuid = UserContext.get().getUserUuid(true);
 		if(action == 1) {
-			channelMapper.replaceChannelUser(userId, channelUuid);
+			channelMapper.replaceChannelUser(userUuid, channelUuid);
 		}else {
-			channelMapper.deleteChannelUser(userId, channelUuid);
+			channelMapper.deleteChannelUser(userUuid, channelUuid);
 		}
 		return null;
 	}

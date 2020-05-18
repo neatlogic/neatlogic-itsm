@@ -121,7 +121,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
 		if (oldUserList.size() > 0) {
 			ProcessTaskStepUserVo oldUserVo = oldUserList.get(0);
-			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserId()));
+			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserUuid()));
 		} else {
 			/** 分配处理人 **/
 			ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
@@ -153,8 +153,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
 				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				userVo.setUserId(workerList.get(0).getUuid());
-				UserVo user = userMapper.getUserByUserId(workerList.get(0).getUuid());
+				userVo.setUserUuid(workerList.get(0).getUuid());
+				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
 				userVo.setUserName(user.getUserName());
 				userList.add(userVo);
 				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
@@ -293,7 +293,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		auditVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		auditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-		auditVo.setUserId(UserContext.get().getUserId(true));
+		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
 		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
 		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
 			//找出最后一次暂存活动
@@ -453,8 +453,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
 				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				userVo.setUserId(workerList.get(0).getUuid());
-				UserVo user = userMapper.getUserByUserId(workerList.get(0).getUuid());
+				userVo.setUserUuid(workerList.get(0).getUuid());
+				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
 				userVo.setUserName(user.getUserName());
 				userList.add(userVo);
 				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
@@ -546,7 +546,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			ProcessTaskStepSubtaskVo stepSubtaskVo = new ProcessTaskStepSubtaskVo();
 			stepSubtaskVo.setProcessTaskId(processTaskStepUserVo.getProcessTaskId());
 			stepSubtaskVo.setProcessTaskStepId(processTaskStepUserVo.getProcessTaskStepId());
-			stepSubtaskVo.setUserId(processTaskStepUserVo.getUserId());
+			stepSubtaskVo.setUserUuid(processTaskStepUserVo.getUserUuid());
 			List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(stepSubtaskVo);
 			//子任务状态列表
 			List<String> stepSubtaskStatusList = processTaskStepSubtaskList.stream().map(ProcessTaskStepSubtaskVo::getStatus).collect(Collectors.toList());
@@ -561,7 +561,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			String minorUserStatus = null;//userId是子任务处理人时的状态，null代表userId不是子任务处理人
 			List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepUserVo.getProcessTaskStepId(), ProcessUserType.MINOR.getValue());
 			for(ProcessTaskStepUserVo stepUser : processTaskStepUserList) {
-				if(processTaskStepUserVo.getUserId().equals(stepUser.getUserId())) {
+				if(processTaskStepUserVo.getUserUuid().equals(stepUser.getUserUuid())) {
 					minorUserStatus = stepUser.getStatus();
 				}
 			}
@@ -582,7 +582,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			ProcessTaskStepSubtaskVo stepSubtaskVo = new ProcessTaskStepSubtaskVo();
 			stepSubtaskVo.setProcessTaskId(processTaskStepWorkerVo.getProcessTaskId());
 			stepSubtaskVo.setProcessTaskStepId(processTaskStepWorkerVo.getProcessTaskStepId());
-			stepSubtaskVo.setUserId(processTaskStepWorkerVo.getUuid());
+			stepSubtaskVo.setUserUuid(processTaskStepWorkerVo.getUuid());
 			List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(stepSubtaskVo);
 			//子任务状态列表
 			List<String> stepSubtaskStatusList = processTaskStepSubtaskList.stream().map(ProcessTaskStepSubtaskVo::getStatus).collect(Collectors.toList());
@@ -596,7 +596,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			String majorUserStatus = null;//userId是主处理人时的状态，null代表userId不是主处理人
 			List<ProcessTaskStepUserVo> stepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepWorkerVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
 			for(ProcessTaskStepUserVo stepUser : stepMajorUserList) {
-				if(processTaskStepWorkerVo.getUuid().equals(stepUser.getUserId())) {
+				if(processTaskStepWorkerVo.getUuid().equals(stepUser.getUserUuid())) {
 					majorUserStatus = stepUser.getStatus();
 				}
 			}
@@ -633,7 +633,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		if (StringUtils.isBlank(processTaskVo.getOwner())) {
 			throw new ProcessTaskRuntimeException("工单请求人不能为空");
 		}
-		if (userMapper.getUserBaseInfoByUserId(processTaskVo.getOwner()) == null) {
+		if (userMapper.getUserBaseInfoByUuid(processTaskVo.getOwner()) == null) {
 			throw new ProcessTaskRuntimeException("工单请求人账号:'" + processTaskVo.getOwner() + "'不存在");
 		}
 		if (StringUtils.isBlank(processTaskVo.getPriorityUuid())) {

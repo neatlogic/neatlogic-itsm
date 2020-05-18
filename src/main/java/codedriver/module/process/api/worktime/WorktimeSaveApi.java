@@ -103,7 +103,7 @@ public class WorktimeSaveApi extends ApiComponentBase {
 			}
 		}
 		
-		worktimeVo.setLcu(UserContext.get().getUserId());
+		worktimeVo.setLcu(UserContext.get().getUserUuid(true));
 		String uuid = worktimeVo.getUuid();
 		if(worktimeMapper.checkWorktimeIsExists(uuid) == 0) {
 			worktimeVo.setUuid(null);

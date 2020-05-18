@@ -66,12 +66,12 @@ public class ChannelSearchApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
-		channelVo.setUserId(UserContext.get().getUserId());
+		channelVo.setUserUuid(UserContext.get().getUserUuid(true));
 		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
 		if(isAuthenticate != null && isAuthenticate.intValue() == 1) {
-			List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
+			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
 			//查出当前用户已授权的服务
-			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserId(true), teamUuidList, UserContext.get().getRoleNameList(), null);
+			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleNameList(), null);
 			channelVo.setAuthorizedUuidList(currentUserAuthorizedChannelUuidList);
 			channelVo.setIsActive(1);
 		}

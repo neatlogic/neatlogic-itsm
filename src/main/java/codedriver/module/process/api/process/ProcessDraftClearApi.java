@@ -45,7 +45,7 @@ public class ProcessDraftClearApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessDraftVo processDraftVo = new ProcessDraftVo();
-		processDraftVo.setFcu(UserContext.get().getUserId());
+		processDraftVo.setFcu(UserContext.get().getUserUuid(true));
 		processDraftVo.setProcessUuid(jsonObj.getString("processUuid"));
 		processMapper.deleteProcessDraft(processDraftVo);
 		return null;

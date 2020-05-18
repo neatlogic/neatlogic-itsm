@@ -1,8 +1,6 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,13 +80,13 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 			jsonObj.remove("workerList");
 			String[] split = workerList.split("#");
 			if(GroupSearch.USER.getValue().equals(split[0])) {
-				UserVo userVo = userMapper.getUserByUserId(split[1]);
+				UserVo userVo = userMapper.getUserBaseInfoByUuid(split[1]);
 				if(userVo != null) {
-					List<String> oldWorkerList = new ArrayList<>();
-					oldWorkerList.add(GroupSearch.USER.getValuePlugin() + processTaskStepSubtaskVo.getUserId());
-					jsonObj.put("oldUserId", processTaskStepSubtaskVo.getUserId());
+					//List<String> oldWorkerList = new ArrayList<>();
+					//oldWorkerList.add(GroupSearch.USER.getValuePlugin() + processTaskStepSubtaskVo.getUserUuid());
+					jsonObj.put("oldUserUuid", processTaskStepSubtaskVo.getUserUuid());
 					jsonObj.put("oldUserName", processTaskStepSubtaskVo.getUserName());
-					processTaskStepSubtaskVo.setUserId(userVo.getUserId());
+					processTaskStepSubtaskVo.setUserUuid(userVo.getUuid());
 					processTaskStepSubtaskVo.setUserName(userVo.getUserName());
 				}else {
 					throw new UserNotFoundException(split[1]);
