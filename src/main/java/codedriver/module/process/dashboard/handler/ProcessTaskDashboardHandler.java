@@ -59,6 +59,10 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			chartConfig = chart.getChartConfig();
 			if(chartConfig.containsKey("showConfig")) {
 				JSONObject showConfigJson = chartConfig.getJSONObject("showConfig");
+				if(showConfigJson.containsKey(DashboardShowConfig.TYPE.getValue())) {
+					DashboardShowConfigVo aggregateShowConfig = (DashboardShowConfigVo)showConfigJson.get(DashboardShowConfig.TYPE.getValue());
+					processTaskShowChartConfigArray.add(aggregateShowConfig);
+				}
 				if(showConfigJson.containsKey(DashboardShowConfig.AGGREGATE.getValue())) {
 					DashboardShowConfigVo aggregateShowConfig = (DashboardShowConfigVo)showConfigJson.get(DashboardShowConfig.AGGREGATE.getValue());
 					processTaskShowChartConfigArray.add(aggregateShowConfig);
