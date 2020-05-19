@@ -35,7 +35,7 @@ public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWor
 		if(userVo != null) {
 			userJson.put("username", userVo.getUserName());
 		}
-		userJson.put("userid", userUuid);
+		userJson.put("useruuid", userUuid);
 		return userJson;
 	}
 

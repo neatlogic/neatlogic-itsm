@@ -38,7 +38,7 @@ public class ProcessTaskReporterColumn extends WorkcenterColumnBase implements I
 		if(userVo != null) {
 			userJson.put("username", userVo.getUserName());
 		}
-		userJson.put("userid", userUuid);
+		userJson.put("useruuid", userUuid);
 		return userJson;
 	}
 

@@ -126,7 +126,7 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 										UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 										if(userVo != null) {
 											JSONObject userJson = new JSONObject();
-											userJson.put("userid", user);
+											userJson.put("useruuid", user);
 											userJson.put("username", userVo.getUserName());
 											userArrayTmp.add(userJson);
 										}
