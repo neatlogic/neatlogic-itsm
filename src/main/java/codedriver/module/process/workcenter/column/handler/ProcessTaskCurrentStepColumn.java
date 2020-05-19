@@ -96,8 +96,8 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 											if(roleVo != null) {
 												JSONObject roleJson = new JSONObject();
 												roleJson.put("type", GroupSearch.ROLE.getValue());
-												roleJson.put("worker", roleVo.getName());
-												roleJson.put("workername", roleVo.getDescription());
+												roleJson.put("worker", roleVo.getUuid());
+												roleJson.put("workername", roleVo.getName());
 												userArrayTmp.add(roleJson);
 											}
 										}else if(user.toString().startsWith(GroupSearch.TEAM.getValuePlugin())) {

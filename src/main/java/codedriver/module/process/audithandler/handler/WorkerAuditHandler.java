@@ -78,8 +78,8 @@ public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler{
 				if(roleVo != null) {
 					Map<String, String> roleMap = new HashMap<>();
 					roleMap.put("type", GroupSearch.TEAM.getValue());
-					roleMap.put("value", roleVo.getName());
-					roleMap.put("text", roleVo.getDescription());
+					roleMap.put("value", roleVo.getUuid());
+					roleMap.put("text", roleVo.getName());
 					resultList.add(roleMap);
 				}
 			}
