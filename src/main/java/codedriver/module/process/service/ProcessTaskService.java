@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -71,4 +72,6 @@ public interface ProcessTaskService {
 	* @return void
 	 */
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode);
+
+	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepCommentVo);
 }

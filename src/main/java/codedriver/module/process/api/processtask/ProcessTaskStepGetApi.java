@@ -263,6 +263,13 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					}
 					processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
 				}
+				
+				//步骤评论列表
+				List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
+				for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
+					processTaskService.parseProcessTaskStepComment(processTaskStepComment);
+				}
+				
 				//获取当前用户有权限的所有子任务
 				//子任务列表
 				if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {

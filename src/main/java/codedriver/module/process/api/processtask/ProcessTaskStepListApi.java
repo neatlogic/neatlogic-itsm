@@ -11,14 +11,11 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
-import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -34,11 +31,15 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 @Service
 public class ProcessTaskStepListApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -116,23 +117,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 					processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
 					processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
 					//步骤评论列表
-					processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-					processTaskStepAuditVo.setProcessTaskId(processTaskId);
-					processTaskStepAuditVo.setProcessTaskStepId(processTaskStepVo.getId());
-					processTaskStepAuditVo.setAction(ProcessTaskStepAction.COMMENT.getValue());
-					processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-					if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-						for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-							List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
-							processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
-							for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAuditDetailList) {
-								IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
-								if(auditDetailHandler != null) {
-									auditDetailHandler.handle(processTaskStepAuditDetailVo);
-								}
-							}
-						}
-						processTaskStepVo.setProcessTaskStepAuditList(processTaskStepAuditList);
+					List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepVo.getId());
+					for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
+						processTaskService.parseProcessTaskStepComment(processTaskStepComment);
 					}
 					//子任务列表
 					ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
