@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPool;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
@@ -43,7 +44,7 @@ public class WorkcenterProcessTaskDeleteForTestApi extends ApiComponentBase {
 		Integer from = jsonObj.getInteger("from");
 		Integer to = jsonObj.getInteger("to");
 		MultiAttrsObjectPool  poll = ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME);
-		poll.checkout("techsure");
+		poll.checkout(TenantContext.get().getTenantUuid());
 		if(from != null && to != null) {
 			for(Integer i=from;i<to;i++) {
 				poll.delete(i.toString());

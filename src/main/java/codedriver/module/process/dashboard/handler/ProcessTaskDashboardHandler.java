@@ -14,6 +14,8 @@ import codedriver.framework.dashboard.core.DashboardChartFactory;
 import codedriver.framework.dashboard.core.DashboardHandlerBase;
 import codedriver.framework.dashboard.dto.DashboardShowConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
+import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.service.WorkcenterService;
@@ -70,8 +72,14 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 				if(showConfigJson.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
 					DashboardShowConfigVo groupShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.GROUPFIELD.getValue());
 					JSONArray groupFieldDataArray = groupShowConfig.getDataList();
-					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.PRIORITY.getValue(),ProcessWorkcenterField.PRIORITY.getName())));
-					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.STATUS.getValue(),ProcessWorkcenterField.STATUS.getName())));
+					JSONObject priorityJson = ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.PRIORITY.getValue()).getConfig();
+					priorityJson.remove("isMultiple");
+					priorityJson.put("handler", ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.PRIORITY.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
+					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", ProcessWorkcenterField.PRIORITY.getValue(),ProcessWorkcenterField.PRIORITY.getName(),priorityJson)));
+					JSONObject statusJson = ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()).getConfig();
+					statusJson.remove("isMultiple");
+					statusJson.put("handler", ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
+					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", ProcessWorkcenterField.STATUS.getValue(),ProcessWorkcenterField.STATUS.getName(),statusJson)));
 					processTaskShowChartConfigArray.add(groupShowConfig);
 				}
 				if(showConfigJson.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())) {
@@ -87,6 +95,10 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 				}
 				if(showConfigJson.containsKey(DashboardShowConfig.REFRESHTIME.getValue())) {
 					DashboardShowConfigVo refreshTimeShowConfig = (DashboardShowConfigVo)showConfigJson.get(DashboardShowConfig.REFRESHTIME.getValue());
+					processTaskShowChartConfigArray.add(refreshTimeShowConfig);
+				}
+				if(showConfigJson.containsKey(DashboardShowConfig.COLOR.getValue())) {
+					DashboardShowConfigVo refreshTimeShowConfig = (DashboardShowConfigVo)showConfigJson.get(DashboardShowConfig.COLOR.getValue());
 					processTaskShowChartConfigArray.add(refreshTimeShowConfig);
 				}
 			}
