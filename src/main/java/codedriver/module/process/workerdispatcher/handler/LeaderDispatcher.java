@@ -36,7 +36,7 @@ public class LeaderDispatcher extends WorkerDispatcherBase {
 			if (StringUtils.isNotBlank(teamUuid)) {
 				List<String> teamIdList = new ArrayList<>();
 				teamIdList.add(teamUuid);
-				return userMapper.getLeaderUserIdByTeamIds(teamIdList);
+				return userMapper.getLeaderUserUuidByTeamIds(teamIdList);
 			}
 		}
 		return null;

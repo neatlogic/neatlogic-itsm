@@ -56,11 +56,11 @@ public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler{
 		for(String worker : workerList) {
 			String[] split = worker.split("#");
 			if(GroupSearch.USER.getValue().equals(split[0])) {
-				UserVo userVo = userMapper.getUserByUserId(split[1]);
+				UserVo userVo = userMapper.getUserBaseInfoByUuid(split[1]);
 				if(userVo != null) {
 					Map<String, String> userMap = new HashMap<>();
 					userMap.put("type", GroupSearch.USER.getValue());
-					userMap.put("value", userVo.getUserId());
+					userMap.put("value", userVo.getUuid());
 					userMap.put("text", userVo.getUserName());
 					resultList.add(userMap);
 				}
@@ -74,12 +74,12 @@ public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler{
 					resultList.add(teamMap);
 				}
 			}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
-				RoleVo roleVo = roleMapper.getRoleByRoleName(split[1]);
+				RoleVo roleVo = roleMapper.getRoleByUuid(split[1]);
 				if(roleVo != null) {
 					Map<String, String> roleMap = new HashMap<>();
 					roleMap.put("type", GroupSearch.TEAM.getValue());
-					roleMap.put("value", roleVo.getName());
-					roleMap.put("text", roleVo.getDescription());
+					roleMap.put("value", roleVo.getUuid());
+					roleMap.put("text", roleVo.getName());
 					resultList.add(roleMap);
 				}
 			}

@@ -108,7 +108,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		auditVo.setProcessTaskId(processTaskId);
 		auditVo.setProcessTaskStepId(processTaskStepId);
 		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-		auditVo.setUserId(UserContext.get().getUserId(true));
+		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
 		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
 		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
 			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
@@ -161,7 +161,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		ProcessTaskStepCommentVo processTaskStepCommentVo = new ProcessTaskStepCommentVo();
 		processTaskStepCommentVo.setProcessTaskId(processTaskId);
 		processTaskStepCommentVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepCommentVo.setFcu(UserContext.get().getUserId(true));
+		processTaskStepCommentVo.setFcu(UserContext.get().getUserUuid(true));
 		
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {

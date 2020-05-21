@@ -67,13 +67,13 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
 				if(CollectionUtils.isEmpty(dataList)) {
 					return processTaskStepWorkerList;
 				}
-				for(String userId : dataList) {
-					if(userMapper.getUserByUserId(userId) != null) {
-						processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), userId));
+				for(String userUuid : dataList) {
+					if(userMapper.getUserBaseInfoByUuid(userUuid) != null) {
+						processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), userUuid));
 					}
 				}
 			}else {
-				if(userMapper.getUserByUserId(data) != null) {
+				if(userMapper.getUserBaseInfoByUuid(data) != null) {
 					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), data));				
 				}
 			}

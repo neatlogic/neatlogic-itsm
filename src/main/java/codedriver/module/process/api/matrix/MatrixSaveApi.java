@@ -58,14 +58,14 @@ public class MatrixSaveApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         ProcessMatrixVo matrixVo = JSON.toJavaObject(jsonObj, ProcessMatrixVo.class);
-        matrixVo.setLcu(UserContext.get().getUserId());
+        matrixVo.setLcu(UserContext.get().getUserUuid(true));
         if (StringUtils.isNotBlank(matrixVo.getUuid())){
         	if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
         		throw new MatrixNameRepeatException(matrixVo.getName());
         	}
             matrixMapper.updateMatrixNameAndLcu(matrixVo);
         }else {
-            matrixVo.setFcu(UserContext.get().getUserId());
+            matrixVo.setFcu(UserContext.get().getUserUuid(true));
             matrixVo.setUuid(UUIDUtil.getUUID());
             if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
             	throw new MatrixNameRepeatException(matrixVo.getName());

@@ -1,7 +1,7 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.attribute.constvalue.AttributeHandler;
+import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
@@ -103,7 +103,7 @@ public class MatrixAttributeExportApi extends BinaryStreamApiComponentBase {
         if (StringUtils.isNotBlank(attributeVo.getConfig())){
             String config = attributeVo.getConfig();
             JSONObject configObj = JSONObject.parseObject(config);
-            if (AttributeHandler.SELECT.getValue().equals(configObj.getString("handler"))){
+            if (ProcessMatrixAttributeType.SELECT.getValue().equals(configObj.getString("handler"))){
                 if (configObj.containsKey("config")){
                     JSONArray configArray = configObj.getJSONArray("config");
                     for (int i = 0; i < configArray.size(); i++){

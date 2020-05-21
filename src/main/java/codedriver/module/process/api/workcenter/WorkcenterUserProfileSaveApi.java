@@ -56,8 +56,8 @@ public class WorkcenterUserProfileSaveApi extends ApiComponentBase {
 		if(jsonObj.isEmpty()) {
 			throw new WorkcenterParamException("viewType|workcenterList");
 		}
-		String userId = UserContext.get().getUserId();
-		WorkcenterUserProfileVo userProfile= workcenterMapper.getWorkcenterUserProfileByUserId(userId);
+		String userUuid = UserContext.get().getUserUuid();
+		WorkcenterUserProfileVo userProfile= workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);
 		if(userProfile != null) {
 			JSONObject configOld = JSONObject.parseObject(userProfile.getConfig());
 			if(jsonObj.containsKey("viewType")) {
@@ -75,9 +75,9 @@ public class WorkcenterUserProfileSaveApi extends ApiComponentBase {
 				configOld.put("workcenterList", jsonObj.getString("workcenterList"));
 			}
 			userProfile.setConfig(configOld.toJSONString());
-			workcenterMapper.deleteWorkcenterUserProfileByUserId(userId);
+			workcenterMapper.deleteWorkcenterUserProfileByUserUuid(userUuid);
 		}else {
-			userProfile = new WorkcenterUserProfileVo(userId,jsonObj.toJSONString());
+			userProfile = new WorkcenterUserProfileVo(userUuid,jsonObj.toJSONString());
 		}
 		workcenterMapper.insertWorkcenterUserProfile(userProfile);
 		return null;

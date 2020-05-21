@@ -81,7 +81,7 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 			processTaskStepCommentVo.setId(oldCommentVo.getId());
 			processTaskStepCommentVo.setProcessTaskId(oldCommentVo.getProcessTaskId());
 			processTaskStepCommentVo.setProcessTaskStepId(oldCommentVo.getProcessTaskStepId());
-			processTaskStepCommentVo.setLcu(UserContext.get().getUserId(true));
+			processTaskStepCommentVo.setLcu(UserContext.get().getUserUuid(true));
 			
 			String content = jsonObj.getString("content");
 			if(StringUtils.isNotBlank(content)) {

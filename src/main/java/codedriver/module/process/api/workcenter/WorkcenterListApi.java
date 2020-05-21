@@ -74,12 +74,12 @@ public class WorkcenterListApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Integer isAll = jsonObj.getInteger("isAll");
 		JSONObject workcenterJson = new JSONObject();
-		String userId = UserContext.get().getUserId(true);
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(userId);
-		List<String>  workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(UserContext.get().getUserId(),teamUuidList,UserContext.get().getRoleNameList());
+		String userUuid = UserContext.get().getUserUuid(true);
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+		List<String>  workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid,teamUuidList,UserContext.get().getRoleUuidList());
 		List<WorkcenterVo> workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
-		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),WORKCENTER_MODIFY.class.getSimpleName()));
-		WorkcenterUserProfileVo userProfile= workcenterMapper.getWorkcenterUserProfileByUserId(userId);
+		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid,WORKCENTER_MODIFY.class.getSimpleName()));
+		WorkcenterUserProfileVo userProfile= workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);
 		Map<String,Integer> workcenterUserSortMap = new HashMap<String,Integer>();
 		String viewType = "table";//默认table展示
 		if(userProfile != null) {
@@ -104,7 +104,7 @@ public class WorkcenterListApi extends ApiComponentBase {
 				workcenter.setIsCanEdit(1);
 				workcenter.setIsCanRole(1);
 			}else if(workcenter.getType().equals(ProcessWorkcenterType.CUSTOM.getValue())){
-				if(UserContext.get().getUserId().equalsIgnoreCase(workcenter.getOwner())) {
+				if(UserContext.get().getUserUuid(true).equalsIgnoreCase(workcenter.getOwner())) {
 					workcenter.setIsCanEdit(1);
 					if(CollectionUtils.isNotEmpty(userAuthList)) {
 						workcenter.setIsCanRole(1);

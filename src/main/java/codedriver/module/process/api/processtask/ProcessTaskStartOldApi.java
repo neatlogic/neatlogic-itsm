@@ -78,8 +78,8 @@ public class ProcessTaskStartOldApi extends ApiComponentBase {
 			throw new ProcessTaskException("请输入正确的流程编号!");
 		}
 
-		String currentUserId = UserContext.get().getUserId();
-		jsonObj.put("owner", currentUserId);// 工单上报人
+		String currentUserUuid = UserContext.get().getUserUuid(true);
+		jsonObj.put("owner", currentUserUuid);// 工单上报人
 		ProcessStepVo startStepVo = processService.getProcessStartStep(processUuid);
 		if (startStepVo != null) {
 			ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo(startStepVo);

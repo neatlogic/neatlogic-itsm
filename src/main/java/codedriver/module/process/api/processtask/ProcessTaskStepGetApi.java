@@ -245,7 +245,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				processTaskStepAuditVo.setProcessTaskId(processTaskId);
 				processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
 				processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-				processTaskStepAuditVo.setUserId(UserContext.get().getUserId(true));
+				processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid(true));
 				List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 				if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
 					ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
@@ -279,9 +279,9 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
 					List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
 					for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-						String currentUser = UserContext.get().getUserId(true);
+						String currentUser = UserContext.get().getUserUuid(true);
 						if((currentUser.equals(processTaskStepSubtask.getOwner()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
-								|| (currentUser.equals(processTaskStepSubtask.getUserId()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
+								|| (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
 							List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
 							Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
 							while(iterator.hasNext()) {

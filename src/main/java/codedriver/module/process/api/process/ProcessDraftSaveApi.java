@@ -51,14 +51,14 @@ public class ProcessDraftSaveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessDraftVo processDraftVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessDraftVo>() {
 		});
-		processDraftVo.setFcu(UserContext.get().getUserId());
+		processDraftVo.setFcu(UserContext.get().getUserUuid(true));
 		if (processMapper.checkProcessDraftIsExists(processDraftVo) > 0) {
 			return null;
 		}
 		String earliestUuid = null;
 		if (processMapper.checkProcessIsExists(processDraftVo.getProcessUuid()) == 0) {
 			ProcessDraftVo processDraft = new ProcessDraftVo();
-			processDraft.setFcu(UserContext.get().getUserId());
+			processDraft.setFcu(UserContext.get().getUserUuid(true));
 			earliestUuid = processMapper.getEarliestProcessDraft(processDraft);
 		} else {
 			earliestUuid = processMapper.getEarliestProcessDraft(processDraftVo);

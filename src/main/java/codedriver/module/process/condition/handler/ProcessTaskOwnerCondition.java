@@ -81,26 +81,26 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 			List<String> valueList = conditionVo.getValueList();
 			if(!CollectionUtils.isEmpty(valueList)) {
 				//解析valueList
-				//["user#userId", "team#teamUuid","role#roleName"]
-				List<String> userIdList = new ArrayList<>();
+				//["user#userUuid", "team#teamUuid","role#roleUuid"]
+				List<String> userUuidList = new ArrayList<>();
 				List<String> teamUuidList = new ArrayList<>();
-				List<String> roleNameList = new ArrayList<>();
+				List<String> roleUuidList = new ArrayList<>();
 				for(String value : valueList) {
 					String[] split = value.split("#");
 					if(GroupSearch.USER.getValue().equals(split[0])) {
-						userIdList.add(split[1]);
+						userUuidList.add(split[1]);
 					}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
 						teamUuidList.add(split[1]);
 					}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
-						roleNameList.add(split[1]);
+						roleUuidList.add(split[1]);
 					}
 				}	
 				ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
-				if(userIdList.contains(processTaskVo.getOwner())) {
+				if(userUuidList.contains(processTaskVo.getOwner())) {
 					return true;
 				}
-				UserVo user = userMapper.getUserByUserId(processTaskVo.getOwner());
-				if(roleNameList.removeAll(user.getRoleNameList())) {
+				UserVo user = userMapper.getUserByUuid(processTaskVo.getOwner());
+				if(roleUuidList.removeAll(user.getRoleUuidList())) {
 					return true;
 				}
 				if(!CollectionUtils.isEmpty(user.getTeamList())) {

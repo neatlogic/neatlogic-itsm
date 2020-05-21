@@ -55,11 +55,11 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 	@Description(desc = "当前用户任务列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userId = UserContext.get().getUserId(true);
-		List<String> roleNameList = UserContext.get().getRoleNameList();
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(UserContext.get().getUserId(true));
+		String userUuid = UserContext.get().getUserUuid(true);
+		List<String> roleUuidList = UserContext.get().getRoleUuidList();
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
 		
-		List<Long> processTaskStepIdList = processTaskMapper.getProcessTaskStepIdList(userId, teamUuidList, roleNameList);
+		List<Long> processTaskStepIdList = processTaskMapper.getProcessTaskStepIdList(userUuid, teamUuidList, roleUuidList);
 		if(CollectionUtils.isEmpty(processTaskStepIdList)) {
 			return null;
 		}

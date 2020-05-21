@@ -57,7 +57,7 @@ public class MatrixNameUpdateApi extends ApiComponentBase {
     	if(matrixMapper.checkMatrixNameIsRepeat(processMatrixVo) > 0){
     		throw new MatrixNameRepeatException(processMatrixVo.getName());
     	}
-        processMatrixVo.setLcu(UserContext.get().getUserId());
+        processMatrixVo.setLcu(UserContext.get().getUserUuid(true));
         matrixMapper.updateMatrixNameAndLcu(processMatrixVo);
         return null;
     }

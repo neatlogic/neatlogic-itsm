@@ -61,7 +61,7 @@ public class ProcessSearchApi extends ApiComponentBase {
 		ProcessVo processVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessVo>() {});
 		int isICreated = jsonObj.getIntValue("isICreated");
 		if(isICreated == 1) {
-			processVo.setFcu(UserContext.get().getUserId());
+			processVo.setFcu(UserContext.get().getUserUuid(true));
 		}
 		JSONObject resultObj = new JSONObject();
 		if(processVo.getNeedPage()) {

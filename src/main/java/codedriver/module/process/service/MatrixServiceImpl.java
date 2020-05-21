@@ -143,7 +143,7 @@ public class MatrixServiceImpl implements MatrixService {
 				}
 			}
 		}else if(ProcessMatrixAttributeType.USER.getValue().equals(type)) {
-			UserVo userVo = userMapper.getUserBaseInfoByUserId(value);
+			UserVo userVo = userMapper.getUserBaseInfoByUuid(value);
 			if(userVo != null) {
 				resultObj.put("text", userVo.getUserName());
 			}
@@ -153,9 +153,9 @@ public class MatrixServiceImpl implements MatrixService {
 				resultObj.put("text", teamVo.getName());
 			}
 		}else if(ProcessMatrixAttributeType.ROLE.getValue().equals(type)) {
-			RoleVo roleVo = roleMapper.getRoleByRoleName(value);
+			RoleVo roleVo = roleMapper.getRoleByUuid(value);
 			if(roleVo != null) {
-				resultObj.put("text", roleVo.getDescription());
+				resultObj.put("text", roleVo.getName());
 			}
 		}
 		return resultObj;

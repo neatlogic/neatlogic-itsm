@@ -91,7 +91,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 					userList.add(user);
 					//如果是待处理状态，则需额外匹配角色和组
 					if(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())) {
-						UserVo userVo = userMapper.getUserByUserId(user.replace(GroupSearch.USER.getValuePlugin(),""));
+						UserVo userVo = userMapper.getUserByUuid(user.replace(GroupSearch.USER.getValuePlugin(),""));
 						if(userVo != null) {
 							List<String> teamList = userVo.getTeamNameList();
 							if(CollectionUtils.isNotEmpty(teamList)) {
@@ -99,10 +99,10 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 									userList.add(GroupSearch.TEAM.getValuePlugin()+team);
 								}
 							}
-							List<String> roleList = userVo.getRoleNameList();
-							if(CollectionUtils.isNotEmpty(roleList)) {
-								for(String role : roleList) {
-									userList.add(GroupSearch.ROLE.getValuePlugin()+role);
+							List<String> roleUuidList = userVo.getRoleUuidList();
+							if(CollectionUtils.isNotEmpty(roleUuidList)) {
+								for(String roleUuid : roleUuidList) {
+									userList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
 								}
 							}
 						}

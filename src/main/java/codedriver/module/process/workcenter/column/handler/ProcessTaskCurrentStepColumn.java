@@ -83,7 +83,7 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 								for(String user :userList) {
 									if(StringUtils.isNotBlank(user.toString())) {
 										if(user.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
-											UserVo userVo =userMapper.getUserByUserId(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
+											UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 											if(userVo != null) {
 												JSONObject userJson = new JSONObject();
 												userJson.put("type", GroupSearch.USER.getValue());
@@ -92,12 +92,12 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 												userArrayTmp.add(userJson);
 											}
 										}else if(user.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
-											RoleVo roleVo = roleMapper.getRoleByRoleName(user.toString().replaceFirst(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
+											RoleVo roleVo = roleMapper.getRoleByUuid(user.toString().replaceFirst(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
 											if(roleVo != null) {
 												JSONObject roleJson = new JSONObject();
 												roleJson.put("type", GroupSearch.ROLE.getValue());
-												roleJson.put("worker", roleVo.getName());
-												roleJson.put("workername", roleVo.getDescription());
+												roleJson.put("worker", roleVo.getUuid());
+												roleJson.put("workername", roleVo.getName());
 												userArrayTmp.add(roleJson);
 											}
 										}else if(user.toString().startsWith(GroupSearch.TEAM.getValuePlugin())) {
@@ -123,10 +123,10 @@ public class ProcessTaskCurrentStepColumn extends WorkcenterColumnBase implement
 								List<String> userList = userArray.stream().map(object -> object.toString()).collect(Collectors.toList());
 								for(String user :userList) {
 									if(StringUtils.isNotBlank(user.toString())) {
-										UserVo userVo =userMapper.getUserByUserId(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
+										UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 										if(userVo != null) {
 											JSONObject userJson = new JSONObject();
-											userJson.put("userid", user);
+											userJson.put("useruuid", user);
 											userJson.put("username", userVo.getUserName());
 											userArrayTmp.add(userJson);
 										}
