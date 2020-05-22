@@ -79,7 +79,6 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
 		
-		
 		//开始步骤
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
 		if(processTaskStepList.size() != 1) {
@@ -90,7 +89,42 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		if(CollectionUtils.isNotEmpty(startStepMajorUserList)) {
 			startStepVo.setMajorUser(startStepMajorUserList.get(0));
 		}
+		startStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.MINOR.getValue()));
 		startStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.AGENT.getValue()));
+		startStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(startStepVo.getId()));
+		
+		//步骤评论列表
+		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(startStepVo.getId());
+		for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
+			processTaskService.parseProcessTaskStepComment(processTaskStepComment);
+		}
+		startStepVo.setCommentList(processTaskStepCommentList);
+		//子任务列表
+		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
+		processTaskStepSubtaskVo.setProcessTaskId(startStepVo.getProcessTaskId());
+		processTaskStepSubtaskVo.setProcessTaskStepId(startStepVo.getId());
+		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+		for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+			List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
+			Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
+			while(iterator.hasNext()) {
+				ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
+				if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
+					if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+						processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
+						iterator.remove();
+					}
+				}
+			}
+			processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
+			processTaskStepSubtask.setIsAbortable(0);
+			processTaskStepSubtask.setIsCompletable(0);
+			processTaskStepSubtask.setIsEditable(0);
+			processTaskStepSubtask.setIsRedoable(0);
+			
+		}
+		startStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
+		
 		//上报描述内容和附件
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
 		processTaskStepAuditVo.setProcessTaskId(processTaskId);
@@ -173,15 +207,16 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 					processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
 					processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
 					//步骤评论列表
-					List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepVo.getId());
+					processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepVo.getId());
 					for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
 						processTaskService.parseProcessTaskStepComment(processTaskStepComment);
 					}
+					processTaskStepVo.setCommentList(processTaskStepCommentList);
 					//子任务列表
-					ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
+					processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
 					processTaskStepSubtaskVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
 					processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepVo.getId());
-					List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+					processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
 					for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
 						List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
 						Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();

@@ -269,7 +269,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
 					processTaskService.parseProcessTaskStepComment(processTaskStepComment);
 				}
-				
+				processTaskStepVo.setCommentList(processTaskStepCommentList);
 				//获取当前用户有权限的所有子任务
 				//子任务列表
 				if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
