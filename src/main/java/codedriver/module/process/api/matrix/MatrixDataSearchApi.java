@@ -104,6 +104,7 @@ public class MatrixDataSearchApi extends ApiComponentBase {
     	if(matrixVo == null) {
     		throw new MatrixNotFoundException(dataVo.getMatrixUuid());
     	}
+    	List<Map<String, Object>> tbodyList = new ArrayList<>();
     	if(ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
     		List<ProcessMatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
             if (CollectionUtils.isNotEmpty(attributeVoList)){
@@ -138,8 +139,8 @@ public class MatrixDataSearchApi extends ApiComponentBase {
                     returnObj.put("currentPage", dataVo.getCurrentPage());
                 }
                 
-                List<Map<String, String>> tbodyList = matrixDataMapper.searchDynamicTableData(dataVo);
-            	returnObj.put("tbodyList", matrixService.matrixTableDataValueHandle(attributeVoList, tbodyList));
+                List<Map<String, String>> dataList = matrixDataMapper.searchDynamicTableData(dataVo);
+                tbodyList = matrixService.matrixTableDataValueHandle(attributeVoList, dataList);
             }
     	}else {
     		ProcessMatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(dataVo.getMatrixUuid());
@@ -160,7 +161,6 @@ public class MatrixDataSearchApi extends ApiComponentBase {
         				returnObj.putAll(transformedResult);
         				JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
         				if(CollectionUtils.isNotEmpty(tbodyArray)) {
-        					List<Map<String, Object>> tbodyList = new ArrayList<>();
         					for(int i = 0; i < tbodyArray.size(); i++) {
         						JSONObject rowData = tbodyArray.getJSONObject(i);
         						Integer pageSize = jsonObj.getInteger("pageSize");
@@ -176,13 +176,13 @@ public class MatrixDataSearchApi extends ApiComponentBase {
             						}
         						}
         					}
-        					returnObj.put("tbodyList", tbodyList);
         				}
         			}
         		}
             }
     	}
-        
+
+		returnObj.put("tbodyList", tbodyList);
         List<ProcessMatrixDispatcherVo> dispatcherVoList = matrixMapper.getMatrixDispatcherByMatrixUuid(dataVo.getMatrixUuid());
         returnObj.put("dispatcherVoList", dispatcherVoList);
         List<ProcessMatrixFormComponentVo> componentVoList = matrixMapper.getMatrixFormComponentByMatrixUuid(dataVo.getMatrixUuid());
