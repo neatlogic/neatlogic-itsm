@@ -55,6 +55,8 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
+		// 锁定当前流程
+		processTaskMapper.getProcessTaskLockById(processTaskId);
 		String oldPriorityUuid = processTaskVo.getPriorityUuid();
 		String priorityUuid = jsonObj.getString("priorityUuid");
 		//如果优先级跟原来的优先级不一样，生成活动

@@ -87,6 +87,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
+		processTaskMapper.getProcessTaskLockById(processTaskId);
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 	
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);

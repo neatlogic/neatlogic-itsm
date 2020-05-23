@@ -67,6 +67,8 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
+		// 锁定当前流程
+		processTaskMapper.getProcessTaskLockById(processTaskId);
 		
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
