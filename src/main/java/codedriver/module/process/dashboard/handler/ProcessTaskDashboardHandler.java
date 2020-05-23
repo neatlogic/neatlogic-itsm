@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.QueryResultSet;
 
+import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.common.constvalue.dashboard.DashboardShowConfig;
 import codedriver.framework.dashboard.core.DashboardChartBase;
 import codedriver.framework.dashboard.core.DashboardChartFactory;
@@ -72,13 +73,17 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 				if(showConfigJson.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
 					DashboardShowConfigVo groupShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.GROUPFIELD.getValue());
 					JSONArray groupFieldDataArray = groupShowConfig.getDataList();
-					JSONObject priorityJson = ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.PRIORITY.getValue()).getConfig();
-					priorityJson.remove("isMultiple");
-					priorityJson.put("handler", ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.PRIORITY.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
+					JSONObject priorityJson = new JSONObject();
+					JSONObject statusJson = new JSONObject();
+					if(ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())) {
+						priorityJson = ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.PRIORITY.getValue()).getConfig();
+						priorityJson.remove("isMultiple");
+						priorityJson.put("handler", ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.PRIORITY.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
+						statusJson = ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()).getConfig();
+						statusJson.remove("isMultiple");
+						statusJson.put("handler", ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
+					}
 					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", ProcessWorkcenterField.PRIORITY.getValue(),ProcessWorkcenterField.PRIORITY.getName(),priorityJson)));
-					JSONObject statusJson = ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()).getConfig();
-					statusJson.remove("isMultiple");
-					statusJson.put("handler", ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
 					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", ProcessWorkcenterField.STATUS.getValue(),ProcessWorkcenterField.STATUS.getName(),statusJson)));
 					processTaskShowChartConfigArray.add(groupShowConfig);
 				}
