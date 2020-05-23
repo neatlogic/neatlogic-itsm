@@ -99,6 +99,8 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 			if(targetTime != null) {
 				processTaskStepSubtaskVo.setTargetTime(new Date(targetTime));
 			}
+			// 锁定当前流程
+			processTaskMapper.getProcessTaskLockById(processTaskStepSubtaskVo.getProcessTaskId());
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
 			processTaskService.editSubtask(processTaskStepSubtaskVo);
 		}else {

@@ -57,6 +57,8 @@ public class ProcessTaskStepSubtaskAbortApi extends ApiComponentBase {
 			throw new ProcessTaskStepSubtaskNotFoundException(processTaskStepSubtaskId.toString());
 		}
 		if(processTaskStepSubtaskVo.getIsAbortable().intValue() == 1) {
+			// 锁定当前流程
+			processTaskMapper.getProcessTaskLockById(processTaskStepSubtaskVo.getProcessTaskId());
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
 			processTaskService.abortSubtask(processTaskStepSubtaskVo);
 		}else {

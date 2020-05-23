@@ -83,6 +83,8 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
+		// 锁定当前流程
+		processTaskMapper.getProcessTaskLockById(processTaskId);
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 	
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);

@@ -111,6 +111,8 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 		if(targetTime != null) {
 			processTaskStepSubtaskVo.setTargetTime(new Date(targetTime));
 		}
+		// 锁定当前流程
+		processTaskMapper.getProcessTaskLockById(processTaskId);
 		processTaskStepSubtaskVo.setParamObj(jsonObj);
 		processTaskService.createSubtask(processTaskStepSubtaskVo);
 		return null;
