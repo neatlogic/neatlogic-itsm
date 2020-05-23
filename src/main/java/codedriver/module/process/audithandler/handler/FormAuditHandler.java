@@ -97,15 +97,22 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 			for(ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataList) {
 				JSONObject content  = new JSONObject();
 				content.put("label", attributeLabelMap.get(attributeDataVo.getAttributeUuid()));
-				String oldContent = oldContentMap.get(attributeDataVo.getAttributeUuid());
-				if(oldContent != null) {
-					content.put("oldContent", oldContent);
-				}
-				IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
-				if(handler != null) {
-					content.put("newContent", handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())));
+				if(ProcessFormHandler.FORMCASCADELIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
+						|| ProcessFormHandler.FORMDYNAMICLIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
+						|| ProcessFormHandler.FORMSTATICLIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
+						) {
+					content.put("newContent", "已更新");
 				}else {
-					content.put("newContent", attributeDataVo.getData());
+					String oldContent = oldContentMap.get(attributeDataVo.getAttributeUuid());
+					if(oldContent != null) {
+						content.put("oldContent", oldContent);
+					}
+					IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
+					if(handler != null) {
+						content.put("newContent", handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())));
+					}else {
+						content.put("newContent", attributeDataVo.getData());
+					}
 				}
 				contentList.add(content);
 			}
