@@ -60,6 +60,8 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 		String title = jsonObj.getString("title");
 		//如果标题跟原来的标题不一样，生成活动
 		if(!title.equals(oldTile)) {
+			// 锁定当前流程
+			processTaskMapper.getProcessTaskLockById(processTaskId);
 			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 			Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 			if(processTaskStepId != null) {

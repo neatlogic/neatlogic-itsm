@@ -65,6 +65,8 @@ public class ProcessTaskCommentDeleteApi extends ApiComponentBase {
 			throw new ProcessTaskStepCommentNotFoundException(id.toString());
 		}
 		if(Objects.equals(oldCommentVo.getIsDeletable(), 1)) {
+			// 锁定当前流程
+			processTaskMapper.getProcessTaskLockById(oldCommentVo.getProcessTaskId());
 			processTaskMapper.deleteProcessTaskStepCommentById(id);
 			
 			processTaskService.parseProcessTaskStepComment(oldCommentVo);

@@ -77,6 +77,8 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 			throw new ProcessTaskStepCommentNotFoundException(id.toString());
 		}
 		if(Objects.equals(oldCommentVo.getIsEditable(), 1)) {
+			// 锁定当前流程
+			processTaskMapper.getProcessTaskLockById(oldCommentVo.getProcessTaskId());
 			ProcessTaskStepCommentVo processTaskStepCommentVo = new ProcessTaskStepCommentVo();
 			processTaskStepCommentVo.setId(oldCommentVo.getId());
 			processTaskStepCommentVo.setProcessTaskId(oldCommentVo.getProcessTaskId());
