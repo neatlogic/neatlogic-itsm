@@ -23,7 +23,6 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskAuditMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -50,8 +49,6 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 	ChannelMapper channelMapper;
 	@Autowired
 	CatalogMapper catalogMapper;
-	@Autowired
-	ProcessTaskAuditMapper processTaskAuditMapper;
 	
 	@Override
 	public String getHandler() {
@@ -118,7 +115,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 				}
 			 }
 			 /** 获取转交记录 **/
-			 List<ProcessTaskStepAuditVo> transferAuditList = processTaskAuditMapper.getProcessTaskAuditList(new ProcessTaskStepAuditVo(processTaskVo.getId(),ProcessTaskStepAction.TRANSFER.getValue()));
+			 List<ProcessTaskStepAuditVo> transferAuditList = processTaskMapper.getProcessTaskAuditList(new ProcessTaskStepAuditVo(processTaskVo.getId(),ProcessTaskStepAction.TRANSFER.getValue()));
 			
 			 /** 获取工单当前步骤 **/
 			 @SuppressWarnings("serial")
