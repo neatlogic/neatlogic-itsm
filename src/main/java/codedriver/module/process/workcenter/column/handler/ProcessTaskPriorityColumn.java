@@ -40,6 +40,11 @@ public class ProcessTaskPriorityColumn extends WorkcenterColumnBase implements I
 		}
 		return priorityJson;
 	}
+	
+	@Override
+	public JSONObject getMyValueText(JSONObject json) {
+		return (JSONObject) getMyValue(json);
+	}
 
 	@Override
 	public Boolean allowSort() {

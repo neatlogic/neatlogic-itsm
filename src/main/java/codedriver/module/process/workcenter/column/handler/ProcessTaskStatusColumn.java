@@ -31,6 +31,11 @@ public class ProcessTaskStatusColumn extends WorkcenterColumnBase implements IWo
 		statusJson.put("color", ProcessTaskStatus.getColor(status));
 		return statusJson;
 	}
+	
+	@Override
+	public JSONObject getMyValueText(JSONObject json) {
+		return (JSONObject) getMyValue(json);
+	}
 
 	@Override
 	public Boolean allowSort() {
