@@ -365,7 +365,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		return resultObj;
 	}
 	
-	public String conversionTimeUnit(long milliseconds) {
+	private String conversionTimeUnit(long milliseconds) {
 		StringBuilder stringBuilder = new StringBuilder();
 		milliseconds = Math.abs(milliseconds);
 		if(milliseconds >= (60 * 60 * 1000)) {
