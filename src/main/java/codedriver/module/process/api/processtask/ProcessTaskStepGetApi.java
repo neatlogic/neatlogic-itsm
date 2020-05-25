@@ -346,18 +346,20 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				List<ProcessTaskSlaVo> processTaskSlaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(processTaskStepId);
 				for(ProcessTaskSlaVo processTaskSlaVo : processTaskSlaList) {
 					ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskSlaVo.getSlaTimeVo();
-					processTaskSlaTimeVo.setName(processTaskSlaVo.getName());
-					if(processTaskSlaTimeVo.getExpireTime() != null) {
-						long timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
-						processTaskSlaTimeVo.setTimeLeft(timeLeft);
-						processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
+					if(processTaskSlaTimeVo != null) {
+						processTaskSlaTimeVo.setName(processTaskSlaVo.getName());
+						if(processTaskSlaTimeVo.getExpireTime() != null) {
+							long timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
+							processTaskSlaTimeVo.setTimeLeft(timeLeft);
+							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
+						}
+						if(processTaskSlaTimeVo.getRealExpireTime() != null) {
+							long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
+							processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
+							processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
+						}
+						processTaskStepVo.getSlaTimeList().add(processTaskSlaTimeVo);
 					}
-					if(processTaskSlaTimeVo.getRealExpireTime() != null) {
-						long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
-						processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
-						processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
-					}
-					processTaskStepVo.getSlaTimeList().add(processTaskSlaTimeVo);
 				}
 				processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
 			}

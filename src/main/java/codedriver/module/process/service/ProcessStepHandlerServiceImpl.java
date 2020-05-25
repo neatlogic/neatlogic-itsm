@@ -42,6 +42,7 @@ public class ProcessStepHandlerServiceImpl implements ProcessStepHandlerService 
             			ProcessStepHandlerVo handlerConfig = handlerConfigMap.get(handler.getHandler());
             			if(handlerConfig == null) {
             				handlerConfig = new ProcessStepHandlerVo();
+            				handlerConfig.setHandler(handler.getHandler());
             			}
             			handlerConfig.setName(handler.getName());
         				resultList.add(handlerConfig);

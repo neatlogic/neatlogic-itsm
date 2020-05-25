@@ -71,10 +71,8 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
 	})
 	@Output({
-		@Param(name = "Return[n].processTaskId", type = ApiParamType.LONG, desc = "工单id"),
-		@Param(name = "Return[n].title", type = ApiParamType.STRING, desc = "工单标题"),
-		@Param(name = "Return[n].processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
-		@Param(name = "Return[n].stepName", type = ApiParamType.STRING, desc = "步骤名")
+		@Param(name = "taskList", type = ApiParamType.JSONARRAY, desc = "任务列表"),
+		@Param(explode = BasePageVo.class)
 	})
 	@Description(desc = "当前用户任务列表接口")
 	@Override
@@ -115,19 +113,21 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 				processTaskStepIdList.addAll(processTaskStepIdListMap.get(processTask.getId()));
 			}
 		}
-		processTaskStepIdList.sort(Long::compare);
+		processTaskStepIdList.sort((e1, e2) -> -e1.compareTo(e2));
 		int rowNum = processTaskStepIdList.size();
 		int fromIndex = basePageVo.getStartNum();
 		JSONArray taskList = new JSONArray();
+		JSONArray currentTaskList = new JSONArray();
 		if(fromIndex < rowNum) {
 			int toIndex = fromIndex + basePageVo.getPageSize();
 			toIndex = toIndex <= rowNum ? toIndex : rowNum;
 			processTaskStepIdList = processTaskStepIdList.subList(fromIndex, toIndex);
+			if(isCurrentProcessTaskTop && processTaskIdList.contains(currentProcessTaskId)) {
+				processTaskStepIdList.addAll(processTaskStepIdListMap.get(currentProcessTaskId));
+			}
 			if(CollectionUtils.isNotEmpty(processTaskStepIdList)) {
-				if(isCurrentProcessTaskTop && processTaskIdList.contains(currentProcessTaskId)) {
-					processTaskStepIdList.addAll(0, processTaskStepIdListMap.get(currentProcessTaskId));
-				}
 				List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+				processTaskStepList.sort((e1, e2) -> -e1.getId().compareTo(e2.getId()));
 				Map<Long, ProcessTaskSlaTimeVo> stepSlaTimeMap = new HashMap<>();
 				List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskMapper.getProcessTaskSlaTimeByProcessTaskStepIdList(processTaskStepIdList);
 				for(ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
@@ -169,7 +169,14 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 						}
 						task.put("slaTimeVo", processTaskSlaTimeVo);
 					}
-					taskList.add(task);
+					if(Objects.equal(processTaskStep.getProcessTaskId(), currentProcessTaskId)) {
+						currentTaskList.add(task);
+					}else {
+						taskList.add(task);
+					}
+				}
+				if(CollectionUtils.isNotEmpty(currentTaskList)) {
+					taskList.addAll(0, currentTaskList);
 				}
 			}
 		}
