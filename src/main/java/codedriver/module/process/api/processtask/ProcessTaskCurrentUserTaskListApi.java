@@ -185,23 +185,27 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 	private String conversionTimeUnit(long milliseconds) {
 		StringBuilder stringBuilder = new StringBuilder();
 		milliseconds = Math.abs(milliseconds);
-		if(milliseconds >= (60 * 60 * 1000)) {
-			long hours = milliseconds / (60 * 60 * 1000);
-			stringBuilder.append(hours);
-			stringBuilder.append("小时");
-			milliseconds = milliseconds % (60 * 60 * 1000);
-		}
-		if(milliseconds >= (60 * 1000)) {
-			long minutes = milliseconds / (60 * 1000);
-			stringBuilder.append(minutes);
-			stringBuilder.append("分钟");
-			milliseconds = milliseconds % (60 * 1000);
-		}
-		if(milliseconds >= 1000) {
-			long seconds = milliseconds / 1000;
-			stringBuilder.append(seconds);
-			stringBuilder.append("秒");
-		}
+		if(milliseconds < 1000) {
+			stringBuilder.append("0秒");
+		} else {
+			if(milliseconds >= (60 * 60 * 1000)) {
+				long hours = milliseconds / (60 * 60 * 1000);
+				stringBuilder.append(hours);
+				stringBuilder.append("小时");
+				milliseconds = milliseconds % (60 * 60 * 1000);
+			}
+			if(milliseconds >= (60 * 1000)) {
+				long minutes = milliseconds / (60 * 1000);
+				stringBuilder.append(minutes);
+				stringBuilder.append("分钟");
+				milliseconds = milliseconds % (60 * 1000);
+			}
+			if(milliseconds >= 1000) {
+				long seconds = milliseconds / 1000;
+				stringBuilder.append(seconds);
+				stringBuilder.append("秒");
+			}
+		}	
 		return stringBuilder.toString();
 	}
 }
