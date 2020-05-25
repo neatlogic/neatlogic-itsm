@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -541,13 +540,7 @@ public class WorkcenterService {
 	            	taskJson.put("taskid", el.getId());
 	            	for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
 	            		IWorkcenterColumn column = entry.getValue();
-	            		String value =column.getValue(el) == null ? StringUtils.EMPTY:column.getValue(el).toString();
-	            		if(value.startsWith("{")&&value.endsWith("}")) {
-	    					JSONObject groupJson = ((JSONObject)JSONObject.parse(value));
-	    					taskJson.put(column.getName(),groupJson.getString("text"));
-	    				}else {
-	    					taskJson.put(column.getName(), column.getValue(el));
-	    				}
+    					taskJson.put(column.getName(),column.getValueText(el));
 	            	}
 	            	dataList.add(taskJson);
 				}
