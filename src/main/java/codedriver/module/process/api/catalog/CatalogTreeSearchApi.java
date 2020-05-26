@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -76,7 +77,7 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedChannelUuidList);
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();		
-		if(catalogList != null && catalogList.size() > 0) {
+		if(CollectionUtils.isNotEmpty(catalogList)) {
 			for(CatalogVo catalogVo : catalogList) {
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 			}

@@ -13,12 +13,14 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogIllegalParameterException;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.CatalogService;
 
 @Service
 @Transactional
@@ -26,6 +28,9 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	
 	@Autowired
 	private CatalogMapper catalogMapper;
+	
+	@Autowired
+	private CatalogService catalogService;
 	
 	@Autowired
 	private ChannelMapper channelMapper;
@@ -51,6 +56,10 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	@Description(desc = "服务目录删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		catalogMapper.getCatalogLockByUuid(ITree.ROOT_UUID);
+		if(!catalogService.checkLeftRightCodeIsExists()) {
+			catalogService.rebuildLeftRightCode(ITree.ROOT_PARENTUUID, 0);
+		}
 		String uuid = jsonObj.getString("uuid");
 		CatalogVo existsCatalog = catalogMapper.getCatalogByUuid(uuid);
 		if(existsCatalog == null) {
@@ -74,7 +83,10 @@ public class CatalogDeteleApi extends ApiComponentBase {
 		}
 		catalogMapper.deleteCatalogByUuid(uuid);
 		catalogMapper.deleteCatalogAuthorityByCatalogUuid(uuid);
-		catalogMapper.updateSortDecrement(existsCatalog.getParentUuid(), existsCatalog.getSort(), null);
+		//更新删除位置右边的左右编码值
+		catalogMapper.batchUpdateCatalogLeftCode(existsCatalog.getLft(), -2);
+		catalogMapper.batchUpdateCatalogRightCode(existsCatalog.getLft(), -2);
+//		catalogMapper.updateSortDecrement(existsCatalog.getParentUuid(), existsCatalog.getSort(), null);
 //		channelMapper.updateSortDecrement(existsCatalog.getSort(), null);
 		return null;
 	}

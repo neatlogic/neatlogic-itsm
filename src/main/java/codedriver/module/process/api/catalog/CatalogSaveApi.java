@@ -15,6 +15,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dto.CatalogVo;
+import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogNameRepeatException;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -22,6 +23,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.CatalogService;
 
 @Service
 @Transactional
@@ -29,6 +31,9 @@ public class CatalogSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
+
+	@Autowired
+	private CatalogService catalogService;
 	
 	@Override
 	public String getToken() {
@@ -61,26 +66,38 @@ public class CatalogSaveApi extends ApiComponentBase {
 	@Description(desc = "服务目录保存信息接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		catalogMapper.getCatalogLockByUuid(ITree.ROOT_UUID);
+		if(!catalogService.checkLeftRightCodeIsExists()) {
+			catalogService.rebuildLeftRightCode(ITree.ROOT_PARENTUUID, 0);
+		}
 		CatalogVo catalogVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<CatalogVo>() {});
 		//获取父级信息
 		String parentUuid = catalogVo.getParentUuid();
-		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
+		CatalogVo parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
+		if(parentCatalog == null) {
 			throw new CatalogNotFoundException(parentUuid);
 		}
 		if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
 			throw new CatalogNameRepeatException(catalogVo.getName());
 		}
-		int sort;
+//		int sort;
 		String uuid = catalogVo.getUuid();
 		CatalogVo existedCatalog = catalogMapper.getCatalogByUuid(uuid);
 		if(existedCatalog == null) {//新增
 			catalogVo.setUuid(null);
-			sort = catalogMapper.getMaxSortByParentUuid(parentUuid) + 1;
+			catalogVo.setLft(parentCatalog.getRht());
+			catalogVo.setRht(catalogVo.getLft() + 1);
+			//更新插入位置右边的左右编码值
+			catalogMapper.batchUpdateCatalogLeftCode(catalogVo.getLft(), 2);
+			catalogMapper.batchUpdateCatalogRightCode(catalogVo.getLft(), 2);
+//			sort = catalogMapper.getMaxSortByParentUuid(parentUuid) + 1;
 		}else {//修改
 			catalogMapper.deleteCatalogAuthorityByCatalogUuid(uuid);
-			sort = existedCatalog.getSort();
+			catalogVo.setLft(existedCatalog.getLft());
+			catalogVo.setRht(existedCatalog.getRht());
+//			sort = existedCatalog.getSort();
 		}
-		catalogVo.setSort(sort);
+//		catalogVo.setSort(sort);
 		catalogMapper.replaceCatalog(catalogVo);
 		List<AuthorityVo> authorityList = catalogVo.getAuthorityVoList();
 		if(CollectionUtils.isNotEmpty(authorityList)) {
