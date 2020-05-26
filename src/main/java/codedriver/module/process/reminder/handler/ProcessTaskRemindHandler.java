@@ -1,7 +1,7 @@
 package codedriver.module.process.reminder.handler;
 
-import codedriver.framework.reminder.core.GlobalReminderBase;
-import codedriver.framework.reminder.dto.param.GlobalReminderParamVo;
+import codedriver.framework.reminder.core.GlobalReminderHandlerBase;
+import codedriver.framework.reminder.dto.param.GlobalReminderHandlerParamVo;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
@@ -14,7 +14,7 @@ import java.util.List;
  * @create: 2019-12-12 10:55
  **/
 @Service
-public class ProcessTaskRemindHandler extends GlobalReminderBase {
+public class ProcessTaskRemindHandler extends GlobalReminderHandlerBase {
 
     @Override
     public String getName() {
@@ -22,7 +22,7 @@ public class ProcessTaskRemindHandler extends GlobalReminderBase {
     }
 
     @Override
-    public String getPluginId(){
+    public String getHandler(){
         return ClassUtils.getUserClass(this.getClass()).getName();
     }
 
@@ -32,22 +32,12 @@ public class ProcessTaskRemindHandler extends GlobalReminderBase {
     }
 
     @Override
-    public String getShowTemplate() {
-        return "balantflow.instantmessage.message.flow";
-    }
-
-    @Override
-    public String getPopUpTemplate() {
-        return "balantflow.instantmessage.message.modelshow";
-    }
-
-    @Override
     public void packMyData(JSONObject resultObj, JSONObject controlData) {
 
     }
 
     @Override
-    public void myConfig(List<GlobalReminderParamVo> paramVoList) {
+    public void myConfig(List<GlobalReminderHandlerParamVo> paramVoList) {
 
     }
 }

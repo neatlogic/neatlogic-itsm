@@ -1,8 +1,8 @@
 package codedriver.module.process.counter.handler;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.reminder.core.GlobalReminderFactory;
-import codedriver.framework.reminder.core.IGlobalReminder;
+import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
+import codedriver.framework.reminder.core.IGlobalReminderHandler;
 import codedriver.framework.reminder.dto.ReminderMessageVo;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -57,7 +57,7 @@ public class RemindItsmTestApi extends ApiComponentBase {
             message.setParamObj(jsonObj.getJSONObject("paramObj"));
         }
         message.setReceiverList(userUuidList);
-        IGlobalReminder reminder = GlobalReminderFactory.getReminder(ProcessTaskRemindHandler.class.getName());
+        IGlobalReminderHandler reminder = GlobalReminderHandlerFactory.getReminder(ProcessTaskRemindHandler.class.getName());
         reminder.send(message);
         return new JSONObject();
     }
