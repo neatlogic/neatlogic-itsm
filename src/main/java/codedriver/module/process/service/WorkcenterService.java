@@ -403,7 +403,7 @@ public class WorkcenterService {
 				}
 			}
 			List<ConditionVo> conditionList = group.getConditionList();
-			//按es and 组合
+			//按es and 组合,数组元素之间用or
 			JSONArray conditionRelationArray = new JSONArray();
 			ConditionVo fromCondition = null;
 			ArrayList<ConditionVo> andConditionList = new ArrayList<ConditionVo>();
@@ -422,16 +422,27 @@ public class WorkcenterService {
 						conditionRelationJson.put("list", andConditionList);
 						conditionRelationJson.put("isNested", false);
 						conditionRelationArray.add(conditionRelationJson);
+						andConditionList = new ArrayList<ConditionVo>();
 					}
+					andConditionList.add(condition);
 					continue;
 				}
 				String conditionUuid = condition.getUuid();
 				String conditionType = conditionRelMap.get(fromCondition.getUuid()+"_"+conditionUuid);
-				if(conditionType.equals("and")) {
-					andConditionList.add(fromCondition);
+				if(i != conditionList.size()-1&&conditionType.equals("and")) {
+					andConditionList.add(condition);
 				}
-				
-				if(i == conditionList.size()-1||conditionType.equals("or")) {
+				if(conditionType.equals("or")) {//如果是or 则另新建数组元素
+					JSONObject conditionRelationJson = new JSONObject();
+					conditionRelationJson.put("list", andConditionList);
+					conditionRelationJson.put("isNested", false);
+					conditionRelationArray.add(conditionRelationJson);
+					andConditionList = new ArrayList<ConditionVo>();
+					if(i != conditionList.size()-1) {
+						andConditionList.add(condition);
+					}
+				}
+				if(i == conditionList.size()-1) {
 					andConditionList.add(condition);
 					Collections.sort(andConditionList, new Comparator<Object>() {
 						@Override
