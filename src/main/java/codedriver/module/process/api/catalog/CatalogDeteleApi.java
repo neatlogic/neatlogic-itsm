@@ -55,6 +55,8 @@ public class CatalogDeteleApi extends ApiComponentBase {
 		CatalogVo existsCatalog = catalogMapper.getCatalogByUuid(uuid);
 		if(existsCatalog == null) {
 			throw new CatalogNotFoundException(uuid);
+		}else if("1".equals(uuid)) {
+			throw new CatalogIllegalParameterException("未分类目录不能删除");
 		}
 		
 		CatalogVo catalogVo = new CatalogVo();

@@ -21,7 +21,9 @@ import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
@@ -47,6 +49,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+
+    @Autowired
+    private ProcessStepHandlerMapper stepHandlerMapper;
 	
 	@Override
 	public String getToken() {
@@ -84,7 +89,18 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		if(processTaskStepList.size() != 1) {
 			throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 		}
+		Map<String, ProcessStepHandlerVo> handlerConfigMap = new HashMap<>();
+        List<ProcessStepHandlerVo> handlerConfigList = stepHandlerMapper.getProcessStepHandlerConfig();
+        for(ProcessStepHandlerVo handlerConfig : handlerConfigList) {
+        	handlerConfigMap.put(handlerConfig.getHandler(), handlerConfig);
+        }
 		ProcessTaskStepVo startStepVo = processTaskStepList.get(0);
+		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startStepVo.getConfigHash());
+		startStepVo.setConfig(startStepConfig);
+		ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(startStepVo.getHandler());
+		if(processStepHandlerConfig != null) {
+			startStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+		}
 		List<ProcessTaskStepUserVo> startStepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(startStepMajorUserList)) {
 			startStepVo.setMajorUser(startStepMajorUserList.get(0));
@@ -242,6 +258,10 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 				}
 				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 				processTaskStepVo.setConfig(stepConfig);
+				processStepHandlerConfig = handlerConfigMap.get(processTaskStepVo.getHandler());
+				if(processStepHandlerConfig != null) {
+					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+				}
 			}
 		}
 		resultList.add(0, startStepVo);

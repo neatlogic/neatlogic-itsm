@@ -27,17 +27,21 @@ import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.dto.PriorityVo;
+import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
+import codedriver.framework.process.dto.ProcessTaskSlaVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
@@ -79,6 +83,9 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+
+    @Autowired
+    private ProcessStepHandlerMapper stepHandlerMapper;
 	
 	@Autowired
 	private FileMapper fileMapper;
@@ -104,8 +111,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")
 	})
 	@Output({
-		@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "工单信息"),
-		@Param(name = "processTaskStep", explode = ProcessTaskStepVo.class, desc = "工单步骤信息")
+		@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "工单信息")
 	})
 	@Description(desc = "工单步骤基本信息获取接口，当前步骤名称、激活时间、状态、处理人、协助处理人、处理时效、表单属性显示控制等")
 	@Override
@@ -140,9 +146,18 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(processTaskStepList.size() != 1) {
 			throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 		}
+		Map<String, ProcessStepHandlerVo> handlerConfigMap = new HashMap<>();
+        List<ProcessStepHandlerVo> handlerConfigList = stepHandlerMapper.getProcessStepHandlerConfig();
+        for(ProcessStepHandlerVo handlerConfig : handlerConfigList) {
+        	handlerConfigMap.put(handlerConfig.getHandler(), handlerConfig);
+        }
 		ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
 		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
 		startProcessTaskStepVo.setConfig(startStepConfig);
+		ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(startProcessTaskStepVo.getHandler());
+		if(processStepHandlerConfig != null) {
+			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+		}
 		Long startProcessTaskStepId = startProcessTaskStepVo.getId();
 		ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
 		//获取上报描述内容
@@ -225,7 +240,10 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 				processTaskStepVo.setConfig(stepConfig);
-				
+				processStepHandlerConfig = handlerConfigMap.get(processTaskStepVo.getHandler());
+				if(processStepHandlerConfig != null) {
+					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+				}
 				//处理人列表
 				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 				if(CollectionUtils.isNotEmpty(majorUserList)) {
@@ -323,6 +341,26 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					}
 					processTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
 				}
+				
+				//时效列表
+				List<ProcessTaskSlaVo> processTaskSlaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(processTaskStepId);
+				for(ProcessTaskSlaVo processTaskSlaVo : processTaskSlaList) {
+					ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskSlaVo.getSlaTimeVo();
+					if(processTaskSlaTimeVo != null) {
+						processTaskSlaTimeVo.setName(processTaskSlaVo.getName());
+						if(processTaskSlaTimeVo.getExpireTime() != null) {
+							long timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
+							processTaskSlaTimeVo.setTimeLeft(timeLeft);
+							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
+						}
+						if(processTaskSlaTimeVo.getRealExpireTime() != null) {
+							long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
+							processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
+							processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
+						}
+						processTaskStepVo.getSlaTimeList().add(processTaskSlaTimeVo);
+					}
+				}
 				processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
 			}
 		}
@@ -345,5 +383,31 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		}
 		return resultObj;
 	}
-
+	
+	private String conversionTimeUnit(long milliseconds) {
+		StringBuilder stringBuilder = new StringBuilder();
+		milliseconds = Math.abs(milliseconds);
+		if(milliseconds < 1000) {
+			stringBuilder.append("0秒");
+		} else {
+			if(milliseconds >= (60 * 60 * 1000)) {
+				long hours = milliseconds / (60 * 60 * 1000);
+				stringBuilder.append(hours);
+				stringBuilder.append("小时");
+				milliseconds = milliseconds % (60 * 60 * 1000);
+			}
+			if(milliseconds >= (60 * 1000)) {
+				long minutes = milliseconds / (60 * 1000);
+				stringBuilder.append(minutes);
+				stringBuilder.append("分钟");
+				milliseconds = milliseconds % (60 * 1000);
+			}
+			if(milliseconds >= 1000) {
+				long seconds = milliseconds / 1000;
+				stringBuilder.append(seconds);
+				stringBuilder.append("秒");
+			}
+		}
+		return stringBuilder.toString();
+	}
 }
