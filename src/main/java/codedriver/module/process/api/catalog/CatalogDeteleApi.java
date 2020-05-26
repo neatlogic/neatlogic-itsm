@@ -86,8 +86,6 @@ public class CatalogDeteleApi extends ApiComponentBase {
 		//更新删除位置右边的左右编码值
 		catalogMapper.batchUpdateCatalogLeftCode(existsCatalog.getLft(), -2);
 		catalogMapper.batchUpdateCatalogRightCode(existsCatalog.getLft(), -2);
-//		catalogMapper.updateSortDecrement(existsCatalog.getParentUuid(), existsCatalog.getSort(), null);
-//		channelMapper.updateSortDecrement(existsCatalog.getSort(), null);
 		return null;
 	}
 

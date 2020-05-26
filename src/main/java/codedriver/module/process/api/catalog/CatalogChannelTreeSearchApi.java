@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +57,7 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		String parentUuid = null;
 		ITree parent = null;
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(null);
-		if(catalogList != null && catalogList.size() > 0) {
+		if(CollectionUtils.isNotEmpty(catalogList)) {
 			for(CatalogVo catalogVo : catalogList) {
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);			
 			}
@@ -70,7 +71,7 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		}
 		
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
-		if(channelList != null && channelList.size() > 0) {
+		if(CollectionUtils.isNotEmpty(channelList)) {
 			for(ChannelVo channelVo : channelList) {
 				parentUuid = channelVo.getParentUuid();
 				parent = uuidKeyMap.get(parentUuid);

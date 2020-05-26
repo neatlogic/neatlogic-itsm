@@ -80,7 +80,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
 			throw new CatalogNameRepeatException(catalogVo.getName());
 		}
-//		int sort;
+
 		String uuid = catalogVo.getUuid();
 		CatalogVo existedCatalog = catalogMapper.getCatalogByUuid(uuid);
 		if(existedCatalog == null) {//新增
@@ -90,14 +90,12 @@ public class CatalogSaveApi extends ApiComponentBase {
 			//更新插入位置右边的左右编码值
 			catalogMapper.batchUpdateCatalogLeftCode(catalogVo.getLft(), 2);
 			catalogMapper.batchUpdateCatalogRightCode(catalogVo.getLft(), 2);
-//			sort = catalogMapper.getMaxSortByParentUuid(parentUuid) + 1;
 		}else {//修改
 			catalogMapper.deleteCatalogAuthorityByCatalogUuid(uuid);
 			catalogVo.setLft(existedCatalog.getLft());
 			catalogVo.setRht(existedCatalog.getRht());
-//			sort = existedCatalog.getSort();
 		}
-//		catalogVo.setSort(sort);
+
 		catalogMapper.replaceCatalog(catalogVo);
 		List<AuthorityVo> authorityList = catalogVo.getAuthorityVoList();
 		if(CollectionUtils.isNotEmpty(authorityList)) {

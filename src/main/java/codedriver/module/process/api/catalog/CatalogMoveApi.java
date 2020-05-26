@@ -73,82 +73,14 @@ public class CatalogMoveApi extends ApiComponentBase {
 		//目录只能移动到目录后面，不能移动到通道后面
 		//目录只能移进目录里面，不能移进通道里面
 		//所以目标节点只能是目录
-		//目标节点uuid
-		String targetUuid = jsonObj.getString("targetUuid");
-		
-//		Integer targetSort;
-//		Integer newSort;
-//
-//		if(parentUuid.equals(targetUuid)) {
-//			//移进目标节点里面
-//			targetSort = catalogMapper.getMaxSortByParentUuid(parentUuid);
-//		}else {
-//			//移动到目标节点前面或后面
-//			CatalogVo targetCatalog = catalogMapper.getCatalogByUuid(targetUuid);
-//			//判断目标节点服务目录是否存在
-//			if(targetCatalog == null) {
-//				throw new CatalogNotFoundException(targetUuid);
-//			}
-//			if(!parentUuid.equals(targetCatalog.getParentUuid())) {
-//				throw new CatalogIllegalParameterException("服务目录：'" + targetUuid + "'不是服务目录：'" + parentUuid + "'的子目录");
-//			}
-//			targetSort = targetCatalog.getSort();
-//		}
-//		Integer oldSort = moveCatalog.getSort();
-//		String moveType = jsonObj.getString("moveType");
-//		//判断是否是在相同目录下移动
-//		if(parentUuid.equals(moveCatalog.getParentUuid())) {
-//			//相同目录下移动
-//			if(oldSort.compareTo(targetSort) == -1) {//往后移动, 移动前后两个位置直接的服务目录序号减一
-//				if("prev".equals(moveType)) {
-//					newSort = targetSort - 1;
-//				}else{
-//					newSort = targetSort;
-//				}
-//				catalogMapper.updateSortDecrement(parentUuid, oldSort + 1, newSort);
-//			}else {//往前移动, 移动前后两个位置直接的服务目录序号加一
-//				if("prev".equals(moveType)) {
-//					newSort = targetSort;
-//				}else{
-//					newSort = targetSort + 1;
-//				}
-//				catalogMapper.updateSortIncrement(parentUuid, newSort, oldSort - 1);
-//			}
-//		}else {
-//			//不同同目录下移动
-//			if("prev".equals(moveType)) {
-//				newSort = targetSort;
-//			}else{
-//				newSort = targetSort + 1;
-//			}
-//			//旧目录，被移动目录后面的兄弟节点序号减一
-//			catalogMapper.updateSortDecrement(moveCatalog.getParentUuid(), oldSort + 1, null);
-//			//新目录，目标目录后面的兄弟节点序号加一
-//			catalogMapper.updateSortIncrement(parentUuid, newSort, null);
-//		}
-//		
-//		moveCatalog.setSort(newSort);
-//		moveCatalog.setParentUuid(parentUuid);
-//		catalogMapper.updateCatalogForMove(moveCatalog);
-//		//判断移动后是否会脱离根目录
-//		String parentUuidTemp = parentUuid;
-//		while(!ITree.ROOT_UUID.equals(parentUuidTemp)) {
-//			CatalogVo parent = catalogMapper.getCatalogByUuid(parentUuidTemp);
-//			if(parent == null) {
-//				throw new CatalogIllegalParameterException("将服务目录：" + uuid + "的parentUuid设置为：" + parentUuid + "会导致该目录脱离根目录");
-//			}
-//			parentUuidTemp = parent.getParentUuid();
-//			if(parentUuid.equals(parentUuidTemp)) {
-//				throw new CatalogIllegalParameterException("将服务目录：" + uuid + "的parentUuid设置为：" + parentUuid + "会导致该目录脱离根目录");
-//			}
-//		}
-		//-------------------------------------------------------------------------------------------------------
 		if(Objects.equal(uuid, parentUuid)) {
         	throw new CatalogIllegalParameterException("移动后的父节点不可以是当前节点");
         }
         //找出被移动块移动后左编码值     	
 		int lft = 0;
 		String moveType = jsonObj.getString("moveType");
+		//目标节点uuid
+		String targetUuid = jsonObj.getString("targetUuid");
 		if(parentUuid.equals(targetUuid)) {//移动到末尾
 			lft = parentCatalog.getRht();
  		}else {
