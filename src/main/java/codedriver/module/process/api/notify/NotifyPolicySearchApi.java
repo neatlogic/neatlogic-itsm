@@ -79,6 +79,11 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 			resultObj.put("pageSize", basePageVo.getPageSize());
 			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, basePageVo.getPageSize()));
 			resultObj.put("rowNum", rowNum);
+			int fromIndex = basePageVo.getStartNum();
+			fromIndex = fromIndex >= rowNum ? rowNum - 1 : fromIndex;
+			int toIndex = fromIndex + basePageVo.getPageSize();
+			toIndex = toIndex > rowNum ? rowNum : toIndex;
+			tbodyList = tbodyList.subList(fromIndex, toIndex);
 		}
 		resultObj.put("tbodyList", tbodyList);
 		return resultObj;
