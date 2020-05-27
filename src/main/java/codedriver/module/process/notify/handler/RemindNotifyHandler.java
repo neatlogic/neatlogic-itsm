@@ -3,8 +3,8 @@ package codedriver.module.process.notify.handler;
 import codedriver.framework.process.notify.core.NotifyHandlerBase;
 import codedriver.framework.process.notify.core.NotifyHandlerType;
 import codedriver.framework.process.notify.dto.NotifyVo;
-import codedriver.framework.reminder.core.GlobalReminderFactory;
-import codedriver.framework.reminder.core.IGlobalReminder;
+import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
+import codedriver.framework.reminder.core.IGlobalReminderHandler;
 import codedriver.framework.reminder.dto.ReminderMessageVo;
 import codedriver.module.process.reminder.handler.ProcessTaskRemindHandler;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ public class RemindNotifyHandler extends NotifyHandlerBase {
             message.setContent(notifyVo.getContent());
             message.setFromUser(notifyVo.getFromUser());
             message.setReceiverList(notifyVo.getToUserUuidList());
-            IGlobalReminder reminder = GlobalReminderFactory.getReminder(ProcessTaskRemindHandler.class.getName());
+            IGlobalReminderHandler reminder = GlobalReminderHandlerFactory.getReminder(ProcessTaskRemindHandler.class.getName());
             reminder.send(message);
         }
     }
