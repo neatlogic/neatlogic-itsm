@@ -55,23 +55,22 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 	
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
-		List<NotifyPolicyVo> notifyPolicyList = new ArrayList<>();
-		for(Entry<String, NotifyPolicyVo> entry : NotifyPolicyVo.notifyPolicyMap.entrySet()) {
-			notifyPolicyList.add(entry.getValue());
-		}
-		notifyPolicyList.sort((e1, e2) -> -e1.getActionTime().compareTo(e2.getActionTime()));
 		JSONObject resultObj = new JSONObject();
 		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
 		List<NotifyPolicyVo> tbodyList = new ArrayList<>();
-		if(StringUtils.isNoneBlank(basePageVo.getKeyword())) {
-			for(NotifyPolicyVo notifyPolicy : notifyPolicyList) {
+
+		for(Entry<String, NotifyPolicyVo> entry : NotifyPolicyVo.notifyPolicyMap.entrySet()) {
+			NotifyPolicyVo notifyPolicy = entry.getValue();
+			if(StringUtils.isNoneBlank(basePageVo.getKeyword())) {
 				if(notifyPolicy.getName().equalsIgnoreCase(basePageVo.getKeyword())) {
 					tbodyList.add(notifyPolicy);
 				}
+			}else {
+				tbodyList.add(notifyPolicy);
 			}
-		}else {
-			tbodyList = notifyPolicyList;
 		}
+
+		tbodyList.sort((e1, e2) -> -e1.getActionTime().compareTo(e2.getActionTime()));
 		
 		if(basePageVo.getNeedPage()) {
 			int rowNum = tbodyList.size();
@@ -79,11 +78,13 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 			resultObj.put("pageSize", basePageVo.getPageSize());
 			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, basePageVo.getPageSize()));
 			resultObj.put("rowNum", rowNum);
-			int fromIndex = basePageVo.getStartNum();
-			fromIndex = fromIndex >= rowNum ? rowNum - 1 : fromIndex;
-			int toIndex = fromIndex + basePageVo.getPageSize();
-			toIndex = toIndex > rowNum ? rowNum : toIndex;
-			tbodyList = tbodyList.subList(fromIndex, toIndex);
+			if(rowNum > 0) {
+				int fromIndex = basePageVo.getStartNum();
+				fromIndex = fromIndex >= rowNum ? rowNum - 1 : fromIndex;
+				int toIndex = fromIndex + basePageVo.getPageSize();
+				toIndex = toIndex > rowNum ? rowNum : toIndex;
+				tbodyList = tbodyList.subList(fromIndex, toIndex);
+			}		
 		}
 		resultObj.put("tbodyList", tbodyList);
 		return resultObj;
