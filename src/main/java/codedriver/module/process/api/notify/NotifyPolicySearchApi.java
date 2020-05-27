@@ -2,6 +2,7 @@ package codedriver.module.process.api.notify;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,11 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 	
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
-		List<NotifyPolicyVo> notifyPolicyList = NotifyPolicyVo.notifyPolicyList;
+		List<NotifyPolicyVo> notifyPolicyList = new ArrayList<>();
+		for(Entry<String, NotifyPolicyVo> entry : NotifyPolicyVo.notifyPolicyMap.entrySet()) {
+			notifyPolicyList.add(entry.getValue());
+		}
+		notifyPolicyList.sort((e1, e2) -> -e1.getActionTime().compareTo(e2.getActionTime()));
 		JSONObject resultObj = new JSONObject();
 		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
 		List<NotifyPolicyVo> tbodyList = new ArrayList<>();

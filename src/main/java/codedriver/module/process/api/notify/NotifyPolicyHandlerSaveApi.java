@@ -3,9 +3,12 @@ package codedriver.module.process.api.notify;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.dto.NotifyPolicyVo;
+import codedriver.framework.process.exception.notify.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -45,6 +48,23 @@ public class NotifyPolicyHandlerSaveApi  extends ApiComponentBase {
 	
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
+		String uuid = jsonObj.getString("uuid");
+		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(uuid);
+		if(notifyPolicyVo == null) {
+			throw new NotifyPolicyNotFoundException(uuid);
+		}
+
+		String trigger = jsonObj.getString("trigger");
+		JSONArray handlerList = jsonObj.getJSONArray("handlerList");
+		JSONObject configObj = notifyPolicyVo.getConfigObj();
+		JSONArray triggerList = configObj.getJSONArray("triggerList");
+		for(int i = 0; i < triggerList.size(); i++) {
+			JSONObject triggerObj = triggerList.getJSONObject(i);
+			if(trigger.equals(triggerObj.getString("trigger"))) {
+				triggerObj.put("handlerList", handlerList);
+			}
+		}
+		notifyPolicyVo.setConfig(configObj.toJSONString());
 		return null;
 	}
 

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dto.NotifyPolicyVo;
+import codedriver.framework.process.exception.notify.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -43,7 +44,12 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 	
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
-		return null;
+		String uuid = jsonObj.getString("uuid");
+		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(uuid);
+		if(notifyPolicyVo == null) {
+			throw new NotifyPolicyNotFoundException(uuid);
+		}
+		return notifyPolicyVo;
 	}
 
 }

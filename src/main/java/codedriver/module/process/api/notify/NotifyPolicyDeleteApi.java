@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.process.dto.NotifyPolicyVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -42,6 +43,8 @@ public class NotifyPolicyDeleteApi  extends ApiComponentBase {
 	
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
+		String uuid = jsonObj.getString("uuid");
+		NotifyPolicyVo.notifyPolicyMap.remove(uuid);
 		return null;
 	}
 
