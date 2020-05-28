@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -336,7 +337,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	}
 
 	@Override
-	public void commentSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
+	public List<ProcessTaskStepSubtaskContentVo> commentSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
 		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
 		if(currentProcessTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
@@ -350,7 +351,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
 			processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.COMMENTSUBTASK.getValue(), processTaskContentVo.getHash()));
 		}
-		
+		List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
+		Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
+		while(iterator.hasNext()) {
+			ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
+			if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
+				if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+					processTaskStepSubtaskVo.setContent(processTaskStepSubtaskContentVo.getContent());
+					iterator.remove();
+				}
+			}
+		}
+		return processTaskStepSubtaskContentList;
 	}
 	
 	@Override

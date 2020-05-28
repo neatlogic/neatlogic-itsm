@@ -54,7 +54,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			Map<String, String> valueTextMap =  new HashMap<String,String>();
 			if(configChart.containsKey("groupfield")) {
 				for (ProcessWorkcenterField s : ProcessWorkcenterField.values()) {
-					if(s.getValue().equals(configChart.getString("groupfield"))) {
+					if(s.getValue().equals(configChart.getString("groupfield"))||s.getValue().equals(configChart.getString("subgroupfield"))) {
 						JSONArray dataList = ProcessTaskConditionFactory.getHandler(s.getValue()).getConfig().getJSONArray("dataList");
 						for(Object obj:dataList) {
 							JSONObject json = (JSONObject)obj;

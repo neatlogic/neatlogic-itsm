@@ -45,7 +45,7 @@ public class ProcessTaskStepSubtaskCompleteApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
+		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "描述")
 	})
 	@Output({})
 	@Description(desc = "子任务完成接口")

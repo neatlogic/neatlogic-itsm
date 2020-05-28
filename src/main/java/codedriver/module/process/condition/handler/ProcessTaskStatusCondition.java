@@ -77,6 +77,11 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
 		jsonObj3.put("text", ProcessTaskStatus.SUCCEED.getText());
 		jsonList.add(jsonObj3);
 		
+		JSONObject jsonObj4 = new JSONObject();
+		jsonObj4.put("value", ProcessTaskStatus.DRAFT.getValue());
+		jsonObj4.put("text", ProcessTaskStatus.DRAFT.getText());
+		jsonList.add(jsonObj4);
+		
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("dataList", jsonList);
 		returnObj.put("isMultiple", true);
