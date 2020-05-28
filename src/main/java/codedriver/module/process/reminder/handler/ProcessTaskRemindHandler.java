@@ -1,7 +1,7 @@
 package codedriver.module.process.reminder.handler;
 
 import codedriver.framework.reminder.core.GlobalReminderHandlerBase;
-import codedriver.framework.reminder.dto.param.GlobalReminderHandlerParamVo;
+import codedriver.framework.reminder.dto.param.GlobalReminderHandlerConfigVo;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
@@ -37,7 +37,7 @@ public class ProcessTaskRemindHandler extends GlobalReminderHandlerBase {
     }
 
     @Override
-    public void myConfig(List<GlobalReminderHandlerParamVo> paramVoList) {
+    public void myConfig(List<GlobalReminderHandlerConfigVo> paramVoList) {
 
     }
 }

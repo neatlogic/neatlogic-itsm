@@ -1,5 +1,8 @@
 package codedriver.module.process.dashboard.handler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,15 +43,29 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			jsonObj = JSONObject.parseObject(widgetVo.getConditionConfig());
 			QueryResultSet resultSet = workcenterService.searchTaskIterate(new WorkcenterVo(jsonObj));
 			JSONObject preDatas = new JSONObject();
+			JSONObject configChart = widgetVo.getChartConfigObj();
 			while(resultSet.hasMoreResults()) {
 				JSONArray nextDataList = workcenterService.getSearchIterate(resultSet).getJSONArray("tbodyList");
 				if (CollectionUtils.isNotEmpty(nextDataList)) {
-					preDatas = chart.getDataMap(nextDataList, widgetVo.getChartConfigObj(),preDatas);
+					preDatas = chart.getDataMap(nextDataList,configChart,preDatas);
 				}
 			}
+			//补充分组条件所有属性
+			Map<String, String> valueTextMap =  new HashMap<String,String>();
+			if(configChart.containsKey("groupfield")) {
+				for (ProcessWorkcenterField s : ProcessWorkcenterField.values()) {
+					if(s.getValue().equals(configChart.getString("groupfield"))) {
+						JSONArray dataList = ProcessTaskConditionFactory.getHandler(s.getValue()).getConfig().getJSONArray("dataList");
+						for(Object obj:dataList) {
+							JSONObject json = (JSONObject)obj;
+							valueTextMap.put(json.getString("value"), json.getString("text"));
+						}
+					}
+				}
+			}
+			preDatas.put("valueTextMap", valueTextMap);
 			return chart.getData(preDatas);
 		}
-
 		return null;
 	}
 
