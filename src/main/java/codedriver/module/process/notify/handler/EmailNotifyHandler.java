@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 import codedriver.framework.dao.mapper.MailServerMapper;
 import codedriver.framework.dto.MailServerVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.process.notify.core.NotifyHandlerBase;
-import codedriver.framework.process.notify.core.NotifyHandlerType;
-import codedriver.framework.process.notify.dto.NotifyVo;
+import codedriver.framework.notify.core.NotifyHandlerBase;
+import codedriver.framework.notify.core.NotifyHandlerType;
+import codedriver.framework.notify.dto.NotifyVo;
 import codedriver.module.process.notify.exception.EmailServerNotFoundException;
 
 /**

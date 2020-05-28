@@ -3,12 +3,19 @@ package codedriver.module.process.notify.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.notify.core.INotifyTriggerHandler;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
+@Component
+public class ProcessNotifyPolicyHandler implements INotifyPolicyHandler{
 
-public class ProcessNotifyTriggerHandler implements INotifyTriggerHandler{
-
+	@Override
+	public String getName() {
+		return "ITSM";
+	}
+	
 	@Override
 	public List<ValueTextVo> getNotifyTriggerList() {
 		List<ValueTextVo> returnList = new ArrayList<>();

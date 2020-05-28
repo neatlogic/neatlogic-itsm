@@ -1,8 +1,8 @@
 package codedriver.module.process.notify.handler;
 
-import codedriver.framework.process.notify.core.NotifyHandlerBase;
-import codedriver.framework.process.notify.core.NotifyHandlerType;
-import codedriver.framework.process.notify.dto.NotifyVo;
+import codedriver.framework.notify.core.NotifyHandlerBase;
+import codedriver.framework.notify.core.NotifyHandlerType;
+import codedriver.framework.notify.dto.NotifyVo;
 import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
 import codedriver.framework.reminder.core.IGlobalReminderHandler;
 import codedriver.framework.reminder.dto.ReminderMessageVo;
