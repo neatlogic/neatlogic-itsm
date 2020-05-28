@@ -1,5 +1,7 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepSubtaskNotFoundException;
@@ -47,10 +50,13 @@ public class ProcessTaskStepSubtaskCommentApi extends ApiComponentBase {
 		@Param(name = "processTaskStepSubtaskId", type = ApiParamType.LONG, isRequired = true, desc = "子任务id"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, xss = true, desc = "描述")
 	})
-	@Output({})
+	@Output({
+		@Param(name = "contentList", explode = ProcessTaskStepSubtaskContentVo[].class, desc = "评论列表")
+	})
 	@Description(desc = "子任务回复接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		JSONObject resultObj = new JSONObject();
 		Long processTaskStepSubtaskId = jsonObj.getLong("processTaskStepSubtaskId");
 		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskId);
 		if(processTaskStepSubtaskVo == null) {
@@ -60,11 +66,12 @@ public class ProcessTaskStepSubtaskCommentApi extends ApiComponentBase {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(processTaskStepSubtaskVo.getProcessTaskId());
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
-			processTaskService.commentSubtask(processTaskStepSubtaskVo);
+			List<ProcessTaskStepSubtaskContentVo> contentList = processTaskService.commentSubtask(processTaskStepSubtaskVo);
+			resultObj.put("contentList", contentList);
 		}else {
 			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMMENTSUBTASK.getText());
 		}
-		return null;
+		return resultObj;
 	}
 
 }

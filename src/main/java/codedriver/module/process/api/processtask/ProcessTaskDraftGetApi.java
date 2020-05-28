@@ -257,6 +257,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 							if(startProcessTaskStepVo.getProcessStepUuid().equals(processStepUuid)) {
 								ProcessStepVo processStep = processMapper.getProcessStepByUuid(workerPolicyVo.getProcessStepUuid());
 								ProcessTaskStepVo assignableWorkerStep = new ProcessTaskStepVo(processStep);
+								assignableWorkerStep.setIsAutoGenerateId(false);
 								assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
 								assignableWorkerStepList.add(assignableWorkerStep);
 							}
