@@ -217,6 +217,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			return processTaskVo;
 		}else if(channelUuid != null){
 			ProcessTaskVo processTaskVo = new ProcessTaskVo();
+			processTaskVo.setIsAutoGenerateId(false);
 			ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
 			if(channel == null) {
 				throw new ChannelNotFoundException(channelUuid);
@@ -257,6 +258,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 							if(startProcessTaskStepVo.getProcessStepUuid().equals(processStepUuid)) {
 								ProcessStepVo processStep = processMapper.getProcessStepByUuid(workerPolicyVo.getProcessStepUuid());
 								ProcessTaskStepVo assignableWorkerStep = new ProcessTaskStepVo(processStep);
+								assignableWorkerStep.setIsAutoGenerateId(false);
 								assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
 								assignableWorkerStepList.add(assignableWorkerStep);
 							}

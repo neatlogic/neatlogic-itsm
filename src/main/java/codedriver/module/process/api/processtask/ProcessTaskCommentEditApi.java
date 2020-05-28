@@ -62,7 +62,7 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 	
 	@Input({
 		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "回复id"),
-		@Param(name = "content", type = ApiParamType.STRING, xss = true, desc = "描述"),
+		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
 		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
 	@Output({
