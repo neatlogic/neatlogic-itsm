@@ -217,6 +217,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			return processTaskVo;
 		}else if(channelUuid != null){
 			ProcessTaskVo processTaskVo = new ProcessTaskVo();
+			processTaskVo.setIsAutoGenerateId(false);
 			ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
 			if(channel == null) {
 				throw new ChannelNotFoundException(channelUuid);
