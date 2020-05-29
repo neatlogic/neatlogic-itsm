@@ -6,11 +6,10 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
+import codedriver.framework.notify.dto.NotifyPolicyParamTypeVo;
+import codedriver.framework.notify.dto.ProcessExpressionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
@@ -18,7 +17,7 @@ import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 @Component
-public class TestNotifyPolicyHandler implements INotifyPolicyHandler{
+public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 
 	@Override
 	public String getName() {
@@ -26,7 +25,7 @@ public class TestNotifyPolicyHandler implements INotifyPolicyHandler{
 	}
 	
 	@Override
-	public List<ValueTextVo> getNotifyTriggerList() {
+	public List<ValueTextVo> myNotifyTriggerList() {
 		List<ValueTextVo> returnList = new ArrayList<>();
 		for (NotifyTriggerType notifyTriggerType : NotifyTriggerType.values()) {
 			if(NotifyTriggerType.TIMEOUT == notifyTriggerType) {
@@ -38,8 +37,8 @@ public class TestNotifyPolicyHandler implements INotifyPolicyHandler{
 	}
 
 	@Override
-	public List<ValueTextVo> getVariableTypeList() {
-		JSONArray resultArray = new JSONArray();
+	public List<NotifyPolicyParamTypeVo> myParamTypeList() {
+		List<NotifyPolicyParamTypeVo> resultList = new ArrayList<>();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		//固定字段条件
 		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
@@ -48,27 +47,27 @@ public class TestNotifyPolicyHandler implements INotifyPolicyHandler{
 			if(ProcessField.getValue(condition.getName())== null) {
 				continue;
 			}
-			JSONObject commonObj = new JSONObject();
-			commonObj.put("handler", condition.getName());
-			commonObj.put("handlerName", condition.getDisplayName());
-			commonObj.put("handlerType", condition.getHandler(conditionModel));
+			NotifyPolicyParamTypeVo notifyPolicyParamTypeVo = new NotifyPolicyParamTypeVo();
+			notifyPolicyParamTypeVo.setHandler(condition.getName());
+			notifyPolicyParamTypeVo.setHandlerName(condition.getDisplayName());
+			notifyPolicyParamTypeVo.setHandlerType(condition.getHandler(conditionModel));
 			if(condition.getConfig() != null) {
-				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
-				commonObj.put("config", condition.getConfig().toJSONString());
+				notifyPolicyParamTypeVo.setConfig(condition.getConfig().toJSONString());
+				notifyPolicyParamTypeVo.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
 			}
-			commonObj.put("type", condition.getType());
-			commonObj.put("defaultExpression", condition.getDefaultExpression().getExpression());
-			JSONArray expressiobArray = new JSONArray();
+			notifyPolicyParamTypeVo.setType(condition.getType());
+			notifyPolicyParamTypeVo.setDefaultExpression(condition.getDefaultExpression().getExpression());
+			List<ProcessExpressionVo> expressionList = new ArrayList<>();
 			for(ProcessExpression expression:condition.getExpressionList()) {
-				JSONObject expressionObj = new JSONObject();
-				expressionObj.put("expression", expression.getExpression());
-				expressionObj.put("expressionName", expression.getExpressionName());
-				expressiobArray.add(expressionObj);
-				commonObj.put("expressionList", expressiobArray);
+				ProcessExpressionVo processExpressionVo = new ProcessExpressionVo();
+				processExpressionVo.setExpression(expression.getExpression());
+				processExpressionVo.setExpressionName(expression.getExpressionName());
+				expressionList.add(processExpressionVo);
+				notifyPolicyParamTypeVo.setExpressionList(expressionList);			
 			}
-			resultArray.add(commonObj);
+			resultList.add(notifyPolicyParamTypeVo);
 		}
-		return null;
+		return resultList;
 	}
 
 }
