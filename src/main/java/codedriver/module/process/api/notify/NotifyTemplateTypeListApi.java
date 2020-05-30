@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.process.dao.mapper.notify.NotifyMapper;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.process.notify.template.IDefaultTemplate;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
