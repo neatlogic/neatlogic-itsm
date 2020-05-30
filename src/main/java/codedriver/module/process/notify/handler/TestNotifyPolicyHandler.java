@@ -70,4 +70,10 @@ public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 		return resultList;
 	}
 
+	@Override
+	protected List<NotifyPolicyParamTypeVo> mySystemParamList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
