@@ -1,5 +1,8 @@
 package codedriver.module.process.api.form;
 
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormReferencedCannotBeDeletedException;
 import codedriver.framework.restful.annotation.Description;
@@ -54,6 +58,12 @@ public class FormDeleteApi extends ApiComponentBase {
 		}
 		if(formMapper.getFormReferenceCount(uuid) > 0) {
 			throw new FormReferencedCannotBeDeletedException(uuid);
+		}
+		List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);
+		if(CollectionUtils.isNotEmpty(formVersionList)) {
+			for(FormVersionVo formVersionVo : formVersionList) {
+				formMapper.deleteProcessMatrixFormComponentByFormVersionUuid(formVersionVo.getUuid());
+			}
 		}
 		formMapper.deleteFormByUuid(uuid);
 		formMapper.deleteFormVersionByFormUuid(uuid);

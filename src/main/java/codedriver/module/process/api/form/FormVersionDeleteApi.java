@@ -50,6 +50,7 @@ public class FormVersionDeleteApi extends ApiComponentBase {
 		}
 		//删除表单版本
 		formMapper.deleteFormVersionByUuid(uuid);
+		formMapper.deleteProcessMatrixFormComponentByFormVersionUuid(uuid);
 		return null;
 	}
 
