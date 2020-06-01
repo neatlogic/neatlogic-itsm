@@ -74,7 +74,23 @@ public class SelectHandler implements IFormAttributeHandler {
 					}
 				}
 			}
-		}else {//其他，如动态数据源，暂不实现
+		}else {//其他，如动态数据源
+			if(isMultiple) {
+				StringBuilder result = new StringBuilder();
+				for(String key : valueList) {
+					result.append("、");
+					if(key.contains("&=&")) {
+						result.append(key.split("&=&")[1]);
+					}else {
+						result.append(key);
+					}
+				}
+				return result.toString().substring(1);
+			}else {
+				if(value.contains("&=&")) {
+					return value.split("&=&")[1];
+				}
+			}
 		}
 		
 		return value;
