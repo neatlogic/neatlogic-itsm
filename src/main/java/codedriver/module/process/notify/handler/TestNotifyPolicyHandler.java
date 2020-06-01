@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
 import codedriver.framework.notify.dto.NotifyPolicyParamTypeVo;
+import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.ProcessExpressionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
@@ -41,8 +42,8 @@ public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 		List<NotifyPolicyParamTypeVo> resultList = new ArrayList<>();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		//固定字段条件
-		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
-		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
+		Map<String, IProcessTaskCondition> conditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
+		for (Map.Entry<String, IProcessTaskCondition> entry : conditionMap.entrySet()) {
 			IProcessTaskCondition condition = entry.getValue();
 			if(ProcessField.getValue(condition.getName())== null) {
 				continue;
@@ -71,9 +72,21 @@ public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	}
 
 	@Override
-	protected List<NotifyPolicyParamTypeVo> mySystemParamList() {
-		// TODO Auto-generated method stub
-		return null;
+	protected List<NotifyPolicyParamVo> mySystemParamList() {
+		List<NotifyPolicyParamVo> notifyPolicyParamList = new ArrayList<>();
+		NotifyPolicyParamVo param = new NotifyPolicyParamVo();
+		param.setName("processTaskId");
+		param.setType("id");
+		param.setDescription("工单id");
+		param.setConfig("{}");
+		notifyPolicyParamList.add(param);
+		NotifyPolicyParamVo param2 = new NotifyPolicyParamVo();
+		param2.setName("title");
+		param2.setType("title");
+		param2.setDescription("工单标题");
+		param2.setConfig("{}");
+		notifyPolicyParamList.add(param2);
+		return notifyPolicyParamList;
 	}
 
 }
