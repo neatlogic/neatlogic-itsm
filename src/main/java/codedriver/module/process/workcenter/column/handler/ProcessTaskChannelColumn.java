@@ -37,6 +37,18 @@ public class ProcessTaskChannelColumn extends WorkcenterColumnBase  implements I
 		}
 		return channelName;
 	}
+	@Override
+	public JSONObject getMyValueText(JSONObject json) {
+		String channelUuid = json.getString(this.getName());
+		JSONObject channelJson = new JSONObject();
+		ChannelVo channelVo =channelMapper.getChannelByUuid(channelUuid);
+		if(channelVo != null) {
+			channelJson.put("value", channelUuid);
+			channelJson.put("text", channelVo.getName());
+			channelJson.put("color", channelVo.getColor());
+		}
+		return channelJson;
+	}
 
 	@Override
 	public Boolean allowSort() {
