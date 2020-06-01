@@ -1,6 +1,8 @@
 package codedriver.module.process.dashboard.handler;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -44,31 +46,48 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			QueryResultSet resultSet = workcenterService.searchTaskIterate(new WorkcenterVo(jsonObj));
 			JSONObject preDatas = new JSONObject();
 			JSONObject configChart = widgetVo.getChartConfigObj();
-			while(resultSet.hasMoreResults()) {
-				JSONArray nextDataList = workcenterService.getSearchIterate(resultSet).getJSONArray("tbodyList");
-				if (CollectionUtils.isNotEmpty(nextDataList)) {
-					preDatas = chart.getDataMap(nextDataList,configChart,preDatas);
-				}
-			}
 			//补充分组条件所有属性
 			Map<String, String> valueTextMap =  new HashMap<String,String>();
 			if(configChart.containsKey("groupfield")) {
 				for (ProcessWorkcenterField s : ProcessWorkcenterField.values()) {
 					if(s.getValue().equals(configChart.getString("groupfield"))||s.getValue().equals(configChart.getString("subgroupfield"))) {
 						JSONArray dataList = ProcessTaskConditionFactory.getHandler(s.getValue()).getConfig().getJSONArray("dataList");
-						for(Object obj:dataList) {
-							JSONObject json = (JSONObject)obj;
-							valueTextMap.put(json.getString("value"), json.getString("text"));
+						if(CollectionUtils.isNotEmpty(dataList)) {
+							for(Object obj:dataList) {
+								JSONObject json = (JSONObject)obj;
+								valueTextMap.put(json.getString("value"), json.getString("text"));
+							}
 						}
 					}
 				}
 			}
-			preDatas.put("valueTextMap", valueTextMap);
+			if(valueTextMap.size()>0) {
+				preDatas.put("valueTextMap", valueTextMap);
+			}
+			while(resultSet.hasMoreResults()) {
+				JSONArray nextDataList = workcenterService.getSearchIterate(resultSet).getJSONArray("tbodyList");
+				if (CollectionUtils.isNotEmpty(nextDataList)) {
+					preDatas = chart.getDataMap(nextDataList,configChart,preDatas);
+				}
+			}
 			return chart.getData(preDatas);
 		}
 		return null;
 	}
 
+	private void getGroupFieldDataArray(JSONArray groupFieldDataArray,DashboardWidgetVo widgetVo,List<ProcessWorkcenterField> fieldList,Boolean isSub) {
+		JSONObject groupFieldJson = new JSONObject();
+		for(ProcessWorkcenterField groupField : fieldList) {
+			if(!isSub&&ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())) {
+				groupFieldJson = ProcessTaskConditionFactory.getHandler(groupField.getValue()).getConfig();
+				groupFieldJson.remove("isMultiple");
+				groupFieldJson.put("handler", ProcessTaskConditionFactory.getHandler(groupField.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
+				
+			}
+			groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", groupField.getValue(),groupField.getName(),groupFieldJson)));
+		}
+	} 
+	
 	@Override
 	public JSONObject myGetConfig(DashboardWidgetVo widgetVo) {
 		DashboardChartBase chart = DashboardChartFactory.getChart(widgetVo.getChartType());
@@ -89,26 +108,22 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 				}
 				if(showConfigJson.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
 					DashboardShowConfigVo groupShowConfig = (DashboardShowConfigVo) showConfigJson.get(DashboardShowConfig.GROUPFIELD.getValue());
-					JSONArray groupFieldDataArray = groupShowConfig.getDataList();
-					JSONObject priorityJson = new JSONObject();
-					JSONObject statusJson = new JSONObject();
-					if(ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())) {
-						priorityJson = ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.PRIORITY.getValue()).getConfig();
-						priorityJson.remove("isMultiple");
-						priorityJson.put("handler", ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.PRIORITY.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
-						statusJson = ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()).getConfig();
-						statusJson.remove("isMultiple");
-						statusJson.put("handler", ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
-					}
-					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", ProcessWorkcenterField.PRIORITY.getValue(),ProcessWorkcenterField.PRIORITY.getName(),priorityJson)));
-					groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", ProcessWorkcenterField.STATUS.getValue(),ProcessWorkcenterField.STATUS.getName(),statusJson)));
+					getGroupFieldDataArray(groupShowConfig.getDataList(),widgetVo,Arrays.asList(
+							ProcessWorkcenterField.PRIORITY,
+							ProcessWorkcenterField.STATUS,
+							ProcessWorkcenterField.CHANNELTYPE,
+							ProcessWorkcenterField.CHANNEL
+							),false);
 					processTaskShowChartConfigArray.add(groupShowConfig);
 				}
 				if(showConfigJson.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())) {
 					DashboardShowConfigVo subGroupShowConfig = (DashboardShowConfigVo)showConfigJson.get(DashboardShowConfig.SUBGROUPFIELD.getValue());
-					JSONArray subGroupFieldDataArray = subGroupShowConfig.getDataList();
-					subGroupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.PRIORITY.getValue(),ProcessWorkcenterField.PRIORITY.getName())));
-					subGroupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s'}", ProcessWorkcenterField.STATUS.getValue(),ProcessWorkcenterField.STATUS.getName())));
+					getGroupFieldDataArray(subGroupShowConfig.getDataList(),widgetVo,Arrays.asList(
+							ProcessWorkcenterField.PRIORITY,
+							ProcessWorkcenterField.STATUS,
+							ProcessWorkcenterField.CHANNELTYPE,
+							ProcessWorkcenterField.CHANNEL
+							),true);
 					processTaskShowChartConfigArray.add(subGroupShowConfig);
 				}
 				if(showConfigJson.containsKey(DashboardShowConfig.MAXGROUP.getValue())) {

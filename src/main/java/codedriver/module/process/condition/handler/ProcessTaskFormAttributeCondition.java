@@ -122,9 +122,21 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 				}
 				return result;
 			case GREATERTHAN: 
-				return Long.parseLong(dataList.get(0)) > Long.parseLong(valueList.get(0));
+				if(dataList.get(0).length() > valueList.get(0).length()) {
+					return true;
+				}else if(dataList.get(0).length() < valueList.get(0).length()) {
+					return false;
+				}else {
+					return dataList.get(0).compareTo(valueList.get(0)) > 0 ? true : false;
+				}
 			case LESSTHAN: 
-				return Long.parseLong(dataList.get(0)) < Long.parseLong(valueList.get(0));
+				if(dataList.get(0).length() > valueList.get(0).length()) {
+					return false;
+				}else if(dataList.get(0).length() < valueList.get(0).length()) {
+					return true;
+				}else {
+					return dataList.get(0).compareTo(valueList.get(0)) < 0 ? true : false;
+				}
 			default : 
 				return false;
 		}

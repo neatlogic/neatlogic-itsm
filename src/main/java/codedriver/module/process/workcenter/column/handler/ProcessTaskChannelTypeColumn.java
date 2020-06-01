@@ -42,6 +42,11 @@ public class ProcessTaskChannelTypeColumn extends WorkcenterColumnBase implement
 	}
 
 	@Override
+	public JSONObject getMyValueText(JSONObject json) {
+		return (JSONObject) getMyValue(json);
+	}
+	
+	@Override
 	public Boolean allowSort() {
 		return false;
 	}
