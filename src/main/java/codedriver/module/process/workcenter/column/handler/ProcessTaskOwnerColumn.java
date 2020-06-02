@@ -38,6 +38,18 @@ public class ProcessTaskOwnerColumn extends WorkcenterColumnBase implements IWor
 		userJson.put("useruuid", userUuid);
 		return userJson;
 	}
+	
+	@Override
+	public JSONObject getMyValueText(JSONObject json) {
+		JSONObject userJson = new JSONObject();
+		String userUuid = json.getString(this.getName());
+		UserVo userVo =userMapper.getUserBaseInfoByUuid(userUuid.replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
+		if(userVo != null) {
+			userJson.put("text", userVo.getUserName());
+			userJson.put("value", userVo.getUserId());
+		}
+		return userJson;
+	}
 
 	@Override
 	public Boolean allowSort() {
