@@ -1,9 +1,13 @@
 package codedriver.module.process.dashboard.handler;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +52,9 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			JSONObject configChart = widgetVo.getChartConfigObj();
 			//补充分组条件所有属性
 			Map<String, String> valueTextMap =  new HashMap<String,String>();
-			if(configChart.containsKey("groupfield")) {
+			if(configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
 				for (ProcessWorkcenterField s : ProcessWorkcenterField.values()) {
-					if(s.getValue().equals(configChart.getString("groupfield"))||s.getValue().equals(configChart.getString("subgroupfield"))) {
+					if(s.getValue().equals(configChart.getString(DashboardShowConfig.GROUPFIELD.getValue()))||s.getValue().equals(configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue()))) {
 						JSONArray dataList = ProcessTaskConditionFactory.getHandler(s.getValue()).getConfig().getJSONArray("dataList");
 						if(CollectionUtils.isNotEmpty(dataList)) {
 							for(Object obj:dataList) {
@@ -70,7 +74,24 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 					preDatas = chart.getDataMap(nextDataList,configChart,preDatas);
 				}
 			}
-			return chart.getData(preDatas);
+			//排序、限制数量
+			JSONObject data = chart.getData(preDatas);
+			if(!ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())&&!ChartType.TABLECHART.getValue().equals(widgetVo.getChartType())&&configChart.containsKey(DashboardShowConfig.MAXGROUP.getValue())) {
+				Integer maxGroup = configChart.getInteger(DashboardShowConfig.MAXGROUP.getValue());
+				Set<String> maxGroupSet = new HashSet<String>();
+				JSONArray dataList = data.getJSONArray("dataList");
+				dataList.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("total")).reversed());
+				Iterator<Object> dataIterator = dataList.iterator();
+				while(dataIterator.hasNext()) {
+					JSONObject dataJson = (JSONObject)dataIterator.next();
+					if(maxGroupSet.size()>=maxGroup&&!maxGroupSet.contains(dataJson.getString("column"))) {
+						dataIterator.remove();
+					}else {
+						maxGroupSet.add(dataJson.getString("column"));
+					}
+				}
+			}
+			return data;
 		}
 		return null;
 	}
@@ -112,7 +133,8 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 							ProcessWorkcenterField.PRIORITY,
 							ProcessWorkcenterField.STATUS,
 							ProcessWorkcenterField.CHANNELTYPE,
-							ProcessWorkcenterField.CHANNEL
+							ProcessWorkcenterField.CHANNEL,
+							ProcessWorkcenterField.OWNER
 							),false);
 					processTaskShowChartConfigArray.add(groupShowConfig);
 				}
@@ -122,7 +144,8 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 							ProcessWorkcenterField.PRIORITY,
 							ProcessWorkcenterField.STATUS,
 							ProcessWorkcenterField.CHANNELTYPE,
-							ProcessWorkcenterField.CHANNEL
+							ProcessWorkcenterField.CHANNEL,
+							ProcessWorkcenterField.OWNER
 							),true);
 					processTaskShowChartConfigArray.add(subGroupShowConfig);
 				}
