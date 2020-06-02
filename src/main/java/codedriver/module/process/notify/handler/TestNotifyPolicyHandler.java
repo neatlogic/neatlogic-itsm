@@ -74,18 +74,6 @@ public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	@Override
 	protected List<NotifyPolicyParamVo> mySystemParamList() {
 		List<NotifyPolicyParamVo> notifyPolicyParamList = new ArrayList<>();
-		NotifyPolicyParamVo param = new NotifyPolicyParamVo();
-		param.setName("processTaskId");
-		param.setType("id");
-		param.setDescription("工单id");
-		param.setConfig("{}");
-		notifyPolicyParamList.add(param);
-		NotifyPolicyParamVo param2 = new NotifyPolicyParamVo();
-		param2.setName("title");
-		param2.setType("title");
-		param2.setDescription("工单标题");
-		param2.setConfig("{}");
-		notifyPolicyParamList.add(param2);
 		return notifyPolicyParamList;
 	}
 

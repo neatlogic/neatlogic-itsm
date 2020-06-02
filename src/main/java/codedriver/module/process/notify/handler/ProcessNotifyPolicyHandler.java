@@ -85,11 +85,6 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 			param.setName(condition.getName());
 			param.setType(condition.getName());
 			param.setDescription(condition.getDisplayName());
-			if(condition.getConfig() != null) {
-				param.setConfig(condition.getConfig().toJSONString());
-			}else {
-				param.setConfig("{}");
-			}
 			notifyPolicyParamList.add(param);
 		}
 //		NotifyPolicyParamVo param = new NotifyPolicyParamVo();
