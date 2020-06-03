@@ -123,6 +123,13 @@ public class WorkcenterListApi extends ApiComponentBase {
 				wc.setPageSize(100);
 				Integer workcenterCount  = workcenterService.doSearchCount(wc);
 				workcenter.setCount(workcenterCount>99?"99+":workcenterCount.toString());
+				
+				
+				WorkcenterVo wcMe = new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()));
+				wcMe.setPageSize(100);
+				wcMe.setIsMeWillDo(1);
+				Integer meWillDoCount  = workcenterService.doSearchCount(wcMe);
+				workcenter.setMeWillDoCount(meWillDoCount>99?"99+":meWillDoCount.toString());
 			}
 			workcenter.setConditionConfig(null);
 			//排序 用户设置的排序优先
