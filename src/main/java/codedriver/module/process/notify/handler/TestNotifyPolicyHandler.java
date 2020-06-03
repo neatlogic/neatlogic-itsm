@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
 import codedriver.framework.notify.dto.NotifyPolicyParamTypeVo;
@@ -13,7 +14,6 @@ import codedriver.framework.notify.dto.ProcessExpressionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 @Component
@@ -56,9 +56,9 @@ public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 				notifyPolicyParamTypeVo.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
 			}
 			notifyPolicyParamTypeVo.setType(condition.getType());
-			notifyPolicyParamTypeVo.setDefaultExpression(condition.getDefaultExpression().getExpression());
+			notifyPolicyParamTypeVo.setDefaultExpression(condition.getBasicType().getDefaultExpression().getExpression());
 			List<ProcessExpressionVo> expressionList = new ArrayList<>();
-			for(ProcessExpression expression:condition.getExpressionList()) {
+			for(Expression expression:condition.getBasicType().getExpressionList()) {
 				ProcessExpressionVo processExpressionVo = new ProcessExpressionVo();
 				processExpressionVo.setExpression(expression.getExpression());
 				processExpressionVo.setExpressionName(expression.getExpressionName());

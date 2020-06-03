@@ -1,6 +1,5 @@
 package codedriver.module.process.condition.handler;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -10,13 +9,14 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessExpression;
+import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -94,13 +94,8 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	}
 
 	@Override
-	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
-	}
-
-	@Override
-	public ProcessExpression getDefaultExpression() {
-		return ProcessExpression.INCLUDE;
+	public BasicType getBasicType() {
+		return BasicType.ARRAY;
 	}
 
 	@Override
@@ -111,9 +106,9 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 			ProcessTaskStepVo processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 			result = valueList.contains(processTaskStep.getStatus());
 		}			
-		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
+		if(Expression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
 			return result;
-		}else if(ProcessExpression.EXCLUDE.getExpression().equals(conditionVo.getExpression())) {
+		}else if(Expression.EXCLUDE.getExpression().equals(conditionVo.getExpression())) {
 			return !result;
 		}else {
 			return false;
@@ -127,7 +122,7 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 		if(condition.getValueList().size()>1) {
 			value = String.join("','",condition.getValueList());
 		}
-		String where = String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
+		String where = String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
 		return where;
 	}
 }

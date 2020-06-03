@@ -12,9 +12,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
@@ -81,9 +81,11 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 				commonObj.put("config", condition.getConfig().toJSONString());
 			}
 			commonObj.put("type", condition.getType());
-			commonObj.put("defaultExpression", condition.getDefaultExpression().getExpression());
+			commonObj.put("basicType", condition.getBasicType().getName());
+			commonObj.put("basicTypeName", condition.getBasicType().getText());
+			commonObj.put("defaultExpression", condition.getBasicType().getDefaultExpression().getExpression());
 			JSONArray expressiobArray = new JSONArray();
-			for(ProcessExpression expression:condition.getExpressionList()) {
+			for(Expression expression:condition.getBasicType().getExpressionList()) {
 				JSONObject expressionObj = new JSONObject();
 				expressionObj.put("expression", expression.getExpression());
 				expressionObj.put("expressionName", expression.getExpressionName());

@@ -11,9 +11,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.restful.annotation.Description;
@@ -75,10 +75,10 @@ public class DashboardGetConditionApi extends ApiComponentBase {
 			commonObj.put("conditionModel", condition.getHandler(conditionModel));
 			commonObj.put("type", condition.getType());
 			commonObj.put("config", condition.getConfig() == null?"": condition.getConfig().toJSONString());
-			commonObj.put("defaultExpression", condition.getDefaultExpression().getExpression());
+			commonObj.put("defaultExpression", condition.getBasicType().getDefaultExpression().getExpression());
 			commonObj.put("sort", condition.getSort());
 			JSONArray expressiobArray = new JSONArray();
-			for(ProcessExpression expression:condition.getExpressionList()) {
+			for(Expression expression:condition.getBasicType().getExpressionList()) {
 				JSONObject expressionObj = new JSONObject();
 				expressionObj.put("expression", expression.getExpression());
 				expressionObj.put("expressionName", expression.getExpressionName());

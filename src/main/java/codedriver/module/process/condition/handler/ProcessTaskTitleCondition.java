@@ -1,6 +1,5 @@
 package codedriver.module.process.condition.handler;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,10 +7,11 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -56,18 +56,13 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
 	}
 
 	@Override
-	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.LIKE);
-	}
-
-	@Override
-	public ProcessExpression getDefaultExpression() {
-		return ProcessExpression.LIKE;
+	public BasicType getBasicType() {
+		return BasicType.STRING;
 	}
 
 	@Override
 	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {	
-		if(ProcessExpression.LIKE.getExpression().equals(conditionVo.getExpression())) {
+		if(Expression.LIKE.getExpression().equals(conditionVo.getExpression())) {
 			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
 			List<String> valueList = conditionVo.getValueList();
 			return processTaskVo.getTitle().contains(valueList.get(0));
@@ -82,14 +77,14 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
 		String where = "(";
 		if(condition.getValueList().size() == 1) {
 			Object value = condition.getValueList().get(0);
-			where += String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.TITLE.getValue()),String.format("'%s'",  value));
+			where += String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.TITLE.getValue()),String.format("'%s'",  value));
 		}else {
 			List<String> keywordList = condition.getValueList();
 			for(int i=0;i<keywordList.size();i++) {
 				if(i!=0) {
 					where += " or ";
 				}
-				where += String.format(ProcessExpression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.TITLE.getValue()),String.format("'%s'",  keywordList.get(i)));
+				where += String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.TITLE.getValue()),String.format("'%s'",  keywordList.get(i)));
 			}
 		}
 		return where+")";

@@ -1,6 +1,5 @@
 package codedriver.module.process.condition.handler;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +8,12 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.BasicType;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessExpression;
-import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -72,13 +71,8 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	}
 
 	@Override
-	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
-	}
-
-	@Override
-	public ProcessExpression getDefaultExpression() {
-		return ProcessExpression.INCLUDE;
+	public BasicType getBasicType() {
+		return BasicType.ARRAY;
 	}
 
 	@Override

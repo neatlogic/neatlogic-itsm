@@ -14,13 +14,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
@@ -150,7 +150,7 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	    		columnList.add(targetColumn);
 	    		for(String sourceColumnValue : sourceColumnValueList) {
 	    			sourceColumnVo.setValue(sourceColumnValue);
-	    			sourceColumnVo.setExpression(ProcessExpression.EQUAL.getExpression());
+	    			sourceColumnVo.setExpression(Expression.EQUAL.getExpression());
 	    			String targetColumnValue = null;
 	    			sourceColumnList.clear();
 	    			sourceColumnList.add(sourceColumnVo);

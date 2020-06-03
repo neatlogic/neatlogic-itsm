@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.integration.core.IIntegrationHandler;
@@ -23,7 +24,6 @@ import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
 import codedriver.framework.process.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
@@ -170,7 +170,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
         	if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
         		ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo();
         		processMatrixColumnVo.setColumn(keywordColumn);
-        		processMatrixColumnVo.setExpression(ProcessExpression.LIKE.getExpression());
+        		processMatrixColumnVo.setExpression(Expression.LIKE.getExpression());
         		processMatrixColumnVo.setValue(dataVo.getKeyword());
         		List<ProcessMatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
 				if(CollectionUtils.isEmpty(sourceColumnList)) {
