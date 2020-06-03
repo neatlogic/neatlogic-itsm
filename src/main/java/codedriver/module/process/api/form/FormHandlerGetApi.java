@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessExpression;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.restful.annotation.Description;
@@ -54,9 +54,9 @@ public class FormHandlerGetApi extends ApiComponentBase {
 			formHandlerObj.put("handler", s.getHandler());
 			formHandlerObj.put("handlerName", s.getHandlerName());
 			formHandlerObj.put("handlerType", s.getType(ProcessConditionModel.SIMPLE.getValue()).toString());
-			List<ProcessExpression> expressionList = s.getExpressionList();
+			List<Expression> expressionList = s.getExpressionList();
 			JSONArray expressiobArray = new JSONArray();
-			for(ProcessExpression expression:expressionList) {
+			for(Expression expression:expressionList) {
 				JSONObject expressionObj = new JSONObject();
 				expressionObj.put("expression", expression.getExpression());
 				expressionObj.put("expressionName", expression.getExpressionName());

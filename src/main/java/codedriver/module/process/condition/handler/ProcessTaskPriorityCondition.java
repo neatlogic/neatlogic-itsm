@@ -1,6 +1,5 @@
 package codedriver.module.process.condition.handler;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -10,12 +9,13 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessExpression;
-import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.PriorityVo;
@@ -79,18 +79,13 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 	}
 
 	@Override
-	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.INCLUDE);
-	}
-	
-	@Override
-	public ProcessExpression getDefaultExpression() {
-		return ProcessExpression.INCLUDE;
+	public BasicType getBasicType() {
+		return BasicType.ARRAY;
 	}
 
 	@Override
 	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
-		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
+		if(Expression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
 			List<String> valueList = conditionVo.getValueList();
 			if(CollectionUtils.isEmpty(valueList)) {
 				return false;

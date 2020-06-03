@@ -1,16 +1,13 @@
 package codedriver.module.process.condition.handler;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.BasicType;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
@@ -51,13 +48,8 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 	}
 
 	@Override
-	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
-	}
-
-	@Override
-	public ProcessExpression getDefaultExpression() {
-		return ProcessExpression.INCLUDE;
+	public BasicType getBasicType() {
+		return BasicType.ARRAY;
 	}
 
 	@Override

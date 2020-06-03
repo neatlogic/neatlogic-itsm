@@ -1,7 +1,6 @@
 package codedriver.module.process.condition.handler;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -10,14 +9,15 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -66,18 +66,13 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 	}
 
 	@Override
-	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.INCLUDE);
+	public BasicType getBasicType() {
+		return BasicType.ARRAY;
 	}
 	
 	@Override
-	public ProcessExpression getDefaultExpression() {
-		return ProcessExpression.INCLUDE;
-	}
-
-	@Override
 	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
-		if(ProcessExpression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
+		if(Expression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
 			List<String> valueList = conditionVo.getValueList();
 			if(!CollectionUtils.isEmpty(valueList)) {
 				//解析valueList

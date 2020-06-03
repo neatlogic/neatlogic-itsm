@@ -26,11 +26,11 @@ import com.techsure.multiattrsearch.util.ESQueryUtil;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
@@ -355,7 +355,7 @@ public class WorkcenterService {
 		JSONArray valueList = new JSONArray();
 		valueList.add(keyword);
 		conditionObj.put("valueList", valueList);
-		conditionObj.put("expression", ProcessExpression.LIKE.getExpression());
+		conditionObj.put("expression", Expression.LIKE.getExpression());
 		conditionList.add(conditionObj);
 		conditionGroup.put("conditionList", conditionList);
 		conditionGroupList.add(conditionGroup);

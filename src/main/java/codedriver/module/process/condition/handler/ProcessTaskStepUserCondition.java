@@ -1,7 +1,6 @@
 package codedriver.module.process.condition.handler;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,13 +10,14 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
@@ -62,13 +62,8 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 	}
 
 	@Override
-	public List<ProcessExpression> getExpressionList() {
-		return Arrays.asList(ProcessExpression.INCLUDE,ProcessExpression.EXCLUDE);
-	}
-
-	@Override
-	public ProcessExpression getDefaultExpression() {
-		return ProcessExpression.INCLUDE;
+	public BasicType getBasicType() {
+		return BasicType.ARRAY;
 	}
 
 	@Override
@@ -111,7 +106,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 				}
 			}
 			String value = String.join("','",userList);
-			return String.format(ProcessExpression.INCLUDE.getExpressionEs(),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP_USER.getValue()),String.format("'%s'",  value));
+			return String.format(Expression.INCLUDE.getExpressionEs(),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP_USER.getValue()),String.format("'%s'",  value));
 		}
 		return null;
 	}

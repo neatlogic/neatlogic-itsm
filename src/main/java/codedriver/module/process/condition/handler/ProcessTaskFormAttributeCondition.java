@@ -11,9 +11,10 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessExpression;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -57,12 +58,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 	}
 
 	@Override
-	public List<ProcessExpression> getExpressionList() {
-		return null;
-	}
-
-	@Override
-	public ProcessExpression getDefaultExpression() {
+	public BasicType getBasicType() {
 		return null;
 	}
 
@@ -90,7 +86,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 			dataList = new ArrayList<>();
 			dataList.add(data);
 		}
-		ProcessExpression processExpression = ProcessExpression.getProcessExpression(conditionVo.getExpression());
+		Expression processExpression = Expression.getProcessExpression(conditionVo.getExpression());
 		if(processExpression == null) {
 			return false;
 		}
@@ -159,7 +155,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 			if(StringUtils.isNotBlank(value.toString())) {
 				value = String.format("'%s'",  value);
 			}
-			where += String.format(" [ form.key = '%s' and "+ProcessExpression.getExpressionEs(condition.getExpression())+" ] ", formKey,formValueKey,value);
+			where += String.format(" [ form.key = '%s' and "+Expression.getExpressionEs(condition.getExpression())+" ] ", formKey,formValueKey,value);
 			return where+")";
 		}
 		return null;
