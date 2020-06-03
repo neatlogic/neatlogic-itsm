@@ -20,7 +20,6 @@ import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.exception.workcenter.WorkcenterNameRepeatException;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
@@ -87,9 +86,10 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 			}
 		}
 		//判断重名
-		if(workcenterMapper.checkWorkcenterNameIsRepeat(name,uuid)>0) {
-			throw new WorkcenterNameRepeatException(name);
-		}
+		/* 去重范围不确定，暂不去重
+		 * if(workcenterMapper.checkWorkcenterNameIsRepeat(name,uuid)>0) { throw new
+		 * WorkcenterNameRepeatException(name); }
+		 */
 		
 		if((CollectionUtils.isNotEmpty(workcenterList)&&ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterList.get(0).getType()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
 			//判断是否有管理员权限
