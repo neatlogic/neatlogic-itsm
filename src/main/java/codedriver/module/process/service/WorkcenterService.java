@@ -1,6 +1,7 @@
 package codedriver.module.process.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,10 @@ import com.techsure.multiattrsearch.util.ESQueryUtil;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
@@ -56,6 +61,8 @@ public class WorkcenterService {
 	@Autowired
 	WorkcenterMapper workcenterMapper;
 	@Autowired
+	UserMapper userMapper;
+	@Autowired
 	ProcessTaskService processTaskService;
 	@Autowired
 	FormMapper formMapper;
@@ -69,9 +76,58 @@ public class WorkcenterService {
 	private  QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
+		String meWillDoCondition = getMeWillDoCondition(workcenterVo);
+		if(StringUtils.isNotBlank(meWillDoCondition)) {
+			if(StringUtils.isBlank(where)) {
+				where = " where " + getMeWillDoCondition(workcenterVo);
+			}else {
+				where = where + " and " + getMeWillDoCondition(workcenterVo);
+			}
+		}
 		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
+		System.out.println(sql);
 		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
+	}
+	
+	/**
+	 * 附加我的待办条件
+	 * @return
+	 */
+	private String getMeWillDoCondition(WorkcenterVo workcenterVo) {
+		String meWillDoSql = StringUtils.EMPTY;
+		if(workcenterVo.getIsMeWillDo() == 1) {
+			//status
+			List<String> statusList = Arrays.asList(ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
+			String statusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STATUS.getValue()),String.format(" '%s' ", String.join("','",statusList)));
+			//common.step.filtstatus
+			List<String> stepStatusList = Arrays.asList(ProcessTaskStatus.PENDING.getValue(),ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
+			String stepStatusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format(" '%s' ", String.join("','",stepStatusList)));
+			//common.step.usertypelist.userlist
+			List<String> userList = new ArrayList<String>();
+			userList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
+			//如果是待处理状态，则需额外匹配角色和组
+			UserVo userVo = userMapper.getUserByUuid(UserContext.get().getUserUuid());
+			if(userVo != null) {
+				List<String> teamList = userVo.getTeamNameList();
+				if(CollectionUtils.isNotEmpty(teamList)) {
+					for(String team : teamList) {
+						userList.add(GroupSearch.TEAM.getValuePlugin()+team);
+					}
+				}
+				List<String> roleUuidList = userVo.getRoleUuidList();
+				if(CollectionUtils.isNotEmpty(roleUuidList)) {
+					for(String roleUuid : roleUuidList) {
+						userList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
+					}
+				}
+			}
+
+			String userListSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP_USER.getValue()),
+					String.format(" '%s' ", String.join("','",userList)));
+			meWillDoSql = String.format(" ([ %s and %s and %s ])", statusSql,stepStatusSql,userListSql) ;
+		}
+		return meWillDoSql;
 	}
 	
 	/**

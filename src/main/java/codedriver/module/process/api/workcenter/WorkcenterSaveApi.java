@@ -21,6 +21,7 @@ import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
+import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.Description;
@@ -78,10 +79,18 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		List<WorkcenterVo> workcenterList = null;
 		if(StringUtils.isNotBlank(uuid)) {
 			workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
+			if(CollectionUtils.isNotEmpty(workcenterList)) {
+				workcenterVo = workcenterList.get(0);
+			}else {
+				throw new WorkcenterNotFoundException(uuid);
+			}
 		}
-		if(CollectionUtils.isNotEmpty(workcenterList)) {
-			workcenterVo = workcenterList.get(0);
-		}
+		//判断重名
+		/* 去重范围不确定，暂不去重
+		 * if(workcenterMapper.checkWorkcenterNameIsRepeat(name,uuid)>0) { throw new
+		 * WorkcenterNameRepeatException(name); }
+		 */
+		
 		if((CollectionUtils.isNotEmpty(workcenterList)&&ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterList.get(0).getType()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
 			//判断是否有管理员权限
 			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid,WORKCENTER_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByUuidList(UserContext.get().getRoleUuidList()))) {
@@ -103,7 +112,10 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 				}else if(value.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
 					authorityVo.setType(GroupSearch.USER.getValue());
 					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
-				}else {
+				}else if(value.toString().startsWith(GroupSearch.COMMON.getValuePlugin())) {
+					authorityVo.setType(GroupSearch.COMMON.getValue());
+					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.COMMON.getValuePlugin(), StringUtils.EMPTY));
+				}else{
 					throw new WorkcenterParamException("valueList");
 				}
 				workcenterMapper.insertWorkcenterAuthority(authorityVo,workcenterVo.getUuid());
