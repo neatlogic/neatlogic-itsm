@@ -112,7 +112,10 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 				}else if(value.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
 					authorityVo.setType(GroupSearch.USER.getValue());
 					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
-				}else {
+				}else if(value.toString().startsWith(GroupSearch.COMMON.getValuePlugin())) {
+					authorityVo.setType(GroupSearch.COMMON.getValue());
+					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.COMMON.getValuePlugin(), StringUtils.EMPTY));
+				}else{
 					throw new WorkcenterParamException("valueList");
 				}
 				workcenterMapper.insertWorkcenterAuthority(authorityVo,workcenterVo.getUuid());
