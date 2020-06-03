@@ -20,7 +20,9 @@ import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.exception.workcenter.WorkcenterNameRepeatException;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
+import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.Description;
@@ -78,10 +80,17 @@ public class WorkcenterSaveApi extends ApiComponentBase {
 		List<WorkcenterVo> workcenterList = null;
 		if(StringUtils.isNotBlank(uuid)) {
 			workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
+			if(CollectionUtils.isNotEmpty(workcenterList)) {
+				workcenterVo = workcenterList.get(0);
+			}else {
+				throw new WorkcenterNotFoundException(uuid);
+			}
 		}
-		if(CollectionUtils.isNotEmpty(workcenterList)) {
-			workcenterVo = workcenterList.get(0);
+		//判断重名
+		if(workcenterMapper.checkWorkcenterNameIsRepeat(name,uuid)>0) {
+			throw new WorkcenterNameRepeatException(name);
 		}
+		
 		if((CollectionUtils.isNotEmpty(workcenterList)&&ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterList.get(0).getType()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
 			//判断是否有管理员权限
 			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid,WORKCENTER_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByUuidList(UserContext.get().getRoleUuidList()))) {
