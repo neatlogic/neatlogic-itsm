@@ -121,6 +121,7 @@ public class FormSaveApi extends ApiComponentBase {
 			}
 		}
 		List<ProcessMatrixFormComponentVo> processMatrixFormComponentList = formVersionVo.getProcessMatrixFormComponentList();
+		formMapper.deleteProcessMatrixFormComponentByFormVersionUuid(formVersionVo.getUuid());
 		if(CollectionUtils.isNotEmpty(processMatrixFormComponentList)) {
 			for(ProcessMatrixFormComponentVo processMatrixFormComponentVo : processMatrixFormComponentList) {
 				matrixMapper.insertMatrixFormComponent(processMatrixFormComponentVo);
