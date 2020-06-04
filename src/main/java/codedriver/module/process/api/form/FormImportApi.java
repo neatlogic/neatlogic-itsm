@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.FormVo;
 import codedriver.framework.process.exception.form.FormImportException;
@@ -99,6 +102,16 @@ public class FormImportApi extends BinaryStreamApiComponentBase {
 					for(FormVersionVo formVersion : formVersionList) {
 						formVersion.setFormUuid(formVo.getUuid());
 						formMapper.insertFormVersion(formVersion);
+						//保存激活版本时，更新表单属性信息
+						if(Objects.equal(formVersion.getIsActive(), 1)) {
+							formMapper.deleteFormAttributeByFormUuid(formVo.getUuid());
+							List<FormAttributeVo> formAttributeList = formVersion.getFormAttributeList();
+							if (CollectionUtils.isNotEmpty(formAttributeList)) {
+								for (FormAttributeVo formAttributeVo : formAttributeList) {
+									formMapper.insertFormAttribute(formAttributeVo);
+								}
+							}
+						}
 						resultList.add("新增版本" + formVersion.getVersion());
 					}
 				}else {
@@ -117,6 +130,7 @@ public class FormImportApi extends BinaryStreamApiComponentBase {
 								version += 1;
 							}
 							formVersion.setVersion(version);
+							formVersion.setIsActive(0);
 							formVersion.setUuid(null);
 							formMapper.insertFormVersion(formVersion);
 							resultList.add("新增版本" + version);
