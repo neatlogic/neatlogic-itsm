@@ -6,15 +6,19 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
-import codedriver.framework.notify.dto.NotifyPolicyParamTypeVo;
-import codedriver.framework.notify.dto.ProcessExpressionVo;
+import codedriver.framework.notify.dto.ExpressionVo;
+import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
+import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 @Component
 public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
@@ -37,43 +41,41 @@ public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	}
 
 	@Override
-	public List<NotifyPolicyParamTypeVo> myParamTypeList() {
-		List<NotifyPolicyParamTypeVo> resultList = new ArrayList<>();
+	protected List<NotifyPolicyParamVo> mySystemParamList() {
+		List<NotifyPolicyParamVo> notifyPolicyParamList = new ArrayList<>();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
-		//固定字段条件
-		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
-		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
+		Map<String, IProcessTaskCondition> conditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
+		for (Map.Entry<String, IProcessTaskCondition> entry : conditionMap.entrySet()) {
 			IProcessTaskCondition condition = entry.getValue();
 			if(ProcessField.getValue(condition.getName())== null) {
 				continue;
 			}
-			NotifyPolicyParamTypeVo notifyPolicyParamTypeVo = new NotifyPolicyParamTypeVo();
-			notifyPolicyParamTypeVo.setHandler(condition.getName());
-			notifyPolicyParamTypeVo.setHandlerName(condition.getDisplayName());
-			notifyPolicyParamTypeVo.setHandlerType(condition.getHandler(conditionModel));
+			NotifyPolicyParamVo param = new NotifyPolicyParamVo();
+			param.setHandler(condition.getName());
+			param.setHandlerName(condition.getDisplayName());
+			param.setHandlerType(condition.getHandler(conditionModel));
 			if(condition.getConfig() != null) {
-				notifyPolicyParamTypeVo.setConfig(condition.getConfig().toJSONString());
-				notifyPolicyParamTypeVo.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
+				param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
+				param.setConfig(condition.getConfig().toJSONString());
 			}
-			notifyPolicyParamTypeVo.setType(condition.getType());
-			notifyPolicyParamTypeVo.setDefaultExpression(condition.getBasicType().getDefaultExpression().getExpression());
-			List<ProcessExpressionVo> expressionList = new ArrayList<>();
-			for(Expression expression:condition.getBasicType().getExpressionList()) {
-				ProcessExpressionVo processExpressionVo = new ProcessExpressionVo();
-				processExpressionVo.setExpression(expression.getExpression());
-				processExpressionVo.setExpressionName(expression.getExpressionName());
-				expressionList.add(processExpressionVo);
-				notifyPolicyParamTypeVo.setExpressionList(expressionList);			
+			param.setType(condition.getType());
+			param.setBasicType(condition.getBasicType().getName());
+			param.setBasicTypeName(condition.getBasicType().getText());
+			param.setDefaultExpression(condition.getBasicType().getDefaultExpression().getExpression());
+			for(Expression expression : condition.getBasicType().getExpressionList()) {
+				param.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
 			}
-			resultList.add(notifyPolicyParamTypeVo);
+			param.setIsEditable(0);
+			notifyPolicyParamList.add(param);
 		}
-		return resultList;
+		return notifyPolicyParamList;
 	}
 
 	@Override
-	protected List<NotifyPolicyParamTypeVo> mySystemParamList() {
-		// TODO Auto-generated method stub
-		return null;
+	protected void myAuthorityConfig(JSONObject config) {
+		List<String> groupList = JSON.parseArray(config.getJSONArray("groupList").toJSONString(), String.class);
+		groupList.add(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue());
+		config.put("groupList", groupList);
 	}
 
 }
