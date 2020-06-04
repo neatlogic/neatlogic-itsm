@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.google.common.base.Objects;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
@@ -110,16 +111,20 @@ public class FormSaveApi extends ApiComponentBase {
 				throw new FormIllegalParameterException("表单版本：'" + formVo.getCurrentVersionUuid() + "'不属于表单：'" + formVo.getUuid() + "'的版本");
 			}
 			formVersionVo.setUuid(formVo.getCurrentVersionUuid());
+			formVersionVo.setIsActive(formVersion.getIsActive());
 			formMapper.updateFormVersion(formVersionVo);
 		}
-		//更新表单属性信息
-		formMapper.deleteFormAttributeByFormUuid(formVo.getUuid());
-		List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-		if (CollectionUtils.isNotEmpty(formAttributeList)) {
-			for (FormAttributeVo formAttributeVo : formAttributeList) {
-				formMapper.insertFormAttribute(formAttributeVo);
+		//保存激活版本时，更新表单属性信息
+		if(Objects.equal(formVersionVo.getIsActive(), 1)) {
+			formMapper.deleteFormAttributeByFormUuid(formVo.getUuid());
+			List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+			if (CollectionUtils.isNotEmpty(formAttributeList)) {
+				for (FormAttributeVo formAttributeVo : formAttributeList) {
+					formMapper.insertFormAttribute(formAttributeVo);
+				}
 			}
 		}
+		
 		List<ProcessMatrixFormComponentVo> processMatrixFormComponentList = formVersionVo.getProcessMatrixFormComponentList();
 		formMapper.deleteProcessMatrixFormComponentByFormVersionUuid(formVersionVo.getUuid());
 		if(CollectionUtils.isNotEmpty(processMatrixFormComponentList)) {
