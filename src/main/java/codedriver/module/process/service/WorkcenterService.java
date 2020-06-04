@@ -86,7 +86,6 @@ public class WorkcenterService {
 		}
 		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
-		System.out.println(sql);
 		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
 	}
 	
