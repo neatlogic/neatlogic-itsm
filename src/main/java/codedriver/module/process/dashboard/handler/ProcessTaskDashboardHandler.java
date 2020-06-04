@@ -74,6 +74,13 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 					preDatas = chart.getDataMap(nextDataList,configChart,preDatas);
 				}
 			}
+			preDatas.put("configObj", configChart);
+			if(configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())){
+				configChart.put("groupfieldtext", ProcessWorkcenterField.getName(configChart.getString(DashboardShowConfig.GROUPFIELD.getValue())));
+			}
+			if(configChart.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())){
+				configChart.put("subgroupfieldtext", ProcessWorkcenterField.getName(configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue())));
+			}
 			//排序、限制数量
 			JSONObject data = chart.getData(preDatas);
 			if(!ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())&&!ChartType.TABLECHART.getValue().equals(widgetVo.getChartType())&&configChart.containsKey(DashboardShowConfig.MAXGROUP.getValue())) {
