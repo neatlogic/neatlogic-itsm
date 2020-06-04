@@ -74,6 +74,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 					preDatas = chart.getDataMap(nextDataList,configChart,preDatas);
 				}
 			}
+			preDatas.put("configObj", configChart);
 			//排序、限制数量
 			JSONObject data = chart.getData(preDatas);
 			if(!ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())&&!ChartType.TABLECHART.getValue().equals(widgetVo.getChartType())&&configChart.containsKey(DashboardShowConfig.MAXGROUP.getValue())) {
