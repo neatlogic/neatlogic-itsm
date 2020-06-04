@@ -59,7 +59,7 @@ public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 			param.setBasicTypeName(condition.getBasicType().getText());
 			param.setDefaultExpression(condition.getBasicType().getDefaultExpression().getExpression());
 			for(Expression expression : condition.getBasicType().getExpressionList()) {
-				param.getExpressionList().add(new ExpressionVo(expression));
+				param.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
 			}
 			param.setIsEditable(0);
 			notifyPolicyParamList.add(param);
