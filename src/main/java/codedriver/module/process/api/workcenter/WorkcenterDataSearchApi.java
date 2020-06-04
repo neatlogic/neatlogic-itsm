@@ -64,12 +64,14 @@ public class WorkcenterDataSearchApi extends ApiComponentBase {
 			String uuid = jsonObj.getString("uuid");
 			Integer currentPage = jsonObj.getInteger("currentPage");
 			Integer pageSize = jsonObj.getInteger("pageSize");
+			Integer isMeWillDo = jsonObj.getInteger("isMeWillDo");
 			List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
 			if(CollectionUtils.isNotEmpty(workcenterList)) {
 				jsonObj = JSONObject.parseObject(workcenterList.get(0).getConditionConfig());
 				jsonObj.put("uuid", uuid);
 				jsonObj.put("currentPage", currentPage);
 				jsonObj.put("pageSize", pageSize);
+				jsonObj.put("isMeWillDo", isMeWillDo);
 			}
 		}
 		return workcenterService.doSearch(new WorkcenterVo(jsonObj));
