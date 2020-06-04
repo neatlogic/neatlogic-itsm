@@ -6,6 +6,9 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
@@ -15,6 +18,7 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
+import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 @Component
 public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
@@ -65,6 +69,13 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 			notifyPolicyParamList.add(param);
 		}
 		return notifyPolicyParamList;
+	}
+
+	@Override
+	protected void myAuthorityConfig(JSONObject config) {
+		List<String> groupList = JSON.parseArray(config.getJSONArray("groupList").toJSONString(), String.class);
+		groupList.add(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue());
+		config.put("groupList", groupList);
 	}
 
 }
