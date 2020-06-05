@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dto.ProcessDraftVo;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessReferencedCannotBeDeleteException;
 import codedriver.framework.restful.annotation.Description;
@@ -60,6 +61,11 @@ public class ProcessDeleteApi extends ApiComponentBase {
 		processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
 		processMapper.deleteProcessStepRelByProcessUuid(uuid);
 		processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
+		ProcessDraftVo processDraftVo = new ProcessDraftVo();
+		processDraftVo.setProcessUuid(uuid);
+		processMapper.deleteProcessDraft(processDraftVo);
+		processMapper.deleteProcessFormByProcessUuid(uuid);
+		processMapper.deleteProcessSlaByProcessUuid(uuid);
 		return uuid;
 	}
 

@@ -1,5 +1,8 @@
 package codedriver.module.process.api.form;
 
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
@@ -66,6 +70,15 @@ public class FormVersionActiveApi extends ApiComponentBase {
 		//将当前版本设置为激活版本
 		formVersionVo.setIsActive(1);
 		formMapper.updateFormVersion(formVersionVo);
+		
+		formMapper.deleteFormAttributeByFormUuid(uuid);
+		List<FormAttributeVo> formAttributeList = formVersion.getFormAttributeList();
+		if (CollectionUtils.isNotEmpty(formAttributeList)) {
+			for (FormAttributeVo formAttributeVo : formAttributeList) {
+				formMapper.insertFormAttribute(formAttributeVo);
+			}
+		}
+		
 		return null;
 	}
 
