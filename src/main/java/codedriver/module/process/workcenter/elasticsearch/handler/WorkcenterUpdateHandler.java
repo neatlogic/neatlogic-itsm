@@ -33,11 +33,11 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
-import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
 
 @Service
-public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
+public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 	Logger logger = LoggerFactory.getLogger(WorkcenterUpdateHandler.class);
 	@Autowired
 	WorkcenterMapper workcenterMapper;
@@ -165,7 +165,7 @@ public class WorkcenterUpdateHandler extends WorkcenterEsHandlerBase {
 			 patch.set("common", WorkcenterFieldJson);
 			 patch.commit();
 		 }else {
-			 ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME).delete(taskId.toString());
+			 ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME).delete(taskId.toString());
 		 }
 	}
 

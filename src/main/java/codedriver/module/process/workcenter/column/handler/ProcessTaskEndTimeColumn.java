@@ -4,12 +4,12 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.column.core.IProcessTaskColumn;
+import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
-import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
 @Component
-public class ProcessTaskEndTimeColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
+public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 
 	@Override
 	public String getName() {
