@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +45,8 @@ import codedriver.module.process.service.MatrixService;
 @Service
 public class MatrixCellDataGetApi extends ApiComponentBase {
 
+	private final static Logger logger = LoggerFactory.getLogger(MatrixCellDataGetApi.class);
+	
     @Autowired
     private MatrixService matrixService;
 
@@ -157,7 +161,8 @@ public class MatrixCellDataGetApi extends ApiComponentBase {
 	    			integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
 	            	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
 	            	if(StringUtils.isNotBlank(resultVo.getError())) {
-	            		throw new MatrixExternalException(resultVo.getError());
+	        			logger.error(resultVo.getError());
+	            		throw new MatrixExternalException("外部接口访问异常");
 	            	}else {
 		            	List<Map<String, JSONObject>> tbodyList = matrixService.getExternalDataTbodyList(resultVo, columnList, 1, null);
 		            	if(CollectionUtils.isNotEmpty(tbodyList)) {

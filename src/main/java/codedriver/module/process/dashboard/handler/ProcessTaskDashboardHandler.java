@@ -141,6 +141,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 							ProcessWorkcenterField.STATUS,
 							ProcessWorkcenterField.CHANNELTYPE,
 							ProcessWorkcenterField.CHANNEL,
+							ProcessWorkcenterField.STEP_USER,
 							ProcessWorkcenterField.OWNER
 							),false);
 					processTaskShowChartConfigArray.add(groupShowConfig);
@@ -152,6 +153,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 							ProcessWorkcenterField.STATUS,
 							ProcessWorkcenterField.CHANNELTYPE,
 							ProcessWorkcenterField.CHANNEL,
+							ProcessWorkcenterField.STEP_USER,
 							ProcessWorkcenterField.OWNER
 							),true);
 					processTaskShowChartConfigArray.add(subGroupShowConfig);

@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,8 @@ import codedriver.module.process.service.MatrixService;
 @Service
 public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 
+	private final static Logger logger = LoggerFactory.getLogger(MatrixColumnDataInitForTableApi.class);
+			
     @Autowired
     private MatrixService matrixService;
 	
@@ -190,7 +194,7 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 	    			integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
 	            	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
 	            	if(StringUtils.isNotBlank(resultVo.getError())) {
-	            		throw new MatrixExternalException(resultVo.getError());
+	            		throw new MatrixExternalException("外部接口访问异常");
 	            	}else {
 		        		resultList.addAll(matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), null));
 	            	}
@@ -198,7 +202,12 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 	    		returnObj.put("tbodyList", resultList);
         	}else {
         		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-        		matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
+        		if(StringUtils.isNotBlank(resultVo.getError())) {
+        			logger.error(resultVo.getError());
+            		throw new MatrixExternalException("外部接口访问异常");
+            	}else {
+            		matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
+            	}
         	}        	
     		returnObj.put("theadList", theadList);
         }
