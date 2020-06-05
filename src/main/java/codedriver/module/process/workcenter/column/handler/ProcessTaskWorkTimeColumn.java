@@ -6,14 +6,14 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.column.core.IProcessTaskColumn;
+import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.WorktimeVo;
-import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
-import codedriver.framework.process.workcenter.column.core.WorkcenterColumnBase;
 
 @Component
-public class ProcessTaskWorkTimeColumn extends WorkcenterColumnBase implements IWorkcenterColumn{
+public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 	@Autowired
 	WorktimeMapper worktimeMapper;
 	@Override

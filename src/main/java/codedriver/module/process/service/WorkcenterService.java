@@ -34,6 +34,8 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
+import codedriver.framework.process.column.core.IProcessTaskColumn;
+import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -47,12 +49,10 @@ import codedriver.framework.process.dto.condition.ConditionGroupRelVo;
 import codedriver.framework.process.dto.condition.ConditionGroupVo;
 import codedriver.framework.process.dto.condition.ConditionRelVo;
 import codedriver.framework.process.dto.condition.ConditionVo;
+import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
-import codedriver.framework.process.workcenter.column.core.IWorkcenterColumn;
-import codedriver.framework.process.workcenter.column.core.WorkcenterColumnFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.elasticsearch.core.WorkcenterEsHandlerBase;
 import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
 import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 @Service
@@ -86,7 +86,7 @@ public class WorkcenterService {
 		}
 		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
-		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME), sql);
+		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME), sql);
 	}
 	
 	/**
@@ -141,7 +141,7 @@ public class WorkcenterService {
 		List<MultiAttrsObject> resultData = result.getData();
 		//返回的数据重新加工
 		List<JSONObject> dataList = new ArrayList<JSONObject>();
-		Map<String, IWorkcenterColumn> columnComponentMap = WorkcenterColumnFactory.columnComponentMap;
+		Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
 		//获取用户历史自定义theadList
 		List<WorkcenterTheadVo> theadList = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(),UserContext.get().getUserUuid()));
 		//矫正theadList 或存在表单属性或固定字段增删
@@ -170,9 +170,9 @@ public class WorkcenterService {
 			}
 		}
 		//少补
-		for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
-    		IWorkcenterColumn column = entry.getValue();
-    		if(CollectionUtils.isEmpty(theadList.stream().filter(data->column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
+		for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+    		IProcessTaskColumn column = entry.getValue();
+    		if(column.getIsShow()&&CollectionUtils.isEmpty(theadList.stream().filter(data->column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
     			theadList.add(new WorkcenterTheadVo(column));
     		}
     	}
@@ -181,8 +181,8 @@ public class WorkcenterService {
             for (MultiAttrsObject el : resultData) {
             	JSONObject taskJson = new JSONObject();
             	taskJson.put("taskid", el.getId());
-            	for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
-            		IWorkcenterColumn column = entry.getValue();
+            	for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+            		IProcessTaskColumn column = entry.getValue();
             		taskJson.put(column.getName(), column.getValue(el));
             	}
             	//route 供前端跳转路由信息
@@ -380,7 +380,7 @@ public class WorkcenterService {
 			JSONObject titleObj = new JSONObject();
 			JSONArray titleDataList = new JSONArray();
             for (MultiAttrsObject titleEl : dataList) {
-            	IWorkcenterColumn column = WorkcenterColumnFactory.getHandler(condition.getName());
+            	IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(condition.getName());
             	if(column == null) {
             		continue;
             	}
@@ -586,7 +586,7 @@ public class WorkcenterService {
 		String where = assembleWhere(workcenterVo);
 		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
-		QueryParser parser =ElasticSearchPoolManager.getObjectPool(WorkcenterEsHandlerBase.POOL_NAME).createQueryParser();
+		QueryParser parser =ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME).createQueryParser();
 		MultiAttrsQuery query = parser.parse(sql);
 		return query.iterate();
 	}
@@ -597,15 +597,15 @@ public class WorkcenterService {
 	public JSONObject getSearchIterate(QueryResultSet resultSet){
 		JSONObject returnObj = new JSONObject();
 		List<JSONObject> dataList = new ArrayList<JSONObject>();
-		Map<String, IWorkcenterColumn> columnComponentMap = WorkcenterColumnFactory.columnComponentMap;
+		Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
 		if(resultSet.hasMoreResults()) {
 			QueryResult result = resultSet.fetchResult();
 			if(!result.getData().isEmpty()) {
 				for(MultiAttrsObject el : result.getData()) {
 					JSONObject taskJson = new JSONObject();
 	            	taskJson.put("taskid", el.getId());
-	            	for (Map.Entry<String, IWorkcenterColumn> entry : columnComponentMap.entrySet()) {
-	            		IWorkcenterColumn column = entry.getValue();
+	            	for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+	            		IProcessTaskColumn column = entry.getValue();
     					taskJson.put(column.getName(),column.getValueText(el));
 	            	}
 	            	dataList.add(taskJson);
