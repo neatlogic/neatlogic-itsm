@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +49,9 @@ import codedriver.module.process.service.MatrixService;
 
 @Service
 public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
-
+	
+	private final static Logger logger = LoggerFactory.getLogger(MatrixColumnDataSearchForSelectNewApi.class);
+	
     @Autowired
     private MatrixService matrixService;
 
@@ -182,7 +186,8 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
         	integrationVo.getParamObj().putAll(jsonObj);
         	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
         	if(StringUtils.isNotBlank(resultVo.getError())) {
-        		throw new MatrixExternalException(resultVo.getError());
+    			logger.error(resultVo.getError());
+        		throw new MatrixExternalException("外部接口访问异常");
         	}else {
         		resultList = matrixService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null);
         	}

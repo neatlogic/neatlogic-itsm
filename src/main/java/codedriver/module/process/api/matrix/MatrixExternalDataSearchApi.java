@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,8 @@ import codedriver.module.process.service.MatrixService;
 @Deprecated
 public class MatrixExternalDataSearchApi extends ApiComponentBase {
 
+	private final static Logger logger = LoggerFactory.getLogger(MatrixExternalDataSearchApi.class);
+	
     @Autowired
     private MatrixService matrixService;
 	@Autowired
@@ -96,7 +100,8 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
         	integrationVo.getParamObj().putAll(jsonObj);
     		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
     		if(StringUtils.isNotBlank(resultVo.getError())) {
-        		throw new MatrixExternalException(resultVo.getError());
+    			logger.error(resultVo.getError());
+        		throw new MatrixExternalException("外部接口访问异常");
         	}else if(StringUtils.isNotBlank(resultVo.getTransformedResult())) {
     			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
     			if(MapUtils.isNotEmpty(transformedResult)) {
