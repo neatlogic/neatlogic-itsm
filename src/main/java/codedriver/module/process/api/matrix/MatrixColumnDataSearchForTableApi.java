@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +48,8 @@ import codedriver.module.process.service.MatrixService;
 @Service
 public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
 
+	private final static Logger logger = LoggerFactory.getLogger(MatrixColumnDataSearchForTableApi.class);
+			
     @Autowired
     private MatrixService matrixService;
 
@@ -198,7 +202,8 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
         	integrationVo.getParamObj().putAll(jsonObj);
     		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
     		if(StringUtils.isNotBlank(resultVo.getError())) {
-        		throw new MatrixExternalException(resultVo.getError());
+    			logger.error(resultVo.getError());
+        		throw new MatrixExternalException("外部接口访问异常");
         	}else {
         		matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
         	}
