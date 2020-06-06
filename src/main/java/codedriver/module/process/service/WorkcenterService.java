@@ -429,7 +429,7 @@ public class WorkcenterService {
 	private static String assembleWhere(WorkcenterVo workcenterVo) {
 		Map<String,String> groupRelMap = new HashMap<String,String>();
 		StringBuilder whereSb = new StringBuilder();
-		whereSb.append(" where ");
+		whereSb.append(" where (");
 		List<ConditionGroupRelVo> groupRelList = workcenterVo.getConditionGroupRelList();
 		if(CollectionUtils.isNotEmpty(groupRelList)) {
 			//将group 以连接表达式 存 Map<fromUuid_toUuid,joinType> 
@@ -573,7 +573,7 @@ public class WorkcenterService {
 			whereSb.append(")");
 			fromGroupUuid = toGroupUuid;
 		}
-		return whereSb.toString();
+		return whereSb.toString()+")";
 	}
 	
 	/**
