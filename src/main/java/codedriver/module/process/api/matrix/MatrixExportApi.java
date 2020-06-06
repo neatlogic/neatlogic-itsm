@@ -31,6 +31,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
@@ -51,6 +53,8 @@ import java.util.Map;
  **/
 @Service
 public class MatrixExportApi extends BinaryStreamApiComponentBase {
+	
+	private final static Logger logger = LoggerFactory.getLogger(MatrixExportApi.class);
 
     @Autowired
     private MatrixAttributeMapper attributeMapper;
@@ -138,7 +142,8 @@ public class MatrixExportApi extends BinaryStreamApiComponentBase {
 
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
             if(StringUtils.isNotBlank(resultVo.getError())) {
-        		throw new MatrixExternalException(resultVo.getError());
+    			logger.error(resultVo.getError());
+        		throw new MatrixExternalException("外部接口访问异常");
         	}else if(StringUtils.isNotBlank(resultVo.getTransformedResult())) {
     			JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
     			if(MapUtils.isNotEmpty(transformedResult)) {
