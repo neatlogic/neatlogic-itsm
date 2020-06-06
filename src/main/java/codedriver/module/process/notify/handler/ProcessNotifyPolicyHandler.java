@@ -25,7 +25,7 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 
 	@Override
 	public String getName() {
-		return "ITSM" ;
+		return "ITSM";
 	}
 	
 	@Override

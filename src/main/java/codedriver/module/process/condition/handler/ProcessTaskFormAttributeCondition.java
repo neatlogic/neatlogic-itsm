@@ -64,10 +64,6 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 
 	@Override
 	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
-		List<String> valueList = conditionVo.getValueList();
-		if(CollectionUtils.isEmpty(valueList)) {
-			return false;
-		}
 		ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo = new ProcessTaskFormAttributeDataVo();
 		processTaskFormAttributeDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		processTaskFormAttributeDataVo.setAttributeUuid(conditionVo.getName());
@@ -90,18 +86,32 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 		if(processExpression == null) {
 			return false;
 		}
+
+		List<String> valueList = conditionVo.getValueList();
 		switch(processExpression) {
-			case LIKE: 		
+			case LIKE: 
+				if(CollectionUtils.isEmpty(valueList)) {
+					return false;
+				}
 				return dataList.get(0).contains(valueList.get(0));
 			case EQUAL: 
+				if(CollectionUtils.isEmpty(valueList)) {
+					return false;
+				}
 				return dataList.get(0).equals(valueList.get(0));
 			case UNEQUAL: 
+				if(CollectionUtils.isEmpty(valueList)) {
+					return false;
+				}
 				return !dataList.get(0).equals(valueList.get(0));
 			case INCLUDE: 
 				return valueList.removeAll(dataList);
 			case EXCLUDE: 
 				return !valueList.removeAll(dataList);
 			case BETWEEN: 
+				if(CollectionUtils.isEmpty(valueList)) {
+					return false;
+				}
 				long dataLong = Long.parseLong(dataList.get(0));
 				boolean result = false;
 				long left = Long.parseLong(valueList.get(0));
@@ -118,6 +128,9 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 				}
 				return result;
 			case GREATERTHAN: 
+				if(CollectionUtils.isEmpty(valueList)) {
+					return false;
+				}
 				if(dataList.get(0).length() > valueList.get(0).length()) {
 					return true;
 				}else if(dataList.get(0).length() < valueList.get(0).length()) {
@@ -126,6 +139,9 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 					return dataList.get(0).compareTo(valueList.get(0)) > 0 ? true : false;
 				}
 			case LESSTHAN: 
+				if(CollectionUtils.isEmpty(valueList)) {
+					return false;
+				}
 				if(dataList.get(0).length() > valueList.get(0).length()) {
 					return false;
 				}else if(dataList.get(0).length() < valueList.get(0).length()) {
