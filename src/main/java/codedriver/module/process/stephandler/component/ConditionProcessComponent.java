@@ -54,10 +54,11 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	public JSONObject getChartConfig() {
 		return new JSONObject() {
 			{
-				this.put("icon", "ts-shunt");
-				this.put("shape", "L-rectangle-50%:R-rectangle-50%");
+				this.put("icon", "ts-m-problem");
+				this.put("shape", "L-triangle:R-triangle");
 				this.put("width", 68);
-				this.put("height", 40);
+				this.put("height", 68);
+				this.put("rdy", 68 / 4);
 			}
 		};
 	}
@@ -307,7 +308,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public int getSort() {
-		return 0;
+		return 2;
 	}
 
 	@Override
