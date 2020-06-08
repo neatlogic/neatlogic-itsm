@@ -64,10 +64,6 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 
 	@Override
 	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
-		List<String> valueList = conditionVo.getValueList();
-		if(CollectionUtils.isEmpty(valueList)) {
-			return false;
-		}
 		ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo = new ProcessTaskFormAttributeDataVo();
 		processTaskFormAttributeDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		processTaskFormAttributeDataVo.setAttributeUuid(conditionVo.getName());
@@ -76,48 +72,70 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 			return false;
 		}
 		String data = processTaskFormAttributeData.getData();
-		if(StringUtils.isBlank(data)) {
-			return false;
-		}
 		List<String> dataList = null;
 		if(data.startsWith("[") && data.endsWith("]")) {
 			dataList = JSON.parseArray(data, String.class);
 		}else {
 			dataList = new ArrayList<>();
-			dataList.add(data);
+			if(StringUtils.isNotBlank(data)) {
+				dataList.add(data);
+			}
 		}
 		Expression processExpression = Expression.getProcessExpression(conditionVo.getExpression());
 		if(processExpression == null) {
 			return false;
 		}
+
+		List<String> valueList = conditionVo.getValueList();
 		switch(processExpression) {
-			case LIKE: 		
+			case LIKE: 
+				if(CollectionUtils.isEmpty(valueList) || CollectionUtils.isEmpty(dataList)) {
+					return false;
+				}
 				return dataList.get(0).contains(valueList.get(0));
 			case EQUAL: 
+				if(CollectionUtils.isEmpty(valueList) || CollectionUtils.isEmpty(dataList)) {
+					return false;
+				}
 				return dataList.get(0).equals(valueList.get(0));
 			case UNEQUAL: 
+				if(CollectionUtils.isEmpty(valueList) || CollectionUtils.isEmpty(dataList)) {
+					return false;
+				}
 				return !dataList.get(0).equals(valueList.get(0));
 			case INCLUDE: 
 				return valueList.removeAll(dataList);
 			case EXCLUDE: 
 				return !valueList.removeAll(dataList);
 			case BETWEEN: 
-				long dataLong = Long.parseLong(dataList.get(0));
+				if(CollectionUtils.isEmpty(valueList) || CollectionUtils.isEmpty(dataList)) {
+					return false;
+				}
+				String dataStr = dataList.get(0);
 				boolean result = false;
-				long left = Long.parseLong(valueList.get(0));
-				if(dataLong >= left) {
+				String left = valueList.get(0);
+				if(dataStr.length() > left.length()) {
 					result = true;
+				}else if(dataStr.length() < left.length()) {
+					result = false;
+				}else {
+					result = dataStr.compareTo(left) >= 0 ? true : false;
 				}
 				if(result && valueList.size() == 2) {
-					long right = Long.parseLong(valueList.get(1));
-					if(dataLong <= right) {
+					String right = valueList.get(1);
+					if(dataStr.length() > right.length()) {
+						result = false;
+					}else if(dataStr.length() < right.length()) {
 						result = true;
 					}else {
-						result = false;
+						result = dataStr.compareTo(right) <= 0 ? true : false;
 					}
 				}
 				return result;
 			case GREATERTHAN: 
+				if(CollectionUtils.isEmpty(valueList) || CollectionUtils.isEmpty(dataList)) {
+					return false;
+				}
 				if(dataList.get(0).length() > valueList.get(0).length()) {
 					return true;
 				}else if(dataList.get(0).length() < valueList.get(0).length()) {
@@ -126,6 +144,9 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 					return dataList.get(0).compareTo(valueList.get(0)) > 0 ? true : false;
 				}
 			case LESSTHAN: 
+				if(CollectionUtils.isEmpty(valueList) || CollectionUtils.isEmpty(dataList)) {
+					return false;
+				}
 				if(dataList.get(0).length() > valueList.get(0).length()) {
 					return false;
 				}else if(dataList.get(0).length() < valueList.get(0).length()) {

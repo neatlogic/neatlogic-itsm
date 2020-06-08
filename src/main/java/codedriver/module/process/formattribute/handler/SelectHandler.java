@@ -38,7 +38,7 @@ public class SelectHandler implements IFormAttributeHandler {
 		if(isMultiple) {
 			valueList = JSON.parseArray(value, String.class);
 			if(CollectionUtils.isEmpty(valueList)) {
-				return value;
+				return "";
 			}
 		}else {
 			if(StringUtils.isBlank(value)) {
