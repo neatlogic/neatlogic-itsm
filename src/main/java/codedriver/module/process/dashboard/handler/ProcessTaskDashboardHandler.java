@@ -1,5 +1,6 @@
 package codedriver.module.process.dashboard.handler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,9 +49,16 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 		JSONObject jsonObj = new JSONObject();
 		if (chart != null) {
 			jsonObj = JSONObject.parseObject(widgetVo.getConditionConfig());
-			QueryResultSet resultSet = workcenterService.searchTaskIterate(new WorkcenterVo(jsonObj));
 			JSONObject preDatas = new JSONObject();
 			JSONObject configChart = widgetVo.getChartConfigObj();
+			String groupField = configChart.getString(DashboardShowConfig.GROUPFIELD.getValue());
+			String subGroupField = configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue());
+			List<String> resultColumnList = new ArrayList<String>();
+			resultColumnList.add(groupField);
+			if(StringUtils.isNotBlank(subGroupField)) {
+				resultColumnList.add(subGroupField);
+			}
+			jsonObj.put("resultColumnList", resultColumnList);
 			//补充分组条件所有属性
 			Map<String, String> valueTextMap =  new HashMap<String,String>();
 			if(configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
@@ -68,18 +77,20 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			if(valueTextMap.size()>0) {
 				preDatas.put("valueTextMap", valueTextMap);
 			}
+			WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
+			QueryResultSet resultSet = workcenterService.searchTaskIterate(workcenterVo);
 			while(resultSet.hasMoreResults()) {
-				JSONArray nextDataList = workcenterService.getSearchIterate(resultSet).getJSONArray("tbodyList");
+				JSONArray nextDataList = workcenterService.getSearchIterate(resultSet,workcenterVo).getJSONArray("tbodyList");
 				if (CollectionUtils.isNotEmpty(nextDataList)) {
 					preDatas = chart.getDataMap(nextDataList,configChart,preDatas);
 				}
 			}
 			preDatas.put("configObj", configChart);
 			if(configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())){
-				configChart.put("groupfieldtext", ProcessWorkcenterField.getName(configChart.getString(DashboardShowConfig.GROUPFIELD.getValue())));
+				configChart.put("groupfieldtext", ProcessWorkcenterField.getName(groupField));
 			}
 			if(configChart.containsKey(DashboardShowConfig.SUBGROUPFIELD.getValue())){
-				configChart.put("subgroupfieldtext", ProcessWorkcenterField.getName(configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue())));
+				configChart.put("subgroupfieldtext", ProcessWorkcenterField.getName(subGroupField));
 			}
 			//排序、限制数量
 			JSONObject data = chart.getData(preDatas);

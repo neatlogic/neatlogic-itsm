@@ -582,7 +582,17 @@ public class WorkcenterService {
 	 * @return 
 	 */
 	public  QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo){
+		JSONArray resultColumnArray = workcenterVo.getResultColumnList();
 		String selectColumn = "*";
+		
+		if(!CollectionUtils.isEmpty(resultColumnArray)) {
+			List<String> columnResultList = new ArrayList<String>();
+			for(Object column:resultColumnArray) {
+				columnResultList.add(ProcessWorkcenterField.getConditionValue(column.toString()));
+				selectColumn = String.join(",", columnResultList);
+			}
+		}
+		
 		String where = assembleWhere(workcenterVo);
 		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
@@ -594,7 +604,7 @@ public class WorkcenterService {
 	/**
 	 * 流式分批获取并处理数据
 	 */
-	public JSONObject getSearchIterate(QueryResultSet resultSet){
+	public JSONObject getSearchIterate(QueryResultSet resultSet,WorkcenterVo workcenterVo){
 		JSONObject returnObj = new JSONObject();
 		List<JSONObject> dataList = new ArrayList<JSONObject>();
 		Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
@@ -604,8 +614,8 @@ public class WorkcenterService {
 				for(MultiAttrsObject el : result.getData()) {
 					JSONObject taskJson = new JSONObject();
 	            	taskJson.put("taskid", el.getId());
-	            	for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-	            		IProcessTaskColumn column = entry.getValue();
+	            	for (Object columnObj: workcenterVo.getResultColumnList()) {
+	            		IProcessTaskColumn column = columnComponentMap.get(columnObj);
     					taskJson.put(column.getName(),column.getValueText(el));
 	            	}
 	            	dataList.add(taskJson);
