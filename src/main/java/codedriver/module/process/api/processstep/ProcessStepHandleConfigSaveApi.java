@@ -57,7 +57,6 @@ public class ProcessStepHandleConfigSaveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	ProcessStepHandlerVo stepHandlerVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessStepHandlerVo>() {});
-//        stepHandlerService.saveStepHandlerConfig(handlerVo);
 
         stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
         stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);

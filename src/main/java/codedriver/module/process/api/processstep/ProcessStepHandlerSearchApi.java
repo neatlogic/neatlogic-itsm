@@ -30,9 +30,6 @@ import java.util.Map;
 @Service
 public class ProcessStepHandlerSearchApi extends ApiComponentBase {
 
-//    @Autowired
-//    private ProcessStepHandlerService processStepService;
-
     @Autowired
     private ProcessStepHandlerMapper stepHandlerMapper;
 
@@ -61,7 +58,6 @@ public class ProcessStepHandlerSearchApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-//        List<ProcessStepHandlerVo> processStepHandlerList = processStepService.searchProcessComponent(jsonObj.getString("name"));
         List<ProcessStepHandlerVo> processStepHandlerList = new ArrayList<>();
     	Map<String, ProcessStepHandlerVo> handlerConfigMap = new HashMap<>();
         List<ProcessStepHandlerVo> handlerConfigList = stepHandlerMapper.getProcessStepHandlerConfig();
