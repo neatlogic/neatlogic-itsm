@@ -93,7 +93,7 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public int getSort() {
-		return 0;
+		return 1;
 	}
 
 	@Override
