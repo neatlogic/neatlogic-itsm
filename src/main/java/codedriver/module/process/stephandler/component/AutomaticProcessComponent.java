@@ -217,18 +217,24 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
 		/** 组装通知模板 **/
-		JSONArray notifyList = stepConfigObj.getJSONArray("notifyList");
-		if (!CollectionUtils.isEmpty(notifyList)) {
-			List<String> templateUuidList = new ArrayList<>();
-			for (int j = 0; j < notifyList.size(); j++) {
-				JSONObject notifyObj = notifyList.getJSONObject(j);
-				String template = notifyObj.getString("template");
-				if (StringUtils.isNotBlank(template)) {
-					templateUuidList.add(template);
-				}
-			}
-			processStepVo.setTemplateUuidList(templateUuidList);
-		}
+//		JSONArray notifyList = stepConfigObj.getJSONArray("notifyList");
+//		if (!CollectionUtils.isEmpty(notifyList)) {
+//			List<String> templateUuidList = new ArrayList<>();
+//			for (int j = 0; j < notifyList.size(); j++) {
+//				JSONObject notifyObj = notifyList.getJSONObject(j);
+//				String template = notifyObj.getString("template");
+//				if (StringUtils.isNotBlank(template)) {
+//					templateUuidList.add(template);
+//				}
+//			}
+//			processStepVo.setTemplateUuidList(templateUuidList);
+//		}
+		/** 组装通知策略id **/
+		JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
+        Long policyId = notifyPolicyConfig.getLong("policyId");
+        if(policyId != null) {
+        	processStepVo.setNotifyPolicyId(policyId);
+        }
 		/** 组装分配策略 **/
 		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
 		if (!MapUtils.isEmpty(workerPolicyConfig)) {
