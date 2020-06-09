@@ -480,10 +480,12 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 //		}
 		/** 组装通知策略id **/
 		JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
-        Long policyId = notifyPolicyConfig.getLong("policyId");
-        if(policyId != null) {
-        	processStepVo.setNotifyPolicyId(policyId);
-        }
+		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
+	        Long policyId = notifyPolicyConfig.getLong("policyId");
+	        if(policyId != null) {
+	        	processStepVo.setNotifyPolicyId(policyId);
+	        }
+		}
 		/** 组装分配策略 **/
 		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
 		if (MapUtils.isNotEmpty(workerPolicyConfig)) {
