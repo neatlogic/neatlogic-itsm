@@ -6,26 +6,31 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
+import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessDraftVo;
 import codedriver.framework.process.dto.ProcessFormVo;
 import codedriver.framework.process.dto.ProcessSlaVo;
 import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
-import codedriver.framework.process.dto.ProcessStepNotifyTemplateVo;
 import codedriver.framework.process.dto.ProcessStepRelVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
-import codedriver.framework.process.notify.template.IDefaultTemplate;
 
 @Service
 public class ProcessServiceImpl implements ProcessService {
 
 	@Autowired
 	private ProcessMapper processMapper;
+
+    @Autowired
+    private NotifyPolicyInvokerManager notifyPolicyInvokerManager;
 
 	@Override
 	public ProcessVo getProcessByUuid(String processUuid) {
@@ -80,6 +85,7 @@ public class ProcessServiceImpl implements ProcessService {
 			processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
 			processMapper.deleteProcessFormByProcessUuid(uuid);
 			processMapper.deleteProcessSlaByProcessUuid(uuid);
+			notifyPolicyInvokerManager.removeInvoker(uuid);
 			processMapper.updateProcess(processVo);
 		} else {
 			processVo.setFcu(UserContext.get().getUserUuid(true));
@@ -121,12 +127,25 @@ public class ProcessServiceImpl implements ProcessService {
 						processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
 					}
 				}
-				if (stepVo.getTemplateUuidList() != null && stepVo.getTemplateUuidList().size() > 0) {
-					for (String templateUuid : stepVo.getTemplateUuidList()) {
-						if(!IDefaultTemplate.DEFAULT_TEMPLATE_UUID_PREFIX.equals(templateUuid)) {
-							processMapper.replaceProcessStepNotifyTemplate(new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
-						}
-					}
+//				if (stepVo.getTemplateUuidList() != null && stepVo.getTemplateUuidList().size() > 0) {//
+//					for (String templateUuid : stepVo.getTemplateUuidList()) {
+//						if(!IDefaultTemplate.DEFAULT_TEMPLATE_UUID_PREFIX.equals(templateUuid)) {
+//							processMapper.replaceProcessStepNotifyTemplate(new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
+//						}
+//					}
+//				}
+				
+				if(stepVo.getNotifyPolicyId() != null) {
+					NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
+		        	notifyPolicyInvokerVo.setPolicyId(stepVo.getNotifyPolicyId());
+		        	notifyPolicyInvokerVo.setInvoker(processVo.getUuid());
+		        	JSONObject notifyPolicyInvokerConfig = new JSONObject();
+		        	notifyPolicyInvokerConfig.put("function", "processstep");
+		        	notifyPolicyInvokerConfig.put("name", "流程管理-" + processVo.getName() + "-" + stepVo.getName());
+		        	notifyPolicyInvokerConfig.put("processUuid", processVo.getUuid());
+		        	notifyPolicyInvokerConfig.put("processStepUuid", stepVo.getUuid());
+		        	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
+		        	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
 				}
 			}
 		}

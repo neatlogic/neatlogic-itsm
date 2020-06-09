@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessDraftVo;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
@@ -23,6 +24,9 @@ public class ProcessDeleteApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessMapper processMapper;
+
+    @Autowired
+    private NotifyPolicyInvokerManager notifyPolicyInvokerManager;
 	
 	@Override
 	public String getToken() {
@@ -66,6 +70,7 @@ public class ProcessDeleteApi extends ApiComponentBase {
 		processMapper.deleteProcessDraft(processDraftVo);
 		processMapper.deleteProcessFormByProcessUuid(uuid);
 		processMapper.deleteProcessSlaByProcessUuid(uuid);
+		notifyPolicyInvokerManager.removeInvoker(uuid);
 		return uuid;
 	}
 
