@@ -150,7 +150,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
 		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
 		startProcessTaskStepVo.setConfig(startStepConfig);
-		ProcessStepHandlerVo processStepHandlerConfig = stepHandlerMapper.getProcessStepHandlerByHandler(startProcessTaskStepVo.getHandler());//handlerConfigMap.get(startProcessTaskStepVo.getHandler());
+		ProcessStepHandlerVo processStepHandlerConfig = stepHandlerMapper.getProcessStepHandlerByHandler(startProcessTaskStepVo.getHandler());
 		if(processStepHandlerConfig != null) {
 			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
 		}
