@@ -146,11 +146,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(processTaskStepList.size() != 1) {
 			throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
 		}
-//		Map<String, ProcessStepHandlerVo> handlerConfigMap = new HashMap<>();
-//        List<ProcessStepHandlerVo> handlerConfigList = stepHandlerMapper.getProcessStepHandlerConfig();
-//        for(ProcessStepHandlerVo handlerConfig : handlerConfigList) {
-//        	handlerConfigMap.put(handlerConfig.getHandler(), handlerConfig);
-//        }
+
 		ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
 		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
 		startProcessTaskStepVo.setConfig(startStepConfig);
