@@ -13,7 +13,8 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,31 +51,34 @@ public class ProcessStepHandleConfigSaveApi extends ApiComponentBase {
     }
 
     @Input({
-    	@Param( name = "handler", type = ApiParamType.STRING, desc = "流程节点组件", isRequired = true),
-        @Param( name = "config", type = ApiParamType.JSONOBJECT, desc = "流程节点组件配置", isRequired = true)
+    	//@Param( name = "handler", type = ApiParamType.STRING, desc = "流程节点组件", isRequired = true),
+        //@Param( name = "config", type = ApiParamType.JSONOBJECT, desc = "流程节点组件配置", isRequired = true)
+    	@Param(name = "processStepHandlerList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "流程节点组件配置信息列表")
     })
     @Description(desc = "流程节点组件配置保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-    	ProcessStepHandlerVo stepHandlerVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessStepHandlerVo>() {});
-
-        stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
-        stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
-        notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
-        JSONObject config = jsonObj.getJSONObject("config");
-        JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
-        Long policyId = notifyPolicyConfig.getLong("policyId");
-        if(policyId != null) {
-        	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
-        	notifyPolicyInvokerVo.setPolicyId(policyId);
-        	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());
-        	JSONObject notifyPolicyInvokerConfig = new JSONObject();
-        	notifyPolicyInvokerConfig.put("function", "processstephandler");
-        	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandler.getName(stepHandlerVo.getHandler()));
-        	notifyPolicyInvokerConfig.put("handler", stepHandlerVo.getHandler());
-        	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
-        	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
-        }
+//    	ProcessStepHandlerVo stepHandlerVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessStepHandlerVo>() {});
+    	List<ProcessStepHandlerVo> processStepHandlerList = JSON.parseArray(jsonObj.getJSONArray("processStepHandlerList").toJSONString(), ProcessStepHandlerVo.class);
+    	for(ProcessStepHandlerVo stepHandlerVo :processStepHandlerList) {
+    		stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
+            stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
+            notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
+            JSONObject config = JSON.parseObject(stepHandlerVo.getConfig());
+            JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
+            Long policyId = notifyPolicyConfig.getLong("policyId");
+            if(policyId != null) {
+            	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
+            	notifyPolicyInvokerVo.setPolicyId(policyId);
+            	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());
+            	JSONObject notifyPolicyInvokerConfig = new JSONObject();
+            	notifyPolicyInvokerConfig.put("function", "processstephandler");
+            	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandler.getName(stepHandlerVo.getHandler()));
+            	notifyPolicyInvokerConfig.put("handler", stepHandlerVo.getHandler());
+            	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
+            	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
+            }
+    	}        
         return null;
     }
 }
