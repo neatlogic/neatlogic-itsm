@@ -18,9 +18,9 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
+import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelIllegalParameterException;
 import codedriver.framework.process.exception.channel.ChannelNameRepeatException;
@@ -93,7 +93,7 @@ public class ChannelSaveApi extends ApiComponentBase {
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
 		//获取父级信息
 		String parentUuid = channelVo.getParentUuid();
-		if(ITree.ROOT_UUID.equals(parentUuid)) {
+		if(CatalogVo.ROOT_UUID.equals(parentUuid)) {
 			throw new ChannelIllegalParameterException("不能在根目录下创建通道，parentUuid=" + parentUuid);
 		}
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {

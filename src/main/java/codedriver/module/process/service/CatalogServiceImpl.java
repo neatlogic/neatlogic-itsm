@@ -32,7 +32,7 @@ public class CatalogServiceImpl implements CatalogService {
 
 	@Override
 	public Integer rebuildLeftRightCode(String parentUuid, int parentLft) {
-		List<CatalogVo> catalogList = catalogMapper.getCatalogByParentUuid(parentUuid);
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListByParentUuid(parentUuid);
 		for(CatalogVo catalog : catalogList) {
 			if(catalog.getChildrenCount() == 0) {
 				catalogMapper.updateCatalogLeftRightCode(catalog.getUuid(), parentLft + 1, parentLft + 2);

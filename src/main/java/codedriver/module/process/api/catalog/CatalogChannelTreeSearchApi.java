@@ -14,7 +14,6 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -53,9 +52,9 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {				
 		
-		Map<String, ITree> uuidKeyMap = new HashMap<>();
+		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 		String parentUuid = null;
-		ITree parent = null;
+		CatalogVo parent = null;
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(null);
 		if(CollectionUtils.isNotEmpty(catalogList)) {
 			for(CatalogVo catalogVo : catalogList) {
@@ -81,8 +80,7 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 			}
 		}
 		
-		ITree root = uuidKeyMap.get(ITree.ROOT_UUID);		
-		List<ITree> resultChildren = root.getChildren();
-		return resultChildren;
+		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
+		return root.getChildren();
 	}
 }

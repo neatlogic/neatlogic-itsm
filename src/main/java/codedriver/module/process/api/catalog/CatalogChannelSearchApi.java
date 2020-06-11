@@ -2,8 +2,6 @@ package codedriver.module.process.api.catalog;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -69,19 +66,30 @@ public class CatalogChannelSearchApi extends ApiComponentBase {
 		BasePageVo basePageVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<BasePageVo>() {});
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(null);
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
-		List<ITree> catalogChannelList = new ArrayList<>(catalogList.size() + channelList.size());
-		catalogChannelList.addAll(catalogList);
-		catalogChannelList.addAll(channelList);
-		Stream<ITree> treeStream = catalogChannelList.stream();
-		if(StringUtils.isNotBlank(keyword)) {
-			treeStream = treeStream.filter(tree -> !tree.getUuid().equals("0") && tree.getName().toUpperCase().contains(keyword.toUpperCase()));
-		}else {
-			treeStream = treeStream.filter(tree -> !tree.getUuid().equals("0"));
+		List<CatalogVo> catalogChannelList = new ArrayList<>(catalogList.size() + channelList.size());
+		for(CatalogVo catalogVo : catalogList) {
+			if(!CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
+				continue;
+			}
+			if(StringUtils.isNotBlank(keyword) && !catalogVo.getName().toUpperCase().contains(keyword.toUpperCase())) {
+				continue;
+			}
+			catalogChannelList.add(catalogVo);
 		}
-		treeStream = treeStream.sorted((tree1, tree2) -> tree1.getName().compareTo(tree2.getName()));
-		List<ITree> treeList = treeStream.collect(Collectors.toList());
+		for(ChannelVo channelVo : channelList) {
+			if(StringUtils.isNotBlank(keyword) && !channelVo.getName().toUpperCase().contains(keyword.toUpperCase())) {
+				continue;
+			}
+			CatalogVo catalogVo = new CatalogVo();
+			catalogVo.setUuid(channelVo.getUuid());
+			catalogVo.setName(channelVo.getName());
+			catalogVo.setParentUuid(channelVo.getParentUuid());
+			catalogChannelList.add(catalogVo);
+		}
+		catalogChannelList.sort((catalogVo1, catalogVo2) -> catalogVo1.getName().compareTo(catalogVo2.getName()));
+
 		if(basePageVo.getNeedPage()) {
-			int rowNum = treeList.size();
+			int rowNum = catalogChannelList.size();
 			int pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
 			resultObj.put("currentPage", basePageVo.getCurrentPage());
 			resultObj.put("pageSize", basePageVo.getPageSize());
@@ -90,10 +98,10 @@ public class CatalogChannelSearchApi extends ApiComponentBase {
 			int fromIndex = basePageVo.getStartNum();
 			int toIndex = fromIndex + basePageVo.getPageSize();
 			toIndex = rowNum < toIndex ? rowNum : toIndex;
-			treeList = treeList.subList(fromIndex, toIndex);
+			catalogChannelList = catalogChannelList.subList(fromIndex, toIndex);
 		}
 		
-		resultObj.put("treeList", treeList);
+		resultObj.put("treeList", catalogChannelList);
 		return resultObj;
 	}
 

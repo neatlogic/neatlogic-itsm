@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.dao.mapper.CatalogMapper;
-import codedriver.framework.process.dto.ITree;
+import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 
@@ -38,8 +38,8 @@ public class RebuidLeftRightCodeApi extends ApiComponentBase {
 
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		catalogMapper.getCatalogLockByUuid(ITree.ROOT_UUID);
-		catalogService.rebuildLeftRightCode(ITree.ROOT_PARENTUUID, 0);
+		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+		catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		return null;
 	}
 

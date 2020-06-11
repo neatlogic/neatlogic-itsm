@@ -22,7 +22,6 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -95,9 +94,9 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		}
 		List<Map<String, Object>> calalogBreadcrumbList = new ArrayList<>();
 		Map<String, Object> treePathMap = null;
-		Map<String, ITree> uuidKeyMap = new HashMap<>();
+		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 		String parentUuid = null;
-		ITree parent = null;
+		CatalogVo parent = null;
 		//
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
 		if(CollectionUtils.isNotEmpty(catalogList)) {
@@ -124,7 +123,7 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 			List<String>hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedChannelUuidList);
 		
 			for(CatalogVo catalogVo : catalogList) {
-				if(!ITree.ROOT_UUID.equals(catalogVo.getUuid())) {//root根目录不返回
+				if(!CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {//root根目录不返回
 					if(catalogVo.isAncestorOrSelf(catalogUuid)) {//只返回catalogUuid的本身及子目录
 						if(keyword == null || channelParentUuidList.contains(catalogVo.getUuid())) {//符合搜索条件
 							if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())//有权限

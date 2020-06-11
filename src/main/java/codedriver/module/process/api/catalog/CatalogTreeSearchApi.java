@@ -1,6 +1,5 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +17,6 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -94,32 +92,33 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 			
 			for(int index = catalogList.size() - 1; index >= 0; index--) {
 				CatalogVo catalogVo = catalogList.get(index);
-				if(catalogVo.getUuid().equals(catalogUuid)) {
-					catalogVo.setSelectedCascade(true);
-				}
+//				if(catalogVo.getUuid().equals(catalogUuid)) {
+//					catalogVo.setSelectedCascade(true);
+//				}
 				if(!currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())
 						|| (!hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid()) && catalogVo.getChildrenCount() == 0)) {
-					ITree parentCatalog = catalogVo.getParent();
+					CatalogVo parentCatalog = catalogVo.getParent();
 					if(parentCatalog != null) {
-						((CatalogVo)parentCatalog).removeChild(catalogVo);
+						parentCatalog.removeChildCatalog(catalogVo);
 					}
 				}
 			}
 		}
 		
-		ITree root = uuidKeyMap.get(ITree.ROOT_UUID);
+		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
 
-		List<ITree> resultChildren = root.getChildren();
-		root.setChildren(null);
-		if(ITree.ROOT_UUID.equals(catalogUuid)) {
-			root.setSelected(true);
-		}else {
-			root.setSelected(false);
-		}
-		if(resultChildren == null) {
-			resultChildren = new ArrayList<>();
-		}
-		resultChildren.add(root);
+		List<Object> resultChildren = root.getChildren();
+		CatalogVo copyRoot = new CatalogVo();
+		copyRoot.setUuid(root.getUuid());
+		copyRoot.setName(root.getName());
+		copyRoot.setParentUuid(root.getParentUuid());
+		copyRoot.setLft(root.getLft());
+//		if(Objects.equal(copyRoot.getUuid(), catalogUuid)) {
+//			root.setSelected(true);
+//		}else {
+//			root.setSelected(false);
+//		}
+		resultChildren.add(copyRoot);
 		return resultChildren;
 	}
 

@@ -32,7 +32,6 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
@@ -191,7 +190,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(channelVo != null) {
 			StringBuilder channelPath = new StringBuilder(channelVo.getName());
 			String parentUuid = channelVo.getParentUuid();
-			while(!ITree.ROOT_UUID.equals(parentUuid)) {
+			while(!CatalogVo.ROOT_UUID.equals(parentUuid)) {
 				CatalogVo catalogVo = catalogMapper.getCatalogByUuid(parentUuid);
 				if(catalogVo != null) {
 					channelPath.insert(0, "/");
