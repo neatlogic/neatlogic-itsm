@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
@@ -51,8 +51,8 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
 	}
 
 	@Override
-	public BasicType getBasicType() {
-		return BasicType.STRING;
+	public ParamType getBasicType() {
+		return ParamType.STRING;
 	}
 
 	@Override

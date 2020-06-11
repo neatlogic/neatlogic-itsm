@@ -1,6 +1,6 @@
 package codedriver.module.process.counter.handler;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
 import codedriver.framework.reminder.core.IGlobalReminderHandler;
 import codedriver.framework.reminder.dto.ReminderMessageVo;

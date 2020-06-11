@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
