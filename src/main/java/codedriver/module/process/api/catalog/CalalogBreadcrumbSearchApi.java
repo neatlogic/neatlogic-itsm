@@ -78,6 +78,7 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
 		JSONObject resultObj = new JSONObject();
+		resultObj.put("breadcrumbList", new ArrayList<>());
 		//已授权的服务uuid
 		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 		if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
@@ -152,8 +153,6 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 					int toIndex = fromIndex + basePageVo.getPageSize();
 					toIndex = toIndex >  rowNum ? rowNum : toIndex;
 					resultObj.put("breadcrumbList", calalogBreadcrumbList.subList(fromIndex, toIndex));
-				}else {
-					resultObj.put("breadcrumbList", new ArrayList<>());
 				}
 			}else {
 				resultObj.put("breadcrumbList", calalogBreadcrumbList);

@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dto.AuthorityVo;
@@ -69,7 +68,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
-		CatalogVo catalogVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<CatalogVo>() {});
+		CatalogVo catalogVo = JSON.toJavaObject(jsonObj, CatalogVo.class);
 		//获取父级信息
 		String parentUuid = catalogVo.getParentUuid();
 		CatalogVo parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
@@ -81,6 +80,9 @@ public class CatalogSaveApi extends ApiComponentBase {
 		}
 
 		String uuid = catalogVo.getUuid();
+		if(CatalogVo.UNCATEGORIZED_CATALOG_UUID.equals(uuid)) {
+			return uuid;
+		}
 		CatalogVo existedCatalog = catalogMapper.getCatalogByUuid(uuid);
 		if(existedCatalog == null) {//新增
 			catalogVo.setUuid(null);

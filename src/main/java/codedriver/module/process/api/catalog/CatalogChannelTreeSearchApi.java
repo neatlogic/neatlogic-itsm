@@ -1,5 +1,6 @@
 package codedriver.module.process.api.catalog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +20,14 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.CatalogService;
 
 @Service
 public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 
+	@Autowired
+	private CatalogService catalogService;
+	
 	@Autowired
 	private CatalogMapper catalogMapper;
 	
@@ -53,6 +58,10 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {				
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
+		if(!catalogService.checkLeftRightCodeIsExists()) {
+			catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
+		}
 		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
@@ -83,6 +92,6 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		if(root != null) {
 			return root.getChildren();
 		}
-		return null;
+		return new ArrayList<>();
 	}
 }

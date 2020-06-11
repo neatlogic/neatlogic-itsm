@@ -1,5 +1,6 @@
 package codedriver.module.process.api.catalog;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +69,7 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		//已授权的目录uuid
 		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 		if(CollectionUtils.isEmpty(currentUserAuthorizedCatalogUuidList)) {
-			return null;
+			return new ArrayList<>();
 		}
 		//已授权的服务uuid
 		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
@@ -139,7 +140,7 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 			resultChildren.add(copyRoot);
 			return resultChildren;
 		}
-		return null;
+		return new ArrayList<>();
 	}
 
 }
