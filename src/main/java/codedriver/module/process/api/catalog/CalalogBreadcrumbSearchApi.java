@@ -5,16 +5,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -22,7 +23,6 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -64,112 +64,94 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
 		})
 	@Output({
-		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
-		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
-		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
-		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="breadcrumbList", type=ApiParamType.JSONARRAY, desc="服务目录路径列表"),
-		@Param(name="breadcrumbList[0].uuid", type=ApiParamType.STRING, desc="服务目录uuid"),
-		@Param(name="breadcrumbList[0].path", type=ApiParamType.JSONARRAY, desc="服务目录路径")
+		@Param(explode = BasePageVo.class),
+		@Param(name="breadcrumbList", type=ApiParamType.JSONARRAY, desc="服务目录路径列表")
 	})
 	@Description(desc = "获取某个服务目录下的所有服务目录路径接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String catalogUuid = jsonObj.getString("catalogUuid");
-		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
+		CatalogVo catalog = catalogMapper.getCatalogByUuid(catalogUuid);
+		if(catalog == null) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
-
-		Set<String> channelParentUuidList = null;
-		String keyword = jsonObj.getString("keyword");
-		if(keyword != null) {
-			ChannelVo channelVo = new ChannelVo();
-			channelVo.setKeyword(keyword);
-			channelVo.setNeedPage(false);
-			List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);
-			if(CollectionUtils.isNotEmpty(channelList)) {
-				channelParentUuidList = channelList.stream().map(ChannelVo::getParentUuid).collect(Collectors.toSet());
-			}else {
-				return null;
-			}
+		
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("breadcrumbList", new ArrayList<>());
+		//已授权的服务uuid
+		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
+			return resultObj;
 		}
-		List<Map<String, Object>> calalogBreadcrumbList = new ArrayList<>();
-		Map<String, Object> treePathMap = null;
-		Map<String, ITree> uuidKeyMap = new HashMap<>();
-		String parentUuid = null;
-		ITree parent = null;
-		//
-		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
+
+		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
+		ChannelVo channel = new ChannelVo();
+		channel.setKeyword(basePageVo.getKeyword());
+		channel.setIsActive(1);
+		channel.setAuthorizedUuidList(currentUserAuthorizedChannelUuidList);
+		channel.setNeedPage(false);
+		List<ChannelVo> channelList = channelMapper.searchChannelList(channel);
+		if(CollectionUtils.isEmpty(channelList)) {
+			return resultObj;
+		}
+
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(catalog.getLft(), catalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
+
+			//已授权的目录uuid
+			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+
+			Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 			for(CatalogVo catalogVo : catalogList) {
+				if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())) {
+					catalogVo.setAuthority(true);
+				}
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 			}
 			//设置父级
 			for(CatalogVo catalogVo : catalogList) {
-				parentUuid = catalogVo.getParentUuid();
-				parent = uuidKeyMap.get(parentUuid);
+				String parentUuid = catalogVo.getParentUuid();
+				CatalogVo parent = uuidKeyMap.get(parentUuid);
 				if(parent != null) {
 					catalogVo.setParent(parent);
 				}				
 			}
+
 			//排序
 			Collections.sort(catalogList);
-			
-			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-			//已授权的目录uuid
-			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
-			//已授权的服务uuid
-			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 			//查出有已启用且有授权服务的目录uuid
-			List<String>hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedChannelUuidList);
-		
+			List<String>hasActiveChannelCatalogUuidList = channelList.stream().map(ChannelVo::getParentUuid).collect(Collectors.toList());
+			List<Map<String, Object>> calalogBreadcrumbList = new ArrayList<>();
 			for(CatalogVo catalogVo : catalogList) {
-				if(!ITree.ROOT_UUID.equals(catalogVo.getUuid())) {//root根目录不返回
-					if(catalogVo.isAncestorOrSelf(catalogUuid)) {//只返回catalogUuid的本身及子目录
-						if(keyword == null || channelParentUuidList.contains(catalogVo.getUuid())) {//符合搜索条件
-							if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())//有权限
-									&& hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {//有已启用且有授权服务
-								treePathMap = new HashMap<>();
-								treePathMap.put("uuid", catalogVo.getUuid());
-								treePathMap.put("path", catalogVo.getNameList());
-								treePathMap.put("keyword", keyword);
-								calalogBreadcrumbList.add(treePathMap);
-							}
-						}
+				if(!CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {//root根目录不返回
+					if(catalogVo.isAuthority() && hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
+						Map<String, Object> treePathMap = new HashMap<>();
+						treePathMap.put("uuid", catalogVo.getUuid());
+						treePathMap.put("path", catalogVo.getNameList());
+						treePathMap.put("keyword", basePageVo.getKeyword());
+						calalogBreadcrumbList.add(treePathMap);
 					}
 				}
 			}
-		}
-		
-		JSONObject resultObj = new JSONObject();
-		boolean needPage = true;
-		if(jsonObj.containsKey("needPage")) {
-			needPage = jsonObj.getBooleanValue("needPage");
-		}
-		if(needPage) {
-			int currentPage = 1;
-			if(jsonObj.containsKey("currentPage")) {
-				currentPage = jsonObj.getIntValue("currentPage");
+			if(basePageVo.getNeedPage()) {
+				int rowNum = calalogBreadcrumbList.size();
+				int pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
+				resultObj.put("currentPage", basePageVo.getCurrentPage());
+				resultObj.put("pageSize", basePageVo.getPageSize());
+				resultObj.put("pageCount", pageCount);
+				resultObj.put("rowNum", rowNum);
+				int fromIndex = basePageVo.getStartNum();
+				if(fromIndex < rowNum) {
+					int toIndex = fromIndex + basePageVo.getPageSize();
+					toIndex = toIndex >  rowNum ? rowNum : toIndex;
+					resultObj.put("breadcrumbList", calalogBreadcrumbList.subList(fromIndex, toIndex));
+				}
+			}else {
+				resultObj.put("breadcrumbList", calalogBreadcrumbList);
 			}
-			int pageSize = 10;
-			if(jsonObj.containsKey("pageSize")) {
-				pageSize = jsonObj.getIntValue("pageSize");
-			}
-			int rowNum = calalogBreadcrumbList.size();
-			int pageCount = PageUtil.getPageCount(rowNum, pageSize);
-			int startNum = Math.max((currentPage - 1) * pageSize, 0);
-			int endNum = startNum + pageSize;
-			endNum = endNum >  rowNum ? rowNum : endNum;
-			resultObj.put("breadcrumbList", calalogBreadcrumbList.subList(startNum, endNum));
-			resultObj.put("currentPage", currentPage);
-			resultObj.put("pageSize", pageSize);
-			resultObj.put("pageCount", pageCount);
-			resultObj.put("rowNum", rowNum);
-		}else {
-			resultObj.put("breadcrumbList", calalogBreadcrumbList);
 		}
-		
-		return resultObj;
+        return resultObj;
 	}
 
 }

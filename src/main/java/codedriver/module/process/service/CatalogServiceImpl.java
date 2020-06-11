@@ -6,7 +6,6 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -20,9 +19,9 @@ public class CatalogServiceImpl implements CatalogService {
 	@Override
 	public boolean checkLeftRightCodeIsExists() {
 		int count = catalogMapper.getCatalogCount(new CatalogVo());
-		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(TeamVo.ROOT_UUID);
+		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
 		if(rootCatalog == null) {
-			throw new TeamNotFoundException(TeamVo.ROOT_UUID);
+			throw new TeamNotFoundException(CatalogVo.ROOT_UUID);
 		}
 		if(Objects.equals(rootCatalog.getLft(), 1) && Objects.equals(rootCatalog.getRht(), count * 2)) {
 			return true;
@@ -32,7 +31,7 @@ public class CatalogServiceImpl implements CatalogService {
 
 	@Override
 	public Integer rebuildLeftRightCode(String parentUuid, int parentLft) {
-		List<CatalogVo> catalogList = catalogMapper.getCatalogByParentUuid(parentUuid);
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListByParentUuid(parentUuid);
 		for(CatalogVo catalog : catalogList) {
 			if(catalog.getChildrenCount() == 0) {
 				catalogMapper.updateCatalogLeftRightCode(catalog.getUuid(), parentLft + 1, parentLft + 2);

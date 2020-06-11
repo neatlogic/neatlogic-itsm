@@ -10,7 +10,6 @@ import com.google.common.base.Objects;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dto.CatalogVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogIllegalParameterException;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -53,9 +52,9 @@ public class CatalogMoveApi extends ApiComponentBase {
 	@Description(desc = "服务目录移动位置接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {		
-		catalogMapper.getCatalogLockByUuid(ITree.ROOT_UUID);
+		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogService.rebuildLeftRightCode(ITree.ROOT_PARENTUUID, 0);
+			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
 		String uuid = jsonObj.getString("uuid");		
 		CatalogVo moveCatalog = catalogMapper.getCatalogByUuid(uuid);

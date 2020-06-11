@@ -1,5 +1,6 @@
 package codedriver.module.process.api.catalog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,16 +15,19 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.CatalogService;
 
 @Service
 public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 
+	@Autowired
+	private CatalogService catalogService;
+	
 	@Autowired
 	private CatalogMapper catalogMapper;
 	
@@ -53,17 +57,20 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {				
 		
-		Map<String, ITree> uuidKeyMap = new HashMap<>();
-		String parentUuid = null;
-		ITree parent = null;
-		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(null);
+		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
+		if(!catalogService.checkLeftRightCodeIsExists()) {
+			catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
+		}
+		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
 			for(CatalogVo catalogVo : catalogList) {
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);			
 			}
 			for(CatalogVo catalogVo : catalogList) {
-				parentUuid = catalogVo.getParentUuid();
-				parent = uuidKeyMap.get(parentUuid);
+				String parentUuid = catalogVo.getParentUuid();
+				CatalogVo parent = uuidKeyMap.get(parentUuid);
 				if(parent != null) {
 					catalogVo.setParent(parent);
 				}				
@@ -73,16 +80,18 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
 		if(CollectionUtils.isNotEmpty(channelList)) {
 			for(ChannelVo channelVo : channelList) {
-				parentUuid = channelVo.getParentUuid();
-				parent = uuidKeyMap.get(parentUuid);
+				String parentUuid = channelVo.getParentUuid();
+				CatalogVo parent = uuidKeyMap.get(parentUuid);
 				if(parent != null) {
 					channelVo.setParent(parent);
 				}
 			}
 		}
 		
-		ITree root = uuidKeyMap.get(ITree.ROOT_UUID);		
-		List<ITree> resultChildren = root.getChildren();
-		return resultChildren;
+		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
+		if(root != null) {
+			return root.getChildren();
+		}
+		return new ArrayList<>();
 	}
 }

@@ -11,7 +11,6 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.ITree;
 import codedriver.framework.process.exception.catalog.CatalogIllegalParameterException;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelIllegalParameterException;
@@ -135,7 +134,7 @@ public class ChannelMoveApi extends ApiComponentBase {
 		
 		//判断移动后是否会脱离根目录
 		String parentUuidTemp = parentUuid;
-		while(!ITree.ROOT_UUID.equals(parentUuidTemp)) {
+		while(!CatalogVo.ROOT_UUID.equals(parentUuidTemp)) {
 			CatalogVo parent = catalogMapper.getCatalogByUuid(parentUuidTemp);
 			if(parent == null) {
 				throw new CatalogIllegalParameterException("将服务目录：" + uuid + "的parentUuid设置为：" + parentUuid + "会导致该目录脱离根目录");
