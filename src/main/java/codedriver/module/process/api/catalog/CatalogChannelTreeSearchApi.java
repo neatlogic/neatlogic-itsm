@@ -53,16 +53,15 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {				
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
-		String parentUuid = null;
-		CatalogVo parent = null;
-		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(null);
+		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
 			for(CatalogVo catalogVo : catalogList) {
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);			
 			}
 			for(CatalogVo catalogVo : catalogList) {
-				parentUuid = catalogVo.getParentUuid();
-				parent = uuidKeyMap.get(parentUuid);
+				String parentUuid = catalogVo.getParentUuid();
+				CatalogVo parent = uuidKeyMap.get(parentUuid);
 				if(parent != null) {
 					catalogVo.setParent(parent);
 				}				
@@ -72,8 +71,8 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
 		if(CollectionUtils.isNotEmpty(channelList)) {
 			for(ChannelVo channelVo : channelList) {
-				parentUuid = channelVo.getParentUuid();
-				parent = uuidKeyMap.get(parentUuid);
+				String parentUuid = channelVo.getParentUuid();
+				CatalogVo parent = uuidKeyMap.get(parentUuid);
 				if(parent != null) {
 					channelVo.setParent(parent);
 				}
@@ -81,6 +80,9 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		}
 		
 		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
-		return root.getChildren();
+		if(root != null) {
+			return root.getChildren();
+		}
+		return null;
 	}
 }

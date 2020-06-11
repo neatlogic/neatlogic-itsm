@@ -64,19 +64,27 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
 
-		//查出所有已启用的目录
-		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(1);
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
 		//已授权的目录uuid
 		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		if(CollectionUtils.isEmpty(currentUserAuthorizedCatalogUuidList)) {
+			return null;
+		}
 		//已授权的服务uuid
 		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 		//查出有已启用且有授权服务的目录uuid
 		List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedChannelUuidList);
 		
-		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();		
+		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
+
+		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+		//查出所有目录
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
 			for(CatalogVo catalogVo : catalogList) {
+				if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())) {
+					catalogVo.setAuthority(true);
+				}
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 			}
 			
@@ -95,31 +103,43 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 //				if(catalogVo.getUuid().equals(catalogUuid)) {
 //					catalogVo.setSelectedCascade(true);
 //				}
-				if(!currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())
-						|| (!hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid()) && catalogVo.getChildrenCount() == 0)) {
-					CatalogVo parentCatalog = catalogVo.getParent();
-					if(parentCatalog != null) {
-						parentCatalog.removeChildCatalog(catalogVo);
-					}
+//				if(!currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())
+//						|| (!hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid()) && catalogVo.getChildrenCount() == 0)) {
+//					CatalogVo parentCatalog = catalogVo.getParent();
+//					if(parentCatalog != null) {
+//						parentCatalog.removeChildCatalog(catalogVo);
+//					}
+//				}
+				if(CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
+					continue;
+				}
+				if(catalogVo.isAuthority() && (CollectionUtils.isNotEmpty(catalogVo.getChildren()) || hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid()))) {//
+					continue;
+				}
+				CatalogVo parentCatalog = catalogVo.getParent();
+				if(parentCatalog != null) {
+					parentCatalog.removeChildCatalog(catalogVo);
 				}
 			}
 		}
 		
 		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
-
-		List<Object> resultChildren = root.getChildren();
-		CatalogVo copyRoot = new CatalogVo();
-		copyRoot.setUuid(root.getUuid());
-		copyRoot.setName(root.getName());
-		copyRoot.setParentUuid(root.getParentUuid());
-		copyRoot.setLft(root.getLft());
-//		if(Objects.equal(copyRoot.getUuid(), catalogUuid)) {
-//			root.setSelected(true);
-//		}else {
-//			root.setSelected(false);
-//		}
-		resultChildren.add(copyRoot);
-		return resultChildren;
+		if(root != null) {
+			List<Object> resultChildren = root.getChildren();
+			CatalogVo copyRoot = new CatalogVo();
+			copyRoot.setUuid(root.getUuid());
+			copyRoot.setName(root.getName());
+			copyRoot.setParentUuid(root.getParentUuid());
+			copyRoot.setLft(root.getLft());
+//			if(Objects.equal(copyRoot.getUuid(), catalogUuid)) {
+//				root.setSelected(true);
+//			}else {
+//				root.setSelected(false);
+//			}
+			resultChildren.add(copyRoot);
+			return resultChildren;
+		}
+		return null;
 	}
 
 }

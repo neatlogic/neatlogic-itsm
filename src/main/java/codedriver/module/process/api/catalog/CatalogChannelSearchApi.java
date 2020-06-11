@@ -64,7 +64,8 @@ public class CatalogChannelSearchApi extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		String keyword = jsonObj.getString("keyword");
 		BasePageVo basePageVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<BasePageVo>() {});
-		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(null);
+		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
 		List<CatalogVo> catalogChannelList = new ArrayList<>(catalogList.size() + channelList.size());
 		for(CatalogVo catalogVo : catalogList) {
@@ -87,7 +88,6 @@ public class CatalogChannelSearchApi extends ApiComponentBase {
 			catalogChannelList.add(catalogVo);
 		}
 		catalogChannelList.sort((catalogVo1, catalogVo2) -> catalogVo1.getName().compareTo(catalogVo2.getName()));
-
 		if(basePageVo.getNeedPage()) {
 			int rowNum = catalogChannelList.size();
 			int pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
@@ -96,12 +96,17 @@ public class CatalogChannelSearchApi extends ApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
 			int fromIndex = basePageVo.getStartNum();
-			int toIndex = fromIndex + basePageVo.getPageSize();
-			toIndex = rowNum < toIndex ? rowNum : toIndex;
-			catalogChannelList = catalogChannelList.subList(fromIndex, toIndex);
+			if(fromIndex < rowNum) {
+				int toIndex = fromIndex + basePageVo.getPageSize();
+				toIndex = toIndex > rowNum ? rowNum : toIndex;
+				resultObj.put("treeList", catalogChannelList.subList(fromIndex, toIndex));
+			}else {
+				resultObj.put("treeList", new ArrayList<>());
+			}
+		}else {
+			resultObj.put("treeList", catalogChannelList);
 		}
-		
-		resultObj.put("treeList", catalogChannelList);
+			
 		return resultObj;
 	}
 
