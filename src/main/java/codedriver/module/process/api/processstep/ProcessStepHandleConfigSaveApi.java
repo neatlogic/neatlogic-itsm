@@ -1,6 +1,6 @@
 package codedriver.module.process.api.processstep;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
 import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;

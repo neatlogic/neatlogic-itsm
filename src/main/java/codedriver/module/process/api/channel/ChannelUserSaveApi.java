@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.restful.annotation.Description;

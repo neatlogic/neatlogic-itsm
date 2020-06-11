@@ -16,8 +16,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.WorktimeVo;
 import codedriver.framework.process.exception.worktime.WorktimeConfigIllegalException;

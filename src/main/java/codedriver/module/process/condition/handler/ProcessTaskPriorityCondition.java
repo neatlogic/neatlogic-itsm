@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
@@ -79,8 +79,8 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 	}
 
 	@Override
-	public BasicType getBasicType() {
-		return BasicType.ARRAY;
+	public ParamType getBasicType() {
+		return ParamType.ARRAY;
 	}
 
 	@Override
