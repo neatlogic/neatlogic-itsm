@@ -117,13 +117,7 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 					catalogVo.setParent(parent);
 				}				
 			}
-//			for(ChannelVo channelVo : channelList) {
-//				String parentUuid = channelVo.getParentUuid();
-//				CatalogVo parent = uuidKeyMap.get(parentUuid);
-//				if(parent != null) {
-//					channelVo.setParent(parent);
-//				}
-//			}
+
 			//排序
 			Collections.sort(catalogList);
 			//查出有已启用且有授权服务的目录uuid
@@ -136,7 +130,6 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 						treePathMap.put("uuid", catalogVo.getUuid());
 						treePathMap.put("path", catalogVo.getNameList());
 						treePathMap.put("keyword", basePageVo.getKeyword());
-//						System.out.println(treePathMap);
 						calalogBreadcrumbList.add(treePathMap);
 					}
 				}

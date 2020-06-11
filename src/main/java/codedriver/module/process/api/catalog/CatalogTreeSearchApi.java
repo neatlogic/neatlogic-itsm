@@ -101,16 +101,6 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 			
 			for(int index = catalogList.size() - 1; index >= 0; index--) {
 				CatalogVo catalogVo = catalogList.get(index);
-//				if(catalogVo.getUuid().equals(catalogUuid)) {
-//					catalogVo.setSelectedCascade(true);
-//				}
-//				if(!currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())
-//						|| (!hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid()) && catalogVo.getChildrenCount() == 0)) {
-//					CatalogVo parentCatalog = catalogVo.getParent();
-//					if(parentCatalog != null) {
-//						parentCatalog.removeChildCatalog(catalogVo);
-//					}
-//				}
 				if(CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
 					continue;
 				}
@@ -132,11 +122,6 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 			copyRoot.setName(root.getName());
 			copyRoot.setParentUuid(root.getParentUuid());
 			copyRoot.setLft(root.getLft());
-//			if(Objects.equal(copyRoot.getUuid(), catalogUuid)) {
-//				root.setSelected(true);
-//			}else {
-//				root.setSelected(false);
-//			}
 			resultChildren.add(copyRoot);
 			return resultChildren;
 		}
