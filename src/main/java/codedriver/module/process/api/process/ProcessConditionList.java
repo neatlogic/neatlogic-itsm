@@ -91,7 +91,7 @@ public class ProcessConditionList extends ApiComponentBase {
 			
 			ConditionParamVo conditionParamVo = new ConditionParamVo();
 			conditionParamVo.setName(condition.getName());
-			conditionParamVo.setDisplayName(condition.getDisplayName());
+			conditionParamVo.setLabel(condition.getDisplayName());
 			conditionParamVo.setController(condition.getHandler(conditionModel));
 			if(condition.getConfig() != null) {
 				conditionParamVo.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
@@ -125,7 +125,7 @@ public class ProcessConditionList extends ApiComponentBase {
 				formAttributeVo.setConditionModel(conditionModel);
 				ConditionParamVo conditionParamVo = new ConditionParamVo();
 				conditionParamVo.setName(formAttributeVo.getUuid());
-				conditionParamVo.setDisplayName(formAttributeVo.getLabel());
+				conditionParamVo.setLabel(formAttributeVo.getLabel());
 				conditionParamVo.setController(formAttributeVo.getHandlerType());
 				conditionParamVo.setIsMultiple(formAttributeVo.getIsMultiple());
 				conditionParamVo.setConfig(formAttributeVo.getConfig());

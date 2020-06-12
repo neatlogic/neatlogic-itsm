@@ -53,7 +53,7 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 			}
 			ConditionParamVo param = new ConditionParamVo();
 			param.setName(condition.getName());
-			param.setDisplayName(condition.getDisplayName());
+			param.setLabel(condition.getDisplayName());
 			param.setController(condition.getHandler(conditionModel));
 			if(condition.getConfig() != null) {
 				param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
