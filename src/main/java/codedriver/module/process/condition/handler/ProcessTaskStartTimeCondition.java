@@ -56,7 +56,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return ParamType.DATE;
 	}
 

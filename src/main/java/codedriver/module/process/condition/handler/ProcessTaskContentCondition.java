@@ -60,7 +60,7 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return ParamType.STRING;
 	}
 

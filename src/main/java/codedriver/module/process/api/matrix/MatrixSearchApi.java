@@ -1,5 +1,9 @@
 package codedriver.module.process.api.matrix;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +52,8 @@ public class MatrixSearchApi extends ApiComponentBase {
     	@Param( name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external"),
         @Param( name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
         @Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
-        @Param( name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER)
+        @Param( name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER),
+        @Param( name = "valueList", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY)
     })
     @Output({ 
     	@Param( name = "tbodyList", desc = "矩阵数据源列表", explode = ProcessMatrixVo[].class),
@@ -58,16 +63,28 @@ public class MatrixSearchApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        ProcessMatrixVo matrix = JSON.toJavaObject(jsonObj, ProcessMatrixVo.class);
-        if (matrix.getNeedPage()){
-            int rowNum = matrixMapper.searchMatrixCount(matrix);
-            matrix.setPageCount(PageUtil.getPageCount(rowNum, matrix.getPageSize()));
-            returnObj.put("pageCount", matrix.getPageCount());
-            returnObj.put("rowNum", rowNum);
-            returnObj.put("pageSize", matrix.getPageSize());
-            returnObj.put("currentPage", matrix.getCurrentPage());
+        List<String> valueList = JSON.parseArray(jsonObj.getString("valueList"), String.class);
+        if(CollectionUtils.isNotEmpty(valueList)) {
+        	List<ProcessMatrixVo> tbodyList = new ArrayList<>();
+        	for(String uuid : valueList) {
+        		ProcessMatrixVo processMatrixVo = matrixMapper.getMatrixByUuid(uuid);
+        		if(processMatrixVo != null) {
+        			tbodyList.add(processMatrixVo);
+        		}
+        	}
+        	returnObj.put("tbodyList", tbodyList);
+        }else {
+        	 ProcessMatrixVo matrix = JSON.toJavaObject(jsonObj, ProcessMatrixVo.class);
+             if (matrix.getNeedPage()){
+                 int rowNum = matrixMapper.searchMatrixCount(matrix);
+                 matrix.setPageCount(PageUtil.getPageCount(rowNum, matrix.getPageSize()));
+                 returnObj.put("pageCount", matrix.getPageCount());
+                 returnObj.put("rowNum", rowNum);
+                 returnObj.put("pageSize", matrix.getPageSize());
+                 returnObj.put("currentPage", matrix.getCurrentPage());
+             }
+             returnObj.put("tbodyList", matrixMapper.searchMatrix(matrix));
         }
-        returnObj.put("tbodyList", matrixMapper.searchMatrix(matrix));
         return returnObj;
     }
 }

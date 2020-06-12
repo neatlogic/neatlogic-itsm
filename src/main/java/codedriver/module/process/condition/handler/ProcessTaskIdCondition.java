@@ -51,7 +51,7 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return ParamType.STRING;
 	}
 

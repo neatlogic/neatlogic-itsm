@@ -91,7 +91,8 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
     	@Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),           
     	@Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true),
         @Param(name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
-        @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER)
+        @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
+        @Param( name = "valueList", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY)
     	})
     @Description(desc = "矩阵属性数据查询-下拉级联接口")
     @Output({ 
@@ -104,7 +105,8 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(dataVo.getMatrixUuid());
         }      
-
+        
+        List<String> valueList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("valueList")), String.class);
     	List<String> columnList = dataVo.getColumnList();
     	if(CollectionUtils.isEmpty(columnList)) {
     		throw new ParamIrregularException("参数“columnList”不符合格式要求");
@@ -124,25 +126,52 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
             			throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
             		}
             	}
-            	if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
-            		ProcessMatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(keywordColumn);
-                	if(processMatrixAttribute == null) {
-                		throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
-                	}
-                	List<String> uuidList = matrixService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, dataVo.getKeyword(), dataVo.getPageSize());
-                	if(CollectionUtils.isNotEmpty(uuidList)) {
-                		dataVo.setUuidList(uuidList);                	
-                	}
-            	}          	
-            	List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
-            	for(Map<String, String> dataMap : dataMapList) {
-            		Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
-            		for(Entry<String, String> entry : dataMap.entrySet()) {
-            			String attributeUuid = entry.getKey();
-            			resultMap.put(attributeUuid, matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
+            	if(CollectionUtils.isNotEmpty(valueList)) {
+            		for(String value : valueList) {
+            			if(value.contains("&=&")) {
+            				List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
+            				String[] split = value.split("&=&");
+            				for(int i = 0; i < split.length; i++) {
+            					String column = columnList.get(i);
+            					if(StringUtils.isNotBlank(column)) {
+            						ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo(column, split[i]);
+            						processMatrixColumnVo.setExpression(Expression.EQUAL.getExpression());
+            						sourceColumnList.add(processMatrixColumnVo);
+            					}
+            				}
+            				dataVo.setSourceColumnList(sourceColumnList);
+            				List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
+                        	for(Map<String, String> dataMap : dataMapList) {
+                        		Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
+                        		for(Entry<String, String> entry : dataMap.entrySet()) {
+                        			String attributeUuid = entry.getKey();
+                        			resultMap.put(attributeUuid, matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
+                        		}
+                        		resultList.add(resultMap);
+                        	}
+            			}
             		}
-            		resultList.add(resultMap);
-            	}
+            	}else {
+            		if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
+                		ProcessMatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(keywordColumn);
+                    	if(processMatrixAttribute == null) {
+                    		throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
+                    	}
+                    	List<String> uuidList = matrixService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, dataVo.getKeyword(), dataVo.getPageSize());
+                    	if(CollectionUtils.isNotEmpty(uuidList)) {
+                    		dataVo.setUuidList(uuidList);                	
+                    	}
+                	}          	
+                	List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
+                	for(Map<String, String> dataMap : dataMapList) {
+                		Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
+                		for(Entry<String, String> entry : dataMap.entrySet()) {
+                			String attributeUuid = entry.getKey();
+                			resultMap.put(attributeUuid, matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
+                		}
+                		resultList.add(resultMap);
+                	}
+            	}         	
             }
             
         }else {
@@ -166,30 +195,57 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
         			throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
         		}
         	}
-        	if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
-            	if(!attributeList.contains(keywordColumn)) {
-            		throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
-            	}
-        	}
-        	if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
-        		ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo();
-        		processMatrixColumnVo.setColumn(keywordColumn);
-        		processMatrixColumnVo.setExpression(Expression.LIKE.getExpression());
-        		processMatrixColumnVo.setValue(dataVo.getKeyword());
-        		List<ProcessMatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
-				if(CollectionUtils.isEmpty(sourceColumnList)) {
-					sourceColumnList = new ArrayList<>();
-				}
-				sourceColumnList.add(processMatrixColumnVo);
-				jsonObj.put("sourceColumnList", sourceColumnList);
-			}
-        	integrationVo.getParamObj().putAll(jsonObj);
-        	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-        	if(StringUtils.isNotBlank(resultVo.getError())) {
-    			logger.error(resultVo.getError());
-        		throw new MatrixExternalException("外部接口访问异常");
+        	if(CollectionUtils.isNotEmpty(valueList)) {
+        		for(String value : valueList) {
+        			if(value.contains("&=&")) {
+        				List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
+        				String[] split = value.split("&=&");
+        				for(int i = 0; i < split.length; i++) {
+        					String column = columnList.get(i);
+        					if(StringUtils.isNotBlank(column)) {
+        						ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo(column, split[i]);
+        						processMatrixColumnVo.setExpression(Expression.EQUAL.getExpression());
+        						sourceColumnList.add(processMatrixColumnVo);
+        					}
+        				}
+        				//dataVo.setSourceColumnList(sourceColumnList);
+        				jsonObj.put("sourceColumnList", sourceColumnList);
+        				integrationVo.getParamObj().putAll(jsonObj);
+                    	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+                    	if(StringUtils.isNotBlank(resultVo.getError())) {
+                			logger.error(resultVo.getError());
+                    		throw new MatrixExternalException("外部接口访问异常");
+                    	}else {
+                    		resultList.addAll(matrixService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null));
+                    	}
+        			}
+        		}
         	}else {
-        		resultList = matrixService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null);
+        		if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
+                	if(!attributeList.contains(keywordColumn)) {
+                		throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
+                	}
+            	}
+            	if(StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
+            		ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo();
+            		processMatrixColumnVo.setColumn(keywordColumn);
+            		processMatrixColumnVo.setExpression(Expression.LIKE.getExpression());
+            		processMatrixColumnVo.setValue(dataVo.getKeyword());
+            		List<ProcessMatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
+    				if(CollectionUtils.isEmpty(sourceColumnList)) {
+    					sourceColumnList = new ArrayList<>();
+    				}
+    				sourceColumnList.add(processMatrixColumnVo);
+    				jsonObj.put("sourceColumnList", sourceColumnList);
+    			}
+            	integrationVo.getParamObj().putAll(jsonObj);
+            	IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+            	if(StringUtils.isNotBlank(resultVo.getError())) {
+        			logger.error(resultVo.getError());
+            		throw new MatrixExternalException("外部接口访问异常");
+            	}else {
+            		resultList = matrixService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null);
+            	}
         	}
         }
         returnObj.put("columnDataList", resultList);

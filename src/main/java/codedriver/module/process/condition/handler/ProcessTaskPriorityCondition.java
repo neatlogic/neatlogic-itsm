@@ -79,7 +79,7 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return ParamType.ARRAY;
 	}
 

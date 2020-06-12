@@ -94,7 +94,7 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return ParamType.ARRAY;
 	}
 
