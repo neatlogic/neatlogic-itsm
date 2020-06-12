@@ -48,7 +48,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return ParamType.ARRAY;
 	}
 

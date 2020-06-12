@@ -51,7 +51,7 @@ public class ProcessTaskConstantCondition extends ProcessTaskConditionBase imple
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return null;
 	}
 

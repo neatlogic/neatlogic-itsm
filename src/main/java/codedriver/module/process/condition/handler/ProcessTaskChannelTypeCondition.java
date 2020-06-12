@@ -71,7 +71,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return ParamType.ARRAY;
 	}
 

@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
@@ -80,16 +81,20 @@ public class WorkcenterGetConditionApi extends ApiComponentBase {
 			commonObj.put("conditionModel", condition.getHandler(conditionModel));
 			commonObj.put("type", condition.getType());
 			commonObj.put("config", condition.getConfig() == null?"": condition.getConfig().toJSONString());
-			commonObj.put("defaultExpression", condition.getBasicType().getDefaultExpression().getExpression());
 			commonObj.put("sort", condition.getSort());
-			JSONArray expressiobArray = new JSONArray();
-			for(Expression expression:condition.getBasicType().getExpressionList()) {
-				JSONObject expressionObj = new JSONObject();
-				expressionObj.put("expression", expression.getExpression());
-				expressionObj.put("expressionName", expression.getExpressionName());
-				expressiobArray.add(expressionObj);
-				commonObj.put("expressionList", expressiobArray);
+			ParamType paramType = condition.getParamType();
+			if(paramType != null) {
+				commonObj.put("defaultExpression", paramType.getDefaultExpression().getExpression());
+				JSONArray expressiobArray = new JSONArray();
+				for(Expression expression:paramType.getExpressionList()) {
+					JSONObject expressionObj = new JSONObject();
+					expressionObj.put("expression", expression.getExpression());
+					expressionObj.put("expressionName", expression.getExpressionName());
+					expressiobArray.add(expressionObj);
+					commonObj.put("expressionList", expressiobArray);
+				}
 			}
+			
 			resultArray.add(commonObj);
 		}
 		Collections.sort(resultArray, new Comparator<Object>() {

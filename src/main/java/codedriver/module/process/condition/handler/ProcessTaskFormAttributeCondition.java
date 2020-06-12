@@ -58,7 +58,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return null;
 	}
 

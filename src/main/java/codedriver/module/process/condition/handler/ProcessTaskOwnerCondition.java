@@ -66,7 +66,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 	}
 
 	@Override
-	public ParamType getBasicType() {
+	public ParamType getParamType() {
 		return ParamType.ARRAY;
 	}
 	

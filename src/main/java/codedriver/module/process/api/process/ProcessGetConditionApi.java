@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessField;
@@ -81,17 +82,21 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 				commonObj.put("config", condition.getConfig().toJSONString());
 			}
 			commonObj.put("type", condition.getType());
-			commonObj.put("basicType", condition.getBasicType().getName());
-			commonObj.put("basicTypeName", condition.getBasicType().getText());
-			commonObj.put("defaultExpression", condition.getBasicType().getDefaultExpression().getExpression());
-			JSONArray expressiobArray = new JSONArray();
-			for(Expression expression:condition.getBasicType().getExpressionList()) {
-				JSONObject expressionObj = new JSONObject();
-				expressionObj.put("expression", expression.getExpression());
-				expressionObj.put("expressionName", expression.getExpressionName());
-				expressiobArray.add(expressionObj);
-				commonObj.put("expressionList", expressiobArray);
+			ParamType paramType = condition.getParamType();
+			if(paramType != null) {
+				commonObj.put("basicType", paramType.getName());
+				commonObj.put("basicTypeName", paramType.getText());
+				commonObj.put("defaultExpression", paramType.getDefaultExpression().getExpression());
+				JSONArray expressiobArray = new JSONArray();
+				for(Expression expression:paramType.getExpressionList()) {
+					JSONObject expressionObj = new JSONObject();
+					expressionObj.put("expression", expression.getExpression());
+					expressionObj.put("expressionName", expression.getExpressionName());
+					expressiobArray.add(expressionObj);
+					commonObj.put("expressionList", expressiobArray);
+				}
 			}
+			
 			resultArray.add(commonObj);
 		}
 		//表单条件

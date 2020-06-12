@@ -10,10 +10,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
 import codedriver.framework.notify.dto.ExpressionVo;
-import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
@@ -41,8 +42,8 @@ public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	}
 
 	@Override
-	protected List<NotifyPolicyParamVo> mySystemParamList() {
-		List<NotifyPolicyParamVo> notifyPolicyParamList = new ArrayList<>();
+	protected List<ConditionParamVo> mySystemParamList() {
+		List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		Map<String, IProcessTaskCondition> conditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
 		for (Map.Entry<String, IProcessTaskCondition> entry : conditionMap.entrySet()) {
@@ -50,20 +51,23 @@ public class TestNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 			if(ProcessField.getValue(condition.getName())== null) {
 				continue;
 			}
-			NotifyPolicyParamVo param = new NotifyPolicyParamVo();
-			param.setHandler(condition.getName());
-			param.setHandlerName(condition.getDisplayName());
-			param.setHandlerType(condition.getHandler(conditionModel));
+			ConditionParamVo param = new ConditionParamVo();
+			param.setName(condition.getName());
+			param.setDisplayName(condition.getDisplayName());
+			param.setController(condition.getHandler(conditionModel));
 			if(condition.getConfig() != null) {
 				param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
 				param.setConfig(condition.getConfig().toJSONString());
 			}
 			param.setType(condition.getType());
-			param.setBasicType(condition.getBasicType().getName());
-			param.setBasicTypeName(condition.getBasicType().getText());
-			param.setDefaultExpression(condition.getBasicType().getDefaultExpression().getExpression());
-			for(Expression expression : condition.getBasicType().getExpressionList()) {
-				param.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
+			ParamType paramType = condition.getParamType();
+			if(paramType != null) {
+				param.setParamType(paramType.getName());
+				param.setParamTypeName(paramType.getText());
+				param.setDefaultExpression(paramType.getDefaultExpression().getExpression());
+				for(Expression expression : paramType.getExpressionList()) {
+					param.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
+				}
 			}
 			param.setIsEditable(0);
 			notifyPolicyParamList.add(param);
