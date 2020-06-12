@@ -67,27 +67,6 @@ public class ProcessConditionList extends ApiComponentBase {
 			if(ProcessField.getValue(condition.getName())== null) {
 				continue;
 			}
-//			JSONObject commonObj = new JSONObject();
-//			commonObj.put("handler", condition.getName());
-//			commonObj.put("handlerName", condition.getDisplayName());
-//			commonObj.put("handlerType", condition.getHandler(conditionModel));
-//			if(condition.getConfig() != null) {
-//				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
-//				commonObj.put("config", condition.getConfig().toJSONString());
-//			}
-//			commonObj.put("type", condition.getType());
-//			commonObj.put("basicType", condition.getBasicType().getName());
-//			commonObj.put("basicTypeName", condition.getBasicType().getText());
-//			commonObj.put("defaultExpression", condition.getBasicType().getDefaultExpression().getExpression());
-//			JSONArray expressiobArray = new JSONArray();
-//			for(Expression expression:condition.getBasicType().getExpressionList()) {
-//				JSONObject expressionObj = new JSONObject();
-//				expressionObj.put("expression", expression.getExpression());
-//				expressionObj.put("expressionName", expression.getExpressionName());
-//				expressiobArray.add(expressionObj);
-//				commonObj.put("expressionList", expressiobArray);
-//			}
-//			resultArray.add(commonObj);
 			
 			ConditionParamVo conditionParamVo = new ConditionParamVo();
 			conditionParamVo.setName(condition.getName());
