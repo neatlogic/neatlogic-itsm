@@ -92,6 +92,7 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 				if(ProcessTaskStepAction.COMPLETE.getValue().equals(action) && ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
 					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
 						processTaskStep.setName(processTaskStep.getAliasName());
+						processTaskStep.setFlowDirection("");
 					}else {
 						processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
 					}
@@ -99,6 +100,7 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 				}else if(ProcessTaskStepAction.BACK.getValue().equals(action) && ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
 					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
 						processTaskStep.setName(processTaskStep.getAliasName());
+						processTaskStep.setFlowDirection("");
 					}else {
 						processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
 					}
