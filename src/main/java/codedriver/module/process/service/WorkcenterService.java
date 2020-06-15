@@ -200,6 +200,11 @@ public class WorkcenterService {
 		returnObj.put("pageSize", workcenterVo.getPageSize());
 		returnObj.put("currentPage", workcenterVo.getCurrentPage());
 		returnObj.put("pageCount", PageUtil.getPageCount(result.getTotal(), workcenterVo.getPageSize()));
+		//补充待办数
+		workcenterVo.setIsMeWillDo(1);
+		workcenterVo.setPageSize(100);
+		Integer meWillDoCount = doSearchCount(workcenterVo);
+		returnObj.put("meWillDoRowNum", meWillDoCount>99?"99+":meWillDoCount.toString());
 		return returnObj;
 	}
 	
