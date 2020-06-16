@@ -133,14 +133,11 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
             			if(value.contains("&=&")) {
             				List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
             				String[] split = value.split("&=&");
-//            				for(int i = 0; i < split.length; i++) {
-//        					String column = columnList.get(0);
         					if(StringUtils.isNotBlank(columnList.get(0))) {
         						ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo(columnList.get(0), split[0]);
         						processMatrixColumnVo.setExpression(Expression.EQUAL.getExpression());
         						sourceColumnList.add(processMatrixColumnVo);
         					}
-//            				}       					
             				dataVo.setSourceColumnList(sourceColumnList);
             				if(columnList.size() >= 2 && StringUtils.isNotBlank(columnList.get(1))) {
             					ProcessMatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(columnList.get(1));
