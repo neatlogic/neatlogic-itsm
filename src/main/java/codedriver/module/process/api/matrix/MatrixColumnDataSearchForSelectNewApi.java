@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.google.common.base.Objects;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
@@ -131,24 +133,42 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
             			if(value.contains("&=&")) {
             				List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
             				String[] split = value.split("&=&");
-            				for(int i = 0; i < split.length; i++) {
-            					String column = columnList.get(i);
-            					if(StringUtils.isNotBlank(column)) {
-            						ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo(column, split[i]);
-            						processMatrixColumnVo.setExpression(Expression.EQUAL.getExpression());
-            						sourceColumnList.add(processMatrixColumnVo);
-            					}
-            				}
+//            				for(int i = 0; i < split.length; i++) {
+//        					String column = columnList.get(0);
+        					if(StringUtils.isNotBlank(columnList.get(0))) {
+        						ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo(columnList.get(0), split[0]);
+        						processMatrixColumnVo.setExpression(Expression.EQUAL.getExpression());
+        						sourceColumnList.add(processMatrixColumnVo);
+        					}
+//            				}       					
             				dataVo.setSourceColumnList(sourceColumnList);
-            				List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
-                        	for(Map<String, String> dataMap : dataMapList) {
-                        		Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
-                        		for(Entry<String, String> entry : dataMap.entrySet()) {
-                        			String attributeUuid = entry.getKey();
-                        			resultMap.put(attributeUuid, matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
-                        		}
-                        		resultList.add(resultMap);
-                        	}
+            				if(columnList.size() >= 2 && StringUtils.isNotBlank(columnList.get(1))) {
+            					ProcessMatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(columnList.get(1));
+                            	if(processMatrixAttribute == null) {
+                            		throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), columnList.get(1));
+                            	}
+                            	List<String> uuidList = matrixService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, split[1], dataVo.getPageSize());
+                            	if(CollectionUtils.isNotEmpty(uuidList)) {
+                            		dataVo.setUuidList(uuidList);
+                            		List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
+                                	for(Map<String, String> dataMap : dataMapList) {
+                                		Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
+                                		for(Entry<String, String> entry : dataMap.entrySet()) {
+                                			String attributeUuid = entry.getKey();
+                                			resultMap.put(attributeUuid, matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
+                                		}
+                                		JSONObject textObj = resultMap.get(columnList.get(1));
+                                		if(MapUtils.isNotEmpty(textObj) && Objects.equal(textObj.get("text"), split[1])) {
+                                    		resultList.add(resultMap);;
+                                		}
+                                	}
+                            	}else {
+                            		return returnObj;
+                            	}
+                            	
+            				}else {
+            					return returnObj;
+            				}
             			}
             		}
             	}else {
