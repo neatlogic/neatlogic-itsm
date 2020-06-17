@@ -10,8 +10,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
 import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessDraftVo;
 import codedriver.framework.process.dto.ProcessFormVo;
@@ -21,6 +23,7 @@ import codedriver.framework.process.dto.ProcessStepRelVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessVo;
+import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 
 @Service
@@ -28,7 +31,13 @@ public class ProcessServiceImpl implements ProcessService {
 
 	@Autowired
 	private ProcessMapper processMapper;
+	
+	@Autowired
+	private FormMapper formMapper;
 
+	@Autowired
+	private NotifyMapper notifyMapper;
+	
     @Autowired
     private NotifyPolicyInvokerManager notifyPolicyInvokerManager;
 
@@ -99,6 +108,9 @@ public class ProcessServiceImpl implements ProcessService {
 
 		String formUuid = processVo.getFormUuid();
 		if (StringUtils.isNotBlank(formUuid)) {
+			if(formMapper.checkFormIsExists(formUuid) == 0) {
+				throw new FormNotFoundException(formUuid);
+			}
 			processMapper.insertProcessForm(new ProcessFormVo(uuid, formUuid));
 		}
 
@@ -127,25 +139,20 @@ public class ProcessServiceImpl implements ProcessService {
 						processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
 					}
 				}
-//				if (stepVo.getTemplateUuidList() != null && stepVo.getTemplateUuidList().size() > 0) {//
-//					for (String templateUuid : stepVo.getTemplateUuidList()) {
-//						if(!IDefaultTemplate.DEFAULT_TEMPLATE_UUID_PREFIX.equals(templateUuid)) {
-//							processMapper.replaceProcessStepNotifyTemplate(new ProcessStepNotifyTemplateVo(uuid, stepVo.getUuid(), templateUuid));
-//						}
-//					}
-//				}
 				
 				if(stepVo.getNotifyPolicyId() != null) {
-					NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
-		        	notifyPolicyInvokerVo.setPolicyId(stepVo.getNotifyPolicyId());
-		        	notifyPolicyInvokerVo.setInvoker(processVo.getUuid());
-		        	JSONObject notifyPolicyInvokerConfig = new JSONObject();
-		        	notifyPolicyInvokerConfig.put("function", "processstep");
-		        	notifyPolicyInvokerConfig.put("name", "流程管理-" + processVo.getName() + "-" + stepVo.getName());
-		        	notifyPolicyInvokerConfig.put("processUuid", processVo.getUuid());
-		        	notifyPolicyInvokerConfig.put("processStepUuid", stepVo.getUuid());
-		        	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
-		        	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
+					if(notifyMapper.checkNotifyPolicyIsExists(stepVo.getNotifyPolicyId()) != 0) {
+						NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
+			        	notifyPolicyInvokerVo.setPolicyId(stepVo.getNotifyPolicyId());
+			        	notifyPolicyInvokerVo.setInvoker(processVo.getUuid());
+			        	JSONObject notifyPolicyInvokerConfig = new JSONObject();
+			        	notifyPolicyInvokerConfig.put("function", "processstep");
+			        	notifyPolicyInvokerConfig.put("name", "流程管理-" + processVo.getName() + "-" + stepVo.getName());
+			        	notifyPolicyInvokerConfig.put("processUuid", processVo.getUuid());
+			        	notifyPolicyInvokerConfig.put("processStepUuid", stepVo.getUuid());
+			        	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
+			        	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
+					}
 				}
 			}
 		}

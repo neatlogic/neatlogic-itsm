@@ -163,21 +163,25 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
 		if(condition !=null&&StringUtils.isNotBlank(condition.getName())) {
-			String where = "(";
-			String formKey = condition.getName();
-			String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getHandler()).toLowerCase();
-			Object value = StringUtils.EMPTY;
-			if(CollectionUtils.isNotEmpty(condition.getValueList())) {
-				value = condition.getValueList().get(0);
+			if(condition.getHandler().equals(ProcessFormHandler.FORMDATE.getHandler())) {
+				return getDateEsWhere(condition,conditionList);
+			}else {
+				String where = "(";
+				String formKey = condition.getName();
+				String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getHandler()).toLowerCase();
+				Object value = StringUtils.EMPTY;
+				if(CollectionUtils.isNotEmpty(condition.getValueList())) {
+					value = condition.getValueList().get(0);
+				}
+				if(condition.getValueList().size()>1) {
+					value = String.join("','",condition.getValueList());
+				}
+				if(StringUtils.isNotBlank(value.toString())) {
+					value = String.format("'%s'",  value);
+				}
+				where += String.format(" [ form.key = '%s' and "+Expression.getExpressionEs(condition.getExpression())+" ] ", formKey,formValueKey,value);
+				return where+")";
 			}
-			if(condition.getValueList().size()>1) {
-				value = String.join("','",condition.getValueList());
-			}
-			if(StringUtils.isNotBlank(value.toString())) {
-				value = String.format("'%s'",  value);
-			}
-			where += String.format(" [ form.key = '%s' and "+Expression.getExpressionEs(condition.getExpression())+" ] ", formKey,formValueKey,value);
-			return where+")";
 		}
 		return null;
 	}
