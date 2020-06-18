@@ -17,7 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -27,7 +27,7 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 @Service
-public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
+public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 
 	private final static Logger logger = LoggerFactory.getLogger(FormAuditHandler.class);
 	@Autowired
@@ -39,7 +39,7 @@ public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 	}
 
 	@Override
-	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = JSON.parseArray(processTaskStepAuditDetailVo.getOldContent(), ProcessTaskFormAttributeDataVo.class);
 		if(oldProcessTaskFormAttributeDataList == null) {
 			oldProcessTaskFormAttributeDataList = new ArrayList<>();

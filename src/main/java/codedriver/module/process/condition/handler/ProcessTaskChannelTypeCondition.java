@@ -16,8 +16,6 @@ import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -73,11 +71,5 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	@Override
 	public ParamType getParamType() {
 		return ParamType.ARRAY;
-	}
-
-	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo workcenterConditionVo) {
-		// TODO linbq暂时没有服务类型
-		return false;
 	}
 }

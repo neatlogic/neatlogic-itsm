@@ -2,21 +2,19 @@ package codedriver.module.process.condition.handler;
 
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -53,23 +51,6 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
 	@Override
 	public ParamType getParamType() {
 		return ParamType.STRING;
-	}
-
-	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
-		if(Expression.LIKE.getExpression().equals(conditionVo.getExpression())) {
-			List<String> valueList = conditionVo.getValueList();
-			if(CollectionUtils.isEmpty(valueList)) {
-				return false;
-			}
-			String id = conditionVo.getValueList().get(0);
-			if(StringUtils.isBlank(id)) {
-				return false;
-			}
-			return currentProcessTaskStepVo.getProcessTaskId().toString().contains(id);
-		}else {
-			return false;
-		}
 	}
 	
 	@Override

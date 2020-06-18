@@ -4,13 +4,13 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 @Service
-public class ContentAuditHandler implements IProcessTaskStepAuditDetailHandler{
+public class ContentAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -21,7 +21,7 @@ public class ContentAuditHandler implements IProcessTaskStepAuditDetailHandler{
 	}
 
 	@Override
-	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
 			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(oldContent);
