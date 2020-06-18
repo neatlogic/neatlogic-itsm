@@ -18,11 +18,11 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 @Service
-public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler{
+public class WorkerAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	
 	@Autowired
 	private UserMapper userMapper;
@@ -36,18 +36,6 @@ public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler{
 	@Override
 	public String getType() {
 		return ProcessTaskAuditDetailType.WORKER.getValue();
-	}
-
-	@Override
-	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
-		String oldContent = processTaskStepAuditDetailVo.getOldContent();
-		if(StringUtils.isNotBlank(oldContent)) {
-			processTaskStepAuditDetailVo.setOldContent(parse(oldContent));
-		}
-		String newContent = processTaskStepAuditDetailVo.getNewContent();
-		if(StringUtils.isNotBlank(newContent)) {
-			processTaskStepAuditDetailVo.setNewContent(parse(newContent));
-		}
 	}
 
 	private String parse(String content) {
@@ -85,5 +73,17 @@ public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler{
 			}
 		}
 		return JSON.toJSONString(resultList);
+	}
+
+	@Override
+	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+		String oldContent = processTaskStepAuditDetailVo.getOldContent();
+		if(StringUtils.isNotBlank(oldContent)) {
+			processTaskStepAuditDetailVo.setOldContent(parse(oldContent));
+		}
+		String newContent = processTaskStepAuditDetailVo.getNewContent();
+		if(StringUtils.isNotBlank(newContent)) {
+			processTaskStepAuditDetailVo.setNewContent(parse(newContent));
+		}		
 	}
 }

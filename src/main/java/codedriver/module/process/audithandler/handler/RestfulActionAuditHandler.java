@@ -8,14 +8,14 @@ import com.alibaba.fastjson.JSON;
 
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dto.ActionVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 
 @Service
-public class RestfulActionAuditHandler implements IProcessTaskStepAuditDetailHandler {
+public class RestfulActionAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;
@@ -26,7 +26,7 @@ public class RestfulActionAuditHandler implements IProcessTaskStepAuditDetailHan
 	}
 
 	@Override
-	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
 			ActionVo actionVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), ActionVo.class);
 			IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(actionVo.getIntegrationUuid());

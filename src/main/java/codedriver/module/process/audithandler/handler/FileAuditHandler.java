@@ -12,11 +12,11 @@ import com.alibaba.fastjson.JSON;
 
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 @Service
-public class FileAuditHandler implements IProcessTaskStepAuditDetailHandler{
+public class FileAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	
 	@Autowired
 	private FileMapper fileMapper;
@@ -27,7 +27,7 @@ public class FileAuditHandler implements IProcessTaskStepAuditDetailHandler{
 	}
 
 	@Override
-	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
 			processTaskStepAuditDetailVo.setOldContent(parse(oldContent));
