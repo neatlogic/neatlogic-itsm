@@ -192,12 +192,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 									ProcessTaskVo processTaskVo = ProcessTaskUtil.getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
 									processTaskVo.setCurrentProcessTaskStep(stepVo);
 									JSONObject processFieldData = ProcessTaskUtil.getProcessFieldDataForConditionParam(processTaskVo);
-									ConditionParamContext.init(processFieldData);
-									ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
-									String script = conditionConfigVo.buildScript();
-									ConditionParamContext.get().release();
-									// ((false || true) || (true && false) || (true || false))
+
 									try {
+										ConditionParamContext.init(processFieldData);
+										ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
+										String script = conditionConfigVo.buildScript();
+										// ((false || true) || (true && false) || (true || false))
 										if (RunScriptUtil.runScript(script)) {
 											canRun = true;
 										}
@@ -205,6 +205,10 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 										logger.error(e.getMessage(), e);
 									} catch (ScriptException e) {
 										logger.error(e.getMessage(), e);
+									} catch(Exception e) {
+										logger.error(e.getMessage(), e);
+									} finally {
+										ConditionParamContext.get().release();
 									}
 								}
 							}
