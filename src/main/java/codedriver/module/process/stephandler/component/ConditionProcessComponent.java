@@ -201,11 +201,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 										if (RunScriptUtil.runScript(script)) {
 											canRun = true;
 										}
-									} catch (NoSuchMethodException e) {
-										logger.error(e.getMessage(), e);
-									} catch (ScriptException e) {
-										logger.error(e.getMessage(), e);
-									} catch(Exception e) {
+									} catch (Exception e) {
 										logger.error(e.getMessage(), e);
 									} finally {
 										ConditionParamContext.get().release();
