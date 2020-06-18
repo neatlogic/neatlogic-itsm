@@ -2,14 +2,13 @@ package codedriver.module.process.condition.handler;
 
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
@@ -18,15 +17,9 @@ import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
-
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public String getName() {
@@ -96,23 +89,6 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	@Override
 	public ParamType getParamType() {
 		return ParamType.ARRAY;
-	}
-
-	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo conditionVo) {
-		boolean result = false;
-		List<String> valueList = conditionVo.getValueList();
-		if(!CollectionUtils.isEmpty(valueList)) {
-			ProcessTaskStepVo processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-			result = valueList.contains(processTaskStep.getStatus());
-		}			
-		if(Expression.INCLUDE.getExpression().equals(conditionVo.getExpression())) {
-			return result;
-		}else if(Expression.EXCLUDE.getExpression().equals(conditionVo.getExpression())) {
-			return !result;
-		}else {
-			return false;
-		}
 	}
 	
 	@Override
