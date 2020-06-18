@@ -33,6 +33,10 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.condition.ConditionGroupRelVo;
+import codedriver.framework.dto.condition.ConditionGroupVo;
+import codedriver.framework.dto.condition.ConditionRelVo;
+import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
@@ -45,10 +49,6 @@ import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.dto.condition.ConditionGroupRelVo;
-import codedriver.framework.process.dto.condition.ConditionGroupVo;
-import codedriver.framework.process.dto.condition.ConditionRelVo;
-import codedriver.framework.process.dto.condition.ConditionVo;
 import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
@@ -510,7 +510,7 @@ public class WorkcenterService {
 							try {
 								ConditionVo obj1 = (ConditionVo) o1;
 								ConditionVo obj2 = (ConditionVo) o2;
-								return obj1.getConditionValue().compareTo(obj2.getConditionValue());
+								return ProcessWorkcenterField.getConditionValue(obj1.getName()).compareTo(ProcessWorkcenterField.getConditionValue(obj2.getName()));
 							} catch (Exception ex) {
 
 							}

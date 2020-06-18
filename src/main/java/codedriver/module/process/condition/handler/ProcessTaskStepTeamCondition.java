@@ -9,8 +9,6 @@ import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -52,9 +50,4 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 		return ParamType.ARRAY;
 	}
 
-	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo workcenterConditionVo) {
-		// 条件步骤没有处理组
-		return false;
-	}
 }

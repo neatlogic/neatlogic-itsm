@@ -6,13 +6,13 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 @Service
-public class PriorityAuditHandler implements IProcessTaskStepAuditDetailHandler{
+public class PriorityAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 
 	@Autowired
 	private PriorityMapper priorityMapper;
@@ -23,7 +23,7 @@ public class PriorityAuditHandler implements IProcessTaskStepAuditDetailHandler{
 	}
 
 	@Override
-	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
 			PriorityVo priorityVo = priorityMapper.getPriorityByUuid(oldContent);

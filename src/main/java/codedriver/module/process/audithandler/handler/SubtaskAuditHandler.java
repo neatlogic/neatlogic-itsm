@@ -9,14 +9,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
-import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 @Service
-public class SubtaskAuditHandler implements IProcessTaskStepAuditDetailHandler {
+public class SubtaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -27,7 +27,7 @@ public class SubtaskAuditHandler implements IProcessTaskStepAuditDetailHandler {
 	}
 
 	@Override
-	public void handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		ProcessTaskStepSubtaskVo oldProcessTaskStepSubtaskVo = null;
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getOldContent())) {
 			oldProcessTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getOldContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});		
