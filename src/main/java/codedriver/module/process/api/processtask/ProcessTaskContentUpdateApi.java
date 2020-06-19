@@ -71,6 +71,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+		processTaskStepVo.setProcessTaskId(processTaskId);
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(processTaskStepId != null) {
 			processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);

@@ -63,6 +63,7 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 		//如果优先级跟原来的优先级不一样，生成活动
 		if(!priorityUuid.equals(oldPriorityUuid)) {
 			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+			processTaskStepVo.setProcessTaskId(processTaskId);
 			Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 			if(processTaskStepId != null) {
 				processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);

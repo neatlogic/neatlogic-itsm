@@ -64,6 +64,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(processTaskId);
 			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+			processTaskStepVo.setProcessTaskId(processTaskId);
 			Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 			if(processTaskStepId != null) {
 				processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
