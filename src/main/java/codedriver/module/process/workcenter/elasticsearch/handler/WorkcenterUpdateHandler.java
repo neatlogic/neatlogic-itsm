@@ -65,6 +65,7 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 		JSONObject paramJson = new JSONObject();
 		ListIterator<Object> paramIterator =  params.listIterator();
 		Long taskId = null;
+		Long taskStepId = null;
 		TO: while(paramIterator.hasNext()) {
 			Object param = paramIterator.next();
 			if(param instanceof ProcessTaskVo) {
@@ -80,9 +81,25 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 								| NoSuchMethodException | SecurityException e) {
 							logger.error(e.getMessage(),e);
 						}
-						break TO;
+						if(taskId != null) {
+							break TO;
+						}
+					}
+					if(m.getName().equals("getProcessTaskStepId")) {
+						try {
+							taskStepId = (Long)param.getClass().getMethod("getProcessTaskStepId").invoke(param);
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+								| NoSuchMethodException | SecurityException e) {
+							logger.error(e.getMessage(),e);
+						}
 					}
 				}
+			}
+		}
+		if(taskId == null) {
+			ProcessTaskStepVo  processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(taskStepId);
+			if(processTaskStepVo != null) {
+				taskId = processTaskStepVo.getProcessTaskId();
 			}
 		}
 		paramJson.put("taskId", taskId);
