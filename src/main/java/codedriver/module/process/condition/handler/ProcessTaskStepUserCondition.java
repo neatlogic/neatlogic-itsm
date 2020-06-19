@@ -16,13 +16,12 @@ import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.condition.ConditionVo;
 
 @Component
 public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -64,12 +63,6 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 	@Override
 	public ParamType getParamType() {
 		return ParamType.ARRAY;
-	}
-
-	@Override
-	public boolean predicate(ProcessTaskStepVo currentProcessTaskStepVo, ConditionVo workcenterConditionVo) {
-		// 条件步骤没有处理人
-		return false;
 	}
 	
 	@Override

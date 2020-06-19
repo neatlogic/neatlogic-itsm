@@ -10,6 +10,7 @@ import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 
 public interface ProcessTaskService {
 	public ProcessTaskVo getProcessTaskBaseInfoById(Long processTaskId);
@@ -75,4 +76,22 @@ public interface ProcessTaskService {
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode);
 
 	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepCommentVo);
+
+	/**
+	 * 执行请求
+	 * @param automaticConfigVo
+	 * @param currentProcessTaskStepVo
+	 */
+	public Boolean runRequest(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
+
+	/**
+	 * 初始化job
+	 * @param automaticConfigVo
+	 * @param currentProcessTaskStepVo
+	 */
+	public void initJob(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
+
+	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId);
+
+	public ProcessTaskVo getProcessTaskDetailInfoById(Long processTaskId);
 }

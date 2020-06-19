@@ -1,6 +1,9 @@
 package codedriver.module.process.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,24 +21,51 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.integration.core.IIntegrationHandler;
+import codedriver.framework.integration.core.IntegrationHandlerFactory;
+import codedriver.framework.integration.dao.mapper.IntegrationMapper;
+import codedriver.framework.integration.dto.IntegrationResultVo;
+import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.constvalue.FormAttributeAction;
+import codedriver.framework.process.constvalue.ProcessField;
+import codedriver.framework.process.constvalue.ProcessFlowDirection;
+import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.constvalue.automatic.CallbackType;
+import codedriver.framework.process.constvalue.automatic.FailPolicy;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dao.mapper.WorktimeMapper;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.PriorityVo;
+import codedriver.framework.process.dto.ProcessStepHandlerVo;
+import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
+import codedriver.framework.process.dto.ProcessTaskFileVo;
+import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -43,11 +73,19 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.scheduler.core.IJob;
+import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dto.JobObject;
+import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 
 @Service
 public class ProcessTaskServiceImpl implements ProcessTaskService {
@@ -65,6 +103,25 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	
 	@Autowired
 	private FileMapper fileMapper;
+	
+	@Autowired
+	private IntegrationMapper integrationMapper;
+	
+	@Autowired
+	private ProcessStepHandlerMapper processStepHandlerMapper;
+	
+	@Autowired
+	private PriorityMapper priorityMapper;
+	
+	@Autowired
+	private ChannelMapper channelMapper;
+	
+	@Autowired
+	private WorktimeMapper worktimeMapper;
+	
+	@Autowired
+	ProcessTaskStepDataMapper processTaskStepDataMapper;
+	
 	
 	@Override
 	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo){
@@ -491,5 +548,493 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		if(user != null) {
 			processTaskStepComment.setFcuName(user.getUserName());
 		}
+	}
+	
+	@Override
+	public Boolean runRequest(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
+		//audit
+		JSONObject data = null;
+		JSONObject audit = new JSONObject();
+		JSONObject auditResult = new JSONObject();
+		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId()));
+		if(auditDataVo != null) {
+			data = auditDataVo.getData();
+		}else {
+			data = new JSONObject(); 
+			auditDataVo = new ProcessTaskStepDataVo();
+			auditDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+			auditDataVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+			auditDataVo.setType("PROCESSTASK-AUTOMATIC");
+		}
+		String integrationUuid = automaticConfigVo.getBaseIntegrationUuid();
+		JSONObject successConfig = automaticConfigVo.getBaseSuccessConfig();
+		Boolean isUnloadJob = false;
+		JSONObject failConfig = null;
+		if(!automaticConfigVo.getIsRequest()) {
+			integrationUuid =automaticConfigVo.getCallbackIntegrationUuid();
+			successConfig = automaticConfigVo.getCallbackSuccessConfig();
+			failConfig = automaticConfigVo.getCallbackFailConfig();
+			if(data.containsKey("callbackAudit")) {
+				audit = data.getJSONObject("callbackAudit");
+			}else {
+				data.put("callbackAudit", audit);
+			}
+			audit.put("type", automaticConfigVo.getCallbackType());
+			audit.put("interval", automaticConfigVo.getCallbackInterval());
+			auditResult.put("template", automaticConfigVo.getCallbackResultTemplate());
+		}else {
+			if(data.containsKey("requestAudit")) {
+				audit = data.getJSONObject("requestAudit");
+			}else {
+				data.put("requestAudit", audit);
+			}
+			auditResult.put("template", automaticConfigVo.getBaseResultTemplate());
+		}
+		audit.put("startTime", System.currentTimeMillis());
+		audit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
+		audit.put("result", auditResult);
+		IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		try {
+			IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(integrationUuid);
+			audit.put("integrationUuid", integrationUuid);
+			audit.put("integrationName", integrationVo.getName());
+			IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+			if (handler == null) {
+				throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+			}
+	    	integrationVo.getParamObj().putAll(getIntegrationParam(automaticConfigVo,currentProcessTaskStepVo));
+			IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+			audit.put("endTime", System.currentTimeMillis());
+			auditResult.put("json", resultVo.getRawResult());
+			if(StringUtils.isNotBlank(resultVo.getError())) {
+				logger.error(resultVo.getError());
+	    		throw new MatrixExternalException("外部接口访问异常");
+	    	}else if(StringUtils.isNotBlank(resultVo.getRawResult())) {
+				if(predicate(successConfig,resultVo)) {//如果执行成功
+					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
+					if(automaticConfigVo.getIsRequest()&&!automaticConfigVo.getIsHasCallback()||!automaticConfigVo.getIsRequest()) {//第一次请求
+						processHandler.complete(currentProcessTaskStepVo);
+					}else {//回调请求
+						if(CallbackType.WAIT.getValue().equals(automaticConfigVo.getCallbackType())) {
+							//等待回调,挂起
+							processHandler.hang(currentProcessTaskStepVo);
+						}
+						if(CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
+							automaticConfigVo.setIsRequest(false);
+							automaticConfigVo.setResultJson(JSONObject.parseObject(resultVo.getRawResult()));
+							initJob(automaticConfigVo,currentProcessTaskStepVo);
+						}
+					}
+					isUnloadJob = true;
+				}else if(automaticConfigVo.getIsRequest()||!automaticConfigVo.getIsRequest()&&predicate(failConfig,resultVo)){//失败
+					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
+						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
+						if(backStepList.size() == 1) {
+							ProcessTaskStepVo processTaskStepVo = backStepList.get(0);
+							if (processHandler != null) {
+								processHandler.back(processTaskStepVo);
+							}
+						}else {//如果存在多个回退线，则挂起
+							processHandler.hang(currentProcessTaskStepVo);
+						}
+					}else if(FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
+						processHandler.complete(currentProcessTaskStepVo);
+					}else if(FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
+						processHandler.abort(currentProcessTaskStepVo);
+					}else {//hang
+						processHandler.hang(currentProcessTaskStepVo);
+					}
+					isUnloadJob = true;
+				}else{
+					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.RUNNING.getValue()));
+					//continue
+				}
+	    	}
+			auditDataVo.setData(data.toJSONString());
+			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
+		}catch(Exception ex) {
+			logger.error(ex.getMessage(),ex);
+			processHandler.hang(currentProcessTaskStepVo);
+			isUnloadJob = true;
+		}
+		return isUnloadJob;
+	}
+	
+	@Override
+	public void initJob(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
+		IJob jobHandler = SchedulerManager.getHandler(ProcessTaskAutomaticJob.class.getName());
+		if (jobHandler != null) {
+			JobObject.Builder jobObjectBuilder = new JobObject.Builder(
+					currentProcessTaskStepVo.getProcessTaskId().toString()+"-"+currentProcessTaskStepVo.getId().toString(),
+					jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()
+					).addData("automaticConfigVo", automaticConfigVo)
+					 .addData("currentProcessTaskStepVo", currentProcessTaskStepVo);
+			JobObject jobObject = jobObjectBuilder.build();
+			jobHandler.reloadJob(jobObject);
+		} else {
+			throw new ScheduleHandlerNotFoundException(ProcessTaskAutomaticJob.class.getName());
+		}
+	}
+	
+	/**
+	 * @Description: 判断条件是否成立
+	 * @Param: 
+	 * @return: boolean
+	 */
+	private Boolean predicate(JSONObject config,IntegrationResultVo resultVo) {
+		Boolean result = true;
+		if(config.isEmpty()) {
+			if(resultVo.getStatusCode() != 200) {
+				result = false;
+			}
+		}else {
+			JSONObject resultJson = JSONObject.parseObject(resultVo.getRawResult());
+			Expression exp = Expression.getProcessExpression(config.getString("expression"));
+			String name = config.getString("name");
+			String value = config.getString("value");
+			if(exp == Expression.EQUAL) {
+				return resultJson.getString(name).equals(value);
+			}else if(exp == Expression.UNEQUAL) {
+				return !resultJson.getString(name).equals(value);
+			}else if(exp == Expression.INCLUDE) {
+				return resultJson.getString(name).indexOf(value)>-1;
+			}else if(exp == Expression.EXCLUDE) {
+				return !(resultJson.getString(name).indexOf(value)>-1);
+			}else if(exp == Expression.GREATERTHAN) {
+				return Double.parseDouble(resultJson.getString(name)) >= Double.parseDouble(value);
+			}else if(exp == Expression.LESSTHAN) {
+				return Double.parseDouble(resultJson.getString(name)) <= Double.parseDouble(value);
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * 拼装入参数
+	 * @param automaticConfigVo
+	 * @return
+	 */
+	private JSONObject getIntegrationParam(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
+		ProcessTaskStepVo stepVo = getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
+		ProcessTaskVo processTaskVo = getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskVo.setCurrentProcessTaskStep(stepVo);
+		JSONObject processTaskJson = getProcessFieldData(processTaskVo);
+		JSONObject resultJson = automaticConfigVo.getResultJson();
+		JSONArray paramList =  automaticConfigVo.getBaseParamList();
+		JSONObject integrationParam = new JSONObject();
+		if(!automaticConfigVo.getIsRequest()) {
+			paramList = automaticConfigVo.getCallbackParamList();
+		}
+		if(!CollectionUtils.isEmpty(paramList)) {
+			for(Object paramObj : paramList) {
+				JSONObject param = (JSONObject)paramObj;
+				String type = param.getString("type");
+				String value = param.getString("value");
+				String name = param.getString("name");
+				if(type.equals("common")||type.equals("form")) {
+					integrationParam.put(name, processTaskJson.get(value));
+				}else if(type.equals("integration")){
+					integrationParam.put(name, resultJson.get(value));
+				}else{//常量 
+					integrationParam.put(name, value);
+				}
+			}
+		}
+		return integrationParam;
+	}
+	
+	/**
+	 * vo 转 json
+	 * @param processTaskVo
+	 * @return
+	 */
+	public JSONObject getProcessFieldData(ProcessTaskVo processTaskVo) {
+		JSONObject resultObj = new JSONObject();
+		resultObj.put(ProcessField.ID.getValue(), processTaskVo.getId());
+		resultObj.put(ProcessField.TITLE.getValue(), processTaskVo.getTitle());
+		resultObj.put(ProcessField.CHANNELTYPE.getValue(), processTaskVo.getChannelType().getName());
+
+		resultObj.put(ProcessField.OWNER.getValue(), processTaskVo.getOwnerName());
+		resultObj.put(ProcessField.REPORTER.getValue(), processTaskVo.getReporterName());
+		resultObj.put(ProcessField.PRIORITY.getValue(), processTaskVo.getPriority().getName());
+		resultObj.put(ProcessField.STATUS.getValue(), processTaskVo.getStatusVo().getText());
+		
+		ProcessTaskStepVo startProcessTaskStep = processTaskVo.getStartProcessTaskStep();
+		ProcessTaskStepCommentVo comment = startProcessTaskStep.getComment();
+		if(comment != null && StringUtils.isNotBlank(comment.getContent())) {
+			resultObj.put(ProcessField.CONTENT.getValue(), comment.getContent());
+		}else {
+			resultObj.put(ProcessField.CONTENT.getValue(), "");
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date endTime = processTaskVo.getEndTime();
+		if(endTime != null) {
+			resultObj.put(ProcessField.ENDTIME.getValue(), sdf.format(endTime));
+		}else {
+			resultObj.put(ProcessField.ENDTIME.getValue(), "");
+		}
+		Date startTime = processTaskVo.getStartTime();
+		if(startTime != null) {
+			resultObj.put(ProcessField.STARTTIME.getValue(), sdf.format(startTime));
+		}else {
+			resultObj.put(ProcessField.STARTTIME.getValue(), "");
+		}
+		Date expireTime = processTaskVo.getExpireTime();
+		if(expireTime != null) {
+			resultObj.put(ProcessField.EXPIREDTIME.getValue(), sdf.format(expireTime));
+		}else {
+			resultObj.put(ProcessField.EXPIREDTIME.getValue(), "");
+		}
+		
+//		Map<String, Object> formAttributeDataMap = processTaskVo.getFormAttributeDataMap();
+		return resultObj;
+	}
+	
+	/**
+	 * 获取工单回退步骤列表
+	 * @param processTaskStepId
+	 * @return
+	 */
+	private List<ProcessTaskStepVo> getbackStepList(Long processTaskStepId){
+		List<ProcessTaskStepVo> resultList = new ArrayList<>();
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
+		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
+			if(processTaskStep.getIsActive() != null) {
+				if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
+					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+						processTaskStep.setName(processTaskStep.getAliasName());
+						processTaskStep.setFlowDirection("");
+					}else {
+						processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
+					}
+					resultList.add(processTaskStep);
+				}
+			}
+		}
+		return resultList;
+	}
+	
+	@Override
+	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId) {
+		//获取步骤信息
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		processTaskStepVo.setConfig(stepConfig);
+		ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+		if(processStepHandlerVo != null) {
+			processTaskStepVo.setGlobalConfig(processStepHandlerVo.getConfig());					
+		}
+		//处理人列表
+		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
+		if(CollectionUtils.isNotEmpty(majorUserList)) {
+			processTaskStepVo.setMajorUser(majorUserList.get(0));
+		}
+		List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
+		processTaskStepVo.setMinorUserList(minorUserList);
+		
+		List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.AGENT.getValue());
+		processTaskStepVo.setAgentUserList(agentUserList);
+		
+		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
+		processTaskStepVo.setWorkerList(workerList);
+		//回复框内容和附件暂存回显
+		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
+		processTaskStepAuditVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
+		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
+		processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+		processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid(true));
+		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
+		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+			ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
+			processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
+//			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
+//				if(ProcessTaskAuditDetailType.FORM.getValue().equals(processTaskStepAuditDetailVo.getType())) {
+//					List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(processTaskStepAuditDetailVo.getNewContent(), ProcessTaskFormAttributeDataVo.class);
+//					if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+//						Map<String, Object> formAttributeDataMap = new HashMap<>();
+//						for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+//							formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+//						}
+//						processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
+//					}
+//				}
+//			}
+		}
+		
+		//步骤评论列表
+//		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
+//		for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
+//			processTaskService.parseProcessTaskStepComment(processTaskStepComment);
+//		}
+//		processTaskStepVo.setCommentList(processTaskStepCommentList);
+		//获取当前用户有权限的所有子任务
+		//子任务列表
+//		if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+//			List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
+//			ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
+//			processTaskStepSubtaskVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
+//			processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
+//			List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+//			for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+//				String currentUser = UserContext.get().getUserUuid(true);
+//				if((currentUser.equals(processTaskStepSubtask.getOwner()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
+//						|| (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
+//					List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
+//					Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
+//					while(iterator.hasNext()) {
+//						ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
+//						if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
+//							if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+//								processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
+//								iterator.remove();
+//							}
+//						}
+//					}
+//					processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
+//					subtaskList.add(processTaskStepSubtask);
+//				}
+//			}
+//			processTaskStepVo.setProcessTaskStepSubtaskList(subtaskList);
+//		}
+		
+		//获取可分配处理人的步骤列表				
+//		ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
+//		processTaskStepWorkerPolicyVo.setProcessTaskId(processTaskId);
+//		List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
+//		if(CollectionUtils.isNotEmpty(processTaskStepWorkerPolicyList)) {
+//			List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
+//			for(ProcessTaskStepWorkerPolicyVo workerPolicyVo : processTaskStepWorkerPolicyList) {
+//				if(WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
+//					List<String> processStepUuidList = JSON.parseArray(workerPolicyVo.getConfigObj().getString("processStepUuidList"), String.class);
+//					for(String processStepUuid : processStepUuidList) {
+//						if(processTaskStepVo.getProcessStepUuid().equals(processStepUuid)) {
+//							List<ProcessTaskStepUserVo> majorList = processTaskMapper.getProcessTaskStepUserByStepId(workerPolicyVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
+//							if(CollectionUtils.isEmpty(majorList)) {
+//								ProcessTaskStepVo assignableWorkerStep = processTaskMapper.getProcessTaskStepBaseInfoById(workerPolicyVo.getProcessTaskStepId());
+//								assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
+//								assignableWorkerStepList.add(assignableWorkerStep);
+//							}
+//						}
+//					}
+//				}
+//			}
+//			processTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
+//		}
+		
+		//时效列表
+//		List<ProcessTaskSlaVo> processTaskSlaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(processTaskStepId);
+//		for(ProcessTaskSlaVo processTaskSlaVo : processTaskSlaList) {
+//			ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskSlaVo.getSlaTimeVo();
+//			if(processTaskSlaTimeVo != null) {
+//				processTaskSlaTimeVo.setName(processTaskSlaVo.getName());
+//				if(processTaskSlaTimeVo.getExpireTime() != null) {
+//					long timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
+//					processTaskSlaTimeVo.setTimeLeft(timeLeft);
+//					processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
+//				}
+//				if(processTaskSlaTimeVo.getRealExpireTime() != null) {
+//					long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
+//					processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
+//					processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
+//				}
+//				processTaskStepVo.getSlaTimeList().add(processTaskSlaTimeVo);
+//			}
+//		}
+		return processTaskStepVo;
+	}
+	
+	@Override
+	public ProcessTaskVo getProcessTaskDetailInfoById(Long processTaskId) {
+		//获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
+		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+		if(processTaskVo == null) {
+			throw new ProcessTaskNotFoundException(processTaskId.toString());
+		}
+		
+		//获取工单流程图信息
+		ProcessTaskConfigVo processTaskConfig = processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
+		if(processTaskConfig == null) {
+			throw new ProcessTaskRuntimeException("没有找到工单：'" + processTaskId + "'的流程图配置信息");
+		}
+		processTaskVo.setConfig(processTaskConfig.getConfig());
+		//获取开始步骤id
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+		if(processTaskStepList.size() != 1) {
+			throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
+		}
+
+		ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
+		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
+		startProcessTaskStepVo.setConfig(startStepConfig);
+		ProcessStepHandlerVo processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerByHandler(startProcessTaskStepVo.getHandler());
+		if(processStepHandlerConfig != null) {
+			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+		}
+		Long startProcessTaskStepId = startProcessTaskStepVo.getId();
+		ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
+		//获取上报描述内容
+		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
+		if(!processTaskStepContentList.isEmpty()) {
+			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
+			if(processTaskContentVo != null) {
+				comment.setContent(processTaskContentVo.getContent());
+			}
+		}
+		//附件
+		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
+		processTaskFileVo.setProcessTaskId(processTaskId);
+		processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
+		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
+		
+		if(processTaskFileList.size() > 0) {
+			List<String> fileUuidList = new ArrayList<>();
+			List<FileVo> fileList = new ArrayList<>();
+			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
+				fileUuidList.add(processTaskFile.getFileUuid());
+				FileVo fileVo = fileMapper.getFileByUuid(processTaskFile.getFileUuid());
+				fileList.add(fileVo);
+			}
+			comment.setFileList(fileList);
+		}
+		startProcessTaskStepVo.setComment(comment);
+		processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
+		
+		//优先级
+		PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
+		processTaskVo.setPriority(priorityVo);
+		//上报服务路径
+		ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+		if(channelVo != null) {
+			StringBuilder channelPath = new StringBuilder();
+			List<String> ancestorNameList = channelMapper.getAllAncestorNameListByParentUuid(channelVo.getParentUuid());
+			for(String name : ancestorNameList) {
+				channelPath.append(name);
+				channelPath.append("/");
+			}
+			channelPath.append(channelVo.getName());
+			processTaskVo.setChannelPath(channelPath.toString());
+			processTaskVo.setChannelType(channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid()));
+		}
+		//耗时
+		if(processTaskVo.getEndTime() != null) {
+			long timeCost = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), processTaskVo.getStartTime().getTime(), processTaskVo.getEndTime().getTime());
+			processTaskVo.setTimeCost(timeCost);
+		}
+		
+		//获取工单表单信息
+		ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+		if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
+			processTaskVo.setFormConfig(processTaskFormVo.getFormContent());			
+			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
+			if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+				Map<String, Object> formAttributeDataMap = new HashMap<>();
+				for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+					formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+				}
+				processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
+			}
+		}
+		return processTaskVo;
 	}
 }

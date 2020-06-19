@@ -23,6 +23,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
+import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.dto.ProcessStepVo;
@@ -30,10 +32,11 @@ import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.RelExpressionVo;
-import codedriver.framework.process.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
+import codedriver.framework.util.RunScriptUtil;
 
 @Service
 public class ConditionProcessComponent extends ProcessStepHandlerBase {
@@ -54,7 +57,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	public JSONObject getChartConfig() {
 		return new JSONObject() {
 			{
-				this.put("icon", "ts-m-problem");
+				this.put("icon", "tsfont-question");
 				this.put("shape", "L-triangle:R-triangle");
 				this.put("width", 68);
 				this.put("height", 68);
@@ -185,17 +188,23 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 							} else if ("optional".equals(type)) {// 自定义
 								JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
 								if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-									ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
-									String script = conditionConfigVo.buildScript(currentProcessTaskStepVo);
-									// ((false || true) || (true && false) || (true || false))
+									ProcessTaskStepVo stepVo = ProcessTaskUtil.getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
+									ProcessTaskVo processTaskVo = ProcessTaskUtil.getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
+									processTaskVo.setCurrentProcessTaskStep(stepVo);
+									JSONObject processFieldData = ProcessTaskUtil.getProcessFieldDataForConditionParam(processTaskVo);
+
 									try {
-										if (runScript(currentProcessTaskStepVo.getProcessTaskId(), script)) {
+										ConditionParamContext.init(processFieldData);
+										ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
+										String script = conditionConfigVo.buildScript();
+										// ((false || true) || (true && false) || (true || false))
+										if (RunScriptUtil.runScript(script)) {
 											canRun = true;
 										}
-									} catch (NoSuchMethodException e) {
+									} catch (Exception e) {
 										logger.error(e.getMessage(), e);
-									} catch (ScriptException e) {
-										logger.error(e.getMessage(), e);
+									} finally {
+										ConditionParamContext.get().release();
 									}
 								}
 							}
