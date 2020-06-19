@@ -312,9 +312,9 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		String content = paramObj.getString("content");
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
+//			processTaskMapper.replaceProcessTaskContent(contentVo);
 			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+//			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
 
 		if(ProcessTaskStepAction.COMPLETE.getValue().equals(paramObj.getString("action"))) {		
@@ -388,9 +388,9 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		String content = paramObj.getString("content");
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
+//			processTaskMapper.replaceProcessTaskContent(contentVo);
 			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+//			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
 		return 1;
 	}
@@ -422,9 +422,9 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		String content = paramObj.getString("content");
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
+//			processTaskMapper.replaceProcessTaskContent(contentVo);
 			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+//			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
@@ -660,7 +660,10 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		// 获取上报描述内容
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
 		if (CollectionUtils.isNotEmpty(processTaskStepContentList)) {
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskStepContentList.get(0).getContentHash());
+			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
+			if(processTaskContentVo != null) {
+				paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskContentVo.getContent());
+			}
 		}
 		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());

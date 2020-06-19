@@ -264,13 +264,18 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
 					for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
 						if(ProcessTaskAuditDetailType.FORM.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-							List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(processTaskStepAuditDetailVo.getNewContent(), ProcessTaskFormAttributeDataVo.class);
-							if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-								Map<String, Object> formAttributeDataMap = new HashMap<>();
-								for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-									formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+							if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
+								ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
+								if(processTaskContentVo != null) {
+									List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(processTaskContentVo.getContent(), ProcessTaskFormAttributeDataVo.class);
+									if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+										Map<String, Object> formAttributeDataMap = new HashMap<>();
+										for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+											formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+										}
+										processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
+									}
 								}
-								processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
 							}
 						}
 					}

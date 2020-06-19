@@ -111,7 +111,8 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 				oldFileUuidList.add(processTaskFile.getFileUuid());
 			}
 			oldFileUuidListStr = JSON.toJSONString(oldFileUuidList);
-			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), oldFileUuidListStr);
+			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(oldFileUuidListStr);
+			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), processTaskContentVo.getHash());
 			processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
 		}
 		/** 保存新附件uuid **/
@@ -127,10 +128,10 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			newContentHash = contentVo.getHash();
-			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, newContentHash));
-			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), newContentHash);
+//			newContentHash = contentVo.getHash();
+//			processTaskMapper.replaceProcessTaskContent(contentVo);
+			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, contentVo.getHash()));
+//			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), newContentHash);
 		}else if(oldContentHash != null){
 			processTaskMapper.deleteProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, oldContentHash));
 		}

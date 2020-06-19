@@ -10,7 +10,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -20,7 +19,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
@@ -30,8 +28,6 @@ import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 
 	private final static Logger logger = LoggerFactory.getLogger(FormAuditHandler.class);
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
 	
 	@Override
 	public String getType() {

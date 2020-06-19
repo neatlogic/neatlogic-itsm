@@ -88,8 +88,8 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 			String content = jsonObj.getString("content");
 			if(StringUtils.isNotBlank(content)) {
 				ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-				processTaskMapper.replaceProcessTaskContent(contentVo);
-				jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+//				processTaskMapper.replaceProcessTaskContent(contentVo);
+//				jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 				processTaskStepCommentVo.setContentHash(contentVo.getHash());
 			}
 			
@@ -110,9 +110,9 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 			}
 			processTaskMapper.updateProcessTaskStepCommentById(processTaskStepCommentVo);
 			
-			processTaskService.parseProcessTaskStepComment(oldCommentVo);
+//			processTaskService.parseProcessTaskStepComment(oldCommentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldCommentVo.getContentHash());
-			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), JSON.toJSONString(oldCommentVo.getFileUuidList()));
+			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), oldCommentVo.getFileUuidListHash());
 			
 			//生成活动
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldCommentVo.getProcessTaskStepId());	

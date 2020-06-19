@@ -217,7 +217,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			oldSubtaskVo.setUserName(oldProcessTaskStepSubtask.getUserName());
 			oldSubtaskVo.setTargetTime(oldProcessTaskStepSubtask.getTargetTime());
 			oldSubtaskVo.setContentHash(oldProcessTaskStepSubtask.getContentHash());
-			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), JSON.toJSONString(oldSubtaskVo));
+			ProcessTaskContentVo oldSubtaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldSubtaskVo));
+			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), oldSubtaskContentVo.getHash());
 			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.EDITSUBTASK);
 		}else {
