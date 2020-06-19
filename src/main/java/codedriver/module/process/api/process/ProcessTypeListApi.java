@@ -39,6 +39,8 @@ public class ProcessTypeListApi extends ApiComponentBase {
 	@Description(desc = "流程类型列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		
+		//TODO  确定是否有用，删除？
 		List<ProcessTypeVo> processTyepList = processMapper.getAllProcessType();
 		return processTyepList;
 	}

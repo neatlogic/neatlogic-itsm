@@ -57,7 +57,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	public JSONObject getChartConfig() {
 		return new JSONObject() {
 			{
-				this.put("icon", "ts-m-problem");
+				this.put("icon", "tsfont-question");
 				this.put("shape", "L-triangle:R-triangle");
 				this.put("width", 68);
 				this.put("height", 68);

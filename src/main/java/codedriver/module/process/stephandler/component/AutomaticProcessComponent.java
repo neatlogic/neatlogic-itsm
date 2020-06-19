@@ -1,22 +1,18 @@
 package codedriver.module.process.stephandler.component;
 
-import java.time.DateTimeException;
-import java.time.format.DateTimeFormatter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -27,8 +23,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
@@ -36,21 +34,28 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.exception.worktime.WorktimeConfigIllegalException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
+import codedriver.module.process.service.ProcessTaskService;
 
 @Service
 public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	static Logger logger = LoggerFactory.getLogger(AutomaticProcessComponent.class);
 	private static final ThreadLocal<List<RequestFirstThread>> AUTOMATIC_LIST = new ThreadLocal<>();
+	
+	@Autowired
+	ProcessTaskService processTaskService;
+	
+	
 	@Override
 	public String getHandler() {
 		return ProcessStepHandler.AUTOMATIC.getHandler();
 	}
-
+	
 	@Override
 	public String getType() {
 		return ProcessStepHandler.AUTOMATIC.getType();
@@ -99,7 +104,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		} catch (Exception ex) {
 			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
 		}
-		requestFirst(automaticConfig);
+		requestFirst(currentProcessTaskStepVo,automaticConfig);
 		return 0;
 	}
 	
@@ -107,9 +112,9 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	 * automatic 第一次请求
 	 * @param automaticConfig
 	 */
-	private void requestFirst(JSONObject automaticConfig) {
+	private void requestFirst(ProcessTaskStepVo currentProcessTaskStepVo,JSONObject automaticConfig) {
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-			CachedThreadPool.execute(new RequestFirstThread(automaticConfig));
+			CachedThreadPool.execute(new RequestFirstThread(currentProcessTaskStepVo,automaticConfig));
 		} else {
 			List<RequestFirstThread> handlerList = AUTOMATIC_LIST.get();
 			if (handlerList == null) {
@@ -130,71 +135,67 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 					}
 				});
 			}
-			handlerList.add(new RequestFirstThread(automaticConfig));
+			handlerList.add(new RequestFirstThread(currentProcessTaskStepVo,automaticConfig));
 		}
 	}
 	
 	private class RequestFirstThread extends CodeDriverThread {
 		private JSONObject automaticConfig;
-		private RequestFirstThread(JSONObject automaticConfig) {
+		private ProcessTaskStepVo currentProcessTaskStepVo;
+		private RequestFirstThread(ProcessTaskStepVo currentProcessTaskStepVo,JSONObject automaticConfig) {
 			this.automaticConfig = automaticConfig;
+			this.currentProcessTaskStepVo = currentProcessTaskStepVo;
 		}
 		@Override
 		protected void execute() {
-			DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("H:mm");
-			JSONObject baseConfig = automaticConfig.getJSONObject("base");
-			String baseIntegrationUuid = baseConfig.getString("integrationUuid");
-			JSONObject runWindowJson = baseConfig.getJSONObject("runWindow");
-			JSONObject baseParamsJson = baseConfig.getJSONObject("params");
-			JSONObject baseSucessFlagJson = baseConfig.getJSONObject("sucessFlag");
-			String baseFailPolicy = baseConfig.getString("failPolicy");
-			String baseShowTemplate = baseConfig.getString("baseShowTemplate");
+			AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
+			JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
+			automaticConfigVo.setIsRequest(true);
 			//检验执行时间窗口
-			
-			try {
-				timeFormatter.parse("");
-			}catch(DateTimeException e) {
-				throw new WorktimeConfigIllegalException("");
+			if(isTimeToRun(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"))) {
+				processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
+			}else {//loadJob,定时执行第一次请求
+				processTaskService.initJob(automaticConfigVo,currentProcessTaskStepVo);
 			}
-			
 		}
 		
-	}
-	
-	private Boolean isTimeToRun(String startTime,String endTime) {
-		Boolean isTimeToRun = true;
-		Calendar nowData = Calendar.getInstance();
-		nowData.set(Calendar.HOUR_OF_DAY, 12);
-		nowData.set(Calendar.MINUTE, 12);
-		nowData.set(Calendar.SECOND, 0);
-		
-		return isTimeToRun;
 	}
 	
 	/**
-	 * 返回result对应key的值
-	 * @param key
-	 * @param returnObj
+	 * 判断是否满足执行时间窗口
+	 * @param startTime
+	 * @param endTime
 	 * @return
-	 * @throws ScriptException
-	 * @throws NoSuchMethodException
 	 */
-	private String getReturnValue(String key, JSONObject returnObj) throws ScriptException, NoSuchMethodException {
-		ScriptEngineManager sem = new ScriptEngineManager();
-		ScriptEngine se = sem.getEngineByName("nashorn");
-		StringBuilder scriptBuilder = new StringBuilder();
-		scriptBuilder.append("function run(){");
-		scriptBuilder.append("return json." + key + ";\n");
-		scriptBuilder.append("}");
-
-		se.put("json", returnObj);
-		se.eval(scriptBuilder.toString());
-		Invocable invocableEngine = (Invocable) se;
-		Object callbackvalue = invocableEngine.invokeFunction("run");
-		if (callbackvalue != null) {
-			return callbackvalue.toString();
+	private Boolean isTimeToRun(String startTimeStr,String endTimeStr) {
+		if(StringUtils.isBlank(startTimeStr)&&StringUtils.isBlank(endTimeStr)) {//如果没有设置时间窗口
+			return true;
 		}
-		return "";
+		Date nowTime =null;
+	    Date startTime = null;
+	    Date endTime = null;
+	    SimpleDateFormat  df = new SimpleDateFormat("H:mm");
+		try {
+			nowTime = df.parse(df.format(new Date()));
+			startTime =df.parse(startTimeStr);
+			endTime = df.parse(endTimeStr);
+		}catch(ParseException e) {
+			throw new WorktimeConfigIllegalException("startTime/endTime");
+		}
+		Calendar date = Calendar.getInstance();
+        date.setTime(nowTime);
+
+        Calendar begin = Calendar.getInstance();
+        begin.setTime(startTime);
+
+        Calendar end = Calendar.getInstance();
+        end.setTime(endTime);
+
+        if (date.after(begin) && date.before(end)) {
+            return true;
+        } else {
+            return false;
+        }
 	}
 	
 	@Override
@@ -216,19 +217,6 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-		/** 组装通知模板 **/
-//		JSONArray notifyList = stepConfigObj.getJSONArray("notifyList");
-//		if (!CollectionUtils.isEmpty(notifyList)) {
-//			List<String> templateUuidList = new ArrayList<>();
-//			for (int j = 0; j < notifyList.size(); j++) {
-//				JSONObject notifyObj = notifyList.getJSONObject(j);
-//				String template = notifyObj.getString("template");
-//				if (StringUtils.isNotBlank(template)) {
-//					templateUuidList.add(template);
-//				}
-//			}
-//			processStepVo.setTemplateUuidList(templateUuidList);
-//		}
 		/** 组装通知策略id **/
 		JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
         Long policyId = notifyPolicyConfig.getLong("policyId");
@@ -305,6 +293,20 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 						}
 					}
 				}
+			}
+		}
+		if (workerList.size() == 1) {
+			String autoStart = workerPolicyConfig.getString("autoStart");
+			/** 设置当前步骤状态为处理中 **/
+			if ("1".equals(autoStart) && StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
+				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
+				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+				userVo.setUserUuid(workerList.get(0).getUuid());
+				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
+				userVo.setUserName(user.getUserName());
+				userList.add(userVo);
+				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 			}
 		}
 		return 1;
