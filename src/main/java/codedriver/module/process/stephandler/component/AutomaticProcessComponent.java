@@ -2,19 +2,10 @@ package codedriver.module.process.stephandler.component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.DateTimeException;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -32,8 +23,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
@@ -300,6 +293,20 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 						}
 					}
 				}
+			}
+		}
+		if (workerList.size() == 1) {
+			String autoStart = workerPolicyConfig.getString("autoStart");
+			/** 设置当前步骤状态为处理中 **/
+			if ("1".equals(autoStart) && StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
+				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
+				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+				userVo.setUserUuid(workerList.get(0).getUuid());
+				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
+				userVo.setUserName(user.getUserName());
+				userList.add(userVo);
+				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 			}
 		}
 		return 1;

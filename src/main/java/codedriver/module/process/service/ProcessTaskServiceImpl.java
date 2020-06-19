@@ -590,7 +590,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			}
 			auditResult.put("template", automaticConfigVo.getBaseResultTemplate());
 		}
-		audit.put("startTime", System.currentTimeMillis() / 1000);
+		audit.put("startTime", System.currentTimeMillis());
 		audit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
 		audit.put("result", auditResult);
 		IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
@@ -604,14 +604,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			}
 	    	integrationVo.getParamObj().putAll(getIntegrationParam(automaticConfigVo,currentProcessTaskStepVo));
 			IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
-			audit.put("endTime", Calendar.getInstance().getTimeInMillis());
+			audit.put("endTime", System.currentTimeMillis());
 			auditResult.put("json", resultVo.getRawResult());
 			if(StringUtils.isNotBlank(resultVo.getError())) {
 				logger.error(resultVo.getError());
 	    		throw new MatrixExternalException("外部接口访问异常");
-	    	}else if(StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-	    		JSONObject resultJson = JSONObject.parseObject(resultVo.getTransformedResult());
-				if(predicate(successConfig,resultJson)) {//如果执行成功
+	    	}else if(StringUtils.isNotBlank(resultVo.getRawResult())) {
+				if(predicate(successConfig,resultVo)) {//如果执行成功
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
 					if(automaticConfigVo.getIsRequest()&&!automaticConfigVo.getIsHasCallback()||!automaticConfigVo.getIsRequest()) {//第一次请求
 						processHandler.complete(currentProcessTaskStepVo);
@@ -622,12 +621,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 						}
 						if(CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
 							automaticConfigVo.setIsRequest(false);
-							automaticConfigVo.setResultJson(resultJson);
+							automaticConfigVo.setResultJson(JSONObject.parseObject(resultVo.getRawResult()));
 							initJob(automaticConfigVo,currentProcessTaskStepVo);
 						}
 					}
 					isUnloadJob = true;
-				}else if(automaticConfigVo.getIsRequest()||!automaticConfigVo.getIsRequest()&&predicate(failConfig,resultJson)){//失败
+				}else if(automaticConfigVo.getIsRequest()||!automaticConfigVo.getIsRequest()&&predicate(failConfig,resultVo)){//失败
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
 					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
@@ -683,25 +682,31 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 * @Param: 
 	 * @return: boolean
 	 */
-	private Boolean predicate(JSONObject config,JSONObject resultJson) {
+	private Boolean predicate(JSONObject config,IntegrationResultVo resultVo) {
 		Boolean result = true;
-		Expression exp = Expression.getProcessExpression(config.getString("expression"));
-		String name = config.getString("name");
-		String value = config.getString("value");
-		if(exp == Expression.EQUAL) {
-			return resultJson.getString(name).equals(value);
-		}else if(exp == Expression.UNEQUAL) {
-			return !resultJson.getString(name).equals(value);
-		}else if(exp == Expression.INCLUDE) {
-			return resultJson.getString(name).indexOf(value)>-1;
-		}else if(exp == Expression.EXCLUDE) {
-			return !(resultJson.getString(name).indexOf(value)>-1);
-		}else if(exp == Expression.GREATERTHAN) {
-			return Double.parseDouble(resultJson.getString(name)) >= Double.parseDouble(value);
-		}else if(exp == Expression.LESSTHAN) {
-			return Double.parseDouble(resultJson.getString(name)) <= Double.parseDouble(value);
+		if(config.isEmpty()) {
+			if(resultVo.getStatusCode() != 200) {
+				result = false;
+			}
+		}else {
+			JSONObject resultJson = JSONObject.parseObject(resultVo.getRawResult());
+			Expression exp = Expression.getProcessExpression(config.getString("expression"));
+			String name = config.getString("name");
+			String value = config.getString("value");
+			if(exp == Expression.EQUAL) {
+				return resultJson.getString(name).equals(value);
+			}else if(exp == Expression.UNEQUAL) {
+				return !resultJson.getString(name).equals(value);
+			}else if(exp == Expression.INCLUDE) {
+				return resultJson.getString(name).indexOf(value)>-1;
+			}else if(exp == Expression.EXCLUDE) {
+				return !(resultJson.getString(name).indexOf(value)>-1);
+			}else if(exp == Expression.GREATERTHAN) {
+				return Double.parseDouble(resultJson.getString(name)) >= Double.parseDouble(value);
+			}else if(exp == Expression.LESSTHAN) {
+				return Double.parseDouble(resultJson.getString(name)) <= Double.parseDouble(value);
+			}
 		}
-		
 		return result;
 	}
 	
