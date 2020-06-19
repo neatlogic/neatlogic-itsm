@@ -106,7 +106,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		JSONObject workerPolicyConfig = null;
 		try {
 			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
-			currentProcessTaskStepVo.setParamObj(stepConfigObj);
+			currentProcessTaskStepVo.getParamObj().putAll(stepConfigObj);
 			if (MapUtils.isNotEmpty(stepConfigObj)) {
 				workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
 			}
@@ -300,7 +300,10 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			ProcessTaskStepAuditVo processTaskStepAuditVo = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
 			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAuditVo.getAuditDetailList();
 			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetail : processTaskStepAuditDetailList) {
-				paramObj.put(ProcessTaskAuditDetailType.getParamName(processTaskStepAuditDetail.getType()), processTaskStepAuditDetail.getNewContent());
+				ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetail.getNewContent());
+				if(processTaskContentVo != null) {
+					paramObj.put(ProcessTaskAuditDetailType.getParamName(processTaskStepAuditDetail.getType()), processTaskContentVo.getContent());
+				}
 			}
 			//删除暂存活动
 			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {

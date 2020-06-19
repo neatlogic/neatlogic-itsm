@@ -2,7 +2,6 @@ package codedriver.module.process.service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -275,6 +274,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			oldSubtaskVo.setTargetTime(oldProcessTaskStepSubtask.getTargetTime());
 			oldSubtaskVo.setContentHash(oldProcessTaskStepSubtask.getContentHash());
 			ProcessTaskContentVo oldSubtaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldSubtaskVo));
+			processTaskMapper.replaceProcessTaskContent(oldSubtaskContentVo);
 			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), oldSubtaskContentVo.getHash());
 			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.EDITSUBTASK);
