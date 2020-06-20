@@ -71,6 +71,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 	public void initJob(String tenantUuid) {
 		List<ProcessTaskStepDataVo> dataList = processTaskStepDataMapper.searchProcessTaskStepData(new ProcessTaskStepDataVo());
 		AutomaticConfigVo automaticConfigVo = null;
+		Boolean isLoadJob = false;
 		for(ProcessTaskStepDataVo dataVo : dataList) {
 			JSONObject dataObject = dataVo.getData();
 			ProcessTaskStepVo  processTaskStepVo = null;
@@ -83,6 +84,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 					String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 					automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
 					automaticConfigVo.setIsRequest(true);
+					isLoadJob = true;
 				}
 				//load回调job
 				if( dataObject.containsKey("callbackAudit")&&ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))){
@@ -93,19 +95,21 @@ public class ProcessTaskAutomaticJob extends JobBase {
 						String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 						automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
 						automaticConfigVo.setIsRequest(false);
+						isLoadJob = true;
 					}
 				}
+				if(isLoadJob) {
+					JobObject.Builder jobObjectBuilder = new JobObject.Builder(dataVo.getProcessTaskId()+"-"+dataVo.getProcessTaskStepId(),
+							this.getGroupName(),
+							this.getClassName(), 
+							tenantUuid)
+							.addData("automaticConfigVo", automaticConfigVo)
+							.addData("currentProcessTaskStepVo", processTaskStepVo);
+					JobObject jobObject = jobObjectBuilder.build();
+					this.reloadJob(jobObject);
+				}
 			}
-			JobObject.Builder jobObjectBuilder = new JobObject.Builder(dataVo.getProcessTaskId()+"-"+dataVo.getProcessTaskStepId(),
-					this.getGroupName(),
-					this.getClassName(), 
-					tenantUuid)
-					.addData("automaticConfigVo", automaticConfigVo)
-					.addData("currentProcessTaskStepVo", processTaskStepVo);
-			JobObject jobObject = jobObjectBuilder.build();
-			this.reloadJob(jobObject);
 		}
-		
 	}
 
 	@Override

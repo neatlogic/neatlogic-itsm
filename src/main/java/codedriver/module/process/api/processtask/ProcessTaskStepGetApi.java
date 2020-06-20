@@ -20,6 +20,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
@@ -128,8 +129,9 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		}
 
 		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+		ProcessTaskStepVo processTaskStepVo = null;
 		if(processTaskStepId != null) {
-			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+			processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 			if(processTaskStepVo == null) {
 				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 			}
@@ -236,7 +238,6 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
 			if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 				//获取步骤信息
-				ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 				processTaskStepVo.setConfig(stepConfig);
 				processStepHandlerConfig = stepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
@@ -402,6 +403,30 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					}
 				}
 				processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
+			}
+			//processtaskStepData
+			ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));
+			if(stepDataVo != null) {
+				JSONObject stepDataJson = stepDataVo.getData();
+				processTaskStepVo.setProcessTaskStepData(stepDataJson);
+				verifyActionList = new ArrayList<>();
+				verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
+				actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
+				if(actionList.removeAll(verifyActionList)) {//有处理权限
+					stepDataJson.put("isStepUser", 1);
+					if(processTaskStepVo.getHandler().equals(ProcessStepHandler.AUTOMATIC.getHandler())){
+						JSONObject requestAuditJson = stepDataJson.getJSONObject("requestAudit");
+						if(requestAuditJson.containsKey("status")
+								&&requestAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+							requestAuditJson.put("isRetry", 1);
+						}
+						JSONObject callbackAuditJson = stepDataJson.getJSONObject("callbackAudit");
+						if(callbackAuditJson.containsKey("status")
+								&&callbackAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+							callbackAuditJson.put("isRetry", 1);
+						}
+					}
+				}
 			}
 		}
 

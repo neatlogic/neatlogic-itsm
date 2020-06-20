@@ -555,46 +555,29 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	
 	@Override
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
-		//audit
-		JSONObject data = null;
-		JSONObject audit = new JSONObject();
-		JSONObject auditResult = new JSONObject();
-
+		
+		Boolean isUnloadJob = false;
 		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler()));
-		if(auditDataVo != null) {
-			data = auditDataVo.getData();
-		}else {
-			data = new JSONObject(); 
-			auditDataVo = new ProcessTaskStepDataVo(true);
-			auditDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-			auditDataVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-			auditDataVo.setType(ProcessStepHandler.AUTOMATIC.getHandler());
-		}
+		JSONObject data = auditDataVo.getData();
 		String integrationUuid = automaticConfigVo.getBaseIntegrationUuid();
 		JSONObject successConfig = automaticConfigVo.getBaseSuccessConfig();
 		String template = automaticConfigVo.getBaseResultTemplate();
-		Boolean isUnloadJob = false;
 		JSONObject failConfig = null;
-		if(automaticConfigVo.getIsRequest()) {
-			if(data.containsKey("requestAudit")) {
-				audit = data.getJSONObject("requestAudit");
-			}else {
-				data.put("requestAudit", audit);
-			}
-			audit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
-		}else {
+		JSONObject audit = data.getJSONObject("requestAudit");
+		if(!automaticConfigVo.getIsRequest()) {
 			audit = data.getJSONObject("callbackAudit");
+		}else {
 			template = automaticConfigVo.getCallbackResultTemplate();
 			integrationUuid =automaticConfigVo.getCallbackIntegrationUuid();
 			successConfig = automaticConfigVo.getCallbackSuccessConfig();
 			failConfig = automaticConfigVo.getCallbackFailConfig();
 		}
 		audit.put("startTime", System.currentTimeMillis());
+		JSONObject auditResult = new JSONObject();
 		audit.put("result", auditResult);
 		IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		try {
 			IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(integrationUuid);
-			audit.put("integrationUuid", integrationUuid);
 			audit.put("integrationName", integrationVo.getName());
 			IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
 			if (handler == null) {
@@ -616,20 +599,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					}else {//回调请求
 						if(CallbackType.WAIT.getValue().equals(automaticConfigVo.getCallbackType())) {
 							//等待回调,挂起
-							processHandler.hang(currentProcessTaskStepVo);
+							//processHandler.hang(currentProcessTaskStepVo);
 						}
 						if(CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
 							automaticConfigVo.setIsRequest(false);
 							automaticConfigVo.setResultJson(JSONObject.parseObject(resultVo.getRawResult()));
-							IntegrationVo callbackIntegrationVo = integrationMapper.getIntegrationByUuid(automaticConfigVo.getCallbackIntegrationUuid());
-							JSONObject callbackAudit = new JSONObject();
-							data.put("callbackAudit", callbackAudit);
-							callbackAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
-							callbackAudit.put("type", automaticConfigVo.getCallbackType());
-							callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
-							callbackAudit.put("integrationUuid", automaticConfigVo.getCallbackIntegrationUuid());
-							callbackAudit.put("integrationName", callbackIntegrationVo.getName());
-							template = automaticConfigVo.getCallbackResultTemplate();
 							initJob(automaticConfigVo,currentProcessTaskStepVo);
 						}
 					}
@@ -644,14 +618,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 								processHandler.back(processTaskStepVo);
 							}
 						}else {//如果存在多个回退线，则挂起
-							processHandler.hang(currentProcessTaskStepVo);
+							//processHandler.hang(currentProcessTaskStepVo);
 						}
 					}else if(FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						processHandler.complete(currentProcessTaskStepVo);
 					}else if(FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						processHandler.abort(currentProcessTaskStepVo);
 					}else {//hang
-						processHandler.hang(currentProcessTaskStepVo);
+						//processHandler.hang(currentProcessTaskStepVo);
 					}
 					isUnloadJob = true;
 				}else{
