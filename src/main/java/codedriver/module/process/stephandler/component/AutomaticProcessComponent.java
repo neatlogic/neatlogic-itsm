@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dto.UserVo;
@@ -132,6 +133,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
 		ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
 		auditDataVo.setData(data.toJSONString());
+		auditDataVo.setFcu(UserContext.get().getUserUuid());
 		processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		
 	}
@@ -184,6 +186,14 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 			if(isTimeToRun(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"))) {
 				processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
 			}else {//loadJob,定时执行第一次请求
+				//初始化audit执行状态
+				JSONObject audit = null;
+				ProcessTaskStepDataVo data = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler()));
+				JSONObject dataObject = data.getData();
+				audit = dataObject.getJSONObject("requestAudit");
+				audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
+				data.setData(dataObject.toJSONString());
+				processTaskStepDataMapper.replaceProcessTaskStepData(data);
 				processTaskService.initJob(automaticConfigVo,currentProcessTaskStepVo);
 			}
 		}

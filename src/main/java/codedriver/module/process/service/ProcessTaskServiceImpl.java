@@ -586,7 +586,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
 			audit.put("endTime", System.currentTimeMillis());
 			auditResult.put("json", resultVo.getRawResult());
-			auditResult.put("template", FreemarkerUtil.transform(resultVo.getRawResult(), template));
+			auditResult.put("template", FreemarkerUtil.transform(JSONObject.parse(resultVo.getTransformedResult()), template));
 			if(StringUtils.isNotBlank(resultVo.getError())) {
 				logger.error(resultVo.getError());
 	    		throw new MatrixExternalException("外部接口访问异常");
@@ -603,6 +603,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 						if(CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
 							automaticConfigVo.setIsRequest(false);
 							automaticConfigVo.setResultJson(JSONObject.parseObject(resultVo.getRawResult()));
+							JSONObject callbackAudit = data.getJSONObject("callbackAudit");
+							callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
 							initJob(automaticConfigVo,currentProcessTaskStepVo);
 						}
 					}
@@ -635,7 +637,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			
 		}catch(Exception ex) {
 			logger.error(ex.getMessage(),ex);
-			processHandler.hang(currentProcessTaskStepVo);
+			//processHandler.hang(currentProcessTaskStepVo);
 			isUnloadJob = true;
 		}finally {
 			auditDataVo.setData(data.toJSONString());

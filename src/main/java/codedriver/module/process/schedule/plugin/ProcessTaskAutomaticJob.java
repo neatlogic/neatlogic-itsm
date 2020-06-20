@@ -53,11 +53,12 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		Date startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"));
 		Date endTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("endTime"));
 		String groupName = automaticConfigVo.getIsRequest()?"-REQUEST":"-CALLBACK";
+		ProcessTaskStepVo  currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
 		newJobObjectBuilder = new JobObject.Builder(jobObject.getJobName(), this.getGroupName()+groupName, this.getClassName(), TenantContext.get().getTenantUuid())
 				.withBeginTime(startTime)
 			    .withEndTime(endTime)
 				.addData("automaticConfigVo", automaticConfigVo)
-				.addData("currentProcessTaskStepVo", jobObject.getData("currentProcessTaskStepVo"));
+				.addData("currentProcessTaskStepVo", currentProcessTaskStepVo);
 		if(automaticConfigVo.getIsRequest()) {
 			newJobObjectBuilder.withIntervalInSeconds(5)
 			                   .withRepeatCount(0);
@@ -65,7 +66,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			newJobObjectBuilder.withIntervalInSeconds(automaticConfigVo.getCallbackInterval()*60);
 		}
 		JobObject newJobObject = newJobObjectBuilder.build();
-		System.out.println(schedulerManager.loadJob(newJobObject));
+		schedulerManager.loadJob(newJobObject);
 	}
 
 	@Override

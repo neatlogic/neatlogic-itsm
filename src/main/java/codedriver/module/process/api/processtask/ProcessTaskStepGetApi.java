@@ -419,11 +419,15 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 						if(requestAuditJson.containsKey("status")
 								&&requestAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
 							requestAuditJson.put("isRetry", 1);
+						}else {
+							requestAuditJson.put("isRetry", 0);
 						}
 						JSONObject callbackAuditJson = stepDataJson.getJSONObject("callbackAudit");
 						if(callbackAuditJson.containsKey("status")
 								&&callbackAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
 							callbackAuditJson.put("isRetry", 1);
+						}else {
+							callbackAuditJson.put("isRetry", 0);
 						}
 					}
 				}
