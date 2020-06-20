@@ -35,9 +35,8 @@ import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskAssignWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -106,7 +105,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		JSONObject workerPolicyConfig = null;
 		try {
 			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
-			currentProcessTaskStepVo.setParamObj(stepConfigObj);
+			currentProcessTaskStepVo.getParamObj().putAll(stepConfigObj);
 			if (MapUtils.isNotEmpty(stepConfigObj)) {
 				workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
 			}
@@ -289,32 +288,46 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		//找出当前用户再当前步骤的所有暂存活动，一般只有一个
-		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
-		auditVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-		auditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
-		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
-		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-			//找出最后一次暂存活动
-			ProcessTaskStepAuditVo processTaskStepAuditVo = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
-			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAuditVo.getAuditDetailList();
-			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetail : processTaskStepAuditDetailList) {
-				paramObj.put(ProcessTaskAuditDetailType.getParamName(processTaskStepAuditDetail.getType()), processTaskStepAuditDetail.getNewContent());
-			}
-			//删除暂存活动
-			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-				processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
+//		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
+//		auditVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+//		auditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+//		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+//		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
+//		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
+//		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+//			//找出最后一次暂存活动
+//			ProcessTaskStepAuditVo processTaskStepAuditVo = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
+//			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAuditVo.getAuditDetailList();
+//			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetail : processTaskStepAuditDetailList) {
+//				ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetail.getNewContent());
+//				if(processTaskContentVo != null) {
+//					paramObj.put(ProcessTaskAuditDetailType.getParamName(processTaskStepAuditDetail.getType()), processTaskContentVo.getContent());
+//				}
+//			}
+//			//删除暂存活动
+//			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+//				processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
+//			}
+//		}
+		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+		processTaskStepDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskStepDataVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+		processTaskStepDataVo.setType("stepDraftSave");
+		ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+		if(stepDraftSaveData != null) {
+			JSONObject dataObj = stepDraftSaveData.getData();
+			if(MapUtils.isNotEmpty(dataObj)) {
+				paramObj.putAll(dataObj);
 			}
 		}
-		
 		/** 保存描述内容 **/
 		String content = paramObj.getString("content");
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
+//			processTaskMapper.replaceProcessTaskContent(contentVo);
 			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+//			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
 
 		if(ProcessTaskStepAction.COMPLETE.getValue().equals(paramObj.getString("action"))) {		
@@ -388,9 +401,9 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		String content = paramObj.getString("content");
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
+//			processTaskMapper.replaceProcessTaskContent(contentVo);
 			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+//			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
 		return 1;
 	}
@@ -422,9 +435,9 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		String content = paramObj.getString("content");
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
+//			processTaskMapper.replaceProcessTaskContent(contentVo);
 			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+//			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 		}
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
@@ -660,7 +673,10 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		// 获取上报描述内容
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
 		if (CollectionUtils.isNotEmpty(processTaskStepContentList)) {
-			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskStepContentList.get(0).getContentHash());
+			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
+			if(processTaskContentVo != null) {
+				paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskContentVo.getContent());
+			}
 		}
 		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());

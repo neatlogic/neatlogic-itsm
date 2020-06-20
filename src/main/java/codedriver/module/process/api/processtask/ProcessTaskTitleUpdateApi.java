@@ -10,6 +10,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -56,13 +57,14 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
-		String oldTile = processTaskVo.getTitle();	
+		String oldTitle = processTaskVo.getTitle();	
 		String title = jsonObj.getString("title");
 		//如果标题跟原来的标题不一样，生成活动
-		if(!title.equals(oldTile)) {
+		if(!title.equals(oldTitle)) {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(processTaskId);
 			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+			processTaskStepVo.setProcessTaskId(processTaskId);
 			Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 			if(processTaskStepId != null) {
 				processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
@@ -80,8 +82,9 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 			//更新标题
 			processTaskVo.setTitle(title);
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
-			//生成活动	
-			jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTile);
+			//生成活动
+			ProcessTaskContentVo oldTitleContentVo = new ProcessTaskContentVo(oldTitle);
+			jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTitleContentVo.getHash());
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.UPDATETITLE);
 		}

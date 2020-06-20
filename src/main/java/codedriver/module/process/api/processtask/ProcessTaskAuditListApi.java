@@ -16,6 +16,7 @@ import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetail
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -72,15 +73,14 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 		}
 		List<ProcessTaskStepAuditVo> resutlList = new ArrayList<>();
 		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-			if(ProcessTaskStepAction.SAVE.getValue().equals(processTaskStepAudit.getAction())) {
-				continue;
-			}
-			//判断当前用户是否有权限查看该节点信息
-			List<String> verifyActionList = new ArrayList<>();
-			verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-			List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
-			if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
-				continue;
+			if(processTaskStepAudit.getProcessTaskStepId() != null) {
+				//判断当前用户是否有权限查看该节点信息
+				List<String> verifyActionList = new ArrayList<>();
+				verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
+				List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
+				if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
+					continue;
+				}
 			}
 			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
 			processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
@@ -88,7 +88,10 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 			while(iterator.hasNext()) {
 				ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo = iterator.next();
 				if(ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-					processTaskStepAudit.setNextStepId(Long.parseLong(processTaskStepAuditDetailVo.getNewContent()));
+					ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
+					if(processTaskContentVo != null) {
+						processTaskStepAudit.setNextStepId(Long.parseLong(processTaskContentVo.getContent()));
+					}
 				}
 				IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
 				if(auditDetailHandler != null) {

@@ -2,7 +2,6 @@ package codedriver.module.process.service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -276,7 +275,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			oldSubtaskVo.setUserName(oldProcessTaskStepSubtask.getUserName());
 			oldSubtaskVo.setTargetTime(oldProcessTaskStepSubtask.getTargetTime());
 			oldSubtaskVo.setContentHash(oldProcessTaskStepSubtask.getContentHash());
-			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), JSON.toJSONString(oldSubtaskVo));
+			ProcessTaskContentVo oldSubtaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldSubtaskVo));
+			processTaskMapper.replaceProcessTaskContent(oldSubtaskContentVo);
+			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), oldSubtaskContentVo.getHash());
 			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.EDITSUBTASK);
 		}else {
@@ -558,12 +559,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		JSONObject data = null;
 		JSONObject audit = new JSONObject();
 		JSONObject auditResult = new JSONObject();
+
 		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler()));
 		if(auditDataVo != null) {
 			data = auditDataVo.getData();
 		}else {
 			data = new JSONObject(); 
-			auditDataVo = new ProcessTaskStepDataVo();
+			auditDataVo = new ProcessTaskStepDataVo(true);
 			auditDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 			auditDataVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 			auditDataVo.setType(ProcessStepHandler.AUTOMATIC.getHandler());
