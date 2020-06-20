@@ -22,10 +22,11 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -50,6 +51,9 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+	
+	@Autowired
+	private ProcessTaskStepDataMapper processTaskStepDataMapper;
 	
 	@Autowired
 	private FileMapper fileMapper;
@@ -106,15 +110,22 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMMENT);
 		
 		//删除暂存活动
-		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
-		auditVo.setProcessTaskId(processTaskId);
-		auditVo.setProcessTaskStepId(processTaskStepId);
-		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
-		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
-		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
-		}
+//		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
+//		auditVo.setProcessTaskId(processTaskId);
+//		auditVo.setProcessTaskStepId(processTaskStepId);
+//		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+//		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
+//		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
+//		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+//			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
+//		}
+
+		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+		processTaskStepDataVo.setProcessTaskId(processTaskId);
+		processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
+		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+		processTaskStepDataVo.setType("stepDraftSave");
+		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 		//组件联动导致隐藏的属性uuid列表
 		processTaskMapper.deleteProcessTaskStepDynamicHideFormAttributeByProcessTaskStepId(processTaskStepId);
 		List<String> hidecomponentList = JSON.parseArray(jsonObj.getString("hidecomponentList"), String.class);
@@ -153,6 +164,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			}
 			oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
 			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldProcessTaskFormAttributeDataList));
+			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), processTaskContentVo.getHash());
 		}
 		//写入当前步骤的表单属性值

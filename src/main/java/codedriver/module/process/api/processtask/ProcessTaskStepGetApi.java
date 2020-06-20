@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -19,7 +21,6 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessStepType;
-import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
@@ -29,6 +30,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
@@ -41,10 +43,9 @@ import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -85,6 +86,9 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 
     @Autowired
     private ProcessStepHandlerMapper stepHandlerMapper;
+	
+	@Autowired
+	private ProcessTaskStepDataMapper processTaskStepDataMapper;
 	
 	@Autowired
 	private FileMapper fileMapper;
@@ -254,32 +258,68 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				}
 				
 				//回复框内容和附件暂存回显
-				ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-				processTaskStepAuditVo.setProcessTaskId(processTaskId);
-				processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-				processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-				processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid(true));
-				List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-				if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-					ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
-					for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
-						if(ProcessTaskAuditDetailType.FORM.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-							if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
-								ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
-								if(processTaskContentVo != null) {
-									List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(processTaskContentVo.getContent(), ProcessTaskFormAttributeDataVo.class);
-									if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-										Map<String, Object> formAttributeDataMap = new HashMap<>();
-										for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-											formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-										}
-										processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
-									}
+//				ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
+//				processTaskStepAuditVo.setProcessTaskId(processTaskId);
+//				processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
+//				processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+//				processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid(true));
+//				List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
+//				if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+//					ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
+//					for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
+//						if(ProcessTaskAuditDetailType.FORM.getValue().equals(processTaskStepAuditDetailVo.getType())) {
+//							if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
+//								ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
+//								if(processTaskContentVo != null) {
+//									List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(processTaskContentVo.getContent(), ProcessTaskFormAttributeDataVo.class);
+//									if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+//										Map<String, Object> formAttributeDataMap = new HashMap<>();
+//										for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+//											formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+//										}
+//										processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
+//									}
+//								}
+//							}
+//						}
+//					}
+//					processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
+//				}
+				
+				ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+				processTaskStepDataVo.setProcessTaskId(processTaskId);
+				processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
+				processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+				processTaskStepDataVo.setType("stepDraftSave");
+				ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+				if(stepDraftSaveData != null) {
+					JSONObject dataObj = stepDraftSaveData.getData();
+					if(MapUtils.isNotEmpty(dataObj)) {
+						JSONArray formAttributeDataList = dataObj.getJSONArray("formAttributeDataList");
+						if(CollectionUtils.isNotEmpty(formAttributeDataList)) {
+							Map<String, Object> formAttributeDataMap = new HashMap<>();
+							for(int i = 0; i < formAttributeDataList.size(); i++) {
+								JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+								formAttributeDataMap.put(formAttributeDataObj.getString("attributeUuid"), formAttributeDataObj.get("dataList"));
+							}
+							processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
+						}
+						ProcessTaskStepCommentVo commentVo = new ProcessTaskStepCommentVo();
+						String content = dataObj.getString("content");
+						commentVo.setContent(content);
+						List<String> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), String.class);
+						if(CollectionUtils.isNotEmpty(fileUuidList)) {
+							List<FileVo> fileList = new ArrayList<>();
+							for(String fileUuid : fileUuidList) {
+								FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+								if(fileVo != null) {
+									fileList.add(fileVo);
 								}
 							}
+							commentVo.setFileList(fileList);
 						}
+						processTaskStepVo.setComment(commentVo);
 					}
-					processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
 				}
 				
 				//步骤评论列表

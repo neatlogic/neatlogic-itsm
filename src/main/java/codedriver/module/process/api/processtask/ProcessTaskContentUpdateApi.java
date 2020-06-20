@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
@@ -38,6 +40,9 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private FileMapper fileMapper;
 	
 	@Override
 	public String getToken() {
@@ -100,7 +105,6 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
 		}
 		//获取上传附件uuid
-		String newFileUuidListStr = jsonObj.getString("fileUuidList");
 		String oldFileUuidListStr = null;
 		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 		processTaskFileVo.setProcessTaskId(processTaskId);
@@ -117,13 +121,19 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 			processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
 		}
 		/** 保存新附件uuid **/
-		if (StringUtils.isNotBlank(newFileUuidListStr)) {
-			List<String> fileUuidList = JSON.parseArray(newFileUuidListStr, String.class);
+		String newFileUuidListStr = null;
+		List<String> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), String.class);
+		if(CollectionUtils.isNotEmpty(fileUuidList)) {
+			newFileUuidListStr = JSON.toJSONString(fileUuidList);
 			for (String fileUuid : fileUuidList) {
-				processTaskFileVo.setFileUuid(fileUuid);
-				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
+				if(fileMapper.getFileByUuid(fileUuid) != null) {
+					processTaskFileVo.setFileUuid(fileUuid);
+					processTaskMapper.insertProcessTaskFile(processTaskFileVo);
+				}
 			}
 		}
+		
+
 		
 		String newContentHash = null;
 		String content = jsonObj.getString("content");

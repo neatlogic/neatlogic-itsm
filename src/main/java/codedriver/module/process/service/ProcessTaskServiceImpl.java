@@ -39,6 +39,7 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.constvalue.FormAttributeAction;
 import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
+import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
@@ -557,12 +558,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		JSONObject data = null;
 		JSONObject audit = new JSONObject();
 		JSONObject auditResult = new JSONObject();
-		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId()));
+		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler()));
 		if(auditDataVo != null) {
 			data = auditDataVo.getData();
 		}else {
 			data = new JSONObject(); 
-			auditDataVo = new ProcessTaskStepDataVo();
+			auditDataVo = new ProcessTaskStepDataVo(true);
 			auditDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 			auditDataVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 			auditDataVo.setType("PROCESSTASK-AUTOMATIC");

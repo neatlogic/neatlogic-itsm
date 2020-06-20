@@ -73,9 +73,6 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 		}
 		List<ProcessTaskStepAuditVo> resutlList = new ArrayList<>();
 		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-			if(ProcessTaskStepAction.SAVE.getValue().equals(processTaskStepAudit.getAction())) {
-				continue;
-			}
 			if(processTaskStepAudit.getProcessTaskStepId() != null) {
 				//判断当前用户是否有权限查看该节点信息
 				List<String> verifyActionList = new ArrayList<>();
