@@ -1,11 +1,8 @@
 package codedriver.module.process.schedule.plugin;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +11,16 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
-import codedriver.framework.process.exception.worktime.WorktimeConfigIllegalException;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
+import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Component
@@ -51,21 +49,8 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
 		JobObject.Builder newJobObjectBuilder = null;
 		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
-		SimpleDateFormat  df = new SimpleDateFormat("H:mm");
-		Date startTime = null;
-		Date endTime = null;
-		try {
-			String startTimeStr = timeWindowConfig.getString("startTime");
-			if(StringUtils.isNotBlank(startTimeStr)) {
-				startTime =df.parse(startTimeStr);
-			}
-			String endTimeStr = timeWindowConfig.getString("endTime");
-			if(StringUtils.isNotBlank(endTimeStr)) {
-				endTime =df.parse(endTimeStr);
-			}
-		}catch(ParseException e) {
-			throw new WorktimeConfigIllegalException("startTime/endTime");
-		}
+		Date startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"));
+		Date endTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("endTime"));
 		String groupName = automaticConfigVo.getIsRequest()?"-REQUEST":"-CALLBACK";
 		newJobObjectBuilder = new JobObject.Builder(jobObject.getJobName(), this.getGroupName()+groupName, this.getClassName(), TenantContext.get().getTenantUuid())
 				.withBeginTime(startTime)
@@ -79,7 +64,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			newJobObjectBuilder.withIntervalInSeconds(automaticConfigVo.getCallbackInterval());
 		}
 		JobObject newJobObject = newJobObjectBuilder.build();
-		schedulerManager.loadJob(newJobObject);
+		System.out.println(schedulerManager.loadJob(newJobObject));
 	}
 
 	@Override
@@ -114,7 +99,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			JobObject.Builder jobObjectBuilder = new JobObject.Builder(dataVo.getProcessTaskId()+"-"+dataVo.getProcessTaskStepId(),
 					this.getGroupName(),
 					this.getClassName(), 
-					TenantContext.get().getTenantUuid())
+					tenantUuid)
 					.addData("automaticConfigVo", automaticConfigVo)
 					.addData("currentProcessTaskStepVo", processTaskStepVo);
 			JobObject jobObject = jobObjectBuilder.build();
@@ -125,6 +110,8 @@ public class ProcessTaskAutomaticJob extends JobBase {
 
 	@Override
 	public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
+		//String tenantUuid = jobObject.getTenantUuid();
+		UserContext.init(null);//避免后续获取用户异常
 		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
 		ProcessTaskStepVo currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
 		Boolean isUnloadJob = processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);

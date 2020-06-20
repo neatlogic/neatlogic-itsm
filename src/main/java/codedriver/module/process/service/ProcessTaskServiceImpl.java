@@ -85,6 +85,7 @@ import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import codedriver.framework.util.FreemarkerUtil;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 
 @Service
@@ -558,7 +559,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		JSONObject data = null;
 		JSONObject audit = new JSONObject();
 		JSONObject auditResult = new JSONObject();
-		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler()));
+
+		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler()));
 		if(auditDataVo != null) {
 			data = auditDataVo.getData();
 		}else {
@@ -566,34 +568,28 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			auditDataVo = new ProcessTaskStepDataVo(true);
 			auditDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 			auditDataVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-			auditDataVo.setType("PROCESSTASK-AUTOMATIC");
+			auditDataVo.setType(ProcessStepHandler.AUTOMATIC.getHandler());
 		}
 		String integrationUuid = automaticConfigVo.getBaseIntegrationUuid();
 		JSONObject successConfig = automaticConfigVo.getBaseSuccessConfig();
+		String template = automaticConfigVo.getBaseResultTemplate();
 		Boolean isUnloadJob = false;
 		JSONObject failConfig = null;
-		if(!automaticConfigVo.getIsRequest()) {
-			integrationUuid =automaticConfigVo.getCallbackIntegrationUuid();
-			successConfig = automaticConfigVo.getCallbackSuccessConfig();
-			failConfig = automaticConfigVo.getCallbackFailConfig();
-			if(data.containsKey("callbackAudit")) {
-				audit = data.getJSONObject("callbackAudit");
-			}else {
-				data.put("callbackAudit", audit);
-			}
-			audit.put("type", automaticConfigVo.getCallbackType());
-			audit.put("interval", automaticConfigVo.getCallbackInterval());
-			auditResult.put("template", automaticConfigVo.getCallbackResultTemplate());
-		}else {
+		if(automaticConfigVo.getIsRequest()) {
 			if(data.containsKey("requestAudit")) {
 				audit = data.getJSONObject("requestAudit");
 			}else {
 				data.put("requestAudit", audit);
 			}
-			auditResult.put("template", automaticConfigVo.getBaseResultTemplate());
+			audit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
+		}else {
+			audit = data.getJSONObject("callbackAudit");
+			template = automaticConfigVo.getCallbackResultTemplate();
+			integrationUuid =automaticConfigVo.getCallbackIntegrationUuid();
+			successConfig = automaticConfigVo.getCallbackSuccessConfig();
+			failConfig = automaticConfigVo.getCallbackFailConfig();
 		}
 		audit.put("startTime", System.currentTimeMillis());
-		audit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
 		audit.put("result", auditResult);
 		IProcessStepHandler processHandler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		try {
@@ -608,6 +604,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
 			audit.put("endTime", System.currentTimeMillis());
 			auditResult.put("json", resultVo.getRawResult());
+			auditResult.put("template", FreemarkerUtil.transform(resultVo.getRawResult(), template));
 			if(StringUtils.isNotBlank(resultVo.getError())) {
 				logger.error(resultVo.getError());
 	    		throw new MatrixExternalException("外部接口访问异常");
@@ -624,6 +621,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 						if(CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
 							automaticConfigVo.setIsRequest(false);
 							automaticConfigVo.setResultJson(JSONObject.parseObject(resultVo.getRawResult()));
+							IntegrationVo callbackIntegrationVo = integrationMapper.getIntegrationByUuid(automaticConfigVo.getCallbackIntegrationUuid());
+							JSONObject callbackAudit = new JSONObject();
+							data.put("callbackAudit", callbackAudit);
+							callbackAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
+							callbackAudit.put("type", automaticConfigVo.getCallbackType());
+							callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
+							callbackAudit.put("integrationUuid", automaticConfigVo.getCallbackIntegrationUuid());
+							callbackAudit.put("integrationName", callbackIntegrationVo.getName());
+							template = automaticConfigVo.getCallbackResultTemplate();
 							initJob(automaticConfigVo,currentProcessTaskStepVo);
 						}
 					}
@@ -653,12 +659,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					//continue
 				}
 	    	}
-			auditDataVo.setData(data.toJSONString());
-			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
+			
 		}catch(Exception ex) {
 			logger.error(ex.getMessage(),ex);
 			processHandler.hang(currentProcessTaskStepVo);
 			isUnloadJob = true;
+		}finally {
+			auditDataVo.setData(data.toJSONString());
+			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}
 		return isUnloadJob;
 	}
@@ -686,7 +694,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 */
 	private Boolean predicate(JSONObject config,IntegrationResultVo resultVo) {
 		Boolean result = true;
-		if(config.isEmpty()) {
+		if(config==null||config.isEmpty()) {
 			if(resultVo.getStatusCode() != 200) {
 				result = false;
 			}
@@ -718,10 +726,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 * @return
 	 */
 	private JSONObject getIntegrationParam(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
-		ProcessTaskStepVo stepVo = getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
-		ProcessTaskVo processTaskVo = getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskVo.setCurrentProcessTaskStep(stepVo);
-		JSONObject processTaskJson = getProcessFieldData(processTaskVo);
+		//ProcessTaskStepVo stepVo = getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
+		//ProcessTaskVo processTaskVo = getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
+		//processTaskVo.setCurrentProcessTaskStep(stepVo);
+		JSONObject processTaskJson = new JSONObject();//getProcessFieldData(processTaskVo);
 		JSONObject resultJson = automaticConfigVo.getResultJson();
 		JSONArray paramList =  automaticConfigVo.getBaseParamList();
 		JSONObject integrationParam = new JSONObject();
