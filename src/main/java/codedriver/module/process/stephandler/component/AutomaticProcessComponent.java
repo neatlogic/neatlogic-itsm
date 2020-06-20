@@ -28,6 +28,7 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.constvalue.automatic.CallbackType;
 import codedriver.framework.process.constvalue.automatic.FailPolicy;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
@@ -127,6 +128,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		callbackAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
 		callbackAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
 		callbackAudit.put("type", automaticConfigVo.getCallbackType());
+		callbackAudit.put("typeName", CallbackType.getText(automaticConfigVo.getCallbackType()));
 		callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
 		ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
 		auditDataVo.setData(data.toJSONString());

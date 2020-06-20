@@ -62,7 +62,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			newJobObjectBuilder.withIntervalInSeconds(5)
 			                   .withRepeatCount(0);
 		}else {
-			newJobObjectBuilder.withIntervalInSeconds(automaticConfigVo.getCallbackInterval());
+			newJobObjectBuilder.withIntervalInSeconds(automaticConfigVo.getCallbackInterval()*60);
 		}
 		JobObject newJobObject = newJobObjectBuilder.build();
 		System.out.println(schedulerManager.loadJob(newJobObject));

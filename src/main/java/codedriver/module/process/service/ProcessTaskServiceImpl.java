@@ -566,7 +566,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		JSONObject audit = data.getJSONObject("requestAudit");
 		if(!automaticConfigVo.getIsRequest()) {
 			audit = data.getJSONObject("callbackAudit");
-		}else {
 			template = automaticConfigVo.getCallbackResultTemplate();
 			integrationUuid =automaticConfigVo.getCallbackIntegrationUuid();
 			successConfig = automaticConfigVo.getCallbackSuccessConfig();
