@@ -427,7 +427,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 								&&callbackAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
 							callbackAuditJson.put("isRetry", 1);
 						}else {
-							callbackAuditJson.put("isRetry", 0);
+							stepDataJson.put("callbackAudit", new JSONObject());
 						}
 					}
 				}
