@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
@@ -69,7 +70,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 
 	@Override
 	public void initJob(String tenantUuid) {
-		List<ProcessTaskStepDataVo> dataList = processTaskStepDataMapper.searchProcessTaskStepData(new ProcessTaskStepDataVo());
+		List<ProcessTaskStepDataVo> dataList = processTaskStepDataMapper.searchProcessTaskStepData(new ProcessTaskStepDataVo(null,null,ProcessStepHandler.AUTOMATIC.getHandler()));
 		AutomaticConfigVo automaticConfigVo = null;
 		Boolean isLoadJob = false;
 		for(ProcessTaskStepDataVo dataVo : dataList) {
