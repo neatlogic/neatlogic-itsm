@@ -109,17 +109,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		}
 		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMMENT);
 		
-		//删除暂存活动
-//		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
-//		auditVo.setProcessTaskId(processTaskId);
-//		auditVo.setProcessTaskStepId(processTaskStepId);
-//		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-//		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
-//		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
-//		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-//			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
-//		}
-
+		//删除暂存
 		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 		processTaskStepDataVo.setProcessTaskId(processTaskId);
 		processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
@@ -127,22 +117,12 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		processTaskStepDataVo.setType("stepDraftSave");
 		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 		//组件联动导致隐藏的属性uuid列表
-//		processTaskMapper.deleteProcessTaskStepDynamicHideFormAttributeByProcessTaskStepId(processTaskStepId);
+
 		List<String> hidecomponentList = JSON.parseArray(jsonObj.getString("hidecomponentList"), String.class);
 		if(hidecomponentList == null) {
 			hidecomponentList = new ArrayList<>();
 		}
-//		if(CollectionUtils.isNotEmpty(hidecomponentList)) {
-//			for(String attributeUuid : hidecomponentList) {
-//				ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo = new ProcessTaskStepFormAttributeVo();
-//				processTaskStepFormAttributeVo.setProcessTaskId(processTaskId);
-//				processTaskStepFormAttributeVo.setProcessTaskStepId(processTaskStepId);
-//				processTaskStepFormAttributeVo.setAttributeUuid(attributeUuid);
-//				processTaskMapper.insertProcessTaskStepDynamicHideFormAttribute(processTaskStepFormAttributeVo);
-//			}				
-//		}else {
-//			hidecomponentList = new ArrayList<>();
-//		}
+
 		//表单属性显示控制
 		Map<String, String> formAttributeActionMap = new HashMap<>();
 		List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
