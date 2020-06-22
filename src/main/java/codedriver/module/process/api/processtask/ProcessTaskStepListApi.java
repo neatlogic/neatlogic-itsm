@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
@@ -23,9 +24,11 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -52,6 +55,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 
     @Autowired
     private ProcessStepHandlerMapper stepHandlerMapper;
+    
+    @Autowired
+	ProcessTaskStepDataMapper processTaskStepDataMapper;
 	
 	@Override
 	public String getToken() {
@@ -261,6 +267,13 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 				processStepHandlerConfig = handlerConfigMap.get(processTaskStepVo.getHandler());
 				if(processStepHandlerConfig != null) {
 					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+				}
+				//processtaskStepData
+				ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));
+				if(stepDataVo != null) {
+					JSONObject stepDataJson = stepDataVo.getData();
+					stepDataJson.put("isStepUser", processTaskMapper.checkIsProcessTaskStepUser(processTaskId, processTaskStepVo.getId(), UserContext.get().getUserUuid())>0?1:0);
+					processTaskStepVo.setProcessTaskStepData(stepDataJson);
 				}
 			}
 		}

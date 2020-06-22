@@ -70,7 +70,7 @@ public class ProcessTaskCommentDeleteApi extends ApiComponentBase {
 			processTaskMapper.deleteProcessTaskStepCommentById(id);
 			
 			processTaskService.parseProcessTaskStepComment(oldCommentVo);
-			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), oldCommentVo.getContentHash());
+			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), oldCommentVo.getContent());
 			jsonObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(oldCommentVo.getFileUuidList()));
 			
 			//生成活动

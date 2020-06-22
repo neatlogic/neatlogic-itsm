@@ -22,10 +22,11 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -52,6 +53,9 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 	private ProcessTaskService processTaskService;
 	
 	@Autowired
+	private ProcessTaskStepDataMapper processTaskStepDataMapper;
+	
+	@Autowired
 	private FileMapper fileMapper;
 	
 	@Override
@@ -73,6 +77,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
 		@Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "表单属性数据列表"),
+		@Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "联动隐藏表单属性列表"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
 		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
 	})
@@ -105,14 +110,35 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMMENT);
 		
 		//删除暂存活动
-		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
-		auditVo.setProcessTaskId(processTaskId);
-		auditVo.setProcessTaskStepId(processTaskStepId);
-		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
-		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
-		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
+//		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
+//		auditVo.setProcessTaskId(processTaskId);
+//		auditVo.setProcessTaskStepId(processTaskStepId);
+//		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+//		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
+//		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
+//		for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+//			processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
+//		}
+
+		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+		processTaskStepDataVo.setProcessTaskId(processTaskId);
+		processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
+		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+		processTaskStepDataVo.setType("stepDraftSave");
+		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+		//组件联动导致隐藏的属性uuid列表
+		processTaskMapper.deleteProcessTaskStepDynamicHideFormAttributeByProcessTaskStepId(processTaskStepId);
+		List<String> hidecomponentList = JSON.parseArray(jsonObj.getString("hidecomponentList"), String.class);
+		if(CollectionUtils.isNotEmpty(hidecomponentList)) {
+			for(String attributeUuid : hidecomponentList) {
+				ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo = new ProcessTaskStepFormAttributeVo();
+				processTaskStepFormAttributeVo.setProcessTaskId(processTaskId);
+				processTaskStepFormAttributeVo.setProcessTaskStepId(processTaskStepId);
+				processTaskStepFormAttributeVo.setAttributeUuid(attributeUuid);
+				processTaskMapper.insertProcessTaskStepDynamicHideFormAttribute(processTaskStepFormAttributeVo);
+			}				
+		}else {
+			hidecomponentList = new ArrayList<>();
 		}
 		//表单属性显示控制
 		Map<String, String> formAttributeActionMap = new HashMap<>();
@@ -129,12 +155,17 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			while(iterator.hasNext()) {
 				ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo = iterator.next();
 				String attributeUuid = processTaskFormAttributeDataVo.getAttributeUuid();
-				if(formAttributeActionMap.get(attributeUuid) != null) {//只读或隐藏
+				if(formAttributeActionMap.containsKey(attributeUuid)) {//只读或隐藏
+					iterator.remove();
+				}
+				if(hidecomponentList.contains(attributeUuid)) {
 					iterator.remove();
 				}
 			}
 			oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
-			jsonObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
+			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldProcessTaskFormAttributeDataList));
+			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+			jsonObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), processTaskContentVo.getHash());
 		}
 		//写入当前步骤的表单属性值
 		JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
@@ -143,7 +174,10 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			for(int i = 0; i < formAttributeDataList.size(); i++) {
 				JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
 				String attributeUuid = formAttributeDataObj.getString("attributeUuid");
-				if(formAttributeActionMap.get(attributeUuid) != null) {//对于只读或隐藏的属性，当前用户不能修改，不更新数据库中的值，不进行修改前后对比
+				if(formAttributeActionMap.containsKey(attributeUuid)) {//对于只读或隐藏的属性，当前用户不能修改，不更新数据库中的值，不进行修改前后对比
+					continue;
+				}
+				if(hidecomponentList.contains(attributeUuid)) {
 					continue;
 				}
 				ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
@@ -167,8 +201,8 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
-			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
+//			processTaskMapper.replaceProcessTaskContent(contentVo);
+//			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 			processTaskStepCommentVo.setContentHash(contentVo.getHash());
 		}
 		

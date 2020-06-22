@@ -246,6 +246,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				throw new ProcessTaskRuntimeException("流程：'" + channel.getProcessUuid() + "'有" + processStepList.size() + "个开始步骤");
 			}
 			ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(processStepList.get(0));
+			startProcessTaskStepVo.setIsAutoGenerateId(false);
 			
 			//获取可分配处理人的步骤列表	
 			List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = processMapper.getProcessStepWorkerPolicyListByProcessUuid(channel.getProcessUuid());
