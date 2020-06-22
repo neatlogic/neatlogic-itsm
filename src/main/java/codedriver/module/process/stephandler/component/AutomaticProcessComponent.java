@@ -21,7 +21,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dto.UserVo;
@@ -29,8 +28,6 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
-import codedriver.framework.process.constvalue.automatic.CallbackType;
-import codedriver.framework.process.constvalue.automatic.FailPolicy;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -109,33 +106,10 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
 		}
 		//初始化audit
-		initProcessTaskStepData(currentProcessTaskStepVo,automaticConfig);
+		AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
+		processTaskService.initProcessTaskStepData(currentProcessTaskStepVo,automaticConfigVo,null,"request");
 		requestFirst(currentProcessTaskStepVo,automaticConfig);
 		return 0;
-	}
-	
-	private void initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo,JSONObject automaticConfig) {
-		AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
-		JSONObject data = new JSONObject();
-		JSONObject requestAudit = new JSONObject();
-		JSONObject callbackAudit = new JSONObject();
-		data.put("requestAudit", requestAudit);
-		data.put("callbackAudit", callbackAudit);
-		requestAudit.put("integrationUuid", automaticConfigVo.getBaseIntegrationUuid());
-		requestAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
-		requestAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
-		
-		callbackAudit.put("integrationUuid", automaticConfigVo.getCallbackIntegrationUuid());
-		callbackAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
-		callbackAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
-		callbackAudit.put("type", automaticConfigVo.getCallbackType());
-		callbackAudit.put("typeName", CallbackType.getText(automaticConfigVo.getCallbackType()));
-		callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
-		ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
-		auditDataVo.setData(data.toJSONString());
-		auditDataVo.setFcu(UserContext.get().getUserUuid());
-		processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
-		
 	}
 	
 	

@@ -3,6 +3,8 @@ package codedriver.module.process.service;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
@@ -94,4 +96,7 @@ public interface ProcessTaskService {
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId);
 
 	public ProcessTaskVo getProcessTaskDetailInfoById(Long processTaskId);
+
+	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo, AutomaticConfigVo automaticConfig,
+			JSONObject data, String type);
 }
