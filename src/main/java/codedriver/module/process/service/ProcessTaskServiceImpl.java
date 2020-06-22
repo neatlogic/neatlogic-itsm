@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -650,6 +651,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	
 	@Override
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo,AutomaticConfigVo automaticConfigVo,JSONObject data,String type) {
+		JSONObject failConfig = new JSONObject();
+		JSONObject successConfig = new JSONObject();
+		failConfig.put("default", "默认按状态码判断，4xx和5xx表示失败");
+		successConfig.put("default", "默认按状态码判断，2xx和3xx表示成功");
 		//init request
 		if(type.equals("request")) {
 			data = new JSONObject();
@@ -659,7 +664,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			requestAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
 			requestAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
 			requestAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
-			requestAudit.put("successConfig", automaticConfigVo.getBaseSuccessConfig());
+			if(automaticConfigVo.getBaseSuccessConfig() != null) {
+				requestAudit.put("successConfig",successConfig);
+			}
 			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
 			auditDataVo.setData(data.toJSONString());
 			auditDataVo.setFcu(UserContext.get().getUserUuid());
@@ -674,7 +681,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
 			callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
 			callbackAudit.put("successConfig", automaticConfigVo.getCallbackSuccessConfig());
-			callbackAudit.put("failConfig", automaticConfigVo.getCallbackFailConfig());
+			if(automaticConfigVo.getCallbackSuccessConfig() != null) {
+				callbackAudit.put("failConfig",failConfig);
+			}
+			if(automaticConfigVo.getCallbackFailConfig() != null) {
+				callbackAudit.put("successConfig",successConfig);
+			}
 			data.put("callbackAudit", callbackAudit);
 		}
 		return data;
@@ -703,8 +715,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 */
 	private Boolean predicate(JSONObject config,IntegrationResultVo resultVo) {
 		Boolean result = false;
-		if(config==null||config.isEmpty()) {
-			if(resultVo.getStatusCode() == 200) {
+		if(config==null||config.isEmpty()||!config.containsKey("expression")) {
+			Pattern pattern = Pattern.compile("(2|3).*");
+			if(pattern.matcher(String.valueOf(resultVo.getStatusCode())).matches()) {
 				result = true;
 			}
 		}else {
@@ -1020,5 +1033,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			}
 		}
 		return processTaskVo;
+	}
+	
+	public static void main(String[] args) {
+		Pattern pattern = Pattern.compile("(5|4).*");
+		System.out.println( pattern.matcher("300").matches());
 	}
 }
