@@ -1,12 +1,11 @@
 package codedriver.module.process.service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -22,7 +21,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -36,8 +34,8 @@ import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
+import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.FormAttributeAction;
-import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
@@ -62,7 +60,6 @@ import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -86,6 +83,7 @@ import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 
@@ -565,6 +563,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		String template = automaticConfigVo.getBaseResultTemplate();
 		JSONObject failConfig = null;
 		JSONObject audit = data.getJSONObject("requestAudit");
+		String resultJson = null;
 		if(!automaticConfigVo.getIsRequest()) {
 			audit = data.getJSONObject("callbackAudit");
 			template = automaticConfigVo.getCallbackResultTemplate();
@@ -585,13 +584,17 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			}
 	    	integrationVo.getParamObj().putAll(getIntegrationParam(automaticConfigVo,currentProcessTaskStepVo));
 			IntegrationResultVo resultVo = handler.sendRequest(integrationVo,ProcessRequestFrom.PROCESS);
+			resultJson = resultVo.getTransformedResult();
+			if(StringUtils.isBlank(resultVo.getTransformedResult())) {
+				resultJson = resultVo.getRawResult();
+			}
 			audit.put("endTime", System.currentTimeMillis());
-			auditResult.put("json", resultVo.getRawResult());
+			auditResult.put("json", resultJson);
 			auditResult.put("template", FreemarkerUtil.transform(JSONObject.parse(resultVo.getTransformedResult()), template));
 			if(StringUtils.isNotBlank(resultVo.getError())) {
 				logger.error(resultVo.getError());
 	    		throw new MatrixExternalException("外部接口访问异常");
-	    	}else if(StringUtils.isNotBlank(resultVo.getRawResult())) {
+	    	}else if(StringUtils.isNotBlank(resultJson)) {
 				if(predicate(successConfig,resultVo)) {//如果执行成功
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
 					if(automaticConfigVo.getIsRequest()&&!automaticConfigVo.getIsHasCallback()||!automaticConfigVo.getIsRequest()) {//第一次请求
@@ -603,13 +606,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 						}
 						if(CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
 							automaticConfigVo.setIsRequest(false);
-							automaticConfigVo.setResultJson(JSONObject.parseObject(resultVo.getRawResult()));
+							automaticConfigVo.setResultJson(JSONObject.parseObject(resultJson));
 							data = initProcessTaskStepData(currentProcessTaskStepVo,automaticConfigVo,data,"callback");
 							initJob(automaticConfigVo,currentProcessTaskStepVo);
 						}
 					}
 					isUnloadJob = true;
-				}else if(automaticConfigVo.getIsRequest()||(!automaticConfigVo.getIsRequest()&&!predicate(failConfig,resultVo))){//失败
+				}else if(automaticConfigVo.getIsRequest()||(!automaticConfigVo.getIsRequest()&&predicate(failConfig,resultVo))){//失败
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
 					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
@@ -648,6 +651,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	
 	@Override
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo,AutomaticConfigVo automaticConfigVo,JSONObject data,String type) {
+		JSONObject failConfig = new JSONObject();
+		JSONObject successConfig = new JSONObject();
+		failConfig.put("default", "默认按状态码判断，4xx和5xx表示失败");
+		successConfig.put("default", "默认按状态码判断，2xx和3xx表示成功");
 		//init request
 		if(type.equals("request")) {
 			data = new JSONObject();
@@ -657,6 +664,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			requestAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
 			requestAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
 			requestAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
+			if(automaticConfigVo.getBaseSuccessConfig() != null) {
+				requestAudit.put("successConfig",successConfig);
+			}
 			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
 			auditDataVo.setData(data.toJSONString());
 			auditDataVo.setFcu(UserContext.get().getUserUuid());
@@ -670,6 +680,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			callbackAudit.put("typeName", CallbackType.getText(automaticConfigVo.getCallbackType()));
 			callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
 			callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
+			callbackAudit.put("successConfig", automaticConfigVo.getCallbackSuccessConfig());
+			if(automaticConfigVo.getCallbackSuccessConfig() != null) {
+				callbackAudit.put("failConfig",failConfig);
+			}
+			if(automaticConfigVo.getCallbackFailConfig() != null) {
+				callbackAudit.put("successConfig",successConfig);
+			}
 			data.put("callbackAudit", callbackAudit);
 		}
 		return data;
@@ -697,28 +714,41 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 * @return: boolean
 	 */
 	private Boolean predicate(JSONObject config,IntegrationResultVo resultVo) {
-		Boolean result = true;
-		if(config==null||config.isEmpty()) {
-			if(resultVo.getStatusCode() != 200) {
-				result = false;
+		Boolean result = false;
+		if(config==null||config.isEmpty()||!config.containsKey("expression")) {
+			Pattern pattern = Pattern.compile("(2|3).*");
+			if(pattern.matcher(String.valueOf(resultVo.getStatusCode())).matches()) {
+				result = true;
 			}
 		}else {
-			JSONObject resultJson = JSONObject.parseObject(resultVo.getRawResult());
-			Expression exp = Expression.getProcessExpression(config.getString("expression"));
 			String name = config.getString("name");
-			String value = config.getString("value");
-			if(exp == Expression.EQUAL) {
-				return resultJson.getString(name).equals(value);
-			}else if(exp == Expression.UNEQUAL) {
-				return !resultJson.getString(name).equals(value);
-			}else if(exp == Expression.INCLUDE) {
-				return resultJson.getString(name).indexOf(value)>-1;
-			}else if(exp == Expression.EXCLUDE) {
-				return !(resultJson.getString(name).indexOf(value)>-1);
-			}else if(exp == Expression.GREATERTHAN) {
-				return Double.parseDouble(resultJson.getString(name)) >= Double.parseDouble(value);
-			}else if(exp == Expression.LESSTHAN) {
-				return Double.parseDouble(resultJson.getString(name)) <= Double.parseDouble(value);
+			if(StringUtils.isNotBlank(name)) {
+				String resultValue = null;
+				String transformedResult = resultVo.getTransformedResult();
+				if(StringUtils.isNotBlank(transformedResult)) {
+					JSONObject transformedResultObj = JSON.parseObject(transformedResult);
+					if(MapUtils.isNotEmpty(transformedResultObj)) {
+						resultValue = transformedResultObj.getString(name);
+					}
+				}
+				if(resultValue == null) {
+					String rawResult = resultVo.getRawResult();
+					if(StringUtils.isNotEmpty(rawResult)) {
+						JSONObject rawResultObj = JSON.parseObject(rawResult);
+						if(MapUtils.isNotEmpty(rawResultObj)) {
+							resultValue = rawResultObj.getString(name);
+						}
+					}
+				}
+				if(resultValue != null) {
+					List<String> curentValueList = new ArrayList<>();
+					curentValueList.add(resultValue);
+					String value = config.getString("value");
+					List<String> targetValueList = new ArrayList<>();
+					targetValueList.add(value);
+					String expression = config.getString("expression");
+					result = ConditionUtil.predicate(curentValueList, expression, targetValueList);
+				}
 			}
 		}
 		return result;
@@ -730,10 +760,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 * @return
 	 */
 	private JSONObject getIntegrationParam(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
-		//ProcessTaskStepVo stepVo = getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
-		//ProcessTaskVo processTaskVo = getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
-		//processTaskVo.setCurrentProcessTaskStep(stepVo);
-		JSONObject processTaskJson = new JSONObject();//getProcessFieldData(processTaskVo);
+		ProcessTaskStepVo stepVo = getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
+		ProcessTaskVo processTaskVo = getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskVo.setCurrentProcessTaskStep(stepVo);
+		JSONObject processTaskJson = ProcessTaskUtil.getProcessFieldData(processTaskVo,true);
 		JSONObject resultJson = automaticConfigVo.getResultJson();
 		JSONArray paramList =  automaticConfigVo.getBaseParamList();
 		JSONObject integrationParam = new JSONObject();
@@ -757,54 +787,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		return integrationParam;
 	}
-	
-	/**
-	 * vo 转 json
-	 * @param processTaskVo
-	 * @return
-	 */
-	public JSONObject getProcessFieldData(ProcessTaskVo processTaskVo) {
-		JSONObject resultObj = new JSONObject();
-		resultObj.put(ProcessField.ID.getValue(), processTaskVo.getId());
-		resultObj.put(ProcessField.TITLE.getValue(), processTaskVo.getTitle());
-		resultObj.put(ProcessField.CHANNELTYPE.getValue(), processTaskVo.getChannelType().getName());
-
-		resultObj.put(ProcessField.OWNER.getValue(), processTaskVo.getOwnerName());
-		resultObj.put(ProcessField.REPORTER.getValue(), processTaskVo.getReporterName());
-		resultObj.put(ProcessField.PRIORITY.getValue(), processTaskVo.getPriority().getName());
-		resultObj.put(ProcessField.STATUS.getValue(), processTaskVo.getStatusVo().getText());
 		
-		ProcessTaskStepVo startProcessTaskStep = processTaskVo.getStartProcessTaskStep();
-		ProcessTaskStepCommentVo comment = startProcessTaskStep.getComment();
-		if(comment != null && StringUtils.isNotBlank(comment.getContent())) {
-			resultObj.put(ProcessField.CONTENT.getValue(), comment.getContent());
-		}else {
-			resultObj.put(ProcessField.CONTENT.getValue(), "");
-		}
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date endTime = processTaskVo.getEndTime();
-		if(endTime != null) {
-			resultObj.put(ProcessField.ENDTIME.getValue(), sdf.format(endTime));
-		}else {
-			resultObj.put(ProcessField.ENDTIME.getValue(), "");
-		}
-		Date startTime = processTaskVo.getStartTime();
-		if(startTime != null) {
-			resultObj.put(ProcessField.STARTTIME.getValue(), sdf.format(startTime));
-		}else {
-			resultObj.put(ProcessField.STARTTIME.getValue(), "");
-		}
-		Date expireTime = processTaskVo.getExpireTime();
-		if(expireTime != null) {
-			resultObj.put(ProcessField.EXPIREDTIME.getValue(), sdf.format(expireTime));
-		}else {
-			resultObj.put(ProcessField.EXPIREDTIME.getValue(), "");
-		}
-		
-//		Map<String, Object> formAttributeDataMap = processTaskVo.getFormAttributeDataMap();
-		return resultObj;
-	}
-	
 	/**
 	 * 获取工单回退步骤列表
 	 * @param processTaskStepId
@@ -853,15 +836,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
 		processTaskStepVo.setWorkerList(workerList);
 		//回复框内容和附件暂存回显
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-		processTaskStepAuditVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
-		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-		processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-		processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid(true));
-		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-			ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
-			processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
+//		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
+//		processTaskStepAuditVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
+//		processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
+//		processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
+//		processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid(true));
+//		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
+//		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+//			ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
+//			processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
 //			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
 //				if(ProcessTaskAuditDetailType.FORM.getValue().equals(processTaskStepAuditDetailVo.getType())) {
 //					List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(processTaskStepAuditDetailVo.getNewContent(), ProcessTaskFormAttributeDataVo.class);
@@ -874,7 +857,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 //					}
 //				}
 //			}
-		}
+//		}
 		
 		//步骤评论列表
 //		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
@@ -1050,5 +1033,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			}
 		}
 		return processTaskVo;
+	}
+	
+	public static void main(String[] args) {
+		Pattern pattern = Pattern.compile("(5|4).*");
+		System.out.println( pattern.matcher("300").matches());
 	}
 }
