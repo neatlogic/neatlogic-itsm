@@ -6,12 +6,12 @@ public class WORKTIME_MODIFY extends AuthBase {
 
 	@Override
 	public String getAuthDisplayName() {
-		return "工作时间窗口管理权限";
+		return "服务窗口管理权限";
 	}
 
 	@Override
 	public String getAuthIntroduction() {
-		return "对工作时间窗口添加、修改和删除";
+		return "对服务窗口添加、修改和删除";
 	}
 
 	@Override
