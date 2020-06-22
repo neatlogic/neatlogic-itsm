@@ -33,6 +33,7 @@ import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
+import codedriver.framework.process.integration.handler.ProcessRequestFrom;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -98,7 +99,7 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
     		}
     		
         	integrationVo.getParamObj().putAll(jsonObj);
-    		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+    		IntegrationResultVo resultVo = handler.sendRequest(integrationVo,ProcessRequestFrom.MATRIX);
     		if(StringUtils.isNotBlank(resultVo.getError())) {
     			logger.error(resultVo.getError());
         		throw new MatrixExternalException("外部接口访问异常");
