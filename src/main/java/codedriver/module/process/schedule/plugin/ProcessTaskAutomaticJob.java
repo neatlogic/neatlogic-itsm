@@ -73,44 +73,23 @@ public class ProcessTaskAutomaticJob extends JobBase {
 	public void initJob(String tenantUuid) {
 		List<ProcessTaskStepDataVo> dataList = processTaskStepDataMapper.searchProcessTaskStepData(new ProcessTaskStepDataVo(null,null,ProcessStepHandler.AUTOMATIC.getHandler()));
 		AutomaticConfigVo automaticConfigVo = null;
-		Boolean isLoadJob = false;
 		for(ProcessTaskStepDataVo dataVo : dataList) {
 			JSONObject dataObject = dataVo.getData();
-			ProcessTaskStepVo  processTaskStepVo = null;
 			if(dataObject != null && dataObject.containsKey("requestAudit")) {
 				JSONObject requestStatus = dataObject.getJSONObject("requestAudit").getJSONObject("status");
-				//load第一次请求job
-				if(!ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))
-						&&!ProcessTaskStatus.FAILED.getValue().equals(requestStatus.getString("value"))) {
-					processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(dataVo.getProcessTaskStepId());
-					String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-					automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
-					automaticConfigVo.setIsRequest(true);
-					isLoadJob = true;
-				}
-				//load回调job
-				if( dataObject.containsKey("callbackAudit")&&ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))){
+				
+				if(!ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))) {
+					//load第一次请求job
+					initReloadJob(automaticConfigVo,dataVo,tenantUuid,true);
+				}else if( dataObject.containsKey("callbackAudit")&&ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))){
 					JSONObject callbackStatus = dataObject.getJSONObject("callbackAudit").getJSONObject("status");
 					if(!ProcessTaskStatus.SUCCEED.getValue().equals(callbackStatus.getString("value"))
 							&&!ProcessTaskStatus.FAILED.getValue().equals(callbackStatus.getString("value"))) {
-						processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(dataVo.getProcessTaskStepId());
-						String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-						automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
-						automaticConfigVo.setIsRequest(false);
-						isLoadJob = true;
+						initReloadJob(automaticConfigVo,dataVo,tenantUuid,false);
 					}
 				}
-				if(isLoadJob) {
-					JobObject.Builder jobObjectBuilder = new JobObject.Builder(dataVo.getProcessTaskId()+"-"+dataVo.getProcessTaskStepId(),
-							this.getGroupName(),
-							this.getClassName(), 
-							tenantUuid)
-							.addData("automaticConfigVo", automaticConfigVo)
-							.addData("currentProcessTaskStepVo", processTaskStepVo);
-					JobObject jobObject = jobObjectBuilder.build();
-					this.reloadJob(jobObject);
-				}
 			}
+			
 		}
 	}
 
@@ -123,6 +102,31 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		Boolean isUnloadJob = processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
 		if(isUnloadJob) {
 			schedulerManager.unloadJob(jobObject);
+		}
+	}
+	
+	/**
+	 * reload 请求/回调job
+	 * @param automaticConfigVo
+	 * @param dataVo
+	 * @param tenantUuid
+	 * @param isRequest
+	 */
+	private void initReloadJob(AutomaticConfigVo automaticConfigVo ,ProcessTaskStepDataVo dataVo,String tenantUuid,Boolean isRequest) {
+		ProcessTaskStepVo  processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(dataVo.getProcessTaskStepId());
+		String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		JSONObject configJson = JSONObject.parseObject(config);
+		if(configJson.containsKey("automaticConfig")) {
+			automaticConfigVo = new AutomaticConfigVo(configJson.getJSONObject("automaticConfig"));
+			automaticConfigVo.setIsRequest(isRequest);
+			JobObject.Builder jobObjectBuilder = new JobObject.Builder(dataVo.getProcessTaskId()+"-"+dataVo.getProcessTaskStepId(),
+					this.getGroupName(),
+					this.getClassName(), 
+					tenantUuid)
+					.addData("automaticConfigVo", automaticConfigVo)
+					.addData("currentProcessTaskStepVo", processTaskStepVo);
+			JobObject jobObject = jobObjectBuilder.build();
+			this.reloadJob(jobObject);
 		}
 	}
 	
