@@ -168,7 +168,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 				audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
 				data.setData(dataObject.toJSONString());
 				processTaskStepDataMapper.replaceProcessTaskStepData(data);
-				processTaskService.initJob(automaticConfigVo,currentProcessTaskStepVo);
+				processTaskService.initJob(automaticConfigVo,currentProcessTaskStepVo,dataObject);
 			}
 		}
 		

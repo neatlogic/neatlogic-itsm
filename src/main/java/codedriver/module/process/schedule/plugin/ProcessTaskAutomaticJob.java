@@ -48,6 +48,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 	@Override
 	public void reloadJob(JobObject jobObject) {
 		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
+		JSONObject data = (JSONObject) jobObject.getData("data");
 		JobObject.Builder newJobObjectBuilder = null;
 		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
 		Date startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"));
@@ -66,7 +67,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			newJobObjectBuilder.withIntervalInSeconds(automaticConfigVo.getCallbackInterval()*60);
 		}
 		JobObject newJobObject = newJobObjectBuilder.build();
-		schedulerManager.loadJob(newJobObject);
+		data.put("nextFireTime", schedulerManager.loadJob(newJobObject));
 	}
 
 	@Override
