@@ -79,6 +79,7 @@ import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.integration.handler.ProcessRequestFrom;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.scheduler.core.IJob;
@@ -583,7 +584,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
 			}
 	    	integrationVo.getParamObj().putAll(getIntegrationParam(automaticConfigVo,currentProcessTaskStepVo));
-			IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+			IntegrationResultVo resultVo = handler.sendRequest(integrationVo,ProcessRequestFrom.PROCESS);
 			audit.put("endTime", System.currentTimeMillis());
 			auditResult.put("json", resultVo.getRawResult());
 			auditResult.put("template", FreemarkerUtil.transform(JSONObject.parse(resultVo.getTransformedResult()), template));
