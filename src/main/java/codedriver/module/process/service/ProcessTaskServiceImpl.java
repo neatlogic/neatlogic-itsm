@@ -604,13 +604,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 						if(CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
 							automaticConfigVo.setIsRequest(false);
 							automaticConfigVo.setResultJson(JSONObject.parseObject(resultVo.getRawResult()));
-							JSONObject callbackAudit = data.getJSONObject("callbackAudit");
-							callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
+							data = initProcessTaskStepData(currentProcessTaskStepVo,automaticConfigVo,data,"callback");
 							initJob(automaticConfigVo,currentProcessTaskStepVo);
 						}
 					}
 					isUnloadJob = true;
-				}else if(automaticConfigVo.getIsRequest()||!automaticConfigVo.getIsRequest()&&predicate(failConfig,resultVo)){//失败
+				}else if(automaticConfigVo.getIsRequest()||(!automaticConfigVo.getIsRequest()&&!predicate(failConfig,resultVo))){//失败
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
 					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
@@ -645,6 +644,35 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}
 		return isUnloadJob;
+	}
+	
+	@Override
+	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo,AutomaticConfigVo automaticConfigVo,JSONObject data,String type) {
+		//init request
+		if(type.equals("request")) {
+			data = new JSONObject();
+			JSONObject requestAudit = new JSONObject();
+			data.put("requestAudit", requestAudit);
+			requestAudit.put("integrationUuid", automaticConfigVo.getBaseIntegrationUuid());
+			requestAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
+			requestAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
+			requestAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
+			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
+			auditDataVo.setData(data.toJSONString());
+			auditDataVo.setFcu(UserContext.get().getUserUuid());
+			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
+		}else {//init callback
+			JSONObject callbackAudit = new JSONObject();
+			callbackAudit.put("integrationUuid", automaticConfigVo.getCallbackIntegrationUuid());
+			callbackAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
+			callbackAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
+			callbackAudit.put("type", automaticConfigVo.getCallbackType());
+			callbackAudit.put("typeName", CallbackType.getText(automaticConfigVo.getCallbackType()));
+			callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
+			callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
+			data.put("callbackAudit", callbackAudit);
+		}
+		return data;
 	}
 	
 	@Override
