@@ -50,6 +50,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
 		JSONObject data = (JSONObject) jobObject.getData("data");
 		JobObject.Builder newJobObjectBuilder = null;
+		JSONObject audit = null;
 		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
 		Date startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"));
 		Date endTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("endTime"));
@@ -63,11 +64,13 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		if(automaticConfigVo.getIsRequest()) {
 			newJobObjectBuilder.withIntervalInSeconds(5)
 			                   .withRepeatCount(0);
+			audit = data.getJSONObject("requestAudit");
 		}else {
 			newJobObjectBuilder.withIntervalInSeconds(automaticConfigVo.getCallbackInterval()*60);
+			audit = data.getJSONObject("callbackAudit");
 		}
-		JobObject newJobObject = newJobObjectBuilder.build();
-		data.put("nextFireTime", schedulerManager.loadJob(newJobObject));
+		Date nextFireTime = schedulerManager.loadJob(newJobObjectBuilder.build());
+		audit.put("nextFireTime",nextFireTime);
 	}
 
 	@Override
