@@ -98,14 +98,16 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 				Integer maxGroup = configChart.getInteger(DashboardShowConfig.MAXGROUP.getValue());
 				Set<String> maxGroupSet = new HashSet<String>();
 				JSONArray dataList = data.getJSONArray("dataList");
-				dataList.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("total")).reversed());
-				Iterator<Object> dataIterator = dataList.iterator();
-				while(dataIterator.hasNext()) {
-					JSONObject dataJson = (JSONObject)dataIterator.next();
-					if(maxGroupSet.size()>=maxGroup&&!maxGroupSet.contains(dataJson.getString("column"))) {
-						dataIterator.remove();
-					}else {
-						maxGroupSet.add(dataJson.getString("column"));
+				if(CollectionUtils.isNotEmpty(dataList)) {
+					dataList.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("total")).reversed());
+					Iterator<Object> dataIterator = dataList.iterator();
+					while(dataIterator.hasNext()) {
+						JSONObject dataJson = (JSONObject)dataIterator.next();
+						if(maxGroupSet.size()>=maxGroup&&!maxGroupSet.contains(dataJson.getString("column"))) {
+							dataIterator.remove();
+						}else {
+							maxGroupSet.add(dataJson.getString("column"));
+						}
 					}
 				}
 			}
