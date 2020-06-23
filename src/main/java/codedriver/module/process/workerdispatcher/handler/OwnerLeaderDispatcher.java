@@ -75,8 +75,6 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 				teamLevel = TeamLevel.DEPARTMENT;
 			}else if(TeamUserTitle.TEAMLEADER.getValue().equals(teamUserTitleFilter)) {
 				teamLevel = TeamLevel.TEAM;
-			}else if(TeamUserTitle.GENERALSTAFF.getValue().equals(teamUserTitleFilter)) {
-				teamLevel = TeamLevel.TEAM;
 			}else {
 				return resultList;
 			}
