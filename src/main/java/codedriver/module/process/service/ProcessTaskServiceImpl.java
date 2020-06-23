@@ -664,7 +664,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			requestAudit.put("failPolicy", automaticConfigVo.getBaseFailPolicy());
 			requestAudit.put("failPolicyName", FailPolicy.getText(automaticConfigVo.getBaseFailPolicy()));
 			requestAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
-			if(automaticConfigVo.getBaseSuccessConfig() != null) {
+			requestAudit.put("successConfig", automaticConfigVo.getBaseSuccessConfig());
+			if(automaticConfigVo.getBaseSuccessConfig() == null) {
 				requestAudit.put("successConfig",successConfig);
 			}
 			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
@@ -681,10 +682,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			callbackAudit.put("interval", automaticConfigVo.getCallbackInterval());
 			callbackAudit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
 			callbackAudit.put("successConfig", automaticConfigVo.getCallbackSuccessConfig());
-			if(automaticConfigVo.getCallbackSuccessConfig() != null) {
+			if(automaticConfigVo.getCallbackFailConfig() == null) {
 				callbackAudit.put("failConfig",failConfig);
 			}
-			if(automaticConfigVo.getCallbackFailConfig() != null) {
+			if(automaticConfigVo.getCallbackSuccessConfig() == null) {
 				callbackAudit.put("successConfig",successConfig);
 			}
 			data.put("callbackAudit", callbackAudit);

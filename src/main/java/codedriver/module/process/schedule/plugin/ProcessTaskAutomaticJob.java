@@ -20,6 +20,7 @@ import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.scheduler.core.JobBase;
+import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.service.ProcessTaskService;
@@ -34,6 +35,9 @@ public class ProcessTaskAutomaticJob extends JobBase {
 	
 	@Autowired
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
+	
+	@Autowired
+	SchedulerMapper schedulerMapper;
 	
 	@Override
 	public String getGroupName() {
@@ -59,6 +63,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		newJobObjectBuilder = new JobObject.Builder(jobObject.getJobName(), this.getGroupName()+groupName, this.getClassName(), TenantContext.get().getTenantUuid())
 				.withBeginTime(startTime)
 			    .withEndTime(endTime)
+			    .addData("data", data)
 				.addData("automaticConfigVo", automaticConfigVo)
 				.addData("currentProcessTaskStepVo", currentProcessTaskStepVo);
 		if(automaticConfigVo.getIsRequest()) {
@@ -103,8 +108,30 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		UserContext.init(null);//避免后续获取用户异常
 		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
 		ProcessTaskStepVo currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
+		//excute
 		Boolean isUnloadJob = processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
-		if(isUnloadJob) {
+		//update nextFireTime
+		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler());
+		ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+		JSONObject data = stepData.getData();// (JSONObject) jobObject.getData("data");
+		if(data != null) {
+			JSONObject audit = null;
+			if(automaticConfigVo.getIsRequest()) {
+				audit = data.getJSONObject("requestAudit");
+			}else {
+				audit = data.getJSONObject("callbackAudit");
+			}
+			if(context.getNextFireTime() != null) {
+				audit.put("nextFireTime",context.getNextFireTime());
+			}
+			if(isUnloadJob){
+				audit.remove("nextFireTime");
+			}
+			processTaskStepDataVo.setData(data.toJSONString());
+			processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
+		}
+		//
+		if(data == null || isUnloadJob) {
 			schedulerManager.unloadJob(jobObject);
 		}
 	}
