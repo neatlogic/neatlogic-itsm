@@ -86,17 +86,17 @@ public interface ProcessTaskService {
 	 */
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
 
-	/**
-	 * 初始化job
-	 * @param automaticConfigVo
-	 * @param currentProcessTaskStepVo
-	 */
-	public void initJob(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
-
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId);
 
 	public ProcessTaskVo getProcessTaskDetailInfoById(Long processTaskId);
 
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo, AutomaticConfigVo automaticConfig,
 			JSONObject data, String type);
+
+	/**
+	 * 初始化job
+	 * @param automaticConfigVo
+	 * @param currentProcessTaskStepVo
+	 */
+	public void initJob(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, JSONObject data);
 }

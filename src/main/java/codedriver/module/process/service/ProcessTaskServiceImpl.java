@@ -595,7 +595,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				logger.error(resultVo.getError());
 	    		throw new MatrixExternalException("外部接口访问异常");
 	    	}else if(StringUtils.isNotBlank(resultJson)) {
-				if(predicate(successConfig,resultVo)) {//如果执行成功
+				if(predicate(successConfig,resultVo,true)) {//如果执行成功
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
 					if(automaticConfigVo.getIsRequest()&&!automaticConfigVo.getIsHasCallback()||!automaticConfigVo.getIsRequest()) {//第一次请求
 						processHandler.complete(currentProcessTaskStepVo);
@@ -608,11 +608,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 							automaticConfigVo.setIsRequest(false);
 							automaticConfigVo.setResultJson(JSONObject.parseObject(resultJson));
 							data = initProcessTaskStepData(currentProcessTaskStepVo,automaticConfigVo,data,"callback");
-							initJob(automaticConfigVo,currentProcessTaskStepVo);
+							initJob(automaticConfigVo,currentProcessTaskStepVo,data);
 						}
 					}
 					isUnloadJob = true;
-				}else if(automaticConfigVo.getIsRequest()||(!automaticConfigVo.getIsRequest()&&predicate(failConfig,resultVo))){//失败
+				}else if(automaticConfigVo.getIsRequest()||(!automaticConfigVo.getIsRequest()&&predicate(failConfig,resultVo,false))){//失败
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
 					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
@@ -693,13 +693,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	}
 	
 	@Override
-	public void initJob(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
+	public void initJob(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo,JSONObject data) {
 		IJob jobHandler = SchedulerManager.getHandler(ProcessTaskAutomaticJob.class.getName());
 		if (jobHandler != null) {
 			JobObject.Builder jobObjectBuilder = new JobObject.Builder(
 					currentProcessTaskStepVo.getProcessTaskId().toString()+"-"+currentProcessTaskStepVo.getId().toString(),
 					jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()
 					).addData("automaticConfigVo", automaticConfigVo)
+					 .addData("data", data)
 					 .addData("currentProcessTaskStepVo", currentProcessTaskStepVo);
 			JobObject jobObject = jobObjectBuilder.build();
 			jobHandler.reloadJob(jobObject);
@@ -713,10 +714,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 * @Param: 
 	 * @return: boolean
 	 */
-	private Boolean predicate(JSONObject config,IntegrationResultVo resultVo) {
+	private Boolean predicate(JSONObject config,IntegrationResultVo resultVo,Boolean isSuccess) {
 		Boolean result = false;
 		if(config==null||config.isEmpty()||!config.containsKey("expression")) {
-			Pattern pattern = Pattern.compile("(2|3).*");
+			String patternStr = "(2|3).*";
+			if(!isSuccess) {
+				patternStr = "(4|5).*";
+			}
+			Pattern pattern = Pattern.compile(patternStr);
 			if(pattern.matcher(String.valueOf(resultVo.getStatusCode())).matches()) {
 				result = true;
 			}
