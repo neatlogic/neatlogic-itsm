@@ -127,6 +127,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 					this.getGroupName(),
 					this.getClassName(), 
 					tenantUuid)
+					.addData("data", dataVo.getData())
 					.addData("automaticConfigVo", automaticConfigVo)
 					.addData("currentProcessTaskStepVo", processTaskStepVo);
 			JobObject jobObject = jobObjectBuilder.build();
