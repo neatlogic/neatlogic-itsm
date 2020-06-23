@@ -71,7 +71,7 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 				ListIterator<Object> userTypeIterator = userTypeArray.listIterator();
 				while(userTypeIterator.hasNext()) {
 					JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
-					if(userTypeJson.getString("usertype").equals(ProcessTaskStatus.PENDING.getValue())) {
+					if(ProcessTaskStatus.PENDING.getValue().equals(userTypeJson.getString("usertype"))) {
 						JSONArray userArray = userTypeJson.getJSONArray("userlist");
 						if(CollectionUtils.isNotEmpty(userArray)) {
 							for(Object userObject :userArray) {
