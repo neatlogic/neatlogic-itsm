@@ -1,7 +1,6 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +94,21 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
 		//TODO automatic ，临时处理，重构后删去
 		if(processTaskStepVo!=null&&ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
-			actionList = Arrays.asList("view", "transfer", "pocesstaskview", "work", "complete");
+//			actionList = Arrays.asList("view", "transfer", "pocesstaskview", "work", "complete");
+			actionList.remove(ProcessTaskStepAction.STARTPROCESS.getValue());
+			actionList.remove(ProcessTaskStepAction.START.getValue());
+			actionList.remove(ProcessTaskStepAction.ACTIVE.getValue());
+			actionList.remove(ProcessTaskStepAction.RETREAT.getValue());
+			actionList.remove(ProcessTaskStepAction.ACCEPT.getValue());
+			actionList.remove(ProcessTaskStepAction.WORK.getValue());
+			actionList.remove(ProcessTaskStepAction.ABORT.getValue());
+			actionList.remove(ProcessTaskStepAction.RECOVER.getValue());
+			actionList.remove(ProcessTaskStepAction.BACK.getValue());
+			actionList.remove(ProcessTaskStepAction.SAVE.getValue());
+			actionList.remove(ProcessTaskStepAction.UPDATE.getValue());
+			actionList.remove(ProcessTaskStepAction.COMMENT.getValue());
+			actionList.remove(ProcessTaskStepAction.CREATESUBTASK.getValue());
+			actionList.remove(ProcessTaskStepAction.URGE.getValue());
 		}
 		//
 		
