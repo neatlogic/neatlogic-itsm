@@ -645,6 +645,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			isUnloadJob = true;
 		}finally {
 			auditDataVo.setData(data.toJSONString());
+			auditDataVo.setFcu("system");
 			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}
 		return isUnloadJob;
