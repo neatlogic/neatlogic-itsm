@@ -651,10 +651,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			
 		}catch(Exception ex) {
 			logger.error(ex.getMessage(),ex);
+			audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
 			//processHandler.hang(currentProcessTaskStepVo);
 			isUnloadJob = true;
 		}finally {
 			auditDataVo.setData(data.toJSONString());
+			auditDataVo.setFcu("system");
 			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}
 		return isUnloadJob;
@@ -682,6 +684,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
 			auditDataVo.setData(data.toJSONString());
 			auditDataVo.setFcu(UserContext.get().getUserUuid());
+			auditDataVo.setFcu("system");
 			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}else {//init callback
 			JSONObject callbackAudit = new JSONObject();
@@ -1016,6 +1019,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		
 		//优先级
 		PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
+		if(priorityVo == null) {
+			priorityVo = new PriorityVo();
+			priorityVo.setUuid(processTaskVo.getPriorityUuid());
+		}
 		processTaskVo.setPriority(priorityVo);
 		//上报服务路径
 		ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
