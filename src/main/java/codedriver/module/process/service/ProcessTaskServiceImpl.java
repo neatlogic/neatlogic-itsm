@@ -673,6 +673,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
 			auditDataVo.setData(data.toJSONString());
 			auditDataVo.setFcu(UserContext.get().getUserUuid());
+			auditDataVo.setFcu("system");
 			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}else {//init callback
 			JSONObject callbackAudit = new JSONObject();
