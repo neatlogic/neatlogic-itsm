@@ -1006,6 +1006,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		
 		//优先级
 		PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
+		if(priorityVo == null) {
+			priorityVo = new PriorityVo();
+			priorityVo.setUuid(processTaskVo.getPriorityUuid());
+		}
 		processTaskVo.setPriority(priorityVo);
 		//上报服务路径
 		ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
