@@ -640,6 +640,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			
 		}catch(Exception ex) {
 			logger.error(ex.getMessage(),ex);
+			audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
 			//processHandler.hang(currentProcessTaskStepVo);
 			isUnloadJob = true;
 		}finally {
