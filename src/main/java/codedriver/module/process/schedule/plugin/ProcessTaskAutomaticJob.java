@@ -128,6 +128,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 				audit.remove("nextFireTime");
 			}
 			processTaskStepDataVo.setData(data.toJSONString());
+			processTaskStepDataVo.setFcu("system");
 			processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
 		}
 		//

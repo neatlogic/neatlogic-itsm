@@ -117,6 +117,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 			}
 			oldFileUuidListStr = JSON.toJSONString(oldFileUuidList);
 			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(oldFileUuidListStr);
+			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), processTaskContentVo.getHash());
 			processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
 		}

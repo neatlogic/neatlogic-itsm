@@ -77,6 +77,7 @@ import codedriver.framework.process.exception.process.ProcessStepHandlerNotFound
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
+import codedriver.framework.process.notify.core.NotifyTriggerType;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.scheduler.core.IJob;
@@ -192,6 +193,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getParamName(), JSON.toJSONString(subtaskVo));
 			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.CREATESUBTASK);
+			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.CREATESUBTASK);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
@@ -279,6 +282,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), oldSubtaskContentVo.getHash());
 			currentProcessTaskStepVo.setParamObj(paramObj);
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.EDITSUBTASK);
+			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.EDITSUBTASK);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
@@ -317,6 +322,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.REDOSUBTASK);
+			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.REDOSUBTASK);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
@@ -356,6 +363,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETESUBTASK);
+			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.COMPLETESUBTASK);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
@@ -390,6 +399,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
 			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORTSUBTASK);
+			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.ABORTSUBTASK);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
@@ -640,10 +651,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			
 		}catch(Exception ex) {
 			logger.error(ex.getMessage(),ex);
+			audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
 			//processHandler.hang(currentProcessTaskStepVo);
 			isUnloadJob = true;
 		}finally {
 			auditDataVo.setData(data.toJSONString());
+			auditDataVo.setFcu("system");
 			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}
 		return isUnloadJob;
@@ -671,6 +684,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
 			auditDataVo.setData(data.toJSONString());
 			auditDataVo.setFcu(UserContext.get().getUserUuid());
+			auditDataVo.setFcu("system");
 			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}else {//init callback
 			JSONObject callbackAudit = new JSONObject();
@@ -1005,6 +1019,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		
 		//优先级
 		PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
+		if(priorityVo == null) {
+			priorityVo = new PriorityVo();
+			priorityVo.setUuid(processTaskVo.getPriorityUuid());
+		}
 		processTaskVo.setPriority(priorityVo);
 		//上报服务路径
 		ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
