@@ -153,18 +153,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 			
 		}
 		startProcessTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
-		
-		//上报描述内容和附件
-//		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-//		processTaskStepAuditVo.setProcessTaskId(processTaskId);
-//		processTaskStepAuditVo.setProcessTaskStepId(startStepVo.getId());
-//		processTaskStepAuditVo.setAction(ProcessTaskStepAction.STARTPROCESS.getValue());
-//		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-//		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-//			ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo(processTaskStepAuditList.get(0));
-//			startStepVo.setComment(comment);
-//		}
-//		Long startProcessTaskStepId = startProcessTaskStepVo.getId();
+
 		ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
 		//获取上报描述内容
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepVo.getId());
