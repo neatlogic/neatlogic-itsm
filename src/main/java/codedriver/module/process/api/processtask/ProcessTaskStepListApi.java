@@ -17,6 +17,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -26,8 +28,10 @@ import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
+import codedriver.framework.process.dto.ProcessTaskContentVo;
+import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -58,6 +62,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
     
     @Autowired
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
+	
+	@Autowired
+	private FileMapper fileMapper;
 	
 	@Override
 	public String getToken() {
@@ -100,31 +107,31 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
         for(ProcessStepHandlerVo handlerConfig : handlerConfigList) {
         	handlerConfigMap.put(handlerConfig.getHandler(), handlerConfig);
         }
-		ProcessTaskStepVo startStepVo = processTaskStepList.get(0);
-		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startStepVo.getConfigHash());
-		startStepVo.setConfig(startStepConfig);
-		ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(startStepVo.getHandler());
+		ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
+		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
+		startProcessTaskStepVo.setConfig(startStepConfig);
+		ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(startProcessTaskStepVo.getHandler());
 		if(processStepHandlerConfig != null) {
-			startStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
 		}
-		List<ProcessTaskStepUserVo> startStepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.MAJOR.getValue());
+		List<ProcessTaskStepUserVo> startStepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(startProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(startStepMajorUserList)) {
-			startStepVo.setMajorUser(startStepMajorUserList.get(0));
+			startProcessTaskStepVo.setMajorUser(startStepMajorUserList.get(0));
 		}
-		startStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.MINOR.getValue()));
-		startStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(startStepVo.getId(), ProcessUserType.AGENT.getValue()));
-		startStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(startStepVo.getId()));
+		startProcessTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(startProcessTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
+		startProcessTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(startProcessTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
+		startProcessTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(startProcessTaskStepVo.getId()));
 		
 		//步骤评论列表
-		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(startStepVo.getId());
+		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(startProcessTaskStepVo.getId());
 		for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
 			processTaskService.parseProcessTaskStepComment(processTaskStepComment);
 		}
-		startStepVo.setCommentList(processTaskStepCommentList);
+		startProcessTaskStepVo.setCommentList(processTaskStepCommentList);
 		//子任务列表
 		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
-		processTaskStepSubtaskVo.setProcessTaskId(startStepVo.getProcessTaskId());
-		processTaskStepSubtaskVo.setProcessTaskStepId(startStepVo.getId());
+		processTaskStepSubtaskVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
+		processTaskStepSubtaskVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
 		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
 		for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
 			List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
@@ -145,19 +152,46 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 			processTaskStepSubtask.setIsRedoable(0);
 			
 		}
-		startStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
+		startProcessTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
 		
 		//上报描述内容和附件
-		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-		processTaskStepAuditVo.setProcessTaskId(processTaskId);
-		processTaskStepAuditVo.setProcessTaskStepId(startStepVo.getId());
-		processTaskStepAuditVo.setAction(ProcessTaskStepAction.STARTPROCESS.getValue());
-		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-			ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo(processTaskStepAuditList.get(0));
-			startStepVo.setComment(comment);
+//		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
+//		processTaskStepAuditVo.setProcessTaskId(processTaskId);
+//		processTaskStepAuditVo.setProcessTaskStepId(startStepVo.getId());
+//		processTaskStepAuditVo.setAction(ProcessTaskStepAction.STARTPROCESS.getValue());
+//		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
+//		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+//			ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo(processTaskStepAuditList.get(0));
+//			startStepVo.setComment(comment);
+//		}
+//		Long startProcessTaskStepId = startProcessTaskStepVo.getId();
+		ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
+		//获取上报描述内容
+		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepVo.getId());
+		if(!processTaskStepContentList.isEmpty()) {
+			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
+			if(processTaskContentVo != null) {
+				comment.setContent(processTaskContentVo.getContent());
+			}
 		}
-		startStepVo.setIsView(1);
+		//附件
+		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
+		processTaskFileVo.setProcessTaskId(processTaskId);
+		processTaskFileVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
+		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
+		
+		if(processTaskFileList.size() > 0) {
+			List<String> fileUuidList = new ArrayList<>();
+			List<FileVo> fileList = new ArrayList<>();
+			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
+				fileUuidList.add(processTaskFile.getFileUuid());
+				FileVo fileVo = fileMapper.getFileByUuid(processTaskFile.getFileUuid());
+				fileList.add(fileVo);
+			}
+			comment.setFileList(fileList);
+		}
+		startProcessTaskStepVo.setComment(comment);
+		startProcessTaskStepVo.setIsView(1);
 
 		Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
 		processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
@@ -187,7 +221,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		}
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
 		Set<Long> fromStepIdList = new HashSet<>();
-		fromStepIdList.add(startStepVo.getId());
+		fromStepIdList.add(startProcessTaskStepVo.getId());
 		while(!processTaskStepMap.isEmpty()) {
 			Set<Long> newFromStepIdList = new HashSet<>();
 			for(Long fromStepId : fromStepIdList) {
@@ -277,7 +311,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 				}
 			}
 		}
-		resultList.add(0, startStepVo);
+		resultList.add(0, startProcessTaskStepVo);
 		return resultList;
 	}
 
