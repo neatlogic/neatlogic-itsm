@@ -14,11 +14,6 @@ import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherBase;
 public class WorkloadDispatcher extends WorkerDispatcherBase {
 
 	@Override
-	public String getHandler() {
-		return this.getClass().getName();
-	}
-
-	@Override
 	public String getName() {
 		return "根据工作量分配处理人";
 	}
