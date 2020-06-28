@@ -1,6 +1,7 @@
 package codedriver.module.process.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -156,10 +157,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	@Override
 	public void createSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
-		//插入子任务
-		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-		processTaskMapper.insertProcessTaskStepSubtask(processTaskStepSubtaskVo);
 		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
+		Long targetTime = paramObj.getLong("targetTime");
+		if(targetTime != null) {
+			processTaskStepSubtaskVo.setTargetTime(new Date(targetTime));
+		}
+		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+		//插入子任务	
+		processTaskMapper.insertProcessTaskStepSubtask(processTaskStepSubtaskVo);
 		paramObj.put("processTaskStepSubtaskId", processTaskStepSubtaskVo.getId());
 		String content = paramObj.getString("content");
 		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
@@ -202,31 +207,40 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	}
 
 	@Override
-	public void editSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
-		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
+	public void editSubtask(ProcessTaskStepSubtaskVo oldProcessTaskStepSubtask) {
+		ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldProcessTaskStepSubtask.getProcessTaskStepId());
 		if(currentProcessTaskStepVo == null) {
-			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
+			throw new ProcessTaskStepNotFoundException(oldProcessTaskStepSubtask.getProcessTaskStepId().toString());
 		}else if(currentProcessTaskStepVo.getIsActive().intValue() != 1){
 			throw new ProcessTaskRuntimeException("步骤未激活，不能处理子任务");
 		}
-		
-		JSONObject paramObj = processTaskStepSubtaskVo.getParamObj();
-		String content = paramObj.getString("content");
-		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-		processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-		processTaskStepSubtaskVo.setContentHash(processTaskContentVo.getHash());
-		
-		//TODO linbq查出旧数据
-		ProcessTaskStepSubtaskVo oldProcessTaskStepSubtask = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskVo.getId());
-		List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
-		for(ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo : processTaskStepSubtaskContentList) {
-			if(processTaskStepSubtaskContentVo != null 
-					&& processTaskStepSubtaskContentVo.getContentHash() != null 
-					&& ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
-				oldProcessTaskStepSubtask.setContentHash(processTaskStepSubtaskContentVo.getContentHash());
-				processTaskMapper.updateProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskContentVo.getId(), processTaskContentVo.getHash()));
+		List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(oldProcessTaskStepSubtask.getId());
+		for(ProcessTaskStepSubtaskContentVo subtaskContentVo : processTaskStepSubtaskContentList) {
+			if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(subtaskContentVo.getAction())) {
+				oldProcessTaskStepSubtask.setContentHash(subtaskContentVo.getContentHash());
 			}
 		}
+		JSONObject paramObj = oldProcessTaskStepSubtask.getParamObj();
+		String content = paramObj.getString("content");
+		paramObj.remove("content");
+		ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
+		processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+		processTaskMapper.updateProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(oldProcessTaskStepSubtask.getId(), ProcessTaskStepAction.CREATESUBTASK.getValue(), processTaskContentVo.getHash()));
+		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
+		processTaskStepSubtaskVo.setId(oldProcessTaskStepSubtask.getId());
+		processTaskStepSubtaskVo.setContentHash(processTaskContentVo.getHash());
+		
+		Long targetTime = paramObj.getLong("targetTime");
+		if(targetTime != null) {
+			processTaskStepSubtaskVo.setTargetTime(new Date(targetTime));
+		}
+		
+		String workers = paramObj.getString("workerList");
+		paramObj.remove("workerList");
+		String[] split = workers.split("#");
+		UserVo userVo = userMapper.getUserBaseInfoByUuid(split[1]);
+		processTaskStepSubtaskVo.setUserUuid(userVo.getUuid());
+		processTaskStepSubtaskVo.setUserName(userVo.getUserName());
 		
 		processTaskStepSubtaskVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
@@ -237,28 +251,27 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
-			String oldUserUuid = paramObj.getString("oldUserUuid");
-			if(!processTaskStepSubtaskVo.getUserUuid().equals(oldUserUuid)) {//更新了处理人
+			if(!processTaskStepSubtaskVo.getUserUuid().equals(oldProcessTaskStepSubtask.getUserUuid())) {//更新了处理人
 				
 				List<ProcessTaskStepUserVo> userList = new ArrayList<>();
 				ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
-				processTaskStepUserVo.setProcessTaskId(processTaskStepSubtaskVo.getProcessTaskId());
-				processTaskStepUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
+				processTaskStepUserVo.setProcessTaskId(oldProcessTaskStepSubtask.getProcessTaskId());
+				processTaskStepUserVo.setProcessTaskStepId(oldProcessTaskStepSubtask.getProcessTaskStepId());
 				processTaskStepUserVo.setUserUuid(processTaskStepSubtaskVo.getUserUuid());
 				processTaskStepUserVo.setUserName(processTaskStepSubtaskVo.getUserName());
 				processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 				userList.add(processTaskStepUserVo);
 				ProcessTaskStepUserVo oldUserVo = new ProcessTaskStepUserVo();
-				oldUserVo.setProcessTaskId(processTaskStepSubtaskVo.getProcessTaskId());
-				oldUserVo.setProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
-				oldUserVo.setUserUuid(oldUserUuid);
-				oldUserVo.setUserName(paramObj.getString("oldUserName"));
+				oldUserVo.setProcessTaskId(oldProcessTaskStepSubtask.getProcessTaskId());
+				oldUserVo.setProcessTaskStepId(oldProcessTaskStepSubtask.getProcessTaskStepId());
+				oldUserVo.setUserUuid(oldProcessTaskStepSubtask.getUserUuid());
+				oldUserVo.setUserName(oldProcessTaskStepSubtask.getUserName());
 				oldUserVo.setUserType(ProcessUserType.MINOR.getValue());
 				userList.add(oldUserVo);
 				
 				List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
-				workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid()));
-				workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), oldUserUuid));
+				workerList.add(new ProcessTaskStepWorkerVo(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid()));
+				workerList.add(new ProcessTaskStepWorkerVo(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId(), GroupSearch.USER.getValue(), oldProcessTaskStepSubtask.getUserUuid()));
 				handler.updateProcessTaskStepUserAndWorker(workerList, userList);
 			}
 				
