@@ -86,14 +86,12 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			JSONObject dataObject = dataVo.getData();
 			if(dataObject != null && dataObject.containsKey("requestAudit")) {
 				JSONObject requestStatus = dataObject.getJSONObject("requestAudit").getJSONObject("status");
-				
-				if(!ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))) {
+				if(ProcessTaskStatus.PENDING.getValue().equals(requestStatus.getString("value"))) {
 					//load第一次请求job
 					initReloadJob(automaticConfigVo,dataVo,tenantUuid,true);
-				}else if( dataObject.containsKey("callbackAudit")&&ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))){
+				}else if(ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))&&dataObject.containsKey("callbackAudit")){
 					JSONObject callbackStatus = dataObject.getJSONObject("callbackAudit").getJSONObject("status");
-					if(!ProcessTaskStatus.SUCCEED.getValue().equals(callbackStatus.getString("value"))
-							&&!ProcessTaskStatus.FAILED.getValue().equals(callbackStatus.getString("value"))) {
+					if(ProcessTaskStatus.PENDING.getValue().equals(callbackStatus.getString("value"))) {
 						initReloadJob(automaticConfigVo,dataVo,tenantUuid,false);
 					}
 				}
