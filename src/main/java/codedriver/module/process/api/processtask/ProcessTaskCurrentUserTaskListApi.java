@@ -132,62 +132,63 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 				int toIndex = fromIndex + basePageVo.getPageSize();
 				toIndex = toIndex <= rowNum ? toIndex : rowNum;
 				processTaskStepIdList = processTaskStepIdList.subList(fromIndex, toIndex);
-				if(isCurrentProcessTaskTop && processTaskIdList.contains(currentProcessTaskId)) {
-					processTaskStepIdList.addAll(processTaskStepIdListMap.get(currentProcessTaskId));
+			}
+				
+			if(isCurrentProcessTaskTop && processTaskIdList.contains(currentProcessTaskId)) {
+				processTaskStepIdList.addAll(processTaskStepIdListMap.get(currentProcessTaskId));
+			}
+			if(CollectionUtils.isNotEmpty(processTaskStepIdList)) {
+				List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+				processTaskStepList.sort((e1, e2) -> -e1.getId().compareTo(e2.getId()));
+				Map<Long, ProcessTaskSlaTimeVo> stepSlaTimeMap = new HashMap<>();
+				List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskMapper.getProcessTaskSlaTimeByProcessTaskStepIdList(processTaskStepIdList);
+				for(ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
+					if(!stepSlaTimeMap.containsKey(processTaskSlaTimeVo.getProcessTaskStepId())) {
+						stepSlaTimeMap.put(processTaskSlaTimeVo.getProcessTaskStepId(), processTaskSlaTimeVo);
+					}
 				}
-				if(CollectionUtils.isNotEmpty(processTaskStepIdList)) {
-					List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
-					processTaskStepList.sort((e1, e2) -> -e1.getId().compareTo(e2.getId()));
-					Map<Long, ProcessTaskSlaTimeVo> stepSlaTimeMap = new HashMap<>();
-					List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskMapper.getProcessTaskSlaTimeByProcessTaskStepIdList(processTaskStepIdList);
-					for(ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
-						if(!stepSlaTimeMap.containsKey(processTaskSlaTimeVo.getProcessTaskStepId())) {
-							stepSlaTimeMap.put(processTaskSlaTimeVo.getProcessTaskStepId(), processTaskSlaTimeVo);
-						}
+				Map<String, ProcessStepHandlerVo> handlerConfigMap = new HashMap<>();
+		        List<ProcessStepHandlerVo> handlerConfigList = stepHandlerMapper.getProcessStepHandlerConfig();
+		        for(ProcessStepHandlerVo handlerConfig : handlerConfigList) {
+		        	handlerConfigMap.put(handlerConfig.getHandler(), handlerConfig);
+		        }
+				for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
+					JSONObject task = new JSONObject();
+					ProcessTaskVo processTask = processTaskMap.get(processTaskStep.getProcessTaskId());
+					task.put("processTaskId", processTaskStep.getProcessTaskId());
+					task.put("title", processTask.getTitle());
+					task.put("processTaskStepId", processTaskStep.getId());
+					task.put("stepName", processTaskStep.getName());
+					String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStep.getConfigHash());
+					processTaskStep.setConfig(config);
+					ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(processTaskStep.getHandler());
+					if(processStepHandlerConfig != null) {
+						processTaskStep.setGlobalConfig(processStepHandlerConfig.getConfig());					
 					}
-					Map<String, ProcessStepHandlerVo> handlerConfigMap = new HashMap<>();
-			        List<ProcessStepHandlerVo> handlerConfigList = stepHandlerMapper.getProcessStepHandlerConfig();
-			        for(ProcessStepHandlerVo handlerConfig : handlerConfigList) {
-			        	handlerConfigMap.put(handlerConfig.getHandler(), handlerConfig);
-			        }
-					for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
-						JSONObject task = new JSONObject();
-						ProcessTaskVo processTask = processTaskMap.get(processTaskStep.getProcessTaskId());
-						task.put("processTaskId", processTaskStep.getProcessTaskId());
-						task.put("title", processTask.getTitle());
-						task.put("processTaskStepId", processTaskStep.getId());
-						task.put("stepName", processTaskStep.getName());
-						String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStep.getConfigHash());
-						processTaskStep.setConfig(config);
-						ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(processTaskStep.getHandler());
-						if(processStepHandlerConfig != null) {
-							processTaskStep.setGlobalConfig(processStepHandlerConfig.getConfig());					
+					task.put("statusVo", processTaskStep.getStatusVo());
+					
+					ProcessTaskSlaTimeVo processTaskSlaTimeVo = stepSlaTimeMap.get(processTaskStep.getId());
+					if(processTaskSlaTimeVo != null) {
+						if(processTaskSlaTimeVo.getExpireTime() != null) {
+							long timeLeft = worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
+							processTaskSlaTimeVo.setTimeLeft(timeLeft);
+							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
 						}
-						task.put("statusVo", processTaskStep.getStatusVo());
-						
-						ProcessTaskSlaTimeVo processTaskSlaTimeVo = stepSlaTimeMap.get(processTaskStep.getId());
-						if(processTaskSlaTimeVo != null) {
-							if(processTaskSlaTimeVo.getExpireTime() != null) {
-								long timeLeft = worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
-								processTaskSlaTimeVo.setTimeLeft(timeLeft);
-								processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
-							}
-							if(processTaskSlaTimeVo.getRealExpireTime() != null) {
-								long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
-								processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
-								processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
-							}
-							task.put("slaTimeVo", processTaskSlaTimeVo);
+						if(processTaskSlaTimeVo.getRealExpireTime() != null) {
+							long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
+							processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
+							processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
 						}
-						if(Objects.equal(processTaskStep.getProcessTaskId(), currentProcessTaskId)) {
-							currentTaskList.add(task);
-						}else {
-							taskList.add(task);
-						}
+						task.put("slaTimeVo", processTaskSlaTimeVo);
 					}
-					if(CollectionUtils.isNotEmpty(currentTaskList)) {
-						taskList.addAll(0, currentTaskList);
+					if(Objects.equal(processTaskStep.getProcessTaskId(), currentProcessTaskId)) {
+						currentTaskList.add(task);
+					}else {
+						taskList.add(task);
 					}
+				}
+				if(CollectionUtils.isNotEmpty(currentTaskList)) {
+					taskList.addAll(0, currentTaskList);
 				}
 			}
 
@@ -195,8 +196,7 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, basePageVo.getPageSize()));
 			resultObj.put("taskList", taskList);
 		}
-		
-		
+				
 		return resultObj;
 	}
 	
