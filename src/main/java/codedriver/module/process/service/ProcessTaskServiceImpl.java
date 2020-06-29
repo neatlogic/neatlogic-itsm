@@ -543,7 +543,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	@Override
 	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepComment) {
-		if(StringUtils.isNotBlank(processTaskStepComment.getContentHash())) {
+		if(StringUtils.isBlank(processTaskStepComment.getContent()) && StringUtils.isNotBlank(processTaskStepComment.getContentHash())) {
 			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getContentHash());
 			if(contentVo != null) {
 				processTaskStepComment.setContent(contentVo.getContent());

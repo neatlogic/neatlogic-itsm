@@ -187,6 +187,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 //			processTaskMapper.replaceProcessTaskContent(contentVo);
 //			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 			processTaskStepCommentVo.setContentHash(contentVo.getHash());
+			processTaskStepCommentVo.setContent(content);
 		}
 		
 		String fileUuidListStr = jsonObj.getString("fileUuidList");
@@ -203,12 +204,13 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 				processTaskStepCommentVo.setFileUuidListHash(fileUuidListContentVo.getHash());
 			}
 		}
-		processTaskMapper.insertProcessTaskStepComment(processTaskStepCommentVo);
+		
 		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
+		processTaskStepCommentList.add(processTaskStepCommentVo);
 		for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
 			processTaskService.parseProcessTaskStepComment(processTaskStepComment);
 		}
-		
+		processTaskMapper.insertProcessTaskStepComment(processTaskStepCommentVo);
 		//生成活动	
 		processTaskStepVo.setParamObj(jsonObj);
 		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
