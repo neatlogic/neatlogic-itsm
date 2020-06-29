@@ -28,6 +28,7 @@ import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -77,9 +78,18 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 	@Description(desc = "当前用户任务列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject resultObj = new JSONObject();
 		Long currentProcessTaskId = jsonObj.getLong("currentProcessTaskId");
+		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskId);
+		if(processTaskVo == null) {
+			throw new ProcessTaskNotFoundException(currentProcessTaskId.toString());
+		}
+		JSONObject resultObj = new JSONObject();
 		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
+		resultObj.put("currentPage", basePageVo.getCurrentPage());
+		resultObj.put("pageSize", basePageVo.getPageSize());
+		resultObj.put("rowNum", 0);
+		resultObj.put("pageCount", 0);
+		resultObj.put("taskList", new ArrayList<>());
 		boolean isCurrentProcessTaskTop = false;
 		if(StringUtils.isBlank(basePageVo.getKeyword()) && Objects.equal(basePageVo.getCurrentPage(), 1)) {
 			isCurrentProcessTaskTop = true;
@@ -88,40 +98,42 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 		List<String> roleUuidList = UserContext.get().getRoleUuidList();
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);		
 		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerListByUserUuidTeamUuidListRoleUuidList(userUuid, teamUuidList, roleUuidList);
-		
-		Map<Long, List<Long>> processTaskStepIdListMap = new HashMap<>();
-		List<Long> processTaskIdList = new ArrayList<>();
-		for(ProcessTaskStepWorkerVo processTaskStepWorker : processTaskStepWorkerList) {
-			Long processTaskId = processTaskStepWorker.getProcessTaskId();
-			if(!processTaskIdList.contains(processTaskId)) {
-				processTaskIdList.add(processTaskId);
+		if(CollectionUtils.isNotEmpty(processTaskStepWorkerList)) {
+			Map<Long, List<Long>> processTaskStepIdListMap = new HashMap<>();
+			List<Long> processTaskIdList = new ArrayList<>();
+			for(ProcessTaskStepWorkerVo processTaskStepWorker : processTaskStepWorkerList) {
+				Long processTaskId = processTaskStepWorker.getProcessTaskId();
+				if(!processTaskIdList.contains(processTaskId)) {
+					processTaskIdList.add(processTaskId);
+				}
+				List<Long> processTaskStepIdList = processTaskStepIdListMap.get(processTaskId);
+				if(processTaskStepIdList == null) {
+					processTaskStepIdList = new ArrayList<>();
+					processTaskStepIdListMap.put(processTaskId, processTaskStepIdList);
+				}
+				processTaskStepIdList.add(processTaskStepWorker.getProcessTaskStepId());
 			}
-			List<Long> processTaskStepIdList = processTaskStepIdListMap.get(processTaskId);
-			if(processTaskStepIdList == null) {
-				processTaskStepIdList = new ArrayList<>();
-				processTaskStepIdListMap.put(processTaskId, processTaskStepIdList);
-			}
-			processTaskStepIdList.add(processTaskStepWorker.getProcessTaskStepId());
-		}
 
-		List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndIdList(basePageVo.getKeyword(), processTaskIdList);
-		Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
-		List<Long> processTaskStepIdList = new ArrayList<>();
-		for(ProcessTaskVo processTask : processTaskList) {
-			processTaskMap.put(processTask.getId(), processTask);
-			if(StringUtils.isNotBlank(basePageVo.getKeyword()) || !currentProcessTaskId.equals(processTask.getId())) {
-				processTaskStepIdList.addAll(processTaskStepIdListMap.get(processTask.getId()));
+			List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndIdList(basePageVo.getKeyword(), processTaskIdList);
+			Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
+			List<Long> processTaskStepIdList = new ArrayList<>();
+			for(ProcessTaskVo processTask : processTaskList) {
+				processTaskMap.put(processTask.getId(), processTask);
+				if(StringUtils.isNotBlank(basePageVo.getKeyword()) || !currentProcessTaskId.equals(processTask.getId())) {
+					processTaskStepIdList.addAll(processTaskStepIdListMap.get(processTask.getId()));
+				}
 			}
-		}
-		processTaskStepIdList.sort((e1, e2) -> -e1.compareTo(e2));
-		int rowNum = processTaskStepIdList.size();
-		int fromIndex = basePageVo.getStartNum();
-		JSONArray taskList = new JSONArray();
-		JSONArray currentTaskList = new JSONArray();
-		if(fromIndex < rowNum) {
-			int toIndex = fromIndex + basePageVo.getPageSize();
-			toIndex = toIndex <= rowNum ? toIndex : rowNum;
-			processTaskStepIdList = processTaskStepIdList.subList(fromIndex, toIndex);
+			processTaskStepIdList.sort((e1, e2) -> -e1.compareTo(e2));
+			int rowNum = processTaskStepIdList.size();
+			int fromIndex = basePageVo.getStartNum();
+			JSONArray taskList = new JSONArray();
+			JSONArray currentTaskList = new JSONArray();
+			if(fromIndex < rowNum) {
+				int toIndex = fromIndex + basePageVo.getPageSize();
+				toIndex = toIndex <= rowNum ? toIndex : rowNum;
+				processTaskStepIdList = processTaskStepIdList.subList(fromIndex, toIndex);
+			}
+				
 			if(isCurrentProcessTaskTop && processTaskIdList.contains(currentProcessTaskId)) {
 				processTaskStepIdList.addAll(processTaskStepIdListMap.get(currentProcessTaskId));
 			}
@@ -179,13 +191,12 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 					taskList.addAll(0, currentTaskList);
 				}
 			}
+
+			resultObj.put("rowNum", rowNum);
+			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, basePageVo.getPageSize()));
+			resultObj.put("taskList", taskList);
 		}
-		
-		resultObj.put("currentPage", basePageVo.getCurrentPage());
-		resultObj.put("pageSize", basePageVo.getPageSize());
-		resultObj.put("rowNum", rowNum);
-		resultObj.put("pageCount", PageUtil.getPageCount(rowNum, basePageVo.getPageSize()));
-		resultObj.put("taskList", taskList);
+				
 		return resultObj;
 	}
 	
