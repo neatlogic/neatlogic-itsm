@@ -21,10 +21,12 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
@@ -696,30 +698,16 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		currentProcessTaskStepVo.setParamObj(paramObj);
 		return true;
 	}
+	
 	@SuppressWarnings("serial")
 	@Override
-	public JSONObject makeupConfig(JSONObject configObj) {
-		JSONArray customButtonArray = new JSONArray();
-		customButtonArray.add(new JSONObject() {{this.put("name", "complete");this.put("customText", "流转");this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", "back");this.put("customText", "回退");this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", "reply");this.put("customText", "回复");this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", "transfer");this.put("customText", "转交");this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", "start");this.put("customText", "开始");this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", "abort");this.put("customText", "终止");this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", "recover");this.put("customText", "恢复");this.put("value", "");}});
-		
-		JSONArray authorityArray = new JSONArray();
-		authorityArray.add(new JSONObject() {{this.put("action", "view");this.put("text", "查看节点信息");this.put("acceptList", Arrays.asList("common#alluser"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
-		authorityArray.add(new JSONObject() {{this.put("action", "abort");this.put("text", "终止/恢复流程");this.put("acceptList", Arrays.asList("processUserType#major"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
-		authorityArray.add(new JSONObject() {{this.put("action", "transfer");this.put("text", "转交");this.put("acceptList", Arrays.asList("processUserType#major"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
-		authorityArray.add(new JSONObject() {{this.put("action", "update");this.put("text", "修改上报内容");this.put("acceptList", Arrays.asList("processUserType#major"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
-		authorityArray.add(new JSONObject() {{this.put("action", "urge");this.put("text", "催办");this.put("acceptList", Arrays.asList("processUserType#major"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
-
+	public JSONObject makeupConfig(JSONObject configObj) {				
 		if(configObj == null) {
 			configObj = new JSONObject();
 		}
 		JSONObject resultObj = new JSONObject();
-		/** 通知策略 **/
+		
+		/** 通知 **/
 		JSONObject notifyPolicyConfig = new JSONObject();
 		notifyPolicyConfig.put("text", "通知");
 		JSONObject notifyPolicyObj = configObj.getJSONObject("notifyPolicyConfig");
@@ -727,9 +715,19 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			notifyPolicyConfig.putAll(notifyPolicyObj);
 		}
 		resultObj.put("notifyPolicyConfig", notifyPolicyConfig);
-		/** 授权 **/
+		
+		/** 按钮映射 **/
+		JSONArray customButtonArray = new JSONArray();
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMPLETE.getValue());this.put("customText", ProcessTaskStepAction.COMPLETE.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.BACK.getValue());this.put("customText", ProcessTaskStepAction.BACK.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMMENT.getValue());this.put("customText", ProcessTaskStepAction.COMMENT.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.TRANSFER.getValue());this.put("customText", ProcessTaskStepAction.TRANSFER.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.START.getValue());this.put("customText", ProcessTaskStepAction.START.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.ABORT.getValue());this.put("customText", ProcessTaskStepAction.ABORT.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.RECOVER.getValue());this.put("customText", ProcessTaskStepAction.RECOVER.getText());this.put("value", "");}});
+		
 		JSONObject customButtonConfig = new JSONObject();
-		customButtonConfig.put("text", "授权");
+		customButtonConfig.put("text", "按钮映射");
 		JSONObject customButtonObj = configObj.getJSONObject("customButtonConfig");
 		if(customButtonObj == null) {
 			customButtonObj = new JSONObject();
@@ -751,10 +749,39 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		}
 		customButtonConfig.put("customButtonList", customButtonArray);
 		resultObj.put("customButtonConfig", customButtonConfig);
-		/** 按钮映射 **/
+		
+		/** 授权 **/
+		JSONArray authorityArray = new JSONArray();
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.VIEW.getValue());this.put("text", ProcessTaskStepAction.VIEW.getText());this.put("acceptList", Arrays.asList(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.ABORT.getValue());this.put("text", ProcessTaskStepAction.ABORT.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.TRANSFER.getValue());this.put("text", ProcessTaskStepAction.TRANSFER.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.UPDATE.getValue());this.put("text", ProcessTaskStepAction.UPDATE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.URGE.getValue());this.put("text", ProcessTaskStepAction.URGE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+
 		JSONObject authorityConfig = new JSONObject();
-		authorityConfig.put("text", "按钮映射");
+		authorityConfig.put("text", "授权");
+		JSONObject authorityObj = configObj.getJSONObject("authorityConfig");
+		if(authorityObj == null) {
+			authorityObj = new JSONObject();
+		}
+		JSONArray authorityList = authorityObj.getJSONArray("authorityList");
+		if(CollectionUtils.isNotEmpty(authorityList)) {
+			Map<String, JSONArray> authorityMap = new HashMap<>();
+			for(int i = 0; i < authorityList.size(); i++) {
+				JSONObject authority = authorityList.getJSONObject(i);
+				authorityMap.put(authority.getString("action"), authority.getJSONArray("acceptList"));
+			}
+			for(int i = 0; i < authorityArray.size(); i++) {
+				JSONObject authority = authorityArray.getJSONObject(i);
+				JSONArray acceptList = authorityMap.get(authority.getString("action"));
+				if(acceptList != null) {
+					authority.put("acceptList", acceptList);
+				}
+			}
+		}
+		authorityConfig.put("authorityList", authorityArray);
 		resultObj.put("authorityConfig", authorityConfig);
-		return null;
+		
+		return resultObj;
 	}
 }
