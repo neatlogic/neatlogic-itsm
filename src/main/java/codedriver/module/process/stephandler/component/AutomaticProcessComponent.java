@@ -412,5 +412,11 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public void updateProcessTaskStepUserAndWorker(List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) {
 	}
+
+	@Override
+	public JSONObject makeupConfig(JSONObject configObj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

@@ -1,6 +1,7 @@
 package codedriver.module.process.stephandler.component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -694,5 +695,66 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		}
 		currentProcessTaskStepVo.setParamObj(paramObj);
 		return true;
+	}
+	@SuppressWarnings("serial")
+	@Override
+	public JSONObject makeupConfig(JSONObject configObj) {
+		JSONArray customButtonArray = new JSONArray();
+		customButtonArray.add(new JSONObject() {{this.put("name", "complete");this.put("customText", "流转");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", "back");this.put("customText", "回退");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", "reply");this.put("customText", "回复");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", "transfer");this.put("customText", "转交");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", "start");this.put("customText", "开始");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", "abort");this.put("customText", "终止");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", "recover");this.put("customText", "恢复");this.put("value", "");}});
+		
+		JSONArray authorityArray = new JSONArray();
+		authorityArray.add(new JSONObject() {{this.put("action", "view");this.put("text", "查看节点信息");this.put("acceptList", Arrays.asList("common#alluser"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
+		authorityArray.add(new JSONObject() {{this.put("action", "abort");this.put("text", "终止/恢复流程");this.put("acceptList", Arrays.asList("processUserType#major"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
+		authorityArray.add(new JSONObject() {{this.put("action", "transfer");this.put("text", "转交");this.put("acceptList", Arrays.asList("processUserType#major"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
+		authorityArray.add(new JSONObject() {{this.put("action", "update");this.put("text", "修改上报内容");this.put("acceptList", Arrays.asList("processUserType#major"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
+		authorityArray.add(new JSONObject() {{this.put("action", "urge");this.put("text", "催办");this.put("acceptList", Arrays.asList("processUserType#major"));this.put("groupList", Arrays.asList("common", "processUserType", "user", "team", "role"));}});
+
+		if(configObj == null) {
+			configObj = new JSONObject();
+		}
+		JSONObject resultObj = new JSONObject();
+		/** 通知策略 **/
+		JSONObject notifyPolicyConfig = new JSONObject();
+		notifyPolicyConfig.put("text", "通知");
+		JSONObject notifyPolicyObj = configObj.getJSONObject("notifyPolicyConfig");
+		if(MapUtils.isNotEmpty(notifyPolicyObj)) {
+			notifyPolicyConfig.putAll(notifyPolicyObj);
+		}
+		resultObj.put("notifyPolicyConfig", notifyPolicyConfig);
+		/** 授权 **/
+		JSONObject customButtonConfig = new JSONObject();
+		customButtonConfig.put("text", "授权");
+		JSONObject customButtonObj = configObj.getJSONObject("customButtonConfig");
+		if(customButtonObj == null) {
+			customButtonObj = new JSONObject();
+		}
+		JSONArray customButtonList = customButtonObj.getJSONArray("customButtonList");
+		if(CollectionUtils.isNotEmpty(customButtonList)) {
+			Map<String, String> customButtonMap = new HashMap<>();
+			for(int i = 0; i < customButtonList.size(); i++) {
+				JSONObject customButton = customButtonList.getJSONObject(i);
+				customButtonMap.put(customButton.getString("name"), customButton.getString("value"));
+			}
+			for(int i = 0; i < customButtonArray.size(); i++) {
+				JSONObject customButton = customButtonArray.getJSONObject(i);
+				String value = customButtonMap.get(customButton.getString("name"));
+				if(StringUtils.isNotBlank(value)) {
+					customButton.put("value", value);
+				}
+			}
+		}
+		customButtonConfig.put("customButtonList", customButtonArray);
+		resultObj.put("customButtonConfig", customButtonConfig);
+		/** 按钮映射 **/
+		JSONObject authorityConfig = new JSONObject();
+		authorityConfig.put("text", "按钮映射");
+		resultObj.put("authorityConfig", authorityConfig);
+		return null;
 	}
 }
