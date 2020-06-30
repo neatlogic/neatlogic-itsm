@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,24 +64,26 @@ public class ProcessStepHandleConfigSaveApi extends ApiComponentBase {
     		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(stepHandlerVo.getHandler());
     		if(handler != null) {
     			JSONObject config = handler.makeupConfig(stepHandlerVo.getConfig());
-    			stepHandlerVo.setConfig(config.toJSONString());
-    			stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
-                stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
-                notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
-                JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
-                Long policyId = notifyPolicyConfig.getLong("policyId");
-                if(policyId != null) {
-                	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
-                	notifyPolicyInvokerVo.setPolicyId(policyId);
-                	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());
-                	JSONObject notifyPolicyInvokerConfig = new JSONObject();
-                	notifyPolicyInvokerConfig.put("function", "processstephandler");
-                	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandler.getName(stepHandlerVo.getHandler()));
-                	notifyPolicyInvokerConfig.put("handler", stepHandlerVo.getHandler());
-                	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
-                	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
-                }
-    		}   		
+    			if(MapUtils.isNotEmpty(config)) {
+    				stepHandlerVo.setConfig(config.toJSONString());
+        			stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
+                    stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
+                    notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
+                    JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
+                    Long policyId = notifyPolicyConfig.getLong("policyId");
+                    if(policyId != null) {
+                    	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
+                    	notifyPolicyInvokerVo.setPolicyId(policyId);
+                    	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());
+                    	JSONObject notifyPolicyInvokerConfig = new JSONObject();
+                    	notifyPolicyInvokerConfig.put("function", "processstephandler");
+                    	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandler.getName(stepHandlerVo.getHandler()));
+                    	notifyPolicyInvokerConfig.put("handler", stepHandlerVo.getHandler());
+                    	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
+                    	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
+                    }
+    			} 			
+    		}
     	}        
         return null;
     }
