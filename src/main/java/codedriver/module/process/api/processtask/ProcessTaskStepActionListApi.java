@@ -83,6 +83,7 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
 				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
+			/** 节点管理按钮映射 **/
 			ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
 			if(processStepHandlerVo != null && StringUtils.isNotBlank(processStepHandlerVo.getConfig())) {
 				JSONObject globalConfig = JSON.parseObject(processStepHandlerVo.getConfig());
@@ -99,6 +100,7 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 					}
 				}
 			}
+			/** 节点设置按钮映射 **/
 			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 			JSONObject stepConfigObj = JSON.parseObject(stepConfig);
 			if(MapUtils.isNotEmpty(stepConfigObj)) {
