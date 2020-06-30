@@ -176,11 +176,11 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		
 		if(processTaskFileList.size() > 0) {
-			List<String> fileUuidList = new ArrayList<>();
+			//List<String> fileUuidList = new ArrayList<>();
 			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				fileUuidList.add(processTaskFile.getFileUuid());
-				FileVo fileVo = fileMapper.getFileByUuid(processTaskFile.getFileUuid());
+				//fileUuidList.add(processTaskFile.getFileId());
+				FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
 				fileList.add(fileVo);
 			}
 			comment.setFileList(fileList);
@@ -308,11 +308,11 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 						ProcessTaskStepCommentVo commentVo = new ProcessTaskStepCommentVo();
 						String content = dataObj.getString("content");
 						commentVo.setContent(content);
-						List<String> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), String.class);
+						List<Long> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), Long.class);
 						if(CollectionUtils.isNotEmpty(fileUuidList)) {
 							List<FileVo> fileList = new ArrayList<>();
-							for(String fileUuid : fileUuidList) {
-								FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+							for(Long fileId : fileUuidList) {
+								FileVo fileVo = fileMapper.getFileById(fileId);
 								if(fileVo != null) {
 									fileList.add(fileVo);
 								}

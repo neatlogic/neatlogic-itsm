@@ -111,9 +111,9 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		if(processTaskFileList.size() > 0) {
-			List<String> oldFileUuidList = new ArrayList<>();
+			List<Long> oldFileUuidList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				oldFileUuidList.add(processTaskFile.getFileUuid());
+				oldFileUuidList.add(processTaskFile.getFileId());
 			}
 			oldFileUuidListStr = JSON.toJSONString(oldFileUuidList);
 			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(oldFileUuidListStr);
@@ -123,12 +123,12 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		}
 		/** 保存新附件uuid **/
 		String newFileUuidListStr = null;
-		List<String> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), String.class);
+		List<Long> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), Long.class);
 		if(CollectionUtils.isNotEmpty(fileUuidList)) {
 			newFileUuidListStr = JSON.toJSONString(fileUuidList);
-			for (String fileUuid : fileUuidList) {
-				if(fileMapper.getFileByUuid(fileUuid) != null) {
-					processTaskFileVo.setFileUuid(fileUuid);
+			for (Long fileId : fileUuidList) {
+				if(fileMapper.getFileById(fileId) != null) {
+					processTaskFileVo.setFileId(fileId);
 					processTaskMapper.insertProcessTaskFile(processTaskFileVo);
 				}
 			}

@@ -552,11 +552,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		if(StringUtils.isNotBlank(processTaskStepComment.getFileUuidListHash())) {
 			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getFileUuidListHash());
 			if(contentVo != null) {
-				List<String> fileUuidList = JSON.parseArray(contentVo.getContent(), String.class);
+				List<Long> fileUuidList = JSON.parseArray(contentVo.getContent(), Long.class);
 				if(CollectionUtils.isNotEmpty(fileUuidList)) {
-					processTaskStepComment.setFileUuidList(fileUuidList);
-					for(String fileUuid : fileUuidList) {
-						FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+					processTaskStepComment.setFileIdList(fileUuidList);
+					for(Long fileId : fileUuidList) {
+						FileVo fileVo = fileMapper.getFileById(fileId);
 						if(fileVo != null) {
 							processTaskStepComment.getFileList().add(fileVo);
 						}
@@ -1018,11 +1018,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		
 		if(processTaskFileList.size() > 0) {
-			List<String> fileUuidList = new ArrayList<>();
+			//List<String> fileUuidList = new ArrayList<>();
 			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				fileUuidList.add(processTaskFile.getFileUuid());
-				FileVo fileVo = fileMapper.getFileByUuid(processTaskFile.getFileUuid());
+				//fileUuidList.add(processTaskFile.getFileId());
+				FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
 				fileList.add(fileVo);
 			}
 			comment.setFileList(fileList);
