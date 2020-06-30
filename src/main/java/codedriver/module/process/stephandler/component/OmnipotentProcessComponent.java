@@ -505,9 +505,9 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
 		String fileUuidListStr = paramObj.getString("fileUuidList");
 		if (StringUtils.isNotBlank(fileUuidListStr)) {
-			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
-			for (String fileUuid : fileUuidList) {
-				processTaskFileVo.setFileUuid(fileUuid);
+			List<Long> fileUuidList = JSON.parseArray(fileUuidListStr, Long.class);
+			for (Long fileUuid : fileUuidList) {
+				processTaskFileVo.setFileId(fileUuid);
 				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
 			}
 		}
@@ -638,12 +638,12 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		if (processTaskFileList.size() > 0) {
-			List<String> fileUuidList = new ArrayList<>();
+			List<Long> fileUuidList = new ArrayList<>();
 			for (ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				if (fileMapper.getFileByUuid(processTaskFile.getFileUuid()) == null) {
-					throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileUuid() + "'不存在");
+				if (fileMapper.getFileById(processTaskFile.getFileId()) == null) {
+					throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileId() + "'不存在");
 				}
-				fileUuidList.add(processTaskFile.getFileUuid());
+				fileUuidList.add(processTaskFile.getFileId());
 			}
 			paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(fileUuidList));
 		}
