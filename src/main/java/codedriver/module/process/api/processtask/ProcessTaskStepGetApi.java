@@ -24,6 +24,7 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -176,11 +177,11 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		
 		if(processTaskFileList.size() > 0) {
-			List<String> fileUuidList = new ArrayList<>();
+			//List<String> fileUuidList = new ArrayList<>();
 			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				fileUuidList.add(processTaskFile.getFileUuid());
-				FileVo fileVo = fileMapper.getFileByUuid(processTaskFile.getFileUuid());
+				//fileUuidList.add(processTaskFile.getFileId());
+				FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
 				fileList.add(fileVo);
 			}
 			comment.setFileList(fileList);
@@ -291,7 +292,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				processTaskStepDataVo.setProcessTaskId(processTaskId);
 				processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
 				processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-				processTaskStepDataVo.setType("stepDraftSave");
+				processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
 				ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
 				if(stepDraftSaveData != null) {
 					JSONObject dataObj = stepDraftSaveData.getData();
@@ -308,11 +309,11 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 						ProcessTaskStepCommentVo commentVo = new ProcessTaskStepCommentVo();
 						String content = dataObj.getString("content");
 						commentVo.setContent(content);
-						List<String> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), String.class);
+						List<Long> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), Long.class);
 						if(CollectionUtils.isNotEmpty(fileUuidList)) {
 							List<FileVo> fileList = new ArrayList<>();
-							for(String fileUuid : fileUuidList) {
-								FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+							for(Long fileId : fileUuidList) {
+								FileVo fileVo = fileMapper.getFileById(fileId);
 								if(fileVo != null) {
 									fileList.add(fileVo);
 								}

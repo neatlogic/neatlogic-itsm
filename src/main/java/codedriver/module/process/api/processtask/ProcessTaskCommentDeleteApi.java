@@ -71,7 +71,7 @@ public class ProcessTaskCommentDeleteApi extends ApiComponentBase {
 			
 			processTaskService.parseProcessTaskStepComment(oldCommentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), oldCommentVo.getContent());
-			jsonObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(oldCommentVo.getFileUuidList()));
+			jsonObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(oldCommentVo.getFileIdList()));
 			
 			//生成活动
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldCommentVo.getProcessTaskStepId());	

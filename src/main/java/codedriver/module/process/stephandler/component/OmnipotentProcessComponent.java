@@ -19,7 +19,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dto.UserVo;
@@ -39,7 +38,6 @@ import codedriver.framework.process.dto.ProcessTaskAssignWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -290,49 +288,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-		//找出当前用户再当前步骤的所有暂存活动，一般只有一个
-//		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
-//		auditVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-//		auditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-//		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-//		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
-//		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
-//		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-//			//找出最后一次暂存活动
-//			ProcessTaskStepAuditVo processTaskStepAuditVo = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
-//			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAuditVo.getAuditDetailList();
-//			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetail : processTaskStepAuditDetailList) {
-//				ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetail.getNewContent());
-//				if(processTaskContentVo != null) {
-//					paramObj.put(ProcessTaskAuditDetailType.getParamName(processTaskStepAuditDetail.getType()), processTaskContentVo.getContent());
-//				}
-//			}
-//			//删除暂存活动
-//			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-//				processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
-//			}
-//		}
-		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
-		processTaskStepDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskStepDataVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-		processTaskStepDataVo.setType("stepDraftSave");
-		ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
-		if(stepDraftSaveData != null) {
-			JSONObject dataObj = stepDraftSaveData.getData();
-			if(MapUtils.isNotEmpty(dataObj)) {
-				paramObj.putAll(dataObj);
-			}
-		}
-		/** 保存描述内容 **/
-		String content = paramObj.getString("content");
-		if (StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-//			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-//			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
-		}
-
 		if(ProcessTaskStepAction.COMPLETE.getValue().equals(paramObj.getString("action"))) {		
 //			前置步骤指派处理人
 //			"assignWorkerList": [
@@ -553,9 +508,9 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
 		String fileUuidListStr = paramObj.getString("fileUuidList");
 		if (StringUtils.isNotBlank(fileUuidListStr)) {
-			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
-			for (String fileUuid : fileUuidList) {
-				processTaskFileVo.setFileUuid(fileUuid);
+			List<Long> fileUuidList = JSON.parseArray(fileUuidListStr, Long.class);
+			for (Long fileUuid : fileUuidList) {
+				processTaskFileVo.setFileId(fileUuid);
 				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
 			}
 		}
@@ -686,12 +641,12 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		if (processTaskFileList.size() > 0) {
-			List<String> fileUuidList = new ArrayList<>();
+			List<Long> fileUuidList = new ArrayList<>();
 			for (ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				if (fileMapper.getFileByUuid(processTaskFile.getFileUuid()) == null) {
-					throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileUuid() + "'不存在");
+				if (fileMapper.getFileById(processTaskFile.getFileId()) == null) {
+					throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileId() + "'不存在");
 				}
-				fileUuidList.add(processTaskFile.getFileUuid());
+				fileUuidList.add(processTaskFile.getFileId());
 			}
 			paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(fileUuidList));
 		}

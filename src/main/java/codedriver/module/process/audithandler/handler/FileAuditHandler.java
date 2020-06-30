@@ -39,11 +39,11 @@ public class FileAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	}
 
 	private String parse(String content) {
-		List<String> fileUuidList = JSON.parseArray(content, String.class);
+		List<Long> fileUuidList = JSON.parseArray(content, Long.class);
 		if(CollectionUtils.isNotEmpty(fileUuidList)) {
 			List<FileVo> fileList = new ArrayList<>();
-			for(String fileUuid : fileUuidList) {
-				FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+			for(Long fileId : fileUuidList) {
+				FileVo fileVo = fileMapper.getFileById(fileId);
 				if(fileVo != null) {
 					fileList.add(fileVo);
 				}

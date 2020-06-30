@@ -95,15 +95,15 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 			
 //			String fileUuidListStr = jsonObj.getString("fileUuidList");
 //			if(StringUtils.isNotBlank(fileUuidListStr)) {
-				List<String> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), String.class);
-				if(CollectionUtils.isNotEmpty(fileUuidList)) {
-					for(String fileUuid : fileUuidList) {
-						FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+				List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), Long.class);
+				if(CollectionUtils.isNotEmpty(fileIdList)) {
+					for(Long fileId : fileIdList) {
+						FileVo fileVo = fileMapper.getFileById(fileId);
 						if(fileVo == null) {
-							throw new ProcessTaskRuntimeException("上传附件uuid:'" + fileUuid + "'不存在");
+							throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
 						}
 					}
-					ProcessTaskContentVo fileUuidListContentVo = new ProcessTaskContentVo(JSON.toJSONString(fileUuidList));
+					ProcessTaskContentVo fileUuidListContentVo = new ProcessTaskContentVo(JSON.toJSONString(fileIdList));
 					processTaskMapper.replaceProcessTaskContent(fileUuidListContentVo);
 					processTaskStepCommentVo.setFileUuidListHash(fileUuidListContentVo.getHash());
 				}
