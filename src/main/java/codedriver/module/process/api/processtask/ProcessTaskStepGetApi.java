@@ -24,6 +24,7 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -291,7 +292,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				processTaskStepDataVo.setProcessTaskId(processTaskId);
 				processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
 				processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-				processTaskStepDataVo.setType("stepDraftSave");
+				processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
 				ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
 				if(stepDraftSaveData != null) {
 					JSONObject dataObj = stepDraftSaveData.getData();
