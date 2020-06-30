@@ -64,7 +64,7 @@ public class ProcessStepHandleConfigSaveApi extends ApiComponentBase {
     		stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
             stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
             notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
-            JSONObject config = JSON.parseObject(stepHandlerVo.getConfig());
+            JSONObject config = stepHandlerVo.getConfig();
             JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
             Long policyId = notifyPolicyConfig.getLong("policyId");
             if(policyId != null) {

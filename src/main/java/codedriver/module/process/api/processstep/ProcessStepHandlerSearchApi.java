@@ -1,9 +1,9 @@
 package codedriver.module.process.api.processstep;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -13,6 +13,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,36 +50,34 @@ public class ProcessStepHandlerSearchApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param( name = "name", desc = "流程节点组件名称", type = ApiParamType.STRING)
+            @Param( name = "keywork", type = ApiParamType.STRING, xss = true, desc = "流程节点组件名称")
     })
     @Output({
-            @Param( name = "stepHandlerList", desc = "流程节点组件列表", explode = ProcessStepHandlerVo[].class)
+            @Param( name = "stepHandlerList", explode = ProcessStepHandlerVo[].class, desc = "流程节点组件列表")
     })
     @Description(desc = "流程节点组件检索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        List<ProcessStepHandlerVo> processStepHandlerList = new ArrayList<>();
     	Map<String, ProcessStepHandlerVo> handlerConfigMap = new HashMap<>();
         List<ProcessStepHandlerVo> handlerConfigList = stepHandlerMapper.getProcessStepHandlerConfig();
         for(ProcessStepHandlerVo handlerConfig : handlerConfigList) {
         	handlerConfigMap.put(handlerConfig.getHandler(), handlerConfig);
         }
+
+        List<ProcessStepHandlerVo> processStepHandlerList = new ArrayList<>();
         List<ProcessStepHandlerVo> handlerList = ProcessStepHandlerFactory.getActiveProcessStepHandler();
         if (CollectionUtils.isNotEmpty(handlerList)){
-        	String name = jsonObj.getString("name");
+        	String keywork = jsonObj.getString("keywork");
             for (ProcessStepHandlerVo handler : handlerList){
-            	if(ProcessStepType.PROCESS.getValue().equals(handler.getType())) {
-            		if(StringUtils.isBlank(name) || handler.getName().contains(name)) {
-            			ProcessStepHandlerVo handlerConfig = handlerConfigMap.get(handler.getHandler());
-            			if(handlerConfig == null) {
-            				handlerConfig = new ProcessStepHandlerVo();
-            				handlerConfig.setHandler(handler.getHandler());
-            			}
-            			handlerConfig.setName(handler.getName());
-            			processStepHandlerList.add(handlerConfig);
-            		}
-            	}
+        		if(StringUtils.isBlank(keywork) || handler.getName().toLowerCase().contains(keywork.toLowerCase())) {
+        			ProcessStepHandlerVo handlerConfig = handlerConfigMap.get(handler.getHandler());
+        			IProcessStepHandler processStepHandler= ProcessStepHandlerFactory.getHandler(handler.getHandler());
+        			JSONObject config = processStepHandler.makeupConfig(handlerConfig != null ? handlerConfig.getConfig() : null);
+        			if(MapUtils.isNotEmpty(config)) {
+        				processStepHandlerList.add(new ProcessStepHandlerVo(handler.getHandler(), handler.getName(), config));
+        			}      			
+        		}
             }
         }
         returnObj.put("stepHandlerList", processStepHandlerList);

@@ -852,8 +852,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 		processTaskStepVo.setConfig(stepConfig);
 		ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-		if(processStepHandlerVo != null) {
-			processTaskStepVo.setGlobalConfig(processStepHandlerVo.getConfig());					
+		if(processStepHandlerVo != null && processStepHandlerVo.getConfig() != null) {
+			processTaskStepVo.setGlobalConfig(processStepHandlerVo.getConfig().toJSONString());					
 		}
 		//处理人列表
 		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
@@ -998,8 +998,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
 		startProcessTaskStepVo.setConfig(startStepConfig);
 		ProcessStepHandlerVo processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerByHandler(startProcessTaskStepVo.getHandler());
-		if(processStepHandlerConfig != null) {
-			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+		if(processStepHandlerConfig != null && processStepHandlerConfig.getConfig() != null) {
+			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig().toJSONString());					
 		}
 		Long startProcessTaskStepId = startProcessTaskStepVo.getId();
 		ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();

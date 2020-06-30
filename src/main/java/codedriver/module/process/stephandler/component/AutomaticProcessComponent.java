@@ -427,49 +427,6 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		}
 		JSONObject resultObj = new JSONObject();
 		
-		/** 通知 **/
-		JSONObject notifyPolicyConfig = new JSONObject();
-		notifyPolicyConfig.put("text", "通知");
-		JSONObject notifyPolicyObj = configObj.getJSONObject("notifyPolicyConfig");
-		if(MapUtils.isNotEmpty(notifyPolicyObj)) {
-			notifyPolicyConfig.putAll(notifyPolicyObj);
-		}
-		resultObj.put("notifyPolicyConfig", notifyPolicyConfig);
-		
-		/** 按钮映射 **/
-		JSONArray customButtonArray = new JSONArray();
-		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMPLETE.getValue());this.put("customText", ProcessTaskStepAction.COMPLETE.getText());this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.BACK.getValue());this.put("customText", ProcessTaskStepAction.BACK.getText());this.put("value", "");}});
-//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMMENT.getValue());this.put("customText", ProcessTaskStepAction.COMMENT.getText());this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.TRANSFER.getValue());this.put("customText", ProcessTaskStepAction.TRANSFER.getText());this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.START.getValue());this.put("customText", ProcessTaskStepAction.START.getText());this.put("value", "");}});
-//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.ABORT.getValue());this.put("customText", ProcessTaskStepAction.ABORT.getText());this.put("value", "");}});
-//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.RECOVER.getValue());this.put("customText", ProcessTaskStepAction.RECOVER.getText());this.put("value", "");}});
-		
-		JSONObject customButtonConfig = new JSONObject();
-		customButtonConfig.put("text", "按钮映射");
-		JSONObject customButtonObj = configObj.getJSONObject("customButtonConfig");
-		if(customButtonObj == null) {
-			customButtonObj = new JSONObject();
-		}
-		JSONArray customButtonList = customButtonObj.getJSONArray("customButtonList");
-		if(CollectionUtils.isNotEmpty(customButtonList)) {
-			Map<String, String> customButtonMap = new HashMap<>();
-			for(int i = 0; i < customButtonList.size(); i++) {
-				JSONObject customButton = customButtonList.getJSONObject(i);
-				customButtonMap.put(customButton.getString("name"), customButton.getString("value"));
-			}
-			for(int i = 0; i < customButtonArray.size(); i++) {
-				JSONObject customButton = customButtonArray.getJSONObject(i);
-				String value = customButtonMap.get(customButton.getString("name"));
-				if(StringUtils.isNotBlank(value)) {
-					customButton.put("value", value);
-				}
-			}
-		}
-		customButtonConfig.put("customButtonList", customButtonArray);
-		resultObj.put("customButtonConfig", customButtonConfig);
-		
 		/** 授权 **/
 		JSONArray authorityArray = new JSONArray();
 		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.VIEW.getValue());this.put("text", ProcessTaskStepAction.VIEW.getText());this.put("acceptList", Arrays.asList(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
@@ -478,13 +435,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.UPDATE.getValue());this.put("text", ProcessTaskStepAction.UPDATE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
 		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.URGE.getValue());this.put("text", ProcessTaskStepAction.URGE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
 
-		JSONObject authorityConfig = new JSONObject();
-		authorityConfig.put("text", "授权");
-		JSONObject authorityObj = configObj.getJSONObject("authorityConfig");
-		if(authorityObj == null) {
-			authorityObj = new JSONObject();
-		}
-		JSONArray authorityList = authorityObj.getJSONArray("authorityList");
+		JSONArray authorityList = configObj.getJSONArray("authorityList");
 		if(CollectionUtils.isNotEmpty(authorityList)) {
 			Map<String, JSONArray> authorityMap = new HashMap<>();
 			for(int i = 0; i < authorityList.size(); i++) {
@@ -499,8 +450,43 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 				}
 			}
 		}
-		authorityConfig.put("authorityList", authorityArray);
-		resultObj.put("authorityConfig", authorityConfig);
+		resultObj.put("authorityList", authorityArray);
+		
+		/** 按钮映射 **/
+		JSONArray customButtonArray = new JSONArray();
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMPLETE.getValue());this.put("customText", ProcessTaskStepAction.COMPLETE.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.BACK.getValue());this.put("customText", ProcessTaskStepAction.BACK.getText());this.put("value", "");}});
+//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMMENT.getValue());this.put("customText", ProcessTaskStepAction.COMMENT.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.TRANSFER.getValue());this.put("customText", ProcessTaskStepAction.TRANSFER.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.START.getValue());this.put("customText", ProcessTaskStepAction.START.getText());this.put("value", "");}});
+//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.ABORT.getValue());this.put("customText", ProcessTaskStepAction.ABORT.getText());this.put("value", "");}});
+//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.RECOVER.getValue());this.put("customText", ProcessTaskStepAction.RECOVER.getText());this.put("value", "");}});
+		
+		JSONArray customButtonList = configObj.getJSONArray("customButtonList");
+		if(CollectionUtils.isNotEmpty(customButtonList)) {
+			Map<String, String> customButtonMap = new HashMap<>();
+			for(int i = 0; i < customButtonList.size(); i++) {
+				JSONObject customButton = customButtonList.getJSONObject(i);
+				customButtonMap.put(customButton.getString("name"), customButton.getString("value"));
+			}
+			for(int i = 0; i < customButtonArray.size(); i++) {
+				JSONObject customButton = customButtonArray.getJSONObject(i);
+				String value = customButtonMap.get(customButton.getString("name"));
+				if(StringUtils.isNotBlank(value)) {
+					customButton.put("value", value);
+				}
+			}
+		}
+		resultObj.put("customButtonList", customButtonArray);
+		
+		/** 通知 **/
+		JSONObject notifyPolicyConfig = new JSONObject();
+		notifyPolicyConfig.put("text", "通知");
+		JSONObject notifyPolicyObj = configObj.getJSONObject("notifyPolicyConfig");
+		if(MapUtils.isNotEmpty(notifyPolicyObj)) {
+			notifyPolicyConfig.putAll(notifyPolicyObj);
+		}
+		resultObj.put("notifyPolicyConfig", notifyPolicyConfig);
 		
 		return resultObj;
 	}

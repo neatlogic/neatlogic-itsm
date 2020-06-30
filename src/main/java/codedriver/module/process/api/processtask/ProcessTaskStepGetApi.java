@@ -156,8 +156,8 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
 		startProcessTaskStepVo.setConfig(startStepConfig);
 		ProcessStepHandlerVo processStepHandlerConfig = stepHandlerMapper.getProcessStepHandlerByHandler(startProcessTaskStepVo.getHandler());
-		if(processStepHandlerConfig != null) {
-			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+		if(processStepHandlerConfig != null && processStepHandlerConfig.getConfig() != null) {
+			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig().toJSONString());					
 		}
 		Long startProcessTaskStepId = startProcessTaskStepVo.getId();
 		ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
@@ -241,8 +241,8 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 				processTaskStepVo.setConfig(stepConfig);
 				processStepHandlerConfig = stepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-				if(processStepHandlerConfig != null) {
-					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+				if(processStepHandlerConfig != null && processStepHandlerConfig.getConfig() != null) {
+					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig().toJSONString());					
 				}
 				//处理人列表
 				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
