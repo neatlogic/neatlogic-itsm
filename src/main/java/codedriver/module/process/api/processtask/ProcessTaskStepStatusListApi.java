@@ -73,8 +73,8 @@ public class ProcessTaskStepStatusListApi extends ApiComponentBase {
 				processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
 				processTaskStepVo.setConfig(processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash()));
 				ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(processTaskStepVo.getHandler());
-				if(processStepHandlerConfig != null) {
-					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+				if(processStepHandlerConfig != null && processStepHandlerConfig.getConfig() != null) {
+					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig().toJSONString());					
 				}
 			}
 		}	
