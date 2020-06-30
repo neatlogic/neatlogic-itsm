@@ -480,13 +480,12 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		resultObj.put("customButtonList", customButtonArray);
 		
 		/** 通知 **/
-		JSONObject notifyPolicyConfig = new JSONObject();
-		notifyPolicyConfig.put("text", "通知");
-		JSONObject notifyPolicyObj = configObj.getJSONObject("notifyPolicyConfig");
-		if(MapUtils.isNotEmpty(notifyPolicyObj)) {
-			notifyPolicyConfig.putAll(notifyPolicyObj);
+		JSONObject notifyPolicyObj = new JSONObject();
+		JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
+		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
+			notifyPolicyObj.putAll(notifyPolicyConfig);
 		}
-		resultObj.put("notifyPolicyConfig", notifyPolicyConfig);
+		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
 		
 		return resultObj;
 	}
