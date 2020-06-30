@@ -21,6 +21,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
@@ -114,7 +115,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		processTaskStepDataVo.setProcessTaskId(processTaskId);
 		processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
 		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-		processTaskStepDataVo.setType("stepDraftSave");
+		processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
 		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 		//组件联动导致隐藏的属性uuid列表
 
@@ -192,11 +193,11 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		
 		String fileUuidListStr = jsonObj.getString("fileUuidList");
 		if(StringUtils.isNotBlank(fileUuidListStr)) {
-			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
-			if(CollectionUtils.isNotEmpty(fileUuidList)) {
-				for(String fileUuid : fileUuidList) {
-					if(fileMapper.getFileByUuid(fileUuid) == null) {
-						throw new ProcessTaskRuntimeException("上传附件uuid:'" + fileUuid + "'不存在");
+			List<Long> fileIdList = JSON.parseArray(fileUuidListStr, Long.class);
+			if(CollectionUtils.isNotEmpty(fileIdList)) {
+				for(Long fileId : fileIdList) {
+					if(fileMapper.getFileById(fileId) == null) {
+						throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
 					}
 				}
 				ProcessTaskContentVo fileUuidListContentVo = new ProcessTaskContentVo(fileUuidListStr);

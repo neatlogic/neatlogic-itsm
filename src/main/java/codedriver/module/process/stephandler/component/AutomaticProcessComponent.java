@@ -27,6 +27,7 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
@@ -162,7 +163,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 			}else {//loadJob,定时执行第一次请求
 				//初始化audit执行状态
 				JSONObject audit = null;
-				ProcessTaskStepDataVo data = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler()));
+				ProcessTaskStepDataVo data = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue()));
 				JSONObject dataObject = data.getData();
 				audit = dataObject.getJSONObject("requestAudit");
 				audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));

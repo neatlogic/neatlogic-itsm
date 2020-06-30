@@ -12,8 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -80,7 +80,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 
 	@Override
 	public void initJob(String tenantUuid) {
-		List<ProcessTaskStepDataVo> dataList = processTaskStepDataMapper.searchProcessTaskStepData(new ProcessTaskStepDataVo(null,null,ProcessStepHandler.AUTOMATIC.getHandler()));
+		List<ProcessTaskStepDataVo> dataList = processTaskStepDataMapper.searchProcessTaskStepData(new ProcessTaskStepDataVo(null,null,ProcessTaskStepDataType.AUTOMATIC.getValue()));
 		AutomaticConfigVo automaticConfigVo = null;
 		for(ProcessTaskStepDataVo dataVo : dataList) {
 			JSONObject dataObject = dataVo.getData();
@@ -109,7 +109,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		//excute
 		Boolean isUnloadJob = processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
 		//update nextFireTime
-		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler());
+		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue());
 		ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
 		JSONObject data = stepData.getData();// (JSONObject) jobObject.getData("data");
 		if(data != null) {

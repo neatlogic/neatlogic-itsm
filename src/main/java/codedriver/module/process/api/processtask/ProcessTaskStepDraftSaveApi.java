@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -174,7 +175,7 @@ public class ProcessTaskStepDraftSaveApi extends ApiComponentBase {
 		processTaskStepDataVo.setProcessTaskId(processTaskId);
 		processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
 		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-		processTaskStepDataVo.setType("stepDraftSave");
+		processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
 		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 		processTaskStepDataVo.setData(jsonObj.toJSONString());
 		processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
