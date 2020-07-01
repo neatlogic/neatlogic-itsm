@@ -80,7 +80,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		@Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "表单属性数据列表"),
 		@Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "联动隐藏表单属性列表"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
+		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
 	})
 	@Output({
 		@Param(name = "commentList", explode = ProcessTaskStepCommentVo[].class, desc = "当前步骤评论列表")
@@ -185,25 +185,20 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-//			processTaskMapper.replaceProcessTaskContent(contentVo);
-//			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 			processTaskStepCommentVo.setContentHash(contentVo.getHash());
 			processTaskStepCommentVo.setContent(content);
 		}
 		
-		String fileUuidListStr = jsonObj.getString("fileUuidList");
-		if(StringUtils.isNotBlank(fileUuidListStr)) {
-			List<Long> fileIdList = JSON.parseArray(fileUuidListStr, Long.class);
-			if(CollectionUtils.isNotEmpty(fileIdList)) {
-				for(Long fileId : fileIdList) {
-					if(fileMapper.getFileById(fileId) == null) {
-						throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
-					}
+		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+		if(CollectionUtils.isNotEmpty(fileIdList)) {
+			for(Long fileId : fileIdList) {
+				if(fileMapper.getFileById(fileId) == null) {
+					throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
 				}
-				ProcessTaskContentVo fileUuidListContentVo = new ProcessTaskContentVo(fileUuidListStr);
-				processTaskMapper.replaceProcessTaskContent(fileUuidListContentVo);
-				processTaskStepCommentVo.setFileUuidListHash(fileUuidListContentVo.getHash());
 			}
+			ProcessTaskContentVo fileIdListContentVo = new ProcessTaskContentVo(JSON.toJSONString(fileIdList));
+			processTaskMapper.replaceProcessTaskContent(fileIdListContentVo);
+			processTaskStepCommentVo.setFileIdListHash(fileIdListContentVo.getHash());
 		}
 		
 		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
