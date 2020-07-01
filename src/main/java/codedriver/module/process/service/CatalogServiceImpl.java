@@ -28,9 +28,13 @@ public class CatalogServiceImpl implements CatalogService {
 //			throw new TeamNotFoundException(CatalogVo.ROOT_UUID);
 //		}
 		//获取最大的右编码值maxRhtCode
-		int maxRhtCode = catalogMapper.getMaxRhtCode();
-		if(Objects.equals(maxRhtCode, count * 2 + 1) || count == 0) {
-			return true;
+		CatalogVo vo = catalogMapper.getMaxRhtCode();
+		int maxRhtCode;
+		if(vo != null && vo.getRht() != null){
+			maxRhtCode = vo.getRht();
+			if(Objects.equals(maxRhtCode, count * 2 + 1) || count == 0) {
+				return true;
+			}
 		}
 		return false;
 	}

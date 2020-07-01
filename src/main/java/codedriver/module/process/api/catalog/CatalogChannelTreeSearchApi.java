@@ -57,12 +57,13 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 //			catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
-			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
+			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_UUID, 0);
 		}
 //		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
 		CatalogVo rootCatalog = catalogService.buildRootCatalog();
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
+			catalogList.add(rootCatalog);
 			for(CatalogVo catalogVo : catalogList) {
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);			
 			}
@@ -75,18 +76,6 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 			}
 		}
 
-		List<CatalogVo> childCatalogListForRoot = new ArrayList<>();
-
-		if(uuidKeyMap.size() != 0){
-			Collection<CatalogVo> catalogVos = uuidKeyMap.values();
-			for(CatalogVo vo : catalogVos){
-				if("0".equals(vo.getParentUuid())){
-					childCatalogListForRoot.add(vo);
-				}
-			}
-		}
-//		rootCatalog.getChildren(childCatalogListForRoot,new ArrayList());
-		
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
 		if(CollectionUtils.isNotEmpty(channelList)) {
 			for(ChannelVo channelVo : channelList) {
@@ -98,11 +87,11 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 			}
 		}
 		
-//		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
-//		if(root != null) {
-//			return root.getChildren();
-//		}
-		return rootCatalog.getChildren(childCatalogListForRoot,new ArrayList());
-//		return new ArrayList<>();
+		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
+		if(root != null) {
+			return root.getChildren();
+		}
+//		return rootCatalog.getChildren(childCatalogListForRoot,new ArrayList());
+		return new ArrayList<>();
 	}
 }
