@@ -105,27 +105,23 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
 		}
 		//获取上传附件uuid
-		String oldFileIdListStr = null;
+		List<Long> oldFileIdList = new ArrayList<>();
 		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 		processTaskFileVo.setProcessTaskId(processTaskId);
 		processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		if(processTaskFileList.size() > 0) {
-			List<Long> oldFileIdList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
 				oldFileIdList.add(processTaskFile.getFileId());
 			}
-			oldFileIdListStr = JSON.toJSONString(oldFileIdList);
-			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(oldFileIdListStr);
+			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldFileIdList));
 			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), processTaskContentVo.getHash());
 			processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
 		}
 		/** 保存新附件uuid **/
-		String newFileIdListStr = null;
 		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
 		if(CollectionUtils.isNotEmpty(fileIdList)) {
-			newFileIdListStr = JSON.toJSONString(fileIdList);
 			for (Long fileId : fileIdList) {
 				if(fileMapper.getFileById(fileId) != null) {
 					processTaskFileVo.setFileId(fileId);
@@ -145,7 +141,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 			processTaskMapper.deleteProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, oldContentHash));
 		}
 		//生成活动
-		if(!Objects.equals(oldContentHash, newContentHash) || !Objects.equals(oldFileIdListStr, newFileIdListStr)) {
+		if(!Objects.equals(oldContentHash, newContentHash) || !Objects.equals(oldFileIdList, fileIdList)) {
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.UPDATECONTENT);
 		}

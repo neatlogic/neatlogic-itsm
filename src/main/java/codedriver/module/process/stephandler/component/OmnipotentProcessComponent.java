@@ -506,14 +506,15 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
-		String fileIdListStr = paramObj.getString("fileIdList");
-		if (StringUtils.isNotBlank(fileIdListStr)) {
-			List<Long> fileIdList = JSON.parseArray(fileIdListStr, Long.class);
+		
+		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(paramObj.getJSONArray("fileIdList")), Long.class);
+		if(CollectionUtils.isNotEmpty(fileIdList)) {
 			for (Long fileId : fileIdList) {
 				processTaskFileVo.setFileId(fileId);
 				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
 			}
-		}
+		}	
+
 		return 1;
 	}
 	
