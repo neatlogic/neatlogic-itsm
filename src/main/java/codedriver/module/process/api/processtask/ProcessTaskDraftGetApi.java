@@ -148,10 +148,8 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 			
 			if(processTaskFileList.size() > 0) {
-				//List<Long> fileUuidList = new ArrayList<>();
 				List<FileVo> fileList = new ArrayList<>();
 				for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-					//fileUuidList.add(processTaskFile.getFileId());
 					FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
 					if(fileVo != null) {
 						fileList.add(fileVo);
