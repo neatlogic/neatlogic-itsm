@@ -160,4 +160,10 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public JSONObject makeupConfig(JSONObject configObj) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

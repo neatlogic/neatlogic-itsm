@@ -38,12 +38,12 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.FormAttributeAction;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.automatic.CallbackType;
 import codedriver.framework.process.constvalue.automatic.FailPolicy;
@@ -543,20 +543,20 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	@Override
 	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepComment) {
-		if(StringUtils.isNotBlank(processTaskStepComment.getContentHash())) {
+		if(StringUtils.isBlank(processTaskStepComment.getContent()) && StringUtils.isNotBlank(processTaskStepComment.getContentHash())) {
 			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getContentHash());
 			if(contentVo != null) {
 				processTaskStepComment.setContent(contentVo.getContent());
 			}
 		}
-		if(StringUtils.isNotBlank(processTaskStepComment.getFileUuidListHash())) {
-			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getFileUuidListHash());
+		if(StringUtils.isNotBlank(processTaskStepComment.getFileIdListHash())) {
+			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getFileIdListHash());
 			if(contentVo != null) {
-				List<String> fileUuidList = JSON.parseArray(contentVo.getContent(), String.class);
-				if(CollectionUtils.isNotEmpty(fileUuidList)) {
-					processTaskStepComment.setFileUuidList(fileUuidList);
-					for(String fileUuid : fileUuidList) {
-						FileVo fileVo = fileMapper.getFileByUuid(fileUuid);
+				List<Long> fileIdList = JSON.parseArray(contentVo.getContent(), Long.class);
+				if(CollectionUtils.isNotEmpty(fileIdList)) {
+					processTaskStepComment.setFileIdList(fileIdList);
+					for(Long fileId : fileIdList) {
+						FileVo fileVo = fileMapper.getFileById(fileId);
 						if(fileVo != null) {
 							processTaskStepComment.getFileList().add(fileVo);
 						}
@@ -580,7 +580,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
 		
 		Boolean isUnloadJob = false;
-		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler()));
+		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue()));
 		JSONObject data = auditDataVo.getData();
 		String integrationUuid = automaticConfigVo.getBaseIntegrationUuid();
 		JSONObject successConfig = automaticConfigVo.getBaseSuccessConfig();
@@ -694,7 +694,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			if(automaticConfigVo.getBaseSuccessConfig() == null) {
 				requestAudit.put("successConfig",successConfig);
 			}
-			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessStepHandler.AUTOMATIC.getHandler());
+			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessTaskStepDataType.AUTOMATIC.getValue());
 			auditDataVo.setData(data.toJSONString());
 			auditDataVo.setFcu(UserContext.get().getUserUuid());
 			auditDataVo.setFcu("system");
@@ -852,8 +852,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 		processTaskStepVo.setConfig(stepConfig);
 		ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-		if(processStepHandlerVo != null) {
-			processTaskStepVo.setGlobalConfig(processStepHandlerVo.getConfig());					
+		if(processStepHandlerVo != null && processStepHandlerVo.getConfig() != null) {
+			processTaskStepVo.setGlobalConfig(processStepHandlerVo.getConfig().toJSONString());					
 		}
 		//处理人列表
 		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
@@ -998,8 +998,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
 		startProcessTaskStepVo.setConfig(startStepConfig);
 		ProcessStepHandlerVo processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerByHandler(startProcessTaskStepVo.getHandler());
-		if(processStepHandlerConfig != null) {
-			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+		if(processStepHandlerConfig != null && processStepHandlerConfig.getConfig() != null) {
+			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig().toJSONString());					
 		}
 		Long startProcessTaskStepId = startProcessTaskStepVo.getId();
 		ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
@@ -1018,11 +1018,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		
 		if(processTaskFileList.size() > 0) {
-			List<String> fileUuidList = new ArrayList<>();
 			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				fileUuidList.add(processTaskFile.getFileUuid());
-				FileVo fileVo = fileMapper.getFileByUuid(processTaskFile.getFileUuid());
+				FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
 				fileList.add(fileVo);
 			}
 			comment.setFileList(fileList);

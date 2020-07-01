@@ -3,9 +3,12 @@ package codedriver.module.process.stephandler.component;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -23,10 +26,14 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
@@ -162,7 +169,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 			}else {//loadJob,定时执行第一次请求
 				//初始化audit执行状态
 				JSONObject audit = null;
-				ProcessTaskStepDataVo data = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler()));
+				ProcessTaskStepDataVo data = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue()));
 				JSONObject dataObject = data.getData();
 				audit = dataObject.getJSONObject("requestAudit");
 				audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
@@ -411,6 +418,77 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	
 	@Override
 	public void updateProcessTaskStepUserAndWorker(List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) {
+	}
+	
+	@SuppressWarnings("serial")
+	@Override
+	public JSONObject makeupConfig(JSONObject configObj) {
+		if(configObj == null) {
+			configObj = new JSONObject();
+		}
+		JSONObject resultObj = new JSONObject();
+		
+		/** 授权 **/
+		JSONArray authorityArray = new JSONArray();
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.VIEW.getValue());this.put("text", ProcessTaskStepAction.VIEW.getText());this.put("acceptList", Arrays.asList(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+//		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.ABORT.getValue());this.put("text", ProcessTaskStepAction.ABORT.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.TRANSFER.getValue());this.put("text", ProcessTaskStepAction.TRANSFER.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.UPDATE.getValue());this.put("text", ProcessTaskStepAction.UPDATE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.URGE.getValue());this.put("text", ProcessTaskStepAction.URGE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+
+		JSONArray authorityList = configObj.getJSONArray("authorityList");
+		if(CollectionUtils.isNotEmpty(authorityList)) {
+			Map<String, JSONArray> authorityMap = new HashMap<>();
+			for(int i = 0; i < authorityList.size(); i++) {
+				JSONObject authority = authorityList.getJSONObject(i);
+				authorityMap.put(authority.getString("action"), authority.getJSONArray("acceptList"));
+			}
+			for(int i = 0; i < authorityArray.size(); i++) {
+				JSONObject authority = authorityArray.getJSONObject(i);
+				JSONArray acceptList = authorityMap.get(authority.getString("action"));
+				if(acceptList != null) {
+					authority.put("acceptList", acceptList);
+				}
+			}
+		}
+		resultObj.put("authorityList", authorityArray);
+		
+		/** 按钮映射 **/
+		JSONArray customButtonArray = new JSONArray();
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMPLETE.getValue());this.put("customText", ProcessTaskStepAction.COMPLETE.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.BACK.getValue());this.put("customText", ProcessTaskStepAction.BACK.getText());this.put("value", "");}});
+//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMMENT.getValue());this.put("customText", ProcessTaskStepAction.COMMENT.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.TRANSFER.getValue());this.put("customText", ProcessTaskStepAction.TRANSFER.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.START.getValue());this.put("customText", ProcessTaskStepAction.START.getText());this.put("value", "");}});
+//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.ABORT.getValue());this.put("customText", ProcessTaskStepAction.ABORT.getText());this.put("value", "");}});
+//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.RECOVER.getValue());this.put("customText", ProcessTaskStepAction.RECOVER.getText());this.put("value", "");}});
+		
+		JSONArray customButtonList = configObj.getJSONArray("customButtonList");
+		if(CollectionUtils.isNotEmpty(customButtonList)) {
+			Map<String, String> customButtonMap = new HashMap<>();
+			for(int i = 0; i < customButtonList.size(); i++) {
+				JSONObject customButton = customButtonList.getJSONObject(i);
+				customButtonMap.put(customButton.getString("name"), customButton.getString("value"));
+			}
+			for(int i = 0; i < customButtonArray.size(); i++) {
+				JSONObject customButton = customButtonArray.getJSONObject(i);
+				String value = customButtonMap.get(customButton.getString("name"));
+				if(StringUtils.isNotBlank(value)) {
+					customButton.put("value", value);
+				}
+			}
+		}
+		resultObj.put("customButtonList", customButtonArray);
+		
+		/** 通知 **/
+		JSONObject notifyPolicyObj = new JSONObject();
+		JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
+		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
+			notifyPolicyObj.putAll(notifyPolicyConfig);
+		}
+		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
+		
+		return resultObj;
 	}
 	
 }

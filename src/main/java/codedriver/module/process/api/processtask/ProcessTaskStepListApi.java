@@ -111,8 +111,8 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		String startStepConfig = processTaskMapper.getProcessTaskStepConfigByHash(startProcessTaskStepVo.getConfigHash());
 		startProcessTaskStepVo.setConfig(startStepConfig);
 		ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(startProcessTaskStepVo.getHandler());
-		if(processStepHandlerConfig != null) {
-			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+		if(processStepHandlerConfig != null && processStepHandlerConfig.getConfig() != null) {
+			startProcessTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig().toJSONString());					
 		}
 		List<ProcessTaskStepUserVo> startStepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(startProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(startStepMajorUserList)) {
@@ -170,11 +170,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		
 		if(processTaskFileList.size() > 0) {
-			List<String> fileUuidList = new ArrayList<>();
 			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				fileUuidList.add(processTaskFile.getFileUuid());
-				FileVo fileVo = fileMapper.getFileByUuid(processTaskFile.getFileUuid());
+				FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
 				fileList.add(fileVo);
 			}
 			comment.setFileList(fileList);
@@ -288,8 +286,8 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 				processTaskStepVo.setConfig(stepConfig);
 				processStepHandlerConfig = handlerConfigMap.get(processTaskStepVo.getHandler());
-				if(processStepHandlerConfig != null) {
-					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
+				if(processStepHandlerConfig != null && processStepHandlerConfig.getConfig() != null) {
+					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig().toJSONString());					
 				}
 				//processtaskStepData
 				ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));

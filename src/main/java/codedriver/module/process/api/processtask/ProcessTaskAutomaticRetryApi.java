@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -56,7 +56,7 @@ public class ProcessTaskAutomaticRetryApi extends ApiComponentBase {
 	@Description(desc = "工单automatic步骤重试接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ProcessTaskStepVo  processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(jsonObj.getLong("processTaskStepId"));
-		ProcessTaskStepDataVo data = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),ProcessStepHandler.AUTOMATIC.getHandler()));
+		ProcessTaskStepDataVo data = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue()));
 		JSONObject dataObject = data.getData();
 		Boolean isRetry = false;
 		AutomaticConfigVo automaticConfigVo = null;

@@ -1,6 +1,7 @@
 package codedriver.module.process.stephandler.component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,12 +19,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
@@ -36,7 +38,6 @@ import codedriver.framework.process.dto.ProcessTaskAssignWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -287,49 +288,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-		//找出当前用户再当前步骤的所有暂存活动，一般只有一个
-//		ProcessTaskStepAuditVo auditVo = new ProcessTaskStepAuditVo();
-//		auditVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-//		auditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-//		auditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-//		auditVo.setUserUuid(UserContext.get().getUserUuid(true));
-//		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(auditVo);
-//		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-//			//找出最后一次暂存活动
-//			ProcessTaskStepAuditVo processTaskStepAuditVo = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
-//			List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAuditVo.getAuditDetailList();
-//			for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetail : processTaskStepAuditDetailList) {
-//				ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetail.getNewContent());
-//				if(processTaskContentVo != null) {
-//					paramObj.put(ProcessTaskAuditDetailType.getParamName(processTaskStepAuditDetail.getType()), processTaskContentVo.getContent());
-//				}
-//			}
-//			//删除暂存活动
-//			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-//				processTaskMapper.deleteProcessTaskStepAuditById(processTaskStepAudit.getId());
-//			}
-//		}
-		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
-		processTaskStepDataVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskStepDataVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-		processTaskStepDataVo.setType("stepDraftSave");
-		ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
-		if(stepDraftSaveData != null) {
-			JSONObject dataObj = stepDraftSaveData.getData();
-			if(MapUtils.isNotEmpty(dataObj)) {
-				paramObj.putAll(dataObj);
-			}
-		}
-		/** 保存描述内容 **/
-		String content = paramObj.getString("content");
-		if (StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-//			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-//			paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
-		}
-
 		if(ProcessTaskStepAction.COMPLETE.getValue().equals(paramObj.getString("action"))) {		
 //			前置步骤指派处理人
 //			"assignWorkerList": [
@@ -548,14 +506,15 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
-		String fileUuidListStr = paramObj.getString("fileUuidList");
-		if (StringUtils.isNotBlank(fileUuidListStr)) {
-			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
-			for (String fileUuid : fileUuidList) {
-				processTaskFileVo.setFileUuid(fileUuid);
+		
+		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(paramObj.getJSONArray("fileIdList")), Long.class);
+		if(CollectionUtils.isNotEmpty(fileIdList)) {
+			for (Long fileId : fileIdList) {
+				processTaskFileVo.setFileId(fileId);
 				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
 			}
-		}
+		}	
+
 		return 1;
 	}
 	
@@ -683,16 +642,87 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		if (processTaskFileList.size() > 0) {
-			List<String> fileUuidList = new ArrayList<>();
+			List<Long> fileIdList = new ArrayList<>();
 			for (ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				if (fileMapper.getFileByUuid(processTaskFile.getFileUuid()) == null) {
-					throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileUuid() + "'不存在");
+				if (fileMapper.getFileById(processTaskFile.getFileId()) == null) {
+					throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileId() + "'不存在");
 				}
-				fileUuidList.add(processTaskFile.getFileUuid());
+				fileIdList.add(processTaskFile.getFileId());
 			}
-			paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(fileUuidList));
+			paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(fileIdList));
 		}
 		currentProcessTaskStepVo.setParamObj(paramObj);
 		return true;
+	}
+	
+	@SuppressWarnings("serial")
+	@Override
+	public JSONObject makeupConfig(JSONObject configObj) {				
+		if(configObj == null) {
+			configObj = new JSONObject();
+		}
+		JSONObject resultObj = new JSONObject();
+		
+		/** 授权 **/
+		JSONArray authorityArray = new JSONArray();
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.VIEW.getValue());this.put("text", ProcessTaskStepAction.VIEW.getText());this.put("acceptList", Arrays.asList(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.ABORT.getValue());this.put("text", ProcessTaskStepAction.ABORT.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.TRANSFER.getValue());this.put("text", ProcessTaskStepAction.TRANSFER.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.UPDATE.getValue());this.put("text", ProcessTaskStepAction.UPDATE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.URGE.getValue());this.put("text", ProcessTaskStepAction.URGE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
+
+		JSONArray authorityList = configObj.getJSONArray("authorityList");
+		if(CollectionUtils.isNotEmpty(authorityList)) {
+			Map<String, JSONArray> authorityMap = new HashMap<>();
+			for(int i = 0; i < authorityList.size(); i++) {
+				JSONObject authority = authorityList.getJSONObject(i);
+				authorityMap.put(authority.getString("action"), authority.getJSONArray("acceptList"));
+			}
+			for(int i = 0; i < authorityArray.size(); i++) {
+				JSONObject authority = authorityArray.getJSONObject(i);
+				JSONArray acceptList = authorityMap.get(authority.getString("action"));
+				if(acceptList != null) {
+					authority.put("acceptList", acceptList);
+				}
+			}
+		}
+		resultObj.put("authorityList", authorityArray);
+		
+		/** 按钮映射 **/
+		JSONArray customButtonArray = new JSONArray();
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMPLETE.getValue());this.put("customText", ProcessTaskStepAction.COMPLETE.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.BACK.getValue());this.put("customText", ProcessTaskStepAction.BACK.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMMENT.getValue());this.put("customText", ProcessTaskStepAction.COMMENT.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.TRANSFER.getValue());this.put("customText", ProcessTaskStepAction.TRANSFER.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.START.getValue());this.put("customText", ProcessTaskStepAction.START.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.ABORT.getValue());this.put("customText", ProcessTaskStepAction.ABORT.getText());this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.RECOVER.getValue());this.put("customText", ProcessTaskStepAction.RECOVER.getText());this.put("value", "");}});
+		
+		JSONArray customButtonList = configObj.getJSONArray("customButtonList");
+		if(CollectionUtils.isNotEmpty(customButtonList)) {
+			Map<String, String> customButtonMap = new HashMap<>();
+			for(int i = 0; i < customButtonList.size(); i++) {
+				JSONObject customButton = customButtonList.getJSONObject(i);
+				customButtonMap.put(customButton.getString("name"), customButton.getString("value"));
+			}
+			for(int i = 0; i < customButtonArray.size(); i++) {
+				JSONObject customButton = customButtonArray.getJSONObject(i);
+				String value = customButtonMap.get(customButton.getString("name"));
+				if(StringUtils.isNotBlank(value)) {
+					customButton.put("value", value);
+				}
+			}
+		}
+		resultObj.put("customButtonList", customButtonArray);
+		
+		/** 通知 **/
+		JSONObject notifyPolicyObj = new JSONObject();
+		JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
+		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
+			notifyPolicyObj.putAll(notifyPolicyConfig);
+		}
+		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
+		
+		return resultObj;
 	}
 }

@@ -21,6 +21,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
@@ -79,7 +80,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		@Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "表单属性数据列表"),
 		@Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "联动隐藏表单属性列表"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
+		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
 	})
 	@Output({
 		@Param(name = "commentList", explode = ProcessTaskStepCommentVo[].class, desc = "当前步骤评论列表")
@@ -114,7 +115,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		processTaskStepDataVo.setProcessTaskId(processTaskId);
 		processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
 		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-		processTaskStepDataVo.setType("stepDraftSave");
+		processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
 		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 		//组件联动导致隐藏的属性uuid列表
 
@@ -184,31 +185,28 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-//			processTaskMapper.replaceProcessTaskContent(contentVo);
-//			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 			processTaskStepCommentVo.setContentHash(contentVo.getHash());
+			processTaskStepCommentVo.setContent(content);
 		}
 		
-		String fileUuidListStr = jsonObj.getString("fileUuidList");
-		if(StringUtils.isNotBlank(fileUuidListStr)) {
-			List<String> fileUuidList = JSON.parseArray(fileUuidListStr, String.class);
-			if(CollectionUtils.isNotEmpty(fileUuidList)) {
-				for(String fileUuid : fileUuidList) {
-					if(fileMapper.getFileByUuid(fileUuid) == null) {
-						throw new ProcessTaskRuntimeException("上传附件uuid:'" + fileUuid + "'不存在");
-					}
+		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+		if(CollectionUtils.isNotEmpty(fileIdList)) {
+			for(Long fileId : fileIdList) {
+				if(fileMapper.getFileById(fileId) == null) {
+					throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
 				}
-				ProcessTaskContentVo fileUuidListContentVo = new ProcessTaskContentVo(fileUuidListStr);
-				processTaskMapper.replaceProcessTaskContent(fileUuidListContentVo);
-				processTaskStepCommentVo.setFileUuidListHash(fileUuidListContentVo.getHash());
 			}
+			ProcessTaskContentVo fileIdListContentVo = new ProcessTaskContentVo(JSON.toJSONString(fileIdList));
+			processTaskMapper.replaceProcessTaskContent(fileIdListContentVo);
+			processTaskStepCommentVo.setFileIdListHash(fileIdListContentVo.getHash());
 		}
-		processTaskMapper.insertProcessTaskStepComment(processTaskStepCommentVo);
+		
 		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
+		processTaskStepCommentList.add(processTaskStepCommentVo);
 		for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
 			processTaskService.parseProcessTaskStepComment(processTaskStepComment);
 		}
-		
+		processTaskMapper.insertProcessTaskStepComment(processTaskStepCommentVo);
 		//生成活动	
 		processTaskStepVo.setParamObj(jsonObj);
 		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
