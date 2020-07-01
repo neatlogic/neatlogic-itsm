@@ -29,10 +29,10 @@ public class CatalogServiceImpl implements CatalogService {
 //		}
 		//获取最大的右编码值maxRhtCode
 		CatalogVo vo = catalogMapper.getMaxRhtCode();
-		int maxRhtCode;
+		Integer maxRhtCode;
 		if(vo != null && vo.getRht() != null){
 			maxRhtCode = vo.getRht();
-			if(Objects.equals(maxRhtCode, count * 2 + 1) || count == 0) {
+			if(Objects.equals(maxRhtCode, count * 2) || count == 0) {
 				return true;
 			}
 		}
@@ -58,7 +58,7 @@ public class CatalogServiceImpl implements CatalogService {
 
 	@Override
 	public CatalogVo buildRootCatalog() {
-		int count = catalogMapper.getCatalogCount(new CatalogVo()) + 1;
+		int count = catalogMapper.getCatalogCount(new CatalogVo());
 		CatalogVo rootCatalog = new CatalogVo();
 		rootCatalog.setUuid("0");
 		rootCatalog.setName("root");

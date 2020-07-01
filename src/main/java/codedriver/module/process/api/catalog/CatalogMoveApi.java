@@ -52,7 +52,7 @@ public class CatalogMoveApi extends ApiComponentBase {
 	@Description(desc = "服务目录移动位置接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {		
-		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+//		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
@@ -65,6 +65,10 @@ public class CatalogMoveApi extends ApiComponentBase {
 		String parentUuid = jsonObj.getString("parentUuid");
 		//判断移动后的父级服务目录是否存在
 		CatalogVo parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
+		//如果parentUuid为0，则表明其目标父目录为root，那么就构建一个虚拟的root
+		if("0".equals(parentUuid)){
+			parentCatalog = catalogService.buildRootCatalog();
+		}
 		if(parentCatalog == null) {
 			throw new CatalogNotFoundException(parentUuid);
 		}

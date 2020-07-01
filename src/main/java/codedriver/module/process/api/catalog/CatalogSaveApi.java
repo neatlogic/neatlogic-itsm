@@ -65,18 +65,18 @@ public class CatalogSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 //		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
-		//没有了根节点，那么根据什么来判断是否需要重建左右编码呢，又如何重建呢？
-		//关于如何判断是否需要重建：可以根据表中的count和最大的右编码进行比较
-		//关于如何重建：直接用CatalogVo.ROOT_UUID去重建
+		//根据catalog表中的count和最大的右编码进行比较
 		if(!catalogService.checkLeftRightCodeIsExists()) {
+			//直接用CatalogVo.ROOT_UUID去重建
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_UUID, 0);
 		}
-		//没有了根节点，如果新增一个父目录是root的目录，那么左右编码的值从何而来呢？
+		//构造一个虚拟的root节点
 		CatalogVo rootCatalogVo = catalogService.buildRootCatalog();
 		CatalogVo catalogVo = JSON.toJavaObject(jsonObj, CatalogVo.class);
 		//获取父级信息
 		String parentUuid = catalogVo.getParentUuid();
 		CatalogVo parentCatalog;
+		//如果parentUuid为0，则表明其目标父目录为root
 		if("0".equals(parentUuid)){
 			parentCatalog = rootCatalogVo;
 		}else{

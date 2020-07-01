@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.module.process.service.CatalogService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 public class CatalogTreeSearchApi extends ApiComponentBase {
+
+	@Autowired
+	private CatalogService catalogService;
 	
 	@Autowired
 	private CatalogMapper catalogMapper;
@@ -61,7 +65,8 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String catalogUuid = jsonObj.getString("catalogUuid");
-		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
+		//如果catalogUuid为0则放行
+		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0 && !"0".equals(catalogUuid)) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
 
@@ -78,10 +83,14 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 
-		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+//		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+		//构建一个虚拟的root目录
+		CatalogVo rootCatalogVo = catalogService.buildRootCatalog();
 		//查出所有目录
-		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
+		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalogVo.getLft(), rootCatalogVo.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
+			//将root目录加入到catalogList中
+			catalogList.add(rootCatalogVo);
 			for(CatalogVo catalogVo : catalogList) {
 				if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())) {
 					catalogVo.setAuthority(true);

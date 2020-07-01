@@ -56,6 +56,7 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
+			//不再锁定root节点，且以CatalogVo.ROOT_UUID重建左右编码
 //			catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_UUID, 0);
 		}
@@ -63,6 +64,7 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		CatalogVo rootCatalog = catalogService.buildRootCatalog();
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
+			//将虚拟的root节点加入到catalogList中
 			catalogList.add(rootCatalog);
 			for(CatalogVo catalogVo : catalogList) {
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);			
@@ -91,7 +93,6 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		if(root != null) {
 			return root.getChildren();
 		}
-//		return rootCatalog.getChildren(childCatalogListForRoot,new ArrayList());
 		return new ArrayList<>();
 	}
 }
