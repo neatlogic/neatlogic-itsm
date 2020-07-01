@@ -549,13 +549,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				processTaskStepComment.setContent(contentVo.getContent());
 			}
 		}
-		if(StringUtils.isNotBlank(processTaskStepComment.getFileUuidListHash())) {
-			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getFileUuidListHash());
+		if(StringUtils.isNotBlank(processTaskStepComment.getFileIdListHash())) {
+			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getFileIdListHash());
 			if(contentVo != null) {
-				List<Long> fileUuidList = JSON.parseArray(contentVo.getContent(), Long.class);
-				if(CollectionUtils.isNotEmpty(fileUuidList)) {
-					processTaskStepComment.setFileIdList(fileUuidList);
-					for(Long fileId : fileUuidList) {
+				List<Long> fileIdList = JSON.parseArray(contentVo.getContent(), Long.class);
+				if(CollectionUtils.isNotEmpty(fileIdList)) {
+					processTaskStepComment.setFileIdList(fileIdList);
+					for(Long fileId : fileIdList) {
 						FileVo fileVo = fileMapper.getFileById(fileId);
 						if(fileVo != null) {
 							processTaskStepComment.getFileList().add(fileVo);
@@ -1018,10 +1018,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		
 		if(processTaskFileList.size() > 0) {
-			//List<String> fileUuidList = new ArrayList<>();
 			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				//fileUuidList.add(processTaskFile.getFileId());
 				FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
 				fileList.add(fileVo);
 			}

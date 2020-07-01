@@ -177,10 +177,8 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
 		
 		if(processTaskFileList.size() > 0) {
-			//List<String> fileUuidList = new ArrayList<>();
 			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				//fileUuidList.add(processTaskFile.getFileId());
 				FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
 				fileList.add(fileVo);
 			}
@@ -309,10 +307,10 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 						ProcessTaskStepCommentVo commentVo = new ProcessTaskStepCommentVo();
 						String content = dataObj.getString("content");
 						commentVo.setContent(content);
-						List<Long> fileUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), Long.class);
-						if(CollectionUtils.isNotEmpty(fileUuidList)) {
+						List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+						if(CollectionUtils.isNotEmpty(fileIdList)) {
 							List<FileVo> fileList = new ArrayList<>();
-							for(Long fileId : fileUuidList) {
+							for(Long fileId : fileIdList) {
 								FileVo fileVo = fileMapper.getFileById(fileId);
 								if(fileVo != null) {
 									fileList.add(fileVo);

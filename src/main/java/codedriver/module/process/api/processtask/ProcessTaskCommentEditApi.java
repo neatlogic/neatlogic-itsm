@@ -63,7 +63,7 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "回复id"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-		@Param(name = "fileUuidList", type=ApiParamType.JSONARRAY, desc = "附件uuid列表")
+		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
 	})
 	@Output({
 		@Param(name = "commentList", explode = ProcessTaskStepCommentVo[].class, desc = "当前步骤评论列表")
@@ -88,31 +88,26 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 			String content = jsonObj.getString("content");
 			if(StringUtils.isNotBlank(content)) {
 				ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-//				processTaskMapper.replaceProcessTaskContent(contentVo);
-//				jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), contentVo.getHash());
 				processTaskStepCommentVo.setContentHash(contentVo.getHash());
 			}
-			
-//			String fileUuidListStr = jsonObj.getString("fileUuidList");
-//			if(StringUtils.isNotBlank(fileUuidListStr)) {
-				List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileUuidList")), Long.class);
-				if(CollectionUtils.isNotEmpty(fileIdList)) {
-					for(Long fileId : fileIdList) {
-						FileVo fileVo = fileMapper.getFileById(fileId);
-						if(fileVo == null) {
-							throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
-						}
+
+			List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+			if(CollectionUtils.isNotEmpty(fileIdList)) {
+				for(Long fileId : fileIdList) {
+					FileVo fileVo = fileMapper.getFileById(fileId);
+					if(fileVo == null) {
+						throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
 					}
-					ProcessTaskContentVo fileUuidListContentVo = new ProcessTaskContentVo(JSON.toJSONString(fileIdList));
-					processTaskMapper.replaceProcessTaskContent(fileUuidListContentVo);
-					processTaskStepCommentVo.setFileUuidListHash(fileUuidListContentVo.getHash());
 				}
-//			}
+				ProcessTaskContentVo fileIdListContentVo = new ProcessTaskContentVo(JSON.toJSONString(fileIdList));
+				processTaskMapper.replaceProcessTaskContent(fileIdListContentVo);
+				processTaskStepCommentVo.setFileIdListHash(fileIdListContentVo.getHash());
+			}
+
 			processTaskMapper.updateProcessTaskStepCommentById(processTaskStepCommentVo);
 			
-//			processTaskService.parseProcessTaskStepComment(oldCommentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldCommentVo.getContentHash());
-			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), oldCommentVo.getFileUuidListHash());
+			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), oldCommentVo.getFileIdListHash());
 			
 			//生成活动
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldCommentVo.getProcessTaskStepId());	
