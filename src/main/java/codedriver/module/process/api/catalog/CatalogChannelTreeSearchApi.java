@@ -59,10 +59,11 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+//			catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
-		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+//		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+		CatalogVo rootCatalog = catalogService.buildRootCatalog();
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
 			for(CatalogVo catalogVo : catalogList) {

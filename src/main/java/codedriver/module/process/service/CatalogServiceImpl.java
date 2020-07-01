@@ -2,7 +2,10 @@ package codedriver.module.process.service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import com.sun.org.apache.xml.internal.resolver.Catalog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +18,18 @@ public class CatalogServiceImpl implements CatalogService {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
-	
+
 	@Override
 	public boolean checkLeftRightCodeIsExists() {
-		int count = catalogMapper.getCatalogCount(new CatalogVo());
-		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
-		if(rootCatalog == null) {
-			throw new TeamNotFoundException(CatalogVo.ROOT_UUID);
-		}
-		if(Objects.equals(rootCatalog.getLft(), 1) && Objects.equals(rootCatalog.getRht(), count * 2)) {
+		int count = 0;
+		count = catalogMapper.getCatalogCount(new CatalogVo());
+//		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+//		if(rootCatalog == null) {
+//			throw new TeamNotFoundException(CatalogVo.ROOT_UUID);
+//		}
+		//获取最大的右编码值maxRhtCode
+		int maxRhtCode = catalogMapper.getMaxRhtCode();
+		if(Objects.equals(maxRhtCode, count * 2 + 1) || count == 0) {
 			return true;
 		}
 		return false;
@@ -44,6 +50,18 @@ public class CatalogServiceImpl implements CatalogService {
 			}
 		}
 		return parentLft;
+	}
+
+	@Override
+	public CatalogVo buildRootCatalog() {
+		int count = catalogMapper.getCatalogCount(new CatalogVo()) + 1;
+		CatalogVo rootCatalog = new CatalogVo();
+		rootCatalog.setUuid("0");
+		rootCatalog.setName("root");
+		rootCatalog.setParentUuid("-1");
+		rootCatalog.setLft(1);
+		rootCatalog.setRht(count == 0 ? 2 : count * 2);
+		return rootCatalog;
 	}
 
 }
