@@ -162,8 +162,8 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 					String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStep.getConfigHash());
 					processTaskStep.setConfig(config);
 					ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(processTaskStep.getHandler());
-					if(processStepHandlerConfig != null && processStepHandlerConfig.getConfig() != null) {
-						processTaskStep.setGlobalConfig(processStepHandlerConfig.getConfig().toJSONString());							
+					if(processStepHandlerConfig != null) {
+						processTaskStep.setGlobalConfig(processStepHandlerConfig.getConfig());							
 					}
 					task.put("statusVo", processTaskStep.getStatusVo());
 					
