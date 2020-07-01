@@ -1,9 +1,6 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +74,18 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 				}				
 			}
 		}
+
+		List<CatalogVo> childCatalogListForRoot = new ArrayList<>();
+
+		if(uuidKeyMap.size() != 0){
+			Collection<CatalogVo> catalogVos = uuidKeyMap.values();
+			for(CatalogVo vo : catalogVos){
+				if("0".equals(vo.getParentUuid())){
+					childCatalogListForRoot.add(vo);
+				}
+			}
+		}
+//		rootCatalog.getChildren(childCatalogListForRoot,new ArrayList());
 		
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
 		if(CollectionUtils.isNotEmpty(channelList)) {
@@ -89,10 +98,11 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 			}
 		}
 		
-		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
-		if(root != null) {
-			return root.getChildren();
-		}
-		return new ArrayList<>();
+//		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
+//		if(root != null) {
+//			return root.getChildren();
+//		}
+		return rootCatalog.getChildren(childCatalogListForRoot,new ArrayList());
+//		return new ArrayList<>();
 	}
 }
