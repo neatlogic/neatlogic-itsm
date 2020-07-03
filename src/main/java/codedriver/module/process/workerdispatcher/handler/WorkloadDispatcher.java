@@ -15,11 +15,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherBase;
 
 @Component
@@ -27,9 +25,6 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 	
 	@Autowired
 	private TeamMapper teamMapper;
-	
-	@Autowired
-	private UserMapper userMapper;
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -48,21 +43,10 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 				String[] split = team.split("#");
 				List<TeamUserVo> teamUserList = teamMapper.getTeamUserListByTeamUuid(split[1]);
 				if(CollectionUtils.isNotEmpty(teamUserList)) {
-					String targerUserUuid = null;
-					int minWorkload = Integer.MAX_VALUE;
-					for(TeamUserVo teamUser : teamUserList) {
-						List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(teamUser.getUserUuid());
-						List<String> teamUuidList = userMapper.getTeamUuidListByUserUuid(teamUser.getUserUuid());
-						/** 查出每个组员的工单量 **/
-						List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerListByUserUuidTeamUuidListRoleUuidList(teamUser.getUserUuid(), teamUuidList, roleUuidList);
-						/** 找出工单量较小的组员 **/
-						if(processTaskStepWorkerList.size() < minWorkload) {
-							minWorkload = processTaskStepWorkerList.size();
-							targerUserUuid = teamUser.getUserUuid();
-						}						
-					}
-					if(StringUtils.isNotBlank(targerUserUuid)) {
-						resultList.add(targerUserUuid);
+					/** 找出工单量最少的组员 **/
+					String minWorkloadUserUuid = processTaskMapper.getMinWorkloadUserUuidByTeamUuid(split[1]);
+					if(StringUtils.isNotBlank(minWorkloadUserUuid)) {
+						resultList.add(minWorkloadUserUuid);
 					}
 				}
 			}
