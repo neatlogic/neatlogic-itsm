@@ -85,7 +85,7 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 			}
 			/** 节点管理按钮映射 **/
 			ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-			if(processStepHandlerVo != null && processStepHandlerVo.getConfig() != null) {
+			if(processStepHandlerVo != null) {
 				JSONObject globalConfig = processStepHandlerVo.getConfig();
 				if(MapUtils.isNotEmpty(globalConfig)) {
 					JSONArray customButtonList = globalConfig.getJSONArray("customButtonList");
