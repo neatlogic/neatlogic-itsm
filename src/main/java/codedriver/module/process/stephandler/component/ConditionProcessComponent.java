@@ -123,9 +123,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 							} else if ("optional".equals(type)) {// 自定义
 								JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
 								if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-									ProcessTaskStepVo stepVo = ProcessTaskHandlerUtil.getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
 									ProcessTaskVo processTaskVo = ProcessTaskHandlerUtil.getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
-									processTaskVo.setCurrentProcessTaskStep(stepVo);
 									JSONObject processFieldData = ProcessTaskUtil.getProcessFieldData(processTaskVo,true);
 
 									try {
