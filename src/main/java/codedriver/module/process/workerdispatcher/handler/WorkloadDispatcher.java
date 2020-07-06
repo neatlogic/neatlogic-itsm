@@ -56,7 +56,7 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 
 	@Override
 	public String getHelp() {
-		return "在处理人范围中";
+		return "在选择的组及父级组中，找出工作量最少（只看待处理和处理中的任务数量）的用户作为当前步骤的处理人";
 	}
 
 	@Override
