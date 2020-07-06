@@ -16,6 +16,7 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -91,7 +92,7 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
 										}else {
 											continue;
 										}
-										processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), split[0], split[1]));
+										processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), split[0], split[1], ProcessUserType.MAJOR.getValue()));
 									}
 								}
 							}

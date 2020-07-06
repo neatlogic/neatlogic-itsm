@@ -3,6 +3,8 @@ package codedriver.module.process.workerdispatcher.handler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -43,10 +45,29 @@ public class WorkloadDispatcher extends WorkerDispatcherBase {
 				String[] split = team.split("#");
 				List<TeamUserVo> teamUserList = teamMapper.getTeamUserListByTeamUuid(split[1]);
 				if(CollectionUtils.isNotEmpty(teamUserList)) {
-					/** 找出工单量最少的组员 **/
-					String minWorkloadUserUuid = processTaskMapper.getMinWorkloadUserUuidByTeamUuid(split[1]);
-					if(StringUtils.isNotBlank(minWorkloadUserUuid)) {
-						resultList.add(minWorkloadUserUuid);
+					/** 找出组员的工单量，按工作量从小到大排序 **/
+					List<Map<String, Object>> workloadList = processTaskMapper.getWorkloadByTeamUuid(split[1]);
+					if(CollectionUtils.isNotEmpty(workloadList)) {
+						int minWorkload = Integer.MAX_VALUE;
+						List<String> minWorkloadUserUuidList = new ArrayList<>();
+						for(Map<String, Object> workloadMap : workloadList) {
+							int count = (int) workloadMap.get("count");
+							if(count <= minWorkload) {
+								minWorkload = count;
+								Object userUuid = workloadMap.get("userUuid");
+								if(userUuid != null) {
+									minWorkloadUserUuidList.add(userUuid.toString());									
+								}
+							}else {
+								break;
+							}
+						}
+						/** 随机选取一位用户作为处理人 **/
+						if(CollectionUtils.isNotEmpty(minWorkloadUserUuidList)) {
+							Random random = new Random();
+							int index = random.nextInt(minWorkloadUserUuidList.size());
+							resultList.add(minWorkloadUserUuidList.get(index));
+						}
 					}
 				}
 			}

@@ -58,15 +58,15 @@ public class AssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 			if(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
 				if(ProcessUserType.OWNER.getValue().equals(split[1])) {
 					ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, GroupSearch.USER.getValue(), processTaskVo.getOwner()));
+					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, GroupSearch.USER.getValue(), processTaskVo.getOwner(), ProcessUserType.MAJOR.getValue()));
 				}else if(ProcessUserType.REPORTER.getValue().equals(split[1])) {
 					ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, GroupSearch.USER.getValue(), processTaskVo.getReporter()));
+					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, GroupSearch.USER.getValue(), processTaskVo.getReporter(), ProcessUserType.MAJOR.getValue()));
 				}else if(ProcessUserType.AGENT.getValue().equals(split[1])) {
 					//TODO linbq代办人获取逻辑以后再实现
 				}
 			}else if(GroupSearch.getValue(split[0]) != null) {
-				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[0], split[1]));
+				processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[0], split[1], ProcessUserType.MAJOR.getValue()));
 			}
 		}
 		return processTaskStepWorkerList;

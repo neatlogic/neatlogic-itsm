@@ -50,7 +50,7 @@ public class CopyWorkerPolicyHandler implements IWorkerPolicyHandler {
 						if(processTaskStep.getProcessTaskId().equals(currentProcessTaskStepVo.getProcessTaskId())) {
 							List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStep.getId(),ProcessUserType.MAJOR.getValue());
 							for (ProcessTaskStepUserVo user : userList) {
-								processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), user.getUserUuid()));
+								processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), user.getUserUuid(), ProcessUserType.MAJOR.getValue()));
 							}
 						}
 					}
