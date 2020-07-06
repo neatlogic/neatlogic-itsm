@@ -12,7 +12,6 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.restful.annotation.Description;
@@ -20,6 +19,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.CatalogService;
 @Service
 public class ChannelSearchApi extends ApiComponentBase {
 	
@@ -27,7 +27,7 @@ public class ChannelSearchApi extends ApiComponentBase {
 	private ChannelMapper channelMapper;
 	
 	@Autowired
-	private TeamMapper teamMapper;
+	private CatalogService catalogService;
 	
 	@Override
 	public String getToken() {
@@ -67,12 +67,10 @@ public class ChannelSearchApi extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
 		channelVo.setUserUuid(UserContext.get().getUserUuid(true));
-		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
+		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");isAuthenticate = 1;
 		if(isAuthenticate != null && isAuthenticate.intValue() == 1) {
-			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
 			//查出当前用户已授权的服务
-			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
-			channelVo.setAuthorizedUuidList(currentUserAuthorizedChannelUuidList);
+			channelVo.setAuthorizedUuidList(catalogService.getCurrentUserAuthorizedChannelUuidList());
 			channelVo.setIsActive(1);
 		}
 		if(channelVo.getNeedPage()) {
