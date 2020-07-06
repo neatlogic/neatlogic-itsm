@@ -291,7 +291,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
 		if (oldUserList.size() > 0) {
 			ProcessTaskStepUserVo oldUserVo = oldUserList.get(0);
-			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserUuid()));
+			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserUuid(), ProcessUserType.MAJOR.getValue()));
 		} else {
 			/** 分配处理人 **/
 			ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
@@ -317,18 +317,20 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 			}
 		}
 		if (workerList.size() == 1) {
-			String autoStart = workerPolicyConfig.getString("autoStart");
-			/** 设置当前步骤状态为处理中 **/
-			if ("1".equals(autoStart) && StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
+			if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
 				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
 				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 				userVo.setUserUuid(workerList.get(0).getUuid());
 				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
 				userVo.setUserName(user.getUserName());
-				userList.add(userVo);
-				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+				userList.add(userVo);			
 			}
+		}
+		String autoStart = workerPolicyConfig.getString("autoStart");
+		/** 设置当前步骤状态为处理中 **/
+		if ("1".equals(autoStart)) {
+			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		}
 		return 1;
 	}
