@@ -316,6 +316,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 				}
 			}
 		}
+		/** 当只分配到一个用户时，自动设置为处理人，不需要抢单 **/
 		if (workerList.size() == 1) {
 			if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
 				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
@@ -324,13 +325,13 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 				userVo.setUserUuid(workerList.get(0).getUuid());
 				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
 				userVo.setUserName(user.getUserName());
-				userList.add(userVo);			
+				userList.add(userVo);
+				String autoStart = workerPolicyConfig.getString("autoStart");
+				/** 设置当前步骤状态为处理中 **/
+				if ("1".equals(autoStart)) {
+					currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+				}		
 			}
-		}
-		String autoStart = workerPolicyConfig.getString("autoStart");
-		/** 设置当前步骤状态为处理中 **/
-		if ("1".equals(autoStart)) {
-			currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
 		}
 		return 1;
 	}
