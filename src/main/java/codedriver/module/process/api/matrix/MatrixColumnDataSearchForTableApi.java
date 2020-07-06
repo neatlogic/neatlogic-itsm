@@ -84,10 +84,23 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), @Param(name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true), @Param(name = "searchColumnList ", desc = "搜索属性集合", type = ApiParamType.JSONARRAY), @Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY), @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-			@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"), @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页") })
+	@Input({ 
+		@Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), 
+		@Param(name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true), 
+		@Param(name = "searchColumnList ", desc = "搜索属性集合", type = ApiParamType.JSONARRAY), 
+		@Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY), 
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"), 
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页") 
+	})
 	@Description(desc = "矩阵属性数据查询-table接口")
-	@Output({ @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"), @Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "属性列名集合"), @Param(name = "searchColumnDetailList", type = ApiParamType.JSONARRAY, desc = "搜索属性详情集合"), @Param(explode = BasePageVo.class) })
+	@Output({ 
+		@Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"), 
+		@Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "属性列名集合"), 
+		@Param(name = "searchColumnDetailList", type = ApiParamType.JSONARRAY, desc = "搜索属性详情集合"),
+		@Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型"), 
+		@Param(explode = BasePageVo.class) 
+	})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject returnObj = new JSONObject();
@@ -102,6 +115,7 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
 		}
 		List<String> searchColumnList = JSONObject.parseArray(jsonObj.getString("searchColumnList"), String.class);
 		if (ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+			returnObj.put("type", ProcessMatrixType.CUSTOM.getValue());
 			Map<String, ProcessMatrixAttributeVo> attributeMap = new HashMap<>();
 			List<ProcessMatrixAttributeVo> processMatrixAttributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
 			for (ProcessMatrixAttributeVo attribute : processMatrixAttributeList) {
@@ -147,6 +161,7 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
 				returnObj.put("rowNum", rowNum);
 			}
 		} else {
+			returnObj.put("type", ProcessMatrixType.EXTERNAL.getValue());
 			ProcessMatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(dataVo.getMatrixUuid());
 			if (externalVo == null) {
 				throw new MatrixExternalNotFoundException(dataVo.getMatrixUuid());
