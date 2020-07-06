@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.google.common.base.Objects;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -68,7 +69,7 @@ public class ChannelSearchApi extends ApiComponentBase {
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
 		channelVo.setUserUuid(UserContext.get().getUserUuid(true));
 		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
-		if(isAuthenticate != null && isAuthenticate.intValue() == 1) {
+		if(Objects.equal(isAuthenticate, 1)) {
 			//查出当前用户已授权的服务
 			channelVo.setAuthorizedUuidList(catalogService.getCurrentUserAuthorizedChannelUuidList());
 			channelVo.setIsActive(1);
