@@ -67,7 +67,7 @@ public class ChannelSearchApi extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
 		channelVo.setUserUuid(UserContext.get().getUserUuid(true));
-		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");isAuthenticate = 1;
+		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
 		if(isAuthenticate != null && isAuthenticate.intValue() == 1) {
 			//查出当前用户已授权的服务
 			channelVo.setAuthorizedUuidList(catalogService.getCurrentUserAuthorizedChannelUuidList());
