@@ -91,7 +91,8 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
 		@Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY), 
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"), 
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页") 
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"), 
+		@Param(name = "arrayColumnList", desc = "需要将值转化成数组的属性集合", type = ApiParamType.JSONARRAY) 
 	})
 	@Description(desc = "矩阵属性数据查询-table接口")
 	@Output({ 
