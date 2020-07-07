@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskAssignWorkerVo;
@@ -52,7 +53,7 @@ public class PreStepAssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 				processTaskAssignWorkerVo.setFromProcessStepUuid(processStepUuid);
 				List<ProcessTaskAssignWorkerVo> processTaskAssignWorkerList = processTaskMapper.getPrcessTaskAssignWorker(processTaskAssignWorkerVo);
 				for(ProcessTaskAssignWorkerVo processTaskAssignWorker : processTaskAssignWorkerList) {
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskAssignWorker.getProcessTaskId(), processTaskAssignWorker.getProcessTaskStepId(), processTaskAssignWorker.getType(), processTaskAssignWorker.getUuid()));
+					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskAssignWorker.getProcessTaskId(), processTaskAssignWorker.getProcessTaskStepId(), processTaskAssignWorker.getType(), processTaskAssignWorker.getUuid(), ProcessUserType.MAJOR.getValue()));
 				}
 			}
 		}

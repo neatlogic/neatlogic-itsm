@@ -1,5 +1,7 @@
 package codedriver.module.process.service;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -186,7 +188,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 			userList.add(processTaskStepUserVo);
 			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
-			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid()));
+			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
 			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
 			ProcessTaskStepSubtaskVo subtaskVo = new ProcessTaskStepSubtaskVo();
@@ -270,8 +272,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				userList.add(oldUserVo);
 				
 				List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
-				workerList.add(new ProcessTaskStepWorkerVo(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid()));
-				workerList.add(new ProcessTaskStepWorkerVo(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId(), GroupSearch.USER.getValue(), oldProcessTaskStepSubtask.getUserUuid()));
+				workerList.add(new ProcessTaskStepWorkerVo(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
+				workerList.add(new ProcessTaskStepWorkerVo(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId(), GroupSearch.USER.getValue(), oldProcessTaskStepSubtask.getUserUuid(), ProcessUserType.MINOR.getValue()));
 				handler.updateProcessTaskStepUserAndWorker(workerList, userList);
 			}
 				
@@ -330,7 +332,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 			userList.add(processTaskStepUserVo);
 			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
-			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid()));
+			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
 			currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
 			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
@@ -371,7 +373,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 			userList.add(processTaskStepUserVo);
 			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
-			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid()));
+			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
 			currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
 			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
@@ -407,7 +409,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
 			userList.add(processTaskStepUserVo);
 			List<ProcessTaskStepWorkerVo> workerList = new ArrayList<>();
-			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid()));
+			workerList.add(new ProcessTaskStepWorkerVo(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
 			currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
 			handler.updateProcessTaskStepUserAndWorker(workerList, userList);	
 			//记录活动
@@ -578,7 +580,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	
 	@Override
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
-		
+		IntegrationResultVo resultVo = null;
 		Boolean isUnloadJob = false;
 		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue()));
 		JSONObject data = auditDataVo.getData();
@@ -607,7 +609,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
 			}
 	    	integrationVo.getParamObj().putAll(getIntegrationParam(automaticConfigVo,currentProcessTaskStepVo));
-			IntegrationResultVo resultVo = handler.sendRequest(integrationVo,ProcessRequestFrom.PROCESS);
+			resultVo = handler.sendRequest(integrationVo,ProcessRequestFrom.PROCESS);
 			resultJson = resultVo.getTransformedResult();
 			if(StringUtils.isBlank(resultVo.getTransformedResult())) {
 				resultJson = resultVo.getRawResult();
@@ -638,6 +640,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					isUnloadJob = true;
 				}else if(automaticConfigVo.getIsRequest()||(!automaticConfigVo.getIsRequest()&&predicate(failConfig,resultVo,false))){//失败
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+					audit.put("failedReason","");
 					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
 						if(backStepList.size() == 1) {
@@ -665,6 +668,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}catch(Exception ex) {
 			logger.error(ex.getMessage(),ex);
 			audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+			if(resultVo != null && StringUtils.isNotEmpty(resultVo.getError())) {
+				audit.put("failedReason",resultVo.getError());
+			}else {
+				StringWriter sw = new StringWriter();
+		        PrintWriter pw = new PrintWriter(sw);
+		        ex.printStackTrace(pw);
+				audit.put("failedReason",sw.toString());
+			}
 			//processHandler.hang(currentProcessTaskStepVo);
 			isUnloadJob = true;
 		}finally {
@@ -828,7 +839,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 */
 	private List<ProcessTaskStepVo> getbackStepList(Long processTaskStepId){
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
-		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
 		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
 			if(processTaskStep.getIsActive() != null) {
 				if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){

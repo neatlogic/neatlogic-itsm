@@ -121,7 +121,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
 		if (oldUserList.size() > 0) {
 			ProcessTaskStepUserVo oldUserVo = oldUserList.get(0);
-			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserUuid()));
+			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserUuid(), ProcessUserType.MAJOR.getValue()));
 		} else {
 			/** 分配处理人 **/
 			ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
@@ -146,18 +146,21 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				}
 			}
 		}
+		/** 当只分配到一个用户时，自动设置为处理人，不需要抢单 **/
 		if (workerList.size() == 1) {
-			String autoStart = workerPolicyConfig.getString("autoStart");
-			/** 设置当前步骤状态为处理中 **/
-			if ("1".equals(autoStart) && StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
+			if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
 				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
 				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 				userVo.setUserUuid(workerList.get(0).getUuid());
 				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
 				userVo.setUserName(user.getUserName());
-				userList.add(userVo);
-				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+				userList.add(userVo);	
+				String autoStart = workerPolicyConfig.getString("autoStart");
+				/** 当步骤设置了自动开始时，设置当前步骤状态为处理中 **/
+				if ("1".equals(autoStart)) {
+					currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+				}			
 			}
 		}
 		return 1;
@@ -176,7 +179,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
-		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromId(currentProcessTaskStepVo.getId());
+		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
 		if (nextStepList.size() == 1) {
 			return nextStepList;
 		} else if (nextStepList.size() > 1) {
@@ -436,19 +439,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-		/** 组装通知模板 **/ //TODO linbq 这里要删除
-//		JSONArray notifyList = stepConfigObj.getJSONArray("notifyList");
-//		if (CollectionUtils.isNotEmpty(notifyList)) {
-//			List<String> templateUuidList = new ArrayList<>();
-//			for (int j = 0; j < notifyList.size(); j++) {
-//				JSONObject notifyObj = notifyList.getJSONObject(j);
-//				String template = notifyObj.getString("template");
-//				if (StringUtils.isNotBlank(template)) {
-//					templateUuidList.add(template);
-//				}
-//			}
-//			processStepVo.setTemplateUuidList(templateUuidList);
-//		}
 		/** 组装通知策略id **/
 		JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
 		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {

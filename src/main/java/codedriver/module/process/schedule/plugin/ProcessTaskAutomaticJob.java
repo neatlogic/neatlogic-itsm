@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -102,8 +103,8 @@ public class ProcessTaskAutomaticJob extends JobBase {
 
 	@Override
 	public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-		//String tenantUuid = jobObject.getTenantUuid();
-		UserContext.init(null);//避免后续获取用户异常
+		//避免后续获取用户异常
+		UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);
 		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
 		ProcessTaskStepVo currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
 		//excute

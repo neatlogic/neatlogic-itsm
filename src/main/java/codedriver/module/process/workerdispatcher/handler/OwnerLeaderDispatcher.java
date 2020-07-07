@@ -1,6 +1,7 @@
 package codedriver.module.process.workerdispatcher.handler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -37,43 +38,46 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 	@Override
 	public JSONArray getConfig() {
 		JSONArray resultArray = new JSONArray();
-		
-		JSONObject teamUserTitleFilterConfigObj = new JSONObject();
-		teamUserTitleFilterConfigObj.put("plugin", "teamUserTitleFilter");
-		teamUserTitleFilterConfigObj.put("pluginName", "头衔");
-		JSONObject teamUserTitleFilterPluginConfigObj = new JSONObject();
-		teamUserTitleFilterPluginConfigObj.put("isMultiple", false);
-		List<ValueTextVo> teamUserTitleFilterDataList = new ArrayList<>();
+		/** 选择头衔 **/
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("type", "select");
+		jsonObj.put("name", "teamUserTitle");
+		jsonObj.put("search", false);
+		jsonObj.put("label", "头衔");
+		jsonObj.put("validateList", Arrays.asList("required"));
+		jsonObj.put("multiple", false);
+		jsonObj.put("value", "");
+		jsonObj.put("defaultValue", "");
+		List<ValueTextVo> dataList = new ArrayList<>();
 		for(TeamUserTitle title : TeamUserTitle.values()) {
-			teamUserTitleFilterDataList.add(new ValueTextVo(title.getValue(), title.getText()));
+			dataList.add(new ValueTextVo(title.getValue(), title.getText()));
 		}
-		teamUserTitleFilterPluginConfigObj.put("dataList", teamUserTitleFilterDataList);
-		teamUserTitleFilterConfigObj.put("config",teamUserTitleFilterPluginConfigObj);
-		resultArray.add(teamUserTitleFilterConfigObj);
+		jsonObj.put("dataList", dataList);
+		resultArray.add(jsonObj);
 		
 		return resultArray;
 	}
 
 	@Override
 	public String getHelp() {
-		return "在处理人范围中";
+		return "在上报人所在的组及父级组中，找出与选择头衔相同的用户作为当前步骤的处理人";
 	}
 
 	@Override
 	protected List<String> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
 		List<String> resultList = new ArrayList<>();
-		String teamUserTitleFilter = configObj.getString("teamUserTitleFilter");
-		if(StringUtils.isNotBlank(teamUserTitleFilter)) {
+		String teamUserTitle = configObj.getString("teamUserTitle");
+		if(StringUtils.isNotBlank(teamUserTitle)) {
 			TeamLevel teamLevel = null;
-			if(TeamUserTitle.GROUPLEADER.getValue().equals(teamUserTitleFilter)) {
+			if(TeamUserTitle.GROUPLEADER.getValue().equals(teamUserTitle)) {
 				teamLevel = TeamLevel.GROUP;
-			}else if(TeamUserTitle.COMPANYLEADER.getValue().equals(teamUserTitleFilter)) {
+			}else if(TeamUserTitle.COMPANYLEADER.getValue().equals(teamUserTitle)) {
 				teamLevel = TeamLevel.COMPANY;
-			}else if(TeamUserTitle.CENTERLEADER.getValue().equals(teamUserTitleFilter)) {
+			}else if(TeamUserTitle.CENTERLEADER.getValue().equals(teamUserTitle)) {
 				teamLevel = TeamLevel.CENTER;
-			}else if(TeamUserTitle.DEPARTMENTLEADER.getValue().equals(teamUserTitleFilter)) {
+			}else if(TeamUserTitle.DEPARTMENTLEADER.getValue().equals(teamUserTitle)) {
 				teamLevel = TeamLevel.DEPARTMENT;
-			}else if(TeamUserTitle.TEAMLEADER.getValue().equals(teamUserTitleFilter)) {
+			}else if(TeamUserTitle.TEAMLEADER.getValue().equals(teamUserTitle)) {
 				teamLevel = TeamLevel.TEAM;
 			}else {
 				return resultList;
@@ -84,7 +88,7 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 				List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
 				if(CollectionUtils.isNotEmpty(teamList)) {
 					for(TeamVo teamVo : teamList) {
-						List<String> userUuidList = teamMapper.getTeamUserUuidListByLftRhtLevelTitle(teamVo.getLft(), teamVo.getRht(), teamLevel.getValue(), teamUserTitleFilter);
+						List<String> userUuidList = teamMapper.getTeamUserUuidListByLftRhtLevelTitle(teamVo.getLft(), teamVo.getRht(), teamLevel.getValue(), teamUserTitle);
 						if(CollectionUtils.isNotEmpty(userUuidList)) {
 							resultList.addAll(userUuidList);
 						}

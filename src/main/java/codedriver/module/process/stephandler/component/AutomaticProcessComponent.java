@@ -246,9 +246,9 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
         }
 		/** 组装分配策略 **/
 		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (!MapUtils.isEmpty(workerPolicyConfig)) {
+		if (MapUtils.isNotEmpty(workerPolicyConfig)) {
 			JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
-			if (!CollectionUtils.isEmpty(policyList)) {
+			if (CollectionUtils.isNotEmpty(policyList)) {
 				List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
 				for (int k = 0; k < policyList.size(); k++) {
 					JSONObject policyObj = policyList.getJSONObject(k);
@@ -264,6 +264,27 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 					workerPolicyList.add(processStepWorkerPolicyVo);
 				}
 				processStepVo.setWorkerPolicyList(workerPolicyList);
+			}
+		}
+		/** 收集引用的外部调用uuid **/
+		JSONObject automaticConfig = stepConfigObj.getJSONObject("automaticConfig");
+		if(MapUtils.isNotEmpty(automaticConfig)) {
+			JSONObject requestConfig = automaticConfig.getJSONObject("requestConfig");
+			if(MapUtils.isNotEmpty(requestConfig)) {
+				String integrationUuid = requestConfig.getString("integrationUuid");
+				if(StringUtils.isNotBlank(integrationUuid)) {
+					processStepVo.getIntegrationUuidList().add(integrationUuid);
+				}
+			}
+			JSONObject callbackConfig = automaticConfig.getJSONObject("callbackConfig");
+			if(MapUtils.isNotEmpty(callbackConfig)) {
+				JSONObject config = callbackConfig.getJSONObject("config");
+				if(MapUtils.isNotEmpty(config)) {
+					String integrationUuid = config.getString("integrationUuid");
+					if(StringUtils.isNotBlank(integrationUuid)) {
+						processStepVo.getIntegrationUuidList().add(integrationUuid);
+					}
+				}
 			}
 		}
 	}
@@ -291,7 +312,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
 		if (oldUserList.size() > 0) {
 			ProcessTaskStepUserVo oldUserVo = oldUserList.get(0);
-			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserUuid()));
+			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserUuid(), ProcessUserType.MAJOR.getValue()));
 		} else {
 			/** 分配处理人 **/
 			ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
@@ -316,10 +337,9 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 				}
 			}
 		}
+		/** 当只分配到一个用户时，自动设置为处理人，不需要抢单 **/
 		if (workerList.size() == 1) {
-			String autoStart = workerPolicyConfig.getString("autoStart");
-			/** 设置当前步骤状态为处理中 **/
-			if ("1".equals(autoStart) && StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
+			if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
 				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
 				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
@@ -327,7 +347,11 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
 				userVo.setUserName(user.getUserName());
 				userList.add(userVo);
-				currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+				String autoStart = workerPolicyConfig.getString("autoStart");
+				/** 设置当前步骤状态为处理中 **/
+				if ("1".equals(autoStart)) {
+					currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+				}		
 			}
 		}
 		return 1;
@@ -336,7 +360,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
-		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromId(currentProcessTaskStepVo.getId());
+		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
 		if (nextStepList.size() == 1) {
 			return nextStepList;
 		} else if (nextStepList.size() > 1) {

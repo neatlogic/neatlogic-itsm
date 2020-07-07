@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -81,7 +82,7 @@ public class ProcessTaskTransferApi extends ApiComponentBase {
 			for(String worker : workerList) {	
 				String[] split = worker.split("#");
 				if(GroupSearch.getValue(split[0]) != null) {
-					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[0], split[1]));
+					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskId, processTaskStepId, split[0], split[1], ProcessUserType.MAJOR.getValue()));
 				}
 			}
 			handler.transfer(processTaskStepVo,processTaskStepWorkerList);
