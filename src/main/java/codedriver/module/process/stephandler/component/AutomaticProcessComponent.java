@@ -1,11 +1,7 @@
 package codedriver.module.process.stephandler.component;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +40,10 @@ import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
-import codedriver.framework.process.exception.worktime.WorktimeConfigIllegalException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
+import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Service
@@ -164,7 +160,8 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 			JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
 			automaticConfigVo.setIsRequest(true);
 			//检验执行时间窗口
-			if(isTimeToRun(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"))) {
+			Integer isTimeToRum = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+			if(timeWindowConfig == null || isTimeToRum == 0) {
 				processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
 			}else {//loadJob,定时执行第一次请求
 				//初始化audit执行状态
@@ -173,51 +170,16 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 				JSONObject dataObject = data.getData();
 				audit = dataObject.getJSONObject("requestAudit");
 				audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
+				processTaskService.initJob(automaticConfigVo,currentProcessTaskStepVo,dataObject);
 				data.setData(dataObject.toJSONString());
 				data.setFcu("system");
 				processTaskStepDataMapper.replaceProcessTaskStepData(data);
-				processTaskService.initJob(automaticConfigVo,currentProcessTaskStepVo,dataObject);
 			}
 		}
 		
 	}
 	
-	/**
-	 * 判断是否满足执行时间窗口
-	 * @param startTime
-	 * @param endTime
-	 * @return
-	 */
-	private Boolean isTimeToRun(String startTimeStr,String endTimeStr) {
-		if(StringUtils.isBlank(startTimeStr)&&StringUtils.isBlank(endTimeStr)) {//如果没有设置时间窗口
-			return true;
-		}
-		Date nowTime =null;
-	    Date startTime = null;
-	    Date endTime = null;
-	    SimpleDateFormat  df = new SimpleDateFormat("H:mm");
-		try {
-			nowTime = df.parse(df.format(new Date()));
-			startTime =df.parse(startTimeStr);
-			endTime = df.parse(endTimeStr);
-		}catch(ParseException e) {
-			throw new WorktimeConfigIllegalException("startTime/endTime");
-		}
-		Calendar date = Calendar.getInstance();
-        date.setTime(nowTime);
-
-        Calendar begin = Calendar.getInstance();
-        begin.setTime(startTime);
-
-        Calendar end = Calendar.getInstance();
-        end.setTime(endTime);
-
-        if (date.after(begin) && date.before(end)) {
-            return true;
-        } else {
-            return false;
-        }
-	}
+	
 	
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
