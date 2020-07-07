@@ -80,7 +80,8 @@ public class CatalogServiceImpl implements CatalogService {
 			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 			if(CollectionUtils.isNotEmpty(currentUserAuthorizedChannelUuidList)) {
 				Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
-				CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+				//构造一个虚拟的root节点
+				CatalogVo rootCatalog = buildRootCatalog();
 				/** 查出所有目录 **/
 				List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 				for(CatalogVo catalogVo : catalogList) {
