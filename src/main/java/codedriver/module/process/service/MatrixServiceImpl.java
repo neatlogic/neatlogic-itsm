@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +33,7 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.constvalue.ProcessMatrixAttributeType;
 import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
-import codedriver.framework.util.FreemarkerUtil;
+import codedriver.framework.util.JavascriptUtil;
 
 /**
  * @program: codedriver
@@ -42,6 +44,7 @@ import codedriver.framework.util.FreemarkerUtil;
 @Transactional
 public class MatrixServiceImpl implements MatrixService {
     
+	private static Logger logger = LoggerFactory.getLogger(MatrixServiceImpl.class);
     @Autowired
     private MatrixDataMapper matrixDataMapper;
     
@@ -62,26 +65,32 @@ public class MatrixServiceImpl implements MatrixService {
 			JSONObject output = config.getJSONObject("output");
 			if(MapUtils.isNotEmpty(output)) {
 				String content = output.getString("content");
-				content = FreemarkerUtil.transform(null, content);
-				JSONObject contentObj = JSON.parseObject(content);
-				if(MapUtils.isNotEmpty(contentObj)) {
-					JSONArray theadList = contentObj.getJSONArray("theadList");
-            		if(CollectionUtils.isNotEmpty(theadList)) {
-            			for(int i = 0; i < theadList.size(); i++) {
-            				JSONObject theadObj = theadList.getJSONObject(i);
-            				ProcessMatrixAttributeVo processMatrixAttributeVo = new ProcessMatrixAttributeVo();
-            				processMatrixAttributeVo.setMatrixUuid(matrixUuid);
-            				processMatrixAttributeVo.setUuid(theadObj.getString("key"));
-            				processMatrixAttributeVo.setName(theadObj.getString("title"));
-            				processMatrixAttributeVo.setType(ProcessMatrixAttributeType.INPUT.getValue());
-            				processMatrixAttributeVo.setIsDeletable(0);
-            				processMatrixAttributeVo.setSort(i);
-            				processMatrixAttributeVo.setIsRequired(0);
-            				Integer isSearchable = theadObj.getInteger("isSearchable");
-            				processMatrixAttributeVo.setIsSearchable((isSearchable == null || isSearchable.intValue() != 1) ? 0 : 1);
-            				processMatrixAttributeList.add(processMatrixAttributeVo);
-            			}
-            		}
+				if (StringUtils.isNotBlank(content)) {
+					try {
+						content = JavascriptUtil.transform(new JSONObject(), content);
+						JSONObject contentObj = JSON.parseObject(content);
+						if(MapUtils.isNotEmpty(contentObj)) {
+							JSONArray theadList = contentObj.getJSONArray("theadList");
+		            		if(CollectionUtils.isNotEmpty(theadList)) {
+		            			for(int i = 0; i < theadList.size(); i++) {
+		            				JSONObject theadObj = theadList.getJSONObject(i);
+		            				ProcessMatrixAttributeVo processMatrixAttributeVo = new ProcessMatrixAttributeVo();
+		            				processMatrixAttributeVo.setMatrixUuid(matrixUuid);
+		            				processMatrixAttributeVo.setUuid(theadObj.getString("key"));
+		            				processMatrixAttributeVo.setName(theadObj.getString("title"));
+		            				processMatrixAttributeVo.setType(ProcessMatrixAttributeType.INPUT.getValue());
+		            				processMatrixAttributeVo.setIsDeletable(0);
+		            				processMatrixAttributeVo.setSort(i);
+		            				processMatrixAttributeVo.setIsRequired(0);
+		            				Integer isSearchable = theadObj.getInteger("isSearchable");
+		            				processMatrixAttributeVo.setIsSearchable((isSearchable == null || isSearchable.intValue() != 1) ? 0 : 1);
+		            				processMatrixAttributeList.add(processMatrixAttributeVo);
+		            			}
+		            		}
+						}
+					} catch (Exception ex) {
+						logger.error(ex.getMessage(), ex);
+					}
 				}
 			}
 		}
