@@ -1,5 +1,7 @@
 package codedriver.module.process.service;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -578,7 +580,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	
 	@Override
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
-		
+		IntegrationResultVo resultVo = null;
 		Boolean isUnloadJob = false;
 		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue()));
 		JSONObject data = auditDataVo.getData();
@@ -607,7 +609,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
 			}
 	    	integrationVo.getParamObj().putAll(getIntegrationParam(automaticConfigVo,currentProcessTaskStepVo));
-			IntegrationResultVo resultVo = handler.sendRequest(integrationVo,ProcessRequestFrom.PROCESS);
+			resultVo = handler.sendRequest(integrationVo,ProcessRequestFrom.PROCESS);
 			resultJson = resultVo.getTransformedResult();
 			if(StringUtils.isBlank(resultVo.getTransformedResult())) {
 				resultJson = resultVo.getRawResult();
@@ -638,6 +640,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					isUnloadJob = true;
 				}else if(automaticConfigVo.getIsRequest()||(!automaticConfigVo.getIsRequest()&&predicate(failConfig,resultVo,false))){//失败
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+					audit.put("failedReason","");
 					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
 						if(backStepList.size() == 1) {
@@ -665,6 +668,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}catch(Exception ex) {
 			logger.error(ex.getMessage(),ex);
 			audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+			if(resultVo != null && StringUtils.isNotEmpty(resultVo.getError())) {
+				audit.put("failedReason",resultVo.getError());
+			}else {
+				StringWriter sw = new StringWriter();
+		        PrintWriter pw = new PrintWriter(sw);
+		        ex.printStackTrace(pw);
+				audit.put("failedReason",sw.toString());
+			}
 			//processHandler.hang(currentProcessTaskStepVo);
 			isUnloadJob = true;
 		}finally {
