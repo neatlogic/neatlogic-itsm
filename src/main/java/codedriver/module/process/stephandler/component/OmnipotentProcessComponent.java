@@ -179,7 +179,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
-		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromId(currentProcessTaskStepVo.getId());
+		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
 		if (nextStepList.size() == 1) {
 			return nextStepList;
 		} else if (nextStepList.size() > 1) {

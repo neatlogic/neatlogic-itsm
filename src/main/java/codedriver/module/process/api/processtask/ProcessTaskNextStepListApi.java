@@ -86,7 +86,7 @@ public class ProcessTaskNextStepListApi extends ApiComponentBase{
 		}
 		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, processTaskStepAction);
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
-		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
 		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
 			if(processTaskStep.getIsActive() != null) {
 				if(ProcessTaskStepAction.COMPLETE.getValue().equals(action) && ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
