@@ -439,19 +439,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-		/** 组装通知模板 **/ //TODO linbq 这里要删除
-//		JSONArray notifyList = stepConfigObj.getJSONArray("notifyList");
-//		if (CollectionUtils.isNotEmpty(notifyList)) {
-//			List<String> templateUuidList = new ArrayList<>();
-//			for (int j = 0; j < notifyList.size(); j++) {
-//				JSONObject notifyObj = notifyList.getJSONObject(j);
-//				String template = notifyObj.getString("template");
-//				if (StringUtils.isNotBlank(template)) {
-//					templateUuidList.add(template);
-//				}
-//			}
-//			processStepVo.setTemplateUuidList(templateUuidList);
-//		}
 		/** 组装通知策略id **/
 		JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
 		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {

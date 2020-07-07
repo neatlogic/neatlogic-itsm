@@ -47,12 +47,14 @@ import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Service
@@ -72,6 +74,9 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 	
 	@Autowired
 	private FormMapper formMapper;
+	
+	@Autowired
+	private CatalogService catalogService;
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
@@ -111,9 +116,12 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			}
 			ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
 			if(channel == null) {
-				throw new ChannelNotFoundException(channelUuid);
+				throw new ChannelNotFoundException(processTaskVo.getChannelUuid());
 			}
-			
+			/** 判断当前用户是否拥有channelUuid服务的上报权限 **/
+			if(!catalogService.channelIsAuthority(processTaskVo.getChannelUuid())){
+				throw new ProcessTaskNoPermissionException("上报");
+			}
 			String owner = processTaskVo.getOwner();
 			if(StringUtils.isNotBlank(owner)) {
 				owner = GroupSearch.USER.getValuePlugin() + owner;
@@ -214,12 +222,17 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			}
 			return processTaskVo;
 		}else if(channelUuid != null){
-			ProcessTaskVo processTaskVo = new ProcessTaskVo();
-			processTaskVo.setIsAutoGenerateId(false);
 			ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
 			if(channel == null) {
 				throw new ChannelNotFoundException(channelUuid);
 			}
+			/** 判断当前用户是否拥有channelUuid服务的上报权限 **/
+			if(!catalogService.channelIsAuthority(channelUuid)){
+				throw new ProcessTaskNoPermissionException("上报");
+			}
+
+			ProcessTaskVo processTaskVo = new ProcessTaskVo();
+			processTaskVo.setIsAutoGenerateId(false);
 			processTaskVo.setChannelType(channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid()));
 			processTaskVo.setChannelUuid(channelUuid);
 			processTaskVo.setProcessUuid(channel.getProcessUuid());
