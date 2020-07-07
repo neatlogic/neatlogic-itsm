@@ -20,6 +20,7 @@ import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
@@ -47,6 +48,10 @@ public class ProcessTaskAutomaticCompleteApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "当前步骤Id"),
 		@Param(name = "action", type = ApiParamType.ENUM, rule = "back,complete", isRequired = true, desc = "操作类型，complete：流转,back：回退"),
+	})
+	@Output({
+		@Param(name = "Status", type = ApiParamType.STRING, desc = "操作成功"),
+		@Param(name = "Message", type = ApiParamType.STRING, desc = "异常信息"),
 	})
 	@Description(desc = "流转自动化处理步骤接口")
 	@Override
