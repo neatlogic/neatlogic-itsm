@@ -71,22 +71,22 @@ public class MatrixServiceImpl implements MatrixService {
 						JSONObject contentObj = JSON.parseObject(content);
 						if(MapUtils.isNotEmpty(contentObj)) {
 							JSONArray theadList = contentObj.getJSONArray("theadList");
-		            		if(CollectionUtils.isNotEmpty(theadList)) {
-		            			for(int i = 0; i < theadList.size(); i++) {
-		            				JSONObject theadObj = theadList.getJSONObject(i);
-		            				ProcessMatrixAttributeVo processMatrixAttributeVo = new ProcessMatrixAttributeVo();
-		            				processMatrixAttributeVo.setMatrixUuid(matrixUuid);
-		            				processMatrixAttributeVo.setUuid(theadObj.getString("key"));
-		            				processMatrixAttributeVo.setName(theadObj.getString("title"));
-		            				processMatrixAttributeVo.setType(ProcessMatrixAttributeType.INPUT.getValue());
-		            				processMatrixAttributeVo.setIsDeletable(0);
-		            				processMatrixAttributeVo.setSort(i);
-		            				processMatrixAttributeVo.setIsRequired(0);
-		            				Integer isSearchable = theadObj.getInteger("isSearchable");
-		            				processMatrixAttributeVo.setIsSearchable((isSearchable == null || isSearchable.intValue() != 1) ? 0 : 1);
-		            				processMatrixAttributeList.add(processMatrixAttributeVo);
-		            			}
-		            		}
+							if(CollectionUtils.isNotEmpty(theadList)) {
+								for(int i = 0; i < theadList.size(); i++) {
+									JSONObject theadObj = theadList.getJSONObject(i);
+									ProcessMatrixAttributeVo processMatrixAttributeVo = new ProcessMatrixAttributeVo();
+									processMatrixAttributeVo.setMatrixUuid(matrixUuid);
+									processMatrixAttributeVo.setUuid(theadObj.getString("key"));
+									processMatrixAttributeVo.setName(theadObj.getString("title"));
+									processMatrixAttributeVo.setType(ProcessMatrixAttributeType.INPUT.getValue());
+									processMatrixAttributeVo.setIsDeletable(0);
+									processMatrixAttributeVo.setSort(i);
+									processMatrixAttributeVo.setIsRequired(0);
+									Integer isSearchable = theadObj.getInteger("isSearchable");
+									processMatrixAttributeVo.setIsSearchable((isSearchable == null || isSearchable.intValue() != 1) ? 0 : 1);
+									processMatrixAttributeList.add(processMatrixAttributeVo);
+								}
+							}
 						}
 					} catch (Exception ex) {
 						logger.error(ex.getMessage(), ex);
