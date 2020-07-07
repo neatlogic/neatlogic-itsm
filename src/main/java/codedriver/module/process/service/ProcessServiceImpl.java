@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.exception.integration.IntegrationNotFoundException;
+import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
@@ -40,6 +43,9 @@ public class ProcessServiceImpl implements ProcessService {
 	
     @Autowired
     private NotifyPolicyInvokerManager notifyPolicyInvokerManager;
+    
+    @Autowired
+    private IntegrationMapper integrationMapper;
 
 	@Override
 	public ProcessVo getProcessByUuid(String processUuid) {
@@ -128,6 +134,15 @@ public class ProcessServiceImpl implements ProcessService {
 		if (processVo.getStepList() != null && processVo.getStepList().size() > 0) {
 
 			for (ProcessStepVo stepVo : processVo.getStepList()) {
+				/** 判断引用的外部调用是否存在 **/
+				List<String> integrationUuidList = stepVo.getIntegrationUuidList();
+				if(CollectionUtils.isNotEmpty(integrationUuidList)) {
+					for(String integrationUuid : integrationUuidList) {
+						if(integrationMapper.getIntegrationByUuid(integrationUuid) == null) {
+							throw new IntegrationNotFoundException(integrationUuid);
+						}
+					}
+				}
 				processMapper.insertProcessStep(stepVo);
 				if (stepVo.getFormAttributeList() != null && stepVo.getFormAttributeList().size() > 0) {
 					for (ProcessStepFormAttributeVo processStepAttributeVo : stepVo.getFormAttributeList()) {

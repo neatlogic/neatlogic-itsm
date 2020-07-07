@@ -246,9 +246,9 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
         }
 		/** 组装分配策略 **/
 		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (!MapUtils.isEmpty(workerPolicyConfig)) {
+		if (MapUtils.isNotEmpty(workerPolicyConfig)) {
 			JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
-			if (!CollectionUtils.isEmpty(policyList)) {
+			if (CollectionUtils.isNotEmpty(policyList)) {
 				List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
 				for (int k = 0; k < policyList.size(); k++) {
 					JSONObject policyObj = policyList.getJSONObject(k);
@@ -264,6 +264,27 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 					workerPolicyList.add(processStepWorkerPolicyVo);
 				}
 				processStepVo.setWorkerPolicyList(workerPolicyList);
+			}
+		}
+		/** 收集引用的外部调用uuid **/
+		JSONObject automaticConfig = stepConfigObj.getJSONObject("automaticConfig");
+		if(MapUtils.isNotEmpty(automaticConfig)) {
+			JSONObject requestConfig = automaticConfig.getJSONObject("requestConfig");
+			if(MapUtils.isNotEmpty(requestConfig)) {
+				String integrationUuid = requestConfig.getString("integrationUuid");
+				if(StringUtils.isNotBlank(integrationUuid)) {
+					processStepVo.getIntegrationUuidList().add(integrationUuid);
+				}
+			}
+			JSONObject callbackConfig = automaticConfig.getJSONObject("callbackConfig");
+			if(MapUtils.isNotEmpty(callbackConfig)) {
+				JSONObject config = callbackConfig.getJSONObject("config");
+				if(MapUtils.isNotEmpty(config)) {
+					String integrationUuid = config.getString("integrationUuid");
+					if(StringUtils.isNotBlank(integrationUuid)) {
+						processStepVo.getIntegrationUuidList().add(integrationUuid);
+					}
+				}
 			}
 		}
 	}
