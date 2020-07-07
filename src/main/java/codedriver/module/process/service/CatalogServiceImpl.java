@@ -63,53 +63,54 @@ public class CatalogServiceImpl implements CatalogService {
 
 	@Override
 	public List<String> getCurrentUserAuthorizedChannelUuidList() {
+		List<String> resultList = new ArrayList<>();
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-		//已授权的目录uuid
+		/** 查出当前用户所有已授权的目录uuid集合  **/
 		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
-		if(CollectionUtils.isEmpty(currentUserAuthorizedCatalogUuidList)) {
-			return new ArrayList<>();
-		}
-		//已授权的服务uuid
-		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
-		
-		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
-
-		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
-		//查出所有目录
-		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
-		if(CollectionUtils.isNotEmpty(catalogList)) {
-			for(CatalogVo catalogVo : catalogList) {
-				if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())) {
-					catalogVo.setAuthority(true);
+		if(CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
+			/** 查出当前用户所有已授权的服务uuid集合  **/
+			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+			if(CollectionUtils.isNotEmpty(currentUserAuthorizedChannelUuidList)) {
+				Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
+				CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+				/** 查出所有目录 **/
+				List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());				
+				for(CatalogVo catalogVo : catalogList) {
+					if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())) {
+						catalogVo.setAuthority(true);
+					}
+					uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 				}
-				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
+				
+				for(CatalogVo catalogVo : catalogList) {
+					String parentUuid = catalogVo.getParentUuid();
+					CatalogVo parent = uuidKeyMap.get(parentUuid);
+					if(parent != null) {
+						catalogVo.setParent(parent);
+					}				
+				}
+				
+				List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
+				for(ChannelVo channelVo : channelList) {
+					if(currentUserAuthorizedChannelUuidList.contains(channelVo.getUuid())) {
+						channelVo.setAuthority(true);
+					}
+					String parentUuid = channelVo.getParentUuid();
+					CatalogVo parent = uuidKeyMap.get(parentUuid);
+					if(parent != null) {
+						channelVo.setParent(parent);
+					}
+				}
+				/** 找出有上报权限的服务uuid集合 **/
+				for(ChannelVo channelVo : channelList) {
+					if(channelVo.isAuthority()) {
+						resultList.add(channelVo.getUuid());
+					}
+				}
 			}
 			
-			for(CatalogVo catalogVo : catalogList) {
-				String parentUuid = catalogVo.getParentUuid();
-				CatalogVo parent = uuidKeyMap.get(parentUuid);
-				if(parent != null) {
-					catalogVo.setParent(parent);
-				}				
-			}
 		}
-		List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
-		for(ChannelVo channelVo : channelList) {
-			if(currentUserAuthorizedChannelUuidList.contains(channelVo.getUuid())) {
-				channelVo.setAuthority(true);
-			}
-			String parentUuid = channelVo.getParentUuid();
-			CatalogVo parent = uuidKeyMap.get(parentUuid);
-			if(parent != null) {
-				channelVo.setParent(parent);
-			}
-		}
-		List<String> resultList = new ArrayList<>();
-		for(ChannelVo channelVo : channelList) {
-			if(channelVo.isAuthority()) {
-				resultList.add(channelVo.getUuid());
-			}
-		}
+		
 		return resultList;
 	}
 
@@ -119,13 +120,16 @@ public class CatalogServiceImpl implements CatalogService {
 		if(channel == null ) {
 			throw new ChannelNotFoundException(channelUuid);
 		}
+		/** 服务状态必须是激活**/
 		if(Objects.equals(channel.getIsActive(), 1)) {
 			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+			/** 查出当前用户所有已授权的服务uuid集合  **/
 			List<String> channelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), channelUuid);
+			/** 服务已授权 **/
 			if(channelUuidList.contains(channelUuid)) {
 				CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channel.getParentUuid());
 				if(catalogVo != null && !CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
-					//已授权的目录uuid
+					/** 查出当前用户所有已授权的目录uuid集合  **/
 					List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 					List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfUuidByLftRht(catalogVo.getLft(), catalogVo.getRht());
 					for(CatalogVo catalog : ancestorsAndSelfList) {
@@ -135,8 +139,6 @@ public class CatalogServiceImpl implements CatalogService {
 							return false;
 						}
 					}
-				}else {
-					return true;
 				}
 			}
 		}
