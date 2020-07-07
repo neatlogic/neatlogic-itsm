@@ -839,7 +839,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 */
 	private List<ProcessTaskStepVo> getbackStepList(Long processTaskStepId){
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
-		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(processTaskStepId);
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
 		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
 			if(processTaskStep.getIsActive() != null) {
 				if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){

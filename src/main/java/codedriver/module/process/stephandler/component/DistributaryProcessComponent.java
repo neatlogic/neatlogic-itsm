@@ -77,7 +77,7 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
-		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromId(currentProcessTaskStepVo.getId());
+		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
 		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
 			if(ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
 				resultList.add(processTaskStep);
