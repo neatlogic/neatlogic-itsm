@@ -1,8 +1,10 @@
 package codedriver.module.process.api.matrix;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.type.ParamIrregularException;
@@ -91,7 +94,8 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
 		@Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY), 
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"), 
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页") 
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"), 
+		@Param(name = "arrayColumnList", desc = "需要将值转化成数组的属性集合", type = ApiParamType.JSONARRAY) 
 	})
 	@Description(desc = "矩阵属性数据查询-table接口")
 	@Output({ 
@@ -210,6 +214,34 @@ public class MatrixColumnDataSearchForTableApi extends ApiComponentBase {
 				throw new MatrixExternalException("外部接口访问异常");
 			} else {
 				matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
+				/** 将arrayColumnList包含的列值转成数组 **/
+				List<String> arrayColumnList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("arrayColumnList")), String.class);
+				if(CollectionUtils.isNotEmpty(arrayColumnList)) {
+					JSONArray tbodyList = returnObj.getJSONArray("tbodyList");
+					if(CollectionUtils.isNotEmpty(tbodyList)) {
+						for(int i = 0; i < tbodyList.size(); i++) {
+							JSONObject rowData = tbodyList.getJSONObject(i);
+							for(Entry<String, Object> entry : rowData.entrySet()) {
+								if(arrayColumnList.contains(entry.getKey())) {
+									List<ValueTextVo> valueObjList = new ArrayList<>();
+									JSONObject valueObj = (JSONObject) entry.getValue();
+									String value = valueObj.getString("value");
+									if(StringUtils.isNotBlank(value)) {
+										if(value.startsWith("[") && value.endsWith("]")) {
+											List<String> valueList = JSON.parseArray(valueObj.getJSONArray("value").toJSONString(), String.class);
+											for(String valueStr : valueList) {
+												valueObjList.add(new ValueTextVo(valueStr, valueStr));
+											}
+										}else {
+											valueObjList.add(new ValueTextVo(value, value));
+										}
+									}
+									valueObj.put("value", valueObjList);
+								}
+							}
+						}
+					}
+				}
 			}
 			returnObj.put("theadList", theadList);
 		}
