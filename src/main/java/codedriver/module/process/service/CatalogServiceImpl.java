@@ -107,8 +107,7 @@ public class CatalogServiceImpl implements CatalogService {
 						resultList.add(channelVo.getUuid());
 					}
 				}
-			}
-			
+			}		
 		}
 		
 		return resultList;
@@ -133,12 +132,15 @@ public class CatalogServiceImpl implements CatalogService {
 					List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 					List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfUuidByLftRht(catalogVo.getLft(), catalogVo.getRht());
 					for(CatalogVo catalog : ancestorsAndSelfList) {
-						if(Objects.equals(catalog.getIsActive(), 0)) {
-							return false;
-						}else if(!currentUserAuthorizedCatalogUuidList.contains(catalog.getUuid())) {
-							return false;
+						if(!CatalogVo.ROOT_UUID.equals(catalog.getUuid())) {
+							if(Objects.equals(catalog.getIsActive(), 0)) {
+								return false;
+							}else if(!currentUserAuthorizedCatalogUuidList.contains(catalog.getUuid())) {
+								return false;
+							}
 						}
 					}
+					return true;
 				}
 			}
 		}
