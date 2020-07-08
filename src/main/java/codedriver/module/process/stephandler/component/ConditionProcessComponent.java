@@ -124,18 +124,17 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 								JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
 								if (CollectionUtils.isNotEmpty(conditionGroupList)) {
 									ProcessTaskVo processTaskVo = ProcessTaskHandlerUtil.getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
-									JSONObject processFieldData = ProcessTaskUtil.getProcessFieldData(processTaskVo,true);
-
+									JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+									JSONObject conditionParamTextData = ProcessTaskUtil.getProcessFieldData(processTaskVo, false);
+									JSONObject conditionParamNameData = ProcessTaskUtil.getConditionParamNameData(processTaskVo.getFormConfig());
 									try {
-										ConditionParamContext.init(processFieldData);
+										ConditionParamContext.init(conditionParamData, conditionParamNameData, conditionParamTextData);
 										System.out.println(moveonConfig.toJSONString());
 										ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
-										System.out.println(JSON.toJSONString(conditionConfigVo));
 										String script = conditionConfigVo.buildScript();
+										System.out.println(JSON.toJSONString(conditionConfigVo));
 										// ((false || true) || (true && false) || (true || false))
-										if (RunScriptUtil.runScript(script)) {
-											canRun = true;
-										}
+										canRun = RunScriptUtil.runScript(script);
 									} catch (Exception e) {
 										logger.error(e.getMessage(), e);
 									} finally {
