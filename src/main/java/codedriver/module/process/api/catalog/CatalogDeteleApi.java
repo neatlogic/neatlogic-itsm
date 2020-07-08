@@ -2,8 +2,10 @@ package codedriver.module.process.api.catalog;
 
 import java.util.List;
 
+import codedriver.framework.transaction.util.TransactionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
@@ -33,6 +35,9 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	
 	@Autowired
 	private ChannelMapper channelMapper;
+
+	@Autowired
+	private TransactionUtil transactionUtil;
 	
 	@Override
 	public String getToken() {
@@ -55,9 +60,9 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	@Description(desc = "服务目录删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-//		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+		TransactionStatus transactionStatus = transactionUtil.openTx();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
+			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_UUID, 0);
 		}
 		String uuid = jsonObj.getString("uuid");
 		CatalogVo existsCatalog = catalogMapper.getCatalogByUuid(uuid);
@@ -85,6 +90,7 @@ public class CatalogDeteleApi extends ApiComponentBase {
 		//更新删除位置右边的左右编码值
 		catalogMapper.batchUpdateCatalogLeftCode(existsCatalog.getLft(), -2);
 		catalogMapper.batchUpdateCatalogRightCode(existsCatalog.getLft(), -2);
+		transactionUtil.commitTx(transactionStatus);
 		return null;
 	}
 

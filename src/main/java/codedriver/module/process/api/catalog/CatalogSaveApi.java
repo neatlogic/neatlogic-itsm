@@ -2,9 +2,11 @@ package codedriver.module.process.api.catalog;
 
 import java.util.List;
 
+import codedriver.framework.transaction.util.TransactionUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
@@ -32,6 +34,9 @@ public class CatalogSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private CatalogService catalogService;
+
+	@Autowired
+	private TransactionUtil transactionUtil;
 	
 	@Override
 	public String getToken() {
@@ -64,7 +69,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 	@Description(desc = "服务目录保存信息接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-//		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+		TransactionStatus transactionStatus = transactionUtil.openTx();
 		//根据catalog表中的count和最大的右编码进行比较
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			//直接用CatalogVo.ROOT_UUID去重建
@@ -114,6 +119,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 				catalogMapper.insertCatalogAuthority(authorityVo,catalogVo.getUuid());
 			}
 		}
+		transactionUtil.commitTx(transactionStatus);
 		return catalogVo.getUuid();
 	}
 

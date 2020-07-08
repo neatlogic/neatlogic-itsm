@@ -1,7 +1,9 @@
 package codedriver.module.process.api.catalog;
 
+import codedriver.framework.transaction.util.TransactionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
@@ -27,6 +29,9 @@ public class CatalogMoveApi extends ApiComponentBase {
 	
 	@Autowired
 	private CatalogService catalogService;
+
+	@Autowired
+	private TransactionUtil transactionUtil;
 	
 	@Override
 	public String getToken() {
@@ -51,10 +56,10 @@ public class CatalogMoveApi extends ApiComponentBase {
 	})
 	@Description(desc = "服务目录移动位置接口")
 	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {		
-//		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+	public Object myDoService(JSONObject jsonObj) throws Exception {
+		TransactionStatus transactionStatus = transactionUtil.openTx();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
+			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_UUID, 0);
 		}
 		String uuid = jsonObj.getString("uuid");		
 		CatalogVo moveCatalog = catalogMapper.getCatalogByUuid(uuid);
@@ -130,6 +135,7 @@ public class CatalogMoveApi extends ApiComponentBase {
 		//更新被移动块中节点的左右编码值
  		catalogMapper.batchUpdateCatalogLeftRightCodeByLeftRightCode(moveCatalog.getLft() - moveCatalog.getRht(), moveCatalog.getRht() - moveCatalog.getRht(), lft - moveCatalog.getLft() + moveCatalog.getRht());
 		//-------------------------------------------------------------------------------------------------------
+		transactionUtil.commitTx(transactionStatus);
 		return null;
 	}
 
