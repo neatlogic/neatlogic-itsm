@@ -128,7 +128,9 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
 									try {
 										ConditionParamContext.init(processFieldData);
+										System.out.println(moveonConfig.toJSONString());
 										ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
+										System.out.println(JSON.toJSONString(conditionConfigVo));
 										String script = conditionConfigVo.buildScript();
 										// ((false || true) || (true && false) || (true || false))
 										if (RunScriptUtil.runScript(script)) {

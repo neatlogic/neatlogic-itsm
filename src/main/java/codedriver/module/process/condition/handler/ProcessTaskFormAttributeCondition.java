@@ -2,10 +2,10 @@ package codedriver.module.process.condition.handler;
 
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
@@ -64,11 +64,11 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 				String formKey = condition.getName();
 				String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getHandler()).toLowerCase();
 				Object value = StringUtils.EMPTY;
-				if(CollectionUtils.isNotEmpty(condition.getValueList())) {
-					value = condition.getValueList().get(0);
-				}
-				if(condition.getValueList().size()>1) {
-					value = String.join("','",condition.getValueList());
+				if(condition.getValueList() instanceof String) {
+					value = condition.getValueList();
+				}else if(condition.getValueList() instanceof List) {
+					List<String> values = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+					value = String.join("','", values);
 				}
 				if(StringUtils.isNotBlank(value.toString())) {
 					value = String.format("'%s'",  value);
