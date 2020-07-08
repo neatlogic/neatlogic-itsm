@@ -87,10 +87,23 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), @Param(name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true), @Param(name = "uuidList", desc = "需要回显的数据uuid集合", type = ApiParamType.JSONARRAY), @Param(name = "uuidColumn", desc = "uuid对应的属性", type = ApiParamType.STRING), @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-			@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"), @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页") })
+	@Input({ 
+		@Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), 
+		@Param(name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true), 
+		@Param(name = "uuidList", desc = "需要回显的数据uuid集合", type = ApiParamType.JSONARRAY), 
+		@Param(name = "uuidColumn", desc = "uuid对应的属性", type = ApiParamType.STRING), 
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"), 
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"), 
+		@Param(name = "arrayColumnList", desc = "需要将值转化成数组的属性集合", type = ApiParamType.JSONARRAY)  
+	})
 	@Description(desc = "矩阵属性数据回显-table接口")
-	@Output({ @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"), @Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "属性列名集合"), @Param(explode = BasePageVo.class) })
+	@Output({ 
+		@Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"), 
+		@Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "属性列名集合"), 
+		@Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型"), 
+		@Param(explode = BasePageVo.class) 
+	})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject returnObj = new JSONObject();
@@ -104,6 +117,7 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 			throw new ParamIrregularException("参数“columnList”不符合格式要求");
 		}
 		if (ProcessMatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+			returnObj.put("type", ProcessMatrixType.CUSTOM.getValue());
 			Map<String, ProcessMatrixAttributeVo> attributeMap = new HashMap<>();
 			List<ProcessMatrixAttributeVo> processMatrixAttributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
 			for (ProcessMatrixAttributeVo attribute : processMatrixAttributeList) {
@@ -136,6 +150,7 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 				returnObj.put("rowNum", rowNum);
 			}
 		} else {
+			returnObj.put("type", ProcessMatrixType.EXTERNAL.getValue());
 			ProcessMatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(dataVo.getMatrixUuid());
 			if (externalVo == null) {
 				throw new MatrixExternalNotFoundException(dataVo.getMatrixUuid());
@@ -197,6 +212,14 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 					throw new MatrixExternalException("外部接口访问异常");
 				} else {
 					matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
+					/** 将arrayColumnList包含的属性值转成数组 **/
+					List<String> arrayColumnList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("arrayColumnList")), String.class);
+					if(CollectionUtils.isNotEmpty(arrayColumnList)) {
+						JSONArray tbodyList = returnObj.getJSONArray("tbodyList");
+						if(CollectionUtils.isNotEmpty(tbodyList)) {
+							matrixService.arrayColumnDataConversion(arrayColumnList, tbodyList);
+						}
+					}
 				}
 			}
 			returnObj.put("theadList", theadList);
