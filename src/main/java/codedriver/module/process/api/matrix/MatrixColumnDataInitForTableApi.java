@@ -212,14 +212,14 @@ public class MatrixColumnDataInitForTableApi extends ApiComponentBase {
 					throw new MatrixExternalException("外部接口访问异常");
 				} else {
 					matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
-					/** 将arrayColumnList包含的属性值转成数组 **/
-					List<String> arrayColumnList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("arrayColumnList")), String.class);
-					if(CollectionUtils.isNotEmpty(arrayColumnList)) {
-						JSONArray tbodyList = returnObj.getJSONArray("tbodyList");
-						if(CollectionUtils.isNotEmpty(tbodyList)) {
-							matrixService.arrayColumnDataConversion(arrayColumnList, tbodyList);
-						}
-					}
+				}
+			}
+			/** 将arrayColumnList包含的属性值转成数组 **/
+			List<String> arrayColumnList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("arrayColumnList")), String.class);
+			if(CollectionUtils.isNotEmpty(arrayColumnList)) {
+				JSONArray tbodyList = returnObj.getJSONArray("tbodyList");
+				if(CollectionUtils.isNotEmpty(tbodyList)) {
+					matrixService.arrayColumnDataConversion(arrayColumnList, tbodyList);
 				}
 			}
 			returnObj.put("theadList", theadList);
