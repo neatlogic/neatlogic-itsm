@@ -243,4 +243,29 @@ public class MatrixServiceImpl implements MatrixService {
 		}
 		return resultList;
 	}
+
+	@Override
+	public void arrayColumnDataConversion(List<String> arrayColumnList, JSONArray tbodyList) {
+		for(int i = 0; i < tbodyList.size(); i++) {
+			JSONObject rowData = tbodyList.getJSONObject(i);
+			for(Entry<String, Object> entry : rowData.entrySet()) {
+				if(arrayColumnList.contains(entry.getKey())) {
+					List<ValueTextVo> valueObjList = new ArrayList<>();
+					JSONObject valueObj = (JSONObject) entry.getValue();
+					String value = valueObj.getString("value");
+					if(StringUtils.isNotBlank(value)) {
+						if(value.startsWith("[") && value.endsWith("]")) {
+							List<String> valueList = JSON.parseArray(valueObj.getJSONArray("value").toJSONString(), String.class);
+							for(String valueStr : valueList) {
+								valueObjList.add(new ValueTextVo(valueStr, valueStr));
+							}
+						}else {
+							valueObjList.add(new ValueTextVo(value, value));
+						}
+					}
+					valueObj.put("value", valueObjList);
+				}
+			}
+		}	
+	}
 }

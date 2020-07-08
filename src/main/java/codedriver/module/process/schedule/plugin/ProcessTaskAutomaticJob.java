@@ -56,14 +56,14 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		JSONObject data = (JSONObject) jobObject.getData("data");
 		JobObject.Builder newJobObjectBuilder = null;
 		JSONObject audit = null;
+		/** 计算开始时间 **/
 		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
-		Date startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"));
-		Date endTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("endTime"));
+		Integer isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+		Date startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"),isTimeToRun>0?1:0);
 		String groupName = automaticConfigVo.getIsRequest()?"-REQUEST":"-CALLBACK";
 		ProcessTaskStepVo  currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
 		newJobObjectBuilder = new JobObject.Builder(jobObject.getJobName(), this.getGroupName()+groupName, this.getClassName(), TenantContext.get().getTenantUuid())
 				.withBeginTime(startTime)
-			    .withEndTime(endTime)
 			    .addData("data", data)
 				.addData("automaticConfigVo", automaticConfigVo)
 				.addData("currentProcessTaskStepVo", currentProcessTaskStepVo);
@@ -103,36 +103,41 @@ public class ProcessTaskAutomaticJob extends JobBase {
 
 	@Override
 	public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
-		//避免后续获取用户异常
-		UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);
 		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
-		ProcessTaskStepVo currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
-		//excute
-		Boolean isUnloadJob = processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
-		//update nextFireTime
-		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue());
-		ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
-		JSONObject data = stepData.getData();// (JSONObject) jobObject.getData("data");
-		if(data != null) {
-			JSONObject audit = null;
-			if(automaticConfigVo.getIsRequest()) {
-				audit = data.getJSONObject("requestAudit");
-			}else {
-				audit = data.getJSONObject("callbackAudit");
+		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
+		//判断是否在时间窗口内
+		Integer isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+		if(isTimeToRun == 0) {
+			//避免后续获取用户异常
+			UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);
+			ProcessTaskStepVo currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
+			//excute
+			Boolean isUnloadJob = processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
+			//update nextFireTime
+			ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue());
+			ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+			JSONObject data = stepData.getData();// (JSONObject) jobObject.getData("data");
+			if(data != null) {
+				JSONObject audit = null;
+				if(automaticConfigVo.getIsRequest()) {
+					audit = data.getJSONObject("requestAudit");
+				}else {
+					audit = data.getJSONObject("callbackAudit");
+				}
+				if(context.getNextFireTime() != null) {
+					audit.put("nextFireTime",context.getNextFireTime());
+				}
+				if(isUnloadJob){
+					audit.remove("nextFireTime");
+				}
+				processTaskStepDataVo.setData(data.toJSONString());
+				processTaskStepDataVo.setFcu("system");
+				processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
 			}
-			if(context.getNextFireTime() != null) {
-				audit.put("nextFireTime",context.getNextFireTime());
+			//
+			if(data == null || isUnloadJob) {
+				schedulerManager.unloadJob(jobObject);
 			}
-			if(isUnloadJob){
-				audit.remove("nextFireTime");
-			}
-			processTaskStepDataVo.setData(data.toJSONString());
-			processTaskStepDataVo.setFcu("system");
-			processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
-		}
-		//
-		if(data == null || isUnloadJob) {
-			schedulerManager.unloadJob(jobObject);
 		}
 	}
 	

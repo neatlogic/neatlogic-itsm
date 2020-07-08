@@ -3,6 +3,7 @@ package codedriver.module.process.service;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.exception.util.FreemarkerTransformException;
@@ -23,5 +24,14 @@ public interface MatrixService {
     public List<String> matrixAttributeValueKeyWordSearch(ProcessMatrixAttributeVo processMatrixAttributeVo, String keyword, int pageSize);
     
     public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, int pageSize, JSONObject resultObj);
+    /**
+     * 
+    * @Time:2020年7月8日
+    * @Description: 将arrayColumnList包含的属性值转成数组
+    * @param arrayColumnList 需要将值转化成数组的属性集合
+    * @param tbodyList 表格数据
+    * @return void
+     */
+    public void arrayColumnDataConversion(List<String> arrayColumnList, JSONArray tbodyList);
 
 }
