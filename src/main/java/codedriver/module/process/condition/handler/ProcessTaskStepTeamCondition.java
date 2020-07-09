@@ -50,4 +50,10 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 		return ParamType.ARRAY;
 	}
 
+	@Override
+	public Object valueConversionText(Object value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

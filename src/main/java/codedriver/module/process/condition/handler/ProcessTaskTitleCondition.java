@@ -77,4 +77,9 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
 		}
 		return where+")";
 	}
+
+	@Override
+	public Object valueConversionText(Object value) {
+		return value;
+	}
 }

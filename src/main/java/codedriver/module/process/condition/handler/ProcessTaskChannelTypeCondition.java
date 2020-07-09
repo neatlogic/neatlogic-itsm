@@ -1,10 +1,12 @@
 package codedriver.module.process.condition.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -71,5 +73,30 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	@Override
 	public ParamType getParamType() {
 		return ParamType.ARRAY;
+	}
+
+	@Override
+	public Object valueConversionText(Object value) {
+		if(value != null) {
+			if(value instanceof String) {
+				ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(value.toString());
+				if(channelTypeVo != null) {
+					return channelTypeVo.getName();
+				}
+			}else if(value instanceof List){
+				List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+				List<String> textList = new ArrayList<>();
+				for(String valueStr : valueList) {
+					ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(valueStr);
+					if(channelTypeVo != null) {
+						textList.add(channelTypeVo.getName());					
+					}else {
+						textList.add(valueStr);
+					}
+				}
+				return textList;
+			}			
+		}
+		return value;
 	}
 }

@@ -79,5 +79,11 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 		}
 		return null;
 	}
+
+	@Override
+	public Object valueConversionText(Object value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

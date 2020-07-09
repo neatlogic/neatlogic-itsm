@@ -116,4 +116,10 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 		}
 		return null;
 	}
+
+	@Override
+	public Object valueConversionText(Object value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

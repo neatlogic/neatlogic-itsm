@@ -1,5 +1,6 @@
 package codedriver.module.process.condition.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -105,5 +106,30 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 		}
 		String where = String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
 		return where;
+	}
+
+	@Override
+	public Object valueConversionText(Object value) {
+		if(value != null) {
+			if(value instanceof String) {
+				String text = ProcessTaskStatus.getText(value.toString());
+				if(text != null) {
+					return text;
+				}
+			}else if(value instanceof List){
+				List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+				List<String> textList = new ArrayList<>();
+				for(String valueStr : valueList) {
+					String text = ProcessTaskStatus.getText(valueStr);
+					if(text != null) {
+						textList.add(text);					
+					}else {
+						textList.add(valueStr);
+					}
+				}
+				return textList;
+			}
+		}		
+		return value;
 	}
 }

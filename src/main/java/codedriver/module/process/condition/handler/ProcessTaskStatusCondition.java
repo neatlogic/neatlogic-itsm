@@ -1,7 +1,11 @@
 package codedriver.module.process.condition.handler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -84,6 +88,31 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
 	@Override
 	public ParamType getParamType() {
 		return ParamType.ARRAY;
+	}
+
+	@Override
+	public Object valueConversionText(Object value) {
+		if(value != null) {
+			if(value instanceof String) {
+				String text = ProcessTaskStatus.getText(value.toString());
+				if(text != null) {
+					return text;
+				}
+			}else if(value instanceof List){
+				List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+				List<String> textList = new ArrayList<>();
+				for(String valueStr : valueList) {
+					String text = ProcessTaskStatus.getText(valueStr);
+					if(text != null) {
+						textList.add(text);					
+					}else {
+						textList.add(valueStr);
+					}
+				}
+				return textList;
+			}
+		}		
+		return value;
 	}
 
 }

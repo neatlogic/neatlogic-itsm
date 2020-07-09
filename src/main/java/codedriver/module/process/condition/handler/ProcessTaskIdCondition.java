@@ -77,4 +77,9 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
 		}
 		return where;
 	}
+
+	@Override
+	public Object valueConversionText(Object value) {
+		return value;
+	}
 }
