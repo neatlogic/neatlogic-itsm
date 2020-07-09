@@ -1,5 +1,6 @@
 package codedriver.module.process.formattribute.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -47,18 +48,20 @@ public class UserSelectHandler implements IFormAttributeHandler {
 	@Override
 	public Object getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
 		String value = attributeDataVo.getData();
-		List<String> valueList = null;
 		boolean isMultiple = configObj.getBooleanValue("isMultiple");
 		if(isMultiple) {
-			valueList = JSON.parseArray(value, String.class);
+			List<String> valueList = JSON.parseArray(value, String.class);
 			if(CollectionUtils.isNotEmpty(valueList)) {
-				StringBuilder result = new StringBuilder();
+//				StringBuilder result = new StringBuilder();
+				List<String> textList = new ArrayList<>();
 				for(String key : valueList) {
-					result.append("、");
-					result.append(parse(key));
+//					result.append("、");
+//					result.append(parse(key));
+					textList.add(parse(key));
 				}
-				return result.toString().substring(1);
+				return textList;
 			}
+			return valueList;
 		}else {
 			if(StringUtils.isNotBlank(value)) {
 				return parse(value);

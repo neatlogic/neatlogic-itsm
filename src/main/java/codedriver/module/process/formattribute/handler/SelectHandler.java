@@ -1,5 +1,6 @@
 package codedriver.module.process.formattribute.handler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class SelectHandler implements IFormAttributeHandler {
 		if(isMultiple) {
 			valueList = JSON.parseArray(value, String.class);
 			if(CollectionUtils.isEmpty(valueList)) {
-				return "";
+				return valueList;
 			}
 		}else {
 			if(StringUtils.isBlank(value)) {
@@ -54,17 +55,20 @@ public class SelectHandler implements IFormAttributeHandler {
 					valueTextMap.put(data.getValue(), data.getText());
 				}
 				if(isMultiple) {
-					StringBuilder result = new StringBuilder();
+//					StringBuilder result = new StringBuilder();
+					List<String> textList = new ArrayList<>();
 					for(String key : valueList) {
-						result.append("、");
+//						result.append("、");
 						String text = valueTextMap.get(key);
 						if(text != null) {
-							result.append(text);
+//							result.append(text);
+							textList.add(text);
 						}else {
-							result.append(key);
+//							result.append(key);
+							textList.add(key);
 						}
 					}
-					return result.toString().substring(1);
+					return textList;
 				}else {
 					String text = valueTextMap.get(value);
 					if(text != null) {
@@ -76,16 +80,19 @@ public class SelectHandler implements IFormAttributeHandler {
 			}
 		}else {//其他，如动态数据源
 			if(isMultiple) {
-				StringBuilder result = new StringBuilder();
+//				StringBuilder result = new StringBuilder();
+				List<String> textList = new ArrayList<>();
 				for(String key : valueList) {
-					result.append("、");
+//					result.append("、");
 					if(key.contains("&=&")) {
-						result.append(key.split("&=&")[1]);
+//						result.append(key.split("&=&")[1]);
+						textList.add(key.split("&=&")[1]);
 					}else {
-						result.append(key);
+//						result.append(key);
+						textList.add(key);
 					}
 				}
-				return result.toString().substring(1);
+				return textList;
 			}else {
 				if(value.contains("&=&")) {
 					return value.split("&=&")[1];
