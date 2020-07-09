@@ -2,7 +2,6 @@ package codedriver.module.process.api.dashboard;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,8 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.condition.core.ConditionHandlerFactory;
+import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
-import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.restful.annotation.Description;
@@ -59,10 +59,11 @@ public class DashboardGetConditionApi extends ApiComponentBase {
 		JSONArray resultArray = new JSONArray();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		//固定字段条件
-		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
-		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
-			IProcessTaskCondition condition = entry.getValue();
-			if(ProcessWorkcenterField.getValue(condition.getName())== null) {
+//		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
+//		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
+		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
+//			IProcessTaskCondition condition = entry.getValue();
+			if(!(condition instanceof IProcessTaskCondition) || ProcessWorkcenterField.getValue(condition.getName())== null) {
 				continue;
 			}
 			JSONObject commonObj = new JSONObject();

@@ -159,6 +159,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 							}else {
 								ruleObj.putAll(moveonConfig);
 							}
+							ruleObj.put("type", type);
 							ruleObj.put("result", canRun);
 							ruleObj.put("targetStepList", targetStepNameList);
 							ruleList.add(ruleObj);
