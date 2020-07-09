@@ -84,7 +84,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 			for(ProcessTaskFormAttributeDataVo attributeDataVo : oldProcessTaskFormAttributeDataList) {
 				IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
 				if(handler != null) {
-					oldContentMap.put(attributeDataVo.getAttributeUuid(), handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())));
+					oldContentMap.put(attributeDataVo.getAttributeUuid(), handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())).toString());
 				}else {
 					oldContentMap.put(attributeDataVo.getAttributeUuid(), attributeDataVo.getData());
 				}

@@ -45,7 +45,7 @@ public class UserSelectHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public String getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
+	public Object getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
 		String value = attributeDataVo.getData();
 		List<String> valueList = null;
 		boolean isMultiple = configObj.getBooleanValue("isMultiple");
