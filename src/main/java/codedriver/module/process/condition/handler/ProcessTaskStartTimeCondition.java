@@ -71,7 +71,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 				List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
 				List<String> textList = new ArrayList<>();
 				for(String valueStr : valueList) {
-					textList.add(simpleDateFormat.format(new Date(Integer.parseInt(valueStr))));
+					textList.add(simpleDateFormat.format(new Date(Long.parseLong(valueStr))));
 				}
 				return textList;
 			}

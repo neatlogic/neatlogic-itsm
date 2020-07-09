@@ -103,7 +103,10 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 							config.put("name", formAttribute.getLabel());
 							IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
 							if(formAttributeHandler != null) {
-								return formAttributeHandler.getValue(new AttributeDataVo(), JSON.parseObject(formAttribute.getConfig()));
+								AttributeDataVo attributeDataVo = new AttributeDataVo();
+								attributeDataVo.setAttributeUuid(attributeUuid);
+								attributeDataVo.setData(value.toString());
+								return formAttributeHandler.getValue(attributeDataVo, JSON.parseObject(formAttribute.getConfig()));
 							}
 						}
 					}
