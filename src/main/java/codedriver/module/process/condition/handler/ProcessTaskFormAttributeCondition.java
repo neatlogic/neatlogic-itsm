@@ -2,11 +2,14 @@ package codedriver.module.process.condition.handler;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
 
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
@@ -15,6 +18,11 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.dto.AttributeDataVo;
+import codedriver.framework.process.dto.FormAttributeVo;
+import codedriver.framework.process.dto.FormVersionVo;
+import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 @Component
 public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -83,7 +91,24 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 	@Override
 	public Object valueConversionText(Object value, JSONObject config) {
 		if(value != null) {
-			
+			if(MapUtils.isNotEmpty(config)) {
+				String attributeUuid = config.getString("attributeUuid");
+				String formConfig = config.getString("formConfig");
+				FormVersionVo formVersionVo = new FormVersionVo();
+				formVersionVo.setFormConfig(formConfig);
+				List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+				if(CollectionUtils.isNotEmpty(formAttributeList)) {
+					for(FormAttributeVo formAttribute : formAttributeList) {
+						if(Objects.equal(attributeUuid, formAttribute.getUuid())) {
+							config.put("name", formAttribute.getLabel());
+							IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
+							if(formAttributeHandler != null) {
+								return formAttributeHandler.getValue(new AttributeDataVo(), JSON.parseObject(formAttribute.getConfig()));
+							}
+						}
+					}
+				}
+			}
 		}
 		return value;
 	}
