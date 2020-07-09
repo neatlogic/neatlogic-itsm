@@ -59,7 +59,7 @@ public class CatalogMoveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TransactionStatus transactionStatus = transactionUtil.openTx();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_UUID, 0);
+			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
 		String uuid = jsonObj.getString("uuid");		
 		CatalogVo moveCatalog = catalogMapper.getCatalogByUuid(uuid);

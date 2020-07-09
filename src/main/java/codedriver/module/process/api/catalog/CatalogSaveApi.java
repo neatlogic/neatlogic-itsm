@@ -72,8 +72,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 		TransactionStatus transactionStatus = transactionUtil.openTx();
 		//根据catalog表中的count和最大的右编码进行比较
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			//直接用CatalogVo.ROOT_UUID去重建
-			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_UUID, 0);
+			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
 		//构造一个虚拟的root节点
 		CatalogVo rootCatalogVo = catalogService.buildRootCatalog();

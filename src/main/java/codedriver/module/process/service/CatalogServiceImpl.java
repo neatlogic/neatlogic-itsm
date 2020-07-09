@@ -45,7 +45,7 @@ public class CatalogServiceImpl implements CatalogService {
 		Integer maxRhtCode;
 		if(vo != null && vo.getRht() != null){
 			maxRhtCode = vo.getRht();
-			if(Objects.equals(maxRhtCode, count * 2) || count == 0) {
+			if(Objects.equals(maxRhtCode, count * 2 + 1) || count == 0) {
 				return true;
 			}
 		}
@@ -54,7 +54,16 @@ public class CatalogServiceImpl implements CatalogService {
 
 	@Override
 	public Integer rebuildLeftRightCode(String parentUuid, int parentLft) {
-		List<CatalogVo> catalogList = catalogMapper.getCatalogListByParentUuid(parentUuid);
+		List<CatalogVo> catalogList;
+		if(CatalogVo.ROOT_PARENTUUID.equals(parentUuid)){
+			catalogList = new ArrayList<>();
+			CatalogVo vo = buildRootCatalog();
+			List<CatalogVo> catalogVoListForRoot = catalogMapper.getCatalogListByParentUuid("0");
+			vo.setChildrenCount(catalogVoListForRoot.isEmpty() ? 0 : catalogVoListForRoot.size());
+			catalogList.add(vo);
+		}else{
+			catalogList = catalogMapper.getCatalogListByParentUuid(parentUuid);
+		}
 		for(CatalogVo catalog : catalogList) {
 			if(catalog.getChildrenCount() == 0) {
 				catalogMapper.updateCatalogLeftRightCode(catalog.getUuid(), parentLft + 1, parentLft + 2);
@@ -159,14 +168,14 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public CatalogVo buildRootCatalog() {
-        int count = catalogMapper.getCatalogCountOnLock();
-        CatalogVo rootCatalog = new CatalogVo();
-        rootCatalog.setUuid("0");
-        rootCatalog.setName("root");
-        rootCatalog.setParentUuid("-1");
-        rootCatalog.setLft(1);
-        rootCatalog.setRht(count == 0 ? 2 : count * 2);
-        return rootCatalog;
+		CatalogVo maxRhtCode = catalogMapper.getMaxRhtCode();
+		CatalogVo rootCatalog = new CatalogVo();
+		rootCatalog.setUuid("0");
+		rootCatalog.setName("root");
+		rootCatalog.setParentUuid("-1");
+		rootCatalog.setLft(1);
+		rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.getRht() + 1);
+		return rootCatalog;
     }
 
 }
