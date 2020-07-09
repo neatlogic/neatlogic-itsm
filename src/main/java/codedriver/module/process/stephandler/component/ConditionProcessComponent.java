@@ -27,6 +27,7 @@ import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
@@ -114,12 +115,25 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 				if (MapUtils.isNotEmpty(stepConfigObj)) {
 					JSONArray moveonConfigList = stepConfigObj.getJSONArray("moveonConfigList");
 					if (CollectionUtils.isNotEmpty(moveonConfigList)) {
+						JSONArray ruleList = new JSONArray();
+						Map<String, String> processStepNameMap = new HashMap<>();
+						List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+						for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
+							processStepNameMap.put(processTaskStep.getProcessStepUuid(), processTaskStep.getName());
+						}
 						for (int i = 0; i < moveonConfigList.size(); i++) {
+							JSONObject ruleObj = new JSONObject();
 							JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
+							List<String> targetStepNameList = new ArrayList<>();
+							List<String> targetStepList = JSON.parseArray(JSON.toJSONString(moveonConfig.getJSONArray("targetStepList")), String.class);
+							for(String targetStepUuid : targetStepList) {
+								targetStepNameList.add(processStepNameMap.get(targetStepUuid));
+							}
 							String type = moveonConfig.getString("type");
 							Boolean canRun = false;
 							if ("always".equals(type)) {// 直接流转
 								canRun = true;
+								ruleObj.putAll(moveonConfig);
 							} else if ("optional".equals(type)) {// 自定义
 								JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
 								if (CollectionUtils.isNotEmpty(conditionGroupList)) {
@@ -132,20 +146,24 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 										System.out.println(moveonConfig.toJSONString());
 										ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
 										String script = conditionConfigVo.buildScript();
-										System.out.println(JSON.toJSONString(conditionConfigVo));
 										// ((false || true) || (true && false) || (true || false))
+										System.out.println(JSON.toJSONString(conditionConfigVo));
 										canRun = RunScriptUtil.runScript(script);
+										ruleObj.putAll(JSON.parseObject(JSON.toJSONString(conditionConfigVo)));
 									} catch (Exception e) {
 										logger.error(e.getMessage(), e);
 									} finally {
 										ConditionParamContext.get().release();
 									}
 								}
+							}else {
+								ruleObj.putAll(moveonConfig);
 							}
-
+							ruleObj.put("result", canRun);
+							ruleObj.put("targetStepList", targetStepNameList);
+							ruleList.add(ruleObj);
 							// 符合条件
 							if (canRun) {
-								List<String> targetStepList = JSON.parseArray(moveonConfig.getString("targetStepList"), String.class);
 								if (CollectionUtils.isNotEmpty(targetStepList)) {
 									for (String targetStep : targetStepList) {
 										ProcessTaskStepRelVo relVo = toProcessStepUuidMap.get(targetStep);
@@ -158,6 +176,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 								}
 							}
 						}
+						currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.RULE.getParamName(), ruleList);
 					}
 				}
 			}
