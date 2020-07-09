@@ -80,7 +80,7 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
 	}
 
 	@Override
-	public Object valueConversionText(Object value) {
+	public Object valueConversionText(Object value, JSONObject config) {
 		return value;
 	}
 }

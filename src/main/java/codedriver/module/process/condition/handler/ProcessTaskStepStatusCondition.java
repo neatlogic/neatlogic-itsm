@@ -109,7 +109,7 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	}
 
 	@Override
-	public Object valueConversionText(Object value) {
+	public Object valueConversionText(Object value, JSONObject config) {
 		if(value != null) {
 			if(value instanceof String) {
 				String text = ProcessTaskStatus.getText(value.toString());

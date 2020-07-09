@@ -67,7 +67,7 @@ public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implem
 	}
 
 	@Override
-	public Object valueConversionText(Object value) {
+	public Object valueConversionText(Object value, JSONObject config) {
 		if(value != null) {
 			if(value instanceof String) {
 				ChannelVo channelVo = channelMapper.getChannelByUuid(value.toString());

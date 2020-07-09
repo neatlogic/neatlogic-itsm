@@ -81,9 +81,11 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 	}
 
 	@Override
-	public Object valueConversionText(Object value) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object valueConversionText(Object value, JSONObject config) {
+		if(value != null) {
+			
+		}
+		return value;
 	}
 	
 }

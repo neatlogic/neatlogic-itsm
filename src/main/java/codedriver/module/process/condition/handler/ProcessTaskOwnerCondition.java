@@ -61,7 +61,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 	}
 
 	@Override
-	public Object valueConversionText(Object value) {
+	public Object valueConversionText(Object value, JSONObject config) {
 		if(value != null) {
 			if(value instanceof String) {
 				UserVo userVo = userMapper.getUserByUuid(value.toString().substring(5));

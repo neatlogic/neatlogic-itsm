@@ -51,7 +51,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 	}
 
 	@Override
-	public Object valueConversionText(Object value) {
+	public Object valueConversionText(Object value, JSONObject config) {
 		// TODO Auto-generated method stub
 		return null;
 	}

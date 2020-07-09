@@ -77,7 +77,7 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 	}
 
 	@Override
-	public Object valueConversionText(Object value) {
+	public Object valueConversionText(Object value, JSONObject config) {
 		if(value != null) {
 			if(value instanceof String) {
 				PriorityVo priorityVo = priorityMapper.getPriorityByUuid(value.toString());

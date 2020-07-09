@@ -63,7 +63,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 	}
 
 	@Override
-	public Object valueConversionText(Object value) {
+	public Object valueConversionText(Object value, JSONObject config) {
 		if(value != null) {
 			if(value instanceof String) {
 				return simpleDateFormat.format(new Date(Integer.parseInt(value.toString())));
