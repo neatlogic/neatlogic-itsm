@@ -61,10 +61,7 @@ public class WorkcenterGetConditionApi extends ApiComponentBase {
 		JSONArray resultArray = new JSONArray();
 		String conditionModel = jsonObj.getString("conditionModel") == null?ProcessConditionModel.CUSTOM.getValue():jsonObj.getString("conditionModel");
 		//固定字段条件
-//		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
-//		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
 		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
-//			IProcessTaskCondition condition = entry.getValue();
 			//不支持endTime过滤，如果是简单模式 title、id、content 不返回
 			if(conditionModel.equals(ProcessConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
 					||condition.getName().equals(ProcessWorkcenterField.ID.getValue())||condition.getName().equals(ProcessWorkcenterField.CONTENT.getValue()))

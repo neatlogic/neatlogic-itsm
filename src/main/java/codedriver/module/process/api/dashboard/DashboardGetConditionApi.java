@@ -59,34 +59,30 @@ public class DashboardGetConditionApi extends ApiComponentBase {
 		JSONArray resultArray = new JSONArray();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		//固定字段条件
-//		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
-//		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
 		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
-//			IProcessTaskCondition condition = entry.getValue();
-			if(!(condition instanceof IProcessTaskCondition) || ProcessWorkcenterField.getValue(condition.getName())== null) {
-				continue;
-			}
-			JSONObject commonObj = new JSONObject();
-			commonObj.put("handler", condition.getName());
-			commonObj.put("handlerName", condition.getDisplayName());
-			commonObj.put("handlerType", condition.getHandler(conditionModel));
-			if(condition.getConfig() != null) {
-				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
-			}
-			commonObj.put("conditionModel", condition.getHandler(conditionModel));
-			commonObj.put("type", condition.getType());
-			commonObj.put("config", condition.getConfig() == null?"": condition.getConfig().toJSONString());
-			commonObj.put("defaultExpression", condition.getParamType().getDefaultExpression().getExpression());
-			commonObj.put("sort", condition.getSort());
-			JSONArray expressiobArray = new JSONArray();
-			for(Expression expression:condition.getParamType().getExpressionList()) {
-				JSONObject expressionObj = new JSONObject();
-				expressionObj.put("expression", expression.getExpression());
-				expressionObj.put("expressionName", expression.getExpressionName());
-				expressiobArray.add(expressionObj);
-				commonObj.put("expressionList", expressiobArray);
-			}
-			resultArray.add(commonObj);
+			if(condition instanceof IProcessTaskCondition && ProcessWorkcenterField.getValue(condition.getName()) != null) {
+				JSONObject commonObj = new JSONObject();
+				commonObj.put("handler", condition.getName());
+				commonObj.put("handlerName", condition.getDisplayName());
+				commonObj.put("handlerType", condition.getHandler(conditionModel));
+				if(condition.getConfig() != null) {
+					commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
+				}
+				commonObj.put("conditionModel", condition.getHandler(conditionModel));
+				commonObj.put("type", condition.getType());
+				commonObj.put("config", condition.getConfig() == null?"": condition.getConfig().toJSONString());
+				commonObj.put("defaultExpression", condition.getParamType().getDefaultExpression().getExpression());
+				commonObj.put("sort", condition.getSort());
+				JSONArray expressiobArray = new JSONArray();
+				for(Expression expression:condition.getParamType().getExpressionList()) {
+					JSONObject expressionObj = new JSONObject();
+					expressionObj.put("expression", expression.getExpression());
+					expressionObj.put("expressionName", expression.getExpressionName());
+					expressiobArray.add(expressionObj);
+					commonObj.put("expressionList", expressiobArray);
+				}
+				resultArray.add(commonObj);
+			}			
 		}
 		Collections.sort(resultArray, new Comparator<Object>() {
 			@Override

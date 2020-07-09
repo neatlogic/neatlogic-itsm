@@ -45,34 +45,30 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	protected List<ConditionParamVo> mySystemParamList() {
 		List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
-//		Map<String, IProcessTaskCondition> conditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
-//		for (Map.Entry<String, IProcessTaskCondition> entry : conditionMap.entrySet()) {
 		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
-//			IProcessTaskCondition condition = entry.getValue();
-			if(!(condition instanceof IProcessTaskCondition) || ProcessField.getValue(condition.getName())== null) {
-				continue;
-			}
-			ConditionParamVo param = new ConditionParamVo();
-			param.setName(condition.getName());
-			param.setLabel(condition.getDisplayName());
-			param.setController(condition.getHandler(conditionModel));
-			if(condition.getConfig() != null) {
-				param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
-				param.setConfig(condition.getConfig().toJSONString());
-			}
-			param.setType(condition.getType());
-			ParamType paramType = condition.getParamType();
-			if(paramType != null) {
-				param.setParamType(paramType.getName());
-				param.setParamTypeName(paramType.getText());
-				param.setDefaultExpression(paramType.getDefaultExpression().getExpression());
-				for(Expression expression : paramType.getExpressionList()) {
-					param.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
+			if(condition instanceof IProcessTaskCondition && ProcessField.getValue(condition.getName()) != null) {
+				ConditionParamVo param = new ConditionParamVo();
+				param.setName(condition.getName());
+				param.setLabel(condition.getDisplayName());
+				param.setController(condition.getHandler(conditionModel));
+				if(condition.getConfig() != null) {
+					param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
+					param.setConfig(condition.getConfig().toJSONString());
 				}
-			}
-			
-			param.setIsEditable(0);
-			notifyPolicyParamList.add(param);
+				param.setType(condition.getType());
+				ParamType paramType = condition.getParamType();
+				if(paramType != null) {
+					param.setParamType(paramType.getName());
+					param.setParamTypeName(paramType.getText());
+					param.setDefaultExpression(paramType.getDefaultExpression().getExpression());
+					for(Expression expression : paramType.getExpressionList()) {
+						param.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
+					}
+				}
+				
+				param.setIsEditable(0);
+				notifyPolicyParamList.add(param);
+			}			
 		}
 		return notifyPolicyParamList;
 	}
