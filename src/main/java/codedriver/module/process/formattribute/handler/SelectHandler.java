@@ -31,7 +31,7 @@ public class SelectHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public Object getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
+	public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
 		Object dataObj = attributeDataVo.getDataObj();
 		if(dataObj != null) {
 			boolean isMultiple = configObj.getBooleanValue("isMultiple");

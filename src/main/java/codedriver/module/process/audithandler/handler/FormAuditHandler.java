@@ -85,7 +85,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 				IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
 				if(handler != null) {
 					String result = null;
-					Object value = handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
+					Object value = handler.valueConversionText(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
 					if(value != null) {
 						if(value instanceof String) {
 							result = (String)value;
@@ -116,7 +116,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 					IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
 					if(handler != null) {
 						String result = null;
-						Object value = handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
+						Object value = handler.valueConversionText(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
 						if(value != null) {
 							if(value instanceof String) {
 								result = (String) value;

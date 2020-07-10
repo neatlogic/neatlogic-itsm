@@ -22,7 +22,7 @@ public class TimeHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public Object getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
+	public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
 		return attributeDataVo.getDataObj();
 	}
 

@@ -30,7 +30,7 @@ public class CheckboxHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public Object getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
+	public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
 		List<String> valueList = JSON.parseArray(JSON.toJSONString(attributeDataVo.getDataObj()), String.class);
 		if(CollectionUtils.isNotEmpty(valueList)) {
 			List<String> textList = new ArrayList<>();
