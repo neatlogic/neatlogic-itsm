@@ -621,7 +621,10 @@ public class WorkcenterService {
 	            	taskJson.put("taskid", el.getId());
 	            	for (Object columnObj: workcenterVo.getResultColumnList()) {
 	            		IProcessTaskColumn column = columnComponentMap.get(columnObj);
-    					taskJson.put(column.getName(),column.getValueText(el));
+	            		Object valueText = column.getValueText(el);
+	            		if(valueText != null) {
+	            			taskJson.put(column.getName(),column.getValueText(el));
+	            		}
 	            	}
 	            	dataList.add(taskJson);
 				}
