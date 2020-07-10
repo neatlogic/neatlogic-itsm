@@ -23,6 +23,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
@@ -96,6 +98,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
+		UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);
 		List<ProcessTaskStepVo> nextStepList = new ArrayList<ProcessTaskStepVo>();
 		if (CollectionUtils.isNotEmpty(currentProcessTaskStepVo.getRelList())) {
 			Map<String, ProcessTaskStepRelVo> toProcessStepUuidMap = new HashMap<>();
