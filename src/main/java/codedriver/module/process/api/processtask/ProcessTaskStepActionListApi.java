@@ -129,7 +129,6 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 			actionList.remove(ProcessTaskStepAction.WORK.getValue());
 			actionList.remove(ProcessTaskStepAction.ABORT.getValue());
 			actionList.remove(ProcessTaskStepAction.RECOVER.getValue());
-			actionList.remove(ProcessTaskStepAction.BACK.getValue());
 			actionList.remove(ProcessTaskStepAction.UPDATE.getValue());
 			actionList.remove(ProcessTaskStepAction.COMMENT.getValue());
 			actionList.remove(ProcessTaskStepAction.CREATESUBTASK.getValue());
