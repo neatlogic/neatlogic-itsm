@@ -100,12 +100,10 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 			String formUuid = jsonObj.getString("formUuid");
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
-				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
+				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
 						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
 						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMUSERSELECT.getHandler())){
+						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())){
 					continue;
 				}
 				formAttributeVo.setType("form");
