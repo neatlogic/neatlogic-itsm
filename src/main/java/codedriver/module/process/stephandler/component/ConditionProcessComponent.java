@@ -143,7 +143,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 									ProcessTaskVo processTaskVo = ProcessTaskHandlerUtil.getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
 									JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
 									try {
-										ConditionParamContext.init(conditionParamData).setFormConfig(processTaskVo.getFormConfig());
+										ConditionParamContext.init(conditionParamData).setFormConfig(processTaskVo.getFormConfig()).setTranslate(true);
 										ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
 										String script = conditionConfigVo.buildScript();
 										// ((false || true) || (true && false) || (true || false))

@@ -88,7 +88,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 					Object value = handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
 					if(value != null) {
 						if(value instanceof String) {
-							result = value.toString();
+							result = (String)value;
 						}else if(value instanceof List) {
 							List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
 							result = String.join("、", valueList);
@@ -119,7 +119,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 						Object value = handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
 						if(value != null) {
 							if(value instanceof String) {
-								result = value.toString();
+								result = (String) value;
 							}else if(value instanceof List) {
 								List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
 								result = String.join("、", valueList);
