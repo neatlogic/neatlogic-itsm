@@ -112,7 +112,7 @@ public class DateHandler implements IFormAttributeHandler {
 
 	@Override
 	public Object getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
-		return attributeDataVo.getData();
+		return attributeDataVo.getDataObj();
 	}
 
 }

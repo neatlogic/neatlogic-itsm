@@ -105,7 +105,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 							if(formAttributeHandler != null) {
 								AttributeDataVo attributeDataVo = new AttributeDataVo();
 								attributeDataVo.setAttributeUuid(attributeUuid);
-								attributeDataVo.setData(value.toString());
+								attributeDataVo.setData(JSON.toJSONString(value));
 								return formAttributeHandler.getValue(attributeDataVo, JSON.parseObject(formAttribute.getConfig()));
 							}
 						}

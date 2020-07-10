@@ -47,27 +47,27 @@ public class UserSelectHandler implements IFormAttributeHandler {
 
 	@Override
 	public Object getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
-		String value = attributeDataVo.getData();
-		boolean isMultiple = configObj.getBooleanValue("isMultiple");
-		if(isMultiple) {
-			List<String> valueList = JSON.parseArray(value, String.class);
-			if(CollectionUtils.isNotEmpty(valueList)) {
-//				StringBuilder result = new StringBuilder();
-				List<String> textList = new ArrayList<>();
-				for(String key : valueList) {
-//					result.append("、");
-//					result.append(parse(key));
-					textList.add(parse(key));
+		Object dataObj = attributeDataVo.getDataObj();
+		if(dataObj != null) {
+			boolean isMultiple = configObj.getBooleanValue("isMultiple");
+			if(isMultiple) {
+				List<String> valueList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
+				if(CollectionUtils.isNotEmpty(valueList)) {
+					List<String> textList = new ArrayList<>();
+					for(String key : valueList) {
+						textList.add(parse(key));
+					}
+					return textList;
 				}
-				return textList;
-			}
-			return valueList;
-		}else {
-			if(StringUtils.isNotBlank(value)) {
-				return parse(value);
+				return valueList;
+			}else {
+				String value = (String) dataObj;
+				if(StringUtils.isNotBlank(value)) {
+					return parse(value);
+				}
 			}
 		}
-		return value;
+		return dataObj;
 	}
 
 	private String parse(String key) {
