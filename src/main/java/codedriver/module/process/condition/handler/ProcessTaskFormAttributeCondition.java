@@ -111,7 +111,18 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 								}else if(value instanceof JSONArray){
 									attributeDataVo.setData(JSON.toJSONString(value));
 								}						
-								return formAttributeHandler.valueConversionText(attributeDataVo, JSON.parseObject(formAttribute.getConfig()));
+								Object text = formAttributeHandler.valueConversionText(attributeDataVo, JSON.parseObject(formAttribute.getConfig()));
+								if(text instanceof String) {
+									return text;
+								}else if(text instanceof List){
+									List<String> textList = JSON.parseArray(JSON.toJSONString(text), String.class);
+									if(ProcessFormHandler.FORMDATE.getHandler().equals(formAttribute.getHandler()) || ProcessFormHandler.FORMTIME.getHandler().equals(formAttribute.getHandler())) {
+										return String.join("-", textList);
+									}else {
+										return String.join("、", textList);
+									}
+								}
+								return text;
 							}
 						}
 					}

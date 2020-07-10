@@ -94,7 +94,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 						textList.add(valueStr);
 					}
 				}
-				return textList;
+				return String.join("、", textList);
 			}			
 		}
 		return value;

@@ -85,7 +85,7 @@ public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implem
 						textList.add(valueStr);
 					}
 				}
-				return textList;
+				return String.join("、", textList);
 			}
 		}		
 		return value;

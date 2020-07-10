@@ -79,7 +79,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 						textList.add(valueStr);
 					}
 				}
-				return textList;
+				return String.join("、", textList);
 			}
 		}	
 		return value;

@@ -73,7 +73,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 				for(String valueStr : valueList) {
 					textList.add(simpleDateFormat.format(new Date(Long.parseLong(valueStr))));
 				}
-				return textList;
+				return String.join("-", textList);
 			}
 		}		
 		return value;

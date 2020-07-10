@@ -95,7 +95,7 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 						textList.add(valueStr);
 					}
 				}
-				return textList;
+				return String.join("、", textList);
 			}
 		}		
 		return value;

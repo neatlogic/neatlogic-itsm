@@ -127,7 +127,7 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 						textList.add(valueStr);
 					}
 				}
-				return textList;
+				return String.join("、", textList);
 			}
 		}		
 		return value;
