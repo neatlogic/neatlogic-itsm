@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -41,10 +42,12 @@ public class PriorityDeleteApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		if(priorityMapper.checkPriorityIsExists(uuid) == 0) {
+		PriorityVo priorityVo = priorityMapper.getPriorityByUuid(uuid);
+		if(priorityVo == null) {
 			throw new PriorityNotFoundException(uuid);
 		}
 		priorityMapper.deletePriorityByUuid(uuid);
+		priorityMapper.updateSortDecrement(priorityVo.getSort(), null);
 		return null;
 	}
 
