@@ -116,6 +116,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 				for (ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
 					processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
 				}
+				/** 属性集合去重 **/
 				List<String> distinctColumList = new ArrayList<>();
 				for (String column : columnList) {
 					if (!processMatrixAttributeMap.containsKey(column)) {
