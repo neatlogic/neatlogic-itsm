@@ -174,7 +174,7 @@ public class CatalogServiceImpl implements CatalogService {
 		rootCatalog.setName("root");
 		rootCatalog.setParentUuid("-1");
 		rootCatalog.setLft(1);
-		rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.getRht() + 1);
+		rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.getRht().intValue() + 1);
 		return rootCatalog;
     }
 
