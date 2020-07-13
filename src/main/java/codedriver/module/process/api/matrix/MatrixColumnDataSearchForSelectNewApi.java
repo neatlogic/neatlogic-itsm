@@ -116,11 +116,17 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 				for (ProcessMatrixAttributeVo processMatrixAttributeVo : attributeList) {
 					processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
 				}
+				/** 属性集合去重 **/
+				List<String> distinctColumList = new ArrayList<>();
 				for (String column : columnList) {
 					if (!processMatrixAttributeMap.containsKey(column)) {
 						throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
 					}
+					if(!distinctColumList.contains(column)) {
+						distinctColumList.add(column);
+					}
 				}
+				dataVo.setColumnList(distinctColumList);
 				if (CollectionUtils.isNotEmpty(valueList)) {
 					for (String value : valueList) {
 						if (value.contains("&=&")) {

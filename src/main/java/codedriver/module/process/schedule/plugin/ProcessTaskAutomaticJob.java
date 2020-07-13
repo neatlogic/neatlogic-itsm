@@ -56,10 +56,14 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		JSONObject data = (JSONObject) jobObject.getData("data");
 		JobObject.Builder newJobObjectBuilder = null;
 		JSONObject audit = null;
+		//默认以当前时间为开始时间
+		Date startTime = new Date(System.currentTimeMillis());
 		/** 计算开始时间 **/
 		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
-		Integer isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
-		Date startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"),isTimeToRun>0?1:0);
+		if(timeWindowConfig != null) {
+			Integer isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+			startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"),isTimeToRun>0?1:0);
+		}
 		String groupName = automaticConfigVo.getIsRequest()?"-REQUEST":"-CALLBACK";
 		ProcessTaskStepVo  currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
 		newJobObjectBuilder = new JobObject.Builder(jobObject.getJobName(), this.getGroupName()+groupName, this.getClassName(), TenantContext.get().getTenantUuid())
@@ -105,8 +109,11 @@ public class ProcessTaskAutomaticJob extends JobBase {
 	public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
 		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
 		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
+		Integer isTimeToRun = 0;
 		//判断是否在时间窗口内
-		Integer isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+		if(timeWindowConfig != null) {
+			isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+		}
 		if(isTimeToRun == 0) {
 			//避免后续获取用户异常
 			UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);

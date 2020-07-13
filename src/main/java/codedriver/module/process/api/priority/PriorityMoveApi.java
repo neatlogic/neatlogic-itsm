@@ -14,31 +14,34 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+
 @Service
 @Transactional
-public class PriorityDeleteApi extends ApiComponentBase {
-
+public class PriorityMoveApi extends ApiComponentBase {
+	
 	@Autowired
 	private PriorityMapper priorityMapper;
-	
+
 	@Override
 	public String getToken() {
-		return "process/priority/delete";
+		return "process/priority/move";
 	}
 
 	@Override
 	public String getName() {
-		return "优先级信息删除接口";
+		return "移动动优先级接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
+	
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "优先级uuid")
+		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被移动的优先级uuid"),
+		@Param(name = "sort", type = ApiParamType.INTEGER, isRequired = true, desc = "移动后的序号")
 	})
-	@Description(desc = "优先级信息删除接口")
+	@Description(desc = "移动动优先级接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
@@ -46,8 +49,15 @@ public class PriorityDeleteApi extends ApiComponentBase {
 		if(priorityVo == null) {
 			throw new PriorityNotFoundException(uuid);
 		}
-		priorityMapper.deletePriorityByUuid(uuid);
-		priorityMapper.updateSortDecrement(priorityVo.getSort(), null);
+		int oldSort = priorityVo.getSort();
+		int newSort = jsonObj.getIntValue("sort");
+		if(oldSort < newSort) {//往后移动
+			priorityMapper.updateSortDecrement(oldSort, newSort);
+		}else if(oldSort > newSort) {//往前移动
+			priorityMapper.updateSortIncrement(newSort, oldSort);
+		}
+		priorityVo.setSort(newSort);
+		priorityMapper.updatePriority(priorityVo);
 		return null;
 	}
 
