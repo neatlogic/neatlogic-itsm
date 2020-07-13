@@ -2,6 +2,10 @@ package codedriver.module.process.service;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONArray;
+
+import codedriver.framework.process.dto.CatalogVo;
+
 public interface CatalogService {
 	/**
 	 * 
@@ -34,4 +38,11 @@ public interface CatalogService {
 	* @return boolean
 	 */
 	public boolean channelIsAuthority(String channelUuid);
+	
+	/**
+	 * 获取服务目录底下的服务目录&&服务
+	 * @param catalog
+	 * @return JSONArray
+	 */
+	public JSONArray getCatalogChannelByCatalogUuid(CatalogVo catalog);
 }

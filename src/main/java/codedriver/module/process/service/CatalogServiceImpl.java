@@ -10,6 +10,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.exception.team.TeamNotFoundException;
@@ -148,4 +151,35 @@ public class CatalogServiceImpl implements CatalogService {
 		return false;
 	}
 
+	@Override
+	public JSONArray getCatalogChannelByCatalogUuid(CatalogVo catalog) {
+		JSONArray listArray = new JSONArray();
+		JSONArray sonListArray = new JSONArray();
+		JSONObject catalogParentJson = new JSONObject();
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		catalogParentJson.put("uuid", catalog.getUuid());
+		catalogParentJson.put("name", catalog.getName());
+		catalogParentJson.put("list", sonListArray);
+		//catalog
+		List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
+				UserContext.get().getUserUuid(),
+				teamUuidList,
+				UserContext.get().getRoleUuidList(),
+				catalog.getUuid(),
+				null);
+		for(CatalogVo catalogVo : catalogList) {
+			JSONObject catalogJson = (JSONObject) JSONObject.toJSON(catalogVo);
+			catalogJson.put("type", "catalog");
+			sonListArray.add(catalogJson);
+		}
+		//channel
+		List<ChannelVo> channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),teamUuidList,UserContext.get().getRoleUuidList(),catalog.getUuid());
+		for(ChannelVo channelVo : channelList) {
+			JSONObject channelJson = (JSONObject) JSONObject.toJSON(channelVo);
+			channelJson.put("type", "channel");
+			sonListArray.add(channelJson);
+		}
+		listArray.add(catalogParentJson);
+		return listArray;
+	}
 }

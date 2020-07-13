@@ -83,31 +83,7 @@ public class CatalogChannelSearchForMobileApi extends ApiComponentBase {
 				catalogUuid);
 		//获取以上一级服务目录下的所有有权限的服务目录&&服务
 		for(CatalogVo firstCatalog: firstCatalogList) {
-			JSONArray sonListArray = new JSONArray();
-			JSONObject catalogParentJson = new JSONObject();
-			catalogParentJson.put("uuid", firstCatalog.getUuid());
-			catalogParentJson.put("name", firstCatalog.getName());
-			catalogParentJson.put("list", sonListArray);
-			//catalog
-			List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
-					UserContext.get().getUserUuid(),
-					teamUuidList,
-					UserContext.get().getRoleUuidList(),
-					firstCatalog.getUuid(),
-					null);
-			for(CatalogVo catalogVo : catalogList) {
-				JSONObject catalogJson = (JSONObject) JSONObject.toJSON(catalogVo);
-				catalogJson.put("type", "catalog");
-				sonListArray.add(catalogJson);
-			}
-			//channel
-			List<ChannelVo> channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),teamUuidList,UserContext.get().getRoleUuidList(),firstCatalog.getUuid());
-			for(ChannelVo channelVo : channelList) {
-				JSONObject channelJson = (JSONObject) JSONObject.toJSON(channelVo);
-				channelJson.put("type", "channel");
-				sonListArray.add(channelJson);
-			}
-			listArray.add(catalogParentJson);
+			listArray.addAll(catalogService.getCatalogChannelByCatalogUuid(firstCatalog));
 		}
 		/** 获取对应目录下的收藏服务 **/
 		paramChannel.setIsFavorite(1);
