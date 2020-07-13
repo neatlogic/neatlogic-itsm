@@ -1,7 +1,6 @@
 package codedriver.module.process.api.process;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +12,11 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.condition.core.ConditionHandlerFactory;
+import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.dto.ExpressionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
-import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
@@ -61,45 +61,38 @@ public class ProcessConditionList extends ApiComponentBase {
 		JSONArray resultArray = new JSONArray();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		//固定字段条件
-		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
-		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
-			IProcessTaskCondition condition = entry.getValue();
-			if(ProcessField.getValue(condition.getName())== null) {
-				continue;
-			}
-			
-			ConditionParamVo conditionParamVo = new ConditionParamVo();
-			conditionParamVo.setName(condition.getName());
-			conditionParamVo.setLabel(condition.getDisplayName());
-			conditionParamVo.setController(condition.getHandler(conditionModel));
-			if(condition.getConfig() != null) {
-				conditionParamVo.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
-				conditionParamVo.setConfig(condition.getConfig().toJSONString());
-			}
-			conditionParamVo.setType(condition.getType());
-			ParamType paramType = condition.getParamType();
-			if(paramType != null) {
-				conditionParamVo.setParamType(paramType.getName());
-				conditionParamVo.setParamTypeName(paramType.getText());
-				conditionParamVo.setDefaultExpression(paramType.getDefaultExpression().getExpression());
-				for(Expression expression:paramType.getExpressionList()) {
-					conditionParamVo.getExpressionList().add(new ExpressionVo(expression));
+		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
+			if(condition instanceof IProcessTaskCondition && ProcessField.getValue(condition.getName()) != null) {
+				ConditionParamVo conditionParamVo = new ConditionParamVo();
+				conditionParamVo.setName(condition.getName());
+				conditionParamVo.setLabel(condition.getDisplayName());
+				conditionParamVo.setController(condition.getHandler(conditionModel));
+				if(condition.getConfig() != null) {
+					conditionParamVo.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
+					conditionParamVo.setConfig(condition.getConfig().toJSONString());
 				}
+				conditionParamVo.setType(condition.getType());
+				ParamType paramType = condition.getParamType();
+				if(paramType != null) {
+					conditionParamVo.setParamType(paramType.getName());
+					conditionParamVo.setParamTypeName(paramType.getText());
+					conditionParamVo.setDefaultExpression(paramType.getDefaultExpression().getExpression());
+					for(Expression expression:paramType.getExpressionList()) {
+						conditionParamVo.getExpressionList().add(new ExpressionVo(expression));
+					}
+				}				
+				resultArray.add(conditionParamVo);
 			}
-			
-			resultArray.add(conditionParamVo);
 		}
 		//表单条件
 		String formUuid = jsonObj.getString("formUuid");
 		if(StringUtils.isNotBlank(formUuid)) {
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
-				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
+				if( formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
 						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
 						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMUSERSELECT.getHandler())){
+						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())){
 					continue;
 				}
 				formAttributeVo.setType("form");

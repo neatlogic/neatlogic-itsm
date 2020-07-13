@@ -22,7 +22,7 @@ public class TextareaHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public String getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
+	public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
 		return attributeDataVo.getData();
 	}
 

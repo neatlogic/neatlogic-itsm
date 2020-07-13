@@ -1,11 +1,11 @@
 package codedriver.module.process.formattribute.handler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -31,69 +31,68 @@ public class SelectHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public String getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
-		String value = attributeDataVo.getData();
-		List<String> valueList = null;
-		boolean isMultiple = configObj.getBooleanValue("isMultiple");
-		if(isMultiple) {
-			valueList = JSON.parseArray(value, String.class);
-			if(CollectionUtils.isEmpty(valueList)) {
-				return "";
-			}
-		}else {
-			if(StringUtils.isBlank(value)) {
-				return value;
-			}
-		}
-		String dataSource = configObj.getString("dataSource");
-		if("static".equals(dataSource)) {
-			List<ValueTextVo> dataList = JSON.parseArray(configObj.getString("dataList"), ValueTextVo.class);
-			if(CollectionUtils.isNotEmpty(dataList)) {
-				Map<String, String> valueTextMap = new HashMap<>();
-				for(ValueTextVo data : dataList) {
-					valueTextMap.put(data.getValue(), data.getText());
-				}
-				if(isMultiple) {
-					StringBuilder result = new StringBuilder();
-					for(String key : valueList) {
-						result.append("、");
-						String text = valueTextMap.get(key);
+	public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
+		Object dataObj = attributeDataVo.getDataObj();
+		if(dataObj != null) {
+			boolean isMultiple = configObj.getBooleanValue("isMultiple");
+			String dataSource = configObj.getString("dataSource");
+			if("static".equals(dataSource)) {
+				List<ValueTextVo> dataList = JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("dataList")), ValueTextVo.class);
+				if(CollectionUtils.isNotEmpty(dataList)) {
+					Map<String, String> valueTextMap = new HashMap<>();
+					for(ValueTextVo data : dataList) {
+						valueTextMap.put(data.getValue(), data.getText());
+					}
+					if(isMultiple) {
+						List<String> valueList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
+						if(CollectionUtils.isNotEmpty(valueList)) {
+							List<String> textList = new ArrayList<>();
+							for(String key : valueList) {
+								String text = valueTextMap.get(key);
+								if(text != null) {
+									textList.add(text);
+								}else {
+									textList.add(key);
+								}
+							}
+							return textList;
+						}
+						return valueList;
+					}else {
+						String text = valueTextMap.get((String)dataObj);
 						if(text != null) {
-							result.append(text);
+							return text;
 						}else {
-							result.append(key);
+							return dataObj;
 						}
 					}
-					return result.toString().substring(1);
+				}
+			}else {//其他，如动态数据源
+				if(isMultiple) {
+					List<String> valueList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
+					if(CollectionUtils.isNotEmpty(valueList)) {
+						List<String> textList = new ArrayList<>();
+						for(String key : valueList) {
+							if(key.contains("&=&")) {
+								textList.add(key.split("&=&")[1]);
+							}else {
+								textList.add(key);
+							}
+						}
+						return textList;
+					}
+					return valueList;
 				}else {
-					String text = valueTextMap.get(value);
-					if(text != null) {
-						return text;
+					String value = (String) dataObj;
+					if(value.contains("&=&")) {
+						return value.split("&=&")[1];
 					}else {
-						return value;
+						return dataObj;
 					}
 				}
 			}
-		}else {//其他，如动态数据源
-			if(isMultiple) {
-				StringBuilder result = new StringBuilder();
-				for(String key : valueList) {
-					result.append("、");
-					if(key.contains("&=&")) {
-						result.append(key.split("&=&")[1]);
-					}else {
-						result.append(key);
-					}
-				}
-				return result.toString().substring(1);
-			}else {
-				if(value.contains("&=&")) {
-					return value.split("&=&")[1];
-				}
-			}
-		}
-		
-		return value;
+		}		
+		return dataObj;
 	}
 
 }

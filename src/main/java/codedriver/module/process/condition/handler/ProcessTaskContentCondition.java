@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
@@ -57,18 +58,29 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
 		String where = "(";
-		if(condition.getValueList().size() == 1) {
-			Object value = condition.getValueList().get(0);
+		if(condition.getValueList() instanceof String) {
+			Object value = condition.getValueList();
 			where += String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CONTENT.getValue()),String.format("'%s'",  value));
-		}else {
-			List<String> keywordList = condition.getValueList();
-			for(int i=0;i<keywordList.size();i++) {
-				if(i!=0) {
-					where += " or ";
+		}else if(condition.getValueList() instanceof List) {
+			List<String> keywordList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+			if(keywordList.size() == 1) {
+				Object value = keywordList.get(0);
+				where += String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CONTENT.getValue()),String.format("'%s'",  value));
+			}else {
+				for(int i=0;i<keywordList.size();i++) {
+					if(i!=0) {
+						where += " or ";
+					}
+					where += String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CONTENT.getValue()),String.format("'%s'",  keywordList.get(i)));
 				}
-				where += String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CONTENT.getValue()),String.format("'%s'",  keywordList.get(i)));
 			}
 		}
+		
 		return where+")";
+	}
+
+	@Override
+	public Object valueConversionText(Object value, JSONObject config) {
+		return value;
 	}
 }

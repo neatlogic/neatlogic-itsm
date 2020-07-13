@@ -28,7 +28,7 @@ public class RadioHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public String getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
+	public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
 		String value = attributeDataVo.getData();
 		if(StringUtils.isNotBlank(value)) {
 			String dataSource = configObj.getString("dataSource");

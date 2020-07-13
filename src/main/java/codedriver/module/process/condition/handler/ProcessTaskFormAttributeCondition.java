@@ -2,11 +2,15 @@ package codedriver.module.process.condition.handler;
 
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
 
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
@@ -15,6 +19,11 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.dto.AttributeDataVo;
+import codedriver.framework.process.dto.FormAttributeVo;
+import codedriver.framework.process.dto.FormVersionVo;
+import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 @Component
 public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
@@ -64,11 +73,11 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 				String formKey = condition.getName();
 				String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getHandler()).toLowerCase();
 				Object value = StringUtils.EMPTY;
-				if(CollectionUtils.isNotEmpty(condition.getValueList())) {
-					value = condition.getValueList().get(0);
-				}
-				if(condition.getValueList().size()>1) {
-					value = String.join("','",condition.getValueList());
+				if(condition.getValueList() instanceof String) {
+					value = condition.getValueList();
+				}else if(condition.getValueList() instanceof List) {
+					List<String> values = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+					value = String.join("','", values);
 				}
 				if(StringUtils.isNotBlank(value.toString())) {
 					value = String.format("'%s'",  value);
@@ -78,6 +87,49 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Object valueConversionText(Object value, JSONObject config) {
+		if(value != null) {
+			if(MapUtils.isNotEmpty(config)) {
+				String attributeUuid = config.getString("attributeUuid");
+				String formConfig = config.getString("formConfig");
+				FormVersionVo formVersionVo = new FormVersionVo();
+				formVersionVo.setFormConfig(formConfig);
+				List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+				if(CollectionUtils.isNotEmpty(formAttributeList)) {
+					for(FormAttributeVo formAttribute : formAttributeList) {
+						if(Objects.equal(attributeUuid, formAttribute.getUuid())) {
+							config.put("name", formAttribute.getLabel());
+							IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
+							if(formAttributeHandler != null) {
+								AttributeDataVo attributeDataVo = new AttributeDataVo();
+								attributeDataVo.setAttributeUuid(attributeUuid);
+								if(value instanceof String) {
+									attributeDataVo.setData((String)value);
+								}else if(value instanceof JSONArray){
+									attributeDataVo.setData(JSON.toJSONString(value));
+								}						
+								Object text = formAttributeHandler.valueConversionText(attributeDataVo, JSON.parseObject(formAttribute.getConfig()));
+								if(text instanceof String) {
+									return text;
+								}else if(text instanceof List){
+									List<String> textList = JSON.parseArray(JSON.toJSONString(text), String.class);
+									if(ProcessFormHandler.FORMDATE.getHandler().equals(formAttribute.getHandler()) || ProcessFormHandler.FORMTIME.getHandler().equals(formAttribute.getHandler())) {
+										return String.join("-", textList);
+									}else {
+										return String.join("、", textList);
+									}
+								}
+								return text;
+							}
+						}
+					}
+				}
+			}
+		}
+		return value;
 	}
 	
 }

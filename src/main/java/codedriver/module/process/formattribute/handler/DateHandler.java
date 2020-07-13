@@ -111,8 +111,8 @@ public class DateHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public String getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
-		return attributeDataVo.getData();
+	public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
+		return attributeDataVo.getDataObj();
 	}
 
 }

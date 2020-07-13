@@ -20,8 +20,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
@@ -156,6 +158,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		}
 		@Override
 		protected void execute() {
+			UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);
 			AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
 			JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
 			automaticConfigVo.setIsRequest(true);
