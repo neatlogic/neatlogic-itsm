@@ -1,22 +1,17 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -69,21 +64,50 @@ public class CatalogChannelSearchForMobileApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
-		List<CatalogVo> firstCatalogList = new ArrayList<CatalogVo>();
+		JSONArray listArray = new JSONArray();
+		resultObj.put("list", listArray);
 		String catalogUuid = jsonObj.getString("catalogUuid");
 		ChannelVo paramChannel = new ChannelVo();
 		//查出所有授权的服务目录
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-		CatalogVo param = new CatalogVo();
-		param.setUserUuid(UserContext.get().getUserUuid());
-		param.setRoleUuidList(UserContext.get().getRoleUuidList());
-		param.setTeamUuidList(teamUuidList);
-		List<CatalogVo> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogList(param);
-		//如果服务目录uuid == 0，则展示所有一级服务目录
-		if(catalogUuid == CatalogVo.ROOT_UUID) {
-		
-		}else {
-			//paramChannel.setCatalogUuid(catalogUuid);
+		//如果服务目录catalogUuid == 0，则展示所有一级服务目录,否则仅展示对应的catalogUuid
+		if(catalogUuid.equals(CatalogVo.ROOT_UUID)) {
+			catalogUuid = null;
+		}
+		//找到root目录下所有有权限的一级服务目录
+		List<CatalogVo> firstCatalogList = catalogMapper.getAuthorizedCatalogList(
+				UserContext.get().getUserUuid(),
+				teamUuidList,
+				UserContext.get().getRoleUuidList()
+				,CatalogVo.ROOT_UUID,
+				catalogUuid);
+		//获取以上一级服务目录下的所有有权限的服务目录&&服务
+		for(CatalogVo firstCatalog: firstCatalogList) {
+			JSONArray sonListArray = new JSONArray();
+			JSONObject catalogParentJson = new JSONObject();
+			catalogParentJson.put("uuid", firstCatalog.getUuid());
+			catalogParentJson.put("name", firstCatalog.getName());
+			catalogParentJson.put("list", sonListArray);
+			//catalog
+			List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
+					UserContext.get().getUserUuid(),
+					teamUuidList,
+					UserContext.get().getRoleUuidList(),
+					firstCatalog.getUuid(),
+					null);
+			for(CatalogVo catalogVo : catalogList) {
+				JSONObject catalogJson = (JSONObject) JSONObject.toJSON(catalogVo);
+				catalogJson.put("type", "catalog");
+				sonListArray.add(catalogJson);
+			}
+			//channel
+			List<ChannelVo> channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),teamUuidList,UserContext.get().getRoleUuidList(),firstCatalog.getUuid());
+			for(ChannelVo channelVo : channelList) {
+				JSONObject channelJson = (JSONObject) JSONObject.toJSON(channelVo);
+				channelJson.put("type", "channel");
+				sonListArray.add(channelJson);
+			}
+			listArray.add(catalogParentJson);
 		}
 		/** 获取对应目录下的收藏服务 **/
 		paramChannel.setIsFavorite(1);
