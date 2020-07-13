@@ -1,9 +1,12 @@
 package codedriver.module.process.condition.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -94,11 +97,39 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	@Override
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
-		Object value = condition.getValueList().get(0);
-		if(condition.getValueList().size()>1) {
-			value = String.join("','",condition.getValueList());
+		Object value = StringUtils.EMPTY;
+		if(condition.getValueList() instanceof String) {
+			value = condition.getValueList();
+		}else if(condition.getValueList() instanceof List) {
+			List<String> values = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+			value = String.join("','", values);
 		}
 		String where = String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
 		return where;
+	}
+
+	@Override
+	public Object valueConversionText(Object value, JSONObject config) {
+		if(value != null) {
+			if(value instanceof String) {
+				String text = ProcessTaskStatus.getText(value.toString());
+				if(text != null) {
+					return text;
+				}
+			}else if(value instanceof List){
+				List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+				List<String> textList = new ArrayList<>();
+				for(String valueStr : valueList) {
+					String text = ProcessTaskStatus.getText(valueStr);
+					if(text != null) {
+						textList.add(text);					
+					}else {
+						textList.add(valueStr);
+					}
+				}
+				return String.join("、", textList);
+			}
+		}		
+		return value;
 	}
 }

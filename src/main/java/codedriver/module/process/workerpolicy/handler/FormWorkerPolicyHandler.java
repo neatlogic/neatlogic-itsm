@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
@@ -64,13 +65,13 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
 				if(processTaskFormAttributeData != null) {
 					/** 只有表单属性类型为用户选择器才生效**/
 					if(ProcessFormHandler.FORMUSERSELECT.getHandler().equals(processTaskFormAttributeData.getType())) {
-						String data = processTaskFormAttributeData.getData();
-						if(StringUtils.isNotBlank(data)) {
+						Object dataObj = processTaskFormAttributeData.getDataObj();
+						if(dataObj != null) {
 							List<String> dataList = new ArrayList<>();
-							if(data.startsWith("[") && data.endsWith("]")) {
-								dataList = JSON.parseArray(data, String.class);
-							}else {
-								dataList.add(data);
+							if(dataObj instanceof String) {
+								dataList.add((String)dataObj);
+							}else if(dataObj instanceof JSONArray) {
+								dataList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
 							}
 							if(CollectionUtils.isNotEmpty(dataList)) {
 								for(String value : dataList) {

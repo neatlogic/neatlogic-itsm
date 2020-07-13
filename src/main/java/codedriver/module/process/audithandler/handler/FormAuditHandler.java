@@ -84,7 +84,17 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 			for(ProcessTaskFormAttributeDataVo attributeDataVo : oldProcessTaskFormAttributeDataList) {
 				IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
 				if(handler != null) {
-					oldContentMap.put(attributeDataVo.getAttributeUuid(), handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())));
+					String result = null;
+					Object value = handler.valueConversionText(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
+					if(value != null) {
+						if(value instanceof String) {
+							result = (String)value;
+						}else if(value instanceof List) {
+							List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+							result = String.join("、", valueList);
+						}
+					}
+					oldContentMap.put(attributeDataVo.getAttributeUuid(), result);
 				}else {
 					oldContentMap.put(attributeDataVo.getAttributeUuid(), attributeDataVo.getData());
 				}
@@ -105,7 +115,17 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 					}
 					IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
 					if(handler != null) {
-						content.put("newContent", handler.getValue(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid())));
+						String result = null;
+						Object value = handler.valueConversionText(attributeDataVo, attributeConfigMap.get(attributeDataVo.getAttributeUuid()));
+						if(value != null) {
+							if(value instanceof String) {
+								result = (String) value;
+							}else if(value instanceof List) {
+								List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+								result = String.join("、", valueList);
+							}
+						}
+						content.put("newContent", result);
 					}else {
 						content.put("newContent", attributeDataVo.getData());
 					}

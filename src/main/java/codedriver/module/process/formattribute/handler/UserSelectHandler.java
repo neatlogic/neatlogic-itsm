@@ -1,5 +1,6 @@
 package codedriver.module.process.formattribute.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -45,26 +46,28 @@ public class UserSelectHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public String getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
-		String value = attributeDataVo.getData();
-		List<String> valueList = null;
-		boolean isMultiple = configObj.getBooleanValue("isMultiple");
-		if(isMultiple) {
-			valueList = JSON.parseArray(value, String.class);
-			if(CollectionUtils.isNotEmpty(valueList)) {
-				StringBuilder result = new StringBuilder();
-				for(String key : valueList) {
-					result.append("、");
-					result.append(parse(key));
+	public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
+		Object dataObj = attributeDataVo.getDataObj();
+		if(dataObj != null) {
+			boolean isMultiple = configObj.getBooleanValue("isMultiple");
+			if(isMultiple) {
+				List<String> valueList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
+				if(CollectionUtils.isNotEmpty(valueList)) {
+					List<String> textList = new ArrayList<>();
+					for(String key : valueList) {
+						textList.add(parse(key));
+					}
+					return textList;
 				}
-				return result.toString().substring(1);
-			}
-		}else {
-			if(StringUtils.isNotBlank(value)) {
-				return parse(value);
+				return valueList;
+			}else {
+				String value = (String) dataObj;
+				if(StringUtils.isNotBlank(value)) {
+					return parse(value);
+				}
 			}
 		}
-		return value;
+		return dataObj;
 	}
 
 	private String parse(String key) {

@@ -1,5 +1,6 @@
 package codedriver.module.process.formattribute.handler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,41 +30,39 @@ public class CheckboxHandler implements IFormAttributeHandler {
 	}
 
 	@Override
-	public String getValue(AttributeDataVo attributeDataVo, JSONObject configObj) {
-		List<String> valueList = JSON.parseArray(attributeDataVo.getData(), String.class);
+	public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
+		List<String> valueList = JSON.parseArray(JSON.toJSONString(attributeDataVo.getDataObj()), String.class);
 		if(CollectionUtils.isNotEmpty(valueList)) {
-			StringBuilder result = new StringBuilder();
+			List<String> textList = new ArrayList<>();
 			String dataSource = configObj.getString("dataSource");
 			if("static".equals(dataSource)) {
 				Map<String, String> valueTextMap = new HashMap<>();
-				List<ValueTextVo> dataList = JSON.parseArray(configObj.getString("dataList"), ValueTextVo.class);
+				List<ValueTextVo> dataList = JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("dataList")), ValueTextVo.class);
 				if(CollectionUtils.isNotEmpty(dataList)) {
 					for(ValueTextVo data : dataList) {
 						valueTextMap.put(data.getValue(), data.getText());
 					}
 				}
 				for(String value : valueList) {
-					result.append("、");
 					String text = valueTextMap.get(value);
 					if(text != null) {
-						result.append(text);
+						textList.add(text);
 					}else {
-						result.append(value);
+						textList.add(value);
 					}
 				}
 			}else {//其他，如动态数据源
 				for(String value : valueList) {
-					result.append("、");
 					if(value.contains("&=&")) {
-						result.append(value.split("&=&")[1]);
+						textList.add(value.split("&=&")[1]);
 					}else {
-						result.append(value);
+						textList.add(value);
 					}
 				}
 			}			
-			return result.toString().substring(1);
+			return textList;
 		}else {
-			return "";
+			return valueList;
 		}
 	}
 

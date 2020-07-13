@@ -21,12 +21,12 @@ import com.techsure.multiattrsearch.QueryResultSet;
 
 import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.common.constvalue.dashboard.DashboardShowConfig;
+import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dashboard.core.DashboardChartBase;
 import codedriver.framework.dashboard.core.DashboardChartFactory;
 import codedriver.framework.dashboard.core.DashboardHandlerBase;
 import codedriver.framework.dashboard.dto.DashboardShowConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
-import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -64,7 +64,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			if(configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
 				for (ProcessWorkcenterField s : ProcessWorkcenterField.values()) {
 					if(s.getValue().equals(configChart.getString(DashboardShowConfig.GROUPFIELD.getValue()))||s.getValue().equals(configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue()))) {
-						JSONArray dataList = ProcessTaskConditionFactory.getHandler(s.getValue()).getConfig().getJSONArray("dataList");
+						JSONArray dataList = ConditionHandlerFactory.getHandler(s.getValue()).getConfig().getJSONArray("dataList");
 						if(CollectionUtils.isNotEmpty(dataList)) {
 							for(Object obj:dataList) {
 								JSONObject json = (JSONObject)obj;
@@ -120,9 +120,9 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 		JSONObject groupFieldJson = new JSONObject();
 		for(ProcessWorkcenterField groupField : fieldList) {
 			if(!isSub&&ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())) {
-				groupFieldJson = ProcessTaskConditionFactory.getHandler(groupField.getValue()).getConfig();
+				groupFieldJson = ConditionHandlerFactory.getHandler(groupField.getValue()).getConfig();
 				groupFieldJson.remove("isMultiple");
-				groupFieldJson.put("handler", ProcessTaskConditionFactory.getHandler(groupField.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
+				groupFieldJson.put("handler", ConditionHandlerFactory.getHandler(groupField.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
 				
 			}
 			groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", groupField.getValue(),groupField.getName(),groupFieldJson)));

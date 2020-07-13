@@ -1,8 +1,12 @@
 package codedriver.module.process.condition.handler;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
@@ -15,6 +19,8 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 @Component
 public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
 
+	private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
 	@Override
 	public String getName() {
 		return "starttime";
@@ -54,6 +60,23 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
 		return getDateEsWhere(condition,conditionList);
+	}
+
+	@Override
+	public Object valueConversionText(Object value, JSONObject config) {
+		if(value != null) {
+			if(value instanceof String) {
+				return simpleDateFormat.format(new Date(Integer.parseInt(value.toString())));
+			}else if(value instanceof List){
+				List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+				List<String> textList = new ArrayList<>();
+				for(String valueStr : valueList) {
+					textList.add(simpleDateFormat.format(new Date(Long.parseLong(valueStr))));
+				}
+				return String.join("-", textList);
+			}
+		}		
+		return value;
 	}
 
 }

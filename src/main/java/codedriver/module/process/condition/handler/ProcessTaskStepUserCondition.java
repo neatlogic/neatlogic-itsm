@@ -8,6 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
@@ -71,8 +72,20 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 		List<ConditionVo> stepStatusConditionList = conditionList.stream().filter(con->con.getName().equals(ProcessWorkcenterField.STEP_STATUS.getValue())).collect(Collectors.toList());
 		if(CollectionUtils.isNotEmpty(stepStatusConditionList)) {
 			ConditionVo stepStatusCondition = stepStatusConditionList.get(0);
-			List<String> stepStatusValueList = stepStatusCondition.getValueList();
-			List<String> stepUserValueList = condition.getValueList();
+			List<String> stepStatusValueList = new ArrayList<>();
+			if(stepStatusCondition.getValueList() instanceof String) {
+				stepStatusValueList.add((String)stepStatusCondition.getValueList());
+			}else if(stepStatusCondition.getValueList() instanceof List){
+				List<String> valueList = JSON.parseArray(JSON.toJSONString(stepStatusCondition.getValueList()), String.class);
+				stepStatusValueList.addAll(valueList);
+			}
+			List<String> stepUserValueList = new ArrayList<>();
+			if(condition.getValueList() instanceof String) {
+				stepUserValueList.add((String)condition.getValueList());
+			}else if(condition.getValueList() instanceof List){
+				List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+				stepUserValueList.addAll(valueList);
+			}
 			List<String> userList = new ArrayList<String>();
 			for(String user : stepUserValueList) {
 				for(String stepStatus : stepStatusValueList) {
@@ -101,6 +114,12 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 			String value = String.join("','",userList);
 			return String.format(Expression.INCLUDE.getExpressionEs(),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP_USER.getValue()),String.format("'%s'",  value));
 		}
+		return null;
+	}
+
+	@Override
+	public Object valueConversionText(Object value, JSONObject config) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

@@ -31,6 +31,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionGroupRelVo;
@@ -41,7 +42,6 @@ import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
-import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
@@ -544,7 +544,7 @@ public class WorkcenterService {
 				
 				for(int andIndex =0;andIndex<andConditionTmpList.size();andIndex++) {
 					ConditionVo condition = andConditionTmpList.get(andIndex);
-					IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler(condition.getName());
+					IProcessTaskCondition workcenterCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(condition.getName());
 					if(condition.getType().equals("form")) {
 						formConditionList.add(condition);
 					}else {
@@ -563,7 +563,7 @@ public class WorkcenterService {
 					whereSb.append(" and ");
 				}
 				for(int formIndex =0;formIndex<formConditionList.size();formIndex++) {
-					IProcessTaskCondition workcenterCondition = ProcessTaskConditionFactory.getHandler("form");
+					IProcessTaskCondition workcenterCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler("form");
 					String conditionWhere = workcenterCondition.getEsWhere(formConditionList,formIndex);
 					whereSb.append(conditionWhere);
 					if(formIndex != formConditionList.size()-1) {

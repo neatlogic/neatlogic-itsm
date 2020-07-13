@@ -1,7 +1,6 @@
 package codedriver.module.process.api.process;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +13,9 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.condition.core.ConditionHandlerFactory;
+import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
-import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
@@ -67,49 +67,43 @@ public class ProcessGetConditionApi extends ApiComponentBase {
 		JSONArray resultArray = new JSONArray();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		//固定字段条件
-		Map<String, IProcessTaskCondition> workcenterConditionMap = ProcessTaskConditionFactory.getConditionComponentMap();
-		for (Map.Entry<String, IProcessTaskCondition> entry : workcenterConditionMap.entrySet()) {
-			IProcessTaskCondition condition = entry.getValue();
-			if(ProcessField.getValue(condition.getName())== null) {
-				continue;
-			}
-			JSONObject commonObj = new JSONObject();
-			commonObj.put("handler", condition.getName());
-			commonObj.put("handlerName", condition.getDisplayName());
-			commonObj.put("handlerType", condition.getHandler(conditionModel));
-			if(condition.getConfig() != null) {
-				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
-				commonObj.put("config", condition.getConfig().toJSONString());
-			}
-			commonObj.put("type", condition.getType());
-			ParamType paramType = condition.getParamType();
-			if(paramType != null) {
-				commonObj.put("basicType", paramType.getName());
-				commonObj.put("basicTypeName", paramType.getText());
-				commonObj.put("defaultExpression", paramType.getDefaultExpression().getExpression());
-				JSONArray expressiobArray = new JSONArray();
-				for(Expression expression:paramType.getExpressionList()) {
-					JSONObject expressionObj = new JSONObject();
-					expressionObj.put("expression", expression.getExpression());
-					expressionObj.put("expressionName", expression.getExpressionName());
-					expressiobArray.add(expressionObj);
-					commonObj.put("expressionList", expressiobArray);
+		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
+			if(condition instanceof IProcessTaskCondition && ProcessField.getValue(condition.getName()) != null) {
+				JSONObject commonObj = new JSONObject();
+				commonObj.put("handler", condition.getName());
+				commonObj.put("handlerName", condition.getDisplayName());
+				commonObj.put("handlerType", condition.getHandler(conditionModel));
+				if(condition.getConfig() != null) {
+					commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
+					commonObj.put("config", condition.getConfig().toJSONString());
 				}
-			}
-			
-			resultArray.add(commonObj);
+				commonObj.put("type", condition.getType());
+				ParamType paramType = condition.getParamType();
+				if(paramType != null) {
+					commonObj.put("basicType", paramType.getName());
+					commonObj.put("basicTypeName", paramType.getText());
+					commonObj.put("defaultExpression", paramType.getDefaultExpression().getExpression());
+					JSONArray expressiobArray = new JSONArray();
+					for(Expression expression:paramType.getExpressionList()) {
+						JSONObject expressionObj = new JSONObject();
+						expressionObj.put("expression", expression.getExpression());
+						expressionObj.put("expressionName", expression.getExpressionName());
+						expressiobArray.add(expressionObj);
+						commonObj.put("expressionList", expressiobArray);
+					}
+				}				
+				resultArray.add(commonObj);
+			}			
 		}
 		//表单条件
 		if(jsonObj.containsKey("formUuid") && !StringUtils.isBlank(jsonObj.getString("formUuid"))) {
 			String formUuid = jsonObj.getString("formUuid");
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
-				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
+				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
 						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
 						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMUSERSELECT.getHandler())){
+						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())){
 					continue;
 				}
 				formAttributeVo.setType("form");
