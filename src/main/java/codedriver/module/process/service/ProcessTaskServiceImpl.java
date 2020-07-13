@@ -654,7 +654,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					}else if(FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						processHandler.complete(currentProcessTaskStepVo);
 					}else if(FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
-						processHandler.abort(currentProcessTaskStepVo);
+						processHandler.abortProcessTask(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));
 					}else {//hang
 						//processHandler.hang(currentProcessTaskStepVo);
 					}
