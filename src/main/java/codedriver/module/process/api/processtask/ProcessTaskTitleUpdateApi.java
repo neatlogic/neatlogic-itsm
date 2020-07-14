@@ -46,7 +46,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
-		@Param(name = "title", type = ApiParamType.REGEX, rule="^[A-Za-z_\\d\\u4e00-\\u9fa5]+$",isRequired = true, desc = "标题")
+		@Param(name = "title", type = ApiParamType.REGEX, rule="^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", maxLength = 80, isRequired = true, desc = "标题")
 		//@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "标题")
 	})
 	@Description(desc = "工单标题更新接口")

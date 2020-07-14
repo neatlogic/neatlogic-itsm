@@ -67,11 +67,11 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 	@Input({
 		@Param(name="processTaskId", type = ApiParamType.LONG, desc="工单id"),
 		@Param(name="channelUuid", type= ApiParamType.STRING, isRequired=true, desc="服务uuid"),
-		@Param(name="title", type=ApiParamType.STRING, desc = "标题"),
+		@Param(name="title", type=ApiParamType.STRING, maxLength = 80, desc = "标题"),
 		@Param(name="owner", type=ApiParamType.STRING, desc="请求人"),
 		@Param(name="priorityUuid", type=ApiParamType.STRING, desc="优先级uuid"),
 		@Param(name="formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
-		@Param(name="hidecomponentList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "联动隐藏表单属性列表"), //TODO linbq isRequired = true
+		@Param(name="hidecomponentList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "联动隐藏表单属性列表"),
 		@Param(name="content", type=ApiParamType.STRING, desc = "描述"),
 		@Param(name="fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
 	})

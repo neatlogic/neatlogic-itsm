@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
@@ -53,17 +54,20 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 		PriorityVo priorityVo = new PriorityVo();
 		priorityVo.setIsActive(1);
 		List<PriorityVo> priorityList = priorityMapper.searchPriorityList(priorityVo);
-		JSONArray jsonList = new JSONArray();
+		JSONArray dataList = new JSONArray();
 		for (PriorityVo priority : priorityList) {
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.put("value", priority.getUuid());
-			jsonObj.put("text", priority.getName());
-			jsonList.add(jsonObj);
+			dataList.add(new ValueTextVo(priority.getUuid(), priority.getName()));
 		}
-		JSONObject returnObj = new JSONObject();
-		returnObj.put("dataList", jsonList);
-		returnObj.put("isMultiple", true);
-		return returnObj;
+		JSONObject config = new JSONObject();
+		config.put("type", FormHandlerType.SELECT.toString());
+		config.put("search", false);
+		config.put("multiple", true);
+		config.put("value", "");
+		config.put("defaultValue", "");
+		config.put("dataList", dataList);
+		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
+		config.put("isMultiple", true);
+		return config;
 	}
 
 	@Override

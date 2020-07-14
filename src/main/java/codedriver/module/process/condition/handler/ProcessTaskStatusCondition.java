@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
@@ -45,39 +46,24 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
 	}
 
 	@Override
-	public JSONObject getConfig() {
+	public JSONObject getConfig() {		
+		JSONArray dataList = new JSONArray();
+		dataList.add(new ValueTextVo(ProcessTaskStatus.RUNNING.getValue(), ProcessTaskStatus.RUNNING.getText()));
+		dataList.add(new ValueTextVo(ProcessTaskStatus.ABORTED.getValue(), ProcessTaskStatus.ABORTED.getText()));
+		dataList.add(new ValueTextVo(ProcessTaskStatus.FAILED.getValue(), ProcessTaskStatus.FAILED.getText()));
+		dataList.add(new ValueTextVo(ProcessTaskStatus.SUCCEED.getValue(), ProcessTaskStatus.SUCCEED.getText()));
+		dataList.add(new ValueTextVo(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.DRAFT.getText()));
 		
-		JSONArray jsonList = new JSONArray();
-		
-		JSONObject jsonObj = new JSONObject();
-		jsonObj.put("value", ProcessTaskStatus.RUNNING.getValue());
-		jsonObj.put("text", ProcessTaskStatus.RUNNING.getText());
-		jsonList.add(jsonObj);
-		
-		JSONObject jsonObj1 = new JSONObject();
-		jsonObj1.put("value", ProcessTaskStatus.ABORTED.getValue());
-		jsonObj1.put("text", ProcessTaskStatus.ABORTED.getText());
-		jsonList.add(jsonObj1);
-		
-		JSONObject jsonObj2 = new JSONObject();
-		jsonObj2.put("value", ProcessTaskStatus.FAILED.getValue());
-		jsonObj2.put("text", ProcessTaskStatus.FAILED.getText());
-		jsonList.add(jsonObj2);
-		
-		JSONObject jsonObj3 = new JSONObject();
-		jsonObj3.put("value", ProcessTaskStatus.SUCCEED.getValue());
-		jsonObj3.put("text", ProcessTaskStatus.SUCCEED.getText());
-		jsonList.add(jsonObj3);
-		
-		JSONObject jsonObj4 = new JSONObject();
-		jsonObj4.put("value", ProcessTaskStatus.DRAFT.getValue());
-		jsonObj4.put("text", ProcessTaskStatus.DRAFT.getText());
-		jsonList.add(jsonObj4);
-		
-		JSONObject returnObj = new JSONObject();
-		returnObj.put("dataList", jsonList);
-		returnObj.put("isMultiple", true);
-		return returnObj;
+		JSONObject config = new JSONObject();
+		config.put("type", FormHandlerType.SELECT.toString());
+		config.put("search", false);
+		config.put("multiple", true);
+		config.put("value", "");
+		config.put("defaultValue", "");
+		config.put("dataList", dataList);
+		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
+		config.put("isMultiple", true);
+		return config;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package codedriver.module.process.condition.handler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +46,13 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 
 	@Override
 	public JSONObject getConfig() {
-		JSONObject returnObj = new JSONObject();
-		returnObj.put("isMultiple", true);
-		return returnObj;
+		JSONObject config = new JSONObject();
+		config.put("type", FormHandlerType.USERSELECT.toString());
+		config.put("groupList", Arrays.asList("user"));
+		config.put("multiple", true);
+		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
+		config.put("isMultiple", true);
+		return config;
 	}
 
 	@Override
