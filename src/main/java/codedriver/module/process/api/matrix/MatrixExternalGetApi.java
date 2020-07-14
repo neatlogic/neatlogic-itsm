@@ -7,7 +7,6 @@ import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
-import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -59,11 +58,7 @@ public class MatrixExternalGetApi extends ApiComponentBase {
         }
         
         if(ProcessMatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-        	ProcessMatrixExternalVo processMatrixExternalVo = externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
-        	if(processMatrixExternalVo == null) {
-        		throw new MatrixExternalNotFoundException(matrixUuid);
-        	}
-            return processMatrixExternalVo;
+            return externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
         }else {
         	throw new MatrixExternalException("矩阵:'" + matrixUuid + "'不是外部数据源类型");
         }
