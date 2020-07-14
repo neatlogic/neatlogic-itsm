@@ -11,6 +11,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.exception.team.TeamNotFoundException;
@@ -25,13 +28,13 @@ public class CatalogServiceImpl implements CatalogService {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
-
+	
 	@Autowired
 	private ChannelMapper channelMapper;
-
+	
 	@Autowired
 	private TeamMapper teamMapper;
-
+	
 	@Override
 	public boolean checkLeftRightCodeIsExists() {
 		int count = 0;
@@ -92,22 +95,22 @@ public class CatalogServiceImpl implements CatalogService {
 				//构造一个虚拟的root节点
 				CatalogVo rootCatalog = buildRootCatalog();
 				/** 查出所有目录 **/
-				List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
+				List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());				
 				for(CatalogVo catalogVo : catalogList) {
 					if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())) {
 						catalogVo.setAuthority(true);
 					}
-					uuidKeyMap.put(catalogVo.getUuid(), catalogVo);
+					uuidKeyMap.put(catalogVo.getUuid(), catalogVo);		
 				}
-
+				
 				for(CatalogVo catalogVo : catalogList) {
 					String parentUuid = catalogVo.getParentUuid();
 					CatalogVo parent = uuidKeyMap.get(parentUuid);
 					if(parent != null) {
 						catalogVo.setParent(parent);
-					}
+					}				
 				}
-
+				
 				List<ChannelVo> channelList = channelMapper.getChannelListForTree(1);
 				for(ChannelVo channelVo : channelList) {
 					if(currentUserAuthorizedChannelUuidList.contains(channelVo.getUuid())) {
@@ -125,9 +128,9 @@ public class CatalogServiceImpl implements CatalogService {
 						resultList.add(channelVo.getUuid());
 					}
 				}
-			}
+			}		
 		}
-
+		
 		return resultList;
 	}
 
@@ -162,20 +165,51 @@ public class CatalogServiceImpl implements CatalogService {
 				}
 			}
 		}
-
+		
 		return false;
+	}
+
+	@Override
+	public JSONArray getCatalogChannelByCatalogUuid(CatalogVo catalog) {
+		JSONArray listArray = new JSONArray();
+		JSONArray sonListArray = new JSONArray();
+		JSONObject catalogParentJson = new JSONObject();
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		catalogParentJson.put("uuid", catalog.getUuid());
+		catalogParentJson.put("name", catalog.getName());
+		catalogParentJson.put("list", sonListArray);
+		//catalog
+		List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
+				UserContext.get().getUserUuid(),
+				teamUuidList,
+				UserContext.get().getRoleUuidList(),
+				catalog.getUuid(),
+				null);
+		for(CatalogVo catalogVo : catalogList) {
+			JSONObject catalogJson = (JSONObject) JSONObject.toJSON(catalogVo);
+			catalogJson.put("type", "catalog");
+			sonListArray.add(catalogJson);
+		}
+		//channel
+		List<ChannelVo> channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),teamUuidList,UserContext.get().getRoleUuidList(),catalog.getUuid());
+		for(ChannelVo channelVo : channelList) {
+			JSONObject channelJson = (JSONObject) JSONObject.toJSON(channelVo);
+			channelJson.put("type", "channel");
+			sonListArray.add(channelJson);
+		}
+		listArray.add(catalogParentJson);
+		return listArray;
 	}
 
     @Override
     public CatalogVo buildRootCatalog() {
-		CatalogVo maxRhtCode = catalogMapper.getMaxRhtCode();
-		CatalogVo rootCatalog = new CatalogVo();
-		rootCatalog.setUuid("0");
-		rootCatalog.setName("root");
-		rootCatalog.setParentUuid("-1");
-		rootCatalog.setLft(1);
-		rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.getRht().intValue() + 1);
-		return rootCatalog;
+        CatalogVo maxRhtCode = catalogMapper.getMaxRhtCode();
+        CatalogVo rootCatalog = new CatalogVo();
+        rootCatalog.setUuid("0");
+        rootCatalog.setName("root");
+        rootCatalog.setParentUuid("-1");
+        rootCatalog.setLft(1);
+        rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.getRht().intValue() + 1);
+        return rootCatalog;
     }
-
 }
