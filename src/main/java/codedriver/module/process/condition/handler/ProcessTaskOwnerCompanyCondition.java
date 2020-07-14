@@ -65,7 +65,7 @@ public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase i
 		mappingObj.put("value", "uuid");
 		mappingObj.put("text", "name");
 		config.put("mapping", mappingObj);
-		return null;
+		return config;
 	}
 
 	@Override
