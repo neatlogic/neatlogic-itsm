@@ -21,6 +21,8 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 @Component
 public class ProcessTaskStatusCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
 
+	private String formHandlerType = FormHandlerType.SELECT.toString();
+	
 	@Override
 	public String getName() {
 		return "status";
@@ -34,10 +36,11 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
 		if(ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-			return FormHandlerType.CHECKBOX.toString();
+			formHandlerType = FormHandlerType.CHECKBOX.toString();
 		}else {
-			return FormHandlerType.SELECT.toString();
+			formHandlerType = FormHandlerType.SELECT.toString();
 		}
+		return formHandlerType;
 	}
 	
 	@Override
@@ -55,7 +58,7 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
 		dataList.add(new ValueTextVo(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.DRAFT.getText()));
 		
 		JSONObject config = new JSONObject();
-		config.put("type", FormHandlerType.SELECT.toString());
+		config.put("type", formHandlerType);
 		config.put("search", false);
 		config.put("multiple", true);
 		config.put("value", "");

@@ -25,6 +25,8 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 	@Autowired
 	private PriorityMapper priorityMapper;
 	
+	private String formHandlerType = FormHandlerType.SELECT.toString();
+	
 	@Override
 	public String getName() {
 		return "priority";
@@ -38,10 +40,11 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
 		if(ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-			return FormHandlerType.CHECKBOX.toString();
+			formHandlerType = FormHandlerType.CHECKBOX.toString();
 		}else {
-			return FormHandlerType.SELECT.toString();
+			formHandlerType =  FormHandlerType.SELECT.toString();
 		}
+		return formHandlerType;
 	}
 	
 	@Override
@@ -59,7 +62,7 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 			dataList.add(new ValueTextVo(priority.getUuid(), priority.getName()));
 		}
 		JSONObject config = new JSONObject();
-		config.put("type", FormHandlerType.SELECT.toString());
+		config.put("type", formHandlerType);
 		config.put("search", false);
 		config.put("multiple", true);
 		config.put("value", "");

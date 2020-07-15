@@ -26,6 +26,8 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	@Autowired
 	ChannelMapper channelMapper;
 	
+	private String formHandlerType = FormHandlerType.SELECT.toString();
+	
 	@Override
 	public String getName() {
 		return "channeltype";
@@ -39,10 +41,11 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
 		if(ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-			return FormHandlerType.CHECKBOX.toString();
+			formHandlerType = FormHandlerType.CHECKBOX.toString();
 		}else {
-			return FormHandlerType.SELECT.toString();
+			formHandlerType = FormHandlerType.SELECT.toString();
 		}
+		return formHandlerType;
 	}
 	
 	@Override
@@ -58,7 +61,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 			dataList.add(new ValueTextVo(channelType.getUuid(), channelType.getName()));
 		}
 		JSONObject config = new JSONObject();
-		config.put("type", FormHandlerType.SELECT.toString());
+		config.put("type", formHandlerType);
 		config.put("search", false);
 		config.put("multiple", true);
 		config.put("value", "");

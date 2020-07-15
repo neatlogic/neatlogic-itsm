@@ -104,7 +104,8 @@ public class ProcessConditionList extends ApiComponentBase {
 				conditionParamVo.setIsMultiple(formAttributeVo.getIsMultiple());
 				conditionParamVo.setConfig(formAttributeVo.getConfig());
 				conditionParamVo.setType(formAttributeVo.getType());
-
+				conditionParamVo.setHandler(formAttributeVo.getHandler());
+				
 				ParamType paramType = ProcessFormHandler.getParamType(formAttributeVo.getHandler());
 				if(paramType != null) {
 					conditionParamVo.setParamType(paramType.getName());
