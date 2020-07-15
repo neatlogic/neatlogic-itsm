@@ -1,17 +1,5 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.List;
-
-import codedriver.framework.transaction.util.TransactionUtil;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -24,6 +12,14 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -35,9 +31,6 @@ public class CatalogSaveApi extends ApiComponentBase {
 	@Autowired
 	private CatalogService catalogService;
 
-	@Autowired
-	private TransactionUtil transactionUtil;
-	
 	@Override
 	public String getToken() {
 		return "process/catalog/save";
@@ -69,7 +62,6 @@ public class CatalogSaveApi extends ApiComponentBase {
 	@Description(desc = "服务目录保存信息接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		TransactionStatus transactionStatus = transactionUtil.openTx();
 		//根据catalog表中的count和最大的右编码进行比较
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
@@ -118,7 +110,6 @@ public class CatalogSaveApi extends ApiComponentBase {
 				catalogMapper.insertCatalogAuthority(authorityVo,catalogVo.getUuid());
 			}
 		}
-		transactionUtil.commitTx(transactionStatus);
 		return catalogVo.getUuid();
 	}
 

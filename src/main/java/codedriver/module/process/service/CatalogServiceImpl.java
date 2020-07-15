@@ -22,6 +22,8 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CatalogServiceImpl implements CatalogService {
@@ -56,6 +58,7 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
 	public Integer rebuildLeftRightCode(String parentUuid, int parentLft) {
 		List<CatalogVo> catalogList;
 		if(CatalogVo.ROOT_PARENTUUID.equals(parentUuid)){

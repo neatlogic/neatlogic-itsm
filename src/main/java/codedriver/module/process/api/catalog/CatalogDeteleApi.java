@@ -1,15 +1,5 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.List;
-
-import codedriver.framework.transaction.util.TransactionUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -22,6 +12,12 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -36,9 +32,6 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	@Autowired
 	private ChannelMapper channelMapper;
 
-	@Autowired
-	private TransactionUtil transactionUtil;
-	
 	@Override
 	public String getToken() {
 		return "process/catalog/delete";
@@ -60,7 +53,6 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	@Description(desc = "服务目录删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		TransactionStatus transactionStatus = transactionUtil.openTx();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
@@ -71,7 +63,7 @@ public class CatalogDeteleApi extends ApiComponentBase {
 		}else if("1".equals(uuid)) {
 			throw new CatalogIllegalParameterException("未分类目录不能删除");
 		}
-		
+
 		CatalogVo catalogVo = new CatalogVo();
 		catalogVo.setParentUuid(uuid);
 		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
@@ -90,7 +82,6 @@ public class CatalogDeteleApi extends ApiComponentBase {
 		//更新删除位置右边的左右编码值
 		catalogMapper.batchUpdateCatalogLeftCode(existsCatalog.getLft(), -2);
 		catalogMapper.batchUpdateCatalogRightCode(existsCatalog.getLft(), -2);
-		transactionUtil.commitTx(transactionStatus);
 		return null;
 	}
 

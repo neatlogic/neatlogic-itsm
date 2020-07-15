@@ -1,14 +1,5 @@
 package codedriver.module.process.api.catalog;
 
-import codedriver.framework.transaction.util.TransactionUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -19,6 +10,11 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -30,9 +26,6 @@ public class CatalogMoveApi extends ApiComponentBase {
 	@Autowired
 	private CatalogService catalogService;
 
-	@Autowired
-	private TransactionUtil transactionUtil;
-	
 	@Override
 	public String getToken() {
 		return "process/catalog/move";
@@ -57,7 +50,6 @@ public class CatalogMoveApi extends ApiComponentBase {
 	@Description(desc = "服务目录移动位置接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		TransactionStatus transactionStatus = transactionUtil.openTx();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
@@ -135,7 +127,6 @@ public class CatalogMoveApi extends ApiComponentBase {
 		//更新被移动块中节点的左右编码值
  		catalogMapper.batchUpdateCatalogLeftRightCodeByLeftRightCode(moveCatalog.getLft() - moveCatalog.getRht(), moveCatalog.getRht() - moveCatalog.getRht(), lft - moveCatalog.getLft() + moveCatalog.getRht());
 		//-------------------------------------------------------------------------------------------------------
-		transactionUtil.commitTx(transactionStatus);
 		return null;
 	}
 
