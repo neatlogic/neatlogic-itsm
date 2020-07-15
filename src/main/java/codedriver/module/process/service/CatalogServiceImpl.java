@@ -46,11 +46,9 @@ public class CatalogServiceImpl implements CatalogService {
 //			throw new TeamNotFoundException(CatalogVo.ROOT_UUID);
 //		}
 		//获取最大的右编码值maxRhtCode
-		CatalogVo vo = catalogMapper.getMaxRhtCode();
-		Integer maxRhtCode;
-		if(vo != null && vo.getRht() != null){
-			maxRhtCode = vo.getRht();
-			if(Objects.equals(maxRhtCode, count * 2 + 1) || count == 0) {
+		Integer maxRhtCode = catalogMapper.getMaxRhtCode();
+		if(maxRhtCode != null){
+			if(Objects.equals(maxRhtCode.intValue(), count * 2 + 1) || count == 0) {
 				return true;
 			}
 		}
@@ -58,7 +56,6 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public Integer rebuildLeftRightCode(String parentUuid, int parentLft) {
 		List<CatalogVo> catalogList;
 		if(CatalogVo.ROOT_PARENTUUID.equals(parentUuid)){
@@ -206,13 +203,13 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public CatalogVo buildRootCatalog() {
-        CatalogVo maxRhtCode = catalogMapper.getMaxRhtCode();
+        Integer maxRhtCode = catalogMapper.getMaxRhtCode();
         CatalogVo rootCatalog = new CatalogVo();
         rootCatalog.setUuid("0");
         rootCatalog.setName("root");
         rootCatalog.setParentUuid("-1");
         rootCatalog.setLft(1);
-        rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.getRht().intValue() + 1);
+        rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.intValue() + 1);
         return rootCatalog;
     }
 }
