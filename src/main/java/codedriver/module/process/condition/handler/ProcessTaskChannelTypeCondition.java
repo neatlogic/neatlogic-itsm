@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
@@ -25,6 +26,8 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	@Autowired
 	ChannelMapper channelMapper;
 	
+	private String formHandlerType = FormHandlerType.SELECT.toString();
+	
 	@Override
 	public String getName() {
 		return "channeltype";
@@ -38,10 +41,9 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
 		if(ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-			return FormHandlerType.CHECKBOX.toString();
-		}else {
-			return FormHandlerType.SELECT.toString();
+			formHandlerType = FormHandlerType.CHECKBOX.toString();
 		}
+		return formHandlerType;
 	}
 	
 	@Override
@@ -52,17 +54,20 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	@Override
 	public JSONObject getConfig() {
 		List<ChannelTypeVo>  channellist = channelMapper.searchChannelTypeList(new ChannelTypeVo());
-		JSONArray jsonList = new JSONArray();
+		JSONArray dataList = new JSONArray();
 		for(ChannelTypeVo channelType:channellist) {
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.put("value", channelType.getUuid());
-			jsonObj.put("text", channelType.getName());
-			jsonList.add(jsonObj);
+			dataList.add(new ValueTextVo(channelType.getUuid(), channelType.getName()));
 		}
-		JSONObject returnObj = new JSONObject();
-		returnObj.put("dataList", jsonList);
-		returnObj.put("isMultiple", true);
-		return returnObj;
+		JSONObject config = new JSONObject();
+		config.put("type", formHandlerType);
+		config.put("search", false);
+		config.put("multiple", true);
+		config.put("value", "");
+		config.put("defaultValue", "");
+		config.put("dataList", dataList);
+		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
+		config.put("isMultiple", true);
+		return config;
 	}
 
 	@Override

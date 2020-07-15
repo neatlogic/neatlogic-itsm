@@ -41,7 +41,14 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
 
 	@Override
 	public JSONObject getConfig() {
-		return null;
+		JSONObject config = new JSONObject();
+		config.put("type", "text");
+		config.put("value", "");
+		config.put("defaultValue", "");
+		config.put("maxlength", 16);
+//		config.put("name", "");
+//		config.put("label", "");
+		return config;
 	}
 
 	@Override

@@ -9,35 +9,35 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.constvalue.FormHandlerType;
+import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dto.TeamVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dto.ChannelVo;
 
 @Component
-public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
+public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
 	@Autowired
-	private ChannelMapper channelMapper;
+	private TeamMapper teamMapper;
 	
 	@Override
 	public String getName() {
-		return "channel";
+		return "ownercompany";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "服务";
+		return "上报人公司";
 	}
 
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
 		return FormHandlerType.SELECT.toString();
 	}
-	
+
 	@Override
 	public String getType() {
 		return ProcessFieldType.COMMON.getValue();
@@ -46,11 +46,10 @@ public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implem
 	@Override
 	public JSONObject getConfig() {
 		JSONObject config = new JSONObject();
-		/** 新数据结构，参考前端表单数据结构**/
 		config.put("type", FormHandlerType.SELECT.toString());
 		config.put("search", true);
-		config.put("url", "api/rest/process/channel/search");
-		config.put("rootName", "channelList");
+		config.put("url", "/api/rest/team/search?currentPage=1&pageSize=20&level=company");
+		config.put("rootName", "teamList");
 		config.put("valueName", "uuid");
 		config.put("textName", "name");
 		config.put("multiple", true);
@@ -60,7 +59,6 @@ public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implem
 //		config.put("label", "");
 //		config.put("validateList", Arrays.asList("required"));
 //		config.put("dataList", "");
-		
 		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
 		config.put("isMultiple", true);
 		JSONObject mappingObj = new JSONObject();
@@ -72,7 +70,7 @@ public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implem
 
 	@Override
 	public Integer getSort() {
-		return 9;
+		return 11;
 	}
 
 	@Override
@@ -84,24 +82,24 @@ public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implem
 	public Object valueConversionText(Object value, JSONObject config) {
 		if(value != null) {
 			if(value instanceof String) {
-				ChannelVo channelVo = channelMapper.getChannelByUuid(value.toString());
-				if(channelVo != null) {
-					return channelVo.getName();
+				TeamVo teamVo = teamMapper.getTeamByUuid((String)value);
+				if(teamVo != null) {
+					return teamVo.getName();
 				}
 			}else if(value instanceof List){
 				List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
 				List<String> textList = new ArrayList<>();
 				for(String valueStr : valueList) {
-					ChannelVo channelVo = channelMapper.getChannelByUuid(valueStr);
-					if(channelVo != null) {
-						textList.add(channelVo.getName());					
+					TeamVo teamVo = teamMapper.getTeamByUuid(valueStr);
+					if(teamVo != null) {
+						textList.add(teamVo.getName());					
 					}else {
 						textList.add(valueStr);
 					}
 				}
 				return String.join("、", textList);
 			}
-		}		
+		}	
 		return value;
 	}
 
