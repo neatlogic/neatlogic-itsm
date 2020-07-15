@@ -2,6 +2,7 @@ package codedriver.module.process.api.process;
 
 import java.util.List;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -102,10 +103,22 @@ public class ProcessConditionList extends ApiComponentBase {
 				conditionParamVo.setLabel(formAttributeVo.getLabel());
 				conditionParamVo.setController(formAttributeVo.getHandlerType());
 				conditionParamVo.setIsMultiple(formAttributeVo.getIsMultiple());
-				conditionParamVo.setConfig(formAttributeVo.getConfig());
 				conditionParamVo.setType(formAttributeVo.getType());
 				conditionParamVo.setHandler(formAttributeVo.getHandler());
-				
+				conditionParamVo.setConfig(formAttributeVo.getConfig());
+				if(ProcessFormHandler.FORMDATE.getHandler().equals(formAttributeVo.getHandler())) {
+					JSONObject config = conditionParamVo.getConfig();
+					if(MapUtils.isNotEmpty(config)) {
+						config.put("type", "datetimerange");
+						conditionParamVo.setConfig(config.toJSONString());
+					}
+				}else if(ProcessFormHandler.FORMTIME.getHandler().equals(formAttributeVo.getHandler())) {
+					JSONObject config = conditionParamVo.getConfig();
+					if(MapUtils.isNotEmpty(config)) {
+						config.put("type", "timerange");
+						conditionParamVo.setConfig(config.toJSONString());
+					}
+				}
 				ParamType paramType = ProcessFormHandler.getParamType(formAttributeVo.getHandler());
 				if(paramType != null) {
 					conditionParamVo.setParamType(paramType.getName());

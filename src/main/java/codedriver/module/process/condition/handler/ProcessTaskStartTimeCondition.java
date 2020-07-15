@@ -44,7 +44,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 	@Override
 	public JSONObject getConfig() {
 		JSONObject config = new JSONObject();
-		config.put("type", "datetime");
+		config.put("type", "datetimerange");
 		config.put("value", "");
 		config.put("defaultValue", "");
 		config.put("format", "yyyy-MM-dd HH:mm:ss");
