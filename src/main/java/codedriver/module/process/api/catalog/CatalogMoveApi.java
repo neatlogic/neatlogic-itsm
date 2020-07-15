@@ -50,6 +50,7 @@ public class CatalogMoveApi extends ApiComponentBase {
 	@Description(desc = "服务目录移动位置接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		catalogMapper.getCatalogCountOnLock();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}

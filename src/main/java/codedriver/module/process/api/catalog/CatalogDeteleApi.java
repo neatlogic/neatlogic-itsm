@@ -53,6 +53,7 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	@Description(desc = "服务目录删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		catalogMapper.getCatalogCountOnLock();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}

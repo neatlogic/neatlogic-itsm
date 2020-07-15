@@ -39,8 +39,7 @@ public class CatalogServiceImpl implements CatalogService {
 	
 	@Override
 	public boolean checkLeftRightCodeIsExists() {
-		int count = 0;
-		count = catalogMapper.getCatalogCountOnLock();
+		int count = catalogMapper.getCatalogCountOnLock();
 //		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
 //		if(rootCatalog == null) {
 //			throw new TeamNotFoundException(CatalogVo.ROOT_UUID);
@@ -61,8 +60,8 @@ public class CatalogServiceImpl implements CatalogService {
 		if(CatalogVo.ROOT_PARENTUUID.equals(parentUuid)){
 			catalogList = new ArrayList<>();
 			CatalogVo vo = buildRootCatalog();
-			List<CatalogVo> catalogVoListForRoot = catalogMapper.getCatalogListByParentUuid("0");
-			vo.setChildrenCount(catalogVoListForRoot.isEmpty() ? 0 : catalogVoListForRoot.size());
+			List<CatalogVo> catalogVoListForRoot = catalogMapper.getCatalogListByParentUuid(CatalogVo.ROOT_UUID);
+			vo.setChildrenCount(catalogVoListForRoot.size());
 			catalogList.add(vo);
 		}else{
 			catalogList = catalogMapper.getCatalogListByParentUuid(parentUuid);
