@@ -3,6 +3,7 @@ package codedriver.module.process.api.catalog;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.module.process.service.CatalogService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 public class CatalogChannelSearchApi extends ApiComponentBase {
+
+	@Autowired
+	private CatalogService catalogService;
 
 	@Autowired
 	private CatalogMapper catalogMapper;
@@ -63,7 +67,9 @@ public class CatalogChannelSearchApi extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		String keyword = jsonObj.getString("keyword");
 		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
-		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+//		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+		//由于去除了root节点，所以要构造一个虚拟的root节点
+		CatalogVo rootCatalog = catalogService.buildRootCatalog();
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
 		List<CatalogVo> catalogChannelList = new ArrayList<>(catalogList.size() + channelList.size());

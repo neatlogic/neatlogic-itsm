@@ -1,13 +1,5 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -20,6 +12,12 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -33,7 +31,7 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
 	@Override
 	public String getToken() {
 		return "process/catalog/delete";
@@ -55,7 +53,7 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	@Description(desc = "服务目录删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+		catalogMapper.getCatalogCountOnLock();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
@@ -66,7 +64,7 @@ public class CatalogDeteleApi extends ApiComponentBase {
 		}else if("1".equals(uuid)) {
 			throw new CatalogIllegalParameterException("未分类目录不能删除");
 		}
-		
+
 		CatalogVo catalogVo = new CatalogVo();
 		catalogVo.setParentUuid(uuid);
 		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);

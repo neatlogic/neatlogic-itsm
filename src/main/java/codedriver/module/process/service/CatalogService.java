@@ -38,11 +38,20 @@ public interface CatalogService {
 	* @return boolean
 	 */
 	public boolean channelIsAuthority(String channelUuid);
-	
+
+
+
 	/**
 	 * 获取服务目录底下的服务目录&&服务
 	 * @param catalog
 	 * @return JSONArray
 	 */
 	public JSONArray getCatalogChannelByCatalogUuid(CatalogVo catalog);
+
+    /**
+     * @Time:2020年7月7日
+     * @Description:构造一个虚拟的root节点
+     * @return
+     */
+    public CatalogVo buildRootCatalog();
 }

@@ -1,9 +1,6 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,12 +56,16 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+			//不再锁定root节点
+//			catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
-		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+//		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
+		CatalogVo rootCatalog = catalogService.buildRootCatalog();
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
+			//将虚拟的root节点加入到catalogList中
+			catalogList.add(rootCatalog);
 			for(CatalogVo catalogVo : catalogList) {
 				uuidKeyMap.put(catalogVo.getUuid(), catalogVo);			
 			}
@@ -76,7 +77,7 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 				}				
 			}
 		}
-		
+
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
 		if(CollectionUtils.isNotEmpty(channelList)) {
 			for(ChannelVo channelVo : channelList) {

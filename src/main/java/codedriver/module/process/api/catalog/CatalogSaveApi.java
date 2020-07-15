@@ -1,15 +1,5 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -22,6 +12,14 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -32,7 +30,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private CatalogService catalogService;
-	
+
 	@Override
 	public String getToken() {
 		return "process/catalog/save";
@@ -64,14 +62,23 @@ public class CatalogSaveApi extends ApiComponentBase {
 	@Description(desc = "服务目录保存信息接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+		catalogMapper.getCatalogCountOnLock();
+		//根据catalog表中的count和最大的右编码进行比较
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
+		//构造一个虚拟的root节点
+		CatalogVo rootCatalogVo = catalogService.buildRootCatalog();
 		CatalogVo catalogVo = JSON.toJavaObject(jsonObj, CatalogVo.class);
 		//获取父级信息
 		String parentUuid = catalogVo.getParentUuid();
-		CatalogVo parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
+		CatalogVo parentCatalog;
+		//如果parentUuid为0，则表明其目标父目录为root
+		if("0".equals(parentUuid)){
+			parentCatalog = rootCatalogVo;
+		}else{
+			parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
+		}
 		if(parentCatalog == null) {
 			throw new CatalogNotFoundException(parentUuid);
 		}

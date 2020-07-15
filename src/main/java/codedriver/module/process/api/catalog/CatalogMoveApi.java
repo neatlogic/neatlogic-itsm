@@ -1,12 +1,5 @@
 package codedriver.module.process.api.catalog;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -17,6 +10,11 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -27,7 +25,7 @@ public class CatalogMoveApi extends ApiComponentBase {
 	
 	@Autowired
 	private CatalogService catalogService;
-	
+
 	@Override
 	public String getToken() {
 		return "process/catalog/move";
@@ -51,8 +49,8 @@ public class CatalogMoveApi extends ApiComponentBase {
 	})
 	@Description(desc = "服务目录移动位置接口")
 	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {		
-		catalogMapper.getCatalogLockByUuid(CatalogVo.ROOT_UUID);
+	public Object myDoService(JSONObject jsonObj) throws Exception {
+		catalogMapper.getCatalogCountOnLock();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
 			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
 		}
@@ -65,6 +63,10 @@ public class CatalogMoveApi extends ApiComponentBase {
 		String parentUuid = jsonObj.getString("parentUuid");
 		//判断移动后的父级服务目录是否存在
 		CatalogVo parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
+		//如果parentUuid为0，则表明其目标父目录为root，那么就构建一个虚拟的root
+		if("0".equals(parentUuid)){
+			parentCatalog = catalogService.buildRootCatalog();
+		}
 		if(parentCatalog == null) {
 			throw new CatalogNotFoundException(parentUuid);
 		}

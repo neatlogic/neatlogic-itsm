@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import codedriver.module.process.service.CatalogService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
+
+	@Autowired
+	private CatalogService catalogService;
 
 	@Autowired
 	private CatalogMapper catalogMapper;
@@ -72,6 +76,10 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String catalogUuid = jsonObj.getString("catalogUuid");
 		CatalogVo catalog = catalogMapper.getCatalogByUuid(catalogUuid);
+		//如果catalogUuid为0，则构建一个虚拟的root目录
+		if("0".equals(catalogUuid)){
+			catalog = catalogService.buildRootCatalog();
+		}
 		if(catalog == null) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
@@ -98,7 +106,7 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(catalog.getLft(), catalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
-
+			catalogList.add(catalog);
 			//已授权的目录uuid
 			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 
