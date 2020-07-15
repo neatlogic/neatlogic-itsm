@@ -41,8 +41,6 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	public String getHandler(String processWorkcenterConditionType) {
 		if(ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
 			formHandlerType = FormHandlerType.CHECKBOX.toString();
-		}else {
-			formHandlerType = FormHandlerType.SELECT.toString();
 		}
 		return formHandlerType;
 	}

@@ -45,7 +45,7 @@ public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements 
 		config.put("type", "text");
 		config.put("value", "");
 		config.put("defaultValue", "");
-		config.put("maxlength", 20);
+		config.put("maxlength", 16);
 //		config.put("name", "");
 //		config.put("label", "");
 		return config;
