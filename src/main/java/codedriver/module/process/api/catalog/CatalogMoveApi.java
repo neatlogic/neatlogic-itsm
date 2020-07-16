@@ -79,6 +79,15 @@ public class CatalogMoveApi extends ApiComponentBase {
 		if(Objects.equal(uuid, parentUuid)) {
         	throw new CatalogIllegalParameterException("移动后的父节点不可以是当前节点");
         }
+
+ 		//将被移动块中的所有节点的左右编码值设置为<=0
+        catalogMapper.batchUpdateCatalogLeftRightCodeByLeftRightCode(moveCatalog.getLft(), moveCatalog.getRht(), -moveCatalog.getRht());
+ 		//计算被移动块右边的节点移动步长
+ 		int step = moveCatalog.getRht() - moveCatalog.getLft() + 1;
+ 		//更新旧位置右边的左右编码值
+ 		catalogMapper.batchUpdateCatalogLeftCode(moveCatalog.getLft(), -step);
+ 		catalogMapper.batchUpdateCatalogRightCode(moveCatalog.getLft(), -step);
+ 		
         //找出被移动块移动后左编码值     	
 		int lft = 0;
 		String moveType = jsonObj.getString("moveType");
@@ -114,14 +123,6 @@ public class CatalogMoveApi extends ApiComponentBase {
             moveCatalog.setParentUuid(parentUuid);
             catalogMapper.updateCatalogParentUuidByUuid(moveCatalog);
         }
-
- 		//将被移动块中的所有节点的左右编码值设置为<=0
-        catalogMapper.batchUpdateCatalogLeftRightCodeByLeftRightCode(moveCatalog.getLft(), moveCatalog.getRht(), -moveCatalog.getRht());
- 		//计算被移动块右边的节点移动步长
- 		int step = moveCatalog.getRht() - moveCatalog.getLft() + 1;
- 		//更新旧位置右边的左右编码值
- 		catalogMapper.batchUpdateCatalogLeftCode(moveCatalog.getLft(), -step);
- 		catalogMapper.batchUpdateCatalogRightCode(moveCatalog.getLft(), -step);
 		
 		//更新新位置右边的左右编码值
  		catalogMapper.batchUpdateCatalogLeftCode(lft, step);

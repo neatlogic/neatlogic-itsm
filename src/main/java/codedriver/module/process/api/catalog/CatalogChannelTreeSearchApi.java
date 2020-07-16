@@ -87,10 +87,6 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 			}
 		}
 		
-		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
-		if(root != null) {
-			return root.getChildren();
-		}
-		return new ArrayList<>();
+		return rootCatalog.getChildren();
 	}
 }
