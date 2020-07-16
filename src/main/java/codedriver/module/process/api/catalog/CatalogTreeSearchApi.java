@@ -66,7 +66,7 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String catalogUuid = jsonObj.getString("catalogUuid");
 		//如果catalogUuid为0则放行
-		if(catalogMapper.checkCatalogIsExists(catalogUuid) == 0 && !"0".equals(catalogUuid)) {
+		if(!CatalogVo.ROOT_UUID.equals(catalogUuid) && catalogMapper.checkCatalogIsExists(catalogUuid) == 0) {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
 
@@ -122,19 +122,15 @@ public class CatalogTreeSearchApi extends ApiComponentBase {
 				}
 			}
 		}
-		
-		CatalogVo root = uuidKeyMap.get(CatalogVo.ROOT_UUID);
-		if(root != null) {
-			List<Object> resultChildren = root.getChildren();
-			CatalogVo copyRoot = new CatalogVo();
-			copyRoot.setUuid(root.getUuid());
-			copyRoot.setName(root.getName());
-			copyRoot.setParentUuid(root.getParentUuid());
-			copyRoot.setLft(root.getLft());
-			resultChildren.add(copyRoot);
-			return resultChildren;
-		}
-		return new ArrayList<>();
+
+		List<Object> resultChildren = rootCatalogVo.getChildren();
+		CatalogVo copyRoot = new CatalogVo();
+		copyRoot.setUuid(rootCatalogVo.getUuid());
+		copyRoot.setName(rootCatalogVo.getName());
+		copyRoot.setParentUuid(rootCatalogVo.getParentUuid());
+		copyRoot.setLft(rootCatalogVo.getLft());
+		resultChildren.add(copyRoot);
+		return resultChildren;
 	}
 
 }

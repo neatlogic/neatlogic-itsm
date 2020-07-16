@@ -67,16 +67,12 @@ public class CatalogChannelSearchApi extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		String keyword = jsonObj.getString("keyword");
 		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
-//		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
 		//由于去除了root节点，所以要构造一个虚拟的root节点
 		CatalogVo rootCatalog = catalogService.buildRootCatalog();
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
 		List<ChannelVo> channelList = channelMapper.getChannelListForTree(null);
 		List<CatalogVo> catalogChannelList = new ArrayList<>(catalogList.size() + channelList.size());
 		for(CatalogVo catalogVo : catalogList) {
-			if(!CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
-				continue;
-			}
 			if(StringUtils.isNotBlank(keyword) && !catalogVo.getName().toUpperCase().contains(keyword.toUpperCase())) {
 				continue;
 			}

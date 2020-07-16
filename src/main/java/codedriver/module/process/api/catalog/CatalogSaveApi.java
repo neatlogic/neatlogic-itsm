@@ -65,22 +65,22 @@ public class CatalogSaveApi extends ApiComponentBase {
 		catalogMapper.getCatalogCountOnLock();
 		//根据catalog表中的count和最大的右编码进行比较
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
+			catalogService.rebuildLeftRightCode();
 		}
 		//构造一个虚拟的root节点
-		CatalogVo rootCatalogVo = catalogService.buildRootCatalog();
+//		CatalogVo rootCatalogVo = catalogService.buildRootCatalog();
 		CatalogVo catalogVo = JSON.toJavaObject(jsonObj, CatalogVo.class);
 		//获取父级信息
 		String parentUuid = catalogVo.getParentUuid();
-		CatalogVo parentCatalog;
+		CatalogVo parentCatalog = null;
 		//如果parentUuid为0，则表明其目标父目录为root
-		if("0".equals(parentUuid)){
-			parentCatalog = rootCatalogVo;
+		if(CatalogVo.ROOT_UUID.equals(parentUuid)){
+			parentCatalog = catalogService.buildRootCatalog();
 		}else{
 			parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
-		}
-		if(parentCatalog == null) {
-			throw new CatalogNotFoundException(parentUuid);
+			if(parentCatalog == null) {
+				throw new CatalogNotFoundException(parentUuid);
+			}
 		}
 		if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
 			throw new CatalogNameRepeatException(catalogVo.getName());

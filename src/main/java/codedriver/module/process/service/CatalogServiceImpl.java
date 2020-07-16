@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.sun.org.apache.xml.internal.resolver.Catalog;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,14 +15,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CatalogServiceImpl implements CatalogService {
@@ -40,32 +36,25 @@ public class CatalogServiceImpl implements CatalogService {
 	@Override
 	public boolean checkLeftRightCodeIsExists() {
 		int count = catalogMapper.getCatalogCountOnLock();
-//		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
-//		if(rootCatalog == null) {
-//			throw new TeamNotFoundException(CatalogVo.ROOT_UUID);
-//		}
+		if(count == 0) {
+			return true;
+		}
 		//获取最大的右编码值maxRhtCode
 		Integer maxRhtCode = catalogMapper.getMaxRhtCode();
-		if(maxRhtCode != null){
-			if(Objects.equals(maxRhtCode.intValue(), count * 2 + 1) || count == 0) {
-				return true;
-			}
+		if(Objects.equals(maxRhtCode, count * 2 + 1)) {
+			return true;
 		}
 		return false;
 	}
 
 	@Override
-	public Integer rebuildLeftRightCode(String parentUuid, int parentLft) {
-		List<CatalogVo> catalogList;
-		if(CatalogVo.ROOT_PARENTUUID.equals(parentUuid)){
-			catalogList = new ArrayList<>();
-			CatalogVo vo = buildRootCatalog();
-			List<CatalogVo> catalogVoListForRoot = catalogMapper.getCatalogListByParentUuid(CatalogVo.ROOT_UUID);
-			vo.setChildrenCount(catalogVoListForRoot.size());
-			catalogList.add(vo);
-		}else{
-			catalogList = catalogMapper.getCatalogListByParentUuid(parentUuid);
-		}
+	public void rebuildLeftRightCode() {
+		rebuildLeftRightCode(CatalogVo.ROOT_UUID, 1);
+		
+	}
+
+	private Integer rebuildLeftRightCode(String parentUuid, int parentLft) {
+		List<CatalogVo> catalogList= catalogMapper.getCatalogListByParentUuid(parentUuid);
 		for(CatalogVo catalog : catalogList) {
 			if(catalog.getChildrenCount() == 0) {
 				catalogMapper.updateCatalogLeftRightCode(catalog.getUuid(), parentLft + 1, parentLft + 2);
@@ -204,9 +193,9 @@ public class CatalogServiceImpl implements CatalogService {
     public CatalogVo buildRootCatalog() {
         Integer maxRhtCode = catalogMapper.getMaxRhtCode();
         CatalogVo rootCatalog = new CatalogVo();
-        rootCatalog.setUuid("0");
+        rootCatalog.setUuid(CatalogVo.ROOT_UUID);
         rootCatalog.setName("root");
-        rootCatalog.setParentUuid("-1");
+        rootCatalog.setParentUuid(CatalogVo.ROOT_PARENTUUID);
         rootCatalog.setLft(1);
         rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.intValue() + 1);
         return rootCatalog;

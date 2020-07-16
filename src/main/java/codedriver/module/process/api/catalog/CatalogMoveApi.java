@@ -52,7 +52,7 @@ public class CatalogMoveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		catalogMapper.getCatalogCountOnLock();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
+			catalogService.rebuildLeftRightCode();
 		}
 		String uuid = jsonObj.getString("uuid");		
 		CatalogVo moveCatalog = catalogMapper.getCatalogByUuid(uuid);
@@ -62,13 +62,15 @@ public class CatalogMoveApi extends ApiComponentBase {
 		}		
 		String parentUuid = jsonObj.getString("parentUuid");
 		//判断移动后的父级服务目录是否存在
-		CatalogVo parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
+		CatalogVo parentCatalog = null;
 		//如果parentUuid为0，则表明其目标父目录为root，那么就构建一个虚拟的root
-		if("0".equals(parentUuid)){
+		if(CatalogVo.ROOT_UUID.equals(parentUuid)){
 			parentCatalog = catalogService.buildRootCatalog();
-		}
-		if(parentCatalog == null) {
-			throw new CatalogNotFoundException(parentUuid);
+		}else {
+			parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
+			if(parentCatalog == null) {
+				throw new CatalogNotFoundException(parentUuid);
+			}
 		}
 		//目录只能移动到目录前面，不能移动到通道前面
 		//目录只能移动到目录后面，不能移动到通道后面

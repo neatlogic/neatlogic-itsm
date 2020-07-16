@@ -13,6 +13,8 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 import com.alibaba.fastjson.JSONObject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,28 +57,28 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		catalogMapper.getCatalogCountOnLock();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
+			catalogService.rebuildLeftRightCode();
 		}
 		String uuid = jsonObj.getString("uuid");
 		CatalogVo existsCatalog = catalogMapper.getCatalogByUuid(uuid);
 		if(existsCatalog == null) {
 			throw new CatalogNotFoundException(uuid);
-		}else if("1".equals(uuid)) {
+		}else if(CatalogVo.UNCATEGORIZED_CATALOG_UUID.equals(uuid)) {
 			throw new CatalogIllegalParameterException("未分类目录不能删除");
 		}
 
 		CatalogVo catalogVo = new CatalogVo();
 		catalogVo.setParentUuid(uuid);
 		List<CatalogVo> catalogList = catalogMapper.getCatalogList(catalogVo);
-		if(catalogList != null && catalogList.size() > 0) {
+		if(CollectionUtils.isNotEmpty(catalogList)) {
 			throw new CatalogIllegalParameterException("服务目录：'" + uuid + "'还存在子目录");
 		}
 		ChannelVo channelVo = new ChannelVo();
 		channelVo.setParentUuid(uuid);
 		channelVo.setNeedPage(true);
 		List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);
-		if(channelList != null && channelList.size() > 0) {
-			throw new CatalogIllegalParameterException("服务目录：'" + uuid + "'还存在子通道");
+		if(CollectionUtils.isNotEmpty(channelList)) {
+			throw new CatalogIllegalParameterException("服务目录：'" + uuid + "'还存在子服务");
 		}
 		catalogMapper.deleteCatalogByUuid(uuid);
 		catalogMapper.deleteCatalogAuthorityByCatalogUuid(uuid);
