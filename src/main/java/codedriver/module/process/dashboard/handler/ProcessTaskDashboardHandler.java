@@ -60,14 +60,14 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			}
 			jsonObj.put("resultColumnList", resultColumnList);
 			//补充分组条件所有属性
-			Map<String, String> valueTextMap =  new HashMap<String,String>();
+			Map<String, String> valueTextMap =  new HashMap<>();
 			if(configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
 				for (ProcessWorkcenterField s : ProcessWorkcenterField.values()) {
 					if(s.getValue().equals(configChart.getString(DashboardShowConfig.GROUPFIELD.getValue()))||s.getValue().equals(configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue()))) {
 						JSONArray dataList = ConditionHandlerFactory.getHandler(s.getValue()).getConfig().getJSONArray("dataList");
 						if(CollectionUtils.isNotEmpty(dataList)) {
-							for(Object obj:dataList) {
-								JSONObject json = (JSONObject)obj;
+							for(int i = 0; i < dataList.size(); i++) {
+								JSONObject json = dataList.getJSONObject(i);
 								valueTextMap.put(json.getString("value"), json.getString("text"));
 							}
 						}
