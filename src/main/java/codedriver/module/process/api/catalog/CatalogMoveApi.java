@@ -52,7 +52,7 @@ public class CatalogMoveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		catalogMapper.getCatalogCountOnLock();
 		if(!catalogService.checkLeftRightCodeIsExists()) {
-			catalogService.rebuildLeftRightCode(CatalogVo.ROOT_PARENTUUID, 0);
+			catalogService.rebuildLeftRightCode();
 		}
 		String uuid = jsonObj.getString("uuid");		
 		CatalogVo moveCatalog = catalogMapper.getCatalogByUuid(uuid);
@@ -62,13 +62,15 @@ public class CatalogMoveApi extends ApiComponentBase {
 		}		
 		String parentUuid = jsonObj.getString("parentUuid");
 		//判断移动后的父级服务目录是否存在
-		CatalogVo parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
+		CatalogVo parentCatalog = null;
 		//如果parentUuid为0，则表明其目标父目录为root，那么就构建一个虚拟的root
-		if("0".equals(parentUuid)){
+		if(CatalogVo.ROOT_UUID.equals(parentUuid)){
 			parentCatalog = catalogService.buildRootCatalog();
-		}
-		if(parentCatalog == null) {
-			throw new CatalogNotFoundException(parentUuid);
+		}else {
+			parentCatalog = catalogMapper.getCatalogByUuid(parentUuid);
+			if(parentCatalog == null) {
+				throw new CatalogNotFoundException(parentUuid);
+			}
 		}
 		//目录只能移动到目录前面，不能移动到通道前面
 		//目录只能移动到目录后面，不能移动到通道后面
@@ -77,6 +79,15 @@ public class CatalogMoveApi extends ApiComponentBase {
 		if(Objects.equal(uuid, parentUuid)) {
         	throw new CatalogIllegalParameterException("移动后的父节点不可以是当前节点");
         }
+
+ 		//将被移动块中的所有节点的左右编码值设置为<=0
+        catalogMapper.batchUpdateCatalogLeftRightCodeByLeftRightCode(moveCatalog.getLft(), moveCatalog.getRht(), -moveCatalog.getRht());
+ 		//计算被移动块右边的节点移动步长
+ 		int step = moveCatalog.getRht() - moveCatalog.getLft() + 1;
+ 		//更新旧位置右边的左右编码值
+ 		catalogMapper.batchUpdateCatalogLeftCode(moveCatalog.getLft(), -step);
+ 		catalogMapper.batchUpdateCatalogRightCode(moveCatalog.getLft(), -step);
+ 		
         //找出被移动块移动后左编码值     	
 		int lft = 0;
 		String moveType = jsonObj.getString("moveType");
@@ -112,14 +123,6 @@ public class CatalogMoveApi extends ApiComponentBase {
             moveCatalog.setParentUuid(parentUuid);
             catalogMapper.updateCatalogParentUuidByUuid(moveCatalog);
         }
-
- 		//将被移动块中的所有节点的左右编码值设置为<=0
-        catalogMapper.batchUpdateCatalogLeftRightCodeByLeftRightCode(moveCatalog.getLft(), moveCatalog.getRht(), -moveCatalog.getRht());
- 		//计算被移动块右边的节点移动步长
- 		int step = moveCatalog.getRht() - moveCatalog.getLft() + 1;
- 		//更新旧位置右边的左右编码值
- 		catalogMapper.batchUpdateCatalogLeftCode(moveCatalog.getLft(), -step);
- 		catalogMapper.batchUpdateCatalogRightCode(moveCatalog.getLft(), -step);
 		
 		//更新新位置右边的左右编码值
  		catalogMapper.batchUpdateCatalogLeftCode(lft, step);

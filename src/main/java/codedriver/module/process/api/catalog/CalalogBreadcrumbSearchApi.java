@@ -75,13 +75,15 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String catalogUuid = jsonObj.getString("catalogUuid");
-		CatalogVo catalog = catalogMapper.getCatalogByUuid(catalogUuid);
+		CatalogVo catalog = null;
 		//如果catalogUuid为0，则构建一个虚拟的root目录
-		if("0".equals(catalogUuid)){
+		if(CatalogVo.ROOT_UUID.equals(catalogUuid)){
 			catalog = catalogService.buildRootCatalog();
-		}
-		if(catalog == null) {
-			throw new CatalogNotFoundException(catalogUuid);
+		}else {
+			catalog = catalogMapper.getCatalogByUuid(catalogUuid);
+			if(catalog == null) {
+				throw new CatalogNotFoundException(catalogUuid);
+			}
 		}
 		
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
@@ -106,7 +108,9 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 
 		List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(catalog.getLft(), catalog.getRht());
 		if(CollectionUtils.isNotEmpty(catalogList)) {
-			catalogList.add(catalog);
+			if(CatalogVo.ROOT_UUID.equals(catalogUuid)){
+				catalogList.add(catalog);
+			}
 			//已授权的目录uuid
 			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 
