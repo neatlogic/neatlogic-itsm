@@ -10,13 +10,6 @@ public interface CatalogService {
 	/**
 	 * 
 	* @Time:2020年7月7日
-	* @Description: 判断是否需要重建左右编码
-	* @return boolean
-	 */
-	public boolean checkLeftRightCodeIsExists();
-	/**
-	 * 
-	* @Time:2020年7月7日
 	* @Description: 重建左右编码
 	* @param parentUuid 父级uuid
 	* @param parentLft 父级左编码

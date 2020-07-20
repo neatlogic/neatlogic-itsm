@@ -32,20 +32,6 @@ public class CatalogServiceImpl implements CatalogService {
 	
 	@Autowired
 	private TeamMapper teamMapper;
-	
-	@Override
-	public boolean checkLeftRightCodeIsExists() {
-		int count = catalogMapper.getCatalogCountOnLock();
-		if(count == 0) {
-			return true;
-		}
-		//获取最大的右编码值maxRhtCode
-		Integer maxRhtCode = catalogMapper.getMaxRhtCode();
-		if(Objects.equals(maxRhtCode, count * 2 + 1)) {
-			return true;
-		}
-		return false;
-	}
 
 	@Override
 	public void rebuildLeftRightCode() {

@@ -56,7 +56,7 @@ public class CatalogDeteleApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		catalogMapper.getCatalogCountOnLock();
-		if(!catalogService.checkLeftRightCodeIsExists()) {
+		if(catalogMapper.checkLeftRightCodeIsWrong() > 0) {
 			catalogService.rebuildLeftRightCode();
 		}
 		String uuid = jsonObj.getString("uuid");
