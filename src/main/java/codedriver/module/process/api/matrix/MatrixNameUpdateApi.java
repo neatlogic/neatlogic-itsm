@@ -6,8 +6,10 @@ import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixNameRepeatException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import com.alibaba.fastjson.JSON;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  **/
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class MatrixNameUpdateApi extends ApiComponentBase {
 
     @Autowired

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 	
 	@Autowired

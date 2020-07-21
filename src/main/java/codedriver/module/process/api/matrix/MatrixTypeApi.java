@@ -2,7 +2,9 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessMatrixType;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
  * @create: 2020-03-27 16:52
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixTypeApi extends ApiComponentBase {
 
     @Override

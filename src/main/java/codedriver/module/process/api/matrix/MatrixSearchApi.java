@@ -3,6 +3,8 @@ package codedriver.module.process.api.matrix;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,10 +17,6 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 /**
@@ -27,6 +25,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
  * @create: 2020-03-26 19:06
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixSearchApi extends ApiComponentBase {
 
     @Autowired

@@ -2,6 +2,8 @@ package codedriver.module.process.api.workcenter;
 
 import java.util.List;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +26,12 @@ import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthExcepti
 import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
 
 @Transactional
 @Service
+@OperationType(type = OperationTypeEnum.CREATE)
 public class WorkcenterSaveApi extends ApiComponentBase {
 
 	@Autowired

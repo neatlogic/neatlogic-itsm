@@ -2,7 +2,9 @@ package codedriver.module.process.api.matrix;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -27,6 +29,7 @@ import codedriver.framework.process.exception.matrix.MatrixNameRepeatException;
  **/
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.CREATE)
 public class MatrixSaveApi extends ApiComponentBase {
 
     @Autowired

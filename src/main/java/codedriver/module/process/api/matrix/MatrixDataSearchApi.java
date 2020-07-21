@@ -23,10 +23,8 @@ import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixService;
 
@@ -54,6 +52,7 @@ import java.util.Map.Entry;
  * @create: 2020-03-30 16:34
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixDataSearchApi extends ApiComponentBase {
 
 	private final static Logger logger = LoggerFactory.getLogger(MatrixDataSearchApi.class);

@@ -7,8 +7,10 @@ import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.catalog.CatalogIllegalParameterException;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
@@ -23,6 +25,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.DELETE)
 public class CatalogDeteleApi extends ApiComponentBase {
 	
 	@Autowired
