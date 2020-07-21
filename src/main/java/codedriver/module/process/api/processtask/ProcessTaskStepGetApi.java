@@ -394,7 +394,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
 						}
 						if(processTaskSlaTimeVo.getRealExpireTime() != null) {
-							long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
+							long realTimeLeft = processTaskSlaTimeVo.getRealExpireTime().getTime() - System.currentTimeMillis();
 							processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
 							processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
 						}
