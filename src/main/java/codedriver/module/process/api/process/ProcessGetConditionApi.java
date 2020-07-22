@@ -27,8 +27,8 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
-@Service
-@Transactional
+//@Service
+//@Transactional
 public class ProcessGetConditionApi extends ApiComponentBase {
 
 	@Autowired
