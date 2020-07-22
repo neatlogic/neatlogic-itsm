@@ -147,7 +147,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 										ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
 										String script = conditionConfigVo.buildScript();
 										// ((false || true) || (true && false) || (true || false))
-										System.out.println(JSON.toJSONString(conditionConfigVo));
+//										System.out.println(JSON.toJSONString(conditionConfigVo));
 										canRun = RunScriptUtil.runScript(script);
 										ruleObj.putAll(JSON.parseObject(JSON.toJSONString(conditionConfigVo)));
 									} catch (Exception e) {

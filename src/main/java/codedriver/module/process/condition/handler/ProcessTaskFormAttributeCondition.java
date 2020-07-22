@@ -91,17 +91,17 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 
 	@Override
 	public Object valueConversionText(Object value, JSONObject config) {
-		if(value != null) {
-			if(MapUtils.isNotEmpty(config)) {
-				String attributeUuid = config.getString("attributeUuid");
-				String formConfig = config.getString("formConfig");
-				FormVersionVo formVersionVo = new FormVersionVo();
-				formVersionVo.setFormConfig(formConfig);
-				List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-				if(CollectionUtils.isNotEmpty(formAttributeList)) {
-					for(FormAttributeVo formAttribute : formAttributeList) {
-						if(Objects.equal(attributeUuid, formAttribute.getUuid())) {
-							config.put("name", formAttribute.getLabel());
+		if(MapUtils.isNotEmpty(config)) {
+			String attributeUuid = config.getString("attributeUuid");
+			String formConfig = config.getString("formConfig");
+			FormVersionVo formVersionVo = new FormVersionVo();
+			formVersionVo.setFormConfig(formConfig);
+			List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+			if(CollectionUtils.isNotEmpty(formAttributeList)) {
+				for(FormAttributeVo formAttribute : formAttributeList) {
+					if(Objects.equal(attributeUuid, formAttribute.getUuid())) {
+						config.put("name", formAttribute.getLabel());
+						if(value != null) {
 							IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
 							if(formAttributeHandler != null) {
 								AttributeDataVo attributeDataVo = new AttributeDataVo();
@@ -118,18 +118,21 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 									List<String> textList = JSON.parseArray(JSON.toJSONString(text), String.class);
 									if(ProcessFormHandler.FORMDATE.getHandler().equals(formAttribute.getHandler()) || ProcessFormHandler.FORMTIME.getHandler().equals(formAttribute.getHandler())) {
 										return String.join("-", textList);
+									}else if(ProcessFormHandler.FORMCASCADELIST.getHandler().equals(formAttribute.getHandler())){
+										return String.join("/", textList);
 									}else {
 										return String.join("、", textList);
 									}
 								}
 								return text;
 							}
-						}
+						}						
 					}
 				}
 			}
 		}
 		return value;
 	}
+	
 	
 }
