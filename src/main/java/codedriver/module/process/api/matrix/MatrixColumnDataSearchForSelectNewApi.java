@@ -88,8 +88,13 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true), @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), @Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING), @Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true), @Param(name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
-			@Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER), @Param(name = "valueList", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY) })
+	@Input({ @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true), 
+		@Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), 
+		@Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING), 
+		@Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true), 
+		@Param(name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
+		@Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
+		@Param(name = "valueList", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY) })
 	@Description(desc = "矩阵属性数据查询-下拉级联接口")
 	@Output({ @Param(name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合") })
 	@Override
@@ -122,7 +127,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 					if (!processMatrixAttributeMap.containsKey(column)) {
 						throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
 					}
-					if(!distinctColumList.contains(column)) {
+					if (!distinctColumList.contains(column)) {
 						distinctColumList.add(column);
 					}
 				}
