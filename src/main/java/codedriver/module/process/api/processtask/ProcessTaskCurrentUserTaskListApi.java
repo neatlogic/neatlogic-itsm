@@ -170,7 +170,14 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 					ProcessTaskSlaTimeVo processTaskSlaTimeVo = stepSlaTimeMap.get(processTaskStep.getId());
 					if(processTaskSlaTimeVo != null) {
 						if(processTaskSlaTimeVo.getExpireTime() != null) {
-							long timeLeft = worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
+							long timeLeft = 0L;
+							long nowTime = System.currentTimeMillis();
+							long expireTime = processTaskSlaTimeVo.getExpireTime().getTime();
+							if(nowTime < expireTime) {
+								timeLeft = worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), nowTime, expireTime);
+							}else if(nowTime > expireTime) {
+								timeLeft = -worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), expireTime, nowTime);
+							}
 							processTaskSlaTimeVo.setTimeLeft(timeLeft);
 							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
 						}

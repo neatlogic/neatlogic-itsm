@@ -389,7 +389,14 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					if(processTaskSlaTimeVo != null) {
 						processTaskSlaTimeVo.setName(processTaskSlaVo.getName());
 						if(processTaskSlaTimeVo.getExpireTime() != null) {
-							long timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
+							long timeLeft = 0L;
+							long nowTime = System.currentTimeMillis();
+							long expireTime = processTaskSlaTimeVo.getExpireTime().getTime();
+							if(nowTime < expireTime) {
+								timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), nowTime, expireTime);
+							}else if(nowTime > expireTime) {
+								timeLeft = -worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), expireTime, nowTime);
+							}					
 							processTaskSlaTimeVo.setTimeLeft(timeLeft);
 							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
 						}
