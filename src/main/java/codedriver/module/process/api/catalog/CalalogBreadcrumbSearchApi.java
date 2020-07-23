@@ -47,7 +47,7 @@ public class CalalogBreadcrumbSearchApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "process/calalog/breadcrumb/search";
+		return "process/catalog/breadcrumb/search";
 	}
 
 	@Override
