@@ -49,6 +49,7 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
+import codedriver.module.process.notify.handler.ProcessNotifyPolicyHandler;
 
 @Service
 public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
@@ -711,6 +712,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
 			notifyPolicyObj.putAll(notifyPolicyConfig);
 		}
+		notifyPolicyObj.put("handler", ProcessNotifyPolicyHandler.class.getName());
 		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
 		
 		return resultObj;

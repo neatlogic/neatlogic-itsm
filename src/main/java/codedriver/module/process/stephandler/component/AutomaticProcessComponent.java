@@ -46,6 +46,7 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import codedriver.framework.util.TimeUtil;
+import codedriver.module.process.notify.handler.ProcessNotifyPolicyHandler;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Service
@@ -475,6 +476,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
 			notifyPolicyObj.putAll(notifyPolicyConfig);
 		}
+		notifyPolicyObj.put("handler", ProcessNotifyPolicyHandler.class.getName());
 		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
 		
 		return resultObj;
