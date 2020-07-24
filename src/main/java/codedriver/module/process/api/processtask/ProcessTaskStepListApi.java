@@ -116,10 +116,11 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		List<ProcessTaskStepUserVo> startStepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(startProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(startStepMajorUserList)) {
 			startProcessTaskStepVo.setMajorUser(startStepMajorUserList.get(0));
+		}else {
+			startProcessTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(startProcessTaskStepVo.getId()));
 		}
 		startProcessTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(startProcessTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
 		startProcessTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(startProcessTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
-		startProcessTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(startProcessTaskStepVo.getId()));
 		
 		//步骤评论列表
 		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(startProcessTaskStepVo.getId());

@@ -246,10 +246,11 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 				if(CollectionUtils.isNotEmpty(majorUserList)) {
 					processTaskStepVo.setMajorUser(majorUserList.get(0));
+				}else {
+					processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
 				}
 				processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
 				processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
-				processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
 				//回复框内容和附件暂存回显
 				ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 				processTaskStepDataVo.setProcessTaskId(processTaskId);
@@ -361,7 +362,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 								timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), nowTime, expireTime);
 							}else if(nowTime > expireTime) {
 								timeLeft = -worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), expireTime, nowTime);
-							}
+							}					
 							processTaskSlaTimeVo.setTimeLeft(timeLeft);
 //							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
 						}
