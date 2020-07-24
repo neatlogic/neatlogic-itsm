@@ -18,7 +18,6 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.WorkcenterService;
 
-@AuthAction(name = "WORKCENTER_VIEW")
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterGetApi extends ApiComponentBase {
