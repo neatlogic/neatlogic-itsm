@@ -24,11 +24,13 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.framework.process.dto.ProcessTaskSlaVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -49,6 +51,8 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 	ChannelMapper channelMapper;
 	@Autowired
 	CatalogMapper catalogMapper;
+	@Autowired
+	WorktimeMapper worktimeMapper;
 	
 	@Override
 	public String getHandler() {
@@ -136,8 +140,12 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 			
 			 /** 获取工单当前步骤 **/
 			 @SuppressWarnings("serial")
-			List<ProcessTaskStepVo>  processTaskStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());add(ProcessStepType.START.getValue());}},null);
+			 List<ProcessTaskStepVo>  processTaskStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(taskId,new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());add(ProcessStepType.START.getValue());}},null);
 			 WorkcenterFieldBuilder builder = new WorkcenterFieldBuilder();
+			 
+			 /** 时效列表 **/
+			 List<ProcessTaskSlaVo> processTaskSlaList = processTaskMapper.getProcessTaskSlaByProcessTaskId(processTaskVo.getId());
+				
 			 //form
 			 JSONArray formArray = new JSONArray();
 			 List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(taskId);
@@ -175,7 +183,7 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 			 		.setStepList(processTaskStepList)
 			 		.setTransferFromUserList(transferAuditList)
 			 		.setWorktime(channel.getWorktimeUuid())
-			 		.setExpiredTime(processTaskVo.getExpireTime())
+			 		.setExpiredTime(processTaskSlaList)
 			 		.build();
 			
 			 patch.set("form", formArray);

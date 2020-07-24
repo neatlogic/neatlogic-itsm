@@ -247,44 +247,10 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				if(CollectionUtils.isNotEmpty(majorUserList)) {
 					processTaskStepVo.setMajorUser(majorUserList.get(0));
 				}
-				List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
-				if(CollectionUtils.isNotEmpty(minorUserList)) {
-					processTaskStepVo.setMinorUserList(minorUserList);
-				}
-				List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.AGENT.getValue());
-				if(CollectionUtils.isNotEmpty(agentUserList)) {
-					processTaskStepVo.setAgentUserList(agentUserList);
-				}
-				
+				processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
+				processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
+				processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
 				//回复框内容和附件暂存回显
-//				ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
-//				processTaskStepAuditVo.setProcessTaskId(processTaskId);
-//				processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-//				processTaskStepAuditVo.setAction(ProcessTaskStepAction.SAVE.getValue());
-//				processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid(true));
-//				List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-//				if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-//					ProcessTaskStepAuditVo processTaskStepAudit = processTaskStepAuditList.get(processTaskStepAuditList.size() - 1);
-//					for(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo : processTaskStepAudit.getAuditDetailList()) {
-//						if(ProcessTaskAuditDetailType.FORM.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-//							if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
-//								ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
-//								if(processTaskContentVo != null) {
-//									List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = JSON.parseArray(processTaskContentVo.getContent(), ProcessTaskFormAttributeDataVo.class);
-//									if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-//										Map<String, Object> formAttributeDataMap = new HashMap<>();
-//										for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-//											formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-//										}
-//										processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
-//									}
-//								}
-//							}
-//						}
-//					}
-//					processTaskStepVo.setComment(new ProcessTaskStepCommentVo(processTaskStepAudit));
-//				}
-				
 				ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 				processTaskStepDataVo.setProcessTaskId(processTaskId);
 				processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
@@ -388,14 +354,21 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					if(processTaskSlaTimeVo != null) {
 						processTaskSlaTimeVo.setName(processTaskSlaVo.getName());
 						if(processTaskSlaTimeVo.getExpireTime() != null) {
-							long timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
+							long timeLeft = 0L;
+							long nowTime = System.currentTimeMillis();
+							long expireTime = processTaskSlaTimeVo.getExpireTime().getTime();
+							if(nowTime < expireTime) {
+								timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), nowTime, expireTime);
+							}else if(nowTime > expireTime) {
+								timeLeft = -worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), expireTime, nowTime);
+							}
 							processTaskSlaTimeVo.setTimeLeft(timeLeft);
-							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
+//							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
 						}
 						if(processTaskSlaTimeVo.getRealExpireTime() != null) {
-							long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
+							long realTimeLeft = processTaskSlaTimeVo.getRealExpireTime().getTime() - System.currentTimeMillis();
 							processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
-							processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
+//							processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
 						}
 						processTaskStepVo.getSlaTimeList().add(processTaskSlaTimeVo);
 					}
@@ -453,30 +426,30 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		return resultObj;
 	}
 	
-	private String conversionTimeUnit(long milliseconds) {
-		StringBuilder stringBuilder = new StringBuilder();
-		milliseconds = Math.abs(milliseconds);
-		if(milliseconds < 1000) {
-			stringBuilder.append("0秒");
-		} else {
-			if(milliseconds >= (60 * 60 * 1000)) {
-				long hours = milliseconds / (60 * 60 * 1000);
-				stringBuilder.append(hours);
-				stringBuilder.append("小时");
-				milliseconds = milliseconds % (60 * 60 * 1000);
-			}
-			if(milliseconds >= (60 * 1000)) {
-				long minutes = milliseconds / (60 * 1000);
-				stringBuilder.append(minutes);
-				stringBuilder.append("分钟");
-				milliseconds = milliseconds % (60 * 1000);
-			}
-			if(milliseconds >= 1000) {
-				long seconds = milliseconds / 1000;
-				stringBuilder.append(seconds);
-				stringBuilder.append("秒");
-			}
-		}
-		return stringBuilder.toString();
-	}
+//	private String conversionTimeUnit(long milliseconds) {
+//		StringBuilder stringBuilder = new StringBuilder();
+//		milliseconds = Math.abs(milliseconds);
+//		if(milliseconds < 1000) {
+//			stringBuilder.append("0秒");
+//		} else {
+//			if(milliseconds >= (60 * 60 * 1000)) {
+//				long hours = milliseconds / (60 * 60 * 1000);
+//				stringBuilder.append(hours);
+//				stringBuilder.append("小时");
+//				milliseconds = milliseconds % (60 * 60 * 1000);
+//			}
+//			if(milliseconds >= (60 * 1000)) {
+//				long minutes = milliseconds / (60 * 1000);
+//				stringBuilder.append(minutes);
+//				stringBuilder.append("分钟");
+//				milliseconds = milliseconds % (60 * 1000);
+//			}
+//			if(milliseconds >= 1000) {
+//				long seconds = milliseconds / 1000;
+//				stringBuilder.append(seconds);
+//				stringBuilder.append("秒");
+//			}
+//		}
+//		return stringBuilder.toString();
+//	}
 }

@@ -2,8 +2,6 @@ package codedriver.module.process.api.process;
 
 import java.util.List;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,10 +21,12 @@ import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 
-@Service
-@Transactional
+//@Service
+//@Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessGetConditionApi extends ApiComponentBase {
 

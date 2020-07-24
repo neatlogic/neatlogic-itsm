@@ -17,7 +17,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -30,7 +29,6 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
 import codedriver.module.process.service.WorkcenterService;
 
-@AuthAction(name = "WORKCENTER_VIEW")
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterListApi extends ApiComponentBase {

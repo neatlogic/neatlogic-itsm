@@ -139,6 +139,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+			newContentHash = contentVo.getHash();
 			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, contentVo.getHash()));
 		}else if(oldContentHash != null){
 			processTaskMapper.deleteProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, oldContentHash));

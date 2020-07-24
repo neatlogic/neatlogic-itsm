@@ -54,7 +54,7 @@ public class CatalogChannelTreeSearchApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {				
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
-		if(!catalogService.checkLeftRightCodeIsExists()) {
+		if(catalogMapper.checkLeftRightCodeIsWrong() > 0) {
 			catalogMapper.getCatalogCountOnLock();
 			catalogService.rebuildLeftRightCode();
 		}

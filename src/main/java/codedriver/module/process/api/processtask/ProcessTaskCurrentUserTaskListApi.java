@@ -169,14 +169,21 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 					ProcessTaskSlaTimeVo processTaskSlaTimeVo = stepSlaTimeMap.get(processTaskStep.getId());
 					if(processTaskSlaTimeVo != null) {
 						if(processTaskSlaTimeVo.getExpireTime() != null) {
-							long timeLeft = worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), System.currentTimeMillis(), processTaskSlaTimeVo.getExpireTime().getTime());
+							long timeLeft = 0L;
+							long nowTime = System.currentTimeMillis();
+							long expireTime = processTaskSlaTimeVo.getExpireTime().getTime();
+							if(nowTime < expireTime) {
+								timeLeft = worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), nowTime, expireTime);
+							}else if(nowTime > expireTime) {
+								timeLeft = -worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), expireTime, nowTime);
+							}
 							processTaskSlaTimeVo.setTimeLeft(timeLeft);
-							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
+//							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
 						}
 						if(processTaskSlaTimeVo.getRealExpireTime() != null) {
 							long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
 							processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
-							processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
+//							processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
 						}
 						task.put("slaTimeVo", processTaskSlaTimeVo);
 					}
@@ -199,30 +206,30 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 		return resultObj;
 	}
 	
-	private String conversionTimeUnit(long milliseconds) {
-		StringBuilder stringBuilder = new StringBuilder();
-		milliseconds = Math.abs(milliseconds);
-		if(milliseconds < 1000) {
-			stringBuilder.append("0秒");
-		} else {
-			if(milliseconds >= (60 * 60 * 1000)) {
-				long hours = milliseconds / (60 * 60 * 1000);
-				stringBuilder.append(hours);
-				stringBuilder.append("小时");
-				milliseconds = milliseconds % (60 * 60 * 1000);
-			}
-			if(milliseconds >= (60 * 1000)) {
-				long minutes = milliseconds / (60 * 1000);
-				stringBuilder.append(minutes);
-				stringBuilder.append("分钟");
-				milliseconds = milliseconds % (60 * 1000);
-			}
-			if(milliseconds >= 1000) {
-				long seconds = milliseconds / 1000;
-				stringBuilder.append(seconds);
-				stringBuilder.append("秒");
-			}
-		}	
-		return stringBuilder.toString();
-	}
+//	private String conversionTimeUnit(long milliseconds) {
+//		StringBuilder stringBuilder = new StringBuilder();
+//		milliseconds = Math.abs(milliseconds);
+//		if(milliseconds < 1000) {
+//			stringBuilder.append("0秒");
+//		} else {
+//			if(milliseconds >= (60 * 60 * 1000)) {
+//				long hours = milliseconds / (60 * 60 * 1000);
+//				stringBuilder.append(hours);
+//				stringBuilder.append("小时");
+//				milliseconds = milliseconds % (60 * 60 * 1000);
+//			}
+//			if(milliseconds >= (60 * 1000)) {
+//				long minutes = milliseconds / (60 * 1000);
+//				stringBuilder.append(minutes);
+//				stringBuilder.append("分钟");
+//				milliseconds = milliseconds % (60 * 1000);
+//			}
+//			if(milliseconds >= 1000) {
+//				long seconds = milliseconds / 1000;
+//				stringBuilder.append(seconds);
+//				stringBuilder.append("秒");
+//			}
+//		}
+//		return stringBuilder.toString();
+//	}
 }

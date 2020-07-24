@@ -62,8 +62,7 @@ public class CatalogSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		catalogMapper.getCatalogCountOnLock();
-		//根据catalog表中的count和最大的右编码进行比较
-		if(!catalogService.checkLeftRightCodeIsExists()) {
+		if(catalogMapper.checkLeftRightCodeIsWrong() > 0) {
 			catalogService.rebuildLeftRightCode();
 		}
 		//构造一个虚拟的root节点
