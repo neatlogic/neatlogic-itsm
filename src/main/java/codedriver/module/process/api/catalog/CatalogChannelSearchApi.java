@@ -3,8 +3,7 @@ package codedriver.module.process.api.catalog;
 import java.util.ArrayList;
 import java.util.List;
 
-import codedriver.module.process.service.CatalogService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +22,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.CatalogService;
 
 @Service
 public class CatalogChannelSearchApi extends ApiComponentBase {
