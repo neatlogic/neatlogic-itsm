@@ -5,23 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
-import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -29,6 +23,7 @@ import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundExc
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 @Service
@@ -39,7 +34,10 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 	private ProcessTaskMapper processTaskMapper;
 	
 	@Autowired
-	private ProcessStepHandlerMapper processStepHandlerMapper;
+	private ProcessTaskService processTaskService;
+	
+//	@Autowired
+//	private ProcessStepHandlerMapper processStepHandlerMapper;
 	
 	@Override
 	public String getToken() {
@@ -82,38 +80,39 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
 				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
+			customButtonMap = processTaskService.getCustomButtonTextMap(processTaskStepId);
 			/** 节点管理按钮映射 **/
-			ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-			if(processStepHandlerVo != null) {
-				JSONObject globalConfig = processStepHandlerVo.getConfig();
-				if(MapUtils.isNotEmpty(globalConfig)) {
-					JSONArray customButtonList = globalConfig.getJSONArray("customButtonList");
-					if(CollectionUtils.isNotEmpty(customButtonList)) {
-						for(int i = 0; i < customButtonList.size(); i++) {
-							JSONObject customButton = customButtonList.getJSONObject(i);
-							String value = customButton.getString("value");
-							if(StringUtils.isNotBlank(value)) {
-								customButtonMap.put(customButton.getString("name"), value);
-							}
-						}
-					}
-				}
-			}
+//			ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+//			if(processStepHandlerVo != null) {
+//				JSONObject globalConfig = processStepHandlerVo.getConfig();
+//				if(MapUtils.isNotEmpty(globalConfig)) {
+//					JSONArray customButtonList = globalConfig.getJSONArray("customButtonList");
+//					if(CollectionUtils.isNotEmpty(customButtonList)) {
+//						for(int i = 0; i < customButtonList.size(); i++) {
+//							JSONObject customButton = customButtonList.getJSONObject(i);
+//							String value = customButton.getString("value");
+//							if(StringUtils.isNotBlank(value)) {
+//								customButtonMap.put(customButton.getString("name"), value);
+//							}
+//						}
+//					}
+//				}
+//			}
 			/** 节点设置按钮映射 **/
-			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-			JSONObject stepConfigObj = JSON.parseObject(stepConfig);
-			if(MapUtils.isNotEmpty(stepConfigObj)) {
-				JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
-				if(CollectionUtils.isNotEmpty(customButtonList)) {
-					for(int i = 0; i < customButtonList.size(); i++) {
-						JSONObject customButton = customButtonList.getJSONObject(i);
-						String value = customButton.getString("value");
-						if(StringUtils.isNotBlank(value)) {
-							customButtonMap.put(customButton.getString("name"), value);
-						}
-					}
-				}
-			}
+//			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+//			JSONObject stepConfigObj = JSON.parseObject(stepConfig);
+//			if(MapUtils.isNotEmpty(stepConfigObj)) {
+//				JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
+//				if(CollectionUtils.isNotEmpty(customButtonList)) {
+//					for(int i = 0; i < customButtonList.size(); i++) {
+//						JSONObject customButton = customButtonList.getJSONObject(i);
+//						String value = customButton.getString("value");
+//						if(StringUtils.isNotBlank(value)) {
+//							customButtonMap.put(customButton.getString("name"), value);
+//						}
+//					}
+//				}
+//			}
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
 		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);

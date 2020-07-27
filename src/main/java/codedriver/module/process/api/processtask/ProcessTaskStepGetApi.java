@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
@@ -297,31 +298,75 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				//获取当前用户有权限的所有子任务
 				//子任务列表
 				if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-					List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
 					ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
 					processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
 					processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
 					List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
-					for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-						String currentUser = UserContext.get().getUserUuid(true);
-						if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
-								|| (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
-							List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
-							Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
-							while(iterator.hasNext()) {
-								ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
-								if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-									if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
-										processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
-										iterator.remove();
+					if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
+						Map<String, String> customButtonMap = processTaskService.getCustomButtonTextMap(processTaskStepId);
+						List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
+						for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+							String currentUser = UserContext.get().getUserUuid(true);
+							if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
+									|| (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
+								List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
+								Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
+								while(iterator.hasNext()) {
+									ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
+									if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
+										if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+											processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
+											iterator.remove();
+										}
 									}
 								}
+								processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
+								if(processTaskStepSubtask.getIsAbortable() == 1) {
+									String value = ProcessTaskStepAction.ABORTSUBTASK.getValue();
+									String text = customButtonMap.get(value);
+									if(StringUtils.isBlank(text)) {
+										text = ProcessTaskStepAction.ABORTSUBTASK.getText();
+									}
+									processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+								}
+								if(processTaskStepSubtask.getIsCommentable() == 1) {
+									String value = ProcessTaskStepAction.COMMENTSUBTASK.getValue();
+									String text = customButtonMap.get(value);
+									if(StringUtils.isBlank(text)) {
+										text = ProcessTaskStepAction.COMMENTSUBTASK.getText();
+									}
+									processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+								}
+								if(processTaskStepSubtask.getIsCompletable() == 1) {
+									String value = ProcessTaskStepAction.COMPLETESUBTASK.getValue();
+									String text = customButtonMap.get(value);
+									if(StringUtils.isBlank(text)) {
+										text = ProcessTaskStepAction.COMPLETESUBTASK.getText();
+									}
+									processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+								}
+								if(processTaskStepSubtask.getIsEditable() == 1) {
+									String value = ProcessTaskStepAction.EDITSUBTASK.getValue();
+									String text = customButtonMap.get(value);
+									if(StringUtils.isBlank(text)) {
+										text = ProcessTaskStepAction.EDITSUBTASK.getText();
+									}
+									processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+								}
+								if(processTaskStepSubtask.getIsRedoable() == 1) {
+									String value = ProcessTaskStepAction.REDOSUBTASK.getValue();
+									String text = customButtonMap.get(value);
+									if(StringUtils.isBlank(text)) {
+										text = ProcessTaskStepAction.REDOSUBTASK.getText();
+									}
+									processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+								}
+								subtaskList.add(processTaskStepSubtask);
 							}
-							processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
-							subtaskList.add(processTaskStepSubtask);
 						}
+						processTaskStepVo.setProcessTaskStepSubtaskList(subtaskList);
 					}
-					processTaskStepVo.setProcessTaskStepSubtaskList(subtaskList);
+					
 				}
 				
 				//获取可分配处理人的步骤列表				

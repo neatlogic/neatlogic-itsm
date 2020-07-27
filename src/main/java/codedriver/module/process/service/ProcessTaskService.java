@@ -99,4 +99,6 @@ public interface ProcessTaskService {
 	 * @param currentProcessTaskStepVo
 	 */
 	public void initJob(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, JSONObject data);
+	
+	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
 }
