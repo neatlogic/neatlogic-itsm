@@ -11,7 +11,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
-@Service
+//@Service
 public class ProcessTaskStatusListApi extends ApiComponentBase {
 
 	@Override
