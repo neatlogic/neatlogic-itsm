@@ -1,4 +1,4 @@
-package codedriver.module.process.api.processtask;
+package codedriver.module.process.api.process;
 
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
-public class ProcessTaskCustomButtonStatusList extends ApiComponentBase {
+public class ProcessCustomButtonStatusList extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
