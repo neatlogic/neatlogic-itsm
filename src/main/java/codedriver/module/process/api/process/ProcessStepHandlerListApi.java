@@ -1,5 +1,7 @@
 package codedriver.module.process.api.process;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -12,6 +14,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessStepHandlerListApi extends ApiComponentBase {
 
 	@Override

@@ -2,6 +2,8 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -11,13 +13,10 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class FormHandlerGetApi extends ApiComponentBase {
 
 	@Override

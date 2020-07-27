@@ -32,8 +32,10 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class FormAttributeCheckApi extends ApiComponentBase {
 	
 	@Autowired

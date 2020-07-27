@@ -23,12 +23,11 @@ import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ChannelFormGetApi extends ApiComponentBase {
 	
 	@Autowired

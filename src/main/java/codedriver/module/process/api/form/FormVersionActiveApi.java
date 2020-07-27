@@ -2,6 +2,8 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class FormVersionActiveApi extends ApiComponentBase {
 
 	@Autowired

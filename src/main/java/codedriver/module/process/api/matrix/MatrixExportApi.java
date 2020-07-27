@@ -21,8 +21,10 @@ import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.process.util.ExcelUtil;
@@ -53,6 +55,7 @@ import java.util.Map;
  * @create: 2020-03-26 19:04
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixExportApi extends BinaryStreamApiComponentBase {
 	
 	private final static Logger logger = LoggerFactory.getLogger(MatrixExportApi.class);

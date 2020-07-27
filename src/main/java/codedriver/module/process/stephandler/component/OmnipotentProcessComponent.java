@@ -679,7 +679,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		}
 		resultObj.put("authorityList", authorityArray);
 		
-		/** 按钮映射 **/
+		/** 按钮映射列表 **/
 		JSONArray customButtonArray = new JSONArray();
 		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMPLETE.getValue());this.put("customText", ProcessTaskStepAction.COMPLETE.getText());this.put("value", "");}});
 		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.BACK.getValue());this.put("customText", ProcessTaskStepAction.BACK.getText());this.put("value", "");}});
@@ -705,6 +705,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			}
 		}
 		resultObj.put("customButtonList", customButtonArray);
+		
+		/** 状态映射列表 **/
 		
 		/** 通知 **/
 		JSONObject notifyPolicyObj = new JSONObject();

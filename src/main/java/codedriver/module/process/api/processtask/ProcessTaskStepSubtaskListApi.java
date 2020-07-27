@@ -2,6 +2,8 @@ package codedriver.module.process.api.processtask;
 
 import java.util.List;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +16,9 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskStepSubtaskListApi extends ApiComponentBase {
 	
 	@Autowired

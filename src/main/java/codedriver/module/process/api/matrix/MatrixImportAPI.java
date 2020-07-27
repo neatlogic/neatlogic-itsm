@@ -13,8 +13,10 @@ import codedriver.framework.process.exception.matrix.MatrixFileNotFoundException
 import codedriver.framework.process.exception.matrix.MatrixHeaderMisMatchException;
 import codedriver.framework.process.exception.matrix.MatrixImportException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.process.util.UUIDUtil;
@@ -42,6 +44,7 @@ import java.util.*;
  **/
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.CREATE)
 public class MatrixImportAPI extends BinaryStreamApiComponentBase {
 
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

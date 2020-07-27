@@ -3,6 +3,8 @@ package codedriver.module.process.api.channel;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +16,10 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ChannelGetApi extends ApiComponentBase {
 
 	@Autowired

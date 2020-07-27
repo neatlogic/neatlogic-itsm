@@ -19,15 +19,13 @@ import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
-
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 @Transactional
 @Service
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class WorkcenterConditionSaveApi extends ApiComponentBase {
 
 	@Autowired

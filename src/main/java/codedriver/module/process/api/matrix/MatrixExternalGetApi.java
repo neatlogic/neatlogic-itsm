@@ -8,10 +8,8 @@ import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +21,7 @@ import org.springframework.stereotype.Service;
  * @create: 2020-04-03 19:06
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixExternalGetApi extends ApiComponentBase {
 
     @Autowired
