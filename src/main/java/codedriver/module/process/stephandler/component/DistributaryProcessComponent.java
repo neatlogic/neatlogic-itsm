@@ -168,4 +168,10 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Object handlerStepInfo(Long processTaskStepId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -738,4 +738,10 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		
 		return resultObj;
 	}
+
+	@Override
+	public Object handlerStepInfo(Long processTaskStepId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

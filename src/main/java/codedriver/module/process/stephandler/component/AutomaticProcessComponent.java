@@ -489,5 +489,11 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		
 		return resultObj;
 	}
+
+	@Override
+	public Object handlerStepInfo(Long processTaskStepId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }
