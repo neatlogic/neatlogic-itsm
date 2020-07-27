@@ -1,5 +1,7 @@
 package codedriver.module.process.api.channeltype;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,13 +15,10 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNameRepeatException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.CREATE)
 public class ChannelTypeSaveApi extends ApiComponentBase {
 
 	@Autowired

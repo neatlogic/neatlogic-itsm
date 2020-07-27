@@ -1,5 +1,7 @@
 package codedriver.module.process.api.catalog;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import codedriver.module.process.service.CatalogService;
 
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class RebuidLeftRightCodeApi extends ApiComponentBase {
 
 	@Autowired

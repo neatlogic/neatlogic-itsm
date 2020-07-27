@@ -9,8 +9,10 @@ import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.process.util.ExcelUtil;
@@ -34,6 +36,7 @@ import java.util.List;
  * @create: 2020-03-26 19:05
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixAttributeExportApi extends BinaryStreamApiComponentBase {
 
 	@Autowired

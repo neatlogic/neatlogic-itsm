@@ -18,13 +18,11 @@ import codedriver.framework.process.exception.processtask.ProcessTaskAutomaticNo
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 @Service
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class ProcessTaskAutomaticCompleteApi extends ApiComponentBase {
 
 	@Autowired

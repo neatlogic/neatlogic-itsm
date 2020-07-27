@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.CREATE)
 public class FormImportApi extends BinaryStreamApiComponentBase {
 
 	@Autowired
