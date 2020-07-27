@@ -2,9 +2,7 @@ package codedriver.module.process.api.processtask;
 
 import java.util.List;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +19,8 @@ import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoun
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
-
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ProcessTaskAutomaticCompleteApi extends ApiComponentBase {

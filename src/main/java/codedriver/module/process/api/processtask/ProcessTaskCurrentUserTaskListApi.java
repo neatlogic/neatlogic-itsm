@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +30,8 @@ import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.restful.core.ApiComponentBase;
-
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
@@ -229,7 +228,7 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 //				stringBuilder.append(seconds);
 //				stringBuilder.append("秒");
 //			}
-//		}
+//		}	
 //		return stringBuilder.toString();
 //	}
 }
