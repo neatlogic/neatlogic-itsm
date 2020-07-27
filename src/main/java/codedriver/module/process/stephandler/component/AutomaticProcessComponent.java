@@ -453,6 +453,14 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 //		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.ABORT.getValue());this.put("customText", ProcessTaskStepAction.ABORT.getText());this.put("value", "");}});
 //		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.RECOVER.getValue());this.put("customText", ProcessTaskStepAction.RECOVER.getText());this.put("value", "");}});
 		
+		/** 子任务按钮映射列表 **/
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.ABORTSUBTASK.getValue());this.put("customText", ProcessTaskStepAction.ABORTSUBTASK.getText() + "(子任务)");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMMENTSUBTASK.getValue());this.put("customText", ProcessTaskStepAction.COMMENTSUBTASK.getText() + "(子任务)");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMPLETESUBTASK.getValue());this.put("customText", ProcessTaskStepAction.COMPLETESUBTASK.getText() + "(子任务)");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.CREATESUBTASK.getValue());this.put("customText", ProcessTaskStepAction.CREATESUBTASK.getText() + "(子任务)");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.REDOSUBTASK.getValue());this.put("customText", ProcessTaskStepAction.REDOSUBTASK.getText() + "(子任务)");this.put("value", "");}});
+		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.EDITSUBTASK.getValue());this.put("customText", ProcessTaskStepAction.EDITSUBTASK.getText() + "(子任务)");this.put("value", "");}});
+
 		JSONArray customButtonList = configObj.getJSONArray("customButtonList");
 		if(CollectionUtils.isNotEmpty(customButtonList)) {
 			Map<String, String> customButtonMap = new HashMap<>();
