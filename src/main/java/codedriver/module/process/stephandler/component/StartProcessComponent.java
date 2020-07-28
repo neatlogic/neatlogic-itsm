@@ -156,7 +156,7 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public Object handlerStepInfo(Long processTaskStepId) {
+	public Object getHandlerStepInfo(Long processTaskStepId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

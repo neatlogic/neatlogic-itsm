@@ -75,7 +75,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	public JSONObject getChartConfig() {
 		return new JSONObject() {
 			{
-				this.put("icon", "ts-round-s");
+				this.put("icon", "tsfont-circle-o");
 				this.put("shape", "L-rectangle:R-rectangle");
 				this.put("width", 68);
 				this.put("height", 40);
@@ -474,38 +474,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int mySaveDraft(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-
-		/** 更新工单信息 **/
-		ProcessTaskVo processTaskVo = new ProcessTaskVo();
-		processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskVo.setTitle(paramObj.getString("title"));
-		processTaskVo.setOwner(paramObj.getString("owner"));
-		processTaskVo.setPriorityUuid(paramObj.getString("priorityUuid"));
-		processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
-
-		/** 保存描述内容 **/
-		String content = paramObj.getString("content");
-		if (StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), contentVo.getHash()));
-		}
-
-		/** 保存附件uuid **/
-		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
-		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
-		
-		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(paramObj.getJSONArray("fileIdList")), Long.class);
-		if(CollectionUtils.isNotEmpty(fileIdList)) {
-			for (Long fileId : fileIdList) {
-				processTaskFileVo.setFileId(fileId);
-				processTaskMapper.insertProcessTaskFile(processTaskFileVo);
-			}
-		}	
-
 		return 1;
 	}
 	
@@ -740,7 +708,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public Object handlerStepInfo(Long processTaskStepId) {
+	public Object getHandlerStepInfo(Long processTaskStepId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

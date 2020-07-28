@@ -72,7 +72,8 @@ public class ProcessTaskDraftSaveApi extends ApiComponentBase  {
 		@Param(name="formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
 		@Param(name="hidecomponentList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "联动隐藏表单属性列表"),
 		@Param(name="content", type=ApiParamType.STRING, desc = "描述"),
-		@Param(name="fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
+		@Param(name="fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表"),
+		@Param(name="handlerStepInfo", type=ApiParamType.JSONOBJECT, desc="处理器特有的步骤信息")
 	})
 	@Output({
 		@Param(name="processTaskId", type = ApiParamType.LONG, desc="工单id"),

@@ -38,7 +38,7 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	public JSONObject getChartConfig() {
 		return new JSONObject() {
 			{
-				this.put("icon", "ts-branch");
+				this.put("icon", "tsfont-shunt");
 				this.put("shape", "L-triangle:R-triangle");
 				this.put("width", 68);
 				this.put("height", 68);
@@ -170,7 +170,7 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public Object handlerStepInfo(Long processTaskStepId) {
+	public Object getHandlerStepInfo(Long processTaskStepId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
