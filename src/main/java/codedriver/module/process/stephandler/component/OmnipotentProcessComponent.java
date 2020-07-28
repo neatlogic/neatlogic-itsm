@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,26 +23,22 @@ import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
-import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
-import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskAssignWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
@@ -202,7 +197,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		baseInfoValid(currentProcessTaskStepVo);
+//		baseInfoValid(currentProcessTaskStepVo);
 		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
 		//前置步骤指派处理人
 //		"assignWorkerList": [
@@ -556,63 +551,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				}
 			}
 		}
-	}
-	
-	private boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo) {
-		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
-		if(processTaskVo.getTitle() == null) {
-			throw new ProcessTaskRuntimeException("工单标题格式不能为空");
-		}
-		Pattern titlePattern = Pattern.compile("^[A-Za-z_\\d\\u4e00-\\u9fa5]+$");
-		if (!titlePattern.matcher(processTaskVo.getTitle()).matches()) {
-			throw new ProcessTaskRuntimeException("工单标题格式不对");
-		}
-		paramObj.put(ProcessTaskAuditDetailType.TITLE.getParamName(), processTaskVo.getTitle());
-		if (StringUtils.isBlank(processTaskVo.getOwner())) {
-			throw new ProcessTaskRuntimeException("工单请求人不能为空");
-		}
-		if (userMapper.getUserBaseInfoByUuid(processTaskVo.getOwner()) == null) {
-			throw new ProcessTaskRuntimeException("工单请求人账号:'" + processTaskVo.getOwner() + "'不存在");
-		}
-		if (StringUtils.isBlank(processTaskVo.getPriorityUuid())) {
-			throw new ProcessTaskRuntimeException("工单优先级不能为空");
-		}
-		List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
-		List<String> priorityUuidlist = new ArrayList<>(channelPriorityList.size());
-		for (ChannelPriorityVo channelPriorityVo : channelPriorityList) {
-			priorityUuidlist.add(channelPriorityVo.getPriorityUuid());
-		}
-		if (!priorityUuidlist.contains(processTaskVo.getPriorityUuid())) {
-			throw new ProcessTaskRuntimeException("工单优先级与服务优先级级不匹配");
-		}
-		paramObj.put(ProcessTaskAuditDetailType.PRIORITY.getParamName(), processTaskVo.getPriorityUuid());
-
-		// 获取上报描述内容
-		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(currentProcessTaskStepVo.getId());
-		if (CollectionUtils.isNotEmpty(processTaskStepContentList)) {
-			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
-			if(processTaskContentVo != null) {
-				paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), processTaskContentVo.getContent());
-			}
-		}
-		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
-		processTaskFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
-		if (processTaskFileList.size() > 0) {
-			List<Long> fileIdList = new ArrayList<>();
-			for (ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				if (fileMapper.getFileById(processTaskFile.getFileId()) == null) {
-					throw new ProcessTaskRuntimeException("上传附件uuid:'" + processTaskFile.getFileId() + "'不存在");
-				}
-				fileIdList.add(processTaskFile.getFileId());
-			}
-			paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(fileIdList));
-		}
-		currentProcessTaskStepVo.setParamObj(paramObj);
-		return true;
-	}
+	}	
 	
 	@SuppressWarnings("serial")
 	@Override
