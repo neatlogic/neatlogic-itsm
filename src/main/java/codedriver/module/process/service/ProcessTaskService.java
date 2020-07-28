@@ -99,6 +99,12 @@ public interface ProcessTaskService {
 	 * @param currentProcessTaskStepVo
 	 */
 	public void initJob(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, JSONObject data);
-	
+	/**
+	 * 
+	* @Time:2020年7月28日
+	* @Description: 获取自定义按钮映射数据
+	* @param processTaskStepId
+	* @return Map<String,String>
+	 */
 	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
 }

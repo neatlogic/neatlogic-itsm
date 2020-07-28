@@ -36,9 +36,6 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 	@Autowired
 	private ProcessTaskService processTaskService;
 	
-//	@Autowired
-//	private ProcessStepHandlerMapper processStepHandlerMapper;
-	
 	@Override
 	public String getToken() {
 		return "processtask/step/action/list";
@@ -81,38 +78,6 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
 			}
 			customButtonMap = processTaskService.getCustomButtonTextMap(processTaskStepId);
-			/** 节点管理按钮映射 **/
-//			ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-//			if(processStepHandlerVo != null) {
-//				JSONObject globalConfig = processStepHandlerVo.getConfig();
-//				if(MapUtils.isNotEmpty(globalConfig)) {
-//					JSONArray customButtonList = globalConfig.getJSONArray("customButtonList");
-//					if(CollectionUtils.isNotEmpty(customButtonList)) {
-//						for(int i = 0; i < customButtonList.size(); i++) {
-//							JSONObject customButton = customButtonList.getJSONObject(i);
-//							String value = customButton.getString("value");
-//							if(StringUtils.isNotBlank(value)) {
-//								customButtonMap.put(customButton.getString("name"), value);
-//							}
-//						}
-//					}
-//				}
-//			}
-			/** 节点设置按钮映射 **/
-//			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-//			JSONObject stepConfigObj = JSON.parseObject(stepConfig);
-//			if(MapUtils.isNotEmpty(stepConfigObj)) {
-//				JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
-//				if(CollectionUtils.isNotEmpty(customButtonList)) {
-//					for(int i = 0; i < customButtonList.size(); i++) {
-//						JSONObject customButton = customButtonList.getJSONObject(i);
-//						String value = customButton.getString("value");
-//						if(StringUtils.isNotBlank(value)) {
-//							customButtonMap.put(customButton.getString("name"), value);
-//						}
-//					}
-//				}
-//			}
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
 		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
