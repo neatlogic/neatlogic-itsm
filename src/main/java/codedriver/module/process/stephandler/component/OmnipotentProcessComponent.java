@@ -191,7 +191,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		DataValid.assignWorkerValid(currentProcessTaskStepVo);
 		return 1;
 	}
 
