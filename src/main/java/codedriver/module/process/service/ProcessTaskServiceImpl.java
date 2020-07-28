@@ -646,9 +646,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
 						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
 						if(backStepList.size() == 1) {
-							ProcessTaskStepVo processTaskStepVo = backStepList.get(0);
+							ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
 							if (processHandler != null) {
-								processHandler.back(processTaskStepVo);
+								JSONObject jsonParam = new JSONObject();
+								jsonParam.put("action", ProcessTaskStepAction.BACK.getValue());
+								jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
+								currentProcessTaskStepVo.setParamObj(jsonParam);
+								processHandler.complete(currentProcessTaskStepVo);
 							}
 						}else {//如果存在多个回退线，则挂起
 							//processHandler.hang(currentProcessTaskStepVo);
