@@ -162,9 +162,12 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 			AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
 			JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
 			automaticConfigVo.setIsRequest(true);
+			Integer isTimeToRun = null;
 			//检验执行时间窗口
-			Integer isTimeToRum = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
-			if(timeWindowConfig == null || isTimeToRum == 0) {
+			if(timeWindowConfig != null) {
+				isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+			}
+			if(timeWindowConfig == null || isTimeToRun == 0) {
 				processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
 			}else {//loadJob,定时执行第一次请求
 				//初始化audit执行状态
