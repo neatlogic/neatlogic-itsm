@@ -188,14 +188,28 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-		if (StringUtils.isBlank(stepConfig)) {
-			return 1;
-		}
-		JSONObject stepConfigObj = null;
 		try {
-			stepConfigObj = JSONObject.parseObject(stepConfig);
-			currentProcessTaskStepVo.setParamObj(stepConfigObj);
+			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
+			if (MapUtils.isNotEmpty(stepConfigObj)) {
+				JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+				if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+					String autoStart = workerPolicyConfig.getString("autoStart");
+					if ("1".equals(autoStart) && workerList.size() == 1) {
+						/** 设置当前步骤状态为处理中 **/
+						if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
+							ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
+							userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+							userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+							userVo.setUserUuid(workerList.get(0).getUuid());
+							UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
+							userVo.setUserName(user.getUserName());
+							userList.add(userVo);
+							currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+						}
+					}
+				}
+			}
 		} catch (Exception ex) {
 			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
 		}
