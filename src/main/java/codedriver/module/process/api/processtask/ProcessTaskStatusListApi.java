@@ -1,7 +1,5 @@
 package codedriver.module.process.api.processtask;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -13,8 +11,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
-@Service
-@OperationType(type = OperationTypeEnum.SEARCH)
+//@Service
 public class ProcessTaskStatusListApi extends ApiComponentBase {
 
 	@Override
@@ -41,3 +38,4 @@ public class ProcessTaskStatusListApi extends ApiComponentBase {
 	}
 
 }
+

@@ -1,7 +1,6 @@
 package codedriver.module.process.stephandler.component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +23,9 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
-import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
-import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
@@ -46,6 +43,7 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 import codedriver.framework.util.TimeUtil;
+import codedriver.module.process.notify.handler.ProcessNotifyPolicyHandler;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Service
@@ -77,7 +75,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	public JSONObject getChartConfig() {
 		return new JSONObject() {
 			{
-				this.put("icon", "ts-shunt");
+				this.put("icon", "tsfont-auto");
 				this.put("shape", "L-rectangle-50%:R-rectangle-50%");
 				this.put("width", 68);
 				this.put("height", 40);
@@ -190,14 +188,28 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-		if (StringUtils.isBlank(stepConfig)) {
-			return 1;
-		}
-		JSONObject stepConfigObj = null;
 		try {
-			stepConfigObj = JSONObject.parseObject(stepConfig);
-			currentProcessTaskStepVo.setParamObj(stepConfigObj);
+			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
+			if (MapUtils.isNotEmpty(stepConfigObj)) {
+				JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+				if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+					String autoStart = workerPolicyConfig.getString("autoStart");
+					if ("1".equals(autoStart) && workerList.size() == 1) {
+						/** 设置当前步骤状态为处理中 **/
+						if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
+							ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
+							userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+							userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+							userVo.setUserUuid(workerList.get(0).getUuid());
+							UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
+							userVo.setUserName(user.getUserName());
+							userList.add(userVo);
+							currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
+						}
+					}
+				}
+			}
 		} catch (Exception ex) {
 			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
 		}
@@ -422,12 +434,21 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		
 		/** 授权 **/
 		JSONArray authorityArray = new JSONArray();
-		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.VIEW.getValue());this.put("text", ProcessTaskStepAction.VIEW.getText());this.put("acceptList", Arrays.asList(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
-//		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.ABORT.getValue());this.put("text", ProcessTaskStepAction.ABORT.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
-		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.TRANSFER.getValue());this.put("text", ProcessTaskStepAction.TRANSFER.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
-		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.UPDATE.getValue());this.put("text", ProcessTaskStepAction.UPDATE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
-		authorityArray.add(new JSONObject() {{this.put("action", ProcessTaskStepAction.URGE.getValue());this.put("text", ProcessTaskStepAction.URGE.getText());this.put("acceptList", Arrays.asList(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValuePlugin() + ProcessUserType.MAJOR.getValue()));this.put("groupList", Arrays.asList(GroupSearch.COMMON.getValue(), ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue(), GroupSearch.USER.getValue(), GroupSearch.TEAM.getValue(), GroupSearch.ROLE.getValue()));}});
-
+		ProcessTaskStepAction[] stepActions = {
+				ProcessTaskStepAction.VIEW, 
+				//ProcessTaskStepAction.ABORT, 
+				ProcessTaskStepAction.TRANSFER, 
+				ProcessTaskStepAction.UPDATE, 
+				ProcessTaskStepAction.URGE
+		};
+		for(ProcessTaskStepAction stepAction : stepActions) {
+			authorityArray.add(new JSONObject() {{
+				this.put("action", stepAction.getValue());
+				this.put("text", stepAction.getText());
+				this.put("acceptList", stepAction.getAcceptList());
+				this.put("groupList", stepAction.getGroupList());
+			}});
+		}
 		JSONArray authorityList = configObj.getJSONArray("authorityList");
 		if(CollectionUtils.isNotEmpty(authorityList)) {
 			Map<String, JSONArray> authorityMap = new HashMap<>();
@@ -447,14 +468,38 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		
 		/** 按钮映射 **/
 		JSONArray customButtonArray = new JSONArray();
-		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMPLETE.getValue());this.put("customText", ProcessTaskStepAction.COMPLETE.getText());this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.BACK.getValue());this.put("customText", ProcessTaskStepAction.BACK.getText());this.put("value", "");}});
-//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.COMMENT.getValue());this.put("customText", ProcessTaskStepAction.COMMENT.getText());this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.TRANSFER.getValue());this.put("customText", ProcessTaskStepAction.TRANSFER.getText());this.put("value", "");}});
-		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.START.getValue());this.put("customText", ProcessTaskStepAction.START.getText());this.put("value", "");}});
-//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.ABORT.getValue());this.put("customText", ProcessTaskStepAction.ABORT.getText());this.put("value", "");}});
-//		customButtonArray.add(new JSONObject() {{this.put("name", ProcessTaskStepAction.RECOVER.getValue());this.put("customText", ProcessTaskStepAction.RECOVER.getText());this.put("value", "");}});
-		
+		ProcessTaskStepAction[] stepButtons = {
+				ProcessTaskStepAction.COMPLETE, 
+				ProcessTaskStepAction.BACK, 
+				//ProcessTaskStepAction.COMMENT, 
+				ProcessTaskStepAction.TRANSFER, 
+				ProcessTaskStepAction.START//,
+				//ProcessTaskStepAction.ABORT, 
+				//ProcessTaskStepAction.RECOVER
+		};
+		for(ProcessTaskStepAction stepButton : stepButtons) {
+			customButtonArray.add(new JSONObject() {{
+				this.put("name", stepButton.getValue());
+				this.put("customText", stepButton.getText());
+				this.put("value", "");
+			}});
+		}
+		/** 子任务按钮映射列表 **/
+		ProcessTaskStepAction[] subtaskButtons = {
+				ProcessTaskStepAction.ABORTSUBTASK, 
+				ProcessTaskStepAction.COMMENTSUBTASK, 
+				ProcessTaskStepAction.COMPLETESUBTASK, 
+				ProcessTaskStepAction.CREATESUBTASK, 
+				ProcessTaskStepAction.REDOSUBTASK, 
+				ProcessTaskStepAction.EDITSUBTASK
+		};
+		for(ProcessTaskStepAction subtaskButton : subtaskButtons) {
+			customButtonArray.add(new JSONObject() {{
+				this.put("name", subtaskButton.getValue());
+				this.put("customText", subtaskButton.getText() + "(子任务)");
+				this.put("value", "");
+			}});
+		}
 		JSONArray customButtonList = configObj.getJSONArray("customButtonList");
 		if(CollectionUtils.isNotEmpty(customButtonList)) {
 			Map<String, String> customButtonMap = new HashMap<>();
@@ -478,9 +523,16 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
 			notifyPolicyObj.putAll(notifyPolicyConfig);
 		}
+		notifyPolicyObj.put("handler", ProcessNotifyPolicyHandler.class.getName());
 		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
 		
 		return resultObj;
+	}
+
+	@Override
+	public Object getHandlerStepInfo(Long processTaskStepId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

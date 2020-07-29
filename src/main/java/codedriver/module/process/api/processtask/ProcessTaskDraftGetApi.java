@@ -25,6 +25,7 @@ import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ChannelPriorityVo;
+import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
@@ -44,11 +45,15 @@ import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
@@ -120,13 +125,19 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			if(!catalogService.channelIsAuthority(processTaskVo.getChannelUuid())){
 				throw new ProcessTaskNoPermissionException("上报");
 			}
+
+			ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+			if(channelTypeVo == null) {
+				throw new ChannelTypeNotFoundException(channel.getChannelTypeUuid());
+			}
+			
 			String owner = processTaskVo.getOwner();
 			if(StringUtils.isNotBlank(owner)) {
 				owner = GroupSearch.USER.getValuePlugin() + owner;
 				processTaskVo.setOwner(owner);				
 			}
 			
-			processTaskVo.setChannelType(channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid()));
+			processTaskVo.setChannelType(channelTypeVo);
 			//获取开始步骤信息
 			List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
 			if(processTaskStepList.size() != 1) {
@@ -188,6 +199,13 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				}
 				startProcessTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
 			}
+			
+			/** 当前步骤特有步骤信息 **/
+			IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+			if(processStepHandler == null) {
+				throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+			}
+			startProcessTaskStepVo.setHandlerStepInfo(processStepHandler.getHandlerStepInfo(startProcessTaskStepId));
 			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 			
 			//获取工单流程图信息
@@ -228,10 +246,18 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			if(!catalogService.channelIsAuthority(channelUuid)){
 				throw new ProcessTaskNoPermissionException("上报");
 			}
+			ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+			if(channelTypeVo == null) {
+				throw new ChannelTypeNotFoundException(channel.getChannelTypeUuid());
+			}
 
+			ProcessVo processVo = processMapper.getProcessByUuid(channel.getProcessUuid());
+			if(processVo == null) {
+				throw new ProcessNotFoundException(channel.getProcessUuid());
+			}
 			ProcessTaskVo processTaskVo = new ProcessTaskVo();
 			processTaskVo.setIsAutoGenerateId(false);
-			processTaskVo.setChannelType(channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid()));
+			processTaskVo.setChannelType(channelTypeVo);
 			processTaskVo.setChannelUuid(channelUuid);
 			processTaskVo.setProcessUuid(channel.getProcessUuid());
 			processTaskVo.setWorktimeUuid(channel.getWorktimeUuid());
@@ -240,10 +266,6 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 				if(channelPriority.getIsDefault().intValue() == 1) {
 					processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
 				}
-			}
-			ProcessVo processVo = processMapper.getProcessByUuid(channel.getProcessUuid());
-			if(processVo == null) {
-				throw new ProcessNotFoundException(channel.getProcessUuid());
 			}
 			processTaskVo.setConfig(processVo.getConfig());
 			

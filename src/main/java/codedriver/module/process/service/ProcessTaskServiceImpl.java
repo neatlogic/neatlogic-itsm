@@ -1103,4 +1103,46 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		Pattern pattern = Pattern.compile("(5|4).*");
 		System.out.println( pattern.matcher("300").matches());
 	}
+
+	@Override
+	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId) {
+		Map<String, String> customButtonMap = new HashMap<>();
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		if(processTaskStepVo == null) {
+			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+		}
+		/** 节点管理按钮映射 **/
+		ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+		if(processStepHandlerVo != null) {
+			JSONObject globalConfig = processStepHandlerVo.getConfig();
+			if(MapUtils.isNotEmpty(globalConfig)) {
+				JSONArray customButtonList = globalConfig.getJSONArray("customButtonList");
+				if(CollectionUtils.isNotEmpty(customButtonList)) {
+					for(int i = 0; i < customButtonList.size(); i++) {
+						JSONObject customButton = customButtonList.getJSONObject(i);
+						String value = customButton.getString("value");
+						if(StringUtils.isNotBlank(value)) {
+							customButtonMap.put(customButton.getString("name"), value);
+						}
+					}
+				}
+			}
+		}
+		/** 节点设置按钮映射 **/
+		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		JSONObject stepConfigObj = JSON.parseObject(stepConfig);
+		if(MapUtils.isNotEmpty(stepConfigObj)) {
+			JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
+			if(CollectionUtils.isNotEmpty(customButtonList)) {
+				for(int i = 0; i < customButtonList.size(); i++) {
+					JSONObject customButton = customButtonList.getJSONObject(i);
+					String value = customButton.getString("value");
+					if(StringUtils.isNotBlank(value)) {
+						customButtonMap.put(customButton.getString("name"), value);
+					}
+				}
+			}
+		}
+		return customButtonMap;
+	}
 }
