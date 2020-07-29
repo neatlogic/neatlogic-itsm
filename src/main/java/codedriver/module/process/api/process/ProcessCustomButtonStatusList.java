@@ -1,5 +1,7 @@
 package codedriver.module.process.api.process;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -51,11 +53,16 @@ public class ProcessCustomButtonStatusList extends ApiComponentBase {
 			throw new ProcessStepHandlerNotFoundException(handler);
 		}
 		JSONObject handlerConfig = processStepHandler.makeupConfig(null);
-		JSONArray customButtonList = handlerConfig.getJSONArray("customButtonList");
-		if(customButtonList == null) {
-			customButtonList = new JSONArray();
-		}
-		resultObj.put("customButtonList", customButtonList);
+		if(MapUtils.isNotEmpty(handlerConfig)) {
+			JSONArray authorityList = handlerConfig.getJSONArray("authorityList");
+			if(CollectionUtils.isNotEmpty(authorityList)) {
+				resultObj.put("authorityList", authorityList);
+			}
+			JSONArray customButtonList = handlerConfig.getJSONArray("customButtonList");
+			if(CollectionUtils.isNotEmpty(customButtonList)) {
+				resultObj.put("customButtonList", customButtonList);
+			}			
+		}		
 		JSONArray customStatusList = new JSONArray();
 		for (ProcessTaskStatus status : ProcessTaskStatus.values()) {
 			customStatusList.add(new JSONObject() {{this.put("name", status.getValue());this.put("text", status.getText());this.put("value", "");}});
