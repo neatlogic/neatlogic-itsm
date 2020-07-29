@@ -27,9 +27,12 @@ import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
+import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
+import codedriver.framework.process.dto.ProcessTaskSlaVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -64,6 +67,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 	
 	@Autowired
 	private FileMapper fileMapper;
+	
+	@Autowired
+	private WorktimeMapper worktimeMapper;
 	
 	@Override
 	public String getToken() {
@@ -280,6 +286,30 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 						
 					}
 					processTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
+					//时效列表
+					List<ProcessTaskSlaVo> processTaskSlaList = processTaskMapper.getProcessTaskSlaByProcessTaskStepId(processTaskStepVo.getId());
+					for(ProcessTaskSlaVo processTaskSlaVo : processTaskSlaList) {
+						ProcessTaskSlaTimeVo processTaskSlaTimeVo = processTaskSlaVo.getSlaTimeVo();
+						if(processTaskSlaTimeVo != null) {
+							processTaskSlaTimeVo.setName(processTaskSlaVo.getName());
+							if(processTaskSlaTimeVo.getExpireTime() != null) {
+								long timeLeft = 0L;
+								long nowTime = System.currentTimeMillis();
+								long expireTime = processTaskSlaTimeVo.getExpireTime().getTime();
+								if(nowTime < expireTime) {
+									timeLeft = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), nowTime, expireTime);
+								}else if(nowTime > expireTime) {
+									timeLeft = -worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), expireTime, nowTime);
+								}					
+								processTaskSlaTimeVo.setTimeLeft(timeLeft);
+							}
+							if(processTaskSlaTimeVo.getRealExpireTime() != null) {
+								long realTimeLeft = processTaskSlaTimeVo.getRealExpireTime().getTime() - System.currentTimeMillis();
+								processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
+							}
+							processTaskStepVo.getSlaTimeList().add(processTaskSlaTimeVo);
+						}
+					}
 				}else {
 					processTaskStepVo.setIsView(0);
 				}
