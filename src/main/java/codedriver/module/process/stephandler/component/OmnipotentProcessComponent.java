@@ -84,32 +84,31 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 		return 0;
 	}
-
-	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
-		/** 分配处理人 **/
+	
+	@Override
+	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
+		/** 获取步骤配置信息 **/
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 
-		JSONObject workerPolicyConfig = null;
+		String executeMode = "";
+		int autoStart = 0;
 		try {
 			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
 			currentProcessTaskStepVo.getParamObj().putAll(stepConfigObj);
 			if (MapUtils.isNotEmpty(stepConfigObj)) {
-				workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+				JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+				if(MapUtils.isNotEmpty(stepConfigObj)) {
+					executeMode = workerPolicyConfig.getString("executeMode");
+					autoStart = workerPolicyConfig.getIntValue("autoStart");
+				}
 			}
 		} catch (Exception ex) {
 			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
 		}
-		if(workerPolicyConfig == null) {
-			workerPolicyConfig = new JSONObject();
-		}
 		
-		/** 如果已经存在过处理人，则继续使用旧处理人，否则启用分派 **/
-		List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-		if (oldUserList.size() > 0) {
-			ProcessTaskStepUserVo oldUserVo = oldUserList.get(0);
-			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserUuid(), ProcessUserType.MAJOR.getValue()));
-		} else {
+		/** 如果workerList.size()>0，说明已经存在过处理人，则继续使用旧处理人，否则启用分派 **/
+		if (CollectionUtils.isEmpty(workerList))  {
 			/** 分配处理人 **/
 			ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
 			processTaskStepWorkerPolicyVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
@@ -120,11 +119,11 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 					if (workerPolicyHandler != null) {
 						List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
 						/** 顺序分配处理人 **/
-						if ("sort".equals(workerPolicyConfig.getString("executeMode")) && tmpWorkerList.size() > 0) {
+						if ("sort".equals(executeMode) && CollectionUtils.isEmpty(tmpWorkerList)) {
 							// 找到处理人，则退出
 							workerList.addAll(tmpWorkerList);
 							break;
-						} else if ("batch".equals(workerPolicyConfig.getString("executeMode"))) {
+						} else if ("batch".equals(executeMode)) {
 							// 去重取并集
 							tmpWorkerList.removeAll(workerList);
 							workerList.addAll(tmpWorkerList);
@@ -133,24 +132,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				}
 			}
 		}
-		/** 当只分配到一个用户时，自动设置为处理人，不需要抢单 **/
-		if (workerList.size() == 1) {
-			if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
-				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
-				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				userVo.setUserUuid(workerList.get(0).getUuid());
-				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
-				userVo.setUserName(user.getUserName());
-				userList.add(userVo);	
-				String autoStart = workerPolicyConfig.getString("autoStart");
-				/** 当步骤设置了自动开始时，设置当前步骤状态为处理中 **/
-				if ("1".equals(autoStart)) {
-					currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-				}			
-			}
-		}
-		return 1;
+		
+		return autoStart;
 	}
 
 	@Override

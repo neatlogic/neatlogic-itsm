@@ -104,7 +104,7 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
+	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		return 0;
 	}
 
