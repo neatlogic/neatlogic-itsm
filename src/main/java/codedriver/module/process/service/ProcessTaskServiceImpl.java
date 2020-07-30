@@ -278,7 +278,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 //				workerList.add(new ProcessTaskStepWorkerVo(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId(), GroupSearch.USER.getValue(), processTaskStepSubtaskVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
 //				workerList.add(new ProcessTaskStepWorkerVo(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId(), GroupSearch.USER.getValue(), oldProcessTaskStepSubtask.getUserUuid(), ProcessUserType.MINOR.getValue()));
 //				handler.updateProcessTaskStepUserAndWorker(workerList, userList);
-				handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
+				handler.updateProcessTaskStepUserAndWorker(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId());
 			}
 				
 			//记录活动
