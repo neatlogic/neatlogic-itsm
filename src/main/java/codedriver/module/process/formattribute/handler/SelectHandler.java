@@ -73,8 +73,8 @@ public class SelectHandler implements IFormAttributeHandler {
 					if(CollectionUtils.isNotEmpty(valueList)) {
 						List<String> textList = new ArrayList<>();
 						for(String key : valueList) {
-							if(key.contains("&=&")) {
-								textList.add(key.split("&=&")[1]);
+							if(key.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
+								textList.add(key.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER)[1]);
 							}else {
 								textList.add(key);
 							}
@@ -84,8 +84,8 @@ public class SelectHandler implements IFormAttributeHandler {
 					return valueList;
 				}else {
 					String value = (String) dataObj;
-					if(value.contains("&=&")) {
-						return value.split("&=&")[1];
+					if(value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
+						return value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER)[1];
 					}else {
 						return dataObj;
 					}

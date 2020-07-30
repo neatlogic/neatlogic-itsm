@@ -95,7 +95,7 @@ public class CascadeHandler implements IFormAttributeHandler {
 	}
 
 	private String getText(String matrixUuid, ValueTextVo mapping, String value, List<ProcessMatrixColumnVo> sourceColumnList, MatrixColumnDataSearchForSelectNewApi restComponent) {
-		String[] split = value.split("&=&");
+		String[] split = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER);
 		try {
 			JSONObject paramObj = new JSONObject();
 			paramObj.put("matrixUuid", matrixUuid);

@@ -42,8 +42,8 @@ public class RadioHandler implements IFormAttributeHandler {
 					}
 				}
 			}else {//其他，如动态数据源
-				if(value.contains("&=&")) {
-					return value.split("&=&")[1];
+				if(value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
+					return value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER)[1];
 				}
 			}
 		}

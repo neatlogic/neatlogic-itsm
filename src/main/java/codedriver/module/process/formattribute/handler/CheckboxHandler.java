@@ -53,8 +53,8 @@ public class CheckboxHandler implements IFormAttributeHandler {
 				}
 			}else {//其他，如动态数据源
 				for(String value : valueList) {
-					if(value.contains("&=&")) {
-						textList.add(value.split("&=&")[1]);
+					if(value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
+						textList.add(value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER)[1]);
 					}else {
 						textList.add(value);
 					}
