@@ -2,9 +2,10 @@ package codedriver.module.process.stephandler.component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -84,32 +85,31 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 		return 0;
 	}
-
-	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
-		/** 分配处理人 **/
+	
+	@Override
+	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
+		/** 获取步骤配置信息 **/
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 
-		JSONObject workerPolicyConfig = null;
+		String executeMode = "";
+		int autoStart = 0;
 		try {
 			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
 			currentProcessTaskStepVo.getParamObj().putAll(stepConfigObj);
 			if (MapUtils.isNotEmpty(stepConfigObj)) {
-				workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+				JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+				if(MapUtils.isNotEmpty(stepConfigObj)) {
+					executeMode = workerPolicyConfig.getString("executeMode");
+					autoStart = workerPolicyConfig.getIntValue("autoStart");
+				}
 			}
 		} catch (Exception ex) {
 			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
 		}
-		if(workerPolicyConfig == null) {
-			workerPolicyConfig = new JSONObject();
-		}
 		
-		/** 如果已经存在过处理人，则继续使用旧处理人，否则启用分派 **/
-		List<ProcessTaskStepUserVo> oldUserList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-		if (oldUserList.size() > 0) {
-			ProcessTaskStepUserVo oldUserVo = oldUserList.get(0);
-			workerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), oldUserVo.getUserUuid(), ProcessUserType.MAJOR.getValue()));
-		} else {
+		/** 如果workerList.size()>0，说明已经存在过处理人，则继续使用旧处理人，否则启用分派 **/
+		if (CollectionUtils.isEmpty(workerList))  {
 			/** 分配处理人 **/
 			ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
 			processTaskStepWorkerPolicyVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
@@ -120,11 +120,11 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 					if (workerPolicyHandler != null) {
 						List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
 						/** 顺序分配处理人 **/
-						if ("sort".equals(workerPolicyConfig.getString("executeMode")) && tmpWorkerList.size() > 0) {
+						if ("sort".equals(executeMode) && CollectionUtils.isEmpty(tmpWorkerList)) {
 							// 找到处理人，则退出
 							workerList.addAll(tmpWorkerList);
 							break;
-						} else if ("batch".equals(workerPolicyConfig.getString("executeMode"))) {
+						} else if ("batch".equals(executeMode)) {
 							// 去重取并集
 							tmpWorkerList.removeAll(workerList);
 							workerList.addAll(tmpWorkerList);
@@ -133,24 +133,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 				}
 			}
 		}
-		/** 当只分配到一个用户时，自动设置为处理人，不需要抢单 **/
-		if (workerList.size() == 1) {
-			if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
-				ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
-				userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-				userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-				userVo.setUserUuid(workerList.get(0).getUuid());
-				UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
-				userVo.setUserName(user.getUserName());
-				userList.add(userVo);	
-				String autoStart = workerPolicyConfig.getString("autoStart");
-				/** 当步骤设置了自动开始时，设置当前步骤状态为处理中 **/
-				if ("1".equals(autoStart)) {
-					currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-				}			
-			}
-		}
-		return 1;
+		
+		return autoStart;
 	}
 
 	@Override
@@ -301,87 +285,178 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	protected int mySaveDraft(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 1;
 	}
-	
+
 	@Override
-	public void updateProcessTaskStepUserAndWorker(List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) {
-		
-		for(ProcessTaskStepUserVo processTaskStepUserVo : userList) {
-			//查出userUuid在当前步骤拥有的子任务
-			ProcessTaskStepSubtaskVo stepSubtaskVo = new ProcessTaskStepSubtaskVo();
-			stepSubtaskVo.setProcessTaskId(processTaskStepUserVo.getProcessTaskId());
-			stepSubtaskVo.setProcessTaskStepId(processTaskStepUserVo.getProcessTaskStepId());
-			stepSubtaskVo.setUserUuid(processTaskStepUserVo.getUserUuid());
-			List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(stepSubtaskVo);
-			//子任务状态列表
-			List<String> stepSubtaskStatusList = processTaskStepSubtaskList.stream().map(ProcessTaskStepSubtaskVo::getStatus).collect(Collectors.toList());
-			
-			if(stepSubtaskStatusList.contains(ProcessTaskStatus.RUNNING.getValue())) {
-				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
-			}else if(stepSubtaskStatusList.contains(ProcessTaskStatus.SUCCEED.getValue())) {
-				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
-			}else {//userUuid不是任何子任务处理人
-				processTaskStepUserVo.setStatus(null);
-			}
-			String minorUserStatus = null;//userUuid是子任务处理人时的状态，null代表userUuid不是子任务处理人
-			List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepUserVo.getProcessTaskStepId(), ProcessUserType.MINOR.getValue());
-			for(ProcessTaskStepUserVo stepUser : processTaskStepUserList) {
-				if(processTaskStepUserVo.getUserUuid().equals(stepUser.getUserUuid())) {
-					minorUserStatus = stepUser.getStatus();
-				}
-			}
-			if(minorUserStatus == null && processTaskStepUserVo.getStatus() == null) {
-				//processtask_step_subtask表和processtask_step_user表都没有数据
-				//不增不减不更新
-			}else if(minorUserStatus == null && processTaskStepUserVo.getStatus() != null) {
-				processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
-			}else if(minorUserStatus != null && processTaskStepUserVo.getStatus() == null){
-				processTaskMapper.deleteProcessTaskStepUser(processTaskStepUserVo);
-			}else if(!processTaskStepUserVo.getStatus().equals(minorUserStatus)){
-				processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
+	public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
+		/** 查出processtask_step_subtask表中当前步骤子任务处理人列表 **/		
+		Set<String> runningSubtaskUserUuidSet = new HashSet<>();
+		Set<String> succeedSubtaskUserUuidSet = new HashSet<>();
+		ProcessTaskStepSubtaskVo stepSubtaskVo = new ProcessTaskStepSubtaskVo();
+		stepSubtaskVo.setProcessTaskId(processTaskId);
+		stepSubtaskVo.setProcessTaskStepId(processTaskStepId);
+		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(stepSubtaskVo);
+		for(ProcessTaskStepSubtaskVo subtaskVo : processTaskStepSubtaskList) {
+			if(ProcessTaskStatus.RUNNING.getValue().equals(subtaskVo.getStatus())) {
+				runningSubtaskUserUuidSet.add(subtaskVo.getUserUuid());
+			}else if(ProcessTaskStatus.SUCCEED.getValue().equals(subtaskVo.getStatus())) {
+				succeedSubtaskUserUuidSet.add(subtaskVo.getUserUuid());
 			}
 		}
 		
-		for(ProcessTaskStepWorkerVo processTaskStepWorkerVo : workerList) {
-			//查出userUuid在当前步骤拥有的子任务
-			ProcessTaskStepSubtaskVo stepSubtaskVo = new ProcessTaskStepSubtaskVo();
-			stepSubtaskVo.setProcessTaskId(processTaskStepWorkerVo.getProcessTaskId());
-			stepSubtaskVo.setProcessTaskStepId(processTaskStepWorkerVo.getProcessTaskStepId());
-			stepSubtaskVo.setUserUuid(processTaskStepWorkerVo.getUuid());
-			List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(stepSubtaskVo);
-			//子任务状态列表
-			List<String> stepSubtaskStatusList = processTaskStepSubtaskList.stream().map(ProcessTaskStepSubtaskVo::getStatus).collect(Collectors.toList());
-			String minorUserStatus = null;//userUuid是子任务处理人时的状态，null代表userUuid不是子任务处理人
-			if(stepSubtaskStatusList.contains(ProcessTaskStatus.RUNNING.getValue())) {
-				minorUserStatus = ProcessTaskStepUserStatus.DOING.getValue();
-			}else if(stepSubtaskStatusList.contains(ProcessTaskStatus.SUCCEED.getValue())) {
-				minorUserStatus = ProcessTaskStepUserStatus.DONE.getValue();
+		/** 查出processtask_step_worker表中当前步骤子任务处理人列表 **/
+		Set<String> workerMinorUserUuidSet = new HashSet<>();
+		Set<String> workerMinorUserUuidSet2 = new HashSet<>();
+		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
+		for(ProcessTaskStepWorkerVo workerVo : workerList) {
+			if(ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
+				workerMinorUserUuidSet.add(workerVo.getUuid());
+				workerMinorUserUuidSet2.add(workerVo.getUuid());
 			}
-			
-			String majorUserStatus = null;//userUuid是主处理人时的状态，null代表userUuid不是主处理人
-			List<ProcessTaskStepUserVo> stepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepWorkerVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
-			for(ProcessTaskStepUserVo stepUser : stepMajorUserList) {
-				if(processTaskStepWorkerVo.getUuid().equals(stepUser.getUserUuid())) {
-					majorUserStatus = stepUser.getStatus();
-				}
+		}
+		
+		/** 查出processtask_step_user表中当前步骤子任务处理人列表 **/
+		Set<String> doingMinorUserUuidSet = new HashSet<>();
+		Set<String> doneMinorUserUuidSet = new HashSet<>();
+		List<ProcessTaskStepUserVo> minorUserList =  processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
+		for(ProcessTaskStepUserVo userVo : minorUserList) {
+			if(ProcessTaskStepUserStatus.DOING.getValue().equals(userVo.getStatus())) {
+				doingMinorUserUuidSet.add(userVo.getUserUuid());
+			}else if(ProcessTaskStepUserStatus.DONE.getValue().equals(userVo.getStatus())) {
+				doneMinorUserUuidSet.add(userVo.getUserUuid());
 			}
+		}
+		
+		ProcessTaskStepWorkerVo processTaskStepWorkerVo = new ProcessTaskStepWorkerVo();
+		processTaskStepWorkerVo.setProcessTaskId(processTaskId);
+		processTaskStepWorkerVo.setProcessTaskStepId(processTaskStepId);
+		processTaskStepWorkerVo.setType(GroupSearch.USER.getValue());
+		processTaskStepWorkerVo.setUserType(ProcessUserType.MINOR.getValue());
+		
+		ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+		processTaskStepUserVo.setProcessTaskId(processTaskId);
+		processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);
+		processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
+		/** 删除processtask_step_worker表中当前步骤多余的子任务处理人 **/
+		workerMinorUserUuidSet.removeAll(runningSubtaskUserUuidSet);		
+		for(String userUuid : workerMinorUserUuidSet) {
+			processTaskStepWorkerVo.setUuid(userUuid);
+			processTaskMapper.deleteProcessTaskStepWorker(processTaskStepWorkerVo);
 			
-			List<ProcessTaskStepWorkerVo> processTaskWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepWorkerVo.getProcessTaskStepId());
-			List<String> userUuidList = processTaskWorkerList.stream().filter(e -> GroupSearch.USER.getValue().equals(e.getType())).map(ProcessTaskStepWorkerVo::getUuid).collect(Collectors.toList());
-			
-			if(ProcessTaskStepUserStatus.DOING.getValue().equals(majorUserStatus) 
-					|| ProcessTaskStepUserStatus.DOING.getValue().equals(minorUserStatus)) {//如果userUuid是主处理人或子任务处理人，且状态时doing
-				if(!userUuidList.contains(processTaskStepWorkerVo.getUuid())) {//processtask_step_worker不存在userUuid数据
-					//插入processTaskStepWorker
-					processTaskMapper.insertProcessTaskStepWorker(processTaskStepWorkerVo);
+			if(succeedSubtaskUserUuidSet.contains(userUuid)) {
+				if(doingMinorUserUuidSet.contains(userUuid)) {
+					/** 完成子任务 **/
+					processTaskStepUserVo.setUserUuid(userUuid);
+					processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
+					processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);					
 				}
 			}else {
-				if(userUuidList.contains(processTaskStepWorkerVo.getUuid())) {//processtask_step_worker存在userUuid数据
-					//删除processTaskStepWorker
-					processTaskMapper.deleteProcessTaskStepWorker(processTaskStepWorkerVo);
+				if(doingMinorUserUuidSet.contains(userUuid)) {
+					/** 取消子任务 **/
+					processTaskStepUserVo.setUserUuid(userUuid);
+					processTaskMapper.deleteProcessTaskStepUser(processTaskStepUserVo);
 				}
 			}
 		}
-	}	
+		/** 向processtask_step_worker表中插入当前步骤的子任务处理人 **/	
+		runningSubtaskUserUuidSet.removeAll(workerMinorUserUuidSet2);
+		for(String userUuid : runningSubtaskUserUuidSet) {
+			processTaskStepWorkerVo.setUuid(userUuid);
+			processTaskMapper.insertProcessTaskStepWorker(processTaskStepWorkerVo);
+			
+			if(doneMinorUserUuidSet.contains(userUuid)) {
+				/** 重做子任务 **/
+				processTaskStepUserVo.setUserUuid(userUuid);
+				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
+				processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
+			}else if(!doingMinorUserUuidSet.contains(userUuid)) {
+				/** 创建子任务 **/
+				processTaskStepUserVo.setUserUuid(userUuid);
+				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
+				processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
+			}
+		}
+	}
+	
+//	@Override
+//	public void updateProcessTaskStepUserAndWorker(List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) {
+//		
+//		for(ProcessTaskStepUserVo processTaskStepUserVo : userList) {
+//			//查出userUuid在当前步骤拥有的子任务
+//			ProcessTaskStepSubtaskVo stepSubtaskVo = new ProcessTaskStepSubtaskVo();
+//			stepSubtaskVo.setProcessTaskId(processTaskStepUserVo.getProcessTaskId());
+//			stepSubtaskVo.setProcessTaskStepId(processTaskStepUserVo.getProcessTaskStepId());
+//			stepSubtaskVo.setUserUuid(processTaskStepUserVo.getUserUuid());
+//			List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(stepSubtaskVo);
+//			//子任务状态列表
+//			List<String> stepSubtaskStatusList = processTaskStepSubtaskList.stream().map(ProcessTaskStepSubtaskVo::getStatus).collect(Collectors.toList());
+//			
+//			if(stepSubtaskStatusList.contains(ProcessTaskStatus.RUNNING.getValue())) {
+//				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
+//			}else if(stepSubtaskStatusList.contains(ProcessTaskStatus.SUCCEED.getValue())) {
+//				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
+//			}else {//userUuid不是任何子任务处理人
+//				processTaskStepUserVo.setStatus(null);
+//			}
+//			String minorUserStatus = null;//userUuid是子任务处理人时的状态，null代表userUuid不是子任务处理人
+//			List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepUserVo.getProcessTaskStepId(), ProcessUserType.MINOR.getValue());
+//			for(ProcessTaskStepUserVo stepUser : processTaskStepUserList) {
+//				if(processTaskStepUserVo.getUserUuid().equals(stepUser.getUserUuid())) {
+//					minorUserStatus = stepUser.getStatus();
+//				}
+//			}
+//			if(minorUserStatus == null && processTaskStepUserVo.getStatus() == null) {
+//				//processtask_step_subtask表和processtask_step_user表都没有数据
+//				//不增不减不更新
+//			}else if(minorUserStatus == null && processTaskStepUserVo.getStatus() != null) {
+//				processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
+//			}else if(minorUserStatus != null && processTaskStepUserVo.getStatus() == null){
+//				processTaskMapper.deleteProcessTaskStepUser(processTaskStepUserVo);
+//			}else if(!processTaskStepUserVo.getStatus().equals(minorUserStatus)){
+//				processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
+//			}
+//		}
+//		
+//		for(ProcessTaskStepWorkerVo processTaskStepWorkerVo : workerList) {
+//			//查出userUuid在当前步骤拥有的子任务
+//			ProcessTaskStepSubtaskVo stepSubtaskVo = new ProcessTaskStepSubtaskVo();
+//			stepSubtaskVo.setProcessTaskId(processTaskStepWorkerVo.getProcessTaskId());
+//			stepSubtaskVo.setProcessTaskStepId(processTaskStepWorkerVo.getProcessTaskStepId());
+//			stepSubtaskVo.setUserUuid(processTaskStepWorkerVo.getUuid());
+//			List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(stepSubtaskVo);
+//			//子任务状态列表
+//			List<String> stepSubtaskStatusList = processTaskStepSubtaskList.stream().map(ProcessTaskStepSubtaskVo::getStatus).collect(Collectors.toList());
+//			String minorUserStatus = null;//userUuid是子任务处理人时的状态，null代表userUuid不是子任务处理人
+//			if(stepSubtaskStatusList.contains(ProcessTaskStatus.RUNNING.getValue())) {
+//				minorUserStatus = ProcessTaskStepUserStatus.DOING.getValue();
+//			}else if(stepSubtaskStatusList.contains(ProcessTaskStatus.SUCCEED.getValue())) {
+//				minorUserStatus = ProcessTaskStepUserStatus.DONE.getValue();
+//			}
+//			
+//			String majorUserStatus = null;//userUuid是主处理人时的状态，null代表userUuid不是主处理人
+//			List<ProcessTaskStepUserVo> stepMajorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepWorkerVo.getProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
+//			for(ProcessTaskStepUserVo stepUser : stepMajorUserList) {
+//				if(processTaskStepWorkerVo.getUuid().equals(stepUser.getUserUuid())) {
+//					majorUserStatus = stepUser.getStatus();
+//				}
+//			}
+//			
+//			List<ProcessTaskStepWorkerVo> processTaskWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepWorkerVo.getProcessTaskStepId());
+//			List<String> userUuidList = processTaskWorkerList.stream().filter(e -> GroupSearch.USER.getValue().equals(e.getType())).map(ProcessTaskStepWorkerVo::getUuid).collect(Collectors.toList());
+//			
+//			if(ProcessTaskStepUserStatus.DOING.getValue().equals(majorUserStatus) 
+//					|| ProcessTaskStepUserStatus.DOING.getValue().equals(minorUserStatus)) {//如果userUuid是主处理人或子任务处理人，且状态时doing
+//				if(!userUuidList.contains(processTaskStepWorkerVo.getUuid())) {//processtask_step_worker不存在userUuid数据
+//					//插入processTaskStepWorker
+//					processTaskMapper.insertProcessTaskStepWorker(processTaskStepWorkerVo);
+//				}
+//			}else {
+//				if(userUuidList.contains(processTaskStepWorkerVo.getUuid())) {//processtask_step_worker存在userUuid数据
+//					//删除processTaskStepWorker
+//					processTaskMapper.deleteProcessTaskStepWorker(processTaskStepWorkerVo);
+//				}
+//			}
+//		}
+//	}	
 	
 	@SuppressWarnings("serial")
 	@Override
