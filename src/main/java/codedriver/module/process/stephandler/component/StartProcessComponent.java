@@ -144,7 +144,7 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public void updateProcessTaskStepUserAndWorker(List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) {
+	public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
 		// TODO Auto-generated method stub
 		
 	}

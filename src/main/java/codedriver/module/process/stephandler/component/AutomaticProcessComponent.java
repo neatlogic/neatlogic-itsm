@@ -403,7 +403,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	}
 	
 	@Override
-	public void updateProcessTaskStepUserAndWorker(List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) {
+	public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
 	}
 	
 	@SuppressWarnings("serial")
