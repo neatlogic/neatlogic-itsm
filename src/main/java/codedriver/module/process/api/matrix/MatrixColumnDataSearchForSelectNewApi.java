@@ -42,6 +42,7 @@ import codedriver.framework.process.exception.matrix.MatrixAttributeNotFoundExce
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
+import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixService;
@@ -132,9 +133,9 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 				dataVo.setColumnList(distinctColumList);
 				if (CollectionUtils.isNotEmpty(valueList)) {
 					for (String value : valueList) {
-						if (value.contains("&=&")) {
+						if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
 							List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
-							String[] split = value.split("&=&");
+							String[] split = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER);
 							if (StringUtils.isNotBlank(columnList.get(0))) {
 								ProcessMatrixColumnVo processMatrixColumnVo = new ProcessMatrixColumnVo(columnList.get(0), split[0]);
 								processMatrixColumnVo.setExpression(Expression.EQUAL.getExpression());
@@ -217,9 +218,9 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 			}
 			if (CollectionUtils.isNotEmpty(valueList)) {
 				for (String value : valueList) {
-					if (value.contains("&=&")) {
+					if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
 						List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
-						String[] split = value.split("&=&");
+						String[] split = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER);
 						for (int i = 0; i < split.length; i++) {
 							String column = columnList.get(i);
 							if (StringUtils.isNotBlank(column)) {
@@ -268,6 +269,18 @@ public class MatrixColumnDataSearchForSelectNewApi extends ApiComponentBase {
 				}
 			}
 		}
+		if(columnList.size() == 2) {
+			for(Map<String, JSONObject> resultObj : resultList) {
+				JSONObject firstObj = resultObj.get(columnList.get(0));
+				String firstValue = firstObj.getString("value");
+				String firstText = firstObj.getString("text");
+				JSONObject secondObj = resultObj.get(columnList.get(1));
+				String secondText = secondObj.getString("text");
+				firstObj.put("compose", firstValue + IFormAttributeHandler.SELECT_COMPOSE_JOINER + secondText);
+				secondObj.put("compose", secondText + "(" + firstText + ")");
+			}
+		}
+		
 		returnObj.put("columnDataList", resultList);
 		return returnObj;
 	}
