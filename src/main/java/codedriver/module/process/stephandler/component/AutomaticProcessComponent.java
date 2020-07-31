@@ -21,9 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
-import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -32,7 +30,6 @@ import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -185,33 +182,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	
 	
 	@Override
-	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-		try {
-			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
-			if (MapUtils.isNotEmpty(stepConfigObj)) {
-				JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-				if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-					String autoStart = workerPolicyConfig.getString("autoStart");
-					if ("1".equals(autoStart) && workerList.size() == 1) {
-						/** 设置当前步骤状态为处理中 **/
-						if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
-							ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
-							userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-							userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-							userVo.setUserUuid(workerList.get(0).getUuid());
-							UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
-							userVo.setUserName(user.getUserName());
-							userList.add(userVo);
-							currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-						}
-					}
-				}
-			}
-		} catch (Exception ex) {
-			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
-		}
+	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		return 1;
 	}
 

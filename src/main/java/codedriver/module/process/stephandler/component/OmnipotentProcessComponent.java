@@ -18,7 +18,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -82,7 +81,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-
 		return 0;
 	}
 	
@@ -216,34 +214,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
-
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-		try {
-			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
-			if (MapUtils.isNotEmpty(stepConfigObj)) {
-				JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-				if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-					String autoStart = workerPolicyConfig.getString("autoStart");
-					if ("1".equals(autoStart) && workerList.size() == 1) {
-						/** 设置当前步骤状态为处理中 **/
-						if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
-							ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
-							userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-							userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-							userVo.setUserUuid(workerList.get(0).getUuid());
-							UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
-							userVo.setUserName(user.getUserName());
-							userList.add(userVo);
-							currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-						}
-					}
-				}
-			}
-		} catch (Exception ex) {
-			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
-		}	
+	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		return 1;
 	}
 
@@ -341,19 +312,21 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		for(String userUuid : workerMinorUserUuidSet) {
 			processTaskStepWorkerVo.setUuid(userUuid);
 			processTaskMapper.deleteProcessTaskStepWorker(processTaskStepWorkerVo);
-			
+			System.out.println("deleteProcessTaskStepWorker:" + userUuid);
 			if(succeedSubtaskUserUuidSet.contains(userUuid)) {
 				if(doingMinorUserUuidSet.contains(userUuid)) {
 					/** 完成子任务 **/
 					processTaskStepUserVo.setUserUuid(userUuid);
 					processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
-					processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);					
+					processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
+					System.out.println("updateProcessTaskStepUserStatus:" + userUuid);
 				}
 			}else {
 				if(doingMinorUserUuidSet.contains(userUuid)) {
 					/** 取消子任务 **/
 					processTaskStepUserVo.setUserUuid(userUuid);
 					processTaskMapper.deleteProcessTaskStepUser(processTaskStepUserVo);
+					System.out.println("deleteProcessTaskStepUser:" + userUuid);
 				}
 			}
 		}
@@ -362,17 +335,20 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		for(String userUuid : runningSubtaskUserUuidSet) {
 			processTaskStepWorkerVo.setUuid(userUuid);
 			processTaskMapper.insertProcessTaskStepWorker(processTaskStepWorkerVo);
+			System.out.println("insertProcessTaskStepWorker:" + userUuid);
 			
 			if(doneMinorUserUuidSet.contains(userUuid)) {
 				/** 重做子任务 **/
 				processTaskStepUserVo.setUserUuid(userUuid);
 				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
 				processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
+				System.out.println("updateProcessTaskStepUserStatus:" + userUuid);
 			}else if(!doingMinorUserUuidSet.contains(userUuid)) {
 				/** 创建子任务 **/
 				processTaskStepUserVo.setUserUuid(userUuid);
 				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
 				processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
+				System.out.println("insertProcessTaskStepUser:" + userUuid);
 			}
 		}
 	}
