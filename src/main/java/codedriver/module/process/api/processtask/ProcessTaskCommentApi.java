@@ -174,8 +174,8 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		if(StringUtils.isNotBlank(content)) {
 			processTaskStepCommentVo = new ProcessTaskStepCommentVo();
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+			processTaskMapper.replaceProcessTaskContent(contentVo);
 			processTaskStepCommentVo.setContentHash(contentVo.getHash());
-			processTaskStepCommentVo.setContent(content);
 		}
 		
 		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
