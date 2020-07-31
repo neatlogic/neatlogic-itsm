@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,7 +20,6 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
@@ -190,10 +188,13 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
 			for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-				if(Objects.equals(processTaskStepVo.getIsActive(), 0) && ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
-					continue;
+//				if(Objects.equals(processTaskStepVo.getIsActive(), 0) && ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
+//					continue;
+//				}
+//				processTaskStepMap.put(processTaskStepVo.getId(), processTaskStepVo);
+				if(processTaskStepVo.getStartTime() != null) {
+					processTaskStepMap.put(processTaskStepVo.getId(), processTaskStepVo);
 				}
-				processTaskStepMap.put(processTaskStepVo.getId(), processTaskStepVo);
 			}
 		}
 		
