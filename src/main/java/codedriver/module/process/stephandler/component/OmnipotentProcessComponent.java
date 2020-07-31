@@ -146,26 +146,41 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
-		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
+	protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
+		Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
 		if (nextStepList.size() == 1) {
-			return nextStepList;
+			nextStepSet.add(nextStepList.get(0));
 		} else if (nextStepList.size() > 1) {
-			JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-			if (paramObj != null && paramObj.containsKey("nextStepId")) {
-				Long nextStepId = paramObj.getLong("nextStepId");
-				for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
-					if (processTaskStepVo.getId().equals(nextStepId)) {
-						returnNextStepList.add(processTaskStepVo);
-						break;
-					}
-				}
-			} else {
+			if(nextStepId == null) {
 				throw new ProcessTaskException("找到多个后续节点");
 			}
+			for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
+				if (processTaskStepVo.getId().equals(nextStepId)) {
+					nextStepSet.add(processTaskStepVo);
+					break;
+				}
+			}
 		}
-		return returnNextStepList;
+		return nextStepSet;
+//		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
+//		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
+//		if (nextStepList.size() == 1) {
+//			return nextStepList;
+//		} else if (nextStepList.size() > 1) {
+//			JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+//			if (paramObj != null && paramObj.containsKey("nextStepId")) {
+//				Long nextStepId = paramObj.getLong("nextStepId");
+//				for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
+//					if (processTaskStepVo.getId().equals(nextStepId)) {
+//						returnNextStepList.add(processTaskStepVo);
+//						break;
+//					}
+//				}
+//			} else {
+//				throw new ProcessTaskException("找到多个后续节点");
+//			}
+//		}
+//		return returnNextStepList;
 	}
 
 	@Override

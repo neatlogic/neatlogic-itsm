@@ -2,8 +2,10 @@ package codedriver.module.process.stephandler.component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,13 +98,13 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
+	protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
 		UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);
-		List<ProcessTaskStepVo> nextStepList = new ArrayList<ProcessTaskStepVo>();
-		if (CollectionUtils.isNotEmpty(currentProcessTaskStepVo.getRelList())) {
-			Map<String, ProcessTaskStepRelVo> toProcessStepUuidMap = new HashMap<>();
-			for (ProcessTaskStepRelVo relVo : currentProcessTaskStepVo.getRelList()) {
-				toProcessStepUuidMap.put(relVo.getToProcessStepUuid(), relVo);
+		Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
+		if (CollectionUtils.isNotEmpty(nextStepList)) {
+			Map<String, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
+			for (ProcessTaskStepVo stepVo : nextStepList) {
+				processTaskStepMap.put(stepVo.getProcessStepUuid(), stepVo);
 			}
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
 			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
@@ -166,12 +168,10 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 							if (canRun) {
 								if (CollectionUtils.isNotEmpty(targetStepList)) {
 									for (String targetStep : targetStepList) {
-										ProcessTaskStepRelVo relVo = toProcessStepUuidMap.get(targetStep);
-										ProcessTaskStepVo toStep = new ProcessTaskStepVo();
-										toStep.setProcessTaskId(relVo.getProcessTaskId());
-										toStep.setId(relVo.getToProcessTaskStepId());
-										toStep.setHandler(relVo.getToProcessStepHandler());
-										nextStepList.add(toStep);
+										ProcessTaskStepVo stepVo = processTaskStepMap.get(targetStep);
+										if(stepVo != null) {
+											nextStepSet.add(stepVo);
+										}
 									}
 								}
 							}
@@ -182,7 +182,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 			}
 		}
 
-		return nextStepList;
+		return nextStepSet;
 	}
 
 	@Override

@@ -1,7 +1,8 @@
 package codedriver.module.process.stephandler.component;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,15 +75,14 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) {
-		List<ProcessTaskStepVo> resultList = new ArrayList<>();
-		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
-		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
+	protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
+		Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
+		for(ProcessTaskStepVo processTaskStep : nextStepList) {
 			if(ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
-				resultList.add(processTaskStep);
+				nextStepSet.add(processTaskStep);
 			}
 		}
-		return resultList;
+		return nextStepSet;
 	}
 
 	@Override
