@@ -57,8 +57,10 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
@@ -185,6 +187,12 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			comment.setFileList(fileList);
 		}
 		startProcessTaskStepVo.setComment(comment);
+		/** 当前步骤特有步骤信息 **/
+		IProcessStepHandler startProcessStepHandler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+		if(startProcessStepHandler == null) {
+			throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+		}
+		startProcessTaskStepVo.setHandlerStepInfo(startProcessStepHandler.getHandlerStepInfo(startProcessTaskStepId));
 		processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 		
 		//优先级
@@ -419,6 +427,12 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 						processTaskStepVo.getSlaTimeList().add(processTaskSlaTimeVo);
 					}
 				}
+				/** 当前步骤特有步骤信息 **/
+				IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+				if(processStepHandler == null) {
+					throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+				}
+				processTaskStepVo.setHandlerStepInfo(processStepHandler.getHandlerStepInfo(processTaskStepId));
 				processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
 			}
 			//processtaskStepData

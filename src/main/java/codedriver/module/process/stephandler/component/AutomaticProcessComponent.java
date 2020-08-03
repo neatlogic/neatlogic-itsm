@@ -2,8 +2,10 @@ package codedriver.module.process.stephandler.component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -21,9 +23,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
-import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -32,7 +32,6 @@ import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -185,33 +184,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	
 	
 	@Override
-	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-		try {
-			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
-			if (MapUtils.isNotEmpty(stepConfigObj)) {
-				JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-				if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-					String autoStart = workerPolicyConfig.getString("autoStart");
-					if ("1".equals(autoStart) && workerList.size() == 1) {
-						/** 设置当前步骤状态为处理中 **/
-						if (StringUtils.isNotBlank(workerList.get(0).getUuid()) && GroupSearch.USER.getValue().equals(workerList.get(0).getType())) {
-							ProcessTaskStepUserVo userVo = new ProcessTaskStepUserVo();
-							userVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-							userVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-							userVo.setUserUuid(workerList.get(0).getUuid());
-							UserVo user = userMapper.getUserBaseInfoByUuid(workerList.get(0).getUuid());
-							userVo.setUserName(user.getUserName());
-							userList.add(userVo);
-							currentProcessTaskStepVo.setStatus(ProcessTaskStatus.RUNNING.getValue());
-						}
-					}
-				}
-			}
-		} catch (Exception ex) {
-			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
-		}
+	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		return 1;
 	}
 
@@ -320,26 +293,22 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	}
 	
 	@Override
-	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
-		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
+	protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
+		Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
 		if (nextStepList.size() == 1) {
-			return nextStepList;
+			nextStepSet.add(nextStepList.get(0));
 		} else if (nextStepList.size() > 1) {
-			JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-			if (paramObj != null && paramObj.containsKey("nextStepId")) {
-				Long nextStepId = paramObj.getLong("nextStepId");
-				for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
-					if (processTaskStepVo.getId().equals(nextStepId)) {
-						returnNextStepList.add(processTaskStepVo);
-						break;
-					}
-				}
-			} else {
+			if(nextStepId == null) {
 				throw new ProcessTaskException("找到多个后续节点");
 			}
+			for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
+				if (processTaskStepVo.getId().equals(nextStepId)) {
+					nextStepSet.add(processTaskStepVo);
+					break;
+				}
+			}
 		}
-		return returnNextStepList;
+		return nextStepSet;
 	}
 	
 	@Override

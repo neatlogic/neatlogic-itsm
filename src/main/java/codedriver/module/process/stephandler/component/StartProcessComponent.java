@@ -1,6 +1,7 @@
 package codedriver.module.process.stephandler.component;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -9,7 +10,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
@@ -59,7 +59,7 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public List<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+	protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
 		return null;
 	}
 
@@ -114,7 +114,7 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList, List<ProcessTaskStepUserVo> userList) throws ProcessTaskException {
+	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		return 0;
 	}
 
