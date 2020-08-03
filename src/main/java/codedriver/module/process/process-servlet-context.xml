@@ -15,7 +15,7 @@
 		http://codedriver.techsure.com/schema/codedriver
 		http://codedriver.techsure.com/schema/codedriver.xsd">
 
-	<codedriver:module id="process" name="工作流引擎模块" groupName="IT服务台" group="process" groupSort="1" groupDescription="一站式服务上报-跟踪-处理平台" />
+	<codedriver:module id="process" name="工作流引擎模块" groupName="IT服务" group="process" groupSort="1" groupDescription="一站式服务上报-跟踪-处理平台" />
 
 	<context:component-scan base-package="codedriver.module.process" />
 
