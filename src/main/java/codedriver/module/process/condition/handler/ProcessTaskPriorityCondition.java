@@ -10,9 +10,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
@@ -64,7 +64,7 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
 		config.put("search", false);
 		config.put("multiple", true);
 		config.put("value", "");
-		config.put("defaultValue", "");
+		config.put("defaultValue", new ArrayList<String>());
 		config.put("dataList", dataList);
 		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
 		config.put("isMultiple", true);
