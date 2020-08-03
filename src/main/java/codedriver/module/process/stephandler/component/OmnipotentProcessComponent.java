@@ -327,21 +327,18 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		for(String userUuid : workerMinorUserUuidSet) {
 			processTaskStepWorkerVo.setUuid(userUuid);
 			processTaskMapper.deleteProcessTaskStepWorker(processTaskStepWorkerVo);
-//			System.out.println("deleteProcessTaskStepWorker:" + userUuid);
 			if(succeedSubtaskUserUuidSet.contains(userUuid)) {
 				if(doingMinorUserUuidSet.contains(userUuid)) {
 					/** 完成子任务 **/
 					processTaskStepUserVo.setUserUuid(userUuid);
 					processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
 					processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
-//					System.out.println("updateProcessTaskStepUserStatus:" + userUuid);
 				}
 			}else {
 				if(doingMinorUserUuidSet.contains(userUuid)) {
 					/** 取消子任务 **/
 					processTaskStepUserVo.setUserUuid(userUuid);
 					processTaskMapper.deleteProcessTaskStepUser(processTaskStepUserVo);
-//					System.out.println("deleteProcessTaskStepUser:" + userUuid);
 				}
 			}
 		}
@@ -350,20 +347,17 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		for(String userUuid : runningSubtaskUserUuidSet) {
 			processTaskStepWorkerVo.setUuid(userUuid);
 			processTaskMapper.insertProcessTaskStepWorker(processTaskStepWorkerVo);
-//			System.out.println("insertProcessTaskStepWorker:" + userUuid);
 			
 			if(doneMinorUserUuidSet.contains(userUuid)) {
 				/** 重做子任务 **/
 				processTaskStepUserVo.setUserUuid(userUuid);
 				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
 				processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
-//				System.out.println("updateProcessTaskStepUserStatus:" + userUuid);
 			}else if(!doingMinorUserUuidSet.contains(userUuid)) {
 				/** 创建子任务 **/
 				processTaskStepUserVo.setUserUuid(userUuid);
 				processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
 				processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
-//				System.out.println("insertProcessTaskStepUser:" + userUuid);
 			}
 		}
 	}
