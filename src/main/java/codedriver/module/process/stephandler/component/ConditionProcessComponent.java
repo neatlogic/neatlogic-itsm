@@ -142,6 +142,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 								JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
 								if (CollectionUtils.isNotEmpty(conditionGroupList)) {
 									ProcessTaskVo processTaskVo = ProcessTaskHandlerUtil.getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
+									processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
 									JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
 									try {
 										ConditionParamContext.init(conditionParamData).setFormConfig(processTaskVo.getFormConfig()).setTranslate(true);
