@@ -41,7 +41,9 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
@@ -183,7 +185,13 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		}
 		startProcessTaskStepVo.setComment(comment);
 		startProcessTaskStepVo.setIsView(1);
-
+		/** 当前步骤特有步骤信息 **/
+		IProcessStepHandler startProcessStepHandler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+		if(startProcessStepHandler == null) {
+			throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+		}
+		startProcessTaskStepVo.setHandlerStepInfo(startProcessStepHandler.getHandlerStepInfo(startProcessTaskStepVo.getId()));
+		
 		Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
 		processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
@@ -311,6 +319,12 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 							processTaskStepVo.getSlaTimeList().add(processTaskSlaTimeVo);
 						}
 					}
+					/** 当前步骤特有步骤信息 **/
+					IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
+					if(processStepHandler == null) {
+						throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+					}
+					processTaskStepVo.setHandlerStepInfo(processStepHandler.getHandlerStepInfo(processTaskStepVo.getId()));
 				}else {
 					processTaskStepVo.setIsView(0);
 				}
