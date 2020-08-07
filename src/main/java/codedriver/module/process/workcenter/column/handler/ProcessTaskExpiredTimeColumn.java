@@ -54,7 +54,11 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 				//获取即将超时规则，默认分钟（从超时通知策略获取）
 				JSONObject configObj = processTaskSla.getJSONObject("configObj");
 				if(configObj != null && configObj.containsKey("willOverTimeRule")) {
-					tmpJson.put("willOverTimeRule", configObj.getInteger("willOverTimeRule"));
+					Integer willOverTimeRule =  configObj.getInteger("willOverTimeRule");
+					tmpJson.put("willOverTimeRule",willOverTimeRule);
+					if(willOverTimeRule != null && expireTime != null) {
+						tmpJson.put("willOverTime", expireTime - willOverTimeRule*60*100);
+					}
 				}
 				resultArray.add(tmpJson);
 				
