@@ -19,6 +19,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
@@ -147,7 +148,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		//生成活动
 		if(!Objects.equals(oldContentHash, newContentHash) || !Objects.equals(oldFileIdList, fileIdList)) {
 			processTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.UPDATECONTENT);
+			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATECONTENT);
 		}
 		return null;
 	}

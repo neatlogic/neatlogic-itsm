@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -200,7 +201,7 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 
 			//生成活动	
 			processTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.COMMENT);
+			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
 		}
 		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
 		for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {

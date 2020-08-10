@@ -17,6 +17,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
@@ -111,7 +112,7 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 			//生成活动
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldCommentVo.getProcessTaskStepId());	
 			processTaskStepVo.setParamObj(jsonObj);
-			ProcessStepHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskStepAction.EDITCOMMENT);
+			ProcessStepHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
 			
 			List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(oldCommentVo.getProcessTaskStepId());
 			for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
