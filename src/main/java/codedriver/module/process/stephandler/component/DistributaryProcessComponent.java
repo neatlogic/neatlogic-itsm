@@ -86,8 +86,13 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myComplete(ProcessTaskStepVo currentFlowJobStepVo) {
-		return 1;
+	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
+		return 0;
+	}
+	
+	@Override
+	protected int myCompleteAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
+		return 0;
 	}
 
 	@Override

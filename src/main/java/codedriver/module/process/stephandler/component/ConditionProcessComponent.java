@@ -32,6 +32,7 @@ import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -187,10 +188,20 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myComplete(ProcessTaskStepVo currentFlowJobStepVo) {
+	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {
 		return 1;
 	}
 
+	@Override
+	protected int myCompleteAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
+		if(StringUtils.isNotBlank(currentProcessTaskStepVo.getError())) {
+			currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
+		}
+		/** 处理历史记录 **/
+		String action = currentProcessTaskStepVo.getParamObj().getString("action");
+		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
+		return 1;
+	}
 	public void makeupFlowJobStepVo(ProcessTaskStepVo flowJobStepVo) {
 		if (flowJobStepVo.getRelList() != null && flowJobStepVo.getRelList().size() > 0) {
 			for (ProcessTaskStepRelVo relVo : flowJobStepVo.getRelList()) {

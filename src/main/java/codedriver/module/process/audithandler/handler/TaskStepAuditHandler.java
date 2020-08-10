@@ -22,7 +22,9 @@ public class TaskStepAuditHandler extends ProcessTaskStepAuditDetailHandlerBase 
 			Long processTaskStepId = Long.parseLong(newContent);
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 			if(processTaskStepVo != null) {
+				processTaskStepAuditDetailVo.getParamObj().put("nextStepId", processTaskStepId);
 				processTaskStepAuditDetailVo.setNewContent(processTaskStepVo.getName());
+				processTaskStepAuditDetailVo.getParamObj().put("nextStepName", processTaskStepVo.getName());
 			}
 		}
 	}
