@@ -35,7 +35,7 @@ public class WorkerAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	
 	@Override
 	public String getType() {
-		return ProcessTaskAuditDetailType.WORKER.getValue();
+		return ProcessTaskAuditDetailType.WORKERLIST.getValue();
 	}
 
 	private String parse(String content) {
@@ -65,7 +65,7 @@ public class WorkerAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 				RoleVo roleVo = roleMapper.getRoleByUuid(split[1]);
 				if(roleVo != null) {
 					Map<String, String> roleMap = new HashMap<>();
-					roleMap.put("type", GroupSearch.TEAM.getValue());
+					roleMap.put("type", GroupSearch.ROLE.getValue());
 					roleMap.put("value", roleVo.getUuid());
 					roleMap.put("text", roleVo.getName());
 					resultList.add(roleMap);
@@ -76,7 +76,7 @@ public class WorkerAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	}
 
 	@Override
-	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
 			processTaskStepAuditDetailVo.setOldContent(parse(oldContent));
@@ -84,6 +84,7 @@ public class WorkerAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 		String newContent = processTaskStepAuditDetailVo.getNewContent();
 		if(StringUtils.isNotBlank(newContent)) {
 			processTaskStepAuditDetailVo.setNewContent(parse(newContent));
-		}		
+		}
+		return 1;
 	}
 }

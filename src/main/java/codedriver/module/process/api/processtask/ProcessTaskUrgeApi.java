@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
@@ -59,7 +60,7 @@ public class ProcessTaskUrgeApi extends ApiComponentBase {
 		/*生成催办活动*/
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 		processTaskStepVo.setProcessTaskId(processTaskId);
-		handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.URGE);
+		handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.URGE);
 		return null;
 	}
 

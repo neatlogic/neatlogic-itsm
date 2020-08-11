@@ -44,6 +44,7 @@ import codedriver.framework.process.constvalue.FormAttributeAction;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
@@ -202,7 +203,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			subtaskVo.setContentHash(processTaskContentVo.getHash());
 			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getParamName(), JSON.toJSONString(subtaskVo));
 			currentProcessTaskStepVo.setParamObj(paramObj);
-			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.CREATESUBTASK);
+			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.CREATESUBTASK);
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.CREATESUBTASK);
 		}else {
@@ -300,7 +301,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskMapper.replaceProcessTaskContent(oldSubtaskContentVo);
 			paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), oldSubtaskContentVo.getHash());
 			currentProcessTaskStepVo.setParamObj(paramObj);
-			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.EDITSUBTASK);
+			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.EDITSUBTASK);
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.EDITSUBTASK);
 		}else {
@@ -341,7 +342,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
 			//记录活动
 			currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
-			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.REDOSUBTASK);
+			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.REDOSUBTASK);
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.REDOSUBTASK);
 		}else {
@@ -383,7 +384,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
 			//记录活动
 			currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
-			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.COMPLETESUBTASK);
+			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETESUBTASK);
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.COMPLETESUBTASK);
 		}else {
@@ -420,7 +421,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());	
 			//记录活动
 			currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
-			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskStepAction.ABORTSUBTASK);
+			handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.ABORTSUBTASK);
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.ABORTSUBTASK);
 		}else {

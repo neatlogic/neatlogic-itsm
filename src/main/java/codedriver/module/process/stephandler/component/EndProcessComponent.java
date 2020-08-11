@@ -105,6 +105,11 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		processTaskMapper.updateProcessTaskStatus(processTaskVo);
 		return 0;
 	}
+	
+	@Override
+	protected int myCompleteAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
+		return 0;
+	}
 
 	@Override
 	protected int myRetreat(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {

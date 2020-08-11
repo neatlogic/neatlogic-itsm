@@ -23,7 +23,7 @@ public class SubtaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	}
 
 	@Override
-	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
 			ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});
 			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepSubtaskVo.getContentHash());
@@ -33,14 +33,17 @@ public class SubtaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 			
 			JSONObject content = new JSONObject();
 			content.put("type", "content");
+			content.put("typeName", "描述");
 			content.put("newContent", processTaskStepSubtaskVo.getContent());
 			
 			JSONObject targetTime = new JSONObject();
 			targetTime.put("type", "targetTime");
+			targetTime.put("typeName", "期望时间");
 			targetTime.put("newContent", processTaskStepSubtaskVo.getTargetTime());
 
 			JSONObject userName = new JSONObject();
 			userName.put("type", "userName");
+			userName.put("typeName", "处理人");
 			userName.put("newContent", processTaskStepSubtaskVo.getUserName());
 
 			if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getOldContent())) {
@@ -67,6 +70,7 @@ public class SubtaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 			processTaskStepAuditDetailVo.setOldContent(null);
 			processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(subtask));
 		}
+		return 1;
 	}
 
 }

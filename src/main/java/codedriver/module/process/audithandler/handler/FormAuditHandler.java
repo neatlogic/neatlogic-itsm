@@ -35,7 +35,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	}
 
 	@Override
-	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = JSON.parseArray(processTaskStepAuditDetailVo.getOldContent(), ProcessTaskFormAttributeDataVo.class);
 		if(oldProcessTaskFormAttributeDataList == null) {
 			oldProcessTaskFormAttributeDataList = new ArrayList<>();
@@ -134,6 +134,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 			}
 			processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(contentList));
 		}
+		return 1;
 	}
 
 }

@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
@@ -26,6 +27,7 @@ import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundExc
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.util.FreemarkerUtil;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 @Service
@@ -85,6 +87,7 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 		List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
 		if(CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
 			for(ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+				JSONObject paramObj = new JSONObject();
 				if(processTaskStepAudit.getProcessTaskStepId() != null) {
 					//判断当前用户是否有权限查看该节点信息
 					List<String> verifyActionList = new ArrayList<>();
@@ -93,6 +96,10 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 					if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 						continue;
 					}
+				}
+				paramObj.put("processTaskStepName", processTaskStepAudit.getProcessTaskStepName());
+				if(processTaskStepAudit.getStepStatusVo() != null) {
+					paramObj.put("stepStatusVo", processTaskStepAudit.getStepStatusVo());
 				}
 				List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
 				processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
@@ -107,13 +114,17 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 					}
 					IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
 					if(auditDetailHandler != null) {
-						auditDetailHandler.handle(processTaskStepAuditDetailVo);
+						int isShow = auditDetailHandler.handle(processTaskStepAuditDetailVo);
+						paramObj.putAll(processTaskStepAuditDetailVo.getParamObj());
+						if(isShow == 0) {
+							iterator.remove();
+						}
 					}
 					if(ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-						processTaskStepAudit.setNextStepName(processTaskStepAuditDetailVo.getNewContent());
-						iterator.remove();
+						processTaskStepAudit.setNextStepName(processTaskStepAuditDetailVo.getNewContent());						
 					}
 				}
+				processTaskStepAudit.setDescription(FreemarkerUtil.transform(paramObj, ProcessTaskAuditTypeFactory.getDescription(processTaskStepAudit.getAction())));
 				resutlList.add(processTaskStepAudit);
 			}
 		}		

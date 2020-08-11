@@ -14,8 +14,8 @@ public class ContentAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	}
 
 	@Override
-	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {		
-		
+	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {		
+		return 1;
 	}
 
 }

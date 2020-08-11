@@ -20,6 +20,8 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
@@ -200,6 +202,17 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myComplete(ProcessTaskStepVo currentProcessTaskStepVo) {		
+		return 1;
+	}
+	
+	@Override
+	protected int myCompleteAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
+		if(StringUtils.isNotBlank(currentProcessTaskStepVo.getError())) {
+			currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
+		}
+		/** 处理历史记录 **/
+		String action = currentProcessTaskStepVo.getParamObj().getString("action");
+		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
 		return 1;
 	}
 

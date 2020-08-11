@@ -26,7 +26,7 @@ public class RestfulActionAuditHandler extends ProcessTaskStepAuditDetailHandler
 	}
 
 	@Override
-	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
 			ActionVo actionVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), ActionVo.class);
 			IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(actionVo.getIntegrationUuid());
@@ -44,7 +44,7 @@ public class RestfulActionAuditHandler extends ProcessTaskStepAuditDetailHandler
 			}
 			processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(actionVo));
 		}
-		
+		return 1;
 	}
 
 }

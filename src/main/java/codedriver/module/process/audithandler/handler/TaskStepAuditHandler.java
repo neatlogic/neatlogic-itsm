@@ -16,15 +16,18 @@ public class TaskStepAuditHandler extends ProcessTaskStepAuditDetailHandlerBase 
 	}
 
 	@Override
-	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String newContent = processTaskStepAuditDetailVo.getNewContent();
 		if(StringUtils.isNotBlank(newContent)) {
 			Long processTaskStepId = Long.parseLong(newContent);
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 			if(processTaskStepVo != null) {
+				processTaskStepAuditDetailVo.getParamObj().put("nextStepId", processTaskStepId);
 				processTaskStepAuditDetailVo.setNewContent(processTaskStepVo.getName());
+				processTaskStepAuditDetailVo.getParamObj().put("nextStepName", processTaskStepVo.getName());
 			}
 		}
+		return 0;
 	}
 
 }
