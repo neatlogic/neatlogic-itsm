@@ -59,7 +59,7 @@ public class ChannelSearchForSelectApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="channelList",explode=ChannelVo[].class,desc="服务通道列表")
+		@Param(name="list",explode=ValueTextVo[].class,desc="服务通道列表")
 	})
 	@Description(desc = "查询服务通道_下拉框")
 	@Override
@@ -84,7 +84,7 @@ public class ChannelSearchForSelectApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}			
 		List<ValueTextVo> channelList = channelMapper.searchChannelListForSelect(channelVo);
-		resultObj.put("channelList", channelList);
+		resultObj.put("list", channelList);
 		return resultObj;
 	}
 

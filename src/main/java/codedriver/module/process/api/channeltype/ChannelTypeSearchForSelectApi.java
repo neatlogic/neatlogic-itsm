@@ -50,7 +50,7 @@ public class ChannelTypeSearchForSelectApi extends ApiComponentBase {
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "页大小"),
 		@Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired =true, desc = "总页数"),
 		@Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "总行数"),
-		@Param(name = "tbodyList", explode = ChannelTypeVo[].class, desc = "服务类型列表")
+		@Param(name = "list", explode = ValueTextVo[].class, desc = "服务类型列表")
 	})
 	@Description(desc = "查询服务类型列表_下拉框")
 	@Override
@@ -69,7 +69,7 @@ public class ChannelTypeSearchForSelectApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}
 		List<ValueTextVo> channelTypeList = channelMapper.searchChannelTypeListForSelect(channelTypeVo);
-		resultObj.put("tbodyList", channelTypeList);
+		resultObj.put("list", channelTypeList);
 		return resultObj;
 	}
 

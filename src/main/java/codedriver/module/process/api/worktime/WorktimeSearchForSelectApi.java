@@ -1,7 +1,6 @@
 package codedriver.module.process.api.worktime;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
@@ -47,8 +46,7 @@ public class WorktimeSearchForSelectApi extends ApiComponentBase {
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
 	})
 	@Output({
-		@Param(explode = BasePageVo.class),
-		@Param(name = "tbodyList", explode = WorktimeVo[].class, desc = "工作时间窗口列表")
+		@Param(name = "list", explode = ValueTextVo[].class, desc = "工作时间窗口列表")
 	})
 	@Description(desc = "查询工作时间窗口列表_下拉框")
 	@Override
@@ -67,7 +65,7 @@ public class WorktimeSearchForSelectApi extends ApiComponentBase {
 		}
 		
 		List<ValueTextVo> worktimeList = worktimeMapper.searchWorktimeListForSelect(worktimeVo);
-		resultObj.put("tbodyList", worktimeList);
+		resultObj.put("list", worktimeList);
 		return resultObj;
 	}
 

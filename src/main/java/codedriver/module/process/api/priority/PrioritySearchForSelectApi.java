@@ -51,7 +51,7 @@ public class PrioritySearchForSelectApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="tbodyList",explode=PriorityVo[].class,desc="优先级列表")
+		@Param(name="list",explode=ValueTextVo[].class,desc="优先级列表")
 	})
 	@Description(desc = "查询优先级列表_下拉框")
 	@Override
@@ -70,7 +70,7 @@ public class PrioritySearchForSelectApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}
 		List<ValueTextVo> priorityList = priorityMapper.searchPriorityListForSelect(priorityVo);
-		resultObj.put("tbodyList", priorityList);
+		resultObj.put("list", priorityList);
 		return resultObj;
 	}
 

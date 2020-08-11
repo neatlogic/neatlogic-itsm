@@ -1,7 +1,6 @@
 package codedriver.module.process.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
@@ -54,8 +53,7 @@ public class MatrixSearchForSelectApi extends ApiComponentBase {
         @Param( name = "valueList", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY)
     })
     @Output({ 
-    	@Param( name = "tbodyList", desc = "矩阵数据源列表", explode = ProcessMatrixVo[].class),
-        @Param( explode = BasePageVo.class)
+    	@Param( name = "list", desc = "矩阵数据源列表", explode = ValueTextVo[].class)
     })
     @Description(desc = "查询数据源矩阵_下拉框")
     @Override
@@ -70,7 +68,7 @@ public class MatrixSearchForSelectApi extends ApiComponentBase {
         			tbodyList.add(processMatrixVo);
         		}
         	}
-        	returnObj.put("tbodyList", tbodyList);
+        	returnObj.put("list", tbodyList);
         }else {
         	 ProcessMatrixVo matrix = JSON.toJavaObject(jsonObj, ProcessMatrixVo.class);
              if (matrix.getNeedPage()){
@@ -81,7 +79,7 @@ public class MatrixSearchForSelectApi extends ApiComponentBase {
                  returnObj.put("pageSize", matrix.getPageSize());
                  returnObj.put("currentPage", matrix.getCurrentPage());
              }
-             returnObj.put("tbodyList", matrixMapper.searchMatrixForSelect(matrix));
+             returnObj.put("list", matrixMapper.searchMatrixForSelect(matrix));
         }
         return returnObj;
     }

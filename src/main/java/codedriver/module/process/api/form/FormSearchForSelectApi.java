@@ -50,7 +50,7 @@ public class FormSearchForSelectApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="formList",explode=FormVo[].class,desc="表单列表")
+		@Param(name="list",explode=ValueTextVo[].class,desc="表单列表")
 	})
 	@Description(desc = "查询表单列表_下拉框")
 	@Override
@@ -67,7 +67,7 @@ public class FormSearchForSelectApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}
 		List<ValueTextVo> formList = formMapper.searchFormListForSelect(formVo);
-		resultObj.put("formList", formList);
+		resultObj.put("list", formList);
 		return resultObj;
 	}
 

@@ -52,7 +52,7 @@ public class ProcessSearchForSelectApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="processList",explode=ProcessVo[].class,desc="流程列表")
+		@Param(name="list",explode=ValueTextVo[].class,desc="流程列表")
 	})
 	@Description(desc = "查询流程列表_下拉框")
 	@Override
@@ -74,7 +74,7 @@ public class ProcessSearchForSelectApi extends ApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 		}
 		List<ValueTextVo> processList = processMapper.searchProcessListForSelect(processVo);
-		resultObj.put("processList", processList);
+		resultObj.put("list", processList);
 		return resultObj;
 	}
 
