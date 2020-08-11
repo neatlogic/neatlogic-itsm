@@ -88,6 +88,7 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 			String content = jsonObj.getString("content");
 			if(StringUtils.isNotBlank(content)) {
 				ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+				processTaskMapper.replaceProcessTaskContent(contentVo);
 				processTaskStepCommentVo.setContentHash(contentVo.getHash());
 			}
 

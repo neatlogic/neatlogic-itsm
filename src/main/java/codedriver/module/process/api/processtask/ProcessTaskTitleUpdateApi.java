@@ -88,6 +88,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
 			//生成活动
 			ProcessTaskContentVo oldTitleContentVo = new ProcessTaskContentVo(oldTitle);
+			processTaskMapper.replaceProcessTaskContent(oldTitleContentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTitleContentVo.getHash());
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATETITLE);
