@@ -99,7 +99,7 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 				}
 				paramObj.put("processTaskStepName", processTaskStepAudit.getProcessTaskStepName());
 				if(processTaskStepAudit.getStepStatusVo() != null) {
-					paramObj.put("stepStatus", processTaskStepAudit.getStepStatusVo().getText());
+					paramObj.put("stepStatusVo", processTaskStepAudit.getStepStatusVo());
 				}
 				List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
 				processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
@@ -114,12 +114,14 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 					}
 					IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
 					if(auditDetailHandler != null) {
-						auditDetailHandler.handle(processTaskStepAuditDetailVo);
+						int isShow = auditDetailHandler.handle(processTaskStepAuditDetailVo);
 						paramObj.putAll(processTaskStepAuditDetailVo.getParamObj());
+						if(isShow == 0) {
+							iterator.remove();
+						}
 					}
 					if(ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-						processTaskStepAudit.setNextStepName(processTaskStepAuditDetailVo.getNewContent());
-						iterator.remove();
+						processTaskStepAudit.setNextStepName(processTaskStepAuditDetailVo.getNewContent());						
 					}
 				}
 				processTaskStepAudit.setDescription(FreemarkerUtil.transform(paramObj, ProcessTaskAuditTypeFactory.getDescription(processTaskStepAudit.getAction())));

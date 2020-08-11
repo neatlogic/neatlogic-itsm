@@ -27,7 +27,7 @@ public class FileAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	}
 
 	@Override
-	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
 			processTaskStepAuditDetailVo.setOldContent(parse(oldContent));
@@ -36,6 +36,7 @@ public class FileAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 		if(StringUtils.isNotBlank(newContent)) {
 			processTaskStepAuditDetailVo.setNewContent(parse(newContent));
 		}
+		return 1;
 	}
 
 	private String parse(String content) {

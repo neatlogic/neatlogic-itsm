@@ -23,7 +23,7 @@ public class PriorityAuditHandler extends ProcessTaskStepAuditDetailHandlerBase 
 	}
 
 	@Override
-	protected void myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
 			PriorityVo priorityVo = priorityMapper.getPriorityByUuid(oldContent);
@@ -38,6 +38,7 @@ public class PriorityAuditHandler extends ProcessTaskStepAuditDetailHandlerBase 
 				processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(priorityVo));
 			}
 		}
+		return 1;
 	}
 
 }
