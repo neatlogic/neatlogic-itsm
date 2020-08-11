@@ -86,6 +86,7 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
 			//生成活动
 			ProcessTaskContentVo oldPriorityUuidContentVo = new ProcessTaskContentVo(oldPriorityUuid);
+			processTaskMapper.replaceProcessTaskContent(oldPriorityUuidContentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.PRIORITY.getOldDataParamName(), oldPriorityUuidContentVo.getHash());
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.activityAudit(processTaskStepVo, ProcessTaskStepAction.UPDATEPRIORITY);
