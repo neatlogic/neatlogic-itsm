@@ -10,6 +10,8 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 
 @Component
@@ -33,7 +35,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 		JSONArray resultArray = new JSONArray();
 		String worktimeUuid = json.getString("worktime");
 		JSONArray processTaskSlaArray = json.getJSONArray(this.getName());
-		if(CollectionUtils.isNotEmpty(processTaskSlaArray)) {
+		if(json.getString(ProcessWorkcenterField.STATUS.getValue()).equals(ProcessTaskStatus.RUNNING.getValue())&&CollectionUtils.isNotEmpty(processTaskSlaArray)) {
 			for (int i = 0; i < processTaskSlaArray.size(); i++) {
 				JSONObject tmpJson = new JSONObject();
 				JSONObject processTaskSla = processTaskSlaArray.getJSONObject(i);
