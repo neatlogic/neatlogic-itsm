@@ -15,7 +15,6 @@ import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetai
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.constvalue.IProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
-import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
@@ -99,6 +98,9 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 					}
 				}
 				paramObj.put("processTaskStepName", processTaskStepAudit.getProcessTaskStepName());
+				if(processTaskStepAudit.getStepStatusVo() != null) {
+					paramObj.put("stepStatus", processTaskStepAudit.getStepStatusVo().getText());
+				}
 				List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
 				processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
 				Iterator<ProcessTaskStepAuditDetailVo> iterator = processTaskStepAuditDetailList.iterator();

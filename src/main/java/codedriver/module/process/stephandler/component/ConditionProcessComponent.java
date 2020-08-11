@@ -198,8 +198,9 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 			currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
 		}
 		/** 处理历史记录 **/
-		String action = currentProcessTaskStepVo.getParamObj().getString("action");
-		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
+//		String action = currentProcessTaskStepVo.getParamObj().getString("action");
+//		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
+		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.CONDITION);
 		return 1;
 	}
 	public void makeupFlowJobStepVo(ProcessTaskStepVo flowJobStepVo) {
