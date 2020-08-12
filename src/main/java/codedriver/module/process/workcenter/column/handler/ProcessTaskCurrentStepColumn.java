@@ -23,6 +23,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Component
@@ -68,14 +69,13 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 				stepStatusJson.put("text", ProcessTaskStatus.getText(stepStatus));
 				stepStatusJson.put("color", ProcessTaskStatus.getColor(stepStatus));
 				currentStepJson.put("status", stepStatusJson);
-				//去掉待处理,但未开始的user/role/team
 				JSONArray userTypeArray = currentStepJson.getJSONArray("usertypelist"); 
 				if(CollectionUtils.isNotEmpty(userTypeArray)) {
 					ListIterator<Object> userTypeIterator = userTypeArray.listIterator();
 					while(userTypeIterator.hasNext()) {
 						JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
-						if(userTypeJson.getString("usertype").equals(ProcessTaskStatus.PENDING.getValue())) {
-							//userTypeIterator.remove();
+						//待处理
+						if(userTypeJson.getString("usertype").equals(ProcessUserType.WORKER.getValue())) {
 							JSONArray userArray = userTypeJson.getJSONArray("userlist");
 							JSONArray userArrayTmp = new JSONArray();
 							if(CollectionUtils.isNotEmpty(userArray)) {
@@ -116,7 +116,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 								userTypeJson.put("workerlist", userArrayTmp);
 								userTypeJson.put("userlist", CollectionUtils.EMPTY_COLLECTION);
 							}
-						}else {
+						}else {//处理中
 							JSONArray userArray = userTypeJson.getJSONArray("userlist");
 							JSONArray userArrayTmp = new JSONArray();
 							if(CollectionUtils.isNotEmpty(userArray)) {
