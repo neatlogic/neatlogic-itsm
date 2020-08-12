@@ -145,7 +145,6 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
 		if(!processTaskStepContentList.isEmpty()) {
 			oldContentHash = processTaskStepContentList.get(0).getContentHash();
-			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
 		}
 
 		String content = jsonObj.getString("content");
@@ -155,10 +154,12 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 				jsonObj.remove("content");
 			}else {
 				isUpdate = true;
+				jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
 				processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, contentVo.getHash()));
 			}
 		}else if(oldContentHash != null){
 			isUpdate = true;
+			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
 			processTaskMapper.deleteProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, oldContentHash));
 		}else {
 			jsonObj.remove("content");
