@@ -16,4 +16,10 @@ public class DistributaryProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		return null;
 	}
 
+	@Override
+	public Object getHandlerStepInitInfo(Long processTaskStepId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
