@@ -66,7 +66,7 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
-		@Param(name = "title", type = ApiParamType.STRING, xss=true, maxLength = 80, isRequired = true, desc = "标题"),
+		@Param(name = "title", type = ApiParamType.STRING, xss = true, maxLength = 80, isRequired = true, desc = "标题"),
 		@Param(name = "priorityUuid", type = ApiParamType.STRING, isRequired = true, desc = "优先级uuid"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
 		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
@@ -107,10 +107,8 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 		boolean isUpdate = false;
 		String oldTitle = processTaskVo.getTitle();	
 		String title = jsonObj.getString("title");
-		//如果标题跟原来的标题不一样，生成活动
 		if(!title.equals(oldTitle)) {	
 			isUpdate = true;
-			//更新标题
 			processTaskVo.setTitle(title);
 			ProcessTaskContentVo oldTitleContentVo = new ProcessTaskContentVo(oldTitle);
 			processTaskMapper.replaceProcessTaskContent(oldTitleContentVo);
@@ -121,10 +119,8 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 		
 		String oldPriorityUuid = processTaskVo.getPriorityUuid();
 		String priorityUuid = jsonObj.getString("priorityUuid");
-		//如果优先级跟原来的优先级不一样，生成活动
 		if(!priorityUuid.equals(oldPriorityUuid)) {	
 			isUpdate = true;
-			//更新优先级
 			processTaskVo.setPriorityUuid(priorityUuid);
 			ProcessTaskContentVo oldPriorityUuidContentVo = new ProcessTaskContentVo(oldPriorityUuid);
 			processTaskMapper.replaceProcessTaskContent(oldPriorityUuidContentVo);
@@ -136,7 +132,6 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
 		}
 		
-		//获取上报描述内容hash
 		String oldContentHash = null;
 		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
 		if(!processTaskStepContentList.isEmpty()) {
@@ -160,7 +155,6 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 			jsonObj.remove("content");
 		}
 		
-		//获取上传附件uuid
 		List<Long> oldFileIdList = new ArrayList<>();
 		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
 		processTaskFileVo.setProcessTaskId(processTaskId);
@@ -172,7 +166,7 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 			}
 			
 		}
-		/** 保存新附件uuid **/
+
 		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
 		if(fileIdList == null) {
 			fileIdList = new ArrayList<>();
