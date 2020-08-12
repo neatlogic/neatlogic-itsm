@@ -1044,7 +1044,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
 				FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
-				fileList.add(fileVo);
+				if(fileVo != null) {
+					fileList.add(fileVo);
+				}
 			}
 			comment.setFileList(fileList);
 		}
