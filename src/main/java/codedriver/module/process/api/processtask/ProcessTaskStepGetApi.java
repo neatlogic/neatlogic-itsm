@@ -60,8 +60,9 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -188,11 +189,11 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		}
 		startProcessTaskStepVo.setComment(comment);
 		/** 当前步骤特有步骤信息 **/
-		IProcessStepHandler startProcessStepHandler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
-		if(startProcessStepHandler == null) {
+		IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+		if(startProcessStepUtilHandler == null) {
 			throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
 		}
-		startProcessTaskStepVo.setHandlerStepInfo(startProcessStepHandler.getHandlerStepInfo(startProcessTaskStepId));
+		startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepId));
 		processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 		
 		//优先级
@@ -428,11 +429,11 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 					}
 				}
 				/** 当前步骤特有步骤信息 **/
-				IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-				if(processStepHandler == null) {
+				IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+				if(processStepUtilHandler == null) {
 					throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 				}
-				processTaskStepVo.setHandlerStepInfo(processStepHandler.getHandlerStepInfo(processTaskStepId));
+				processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInfo(processTaskStepId));
 				processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
 			}
 			//processtaskStepData

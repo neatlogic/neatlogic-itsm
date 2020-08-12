@@ -359,9 +359,4 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 		return null;
 	}
 
-	@Override
-	public Object getHandlerStepInfo(Long processTaskStepId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

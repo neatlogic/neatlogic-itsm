@@ -52,8 +52,8 @@ import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
@@ -201,11 +201,11 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			}
 			
 			/** 当前步骤特有步骤信息 **/
-			IProcessStepHandler processStepHandler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
-			if(processStepHandler == null) {
+			IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+			if(processStepUtilHandler == null) {
 				throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
 			}
-			startProcessTaskStepVo.setHandlerStepInfo(processStepHandler.getHandlerStepInfo(startProcessTaskStepId));
+			startProcessTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInfo(startProcessTaskStepId));
 			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 			
 			//获取工单流程图信息
