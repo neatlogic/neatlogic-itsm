@@ -50,8 +50,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
-		@Param(name = "title", type = ApiParamType.REGEX, rule="^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", maxLength = 80, isRequired = true, desc = "标题")
-		//@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "标题")
+		@Param(name = "title", type = ApiParamType.STRING, xss=true, maxLength = 80, isRequired = true, desc = "标题")
 	})
 	@Description(desc = "工单标题更新接口")
 	@Override
@@ -91,7 +90,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 			processTaskMapper.replaceProcessTaskContent(oldTitleContentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTitleContentVo.getHash());
 			processTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATETITLE);
+			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
 		}
 		
 		return null;
