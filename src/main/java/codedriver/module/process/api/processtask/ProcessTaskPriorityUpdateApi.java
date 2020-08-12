@@ -12,11 +12,13 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -32,6 +34,9 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private PriorityMapper priorityMapper;
 	
 	@Override
 	public String getToken() {
@@ -62,8 +67,11 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 		}
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
-		String oldPriorityUuid = processTaskVo.getPriorityUuid();
 		String priorityUuid = jsonObj.getString("priorityUuid");
+		if(priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
+			throw new PriorityNotFoundException(priorityUuid);
+		}
+		String oldPriorityUuid = processTaskVo.getPriorityUuid();
 		//如果优先级跟原来的优先级不一样，生成活动
 		if(!priorityUuid.equals(oldPriorityUuid)) {
 			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
@@ -90,7 +98,7 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 			processTaskMapper.replaceProcessTaskContent(oldPriorityUuidContentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.PRIORITY.getOldDataParamName(), oldPriorityUuidContentVo.getHash());
 			processTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATEPRIORITY);
+			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
 		}
 		
 		return null;
