@@ -19,6 +19,7 @@ import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
@@ -26,6 +27,7 @@ import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -44,6 +46,9 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private PriorityMapper priorityMapper;
 	
 	@Autowired
 	private FileMapper fileMapper;
@@ -117,8 +122,12 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 			jsonObj.remove("title");
 		}
 		
-		String oldPriorityUuid = processTaskVo.getPriorityUuid();
+
 		String priorityUuid = jsonObj.getString("priorityUuid");
+		if(priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
+			throw new PriorityNotFoundException(priorityUuid);
+		}
+		String oldPriorityUuid = processTaskVo.getPriorityUuid();
 		if(!priorityUuid.equals(oldPriorityUuid)) {	
 			isUpdate = true;
 			processTaskVo.setPriorityUuid(priorityUuid);
