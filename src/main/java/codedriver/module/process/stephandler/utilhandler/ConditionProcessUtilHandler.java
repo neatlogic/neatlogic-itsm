@@ -7,7 +7,7 @@ public class ConditionProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.OMNIPOTENT.getHandler();
+		return ProcessStepHandler.CONDITION.getHandler();
 	}
 
 	@Override

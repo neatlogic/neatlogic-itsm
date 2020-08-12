@@ -7,7 +7,7 @@ public class EndProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.OMNIPOTENT.getHandler();
+		return ProcessStepHandler.END.getHandler();
 	}
 
 	@Override

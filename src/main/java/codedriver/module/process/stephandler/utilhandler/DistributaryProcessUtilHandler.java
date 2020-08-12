@@ -7,7 +7,7 @@ public class DistributaryProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.OMNIPOTENT.getHandler();
+		return ProcessStepHandler.DISTRIBUTARY.getHandler();
 	}
 
 	@Override

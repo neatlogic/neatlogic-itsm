@@ -7,7 +7,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.OMNIPOTENT.getHandler();
+		return ProcessStepHandler.AUTOMATIC.getHandler();
 	}
 
 	@Override

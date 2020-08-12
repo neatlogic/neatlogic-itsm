@@ -7,7 +7,7 @@ public class StartProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.OMNIPOTENT.getHandler();
+		return ProcessStepHandler.START.getHandler();
 	}
 
 	@Override
