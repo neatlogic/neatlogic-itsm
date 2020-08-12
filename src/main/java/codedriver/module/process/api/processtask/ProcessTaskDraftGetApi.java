@@ -205,7 +205,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			if(processStepUtilHandler == null) {
 				throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
 			}
-			startProcessTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInfo(startProcessTaskStepId));
+			startProcessTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepId));
 			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 			
 			//获取工单流程图信息

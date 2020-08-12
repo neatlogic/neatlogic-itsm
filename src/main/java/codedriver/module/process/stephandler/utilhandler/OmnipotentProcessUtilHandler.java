@@ -1,8 +1,10 @@
 package codedriver.module.process.stephandler.utilhandler;
 
+import org.springframework.stereotype.Service;
+
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
-
+@Service
 public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
 	@Override

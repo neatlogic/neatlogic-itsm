@@ -183,7 +183,9 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			List<FileVo> fileList = new ArrayList<>();
 			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
 				FileVo fileVo = fileMapper.getFileById(processTaskFile.getFileId());
-				fileList.add(fileVo);
+				if(fileVo != null) {
+					fileList.add(fileVo);
+				}
 			}
 			comment.setFileList(fileList);
 		}
@@ -433,7 +435,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				if(processStepUtilHandler == null) {
 					throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 				}
-				processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInfo(processTaskStepId));
+				processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepId));
 				processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
 			}
 			//processtaskStepData
