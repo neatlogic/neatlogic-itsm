@@ -45,8 +45,8 @@ public class WorkcenterStepActionGetApi extends ApiComponentBase {
 	@Output({
 			@Param(name = "name", type = ApiParamType.STRING, desc="处理按钮英文名称"),
 			@Param(name = "text", type = ApiParamType.STRING, desc="处理按钮中文名称"),
-			@Param(name = "sort", type = ApiParamType.STRING, desc="排序字段"),
-			@Param(name = "isEnable", type = ApiParamType.STRING, desc="是否可用"),
+			@Param(name = "sort", type = ApiParamType.INTEGER, desc="排序字段"),
+			@Param(name = "isEnable", type = ApiParamType.INTEGER, desc="是否可用"),
 	})
 	@Description(desc = "获取工单中心操作按钮")
 	@Override
