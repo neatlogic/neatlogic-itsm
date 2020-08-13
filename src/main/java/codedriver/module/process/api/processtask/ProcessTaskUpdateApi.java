@@ -30,8 +30,8 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -104,7 +104,7 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 		}
 		Long startProcessTaskStepId = processTaskStepList.get(0).getId();
 				
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
 		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);

@@ -25,7 +25,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -64,7 +64,7 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
@@ -92,7 +92,7 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 					//判断当前用户是否有权限查看该节点信息
 					List<String> verifyActionList = new ArrayList<>();
 					verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-					List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
+					List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
 					if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 						continue;
 					}
