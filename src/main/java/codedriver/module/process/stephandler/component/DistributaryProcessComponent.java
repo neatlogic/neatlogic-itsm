@@ -13,7 +13,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
-import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
@@ -148,12 +147,6 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		return 0;
-	}
-
-	@Override
-	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

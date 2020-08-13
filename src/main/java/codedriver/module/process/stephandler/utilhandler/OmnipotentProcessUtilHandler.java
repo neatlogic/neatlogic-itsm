@@ -1,5 +1,6 @@
 package codedriver.module.process.stephandler.utilhandler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,8 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -43,6 +46,40 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 	public Object getHandlerStepInitInfo(Long processTaskStepId) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
+		/** 组装通知策略id **/
+		JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
+		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
+	        Long policyId = notifyPolicyConfig.getLong("policyId");
+	        if(policyId != null) {
+	        	processStepVo.setNotifyPolicyId(policyId);
+	        }
+		}
+		/** 组装分配策略 **/
+		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
+		if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+			JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
+			if (CollectionUtils.isNotEmpty(policyList)) {
+				List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
+				for (int k = 0; k < policyList.size(); k++) {
+					JSONObject policyObj = policyList.getJSONObject(k);
+					if (!"1".equals(policyObj.getString("isChecked"))) {
+						continue;
+					}
+					ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
+					processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
+					processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
+					processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
+					processStepWorkerPolicyVo.setSort(k + 1);
+					processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
+					workerPolicyList.add(processStepWorkerPolicyVo);
+				}
+				processStepVo.setWorkerPolicyList(workerPolicyList);
+			}
+		}
 	}
 
 	@Override

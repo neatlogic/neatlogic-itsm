@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
@@ -26,8 +24,6 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
-import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
@@ -182,59 +178,6 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		return 1;
-	}
-
-	@Override
-	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-		/** 组装通知策略id **/
-		JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
-        Long policyId = notifyPolicyConfig.getLong("policyId");
-        if(policyId != null) {
-        	processStepVo.setNotifyPolicyId(policyId);
-        }
-		/** 组装分配策略 **/
-		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-			JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
-			if (CollectionUtils.isNotEmpty(policyList)) {
-				List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
-				for (int k = 0; k < policyList.size(); k++) {
-					JSONObject policyObj = policyList.getJSONObject(k);
-					if (!"1".equals(policyObj.getString("isChecked"))) {
-						continue;
-					}
-					ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
-					processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
-					processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
-					processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
-					processStepWorkerPolicyVo.setSort(k + 1);
-					processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
-					workerPolicyList.add(processStepWorkerPolicyVo);
-				}
-				processStepVo.setWorkerPolicyList(workerPolicyList);
-			}
-		}
-		/** 收集引用的外部调用uuid **/
-		JSONObject automaticConfig = stepConfigObj.getJSONObject("automaticConfig");
-		if(MapUtils.isNotEmpty(automaticConfig)) {
-			JSONObject requestConfig = automaticConfig.getJSONObject("requestConfig");
-			if(MapUtils.isNotEmpty(requestConfig)) {
-				String integrationUuid = requestConfig.getString("integrationUuid");
-				if(StringUtils.isNotBlank(integrationUuid)) {
-					processStepVo.getIntegrationUuidList().add(integrationUuid);
-				}
-			}
-			JSONObject callbackConfig = automaticConfig.getJSONObject("callbackConfig");
-			if(MapUtils.isNotEmpty(callbackConfig)) {
-				JSONObject config = callbackConfig.getJSONObject("config");
-				if(MapUtils.isNotEmpty(config)) {
-					String integrationUuid = config.getString("integrationUuid");
-					if(StringUtils.isNotBlank(integrationUuid)) {
-						processStepVo.getIntegrationUuidList().add(integrationUuid);
-					}
-				}
-			}
-		}
 	}
 
 	@Override

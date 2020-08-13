@@ -1,6 +1,5 @@
 package codedriver.module.process.stephandler.component;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,15 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -234,40 +230,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		return 1;
-	}
-
-	@Override
-	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-		/** 组装通知策略id **/
-		JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
-		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
-	        Long policyId = notifyPolicyConfig.getLong("policyId");
-	        if(policyId != null) {
-	        	processStepVo.setNotifyPolicyId(policyId);
-	        }
-		}
-		/** 组装分配策略 **/
-		JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-		if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-			JSONArray policyList = workerPolicyConfig.getJSONArray("policyList");
-			if (CollectionUtils.isNotEmpty(policyList)) {
-				List<ProcessStepWorkerPolicyVo> workerPolicyList = new ArrayList<>();
-				for (int k = 0; k < policyList.size(); k++) {
-					JSONObject policyObj = policyList.getJSONObject(k);
-					if (!"1".equals(policyObj.getString("isChecked"))) {
-						continue;
-					}
-					ProcessStepWorkerPolicyVo processStepWorkerPolicyVo = new ProcessStepWorkerPolicyVo();
-					processStepWorkerPolicyVo.setProcessUuid(processStepVo.getProcessUuid());
-					processStepWorkerPolicyVo.setProcessStepUuid(processStepVo.getUuid());
-					processStepWorkerPolicyVo.setPolicy(policyObj.getString("type"));
-					processStepWorkerPolicyVo.setSort(k + 1);
-					processStepWorkerPolicyVo.setConfig(policyObj.getString("config"));
-					workerPolicyList.add(processStepWorkerPolicyVo);
-				}
-				processStepVo.setWorkerPolicyList(workerPolicyList);
-			}
-		}
 	}
 
 	@Override
