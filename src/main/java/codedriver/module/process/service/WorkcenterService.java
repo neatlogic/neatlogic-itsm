@@ -189,8 +189,8 @@ public class WorkcenterService {
 				JSONObject routeJson = new JSONObject();
 				routeJson.put("taskid", el.getId());
 				taskJson.put("route", routeJson);
-				//action 操作，改成从接口单独获取
-//				taskJson.put("action", getStepAction(el));
+				//action 操作
+				taskJson.put("action", getStepAction(el));
 				dataList.add(taskJson);
 			}
 		}
