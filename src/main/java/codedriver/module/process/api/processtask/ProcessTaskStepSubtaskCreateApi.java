@@ -19,10 +19,8 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
@@ -72,12 +70,7 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 		}
 		Long processTaskId = processTaskStepVo.getProcessTaskId();
-
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		if(handler == null) {
-			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
-		}
-		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.CREATESUBTASK);
+		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.CREATESUBTASK);
 		
 		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
 		processTaskStepSubtaskVo.setProcessTaskId(processTaskId);

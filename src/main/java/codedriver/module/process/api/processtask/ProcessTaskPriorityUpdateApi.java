@@ -21,8 +21,8 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -87,7 +87,7 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 				}
 			}
 			
-			IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
+			IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
 			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
 			
 			//更新优先级

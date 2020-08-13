@@ -44,7 +44,6 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
@@ -97,7 +96,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
@@ -257,7 +256,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 				//判断当前用户是否有权限查看该节点信息
 				List<String> verifyActionList = new ArrayList<>();
 				verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-				List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), verifyActionList);
+				List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), verifyActionList);
 				if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 					processTaskStepVo.setIsView(1);
 					List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());

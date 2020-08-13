@@ -50,7 +50,7 @@ import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
@@ -245,7 +245,7 @@ public class WorkcenterService {
 					&&((ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&&isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {		
 				List<String> actionList = new ArrayList<String>();
 				try {
-					actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), stepJson.getLong("id"),new ArrayList<String>(){
+					actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), stepJson.getLong("id"),new ArrayList<String>(){
 						private static final long serialVersionUID = 1L;
 					{
 						add(ProcessTaskStepAction.WORK.getValue());

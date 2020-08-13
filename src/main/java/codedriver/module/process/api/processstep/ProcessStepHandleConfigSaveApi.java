@@ -6,8 +6,8 @@ import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -64,7 +64,7 @@ public class ProcessStepHandleConfigSaveApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	List<ProcessStepHandlerVo> processStepHandlerList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("processStepHandlerList")), ProcessStepHandlerVo.class);
     	for(ProcessStepHandlerVo stepHandlerVo :processStepHandlerList) {
-    		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(stepHandlerVo.getHandler());
+    		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(stepHandlerVo.getHandler());
     		if(handler != null) {
     			JSONObject config = handler.makeupConfig(stepHandlerVo.getConfig());
     			if(MapUtils.isNotEmpty(config)) {

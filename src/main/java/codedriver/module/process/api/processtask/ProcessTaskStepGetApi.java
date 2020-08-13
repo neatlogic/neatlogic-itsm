@@ -61,7 +61,6 @@ import codedriver.framework.process.exception.process.ProcessStepHandlerNotFound
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
@@ -125,7 +124,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
 		//获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
 		if(processTaskVo == null) {
@@ -245,7 +244,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		if(processTaskStepId != null) {
 			List<String> verifyActionList = new ArrayList<>();
 			verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-			List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
+			List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
 			if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 				//获取步骤信息
 				String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
@@ -445,7 +444,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				processTaskStepVo.setProcessTaskStepData(stepDataJson);
 				verifyActionList = new ArrayList<>();
 				verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
-				actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
+				actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
 				if(actionList.removeAll(verifyActionList)) {//有处理权限
 					stepDataJson.put("isStepUser", 1);
 					if(processTaskStepVo.getHandler().equals(ProcessStepHandler.AUTOMATIC.getHandler())){
@@ -473,7 +472,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		Map<String, String> formAttributeActionMap = new HashMap<>();
 		List<String> verifyActionList = new ArrayList<>();
 		verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
-		List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
+		List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
 		if(actionList.removeAll(verifyActionList)) {//有处理权限
 			//表单属性显示控制
 			List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);

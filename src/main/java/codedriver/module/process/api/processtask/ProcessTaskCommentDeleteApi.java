@@ -21,7 +21,7 @@ import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepCommentNotFoundException;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
@@ -76,7 +76,7 @@ public class ProcessTaskCommentDeleteApi extends ApiComponentBase {
 			//生成活动
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldCommentVo.getProcessTaskStepId());	
 			processTaskStepVo.setParamObj(jsonObj);
-			ProcessStepHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
+			ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
 			
 			List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(oldCommentVo.getProcessTaskStepId());
 			for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {

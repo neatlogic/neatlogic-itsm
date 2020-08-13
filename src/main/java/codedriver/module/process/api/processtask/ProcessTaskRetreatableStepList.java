@@ -12,7 +12,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -49,7 +49,7 @@ public class ProcessTaskRetreatableStepList extends ApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
-		return ProcessStepHandlerFactory.getHandler().getRetractableStepList(processTaskId);
+		return ProcessStepUtilHandlerFactory.getHandler().getRetractableStepList(processTaskId);
 	}
 
 }

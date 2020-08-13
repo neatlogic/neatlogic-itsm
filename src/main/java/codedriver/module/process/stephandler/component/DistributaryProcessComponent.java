@@ -161,16 +161,4 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
-	@Override
-	public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public JSONObject makeupConfig(JSONObject configObj) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
