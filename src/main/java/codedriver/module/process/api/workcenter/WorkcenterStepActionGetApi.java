@@ -46,7 +46,7 @@ public class WorkcenterStepActionGetApi extends ApiComponentBase {
 	@Description(desc = "获取工单中心操作按钮")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String jsonStr = "{\"conditionGroupList\":[{\"uuid\":\"185fc3127dfb4566b4d5a303cb4797b9\",\"channelUuidList\":[],\"conditionRelList\":[],\"conditionList\":[{\"uuid\":\"cbeae47566914b488fd1c8939d465dd8\",\"name\":\"id\",\"type\":\"common\",\"valueList\":[\"163426156421120\"],\"expression\":\"like\"}]}],\"conditionGroupRelList\":[{\"from\":\"185fc3127dfb4566b4d5a303cb4797b9\",\"to\":\"185fc3127dfb4566b4d5a303cb4797b9\",\"joinType\":\"and\"}],\"pageSize\":24,\"isMeWillDo\":0}";
+		String jsonStr = "{\"conditionGroupList\":[{\"uuid\":\"185fc3127dfb4566b4d5a303cb4797b9\",\"channelUuidList\":[],\"conditionRelList\":[],\"conditionList\":[{\"uuid\":\"cbeae47566914b488fd1c8939d465dd8\",\"name\":\"id\",\"type\":\"common\",\"valueList\":[\"163426156421120\"],\"expression\":\"like\"}]}]}";
 		JSONObject jsonObject = JSON.parseObject(jsonStr);
 		String taskId = jsonObj.getString("taskId");
 		jsonObject.getJSONArray("conditionGroupList")
