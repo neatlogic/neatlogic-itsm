@@ -33,7 +33,6 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -337,26 +336,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	protected int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
 		return 0;
-	}
-
-	@Override
-	public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public JSONObject makeupConfig(JSONObject configObj) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

@@ -79,13 +79,15 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
-import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -180,7 +182,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		if(currentProcessTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
 		}
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 //			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
 //			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
@@ -207,7 +209,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.CREATESUBTASK);
 		}else {
-			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+			throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
 		
 	}
@@ -255,7 +257,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			return;
 		}
 		
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 			if(!processTaskStepSubtaskVo.getUserUuid().equals(oldProcessTaskStepSubtask.getUserUuid())) {//更新了处理人
 				
@@ -305,7 +307,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.EDITSUBTASK);
 		}else {
-			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+			throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
 	}
 
@@ -326,7 +328,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
 			processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.REDOSUBTASK.getValue(), processTaskContentVo.getHash()));
 		}
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 //			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
 //			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
@@ -346,7 +348,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.REDOSUBTASK);
 		}else {
-			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+			throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
 		
 	}
@@ -368,7 +370,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
 			processTaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.COMPLETESUBTASK.getValue(), processTaskContentVo.getHash()));
 		}
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 //			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
 //			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
@@ -388,7 +390,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.COMPLETESUBTASK);
 		}else {
-			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+			throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
 		
 	}
@@ -405,7 +407,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		processTaskStepSubtaskVo.setCancelUser(UserContext.get().getUserUuid(true));
 		processTaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
 		
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 		if(handler != null) {
 //			List<ProcessTaskStepUserVo> userList = new ArrayList<>();
 //			ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
@@ -425,7 +427,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 			handler.notify(currentProcessTaskStepVo, NotifyTriggerType.ABORTSUBTASK);
 		}else {
-			throw new ProcessStepHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
+			throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
 		}
 	}
 

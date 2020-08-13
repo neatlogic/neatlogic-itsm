@@ -3,8 +3,9 @@ package codedriver.module.process.api.processstep;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -71,11 +72,13 @@ public class ProcessStepHandlerSearchApi extends ApiComponentBase {
             for (ProcessStepHandlerVo handler : handlerList){
         		if(StringUtils.isBlank(keywork) || handler.getName().toLowerCase().contains(keywork.toLowerCase())) {
         			ProcessStepHandlerVo handlerConfig = handlerConfigMap.get(handler.getHandler());
-        			IProcessStepHandler processStepHandler= ProcessStepHandlerFactory.getHandler(handler.getHandler());
-        			JSONObject config = processStepHandler.makeupConfig(handlerConfig != null ? handlerConfig.getConfig() : null);
-        			if(MapUtils.isNotEmpty(config)) {
-        				processStepHandlerList.add(new ProcessStepHandlerVo(handler.getHandler(), handler.getName(), config));
-        			}      			
+        			IProcessStepUtilHandler processStepUtilHandler= ProcessStepUtilHandlerFactory.getHandler(handler.getHandler());
+        			if(processStepUtilHandler != null) {      				
+        				JSONObject config = processStepUtilHandler.makeupConfig(handlerConfig != null ? handlerConfig.getConfig() : null);
+        				if(MapUtils.isNotEmpty(config)) {
+        					processStepHandlerList.add(new ProcessStepHandlerVo(handler.getHandler(), handler.getName(), config));
+        				}      			
+        			}
         		}
             }
         }

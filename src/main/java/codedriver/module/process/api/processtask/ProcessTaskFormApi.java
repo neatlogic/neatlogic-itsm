@@ -30,7 +30,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -81,7 +81,7 @@ public class ProcessTaskFormApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessStepHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
 		/** 检查工单id是否合法 **/
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
 		if(processTaskVo == null) {
@@ -111,7 +111,7 @@ public class ProcessTaskFormApi extends ApiComponentBase {
 				}
 				List<String> verifyActionList = new ArrayList<>();
 				verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-				List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
+				List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
 				if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
 					/** 查出暂存数据中的表单数据**/				
 					ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
@@ -140,7 +140,7 @@ public class ProcessTaskFormApi extends ApiComponentBase {
 			
 			List<String> verifyActionList = new ArrayList<>();
 			verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
-			List<String> actionList = ProcessStepHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
+			List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
 			if(actionList.removeAll(verifyActionList)) {
 				/** 当前用户有处理权限，根据当前步骤表单属性显示设置控制表单属性展示 **/
 				Map<String, String> formAttributeActionMap = new HashMap<>();
