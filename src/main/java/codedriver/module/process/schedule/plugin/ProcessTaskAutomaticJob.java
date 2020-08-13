@@ -61,7 +61,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		/** 计算开始时间 **/
 		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
 		if(timeWindowConfig != null) {
-			Integer isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+			Integer isTimeToRun = TimeUtil.isInTimeWindow(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
 			startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"),isTimeToRun>0?1:0);
 		}
 		String groupName = automaticConfigVo.getIsRequest()?"-REQUEST":"-CALLBACK";
@@ -112,7 +112,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		Integer isTimeToRun = 0;
 		//判断是否在时间窗口内
 		if(timeWindowConfig != null) {
-			isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+			isTimeToRun = TimeUtil.isInTimeWindow(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
 		}
 		if(isTimeToRun == 0) {
 			//避免后续获取用户异常
