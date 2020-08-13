@@ -90,42 +90,40 @@ public class WorkcenterService {
 	}
 	
 	/**
+	 * TODO 需要改成过滤条件联动
 	 * 附加我的待办条件
 	 * @return
 	 */
+	@Deprecated
 	private String getMeWillDoCondition(WorkcenterVo workcenterVo) {
 		String meWillDoSql = StringUtils.EMPTY;
-		if(workcenterVo.getIsMeWillDo() == 1) {
-			//status
-			List<String> statusList = Arrays.asList(ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
-			String statusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STATUS.getValue()),String.format(" '%s' ", String.join("','",statusList)));
-			//common.step.filtstatus
-			List<String> stepStatusList = Arrays.asList(ProcessTaskStatus.PENDING.getValue(),ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
-			String stepStatusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format(" '%s' ", String.join("','",stepStatusList)));
-			//common.step.usertypelist.userlist
-			List<String> userList = new ArrayList<String>();
-			userList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
-			//如果是待处理状态，则需额外匹配角色和组
-			UserVo userVo = userMapper.getUserByUuid(UserContext.get().getUserUuid());
-			if(userVo != null) {
-				List<String> teamList = userVo.getTeamNameList();
-				if(CollectionUtils.isNotEmpty(teamList)) {
-					for(String team : teamList) {
-						userList.add(GroupSearch.TEAM.getValuePlugin()+team);
-					}
-				}
-				List<String> roleUuidList = userVo.getRoleUuidList();
-				if(CollectionUtils.isNotEmpty(roleUuidList)) {
-					for(String roleUuid : roleUuidList) {
-						userList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
-					}
+		//status
+		List<String> statusList = Arrays.asList(ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
+		String statusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STATUS.getValue()),String.format(" '%s' ", String.join("','",statusList)));
+		//common.step.filtstatus
+		List<String> stepStatusList = Arrays.asList(ProcessTaskStatus.PENDING.getValue(),ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
+		String stepStatusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format(" '%s' ", String.join("','",stepStatusList)));
+		//common.step.usertypelist.userlist
+		List<String> userList = new ArrayList<String>();
+		userList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
+		//如果是待处理状态，则需额外匹配角色和组
+		UserVo userVo = userMapper.getUserByUuid(UserContext.get().getUserUuid());
+		if(userVo != null) {
+			List<String> teamList = userVo.getTeamUuidList();
+			if(CollectionUtils.isNotEmpty(teamList)) {
+				for(String team : teamList) {
+					userList.add(GroupSearch.TEAM.getValuePlugin()+team);
 				}
 			}
-
-			String userListSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP_USER.getValue()),
-					String.format(" '%s' ", String.join("','",userList)));
-			meWillDoSql = String.format(" ([ %s and %s and %s ])", statusSql,stepStatusSql,userListSql) ;
+			List<String> roleUuidList = userVo.getRoleUuidList();
+			if(CollectionUtils.isNotEmpty(roleUuidList)) {
+				for(String roleUuid : roleUuidList) {
+					userList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
+				}
+			}
 		}
+		meWillDoSql = String.format(" ([%s and %s and common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing') and not common.step.isactive contains any (0,-1)])", statusSql,stepStatusSql,String.format(" '%s' ", String.join("','",userList))) ;
+//		meWillDoSql = String.format(" common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing')", String.format(" '%s' ", String.join("','",userList))) ;
 		return meWillDoSql;
 	}
 	
@@ -471,6 +469,10 @@ public class WorkcenterService {
 			int nestedBasisCount = 0;
 			for(int i = 0;i<conditionList.size();i++) {
 				ConditionVo condition = conditionList.get(i);
+				//关于我的 必定会 nested
+				if(condition.getName().endsWith(ProcessWorkcenterField.ABOUTME.getValue())){
+					nestedBasisCount = nestedBasisCount+2;
+				}
 				if(!condition.getType().equals("form")&&ProcessWorkcenterField.getConditionValue(condition.getName()).startsWith(ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue()))) {
 					nestedBasisCount++;
 				}
@@ -480,7 +482,7 @@ public class WorkcenterService {
 						JSONObject conditionRelationJson = new JSONObject();
 						andConditionList.add(condition);
 						conditionRelationJson.put("list", andConditionList);
-						conditionRelationJson.put("isNested", false);
+						conditionRelationJson.put("isNested", nestedBasisCount>0?true:false);
 						conditionRelationArray.add(conditionRelationJson);
 						andConditionList = new ArrayList<ConditionVo>();
 					}
