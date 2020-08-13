@@ -73,7 +73,7 @@ public class WorkcenterService {
 	 * @param workcenterVo
 	 * @return 
 	 */
-	private  QueryResult searchTask(WorkcenterVo workcenterVo){
+	public  QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
 		String meWillDoCondition = getMeWillDoCondition(workcenterVo);
@@ -189,8 +189,8 @@ public class WorkcenterService {
             	JSONObject routeJson = new JSONObject();
             	routeJson.put("taskid", el.getId());
             	taskJson.put("route", routeJson);
-            	//action 操作
-            	taskJson.put("action", getStepAction(el));
+            	//action 操作，改为从接口单独获取
+//            	taskJson.put("action", getStepAction(el));
             	dataList.add(taskJson);
             }
         }
@@ -213,7 +213,7 @@ public class WorkcenterService {
 	 * @param MultiAttrsObject el
 	 * @return
 	 */
-	private Object getStepAction(MultiAttrsObject el) {
+	public Object getStepAction(MultiAttrsObject el) {
 		JSONArray actionArray = new JSONArray();
 		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
 		Boolean isHasAbort = false;
