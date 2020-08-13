@@ -73,7 +73,7 @@ public class WorkcenterService {
 	 * @param workcenterVo
 	 * @return 
 	 */
-	private  QueryResult searchTask(WorkcenterVo workcenterVo){
+	public  QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
 		String meWillDoCondition = getMeWillDoCondition(workcenterVo);
@@ -211,7 +211,7 @@ public class WorkcenterService {
 	 * @param MultiAttrsObject el
 	 * @return
 	 */
-	private Object getStepAction(MultiAttrsObject el) {
+	public Object getStepAction(MultiAttrsObject el) {
 		JSONArray actionArray = new JSONArray();
 		JSONObject commonJson = (JSONObject) el.getJSON(ProcessFieldType.COMMON.getValue());
 		Boolean isHasAbort = false;
