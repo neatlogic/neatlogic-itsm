@@ -76,12 +76,12 @@ public class WorkcenterService {
 	public  QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
-		String meWillDoCondition = getMeWillDoCondition(workcenterVo);
-		if(StringUtils.isNotBlank(meWillDoCondition)) {
+		if(workcenterVo.getIsMeWillDo() == 1) {
+			String meWillDoCondition = getMeWillDoCondition(workcenterVo);
 			if(StringUtils.isBlank(where)) {
-				where = " where " + getMeWillDoCondition(workcenterVo);
+				where = " where " + meWillDoCondition;
 			}else {
-				where = where + " and " + getMeWillDoCondition(workcenterVo);
+				where = where + " and " + meWillDoCondition;
 			}
 		}
 		String orderBy = "order by common.starttime desc";
