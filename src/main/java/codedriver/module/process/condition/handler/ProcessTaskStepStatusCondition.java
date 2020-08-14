@@ -10,7 +10,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
@@ -20,7 +19,6 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Component
 public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -85,13 +83,15 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
 		Object value = StringUtils.EMPTY;
+		
 		if(condition.getValueList() instanceof String) {
 			value = condition.getValueList();
 		}else if(condition.getValueList() instanceof List) {
 			List<String> values = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
 			value = String.join("','", values);
 		}
-		String where = String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
+		//String where = String.format(Expression.getExpressionEs(condition.getExpression()),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format("'%s'",  value));
+		String where = String.format(" common.step.filtstatus contains any ( '%s' ) and not common.step.isactive contains any (0,-1)", value) ;
 		return where;
 	}
 

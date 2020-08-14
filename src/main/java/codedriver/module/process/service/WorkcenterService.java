@@ -66,69 +66,67 @@ public class WorkcenterService {
 	ProcessTaskService processTaskService;
 	@Autowired
 	FormMapper formMapper;
-
-
+	
+	
 	/**
 	 *   搜索工单
 	 * @param workcenterVo
-	 * @return
+	 * @return 
 	 */
 	public  QueryResult searchTask(WorkcenterVo workcenterVo){
 		String selectColumn = "*";
 		String where = assembleWhere(workcenterVo);
-		String meWillDoCondition = getMeWillDoCondition(workcenterVo);
-		if(StringUtils.isNotBlank(meWillDoCondition)) {
+		if(workcenterVo.getIsMeWillDo() == 1) {
+			String meWillDoCondition = getMeWillDoCondition(workcenterVo);
 			if(StringUtils.isBlank(where)) {
-				where = " where " + getMeWillDoCondition(workcenterVo);
+				where = " where " + meWillDoCondition;
 			}else {
-				where = where + " and " + getMeWillDoCondition(workcenterVo);
+				where = where + " and " + meWillDoCondition;
 			}
 		}
 		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
 		return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME), sql);
 	}
-
+	
 	/**
+	 * TODO 需要改成过滤条件联动
 	 * 附加我的待办条件
 	 * @return
 	 */
+	@Deprecated
 	private String getMeWillDoCondition(WorkcenterVo workcenterVo) {
 		String meWillDoSql = StringUtils.EMPTY;
-		if(workcenterVo.getIsMeWillDo() == 1) {
-			//status
-			List<String> statusList = Arrays.asList(ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
-			String statusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STATUS.getValue()),String.format(" '%s' ", String.join("','",statusList)));
-			//common.step.filtstatus
-			List<String> stepStatusList = Arrays.asList(ProcessTaskStatus.PENDING.getValue(),ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
-			String stepStatusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format(" '%s' ", String.join("','",stepStatusList)));
-			//common.step.usertypelist.userlist
-			List<String> userList = new ArrayList<String>();
-			userList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
-			//如果是待处理状态，则需额外匹配角色和组
-			UserVo userVo = userMapper.getUserByUuid(UserContext.get().getUserUuid());
-			if(userVo != null) {
-				List<String> teamList = userVo.getTeamNameList();
-				if(CollectionUtils.isNotEmpty(teamList)) {
-					for(String team : teamList) {
-						userList.add(GroupSearch.TEAM.getValuePlugin()+team);
-					}
-				}
-				List<String> roleUuidList = userVo.getRoleUuidList();
-				if(CollectionUtils.isNotEmpty(roleUuidList)) {
-					for(String roleUuid : roleUuidList) {
-						userList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
-					}
+		//status
+		List<String> statusList = Arrays.asList(ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
+		String statusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STATUS.getValue()),String.format(" '%s' ", String.join("','",statusList)));
+		//common.step.filtstatus
+		List<String> stepStatusList = Arrays.asList(ProcessTaskStatus.PENDING.getValue(),ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
+		String stepStatusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+".filtstatus",String.format(" '%s' ", String.join("','",stepStatusList)));
+		//common.step.usertypelist.userlist
+		List<String> userList = new ArrayList<String>();
+		userList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
+		//如果是待处理状态，则需额外匹配角色和组
+		UserVo userVo = userMapper.getUserByUuid(UserContext.get().getUserUuid());
+		if(userVo != null) {
+			List<String> teamList = userVo.getTeamUuidList();
+			if(CollectionUtils.isNotEmpty(teamList)) {
+				for(String team : teamList) {
+					userList.add(GroupSearch.TEAM.getValuePlugin()+team);
 				}
 			}
-
-			String userListSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP_USER.getValue()),
-					String.format(" '%s' ", String.join("','",userList)));
-			meWillDoSql = String.format(" ([ %s and %s and %s ])", statusSql,stepStatusSql,userListSql) ;
+			List<String> roleUuidList = userVo.getRoleUuidList();
+			if(CollectionUtils.isNotEmpty(roleUuidList)) {
+				for(String roleUuid : roleUuidList) {
+					userList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
+				}
+			}
 		}
+		meWillDoSql = String.format(" ([%s and %s and common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing') and not common.step.isactive contains any (0,-1)])", statusSql,stepStatusSql,String.format(" '%s' ", String.join("','",userList))) ;
+//		meWillDoSql = String.format(" common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing')", String.format(" '%s' ", String.join("','",userList))) ;
 		return meWillDoSql;
 	}
-
+	
 	/**
 	 * 工单中心根据条件获取工单列表数据
 	 * @param workcenterVo
@@ -171,29 +169,29 @@ public class WorkcenterService {
 		}
 		//少补
 		for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-			IProcessTaskColumn column = entry.getValue();
-			if(column.getIsShow()&&CollectionUtils.isEmpty(theadList.stream().filter(data->column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
-				theadList.add(new WorkcenterTheadVo(column));
-			}
-		}
+    		IProcessTaskColumn column = entry.getValue();
+    		if(column.getIsShow()&&CollectionUtils.isEmpty(theadList.stream().filter(data->column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
+    			theadList.add(new WorkcenterTheadVo(column));
+    		}
+    	}
 
 		if (!resultData.isEmpty()) {
-			for (MultiAttrsObject el : resultData) {
-				JSONObject taskJson = new JSONObject();
-				taskJson.put("taskid", el.getId());
-				for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-					IProcessTaskColumn column = entry.getValue();
-					taskJson.put(column.getName(), column.getValue(el));
-				}
-				//route 供前端跳转路由信息
-				JSONObject routeJson = new JSONObject();
-				routeJson.put("taskid", el.getId());
-				taskJson.put("route", routeJson);
-				//action 操作
-				taskJson.put("action", getStepAction(el));
-				dataList.add(taskJson);
-			}
-		}
+            for (MultiAttrsObject el : resultData) {
+            	JSONObject taskJson = new JSONObject();
+            	taskJson.put("taskid", el.getId());
+            	for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+            		IProcessTaskColumn column = entry.getValue();
+            		taskJson.put(column.getName(), column.getValue(el));
+            	}
+            	//route 供前端跳转路由信息
+            	JSONObject routeJson = new JSONObject();
+            	routeJson.put("taskid", el.getId());
+            	taskJson.put("route", routeJson);
+            	//action 操作
+            	taskJson.put("action", getStepAction(el));
+            	dataList.add(taskJson);
+            }
+        }
 		returnObj.put("theadList", theadList);
 		returnObj.put("tbodyList", dataList);
 		returnObj.put("rowNum", result.getTotal());
@@ -207,7 +205,7 @@ public class WorkcenterService {
 		returnObj.put("meWillDoRowNum", meWillDoCount>99?"99+":meWillDoCount.toString());
 		return returnObj;
 	}
-
+	
 	/**
 	 * 工单中心 获取操作按钮
 	 * @param MultiAttrsObject el
@@ -225,7 +223,7 @@ public class WorkcenterService {
 		//TODO 临时测试
 		JSONArray stepArray = null;
 		try {
-			stepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
+		   stepArray = (JSONArray) commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
 		}catch(Exception ex){
 			return "";
 		}
@@ -239,26 +237,26 @@ public class WorkcenterService {
 			JSONObject stepJson = (JSONObject)stepObj;
 			Long stepId = stepJson.getLong("id");
 			String stepName = stepJson.getString("name");
-			String stepStatus = stepJson.getString("status");
+			String stepStatus = stepJson.getString("status");		
 			Integer isActive =stepJson.getInteger("isactive");
 			if((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)||ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)||ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus))
-					&&((ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&&isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {
+					&&((ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&&isActive == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepStatus)||ProcessTaskStatus.DRAFT.getValue().equals(stepStatus))) {		
 				List<String> actionList = new ArrayList<String>();
 				try {
 					actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), stepJson.getLong("id"),new ArrayList<String>(){
 						private static final long serialVersionUID = 1L;
-						{
-							add(ProcessTaskStepAction.WORK.getValue());
-							add(ProcessTaskStepAction.ABORT.getValue());
-							add(ProcessTaskStepAction.RECOVER.getValue());
-							add(ProcessTaskStepAction.URGE.getValue());
+					{
+						add(ProcessTaskStepAction.WORK.getValue());
+						add(ProcessTaskStepAction.ABORT.getValue());
+						add(ProcessTaskStepAction.RECOVER.getValue());
+						add(ProcessTaskStepAction.URGE.getValue());
 						}});
 				}catch(Exception ex) {
 					logger.error(ex.getMessage(),ex);
 				}
-
-				if(actionList.contains(ProcessTaskStepAction.WORK.getValue())) {
-					JSONObject configJson = new JSONObject();
+				
+				if(actionList.contains(ProcessTaskStepAction.WORK.getValue())) { 
+				JSONObject configJson = new JSONObject();
 					configJson.put("taskid", el.getId());
 					configJson.put("stepid", stepId);
 					configJson.put("stepName", stepName);
@@ -269,17 +267,17 @@ public class WorkcenterService {
 					handleArray.add(actionJson);
 				}
 				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
-					isHasAbort = true;
+					isHasAbort = true; 
 				}
 				if(actionList.contains(ProcessTaskStepAction.RECOVER.getValue())) {
-					isHasRecover = true;
+					isHasRecover = true; 
 				}
 				if(actionList.contains(ProcessTaskStepAction.URGE.getValue())) {
-					isHasUrge = true;
+					isHasUrge = true; 
 				}
 			}
 		}
-
+		
 		handleActionJson.put("name", "handle");
 		handleActionJson.put("text", "处理");
 		handleActionJson.put("sort", 2);
@@ -288,8 +286,8 @@ public class WorkcenterService {
 			handleActionJson.put("isEnable", 1);
 		}else {
 			handleActionJson.put("isEnable", 0);
-		}
-
+		} 
+		
 		actionArray.add(handleActionJson);
 		//abort|recover
 		if(isHasAbort||isHasRecover) {
@@ -324,7 +322,7 @@ public class WorkcenterService {
 			abortActionJson.put("isEnable", 0);
 			actionArray.add(abortActionJson);
 		}
-
+		
 		//催办
 		JSONObject urgeActionJson = new JSONObject();
 		urgeActionJson.put("name", ProcessTaskStepAction.URGE.getValue());
@@ -341,12 +339,12 @@ public class WorkcenterService {
 		}
 
 		actionArray.add(urgeActionJson);
-
-
+		
+		
 		actionArray.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("sort")));
 		return actionArray;
 	}
-
+	
 	/**
 	 * 工单中心根据条件获取工单列表数据
 	 * @param workcenterVo
@@ -357,7 +355,7 @@ public class WorkcenterService {
 		QueryResult result = searchTask(workcenterVo);
 		return result.getTotal();
 	}
-
+	
 	/**
 	 * 根据关键字获取所有过滤选项
 	 * @param keyword
@@ -370,7 +368,7 @@ public class WorkcenterService {
 		returnArray.addAll(getKeywordOption(new ProcessTaskIdCondition(),keyword,pageSize));
 		return returnArray;
 	}
-
+	
 	/**
 	 * 根据单个关键字获取过滤选项
 	 * @param keyword
@@ -384,25 +382,25 @@ public class WorkcenterService {
 		if (!dataList.isEmpty()) {
 			JSONObject titleObj = new JSONObject();
 			JSONArray titleDataList = new JSONArray();
-			for (MultiAttrsObject titleEl : dataList) {
-				IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(condition.getName());
-				if(column == null) {
-					continue;
-				}
-				titleDataList.add(column.getValue(titleEl));
-			}
-			titleObj.put("dataList", titleDataList);
-			titleObj.put("value", condition.getName());
-			titleObj.put("text",condition.getDisplayName());
-			returnArray.add(titleObj);
+            for (MultiAttrsObject titleEl : dataList) {
+            	IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(condition.getName());
+            	if(column == null) {
+            		continue;
+            	}
+            	titleDataList.add(column.getValue(titleEl));
+            }
+            titleObj.put("dataList", titleDataList);
+            titleObj.put("value", condition.getName());
+            titleObj.put("text",condition.getDisplayName());
+            returnArray.add(titleObj);
 		}
 		return returnArray;
 	}
-
+	
 	/**
 	 * 拼接关键字过滤选项
 	 * @param type 搜索内容类型
-	 * @return
+	 * @return 
 	 */
 	private WorkcenterVo getKeywordCondition(IProcessTaskCondition condition,String keyword) {
 		JSONObject  searchObj = new JSONObject();
@@ -420,11 +418,11 @@ public class WorkcenterService {
 		conditionGroup.put("conditionList", conditionList);
 		conditionGroupList.add(conditionGroup);
 		searchObj.put("conditionGroupList", conditionGroupList);
-
+		
 		return new WorkcenterVo(searchObj);
-
+		
 	}
-
+	
 	/**
 	 * 拼接where条件
 	 * @param workcenterVo
@@ -471,6 +469,10 @@ public class WorkcenterService {
 			int nestedBasisCount = 0;
 			for(int i = 0;i<conditionList.size();i++) {
 				ConditionVo condition = conditionList.get(i);
+				//关于我的 必定会 nested
+				if(condition.getName().endsWith(ProcessWorkcenterField.ABOUTME.getValue())){
+					nestedBasisCount = nestedBasisCount+2;
+				}
 				if(!condition.getType().equals("form")&&ProcessWorkcenterField.getConditionValue(condition.getName()).startsWith(ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue()))) {
 					nestedBasisCount++;
 				}
@@ -480,7 +482,7 @@ public class WorkcenterService {
 						JSONObject conditionRelationJson = new JSONObject();
 						andConditionList.add(condition);
 						conditionRelationJson.put("list", andConditionList);
-						conditionRelationJson.put("isNested", false);
+						conditionRelationJson.put("isNested", nestedBasisCount>0?true:false);
 						conditionRelationArray.add(conditionRelationJson);
 						andConditionList = new ArrayList<ConditionVo>();
 					}
@@ -541,7 +543,7 @@ public class WorkcenterService {
 				if(isNested) {
 					whereSb.append(" [");
 				}
-
+				
 				for(int andIndex =0;andIndex<andConditionTmpList.size();andIndex++) {
 					ConditionVo condition = andConditionTmpList.get(andIndex);
 					IProcessTaskCondition workcenterCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(condition.getName());
@@ -580,16 +582,16 @@ public class WorkcenterService {
 		}
 		return whereSb.toString()+")";
 	}
-
+	
 	/**
 	 *   流式搜索工单
 	 * @param workcenterVo
-	 * @return
+	 * @return 
 	 */
 	public  QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo){
 		JSONArray resultColumnArray = workcenterVo.getResultColumnList();
 		String selectColumn = "*";
-
+		
 		if(!CollectionUtils.isEmpty(resultColumnArray)) {
 			List<String> columnResultList = new ArrayList<String>();
 			for(Object column:resultColumnArray) {
@@ -597,7 +599,7 @@ public class WorkcenterService {
 				selectColumn = String.join(",", columnResultList);
 			}
 		}
-
+		
 		String where = assembleWhere(workcenterVo);
 		String orderBy = "order by common.starttime desc";
 		String sql = String.format("select %s from %s %s %s limit %d,%d", selectColumn,TenantContext.get().getTenantUuid(),where,orderBy,workcenterVo.getStartNum(),workcenterVo.getPageSize());
@@ -605,7 +607,7 @@ public class WorkcenterService {
 		MultiAttrsQuery query = parser.parse(sql);
 		return query.iterate();
 	}
-
+	
 	/**
 	 * 流式分批获取并处理数据
 	 */
@@ -618,15 +620,15 @@ public class WorkcenterService {
 			if(!result.getData().isEmpty()) {
 				for(MultiAttrsObject el : result.getData()) {
 					JSONObject taskJson = new JSONObject();
-					taskJson.put("taskid", el.getId());
-					for (Object columnObj: workcenterVo.getResultColumnList()) {
-						IProcessTaskColumn column = columnComponentMap.get(columnObj);
-						Object valueText = column.getValueText(el);
-						if(valueText != null) {
-							taskJson.put(column.getName(),column.getValueText(el));
-						}
-					}
-					dataList.add(taskJson);
+	            	taskJson.put("taskid", el.getId());
+	            	for (Object columnObj: workcenterVo.getResultColumnList()) {
+	            		IProcessTaskColumn column = columnComponentMap.get(columnObj);
+	            		Object valueText = column.getValueText(el);
+	            		if(valueText != null) {
+	            			taskJson.put(column.getName(),column.getValueText(el));
+	            		}
+	            	}
+	            	dataList.add(taskJson);
 				}
 			}
 		}

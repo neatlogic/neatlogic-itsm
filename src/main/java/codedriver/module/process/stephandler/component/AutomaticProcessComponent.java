@@ -80,7 +80,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public int getSort() {
-		return 0;
+		return 8;
 	}
 
 	@Override
@@ -153,7 +153,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 			Integer isTimeToRun = null;
 			//检验执行时间窗口
 			if(timeWindowConfig != null) {
-				isTimeToRun = TimeUtil.isInTime(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+				isTimeToRun = TimeUtil.isInTimeWindow(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
 			}
 			if(timeWindowConfig == null || isTimeToRun == 0) {
 				processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);

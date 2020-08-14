@@ -112,7 +112,7 @@ public class ProcessTaskCurrentUserTaskListApi extends ApiComponentBase {
 				processTaskStepIdList.add(processTaskStepWorker.getProcessTaskStepId());
 			}
 
-			List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndIdList(basePageVo.getKeyword(), processTaskIdList);
+			List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndIdList(basePageVo.getKeyword(), processTaskIdList,null,null);
 			Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
 			List<Long> processTaskStepIdList = new ArrayList<>();
 			for(ProcessTaskVo processTask : processTaskList) {
