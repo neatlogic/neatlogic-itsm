@@ -80,7 +80,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public int getSort() {
-		return 0;
+		return 8;
 	}
 
 	@Override
