@@ -10,9 +10,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -41,6 +43,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 	
 	{
 		map.put("willdo", sql->getMeWillDoCondition());
+		map.put("done", sql->getMeDoneCondition());
 	}
 	
 	@Autowired
@@ -59,7 +62,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
 		if(ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-			formHandlerType = FormHandlerType.CHECKBOX.toString();
+			formHandlerType = FormHandlerType.RADIO.toString();
 		}
 		return formHandlerType;
 	}
@@ -78,12 +81,12 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 		JSONObject config = new JSONObject();
 		config.put("type", formHandlerType);
 		config.put("search", false);
-		config.put("multiple", true);
+		config.put("multiple", false);
 		config.put("value", "");
 		config.put("defaultValue", "");
 		config.put("dataList", dataList);
 		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
-		config.put("isMultiple", true);
+		config.put("isMultiple", false);
 		return config;
 	}
 
@@ -100,11 +103,23 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 	@Override
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		String where = StringUtils.EMPTY;
-		Function<String, String> result = map.get("willdo");
-        if (result != null) {
-            //执行这段表达式获得String类型的结果
-            return result.apply("");
-        }
+		ConditionVo condition = conditionList.get(index);
+		List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+		for(String value : valueList) {
+			Function<String, String> result = map.get(value);
+	        if (result != null) {
+	            //拼接条件
+	        	String tmpWhere = result.apply("");
+	        	if(StringUtil.isBlank(where)) {
+	        		where = tmpWhere;
+	        	}else {
+	        		if(StringUtils.isNotBlank(tmpWhere)) {
+	        			//TODO 不支持多选，语法不支持，后续看怎么支持
+	        			//where = String.format(" %s or %s", where,result.apply(""));
+	        		}
+	        	}
+	        }
+		}
 		return where;
 	}
 	
@@ -113,7 +128,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 	 * @return
 	 */
 	private String getMeWillDoCondition() {
-		String meWillDoSql = StringUtils.EMPTY;
+		String sql = StringUtils.EMPTY;
 		//status
 		List<String> statusList = Arrays.asList(ProcessTaskStatus.RUNNING.getValue()).stream().map(object -> object.toString()).collect(Collectors.toList());
 		String statusSql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STATUS.getValue()),String.format(" '%s' ", String.join("','",statusList)));
@@ -139,9 +154,16 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 				}
 			}
 		}
-		meWillDoSql = String.format(" %s and %s and common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing') and not common.step.isactive contains any (0,-1)", statusSql,stepStatusSql,String.format(" '%s' ", String.join("','",userList))) ;
-//		meWillDoSql = String.format(" common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing')", String.format(" '%s' ", String.join("','",userList))) ;
-		return meWillDoSql;
+		sql = String.format(" %s and %s and common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing') and not common.step.isactive contains any (0,-1)", statusSql,stepStatusSql,String.format(" '%s' ", String.join("','",userList))) ;
+//		sql = String.format(" common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing')", String.format(" '%s' ", String.join("','",userList))) ;
+		return sql;
+	}
+	
+	
+	private String getMeDoneCondition() {
+		String sql = StringUtils.EMPTY;
+		sql = String.format(" common.step.usertypelist.list.value = '%s' and common.step.usertypelist.list.status = 'done'",  GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid()) ;
+		return sql;
 	}
 
 	@Override
@@ -149,4 +171,6 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	
 }
