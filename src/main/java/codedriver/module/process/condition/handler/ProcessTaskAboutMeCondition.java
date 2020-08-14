@@ -139,7 +139,8 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 				}
 			}
 		}
-		meWillDoSql = String.format(" ([ %s and %s and common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing')])", statusSql,stepStatusSql,String.format(" '%s' ", String.join("','",userList))) ;
+		meWillDoSql = String.format(" %s and %s and common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing') and not common.step.isactive contains any (0,-1)", statusSql,stepStatusSql,String.format(" '%s' ", String.join("','",userList))) ;
+//		meWillDoSql = String.format(" common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing')", String.format(" '%s' ", String.join("','",userList))) ;
 		return meWillDoSql;
 	}
 
