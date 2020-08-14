@@ -21,6 +21,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -468,6 +469,29 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 									callbackAuditJson.put("isRetry", 0);
 								}
 						}
+					}
+				}
+			}
+			/** 下一步骤列表 **/
+			List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
+			for(ProcessTaskStepVo processTaskStep : nextStepList) {
+				if(processTaskStep.getIsActive() != null) {
+					if(ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
+						if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+							processTaskStep.setName(processTaskStep.getAliasName());
+							processTaskStep.setFlowDirection("");
+						}else {
+							processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
+						}
+						processTaskStepVo.getForwardNextStepList().add(processTaskStep);
+					}else if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
+						if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+							processTaskStep.setName(processTaskStep.getAliasName());
+							processTaskStep.setFlowDirection("");
+						}else {
+							processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
+						}
+						processTaskStepVo.getBackwardNextStepList().add(processTaskStep);
 					}
 				}
 			}
