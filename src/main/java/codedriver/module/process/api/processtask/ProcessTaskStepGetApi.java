@@ -262,6 +262,13 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 				}
 				processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
 				processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
+
+				/** 当前步骤特有步骤信息 **/
+				IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+				if(processStepUtilHandler == null) {
+					throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+				}
+				processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepId));
 				//回复框内容和附件暂存回显				
 				ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 				processTaskStepDataVo.setProcessTaskId(processTaskId);
@@ -296,6 +303,11 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 							commentVo.setFileList(fileList);
 						}
 						processTaskStepVo.setComment(commentVo);
+						/** 当前步骤特有步骤信息 **/
+						JSONObject handlerStepInfo = dataObj.getJSONObject("handlerStepInfo");
+						if(handlerStepInfo != null) {
+							processTaskStepVo.setHandlerStepInfo(handlerStepInfo);
+						}
 					}
 				}
 				
@@ -419,22 +431,14 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 								timeLeft = -worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), expireTime, nowTime);
 							}					
 							processTaskSlaTimeVo.setTimeLeft(timeLeft);
-//							processTaskSlaTimeVo.setTimeLeftDesc(conversionTimeUnit(timeLeft));
 						}
 						if(processTaskSlaTimeVo.getRealExpireTime() != null) {
 							long realTimeLeft = processTaskSlaTimeVo.getRealExpireTime().getTime() - System.currentTimeMillis();
 							processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
-//							processTaskSlaTimeVo.setRealTimeLeftDesc(conversionTimeUnit(realTimeLeft));
 						}
 						processTaskStepVo.getSlaTimeList().add(processTaskSlaTimeVo);
 					}
 				}
-				/** 当前步骤特有步骤信息 **/
-				IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-				if(processStepUtilHandler == null) {
-					throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
-				}
-				processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepId));
 				processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
 			}
 			//processtaskStepData
@@ -488,30 +492,4 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 		return resultObj;
 	}
 	
-//	private String conversionTimeUnit(long milliseconds) {
-//		StringBuilder stringBuilder = new StringBuilder();
-//		milliseconds = Math.abs(milliseconds);
-//		if(milliseconds < 1000) {
-//			stringBuilder.append("0秒");
-//		} else {
-//			if(milliseconds >= (60 * 60 * 1000)) {
-//				long hours = milliseconds / (60 * 60 * 1000);
-//				stringBuilder.append(hours);
-//				stringBuilder.append("小时");
-//				milliseconds = milliseconds % (60 * 60 * 1000);
-//			}
-//			if(milliseconds >= (60 * 1000)) {
-//				long minutes = milliseconds / (60 * 1000);
-//				stringBuilder.append(minutes);
-//				stringBuilder.append("分钟");
-//				milliseconds = milliseconds % (60 * 1000);
-//			}
-//			if(milliseconds >= 1000) {
-//				long seconds = milliseconds / 1000;
-//				stringBuilder.append(seconds);
-//				stringBuilder.append("秒");
-//			}
-//		}
-//		return stringBuilder.toString();
-//	}
 }
