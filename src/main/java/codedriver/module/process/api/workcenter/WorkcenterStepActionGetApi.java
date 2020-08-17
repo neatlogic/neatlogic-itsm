@@ -7,15 +7,11 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.WorkcenterService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.query.QueryResult;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -26,12 +22,12 @@ public class WorkcenterStepActionGetApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "workcenter/step/action/get";
+		return "workcenter/processtask/get";
 	}
 
 	@Override
 	public String getName() {
-		return "获取工单中心操作按钮";
+		return "获取工单中心工单";
 	}
 
 	@Override
@@ -43,12 +39,8 @@ public class WorkcenterStepActionGetApi extends ApiComponentBase {
 			@Param(name = "taskId", desc="工单ID" ,type = ApiParamType.STRING, isRequired = true),
 	})
 	@Output({
-			@Param(name = "name", type = ApiParamType.STRING, desc="处理按钮英文名称"),
-			@Param(name = "text", type = ApiParamType.STRING, desc="处理按钮中文名称"),
-			@Param(name = "sort", type = ApiParamType.STRING, desc="排序字段"),
-			@Param(name = "isEnable", type = ApiParamType.STRING, desc="是否可用"),
 	})
-	@Description(desc = "获取工单中心操作按钮")
+	@Description(desc = "获取工单中心工单")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String jsonStr = "{\"conditionGroupList\":[{\"uuid\":\"185fc3127dfb4566b4d5a303cb4797b9\",\"channelUuidList\":[],\"conditionRelList\":[],\"conditionList\":[{\"uuid\":\"cbeae47566914b488fd1c8939d465dd8\",\"name\":\"id\",\"type\":\"common\",\"valueList\":[\"163426156421120\"],\"expression\":\"like\"}]}]}";
@@ -62,14 +54,14 @@ public class WorkcenterStepActionGetApi extends ApiComponentBase {
 				.set(0,taskId);
 
 		WorkcenterVo workcenterVo = JSON.parseObject(jsonObject.toJSONString(), new TypeReference<WorkcenterVo>(){});
-		QueryResult result = workcenterService.searchTask(workcenterVo);
-		List<MultiAttrsObject> resultData = result.getData();
-		if(CollectionUtils.isNotEmpty(resultData)){
-			MultiAttrsObject el = resultData.get(0);
-			return workcenterService.getStepAction(el);
-		}else{
-			return null;
+		JSONObject result = workcenterService.doSearch(workcenterVo);
+		JSONObject json = null;
+		if(result != null){
+			JSONArray tbodyList = result.getJSONArray("tbodyList");
+			if(tbodyList != null){
+				json = tbodyList.getJSONObject(0);
+			}
 		}
-
+		return json;
 	}
 }
