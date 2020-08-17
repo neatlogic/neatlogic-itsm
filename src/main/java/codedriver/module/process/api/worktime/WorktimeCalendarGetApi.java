@@ -61,6 +61,14 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 		return jsonArray;
 	}
 
+	/**
+	 * 
+	* @Time:2020年8月17日
+	* @Description: 生产日历数据
+	* @param year 年份
+	* @param worktimeDateList 已选中的日期数据
+	* @return JSONArray
+	 */
 	private JSONArray generateCalendar(int year, List<String> worktimeDateList) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		
@@ -76,11 +84,12 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(year, 0, 1);
 		for(int i = 1; i < calendar.get(Calendar.DAY_OF_WEEK); i++) {
-			JSONObject NonDateObj = new JSONObject();
-			NonDateObj.put("name", "");
-			NonDateObj.put("dayOfMonth", "");
-			NonDateObj.put("classType", 0);
-			dateList.add(NonDateObj);
+			JSONObject nonDateObj = new JSONObject();
+			nonDateObj.put("name", "");
+			nonDateObj.put("dayOfMonth", "");
+			nonDateObj.put("dayOfWeek", 0);
+			nonDateObj.put("selected", 0);
+			dateList.add(nonDateObj);
 		}
 		while(calendar.get(Calendar.YEAR) == year) {
 			if(calendar.get(Calendar.MONTH) != monthIndex) {
@@ -92,11 +101,12 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 				dateList = new JSONArray();
 				
 				for(int i = 1; i < calendar.get(Calendar.DAY_OF_WEEK); i++) {
-					JSONObject NonDateObj = new JSONObject();
-					NonDateObj.put("name", "");
-					NonDateObj.put("dayOfMonth", "");
-					NonDateObj.put("classType", 0);
-					dateList.add(NonDateObj);
+					JSONObject nonDateObj = new JSONObject();
+					nonDateObj.put("name", "");
+					nonDateObj.put("dayOfMonth", "");
+					nonDateObj.put("dayOfWeek", 0);
+					nonDateObj.put("selected", 0);
+					dateList.add(nonDateObj);
 				}
 			}
 			
@@ -113,7 +123,8 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 			dateName = sdf.format(calendar.getTime());
 			dateObj.put("name", dateName);
 			dateObj.put("dayOfMonth", calendar.get(Calendar.DAY_OF_MONTH));
-			dateObj.put("classType", getClassType(calendar.get(Calendar.DAY_OF_WEEK), worktimeDateList.contains(dateName)));
+			dateObj.put("dayOfWeek", calendar.get(Calendar.DAY_OF_WEEK));
+			dateObj.put("selected", worktimeDateList.contains(dateName) ? 1 : 0);
 			dateList.add(dateObj);
 			calendar.add(Calendar.DATE, 1);
 		}
@@ -126,7 +137,13 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 		trList.add(trObj);
 		return trList;
 	}
-
+	/**
+	 * 
+	* @Time:2020年8月17日
+	* @Description: 获取月份名称 
+	* @param monthIndex
+	* @return String
+	 */
 	private String getMonthName(int monthIndex) {
 		monthIndex += 1;
 		if(monthIndex < 10) {
@@ -135,19 +152,19 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 		return "" + monthIndex;
 	}
 
-	private Object getClassType(int dayOfWeek, boolean selected) {
-		int classType = 0;
-		if(dayOfWeek >=2 && dayOfWeek <= 6) {//工作日
-			classType = 1;
-		}else if(dayOfWeek == 1 || dayOfWeek == 7){//非工作日
-			classType = 2;
-		}else {//空格
-			return classType;	
-		}
-		
-		if(selected) {//已选中
-			classType *= 4;
-		}
-		return classType;
-	}
+//	private Object getClassType(int dayOfWeek, boolean selected) {
+//		int classType = 0;
+//		if(dayOfWeek >=2 && dayOfWeek <= 6) {//工作日
+//			classType = 1;
+//		}else if(dayOfWeek == 1 || dayOfWeek == 7){//非工作日
+//			classType = 2;
+//		}else {//空格
+//			return classType;	
+//		}
+//		
+//		if(selected) {//已选中
+//			classType *= 4;
+//		}
+//		return classType;
+//	}
 }
