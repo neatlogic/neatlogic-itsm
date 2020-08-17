@@ -87,7 +87,7 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 			JSONObject nonDateObj = new JSONObject();
 			nonDateObj.put("name", "");
 			nonDateObj.put("dayOfMonth", "");
-			nonDateObj.put("dayOfWeek", 0);
+			nonDateObj.put("dayOfWeek", -1);
 			nonDateObj.put("selected", 0);
 			dateList.add(nonDateObj);
 		}
@@ -104,7 +104,7 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 					JSONObject nonDateObj = new JSONObject();
 					nonDateObj.put("name", "");
 					nonDateObj.put("dayOfMonth", "");
-					nonDateObj.put("dayOfWeek", 0);
+					nonDateObj.put("dayOfWeek", -1);
 					nonDateObj.put("selected", 0);
 					dateList.add(nonDateObj);
 				}
@@ -123,7 +123,7 @@ public class WorktimeCalendarGetApi extends ApiComponentBase {
 			dateName = sdf.format(calendar.getTime());
 			dateObj.put("name", dateName);
 			dateObj.put("dayOfMonth", calendar.get(Calendar.DAY_OF_MONTH));
-			dateObj.put("dayOfWeek", calendar.get(Calendar.DAY_OF_WEEK));
+			dateObj.put("dayOfWeek", calendar.get(Calendar.DAY_OF_WEEK) - 1);
 			dateObj.put("selected", worktimeDateList.contains(dateName) ? 1 : 0);
 			dateList.add(dateObj);
 			calendar.add(Calendar.DATE, 1);
