@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -65,6 +66,11 @@ public class ChannelGetApi extends ApiComponentBase {
 		channel.setPriorityUuidList(priorityUuidList);
 		List<AuthorityVo> authorityVoList = channelMapper.getChannelAuthorityListByChannelUuid(uuid);
 		channel.setAuthorityVoList(authorityVoList);
+		if(channelMapper.checkChannelIsFavorite(UserContext.get().getUserUuid(true), uuid) == 0) {
+		    channel.setIsFavorite(0);
+		}else {
+		    channel.setIsFavorite(1);
+		}
 		return channel;
 	}
 
