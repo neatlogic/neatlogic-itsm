@@ -104,12 +104,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		
 		boolean isUpdate = false;
 		//获取上报描述内容hash
-		String oldContentHash = null;
-		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
-		if(!processTaskStepContentList.isEmpty()) {
-			oldContentHash = processTaskStepContentList.get(0).getContentHash();
-		}
-
+		String oldContentHash = processTaskMapper.getProcessTaskStepContentHashByProcessTaskStepId(startProcessTaskStepId);
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);

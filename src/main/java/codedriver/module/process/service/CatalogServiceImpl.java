@@ -125,7 +125,7 @@ public class CatalogServiceImpl implements CatalogService {
 				if(catalogVo != null && !CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
 					/** 查出当前用户所有已授权的目录uuid集合  **/
 					List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
-					List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfUuidByLftRht(catalogVo.getLft(), catalogVo.getRht());
+					List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
 					for(CatalogVo catalog : ancestorsAndSelfList) {
 						if(!CatalogVo.ROOT_UUID.equals(catalog.getUuid())) {
 							if(Objects.equals(catalog.getIsActive(), 0)) {

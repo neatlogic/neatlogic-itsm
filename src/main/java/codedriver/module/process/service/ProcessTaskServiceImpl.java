@@ -67,7 +67,6 @@ import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
-import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -1029,9 +1028,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		Long startProcessTaskStepId = startProcessTaskStepVo.getId();
 		ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
 		//获取上报描述内容
-		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
-		if(!processTaskStepContentList.isEmpty()) {
-			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
+		String processTaskStepContentHash = processTaskMapper.getProcessTaskStepContentHashByProcessTaskStepId(startProcessTaskStepId);
+		if(StringUtils.isNotBlank(processTaskStepContentHash)) {
+			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentHash);
 			if(processTaskContentVo != null) {
 				comment.setContent(processTaskContentVo.getContent());
 			}
