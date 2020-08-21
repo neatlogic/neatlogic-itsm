@@ -239,6 +239,12 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 			}
 		}
 		
+		//TODO 兼容老工单表单（判断是否存在旧表单）
+		Map<String,String> oldFormPropMap = processTaskMapper.getProcessTaskOldFormAndPropByTaskId(processTaskId);
+		if(oldFormPropMap != null&&oldFormPropMap.size()>0) {
+		    processTaskVo.setIsHasOldFormProp(1);
+		}
+		
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("processTask", processTaskVo);
 		
