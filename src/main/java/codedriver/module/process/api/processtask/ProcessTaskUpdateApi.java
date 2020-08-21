@@ -28,8 +28,6 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -38,6 +36,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 
 @Service
 @Transactional
@@ -52,6 +51,9 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 	
 	@Autowired
 	private FileMapper fileMapper;
+    
+    @Autowired
+    private ProcessTaskService processTaskService;
 
 	@Override
 	public String getToken() {
@@ -80,22 +82,9 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
+        Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-		if(processTaskVo == null) {
-			throw new ProcessTaskNotFoundException(processTaskId.toString());
-		}
-		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-		processTaskStepVo.setProcessTaskId(processTaskId);
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(processTaskStepId != null) {
-			processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-			if(processTaskStepVo == null) {
-				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
-			}
-			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
-				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
-			}
-		}
 		
 		//获取开始步骤id
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
@@ -195,6 +184,9 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 
 		//生成活动
 		if(isUpdate) {
+		    ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+		    processTaskStepVo.setProcessTaskId(processTaskId);
+		    processTaskStepVo.setId(processTaskStepId);
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);	
 		}

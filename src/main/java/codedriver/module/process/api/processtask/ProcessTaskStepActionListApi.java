@@ -17,10 +17,6 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
@@ -62,27 +58,18 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
+        Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		ProcessTaskStepVo processTaskStepVo = null;
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-		if(processTaskVo == null) {
-			throw new ProcessTaskNotFoundException(processTaskId.toString());
-		}
 		Map<String, String> customButtonMap = new HashMap<>();
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		if(processTaskStepId != null) {
 			processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-			if(processTaskStepVo == null) {
-				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
-			}
-			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
-				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
-			}
 			customButtonMap = processTaskService.getCustomButtonTextMap(processTaskStepId);
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
 		List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
 		//TODO automatic ，临时处理，重构后删去
-		if(processTaskStepVo!=null&&ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
+		if(processTaskStepVo != null && ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
 //			actionList = Arrays.asList("view", "transfer", "pocesstaskview", "work", "complete");
 			actionList.remove(ProcessTaskStepAction.STARTPROCESS.getValue());
 			actionList.remove(ProcessTaskStepAction.START.getValue());

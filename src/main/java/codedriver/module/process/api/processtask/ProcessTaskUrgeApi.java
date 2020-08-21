@@ -3,6 +3,7 @@ package codedriver.module.process.api.processtask;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -19,11 +20,15 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
 public class ProcessTaskUrgeApi extends ApiComponentBase {
+    
+    @Autowired
+    private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -47,6 +52,7 @@ public class ProcessTaskUrgeApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
+		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
 		List<ProcessTaskStepVo> processTaskStepList = handler.getUrgeableStepList(processTaskId);
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
