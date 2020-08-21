@@ -90,6 +90,7 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj, JSONReader jsonReader) throws Exception {
         List<ProcessTaskVo> processTaskList = new ArrayList<ProcessTaskVo>();
+        List<String> errorTaskList = new ArrayList<String>();
         jsonReader.startArray();
         while (jsonReader.hasNext()) {
             ProcessTaskVo processTask = new ProcessTaskVo();
@@ -120,7 +121,9 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                         ProcessVo process = processMapper.getProcessByName(taskValue);
                         if(process == null) {
                             isContinute = true;
-                            logger.error(processTask.getId()+" 工单的 '"+taskValue+"' 流程不存在");
+                            String errorTask = processTask.getId()+" 工单的 '"+taskValue+"' 流程不存在";
+                            logger.error(errorTask);
+                            errorTaskList.add(errorTask);
                             break;
                         }
                         processTask.setProcessUuid(process.getUuid());
@@ -292,7 +295,7 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
         }
         jsonReader.endArray();
         jsonReader.close();
-        return null;
+        return errorTaskList;
     }
 
     @Override
