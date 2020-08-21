@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,6 @@ import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
-import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -162,9 +162,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 
 		ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
 		//获取上报描述内容
-		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepVo.getId());
-		if(!processTaskStepContentList.isEmpty()) {
-			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentList.get(0).getContentHash());
+		String processTaskStepContentHash = processTaskMapper.getProcessTaskStepContentHashByProcessTaskStepId(startProcessTaskStepVo.getId());
+		if(StringUtils.isNotBlank(processTaskStepContentHash)) {
+			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentHash);
 			if(processTaskContentVo != null) {
 				comment.setContent(processTaskContentVo.getContent());
 			}

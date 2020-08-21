@@ -19,6 +19,7 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 @Service
@@ -27,6 +28,9 @@ public class ProcessTaskProcessableStepList extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+    
+    @Autowired
+    private ProcessTaskService processTaskService;
 
 	@Override
 	public String getToken() {
@@ -54,6 +58,7 @@ public class ProcessTaskProcessableStepList extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
+		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		List<ProcessTaskStepVo> processableStepList = ProcessStepUtilHandlerFactory.getHandler().getProcessableStepList(processTaskId);
 		String action = jsonObj.getString("action");
 		if(StringUtils.isNotBlank(action)) {

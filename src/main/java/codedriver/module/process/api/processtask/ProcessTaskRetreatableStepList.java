@@ -8,18 +8,16 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskRetreatableStepList extends ApiComponentBase {
-	
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
+    
+    @Autowired
+    private ProcessTaskService processTaskService;
 	
 	@Override
 	public String getToken() {
@@ -45,10 +43,7 @@ public class ProcessTaskRetreatableStepList extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-		if(processTaskVo == null) {
-			throw new ProcessTaskNotFoundException(processTaskId.toString());
-		}
+		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		return ProcessStepUtilHandlerFactory.getHandler().getRetractableStepList(processTaskId);
 	}
 

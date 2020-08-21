@@ -6,6 +6,7 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -107,4 +108,116 @@ public interface ProcessTaskService {
 	* @return Map<String,String>
 	 */
 	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
+	
+	/**
+	 * 
+	* @Author: linbq
+	* @Time:2020年8月21日
+	* @Description: 检查工单参数是否合法 
+	* @param processTaskId 工单id
+	* @param processTaskStepId 步骤id
+	* @param nextStepId 下一步骤id
+	* @return boolean
+	 */
+	public boolean checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 检查工单参数是否合法 
+    * @param processTaskId 工单id
+    * @param processTaskStepId 步骤id
+    * @return boolean
+     */
+	public boolean checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 检查工单参数是否合法 
+    * @param processTaskId 工单id
+    * @return boolean
+     */
+	public boolean checkProcessTaskParamsIsLegal(Long processTaskId);
+	/**
+	 * 
+	* @Author: linbq
+	* @Time:2020年8月21日
+	* @Description: 获取工单信息 
+	* @param processTaskId 工单id
+	* @return ProcessTaskVo
+	 */
+	public ProcessTaskVo getProcessTaskDetailById(Long processTaskId);
+	/**
+	 * 
+	* @Author: linbq
+	* @Time:2020年8月21日
+	* @Description: 获取开始步骤信息 
+	* @param processTaskId 工单id
+	* @return ProcessTaskStepVo
+	 */
+	public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取当前步骤信息 
+    * @param processTaskStepId 步骤id
+    * @return ProcessTaskStepVo
+     */
+	public ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取步骤回复列表
+    * @param processTaskStepId 步骤id
+    * @return List<ProcessTaskStepCommentVo>
+     */
+	public List<ProcessTaskStepCommentVo> getProcessTaskStepCommentListByProcessTaskStepId(Long processTaskStepId);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取步骤子任务列表
+    * @param processTaskStepId 步骤id
+    * @return List<ProcessTaskStepSubtaskVo>
+     */
+	public List<ProcessTaskStepSubtaskVo> getProcessTaskStepSubtaskListByProcessTaskStepId(Long processTaskStepId);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取可分配处理人的步骤列表
+    * @param processTaskStepId 步骤id
+    * @return List<ProcessTaskStepVo>
+     */
+	public List<ProcessTaskStepVo> getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(Long processTaskId, String processStepUuid);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取步骤时效列表
+    * @param processTaskStepId 步骤id
+    * @return List<ProcessTaskSlaTimeVo>
+     */
+	public List<ProcessTaskSlaTimeVo> getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(Long processTaskStepId, String worktimeUuid);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 设置下一步骤列表
+    * @param ProcessTaskStepVo 步骤信息
+    * @return void
+     */
+	public void setNextStepList(ProcessTaskStepVo processTaskStepVo);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 设置步骤当前用户的暂存数据
+    * @param ProcessTaskStepVo 步骤信息
+    * @return void
+     */
+	public void setTemporaryData(ProcessTaskStepVo processTaskStepVo);
 }

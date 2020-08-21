@@ -18,6 +18,7 @@ import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 @Service
@@ -26,6 +27,9 @@ public class ProcessTaskStepStatusListApi extends ApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+    
+    @Autowired
+    private ProcessTaskService processTaskService;
 
     @Autowired
     private ProcessStepHandlerMapper stepHandlerMapper;
@@ -54,7 +58,8 @@ public class ProcessTaskStepStatusListApi extends ApiComponentBase {
 	@Description(desc = "工单全部步骤状态列表接口，用于流程图上显示步骤状态")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long processTaskId = jsonObj.getLong("processTaskId");	
+		Long processTaskId = jsonObj.getLong("processTaskId");
+		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
 			Map<String, ProcessStepHandlerVo> handlerConfigMap = new HashMap<>();

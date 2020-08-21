@@ -26,16 +26,14 @@ import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 
 @Service
 @Transactional
@@ -44,6 +42,9 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+    
+    @Autowired
+    private ProcessTaskService processTaskService;
 	
 	@Autowired
 	private FileMapper fileMapper;
@@ -72,25 +73,10 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-		if(processTaskVo == null) {
-			throw new ProcessTaskNotFoundException(processTaskId.toString());
-		}
+        Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
-		
-		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-		processTaskStepVo.setProcessTaskId(processTaskId);
-		Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		if(processTaskStepId != null) {
-			processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-			if(processTaskStepVo == null) {
-				throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
-			}
-			if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
-				throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
-			}
-		}
 		
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
 		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
@@ -104,12 +90,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		
 		boolean isUpdate = false;
 		//获取上报描述内容hash
-		String oldContentHash = null;
-		List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentProcessTaskStepId(startProcessTaskStepId);
-		if(!processTaskStepContentList.isEmpty()) {
-			oldContentHash = processTaskStepContentList.get(0).getContentHash();
-		}
-
+		String oldContentHash = processTaskMapper.getProcessTaskStepContentHashByProcessTaskStepId(startProcessTaskStepId);
 		String content = jsonObj.getString("content");
 		if(StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
@@ -163,7 +144,10 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		}
 
 		//生成活动
-		if(isUpdate) {
+		if(isUpdate) {	        
+	        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+	        processTaskStepVo.setProcessTaskId(processTaskId);
+	        processTaskStepVo.setId(processTaskStepId);
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);	
 		}
