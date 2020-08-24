@@ -35,7 +35,6 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
@@ -505,10 +504,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	@Override
 	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepComment) {
 		if(StringUtils.isBlank(processTaskStepComment.getContent()) && StringUtils.isNotBlank(processTaskStepComment.getContentHash())) {
-//			ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepComment.getContentHash());
-//			if(contentVo != null) {
-//				processTaskStepComment.setContent(contentVo.getContent());
-//			}
 			processTaskStepComment.setContent(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepComment.getContentHash()));
 		}
 		if(StringUtils.isNotBlank(processTaskStepComment.getFileIdListHash())) {
@@ -517,12 +512,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				List<Long> fileIdList = JSON.parseArray(fileIdListString, Long.class);
 				if(CollectionUtils.isNotEmpty(fileIdList)) {
 					processTaskStepComment.setFileIdList(fileIdList);
-					for(Long fileId : fileIdList) {
-						FileVo fileVo = fileMapper.getFileById(fileId);
-						if(fileVo != null) {
-							processTaskStepComment.getFileList().add(fileVo);
-						}
-					}
+					processTaskStepComment.setFileList(fileMapper.getFileListByIdList(fileIdList));
 				}
 			}
 		}			
