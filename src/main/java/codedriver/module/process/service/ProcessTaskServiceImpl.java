@@ -1343,7 +1343,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         
         //获取可分配处理人的步骤列表             
-        processTaskStepVo.setAssignableWorkerStepList(getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessUuid()));
+        processTaskStepVo.setAssignableWorkerStepList(getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
         
         //时效列表
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);

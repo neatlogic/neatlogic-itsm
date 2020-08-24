@@ -117,7 +117,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 		    
 		    ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
 			//获取可分配处理人的步骤列表				
-			startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getProcessUuid()));
+			startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getProcessStepUuid()));
 			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 			
 			if(StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
