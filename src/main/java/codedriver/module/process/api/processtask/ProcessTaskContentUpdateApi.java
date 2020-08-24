@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -110,17 +109,8 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		}
 		
 		//获取上传附件uuid
-		List<Long> oldFileIdList = new ArrayList<>();
-		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
-		processTaskFileVo.setProcessTaskId(processTaskId);
-		processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
-		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
-		if(CollectionUtils.isNotEmpty(processTaskFileList)) {
-			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-				oldFileIdList.add(processTaskFile.getFileId());
-			}
-			
-		}
+		List<Long> oldFileIdList = processTaskMapper.getFileIdListByProcessTaskStepId(startProcessTaskStepId);
+
 		/** 保存新附件uuid **/
 		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
 		if(fileIdList == null) {
@@ -132,6 +122,9 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldFileIdList));
 			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
 			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), processTaskContentVo.getHash());
+			ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
+			processTaskFileVo.setProcessTaskId(processTaskId);
+			processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
 			processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
 			for (Long fileId : fileIdList) {
 				if(fileMapper.getFileById(fileId) != null) {

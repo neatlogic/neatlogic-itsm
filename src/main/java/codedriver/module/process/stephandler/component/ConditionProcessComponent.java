@@ -40,6 +40,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.RelExpressionVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.util.RunScriptUtil;
 
 @Service
@@ -141,7 +142,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 							} else if ("optional".equals(type)) {// 自定义
 								JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
 								if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-									ProcessTaskVo processTaskVo = ProcessTaskHandlerUtil.getProcessTaskDetailInfoById(currentProcessTaskStepVo.getProcessTaskId());
+									ProcessTaskVo processTaskVo = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 									processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
 									JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
 									try {
