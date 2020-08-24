@@ -22,6 +22,7 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
@@ -74,6 +75,13 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 					ListIterator<Object> userTypeIterator = userTypeArray.listIterator();
 					while(userTypeIterator.hasNext()) {
 						JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
+						//判断子任务|变更步骤
+						if(ProcessStepHandler.CHANGEHANDLE.getHandler().equals(currentStepJson.getString("handler"))
+						    && ProcessUserType.MINOR.getValue().equals(userTypeJson.getString("usertype"))) {
+						    userTypeJson.put("usertypename", "变更步骤");
+						}else {
+						    userTypeJson.put("usertypename", "子任务");
+						}
 						//待处理
 						if(userTypeJson.getString("usertype").equals(ProcessUserType.WORKER.getValue())) {
 							JSONArray userArray = userTypeJson.getJSONArray("userlist");
