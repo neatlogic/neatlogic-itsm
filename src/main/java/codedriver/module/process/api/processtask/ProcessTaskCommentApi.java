@@ -129,12 +129,8 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
 		}
-		List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
-		for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
-			processTaskService.parseProcessTaskStepComment(processTaskStepComment);
-		}
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("commentList", processTaskStepCommentList);
+		resultObj.put("commentList", processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId));
 		return resultObj;
 	}
 

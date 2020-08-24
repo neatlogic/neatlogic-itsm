@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,6 @@ import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetail
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -94,9 +94,9 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 				while(iterator.hasNext()) {
 					ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo = iterator.next();
 					if(ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-						ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepAuditDetailVo.getNewContent());
-						if(processTaskContentVo != null) {
-							processTaskStepAudit.setNextStepId(Long.parseLong(processTaskContentVo.getContent()));
+						String content = processTaskMapper.getProcessTaskContentStringByHash(processTaskStepAuditDetailVo.getNewContent());
+						if(StringUtils.isNotBlank(content)) {
+							processTaskStepAudit.setNextStepId(Long.parseLong(content));
 						}
 					}
 					IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());

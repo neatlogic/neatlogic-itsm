@@ -114,13 +114,9 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldCommentVo.getProcessTaskStepId());	
 			processTaskStepVo.setParamObj(jsonObj);
 			ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
-			
-			List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(oldCommentVo.getProcessTaskStepId());
-			for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
-				processTaskService.parseProcessTaskStepComment(processTaskStepComment);
-			}
+
 			JSONObject resultObj = new JSONObject();
-			resultObj.put("commentList", processTaskStepCommentList);
+			resultObj.put("commentList", processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(oldCommentVo.getProcessTaskStepId()));
 			return resultObj;
 		}else {
 			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.EDITCOMMENT.getText());
