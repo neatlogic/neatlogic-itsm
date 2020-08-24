@@ -201,15 +201,7 @@ public interface ProcessTaskService {
     * @return void
      */
 	public void setNextStepList(ProcessTaskStepVo processTaskStepVo);
-	/**
-     * 
-    * @Author: linbq
-    * @Time:2020年8月21日
-    * @Description: 设置步骤当前用户的暂存数据
-    * @param ProcessTaskStepVo 步骤信息
-    * @return void
-     */
-//	public void setTemporaryData(ProcessTaskStepVo processTaskStepVo);
+
 	/**
 	 * 
 	* @Author: linbq

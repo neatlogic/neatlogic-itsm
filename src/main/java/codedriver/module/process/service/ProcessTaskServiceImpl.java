@@ -28,7 +28,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.common.constvalue.UserType;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamVo;
@@ -1122,69 +1121,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
         processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
         List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
-        if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-            Map<String, String> customButtonMap = getCustomButtonTextMap(processTaskStepId);
-            List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
-            for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-                String currentUser = UserContext.get().getUserUuid(true);
-                if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
-                        || (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
-                    List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
-                    Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
-                    while(iterator.hasNext()) {
-                        ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
-                        if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-                            if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
-                                processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
-                                iterator.remove();
-                            }
-                        }
+        for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+            List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
+            Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
+            while(iterator.hasNext()) {
+                ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
+                if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
+                    if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+                        processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
+                        iterator.remove();
                     }
-                    processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
-                    if(processTaskStepSubtask.getIsAbortable() == 1) {
-                        String value = ProcessTaskStepAction.ABORTSUBTASK.getValue();
-                        String text = customButtonMap.get(value);
-                        if(StringUtils.isBlank(text)) {
-                            text = ProcessTaskStepAction.ABORTSUBTASK.getText();
-                        }
-                        processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                    }
-                    if(processTaskStepSubtask.getIsCommentable() == 1) {
-                        String value = ProcessTaskStepAction.COMMENTSUBTASK.getValue();
-                        String text = customButtonMap.get(value);
-                        if(StringUtils.isBlank(text)) {
-                            text = ProcessTaskStepAction.COMMENTSUBTASK.getText();
-                        }
-                        processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                    }
-                    if(processTaskStepSubtask.getIsCompletable() == 1) {
-                        String value = ProcessTaskStepAction.COMPLETESUBTASK.getValue();
-                        String text = customButtonMap.get(value);
-                        if(StringUtils.isBlank(text)) {
-                            text = ProcessTaskStepAction.COMPLETESUBTASK.getText();
-                        }
-                        processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                    }
-                    if(processTaskStepSubtask.getIsEditable() == 1) {
-                        String value = ProcessTaskStepAction.EDITSUBTASK.getValue();
-                        String text = customButtonMap.get(value);
-                        if(StringUtils.isBlank(text)) {
-                            text = ProcessTaskStepAction.EDITSUBTASK.getText();
-                        }
-                        processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                    }
-                    if(processTaskStepSubtask.getIsRedoable() == 1) {
-                        String value = ProcessTaskStepAction.REDOSUBTASK.getValue();
-                        String text = customButtonMap.get(value);
-                        if(StringUtils.isBlank(text)) {
-                            text = ProcessTaskStepAction.REDOSUBTASK.getText();
-                        }
-                        processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                    }
-                    subtaskList.add(processTaskStepSubtask);
                 }
             }
-            return subtaskList;
+            processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
         }
         return processTaskStepSubtaskList;
     }

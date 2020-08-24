@@ -22,6 +22,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
+import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -122,7 +123,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 				}
 				if(toStepList.size() > 1) {
 					//按开始时间正序排序
-					toStepList.sort((step1, step2) -> (int)(step1.getStartTime().getTime() - step2.getStartTime().getTime()));
+					toStepList.sort((step1, step2) -> step1.getStartTime().compareTo(step2.getStartTime()));
 				}
 				resultList.addAll(toStepList);
 			}
@@ -163,31 +164,14 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
         //步骤评论列表
         startProcessTaskStepVo.setCommentList(processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(startProcessTaskStepVo.getId()));
         //子任务列表
-        startProcessTaskStepVo.setProcessTaskStepSubtaskList(processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId()));
-//        ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
-//        processTaskStepSubtaskVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
-//        processTaskStepSubtaskVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
-//        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
-//        for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-//            List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
-//            Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
-//            while(iterator.hasNext()) {
-//                ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
-//                if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-//                    if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
-//                        processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
-//                        iterator.remove();
-//                    }
-//                }
-//            }
-//            processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
-//            processTaskStepSubtask.setIsAbortable(0);
-//            processTaskStepSubtask.setIsCompletable(0);
-//            processTaskStepSubtask.setIsEditable(0);
-//            processTaskStepSubtask.setIsRedoable(0);
-//            
-//        }
-//        startProcessTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId());
+        for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+            processTaskStepSubtask.setIsAbortable(0);
+            processTaskStepSubtask.setIsCompletable(0);
+            processTaskStepSubtask.setIsEditable(0);
+            processTaskStepSubtask.setIsRedoable(0);
+        }
+        startProcessTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
         
         startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
         startProcessTaskStepVo.setIsView(1);
@@ -215,31 +199,14 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
         //步骤评论列表
         processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepVo.getId()));
         //子任务列表
-//        ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
-//        processTaskStepSubtaskVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
-//        processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepVo.getId());
-//        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
-//        for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-//            List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
-//            Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
-//            while(iterator.hasNext()) {
-//                ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
-//                if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-//                    if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
-//                        processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
-//                        iterator.remove();
-//                    }
-//                }
-//            }
-//            processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
-//            processTaskStepSubtask.setIsAbortable(0);
-//            processTaskStepSubtask.setIsCompletable(0);
-//            processTaskStepSubtask.setIsEditable(0);
-//            processTaskStepSubtask.setIsRedoable(0);
-//            
-//        }
-//        processTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
-        processTaskStepVo.setProcessTaskStepSubtaskList(processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId()));
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId());
+        for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+            processTaskStepSubtask.setIsAbortable(0);
+            processTaskStepSubtask.setIsCompletable(0);
+            processTaskStepSubtask.setIsEditable(0);
+            processTaskStepSubtask.setIsRedoable(0);
+        }
+        processTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
         //时效列表
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskStepVo.getProcessTaskId());
         processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepVo.getId(), processTaskVo.getWorktimeUuid()));

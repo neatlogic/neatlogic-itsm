@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -27,6 +28,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
@@ -156,8 +158,58 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
         
         //获取当前用户有权限的所有子任务
         //子任务列表
-        if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {          
-            processTaskStepVo.setProcessTaskStepSubtaskList(processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId));
+        if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+            List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+            if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
+                Map<String, String> customButtonMap = processTaskService.getCustomButtonTextMap(processTaskStepId);
+                for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+                    String currentUser = UserContext.get().getUserUuid(true);
+                    if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
+                        || (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
+                        if(processTaskStepSubtask.getIsAbortable() == 1) {
+                            String value = ProcessTaskStepAction.ABORTSUBTASK.getValue();
+                            String text = customButtonMap.get(value);
+                            if(StringUtils.isBlank(text)) {
+                                text = ProcessTaskStepAction.ABORTSUBTASK.getText();
+                            }
+                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+                        }
+                        if(processTaskStepSubtask.getIsCommentable() == 1) {
+                            String value = ProcessTaskStepAction.COMMENTSUBTASK.getValue();
+                            String text = customButtonMap.get(value);
+                            if(StringUtils.isBlank(text)) {
+                                text = ProcessTaskStepAction.COMMENTSUBTASK.getText();
+                            }
+                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+                        }
+                        if(processTaskStepSubtask.getIsCompletable() == 1) {
+                            String value = ProcessTaskStepAction.COMPLETESUBTASK.getValue();
+                            String text = customButtonMap.get(value);
+                            if(StringUtils.isBlank(text)) {
+                                text = ProcessTaskStepAction.COMPLETESUBTASK.getText();
+                            }
+                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+                        }
+                        if(processTaskStepSubtask.getIsEditable() == 1) {
+                            String value = ProcessTaskStepAction.EDITSUBTASK.getValue();
+                            String text = customButtonMap.get(value);
+                            if(StringUtils.isBlank(text)) {
+                                text = ProcessTaskStepAction.EDITSUBTASK.getText();
+                            }
+                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+                        }
+                        if(processTaskStepSubtask.getIsRedoable() == 1) {
+                            String value = ProcessTaskStepAction.REDOSUBTASK.getValue();
+                            String text = customButtonMap.get(value);
+                            if(StringUtils.isBlank(text)) {
+                                text = ProcessTaskStepAction.REDOSUBTASK.getText();
+                            }
+                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+                        }
+                        processTaskStepVo.getProcessTaskStepSubtaskList().add(processTaskStepSubtask);
+                    }
+                }
+            }
         }
         
         //获取可分配处理人的步骤列表             
@@ -201,7 +253,14 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
         processTaskService.setNextStepList(processTaskStepVo);
         return processTaskStepVo;
     }
-	
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 设置步骤当前用户的暂存数据
+    * @param ProcessTaskStepVo 步骤信息
+    * @return void
+     */
 	private void setTemporaryData(ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
