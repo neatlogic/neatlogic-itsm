@@ -25,10 +25,6 @@ public class SubtaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
 			ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});
-//			ProcessTaskContentVo processTaskContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepSubtaskVo.getContentHash());
-//			if(processTaskContentVo != null) {
-//				processTaskStepSubtaskVo.setContent(processTaskContentVo.getContent());
-//			}
 			processTaskStepSubtaskVo.setContent(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepSubtaskVo.getContentHash()));
 			JSONObject content = new JSONObject();
 			content.put("type", "content");
@@ -47,10 +43,6 @@ public class SubtaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 
 			if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getOldContent())) {
 				ProcessTaskStepSubtaskVo oldProcessTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getOldContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});		
-//				ProcessTaskContentVo oldContentVo = processTaskMapper.getProcessTaskContentByHash(oldProcessTaskStepSubtaskVo.getContentHash());
-//				if(oldContentVo != null) {
-//					oldProcessTaskStepSubtaskVo.setContent(oldContentVo.getContent());
-//				}
 				oldProcessTaskStepSubtaskVo.setContent(processTaskMapper.getProcessTaskContentStringByHash(oldProcessTaskStepSubtaskVo.getContentHash()));
 				if(!Objects.equal(oldProcessTaskStepSubtaskVo.getContent(), processTaskStepSubtaskVo.getContent())) {
 					content.put("oldContent", oldProcessTaskStepSubtaskVo.getContent());

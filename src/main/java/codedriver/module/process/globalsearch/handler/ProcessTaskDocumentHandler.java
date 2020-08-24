@@ -50,7 +50,6 @@ public class ProcessTaskDocumentHandler extends DocumentHandlerBase<ProcessTaskV
 				if (StringUtils.isNotBlank(sb.toString())) {
 					sb.append("|");
 				}
-//				ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentVo.getContentHash());
 				sb.append(StringUtil.removeHtml(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepContentVo.getContentHash())));
 			}
 			String c = getShortcut(documentVo, "c", StringUtil.removeHtml(sb.toString()), maxWord);
@@ -81,7 +80,6 @@ public class ProcessTaskDocumentHandler extends DocumentHandlerBase<ProcessTaskV
 					if (StringUtils.isNotBlank(sb.toString())) {
 						sb.append("|");
 					}
-//					ProcessTaskContentVo contentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContentVo.getContentHash());
 					sb.append(StringUtil.removeHtml(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepContentVo.getContentHash())));
 
 				}

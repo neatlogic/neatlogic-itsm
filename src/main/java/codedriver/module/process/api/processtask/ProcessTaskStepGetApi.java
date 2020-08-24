@@ -126,7 +126,14 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
         resultObj.put("processTask", processTaskVo);
 		return resultObj;
 	}
-	
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取当前步骤信息 
+    * @param processTaskStepId 步骤id
+    * @return ProcessTaskStepVo
+     */
 	private ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId) {
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
         Long processTaskId = processTaskStepVo.getProcessTaskId();

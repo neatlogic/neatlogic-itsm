@@ -110,17 +110,7 @@ public class ProcessTaskContentUpdateApi extends ApiComponentBase {
 		
 		//获取上传附件uuid
 		List<Long> oldFileIdList = processTaskMapper.getFileIdListByProcessTaskStepId(startProcessTaskStepId);
-//		List<Long> oldFileIdList = new ArrayList<>();
-//		ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
-//		processTaskFileVo.setProcessTaskId(processTaskId);
-//		processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
-//		List<ProcessTaskFileVo> processTaskFileList = processTaskMapper.searchProcessTaskFile(processTaskFileVo);
-//		if(CollectionUtils.isNotEmpty(processTaskFileList)) {
-//			for(ProcessTaskFileVo processTaskFile : processTaskFileList) {
-//				oldFileIdList.add(processTaskFile.getFileId());
-//			}
-//			
-//		}
+
 		/** 保存新附件uuid **/
 		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
 		if(fileIdList == null) {

@@ -89,8 +89,6 @@ public interface ProcessTaskService {
 
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId);
 
-//	public ProcessTaskVo getProcessTaskDetailInfoById(Long processTaskId);
-
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo, AutomaticConfigVo automaticConfig,
 			JSONObject data, String type);
 
@@ -157,15 +155,7 @@ public interface ProcessTaskService {
 	* @return ProcessTaskStepVo
 	 */
 	public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
-	/**
-     * 
-    * @Author: linbq
-    * @Time:2020年8月21日
-    * @Description: 获取当前步骤信息 
-    * @param processTaskStepId 步骤id
-    * @return ProcessTaskStepVo
-     */
-//	public ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId);
+	
 	/**
      * 
     * @Author: linbq
