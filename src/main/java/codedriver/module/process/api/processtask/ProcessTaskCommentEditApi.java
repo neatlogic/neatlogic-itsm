@@ -21,7 +21,9 @@ import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepFileVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
@@ -66,60 +68,90 @@ public class ProcessTaskCommentEditApi extends ApiComponentBase {
 		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
 	})
 	@Output({
-		@Param(name = "commentList", explode = ProcessTaskStepCommentVo[].class, desc = "当前步骤评论列表")
+		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")
 	})
 	@Description(desc = "工单回复编辑接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long id = jsonObj.getLong("id");
-		ProcessTaskStepCommentVo oldCommentVo = processTaskMapper.getProcessTaskStepCommentById(id);
-		if(oldCommentVo == null) {
-			throw new ProcessTaskStepCommentNotFoundException(id.toString());
+		ProcessTaskStepContentVo processTaskStepContentVo= processTaskMapper.getProcessTaskStepContentById(id);
+        if(processTaskStepContentVo == null) {
+            throw new ProcessTaskStepCommentNotFoundException(id.toString());
+        }
+        ProcessTaskStepReplyVo oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
+		if(Objects.equals(oldReplyVo.getIsEditable(), 0)) {
+            throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.EDITCOMMENT.getText());	
 		}
-		if(Objects.equals(oldCommentVo.getIsEditable(), 1)) {
-			// 锁定当前流程
-			processTaskMapper.getProcessTaskLockById(oldCommentVo.getProcessTaskId());
-			ProcessTaskStepCommentVo processTaskStepCommentVo = new ProcessTaskStepCommentVo();
-			processTaskStepCommentVo.setId(oldCommentVo.getId());
-			processTaskStepCommentVo.setProcessTaskId(oldCommentVo.getProcessTaskId());
-			processTaskStepCommentVo.setProcessTaskStepId(oldCommentVo.getProcessTaskStepId());
-			processTaskStepCommentVo.setLcu(UserContext.get().getUserUuid(true));
-			
-			String content = jsonObj.getString("content");
-			if(StringUtils.isNotBlank(content)) {
-				ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-				processTaskMapper.replaceProcessTaskContent(contentVo);
-				processTaskStepCommentVo.setContentHash(contentVo.getHash());
-			}
+		// 锁定当前流程
+        processTaskMapper.getProcessTaskLockById(oldReplyVo.getProcessTaskId());
+        processTaskService.parseProcessTaskStepReply(oldReplyVo);
+        
+        ProcessTaskStepReplyVo processTaskStepCommentVo = new ProcessTaskStepReplyVo();
+        processTaskStepCommentVo.setId(oldReplyVo.getId());
+        processTaskStepCommentVo.setProcessTaskId(oldReplyVo.getProcessTaskId());
+        processTaskStepCommentVo.setProcessTaskStepId(oldReplyVo.getProcessTaskStepId());
+        processTaskStepCommentVo.setLcu(UserContext.get().getUserUuid(true));
+        boolean isUpdate = false;
+        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+        String content = jsonObj.getString("content");
+        if(StringUtils.isNotBlank(content)) {
+            ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+            if(Objects.equals(oldReplyVo.getContentHash(), contentVo.getHash())) {
+                jsonObj.remove("content");
+            }else {
+                isUpdate = true;
+                processTaskMapper.replaceProcessTaskContent(contentVo);
+                jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldReplyVo.getContentHash());
+                processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldReplyVo.getId(), contentVo.getHash()));
+            }
+        }else if(oldReplyVo.getContentHash() != null) {
+            isUpdate = true;
+            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldReplyVo.getContentHash());
+            if(CollectionUtils.isEmpty(fileIdList)) {
+                processTaskMapper.deleteProcessTaskStepContentById(oldReplyVo.getId());
+            }else {
+                processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldReplyVo.getId(), null));
+            }
+        }else {
+            jsonObj.remove("content");
+        }
+        
+        if(Objects.equals(oldReplyVo.getFileIdList(), fileIdList)) {
+            jsonObj.remove("fileIdList");
+        }else {
+            isUpdate = true;
+            processTaskMapper.deleteProcessTaskStepFileByContentId(oldReplyVo.getId());
+            ProcessTaskContentVo fileIdListContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldReplyVo.getFileIdList()));
+            processTaskMapper.replaceProcessTaskContent(fileIdListContentVo);
+            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), fileIdListContentVo.getHash());
+            /** 保存附件uuid **/
+            ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
+            processTaskStepFileVo.setProcessTaskId(oldReplyVo.getProcessTaskId());
+            processTaskStepFileVo.setProcessTaskStepId(oldReplyVo.getProcessTaskStepId());
+            processTaskStepFileVo.setContentId(oldReplyVo.getId());
+            if(CollectionUtils.isNotEmpty(fileIdList)) {
+                for(Long fileId : fileIdList) {
+                    FileVo fileVo = fileMapper.getFileById(fileId);
+                    if(fileVo == null) {
+                        throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
+                    }
+                    processTaskStepFileVo.setFileId(fileId);
+                    processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
+                }
+            }
+        }
 
-			List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
-			if(CollectionUtils.isNotEmpty(fileIdList)) {
-				for(Long fileId : fileIdList) {
-					FileVo fileVo = fileMapper.getFileById(fileId);
-					if(fileVo == null) {
-						throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
-					}
-				}
-				ProcessTaskContentVo fileIdListContentVo = new ProcessTaskContentVo(JSON.toJSONString(fileIdList));
-				processTaskMapper.replaceProcessTaskContent(fileIdListContentVo);
-				processTaskStepCommentVo.setFileIdListHash(fileIdListContentVo.getHash());
-			}
-
-			processTaskMapper.updateProcessTaskStepCommentById(processTaskStepCommentVo);
-			
-			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldCommentVo.getContentHash());
-			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), oldCommentVo.getFileIdListHash());
-			
-			//生成活动
-			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldCommentVo.getProcessTaskStepId());	
-			processTaskStepVo.setParamObj(jsonObj);
-			ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
-
-			JSONObject resultObj = new JSONObject();
-			resultObj.put("commentList", processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(oldCommentVo.getProcessTaskStepId()));
-			return resultObj;
-		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.EDITCOMMENT.getText());
-		}
+        if(isUpdate) {
+            //生成活动
+            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+            processTaskStepVo.setProcessTaskId(oldReplyVo.getProcessTaskId());
+            processTaskStepVo.setId(oldReplyVo.getProcessTaskStepId());
+            processTaskStepVo.setParamObj(jsonObj);
+            ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
+        }
+        
+        JSONObject resultObj = new JSONObject();
+        resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(oldReplyVo.getProcessTaskStepId()));
+        return resultObj;
 	}
 }

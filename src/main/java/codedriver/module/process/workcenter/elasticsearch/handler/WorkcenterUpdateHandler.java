@@ -129,9 +129,12 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 			 List<ProcessTaskStepVo> stepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(taskId, ProcessStepType.START.getValue());
 			 if (stepList.size() == 1) {
 				ProcessTaskStepVo startStepVo = stepList.get(0);
-				ProcessTaskStepContentVo processTaskStepContent = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
-				if (processTaskStepContent != null) {
-					startContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
+				List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
+				for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
+	                if (ProcessTaskStepAction.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
+	                    startContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
+	                    break;
+	                }
 				}
 			 }
 			 /** 获取转交记录 **/
