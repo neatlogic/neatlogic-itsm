@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskFileVo;
+import codedriver.framework.process.dto.ProcessTaskStepFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -129,49 +130,72 @@ public class ProcessTaskUpdateApi extends ApiComponentBase {
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
 		}
 		
-		String oldContentHash = processTaskMapper.getProcessTaskStepContentHashByProcessTaskStepId(startProcessTaskStepId);
-		String content = jsonObj.getString("content");
-		if(StringUtils.isNotBlank(content)) {
-			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			if(Objects.equals(oldContentHash, contentVo.getHash())) {
-				jsonObj.remove("content");
-			}else {
-				isUpdate = true;
-				jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
-				processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, contentVo.getHash()));
-			}
-		}else if(oldContentHash != null){
-			isUpdate = true;
-			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
-			processTaskMapper.deleteProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, oldContentHash));
-		}else {
-			jsonObj.remove("content");
-		}
-		
-		List<Long> oldFileIdList = processTaskMapper.getFileIdListByProcessTaskStepId(startProcessTaskStepId);
-		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
-		if(fileIdList == null) {
-			fileIdList = new ArrayList<>();
-		}
-		if(Objects.equals(oldFileIdList, fileIdList)) {
-			jsonObj.remove("fileIdList");
-		}else {
-			ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldFileIdList));
-			processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-			jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), processTaskContentVo.getHash());
-			ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
-			processTaskFileVo.setProcessTaskId(processTaskId);
-			processTaskFileVo.setProcessTaskStepId(startProcessTaskStepId);
-			processTaskMapper.deleteProcessTaskFile(processTaskFileVo);
-			for (Long fileId : fileIdList) {
-				if(fileMapper.getFileById(fileId) != null) {
-					isUpdate = true;
-					processTaskFileVo.setFileId(fileId);
-					processTaskMapper.insertProcessTaskFile(processTaskFileVo);
-				}
-			}
-			isUpdate = true;
-		}
+		//获取上传附件uuid
+        List<Long> oldFileIdList = new ArrayList<>();
+        //获取上报描述内容hash
+        String oldContentHash = null;
+        Long oldContentId = null;
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
+        for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
+            if (ProcessTaskStepAction.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
+                oldContentId = processTaskStepContent.getId();
+                oldContentHash = processTaskStepContent.getContentHash();
+                oldFileIdList = processTaskMapper.getFileIdListByContentId(processTaskStepContent.getId());
+                break;
+            }
+        }
+
+        /** 保存新附件uuid **/
+        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+        if(fileIdList == null) {
+            fileIdList = new ArrayList<>();
+        }
+        String content = jsonObj.getString("content");
+        if(StringUtils.isNotBlank(content)) {
+            ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+            if(Objects.equals(oldContentHash, contentVo.getHash())) {
+                jsonObj.remove("content");
+            }else {
+                isUpdate = true;
+                jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
+                if(oldContentId == null) {
+                    processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, startProcessTaskStepId, contentVo.getHash(), ProcessTaskStepAction.STARTPROCESS.getValue()));
+                }else {
+                    processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
+                }
+            }
+        }else if(oldContentHash != null){
+            isUpdate = true;
+            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
+            if(CollectionUtils.isEmpty(fileIdList)) {
+                processTaskMapper.deleteProcessTaskStepContentById(oldContentId);
+            }else {
+                processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, null));
+            }
+        }else {
+            jsonObj.remove("content");
+        }
+        
+        
+        if(Objects.equals(oldFileIdList, fileIdList)) {
+            jsonObj.remove("fileIdList");
+        }else {
+            ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldFileIdList));
+            processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), processTaskContentVo.getHash());
+            ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
+            processTaskStepFileVo.setProcessTaskId(processTaskId);
+            processTaskStepFileVo.setProcessTaskStepId(startProcessTaskStepId);
+            processTaskStepFileVo.setContentId(oldContentId);
+            processTaskMapper.deleteProcessTaskStepFileByContentId(oldContentId);
+            for (Long fileId : fileIdList) {
+                if(fileMapper.getFileById(fileId) != null) {
+                    processTaskStepFileVo.setFileId(fileId);
+                    processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
+                }
+            }
+            isUpdate = true;
+        }
 
 		//生成活动
 		if(isUpdate) {

@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
-import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -78,7 +78,7 @@ public interface ProcessTaskService {
 	 */
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode);
 
-	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepCommentVo);
+	public void parseProcessTaskStepReply(ProcessTaskStepReplyVo processTaskStepReplyVo);
 
 	/**
 	 * 执行请求
@@ -164,7 +164,7 @@ public interface ProcessTaskService {
     * @param processTaskStepId 步骤id
     * @return List<ProcessTaskStepCommentVo>
      */
-	public List<ProcessTaskStepCommentVo> getProcessTaskStepCommentListByProcessTaskStepId(Long processTaskStepId);
+	public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId);
 	/**
      * 
     * @Author: linbq
@@ -228,5 +228,5 @@ public interface ProcessTaskService {
 	* @param processTaskStepId 步骤id
 	* @return ProcessTaskStepCommentVo
 	 */
-	public ProcessTaskStepCommentVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId);
+	public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId);
 }

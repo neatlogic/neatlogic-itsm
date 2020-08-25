@@ -71,7 +71,8 @@ import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
-import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
+import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -501,29 +502,24 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	}
 
 	@Override
-	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepComment) {
-		if(StringUtils.isBlank(processTaskStepComment.getContent()) && StringUtils.isNotBlank(processTaskStepComment.getContentHash())) {
-			processTaskStepComment.setContent(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepComment.getContentHash()));
+	public void parseProcessTaskStepReply(ProcessTaskStepReplyVo processTaskStepReplyVo) {
+		if(StringUtils.isBlank(processTaskStepReplyVo.getContent()) && StringUtils.isNotBlank(processTaskStepReplyVo.getContentHash())) {
+		    processTaskStepReplyVo.setContent(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepReplyVo.getContentHash()));
 		}
-		if(StringUtils.isNotBlank(processTaskStepComment.getFileIdListHash())) {
-			String fileIdListString = processTaskMapper.getProcessTaskContentStringByHash(processTaskStepComment.getFileIdListHash());
-			if(StringUtils.isNotBlank(fileIdListString)) {
-				List<Long> fileIdList = JSON.parseArray(fileIdListString, Long.class);
-				if(CollectionUtils.isNotEmpty(fileIdList)) {
-					processTaskStepComment.setFileIdList(fileIdList);
-					processTaskStepComment.setFileList(fileMapper.getFileListByIdList(fileIdList));
-				}
-			}
-		}			
-		if(StringUtils.isNotBlank(processTaskStepComment.getLcu())) {
-			UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepComment.getLcu());
+		List<Long> fileIdList = processTaskMapper.getFileIdListByContentId(processTaskStepReplyVo.getId());
+		if(CollectionUtils.isNotEmpty(fileIdList)) {
+            processTaskStepReplyVo.setFileIdList(fileIdList);
+            processTaskStepReplyVo.setFileList(fileMapper.getFileListByIdList(fileIdList));
+        }			
+		if(StringUtils.isNotBlank(processTaskStepReplyVo.getLcu())) {
+			UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepReplyVo.getLcu());
 			if(user != null) {
-				processTaskStepComment.setLcuName(user.getUserName());
+			    processTaskStepReplyVo.setLcuName(user.getUserName());
 			}
 		}
-		UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepComment.getFcu());
+		UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepReplyVo.getFcu());
 		if(user != null) {
-			processTaskStepComment.setFcuName(user.getUserName());
+		    processTaskStepReplyVo.setFcuName(user.getUserName());
 		}
 	}
 	
@@ -1108,12 +1104,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public List<ProcessTaskStepCommentVo> getProcessTaskStepCommentListByProcessTaskStepId(Long processTaskStepId) {
-        List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId);
-        for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
-            parseProcessTaskStepComment(processTaskStepComment);
+    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId) {
+        List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
+        for(ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {
+            if(ProcessTaskStepAction.COMMENT.getValue().equals(processTaskStepContentVo.getType())) {
+                ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
+                parseProcessTaskStepReply(processTaskStepReplyVo);
+                processTaskStepReplyList.add(processTaskStepReplyVo);
+            }
         }
-        return processTaskStepCommentList;
+        processTaskStepReplyList.sort((e1, e2) -> e1.getId().compareTo(e2.getId()));
+        return processTaskStepReplyList;
     }
 
     @Override
@@ -1246,15 +1248,23 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public ProcessTaskStepCommentVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId) {
-        ProcessTaskStepCommentVo comment = new ProcessTaskStepCommentVo();
+    public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId) {
+        ProcessTaskStepReplyVo comment = new ProcessTaskStepReplyVo();
         //获取上报描述内容
-        String processTaskStepContentHash = processTaskMapper.getProcessTaskStepContentHashByProcessTaskStepId(processTaskStepId);
-        if(StringUtils.isNotBlank(processTaskStepContentHash)) {
-            comment.setContent(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepContentHash));
+//        String processTaskStepContentHash = processTaskMapper.getProcessTaskStepContentHashByProcessTaskStepId(processTaskStepId);
+//        if(StringUtils.isNotBlank(processTaskStepContentHash)) {
+//            comment.setContent(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepContentHash));
+//        }
+        List<Long> fileIdList = new ArrayList<>();
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
+        for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
+            if (ProcessTaskStepAction.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
+                fileIdList = processTaskMapper.getFileIdListByContentId(processTaskStepContent.getId());
+                comment.setContent(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepContent.getContentHash()));
+                break;
+            }
         }
         //附件
-        List<Long> fileIdList = processTaskMapper.getFileIdListByProcessTaskStepId(processTaskStepId);      
         if(CollectionUtils.isNotEmpty(fileIdList)) {
             comment.setFileList(fileMapper.getFileListByIdList(fileIdList));
         }

@@ -33,8 +33,8 @@ import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskFileVo;
-import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepFileVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepConfigVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
@@ -233,7 +233,7 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                                         jsonReader.startArray();
                                         while (jsonReader.hasNext()) {
                                             jsonReader.startObject();
-                                            ProcessTaskStepCommentVo processTaskStepCommentVo = new ProcessTaskStepCommentVo();
+                                            ProcessTaskStepReplyVo processTaskStepCommentVo = new ProcessTaskStepReplyVo();
                                             while (jsonReader.hasNext()) {
                                                 String taskStepContentKey = jsonReader.readString();
                                                 String taskStepContentValue = StringUtils.EMPTY;
@@ -261,7 +261,7 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                                                         while (jsonReader.hasNext()) {
                                                             jsonReader.startObject();
                                                             FileVo file = new FileVo();
-                                                            ProcessTaskFileVo processTaskFileVo = new ProcessTaskFileVo();
+                                                            ProcessTaskStepFileVo processTaskFileVo = new ProcessTaskStepFileVo();
                                                             while (jsonReader.hasNext()) {
                                                                 String taskStepFileKey = jsonReader.readString();
                                                                 String taskStepFileValue = jsonReader.readObject().toString();
@@ -296,7 +296,7 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                                                             processTaskFileVo.setProcessTaskId(processTask.getId());
                                                             processTaskFileVo.setProcessTaskStepId(processTaskStep.getId());
                                                             processTaskFileVo.setFileId(file.getId());
-                                                            processTaskMapper.insertProcessTaskFile(processTaskFileVo);
+                                                            //processTaskMapper.insertProcessTaskFile(processTaskFileVo);
                                                             jsonReader.endObject();
                                                         }
                                                         jsonReader.endArray();
@@ -305,7 +305,7 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                                             }
                                             processTaskStepCommentVo.setProcessTaskId(processTask.getId());
                                             processTaskStepCommentVo.setProcessTaskStepId(processTaskStep.getId());
-                                            processTaskMapper.insertProcessTaskStepComment(processTaskStepCommentVo);
+                                            //processTaskMapper.insertProcessTaskStepComment(processTaskStepCommentVo);
                                             jsonReader.endObject();
                                         }
                                         jsonReader.endArray();
@@ -323,7 +323,7 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                         if (StringUtils.isNotBlank(taskValue)) {
                             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(taskValue);
                             processTaskMapper.replaceProcessTaskContent(contentVo);
-                            processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTask.getId(), processTask.getStartProcessTaskStep().getId(), contentVo.getHash()));
+                            processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTask.getId(), processTask.getStartProcessTaskStep().getId(), contentVo.getHash(), null));
                         }
                         break;
                     case "processTaskStepRelList":

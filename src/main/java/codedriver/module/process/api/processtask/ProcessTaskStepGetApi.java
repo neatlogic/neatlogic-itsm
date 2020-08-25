@@ -25,7 +25,7 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
-import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -154,7 +154,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
         setTemporaryData(processTaskStepVo);
         
         //步骤评论列表        
-        processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId));
+        processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId));
         
         //获取当前用户有权限的所有子任务
         //子任务列表
@@ -280,7 +280,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
                     }
                     processTaskStepVo.setFormAttributeDataMap(formAttributeDataMap);
                 }
-                ProcessTaskStepCommentVo commentVo = new ProcessTaskStepCommentVo();
+                ProcessTaskStepReplyVo commentVo = new ProcessTaskStepReplyVo();
                 String content = dataObj.getString("content");
                 commentVo.setContent(content);
                 List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("fileIdList")), Long.class);

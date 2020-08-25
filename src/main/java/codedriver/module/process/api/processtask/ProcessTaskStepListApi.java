@@ -162,7 +162,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
         processTaskService.setProcessTaskStepUser(startProcessTaskStepVo);
         
         //步骤评论列表
-        startProcessTaskStepVo.setCommentList(processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(startProcessTaskStepVo.getId()));
         //子任务列表
         List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId());
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
@@ -197,7 +197,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
         }
         processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo.getId()));
         //步骤评论列表
-        processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepVo.getId()));
+        processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId()));
         //子任务列表
         List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId());
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
