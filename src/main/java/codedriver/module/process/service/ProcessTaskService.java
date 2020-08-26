@@ -229,4 +229,14 @@ public interface ProcessTaskService {
 	* @return ProcessTaskStepCommentVo
 	 */
 	public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId);
+	/**
+	 * 
+	* @Author: linbq
+	* @Time:2020年8月26日
+	* @Description: TODO 
+	* @param jsonObj 
+	* @param processTaskStepReplyVo 旧的回复数据
+	* @return boolean 如果保存成功返回true，否则返回false
+	 */
+	public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo processTaskStepReplyVo);
 }
