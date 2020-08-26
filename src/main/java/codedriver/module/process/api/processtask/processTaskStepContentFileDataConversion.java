@@ -83,8 +83,10 @@ public class processTaskStepContentFileDataConversion extends ApiComponentBase {
             processTaskStepContent.setLcd(processTaskStepCommentVo.getLcd());
             processTaskStepContent.setLcu(processTaskStepCommentVo.getLcu());
             processTaskMapper.insertProcessTaskStepContent2(processTaskStepContent);
-            for(Long fileId : processTaskStepCommentVo.getFileIdList()) {
-                processTaskMapper.insertProcessTaskStepFile(new ProcessTaskStepFileVo(processTaskStepCommentVo.getProcessTaskId(), processTaskStepCommentVo.getProcessTaskStepId(), fileId, processTaskStepContent.getId()));
+            if(CollectionUtils.isNotEmpty(processTaskStepCommentVo.getFileIdList())) {
+                for(Long fileId : processTaskStepCommentVo.getFileIdList()) {
+                    processTaskMapper.insertProcessTaskStepFile(new ProcessTaskStepFileVo(processTaskStepCommentVo.getProcessTaskId(), processTaskStepCommentVo.getProcessTaskStepId(), fileId, processTaskStepContent.getId()));
+                }
             }
         }
         return null;
