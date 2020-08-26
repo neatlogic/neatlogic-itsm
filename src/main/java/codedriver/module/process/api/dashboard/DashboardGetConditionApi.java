@@ -5,6 +5,8 @@ import java.util.Comparator;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,12 +20,11 @@ import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class DashboardGetConditionApi extends ApiComponentBase {
+public class DashboardGetConditionApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

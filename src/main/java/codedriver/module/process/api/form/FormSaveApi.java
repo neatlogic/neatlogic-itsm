@@ -4,6 +4,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +28,12 @@ import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.form.FormNameRepeatException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @Transactional
 @AuthAction(name = "FORM_MODIFY")
 @OperationType(type = OperationTypeEnum.CREATE)
-public class FormSaveApi extends ApiComponentBase {
+public class FormSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;

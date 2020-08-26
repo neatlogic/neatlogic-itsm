@@ -6,6 +6,8 @@ import java.util.Map;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +22,11 @@ import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixColumnDataSearchForSelectApi extends ApiComponentBase {
+public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase {
 
     @Autowired
     private MatrixMapper matrixMapper;

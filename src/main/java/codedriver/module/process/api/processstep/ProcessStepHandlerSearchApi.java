@@ -8,7 +8,8 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import com.alibaba.fastjson.JSONObject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,7 +30,7 @@ import java.util.Map;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessStepHandlerSearchApi extends ApiComponentBase {
+public class ProcessStepHandlerSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessStepHandlerMapper stepHandlerMapper;

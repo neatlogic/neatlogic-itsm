@@ -15,9 +15,9 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 /**
  * @program: codedriver
  * @description:
@@ -25,7 +25,7 @@ import codedriver.framework.restful.annotation.*;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixSearchApi extends ApiComponentBase {
+public class MatrixSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private MatrixMapper matrixMapper;

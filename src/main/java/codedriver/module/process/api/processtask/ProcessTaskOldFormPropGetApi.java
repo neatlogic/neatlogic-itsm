@@ -18,12 +18,12 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @SuppressWarnings("deprecation")
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskOldFormPropGetApi extends ApiComponentBase {
+public class ProcessTaskOldFormPropGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;

@@ -8,7 +8,7 @@ import codedriver.framework.process.exception.event.EventTypeMoveException;
 import codedriver.framework.process.exception.event.EventTypeNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.EventTypeService;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class EventTypeMoveApi extends ApiComponentBase {
+public class EventTypeMoveApi extends PrivateApiComponentBase {
 
     @Autowired
     private EventTypeService eventTypeService;

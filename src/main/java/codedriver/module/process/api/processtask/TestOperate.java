@@ -6,10 +6,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.ProcessOperateManager;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Component
-public class TestOperate extends ApiComponentBase {
+public class TestOperate extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

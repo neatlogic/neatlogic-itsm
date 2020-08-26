@@ -14,13 +14,13 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 import codedriver.framework.process.workcenter.dto.WorkcenterUserProfileVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-public class WorkcenterUserProfileSaveApi extends ApiComponentBase {
+public class WorkcenterUserProfileSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	WorkcenterMapper workcenterMapper;

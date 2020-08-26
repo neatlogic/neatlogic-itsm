@@ -8,8 +8,6 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,14 +19,20 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormImportException;
-import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
+import codedriver.framework.process.exception.form.FormNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class FormVersionImportApi extends BinaryStreamApiComponentBase{
+public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase{
 
 	@Autowired
 	private FormMapper formMapper;
