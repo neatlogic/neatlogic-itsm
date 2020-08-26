@@ -25,6 +25,7 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
 import codedriver.module.process.notify.handler.ProcessNotifyPolicyHandler;
@@ -37,13 +38,13 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 	}
 
 	@Override
-	public Object getHandlerStepInfo(Long processTaskStepId) {
+	public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object getHandlerStepInitInfo(Long processTaskStepId) {
+	public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -87,10 +88,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		/** 查出processtask_step_subtask表中当前步骤子任务处理人列表 **/		
 		Set<String> runningSubtaskUserUuidSet = new HashSet<>();
 		Set<String> succeedSubtaskUserUuidSet = new HashSet<>();
-		ProcessTaskStepSubtaskVo stepSubtaskVo = new ProcessTaskStepSubtaskVo();
-		stepSubtaskVo.setProcessTaskId(processTaskId);
-		stepSubtaskVo.setProcessTaskStepId(processTaskStepId);
-		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(stepSubtaskVo);
+		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
 		for(ProcessTaskStepSubtaskVo subtaskVo : processTaskStepSubtaskList) {
 			if(ProcessTaskStatus.RUNNING.getValue().equals(subtaskVo.getStatus())) {
 				runningSubtaskUserUuidSet.add(subtaskVo.getUserUuid());
