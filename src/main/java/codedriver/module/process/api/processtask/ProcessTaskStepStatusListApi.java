@@ -53,27 +53,9 @@ public class ProcessTaskStepStatusListApi extends ApiComponentBase {
 		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
-//			Map<String, ProcessStepHandlerVo> handlerConfigMap = new HashMap<>();
-//	        List<ProcessStepHandlerVo> handlerConfigList = stepHandlerMapper.getProcessStepHandlerConfig();
-//	        for(ProcessStepHandlerVo handlerConfig : handlerConfigList) {
-//	        	handlerConfigMap.put(handlerConfig.getHandler(), handlerConfig);
-//	        }
 	        for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 	            processTaskService.setProcessTaskStepUser(processTaskStepVo);
 	            processTaskService.setProcessTaskStepConfig(processTaskStepVo);
-//				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-//				if(CollectionUtils.isNotEmpty(majorUserList)) {
-//					processTaskStepVo.setMajorUser(majorUserList.get(0));
-//				}else {
-//					processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));					
-//				}
-//				processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
-//				processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
-//				processTaskStepVo.setConfig(processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash()));
-//				ProcessStepHandlerVo processStepHandlerConfig = handlerConfigMap.get(processTaskStepVo.getHandler());
-//				if(processStepHandlerConfig != null) {
-//					processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());					
-//				}
 			}
 		}	
 		return processTaskStepList;
