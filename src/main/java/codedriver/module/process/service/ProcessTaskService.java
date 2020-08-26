@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
-import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -78,7 +78,7 @@ public interface ProcessTaskService {
 	 */
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode);
 
-	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepCommentVo);
+	public void parseProcessTaskStepReply(ProcessTaskStepReplyVo processTaskStepReplyVo);
 
 	/**
 	 * 执行请求
@@ -88,8 +88,6 @@ public interface ProcessTaskService {
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
 
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId);
-
-	public ProcessTaskVo getProcessTaskDetailInfoById(Long processTaskId);
 
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo, AutomaticConfigVo automaticConfig,
 			JSONObject data, String type);
@@ -157,15 +155,7 @@ public interface ProcessTaskService {
 	* @return ProcessTaskStepVo
 	 */
 	public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
-	/**
-     * 
-    * @Author: linbq
-    * @Time:2020年8月21日
-    * @Description: 获取当前步骤信息 
-    * @param processTaskStepId 步骤id
-    * @return ProcessTaskStepVo
-     */
-	public ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId);
+	
 	/**
      * 
     * @Author: linbq
@@ -174,7 +164,7 @@ public interface ProcessTaskService {
     * @param processTaskStepId 步骤id
     * @return List<ProcessTaskStepCommentVo>
      */
-	public List<ProcessTaskStepCommentVo> getProcessTaskStepCommentListByProcessTaskStepId(Long processTaskStepId);
+	public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId);
 	/**
      * 
     * @Author: linbq
@@ -211,13 +201,32 @@ public interface ProcessTaskService {
     * @return void
      */
 	public void setNextStepList(ProcessTaskStepVo processTaskStepVo);
+
 	/**
-     * 
-    * @Author: linbq
-    * @Time:2020年8月21日
-    * @Description: 设置步骤当前用户的暂存数据
-    * @param ProcessTaskStepVo 步骤信息
-    * @return void
-     */
-	public void setTemporaryData(ProcessTaskStepVo processTaskStepVo);
+	 * 
+	* @Author: linbq
+	* @Time:2020年8月24日
+	* @Description: 设置步骤处理人、协助处理人、待办人等 
+	* @param processTaskStepVo 
+	* @return void
+	 */
+	public void setProcessTaskStepUser(ProcessTaskStepVo processTaskStepVo);
+	/**
+	 * 
+	* @Author: linbq
+	* @Time:2020年8月24日
+	* @Description: 设置步骤配置、处理器全局配置信息 
+	* @param processTaskStepVo 
+	* @return void
+	 */
+	public void setProcessTaskStepConfig(ProcessTaskStepVo processTaskStepVo);
+	/**
+	 * 
+	* @Author: linbq
+	* @Time:2020年8月24日
+	* @Description: 获取步骤描述内容及附件列表 
+	* @param processTaskStepId 步骤id
+	* @return ProcessTaskStepCommentVo
+	 */
+	public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId);
 }

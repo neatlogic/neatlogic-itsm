@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ import org.springframework.util.DigestUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
 
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -30,6 +33,8 @@ import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepFileVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepConfigVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
@@ -45,6 +50,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.core.JsonStreamApiComponentBase;
 import codedriver.framework.util.TimeUtil;
 
+@SuppressWarnings("deprecation")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
@@ -64,6 +70,9 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
     
     @Autowired
     private WorktimeMapper worktimeMapper;
+    
+    @Autowired
+    private FileMapper fileMapper;
 
     @Override
     public String getToken() {
@@ -99,14 +108,14 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
             jsonReader.startObject();
             while (jsonReader.hasNext()) {
                 String taskKey = jsonReader.readString();
-                String taskValue = null;
+                String taskValue = StringUtils.EMPTY;
                 if(isContinute) {
                     taskValue =jsonReader.readObject().toString();
                     continue;
                 }
                 if(!taskKey.equals("processTaskStepList")&&!taskKey.equals("processTaskStepRelList")&&!taskKey.equals("formAndPropList")) {
                     taskValue =jsonReader.readObject().toString();
-                    if(taskValue.equals("null")) {
+                    if(taskValue.equals(StringUtils.EMPTY)) {
                         continue;
                     }
                 }
@@ -169,10 +178,9 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                             Boolean isSaveProcessStep = true;
                             jsonReader.startObject();
                             while (jsonReader.hasNext()) {
-                               
                                 String taskStepKey = jsonReader.readString();
-                                String taskStepValue = jsonReader.readObject().toString();
-                                if(taskStepValue.equals("null")) {
+                                String taskStepValue = (!taskStepKey.equals("processTaskStepContentList"))? jsonReader.readObject().toString():StringUtils.EMPTY;
+                                if(!taskStepKey.equals("processTaskStepContentList")&&taskStepValue.equals(StringUtils.EMPTY)) {
                                     continue;
                                 }
                                 processTaskStep.setProcessTaskId(processTask.getId());
@@ -188,7 +196,7 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                                             processTaskStep.setProcessStepUuid(processStep.get(0).getUuid());
                                             stepIdUuidMap.put(processTaskStep.getId(), processTaskStep.getProcessStepUuid());
                                         }else {
-                                            processStep = processStepList.stream().filter(o ->taskStepValue.equals(o.getName())).collect(Collectors.toList()); 
+                                            processStep = processStepList.stream().filter(o ->o.getName().equals(taskStepValue)).collect(Collectors.toList()); 
                                             if(CollectionUtils.isNotEmpty(processStep)) {
                                                 processTaskStep.setProcessStepUuid(processStep.get(0).getUuid());
                                                 stepIdUuidMap.put(processTaskStep.getId(), processTaskStep.getProcessStepUuid());
@@ -221,6 +229,87 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                                         processTaskStep.setConfigHash(configHash);
                                         processTaskMapper.replaceProcessTaskStepConfig(new ProcessTaskStepConfigVo(configHash,taskStepValue));
                                         break;
+                                    case "processTaskStepContentList":
+                                        jsonReader.startArray();
+                                        while (jsonReader.hasNext()) {
+                                            jsonReader.startObject();
+                                            ProcessTaskStepReplyVo processTaskStepCommentVo = new ProcessTaskStepReplyVo();
+                                            while (jsonReader.hasNext()) {
+                                                String taskStepContentKey = jsonReader.readString();
+                                                String taskStepContentValue = StringUtils.EMPTY;
+                                                if(!taskStepContentKey.equals("fileList")) {
+                                                    taskStepContentValue = jsonReader.readObject().toString();
+                                                    if(taskStepContentValue.equals(StringUtils.EMPTY)) {
+                                                        continue;
+                                                    }
+                                                }
+                                                switch (taskStepContentKey) {
+                                                    case "content":
+                                                        String content = StringEscapeUtils.unescapeHtml4(taskStepContentValue);
+                                                        String hash = DigestUtils.md5DigestAsHex(content.getBytes());
+                                                        processTaskStepCommentVo.setContentHash(hash);
+                                                        processTaskMapper.replaceProcessTaskContent(new ProcessTaskContentVo(hash,content));
+                                                        break;
+                                                    case "fcu":
+                                                        processTaskStepCommentVo.setFcu(taskStepContentValue);
+                                                        break;
+                                                    case "fcd":
+                                                        processTaskStepCommentVo.setFcd(TimeUtil.convertStringToDate(taskStepContentValue, TimeUtil.YYYY_MM_DD_HH_MM_SS));
+                                                        break;
+                                                    case "fileList":
+                                                        jsonReader.startArray();
+                                                        while (jsonReader.hasNext()) {
+                                                            jsonReader.startObject();
+                                                            FileVo file = new FileVo();
+                                                            ProcessTaskStepFileVo processTaskFileVo = new ProcessTaskStepFileVo();
+                                                            while (jsonReader.hasNext()) {
+                                                                String taskStepFileKey = jsonReader.readString();
+                                                                String taskStepFileValue = jsonReader.readObject().toString();
+                                                                switch(taskStepFileKey) {
+                                                                    case "id":
+                                                                        file.setId(Long.valueOf(taskStepFileValue));
+                                                                        break;
+                                                                    case "name":
+                                                                        file.setName(taskStepFileValue);
+                                                                        break;
+                                                                    case "size":
+                                                                        file.setSize(Long.valueOf(taskStepFileValue));
+                                                                        break;
+                                                                    case "userId":
+                                                                        file.setUserUuid(taskStepFileValue);
+                                                                        break;
+                                                                    case "uploadTime":
+                                                                        file.setUploadTime(taskStepFileValue);
+                                                                        break;
+                                                                    case "path":
+                                                                        file.setPath("file:"+taskStepFileValue);
+                                                                        break;
+                                                                    case "contentType":
+                                                                        file.setContentType(taskStepFileValue);
+                                                                        break;
+                                                                    case "type":
+                                                                        file.setType(taskStepFileValue);
+                                                                        break;
+                                                                }
+                                                            }
+                                                            fileMapper.insertFile(file);
+                                                            processTaskFileVo.setProcessTaskId(processTask.getId());
+                                                            processTaskFileVo.setProcessTaskStepId(processTaskStep.getId());
+                                                            processTaskFileVo.setFileId(file.getId());
+                                                            //processTaskMapper.insertProcessTaskFile(processTaskFileVo);
+                                                            jsonReader.endObject();
+                                                        }
+                                                        jsonReader.endArray();
+                                                        break;
+                                                }
+                                            }
+                                            processTaskStepCommentVo.setProcessTaskId(processTask.getId());
+                                            processTaskStepCommentVo.setProcessTaskStepId(processTaskStep.getId());
+                                            //processTaskMapper.insertProcessTaskStepComment(processTaskStepCommentVo);
+                                            jsonReader.endObject();
+                                        }
+                                        jsonReader.endArray();
+                                        break;
                                 }
                             }
                             jsonReader.endObject();
@@ -234,7 +323,7 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
                         if (StringUtils.isNotBlank(taskValue)) {
                             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(taskValue);
                             processTaskMapper.replaceProcessTaskContent(contentVo);
-                            processTaskMapper.replaceProcessTaskStepContent(new ProcessTaskStepContentVo(processTask.getId(), processTask.getStartProcessTaskStep().getId(), contentVo.getHash()));
+                            processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTask.getId(), processTask.getStartProcessTaskStep().getId(), contentVo.getHash(), null));
                         }
                         break;
                     case "processTaskStepRelList":

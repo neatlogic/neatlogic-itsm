@@ -10,17 +10,23 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
+import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskAutomaticNotAllowNextStepsException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepMustBeAutomaticException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ProcessTaskAutomaticCompleteApi extends ApiComponentBase {
@@ -61,6 +67,9 @@ public class ProcessTaskAutomaticCompleteApi extends ApiComponentBase {
 		if(processTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 		}
+		if(ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
+		    throw new ProcessTaskStepMustBeAutomaticException();
+		}
 		jsonObj.put("processTaskId", processTaskStepVo.getProcessTaskId());
 		if(action.equals(ProcessTaskStepAction.BACK.getValue())) {
 			flowDirection = ProcessFlowDirection.BACKWARD.getValue();
@@ -80,6 +89,11 @@ public class ProcessTaskAutomaticCompleteApi extends ApiComponentBase {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
 		return null;
+	}
+	
+	@Override
+	public boolean isPrivate() {
+	    return false;
 	}
 
 }
