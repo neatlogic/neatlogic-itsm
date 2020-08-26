@@ -20,6 +20,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
@@ -31,6 +32,7 @@ import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -89,7 +91,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 		
 		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
         
-        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
+        processTaskVo.setStartProcessTaskStep(getStartProcessTaskStepByProcessTaskId(processTaskId));
 
         Map<String, String> formAttributeActionMap = new HashMap<>();
 		if(processTaskStepId != null) {
@@ -132,6 +134,34 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
      * 
     * @Author: linbq
     * @Time:2020年8月21日
+    * @Description: 获取开始步骤信息 
+    * @param processTaskId 工单id
+    * @return ProcessTaskStepVo
+     */
+	public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
+        //获取开始步骤id
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+        if(processTaskStepList.size() != 1) {
+            throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
+        }
+
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
+        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
+
+        startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        /** 当前步骤特有步骤信息 **/
+        IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+        if(startProcessStepUtilHandler == null) {
+            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+        }
+        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
+        return startProcessTaskStepVo;
+    }
+	
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
     * @Description: 获取当前步骤信息 
     * @param processTaskStepId 步骤id
     * @return ProcessTaskStepVo
@@ -149,7 +179,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         if(processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
-        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepId));
+        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
         //回复框内容和附件暂存回显              
         setTemporaryData(processTaskStepVo);
         
@@ -161,7 +191,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
             List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
             if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-                Map<String, String> customButtonMap = processTaskService.getCustomButtonTextMap(processTaskStepId);
+                Map<String, String> customButtonMap = processTaskStepVo.getCustomButtonMap();
                 for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
                     String currentUser = UserContext.get().getUserUuid(true);
                     if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))

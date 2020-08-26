@@ -105,7 +105,7 @@ public interface ProcessTaskService {
 	* @param processTaskStepId
 	* @return Map<String,String>
 	 */
-	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
+//	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
 	
 	/**
 	 * 
@@ -146,15 +146,6 @@ public interface ProcessTaskService {
 	* @return ProcessTaskVo
 	 */
 	public ProcessTaskVo getProcessTaskDetailById(Long processTaskId);
-	/**
-	 * 
-	* @Author: linbq
-	* @Time:2020年8月21日
-	* @Description: 获取开始步骤信息 
-	* @param processTaskId 工单id
-	* @return ProcessTaskStepVo
-	 */
-	public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
 	
 	/**
      * 
@@ -229,4 +220,14 @@ public interface ProcessTaskService {
 	* @return ProcessTaskStepCommentVo
 	 */
 	public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId);
+	/**
+	 * 
+	* @Author: linbq
+	* @Time:2020年8月26日
+	* @Description: TODO 
+	* @param jsonObj 
+	* @param processTaskStepReplyVo 旧的回复数据
+	* @return boolean 如果保存成功返回true，否则返回false
+	 */
+	public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo processTaskStepReplyVo);
 }

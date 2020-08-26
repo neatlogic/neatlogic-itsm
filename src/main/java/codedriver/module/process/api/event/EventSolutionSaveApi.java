@@ -74,6 +74,8 @@ public class EventSolutionSaveApi extends PrivateApiComponentBase{
 			eventSolutionVo.setIsActive(1);
 			eventSolutionVo.setFcu(UserContext.get().getUserUuid());
 			eventSolutionVo.setFcd(new Date());
+			eventSolutionVo.setLcu(UserContext.get().getUserUuid());
+			eventSolutionVo.setLcd(new Date());
 			eventSolutionMapper.insertSolution(eventSolutionVo);
 			for(Long eventTypeId : eventTypeIds){
 				eventSolutionMapper.insertEventTypeSolution(eventTypeId, eventSolutionVo.getId());

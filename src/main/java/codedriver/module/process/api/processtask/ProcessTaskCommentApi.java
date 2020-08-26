@@ -112,11 +112,11 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
 
         /** 保存附件uuid **/
-        ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
-        processTaskStepFileVo.setProcessTaskId(processTaskId);
-        processTaskStepFileVo.setProcessTaskStepId(processTaskStepId);
-        processTaskStepFileVo.setContentId(processTaskStepContentVo.getId());
         if(CollectionUtils.isNotEmpty(fileIdList)) {
+            ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
+            processTaskStepFileVo.setProcessTaskId(processTaskId);
+            processTaskStepFileVo.setProcessTaskStepId(processTaskStepId);
+            processTaskStepFileVo.setContentId(processTaskStepContentVo.getId());
             for (Long fileId : fileIdList) {
                 if(fileMapper.getFileById(fileId) == null) {
                     throw new FileNotFoundException(fileId);

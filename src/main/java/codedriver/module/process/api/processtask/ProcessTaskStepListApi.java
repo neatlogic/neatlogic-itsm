@@ -180,7 +180,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         if(startProcessStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
-        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
 	}
 
@@ -195,7 +195,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         if(processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
-        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo.getId()));
+        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
         //步骤评论列表
         processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId()));
         //子任务列表
