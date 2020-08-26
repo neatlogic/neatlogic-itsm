@@ -105,7 +105,7 @@ public interface ProcessTaskService {
 	* @param processTaskStepId
 	* @return Map<String,String>
 	 */
-	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
+//	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
 	
 	/**
 	 * 
@@ -146,15 +146,6 @@ public interface ProcessTaskService {
 	* @return ProcessTaskVo
 	 */
 	public ProcessTaskVo getProcessTaskDetailById(Long processTaskId);
-	/**
-	 * 
-	* @Author: linbq
-	* @Time:2020年8月21日
-	* @Description: 获取开始步骤信息 
-	* @param processTaskId 工单id
-	* @return ProcessTaskStepVo
-	 */
-	public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
 	
 	/**
      * 
