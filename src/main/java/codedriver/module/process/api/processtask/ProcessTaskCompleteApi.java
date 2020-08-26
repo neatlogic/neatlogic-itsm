@@ -69,9 +69,8 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 		if(handler == null) {
 		    throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
-		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
-        processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
             if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus())) {
                 //如果还有子任务未完成，该步骤不能流转
