@@ -13,9 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -25,6 +23,8 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
@@ -53,12 +53,7 @@ public class ProcessTaskStepSubtaskListApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id"),
-		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-		@Param(name = "id", type = ApiParamType.LONG, desc = "子任务id"),
-		@Param(name = "userUuid", type = ApiParamType.STRING, desc = "子任务处理人"),
-		@Param(name = "owner", type = ApiParamType.STRING, desc = "子任务创建人"),
-		@Param(name = "status", type = ApiParamType.ENUM, rule = "running,succeed,aborted", desc = "状态")
+		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id")
 	})
 	@Output({
 		@Param(name = "Return", explode = ProcessTaskStepSubtaskVo[].class, desc = "子任务列表")
@@ -66,10 +61,15 @@ public class ProcessTaskStepSubtaskListApi extends ApiComponentBase {
 	@Description(desc = "工单步骤子任务列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessTaskStepSubtaskVo>() {});
-		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+	    Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+	    ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+	    if(processTaskStepVo == null) {
+	        throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+	    }
+		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
 		if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-			Map<String, String> customButtonMap = processTaskService.getCustomButtonTextMap(processTaskStepSubtaskVo.getProcessTaskStepId());
+		    processTaskService.setProcessTaskStepConfig(processTaskStepVo);
+			Map<String, String> customButtonMap = processTaskStepVo.getCustomButtonMap();
 			List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
 			for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
 				String currentUser = UserContext.get().getUserUuid(true);

@@ -43,7 +43,6 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.FormAttributeAction;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
@@ -87,7 +86,6 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
-import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
@@ -839,47 +837,47 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		System.out.println( pattern.matcher("300").matches());
 	}
 
-	@Override
-	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId) {
-		Map<String, String> customButtonMap = new HashMap<>();
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		if(processTaskStepVo == null) {
-			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
-		}
-		/** 节点管理按钮映射 **/
-		ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-		if(processStepHandlerVo != null) {
-			JSONObject globalConfig = processStepHandlerVo.getConfig();
-			if(MapUtils.isNotEmpty(globalConfig)) {
-				JSONArray customButtonList = globalConfig.getJSONArray("customButtonList");
-				if(CollectionUtils.isNotEmpty(customButtonList)) {
-					for(int i = 0; i < customButtonList.size(); i++) {
-						JSONObject customButton = customButtonList.getJSONObject(i);
-						String value = customButton.getString("value");
-						if(StringUtils.isNotBlank(value)) {
-							customButtonMap.put(customButton.getString("name"), value);
-						}
-					}
-				}
-			}
-		}
-		/** 节点设置按钮映射 **/
-		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-		JSONObject stepConfigObj = JSON.parseObject(stepConfig);
-		if(MapUtils.isNotEmpty(stepConfigObj)) {
-			JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
-			if(CollectionUtils.isNotEmpty(customButtonList)) {
-				for(int i = 0; i < customButtonList.size(); i++) {
-					JSONObject customButton = customButtonList.getJSONObject(i);
-					String value = customButton.getString("value");
-					if(StringUtils.isNotBlank(value)) {
-						customButtonMap.put(customButton.getString("name"), value);
-					}
-				}
-			}
-		}
-		return customButtonMap;
-	}
+//	@Override
+//	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId) {
+//		Map<String, String> customButtonMap = new HashMap<>();
+//		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+//		if(processTaskStepVo == null) {
+//			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
+//		}
+//		/** 节点管理按钮映射 **/
+//		ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+//		if(processStepHandlerVo != null) {
+//			JSONObject globalConfig = processStepHandlerVo.getConfig();
+//			if(MapUtils.isNotEmpty(globalConfig)) {
+//				JSONArray customButtonList = globalConfig.getJSONArray("customButtonList");
+//				if(CollectionUtils.isNotEmpty(customButtonList)) {
+//					for(int i = 0; i < customButtonList.size(); i++) {
+//						JSONObject customButton = customButtonList.getJSONObject(i);
+//						String value = customButton.getString("value");
+//						if(StringUtils.isNotBlank(value)) {
+//							customButtonMap.put(customButton.getString("name"), value);
+//						}
+//					}
+//				}
+//			}
+//		}
+//		/** 节点设置按钮映射 **/
+//		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+//		JSONObject stepConfigObj = JSON.parseObject(stepConfig);
+//		if(MapUtils.isNotEmpty(stepConfigObj)) {
+//			JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
+//			if(CollectionUtils.isNotEmpty(customButtonList)) {
+//				for(int i = 0; i < customButtonList.size(); i++) {
+//					JSONObject customButton = customButtonList.getJSONObject(i);
+//					String value = customButton.getString("value");
+//					if(StringUtils.isNotBlank(value)) {
+//						customButtonMap.put(customButton.getString("name"), value);
+//					}
+//				}
+//			}
+//		}
+//		return customButtonMap;
+//	}
 
     @Override
     public boolean checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId) {
@@ -983,27 +981,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
-        //获取开始步骤id
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
-        if(processTaskStepList.size() != 1) {
-            throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
-        }
-
-        ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-        setProcessTaskStepConfig(startProcessTaskStepVo);
-
-        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
-        /** 当前步骤特有步骤信息 **/
-        IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
-        if(startProcessStepUtilHandler == null) {
-            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
-        }
-        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo.getId()));
-        return startProcessTaskStepVo;
-    }
-
-    @Override
     public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId) {
         List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
@@ -1020,9 +997,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Override
     public List<ProcessTaskStepSubtaskVo> getProcessTaskStepSubtaskListByProcessTaskStepId(Long processTaskStepId) {
-        ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
-        processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
             List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
             Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();

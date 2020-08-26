@@ -37,7 +37,10 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundExc
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
@@ -115,7 +118,7 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 	            processTaskVo.setOwner(owner);              
 	        }
 		    
-		    ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
+		    ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
 			//获取可分配处理人的步骤列表				
 			startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getProcessStepUuid()));
 			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
@@ -130,7 +133,6 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 	                processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
 	            }
 			}
-			
 			return processTaskVo;
 		}else if(channelUuid != null){
 			ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
@@ -220,4 +222,24 @@ public class ProcessTaskDraftGetApi extends ApiComponentBase {
 			throw new ProcessTaskRuntimeException("参数'processTaskId'和'channelUuid'，至少要传一个");
 		}
 	}
+	
+	private ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
+        //获取开始步骤id
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+        if(processTaskStepList.size() != 1) {
+            throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
+        }
+
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
+        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
+
+        startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        /** 当前步骤特有步骤信息 **/
+        IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+        if(startProcessStepUtilHandler == null) {
+            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+        }
+        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo));
+        return startProcessTaskStepVo;
+    }
 }
