@@ -66,6 +66,7 @@ public class ScoreTemplateSearchApi extends PrivateApiComponentBase{
 			returnObj.put("pageCount", PageUtil.getPageCount(rowNum, scoreTemplateVo.getPageSize()));
 		}
 		List<ScoreTemplateVo> scoreTemplateList = scoreTemplateMapper.searchScoreTemplate(scoreTemplateVo);
+		/** 查询关联的流程数量 */
 		if(CollectionUtils.isNotEmpty(scoreTemplateList)){
 			List<Long> idList = scoreTemplateList.stream().map(ScoreTemplateVo::getId).collect(Collectors.toList());
 			List<ScoreTemplateVo> processCountByIdList = scoreTemplateMapper.getProcessCountByIdList(idList);
