@@ -27,6 +27,7 @@ import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.ProcessOperateManager.Builder;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
 import codedriver.module.process.notify.handler.ProcessNotifyPolicyHandler;
@@ -279,8 +280,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
     @Override
     protected void MySetNextOperationAuthHandlerType(Builder builder) {
-        // TODO Auto-generated method stub
-        
+        builder.setNext(OperationAuthHandlerType.AUTOMATIC);
     }
 
 }
