@@ -55,7 +55,7 @@ public class ScoreTemplateStatusUpdateApi extends PrivateApiComponentBase {
         if(scoreTemplateMapper.checkScoreTemplateExistsById(id) == null){
             throw new ScoreTemplateNotFoundException(id);
         }
-        scoreTemplateMapper.updateScoreTemplateActiveStatus(scoreTemplateVo);
+        scoreTemplateMapper.updateScoreTemplateStatus(scoreTemplateVo);
         return null;
     }
 }
