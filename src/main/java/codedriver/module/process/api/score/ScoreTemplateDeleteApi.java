@@ -13,11 +13,9 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @AuthAction(name = "SCORE_TEMPLATE_MODIFY")
 @Service
-@Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
 public class ScoreTemplateDeleteApi extends PrivateApiComponentBase {
 
