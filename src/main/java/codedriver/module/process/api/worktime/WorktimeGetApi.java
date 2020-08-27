@@ -2,6 +2,8 @@ package codedriver.module.process.api.worktime;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +13,9 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.WorktimeVo;
 import codedriver.framework.process.exception.worktime.WorktimeNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class WorktimeGetApi extends ApiComponentBase {
+public class WorktimeGetApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private WorktimeMapper worktimeMapper;

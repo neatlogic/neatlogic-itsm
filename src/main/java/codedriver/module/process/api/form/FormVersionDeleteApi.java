@@ -15,10 +15,10 @@ import codedriver.framework.process.exception.form.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.DELETE)
-public class FormVersionDeleteApi extends ApiComponentBase {
+public class FormVersionDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;

@@ -6,7 +6,8 @@ import codedriver.framework.process.dto.event.EventTypeVo;
 import codedriver.framework.process.exception.event.EventTypeNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +21,7 @@ import java.util.Map;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class EventTypeTreeSearchApi extends ApiComponentBase {
+public class EventTypeTreeSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private EventTypeMapper eventTypeMapper;

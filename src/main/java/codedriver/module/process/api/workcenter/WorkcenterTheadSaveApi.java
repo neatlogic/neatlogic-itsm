@@ -12,13 +12,13 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-public class WorkcenterTheadSaveApi extends ApiComponentBase {
+public class WorkcenterTheadSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	WorkcenterMapper workcenterMapper;

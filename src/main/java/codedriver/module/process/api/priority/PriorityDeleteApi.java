@@ -15,11 +15,11 @@ import codedriver.framework.process.exception.priority.PriorityNotFoundException
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class PriorityDeleteApi extends ApiComponentBase {
+public class PriorityDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private PriorityMapper priorityMapper;
