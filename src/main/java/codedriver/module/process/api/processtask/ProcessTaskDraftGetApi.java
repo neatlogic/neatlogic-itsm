@@ -210,9 +210,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 				}
 				processTaskVo.setFormConfig(formVersion.getFormConfig());
 				
-				ProcessStepFormAttributeVo processStepFormAttributeVo = new ProcessStepFormAttributeVo();
-				processStepFormAttributeVo.setProcessStepUuid(processStepList.get(0).getUuid());
-				List<ProcessStepFormAttributeVo> processStepFormAttributeList = processMapper.getProcessStepFormAttributeByStepUuid(processStepFormAttributeVo);
+				List<ProcessStepFormAttributeVo> processStepFormAttributeList = processMapper.getProcessStepFormAttributeByStepUuid(startProcessTaskStepVo.getProcessStepUuid());
 				if(CollectionUtils.isNotEmpty(processStepFormAttributeList)) {
 					Map<String, String> formAttributeActionMap = new HashMap<>();
 					for(ProcessStepFormAttributeVo processStepFormAttribute : processStepFormAttributeList) {

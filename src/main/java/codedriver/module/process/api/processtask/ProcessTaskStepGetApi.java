@@ -108,8 +108,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 	                //表单属性显示控制
 	                List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
 	                for(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
+	                    processTaskStepFormAttributeVo.setProcessStepUuid(currentProcessTaskStepVo.getProcessStepUuid());
 	                    formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
 	                }
+	                currentProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
 				}
 			}			
 		}

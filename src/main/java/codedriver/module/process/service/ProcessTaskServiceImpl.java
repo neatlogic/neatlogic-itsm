@@ -75,7 +75,6 @@ import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFileVo;
-import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
@@ -143,37 +142,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Autowired
     private ProcessStepHandlerMapper stepHandlerMapper;
-	
-	
-	@Override
-	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo){
-		return processTaskMapper.getProcessTaskStepFormAttributeByStepId(processTaskStepFormAttributeVo);
-	}
-
-	@Override
-	public ProcessTaskStepVo getProcessTaskStepDetailById(Long processTaskStepId) {
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		ProcessTaskFormVo form = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskStepVo.getProcessTaskId());
-		if (form != null) {
-			processTaskStepVo.setFormUuid(form.getFormUuid());
-		}
-		return processTaskStepVo;
-	}
-
-	@Override
-	public ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId) {
-		return processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-	}
-
-	@Override
-	public ProcessTaskFormVo getProcessTaskFormByProcessTaskId(Long processTaskId) {
-		return processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-	}
-
-	@Override
-	public ProcessTaskVo getProcessTaskBaseInfoById(Long processTaskId) {
-		return processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-	}
 
 	@Override
 	public void createSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo) {
