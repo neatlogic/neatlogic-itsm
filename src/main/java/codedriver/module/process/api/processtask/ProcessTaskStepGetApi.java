@@ -111,7 +111,7 @@ public class ProcessTaskStepGetApi extends ApiComponentBase {
 	                    processTaskStepFormAttributeVo.setProcessStepUuid(currentProcessTaskStepVo.getProcessStepUuid());
 	                    formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
 	                }
-	                processTaskVo.setStepFormconfig(processTaskStepFormAttributeList);
+	                currentProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
 				}
 			}			
 		}
