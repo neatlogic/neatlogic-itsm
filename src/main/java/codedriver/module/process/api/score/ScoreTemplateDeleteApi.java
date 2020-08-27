@@ -1,5 +1,6 @@
 package codedriver.module.process.api.score;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.exception.score.ScoreTemplateNotFoundException;
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+@AuthAction(name = "SCORE_TEMPLATE_MODIFY")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)

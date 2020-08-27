@@ -1,6 +1,7 @@
 package codedriver.module.process.api.score;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.score.ScoreTemplateDimensionVo;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-
+@AuthAction(name = "SCORE_TEMPLATE_MODIFY")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)

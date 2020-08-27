@@ -1,6 +1,7 @@
 package codedriver.module.process.api.score;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.score.ScoreTemplateVo;
@@ -15,7 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
+@AuthAction(name = "SCORE_TEMPLATE_MODIFY")
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ScoreTemplateStatusUpdateApi extends PrivateApiComponentBase {
