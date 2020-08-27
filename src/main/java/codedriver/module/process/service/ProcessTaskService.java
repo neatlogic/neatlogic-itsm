@@ -5,10 +5,8 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
-import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -16,15 +14,6 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 
 public interface ProcessTaskService {
-	public ProcessTaskVo getProcessTaskBaseInfoById(Long processTaskId);
-
-	public ProcessTaskStepVo getProcessTaskStepDetailById(Long processTaskStepId);
-
-	public ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId);
-
-	public ProcessTaskFormVo getProcessTaskFormByProcessTaskId(Long processTaskId);
-
-	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
 
 	/**
 	 * 
