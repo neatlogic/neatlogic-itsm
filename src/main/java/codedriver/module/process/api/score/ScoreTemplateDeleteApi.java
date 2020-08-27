@@ -8,7 +8,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class ScoreTemplateDeleteApi extends ApiComponentBase {
+public class ScoreTemplateDeleteApi extends PrivateApiComponentBase {
 
     @Autowired
     private ScoreTemplateMapper scoreTemplateMapper;
