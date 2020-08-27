@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,10 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
 		List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
+		List<String> operateList = ProcessStepUtilHandlerFactory.getHandler().getOperateList(processTaskId, processTaskStepId);
+		if(!Objects.equals(actionList, operateList)) {
+		    //TODO
+		}
 		//TODO automatic ，临时处理，重构后删去
 		if(processTaskStepVo != null && ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
 //			actionList = Arrays.asList("view", "transfer", "pocesstaskview", "work", "complete");

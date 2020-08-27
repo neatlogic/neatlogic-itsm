@@ -31,7 +31,11 @@ public class TestOperate extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		// ProcessOperate operate = new
-		ProcessOperateManager ProcessOperateBuilder = new ProcessOperateManager.Builder().setNext(OperationAuthHandlerType.START).setNext(OperationAuthHandlerType.SUBTASK).setNext(OperationAuthHandlerType.AUTOMATIC).build();
+		ProcessOperateManager ProcessOperateBuilder = new ProcessOperateManager.Builder()
+		    .setNext(OperationAuthHandlerType.TASK)
+		    .setNext(OperationAuthHandlerType.STEP)
+		    .setNext(OperationAuthHandlerType.AUTOMATIC)
+		    .build();
 		return ProcessOperateBuilder.getOperateList(jsonObj.getLong("processTaskId"), jsonObj.getLong("processTaskStepId"));
 	}
 

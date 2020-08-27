@@ -18,6 +18,7 @@ import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager.Builder;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
 import codedriver.module.process.notify.handler.ProcessNotifyPolicyHandler;
 @Service
@@ -201,5 +202,11 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		
 		return resultObj;
 	}
+
+    @Override
+    protected void MySetNextOperationAuthHandlerType(Builder builder) {
+        // TODO Auto-generated method stub
+        
+    }
 
 }
