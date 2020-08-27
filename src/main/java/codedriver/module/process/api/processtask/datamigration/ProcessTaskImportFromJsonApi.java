@@ -23,6 +23,7 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -37,7 +38,6 @@ import codedriver.framework.process.dto.ProcessTaskStepConfigVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
-import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.ProcessVo;
@@ -233,7 +233,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                         jsonReader.startArray();
                                         while (jsonReader.hasNext()) {
                                             jsonReader.startObject();
-                                            ProcessTaskStepReplyVo processTaskStepCommentVo = new ProcessTaskStepReplyVo();
+                                            ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo();
                                             while (jsonReader.hasNext()) {
                                                 String taskStepContentKey = jsonReader.readString();
                                                 String taskStepContentValue = StringUtils.EMPTY;
@@ -247,14 +247,14 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                                     case "content":
                                                         String content = StringEscapeUtils.unescapeHtml4(taskStepContentValue);
                                                         String hash = DigestUtils.md5DigestAsHex(content.getBytes());
-                                                        processTaskStepCommentVo.setContentHash(hash);
+                                                        processTaskStepContentVo.setContentHash(hash);
                                                         processTaskMapper.replaceProcessTaskContent(new ProcessTaskContentVo(hash,content));
                                                         break;
                                                     case "fcu":
-                                                        processTaskStepCommentVo.setFcu(taskStepContentValue);
+                                                        processTaskStepContentVo.setFcu(taskStepContentValue);
                                                         break;
                                                     case "fcd":
-                                                        processTaskStepCommentVo.setFcd(TimeUtil.convertStringToDate(taskStepContentValue, TimeUtil.YYYY_MM_DD_HH_MM_SS));
+                                                        processTaskStepContentVo.setFcd(TimeUtil.convertStringToDate(taskStepContentValue, TimeUtil.YYYY_MM_DD_HH_MM_SS));
                                                         break;
                                                     case "fileList":
                                                         jsonReader.startArray();
@@ -296,16 +296,18 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                                             processTaskFileVo.setProcessTaskId(processTask.getId());
                                                             processTaskFileVo.setProcessTaskStepId(processTaskStep.getId());
                                                             processTaskFileVo.setFileId(file.getId());
-                                                            //processTaskMapper.insertProcessTaskFile(processTaskFileVo);
+                                                            processTaskFileVo.setContentId(processTaskStepContentVo.getId());
+                                                            processTaskMapper.insertProcessTaskStepFile(processTaskFileVo);
                                                             jsonReader.endObject();
                                                         }
                                                         jsonReader.endArray();
                                                         break;
                                                 }
                                             }
-                                            processTaskStepCommentVo.setProcessTaskId(processTask.getId());
-                                            processTaskStepCommentVo.setProcessTaskStepId(processTaskStep.getId());
-                                            //processTaskMapper.insertProcessTaskStepComment(processTaskStepCommentVo);
+                                            processTaskStepContentVo.setProcessTaskId(processTask.getId());
+                                            processTaskStepContentVo.setProcessTaskStepId(processTaskStep.getId());
+                                            processTaskStepContentVo.setType(ProcessTaskStepAction.COMMENT.getValue());
+                                            processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                                             jsonReader.endObject();
                                         }
                                         jsonReader.endArray();
