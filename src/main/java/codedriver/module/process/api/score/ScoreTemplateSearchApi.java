@@ -10,10 +10,14 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -62,6 +66,20 @@ public class ScoreTemplateSearchApi extends PrivateApiComponentBase{
 			returnObj.put("pageCount", PageUtil.getPageCount(rowNum, scoreTemplateVo.getPageSize()));
 		}
 		List<ScoreTemplateVo> scoreTemplateList = scoreTemplateMapper.searchScoreTemplate(scoreTemplateVo);
+		if(CollectionUtils.isNotEmpty(scoreTemplateList)){
+			List<Long> idList = scoreTemplateList.stream().map(ScoreTemplateVo::getId).collect(Collectors.toList());
+			List<ScoreTemplateVo> processCountByIdList = scoreTemplateMapper.getProcessCountByIdList(idList);
+			Map<Long,ScoreTemplateVo> processCountMap = new HashMap<>();
+			for(ScoreTemplateVo vo : processCountByIdList){
+				processCountMap.put(vo.getId(),vo);
+			}
+			for(ScoreTemplateVo vo : scoreTemplateList){
+				ScoreTemplateVo countVo = processCountMap.get(vo.getId());
+				if(countVo != null){
+					vo.setProcessCount(countVo.getProcessCount());
+				}
+			}
+		}
 		returnObj.put("scoreTemplateList", scoreTemplateList);
 		return returnObj;
 	}
