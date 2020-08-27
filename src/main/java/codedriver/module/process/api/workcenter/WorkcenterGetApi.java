@@ -13,13 +13,13 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.WorkcenterService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class WorkcenterGetApi extends ApiComponentBase {
+public class WorkcenterGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	WorkcenterMapper workcenterMapper;

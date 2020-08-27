@@ -18,7 +18,7 @@ import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.module.process.api.matrix.MatrixColumnDataSearchForSelectNewApi;
 
 @Component
@@ -74,7 +74,7 @@ public class CascadeHandler implements IFormAttributeHandler {
 				String matrixUuid = configObj.getString("matrixUuid");
 				List<ValueTextVo> mappingList = JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("mapping")), ValueTextVo.class);
 				if(StringUtils.isNotBlank(matrixUuid) && CollectionUtils.isNotEmpty(valueList) && CollectionUtils.isNotEmpty(mappingList)) {
-					MatrixColumnDataSearchForSelectNewApi restComponent = (MatrixColumnDataSearchForSelectNewApi)ApiComponentFactory.getInstance(MatrixColumnDataSearchForSelectNewApi.class.getName());
+					MatrixColumnDataSearchForSelectNewApi restComponent = (MatrixColumnDataSearchForSelectNewApi)PrivateApiComponentFactory.getInstance(MatrixColumnDataSearchForSelectNewApi.class.getName());
 					if (restComponent != null) {
 						if(valueList.size() > 0 && mappingList.size() > 0) {
 							List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();

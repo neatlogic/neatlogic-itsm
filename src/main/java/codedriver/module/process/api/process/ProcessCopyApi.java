@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,13 +21,12 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessService;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class ProcessCopyApi extends ApiComponentBase {
+public class ProcessCopyApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessMapper processMapper;

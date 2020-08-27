@@ -8,7 +8,7 @@ import codedriver.framework.process.dto.event.EventTypeVo;
 import codedriver.framework.process.exception.event.EventTypeNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.EventTypeService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class EventTypeSaveApi extends ApiComponentBase{
+public class EventTypeSaveApi extends PrivateApiComponentBase{
 
 	@Autowired
 	private EventTypeService eventTypeService;

@@ -6,7 +6,7 @@ import codedriver.framework.reminder.core.IGlobalReminderHandler;
 import codedriver.framework.reminder.dto.ReminderMessageVo;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.reminder.handler.ProcessTaskRemindHandler;
 
 import com.alibaba.fastjson.JSONObject;
@@ -21,7 +21,7 @@ import java.util.List;
  * @create: 2019-12-13 18:24
  **/
 @Service
-public class RemindItsmTestApi extends ApiComponentBase {
+public class RemindItsmTestApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {

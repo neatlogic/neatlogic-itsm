@@ -24,14 +24,14 @@ import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthExcepti
 import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-public class WorkcenterSaveApi extends ApiComponentBase {
+public class WorkcenterSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	WorkcenterMapper workcenterMapper;

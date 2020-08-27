@@ -2,6 +2,8 @@ package codedriver.module.process.api.process;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +13,9 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessDraftVo;
 import codedriver.framework.process.exception.process.ProcessDraftNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessDraftGetApi extends ApiComponentBase {
+public class ProcessDraftGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessMapper processMapper;

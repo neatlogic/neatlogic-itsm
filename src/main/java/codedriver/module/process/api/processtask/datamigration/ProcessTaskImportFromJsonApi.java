@@ -33,11 +33,11 @@ import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepFileVo;
-import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepConfigVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.ProcessVo;
@@ -47,14 +47,14 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.core.JsonStreamApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateJsonStreamApiComponentBase;
 import codedriver.framework.util.TimeUtil;
 
 @SuppressWarnings("deprecation")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
+public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentBase {
     static Logger logger = LoggerFactory.getLogger(ProcessTaskImportFromJsonApi.class);
     @Autowired
     private ProcessTaskMapper processTaskMapper;
@@ -386,10 +386,4 @@ public class ProcessTaskImportFromJsonApi extends JsonStreamApiComponentBase {
         jsonReader.close();
         return errorTaskList;
     }
-
-    @Override
-    public boolean isPrivate() {
-        return true;
-    }
-
 }

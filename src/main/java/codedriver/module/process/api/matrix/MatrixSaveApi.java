@@ -18,7 +18,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.util.UUIDUtil;
 
 /**
@@ -29,7 +29,7 @@ import codedriver.module.process.util.UUIDUtil;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class MatrixSaveApi extends ApiComponentBase {
+public class MatrixSaveApi extends PrivateApiComponentBase {
 
     @Autowired
     private MatrixMapper matrixMapper;

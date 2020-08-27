@@ -14,11 +14,11 @@ import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Transactional
 @Service
-public class WorkcenterProcessTaskDeleteForTestApi extends ApiComponentBase {
+public class WorkcenterProcessTaskDeleteForTestApi extends PrivateApiComponentBase {
 
 	@Autowired
 	ProcessTaskMapper processTaskMapper;
