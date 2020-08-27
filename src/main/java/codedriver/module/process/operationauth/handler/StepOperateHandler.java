@@ -198,11 +198,25 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
         }
         return resultMap;
 	}
+    
+    @Override
+    public boolean getOperateMap(Long processTaskId, Long processTaskStepId, OperationType operationType) {
+        BiPredicate<Long, Long> predicate = operationBiPredicateMap.get(operationType);
+        if(predicate != null) {
+            return predicate.test(processTaskId, processTaskStepId);
+        }
+        return false;
+    }
 
 	@Override
 	public OperationAuthHandlerType getHandler() {
 		return OperationAuthHandlerType.STEP;
 	}
+    
+    @Override
+    public List<OperationType> getAllOperationTypeList() {      
+        return new ArrayList<>(operationBiPredicateMap.keySet());
+    }
 	
 	/**
      * 
