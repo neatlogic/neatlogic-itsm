@@ -64,6 +64,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+//		ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 		processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 

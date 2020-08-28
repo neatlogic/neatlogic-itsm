@@ -69,6 +69,10 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
 		List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
+//		List<ProcessTaskOperationType> operateList = ProcessStepUtilHandlerFactory.getHandler().getOperateList(processTaskId, processTaskStepId);
+//		if(!Objects.equals(actionList, operateList)) {
+//		    //TODO
+//		}
 		//TODO automatic ，临时处理，重构后删去
 		if(processTaskStepVo != null && ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
 //			actionList = Arrays.asList("view", "transfer", "pocesstaskview", "work", "complete");
