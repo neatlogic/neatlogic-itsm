@@ -11,17 +11,14 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
-import codedriver.framework.process.constvalue.OperationType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 
 @Component
 public class AutomaticOperateHandler extends OperationAuthHandlerBase {
 
-    private static Map<OperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
-
-//	@Autowired
-//	private ProcessTaskMapper processTaskMapper;
+    private static Map<ProcessTaskOperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
     
     @PostConstruct
     public void init() {
@@ -29,21 +26,26 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
     }
 
 	@Override
-	public Map<String, Boolean> getOperateMap(Long processTaskId, Long processTaskStepId) {
-        Map<String, Boolean> resultMap = new HashMap<>();
-        for(Entry<OperationType, BiPredicate<Long, Long>> entry :operationBiPredicateMap.entrySet()) {
-            resultMap.put(entry.getKey().getValue(), entry.getValue().test(processTaskId, processTaskStepId));
+	public Map<ProcessTaskOperationType, Boolean> getOperateMap(Long processTaskId, Long processTaskStepId) {
+        Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
+        for(Entry<ProcessTaskOperationType, BiPredicate<Long, Long>> entry :operationBiPredicateMap.entrySet()) {
+            resultMap.put(entry.getKey(), entry.getValue().test(processTaskId, processTaskStepId));
         }
         return resultMap;
 	}
     
     @Override
-    public boolean getOperateMap(Long processTaskId, Long processTaskStepId, OperationType operationType) {
-        BiPredicate<Long, Long> predicate = operationBiPredicateMap.get(operationType);
-        if(predicate != null) {
-            return predicate.test(processTaskId, processTaskStepId);
-        }
-        return false;
+    public Map<ProcessTaskOperationType, Boolean> getOperateMap(Long processTaskId, Long processTaskStepId, List<ProcessTaskOperationType> operationTypeList) {
+        Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
+        for(ProcessTaskOperationType operationType : operationTypeList) {
+            BiPredicate<Long, Long> predicate = operationBiPredicateMap.get(operationType);
+            if(predicate != null) {
+                resultMap.put(operationType, predicate.test(processTaskId, processTaskStepId));
+            }else {
+                resultMap.put(operationType, false);
+            }
+        }    
+        return resultMap;
     }
 
 	@Override
@@ -52,7 +54,7 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
 	}
     
     @Override
-    public List<OperationType> getAllOperationTypeList() {      
+    public List<ProcessTaskOperationType> getAllOperationTypeList() {      
         return new ArrayList<>(operationBiPredicateMap.keySet());
     }
 

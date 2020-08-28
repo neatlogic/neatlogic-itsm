@@ -135,6 +135,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 	                    formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
 	                }
 	                processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
+	                startProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
 	            }
 			}
 			return processTaskVo;
@@ -213,10 +214,13 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 				List<ProcessStepFormAttributeVo> processStepFormAttributeList = processMapper.getProcessStepFormAttributeByStepUuid(startProcessTaskStepVo.getProcessStepUuid());
 				if(CollectionUtils.isNotEmpty(processStepFormAttributeList)) {
 					Map<String, String> formAttributeActionMap = new HashMap<>();
+					List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = new ArrayList<>();
 					for(ProcessStepFormAttributeVo processStepFormAttribute : processStepFormAttributeList) {
 						formAttributeActionMap.put(processStepFormAttribute.getAttributeUuid(), processStepFormAttribute.getAction());
+						processTaskStepFormAttributeList.add(new ProcessTaskStepFormAttributeVo(processStepFormAttribute));
 					}
 					processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
+					startProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
 				}
 			}
 			return processTaskVo;

@@ -70,7 +70,7 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
 		List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
-		List<String> operateList = ProcessStepUtilHandlerFactory.getHandler().getOperateList(processTaskId, processTaskStepId);
+		List<codedriver.framework.process.constvalue.ProcessTaskOperationType> operateList = ProcessStepUtilHandlerFactory.getHandler().getOperateList(processTaskId, processTaskStepId);
 		if(!Objects.equals(actionList, operateList)) {
 		    //TODO
 		}
