@@ -43,13 +43,17 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -66,6 +70,8 @@ public class WorkcenterService {
 	ProcessTaskService processTaskService;
 	@Autowired
 	FormMapper formMapper;
+	@Autowired
+	ProcessTaskMapper processTaskMapper;
 	
 	
 	/**
@@ -243,22 +249,29 @@ public class WorkcenterService {
 					||ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
 					||ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus)
 					||(ProcessTaskStatus.PENDING.getValue().equals(stepStatus)&&isActive == 1)
-					)) {		
-				List<String> actionList = new ArrayList<String>();
+					)) {
+				List<ProcessTaskOperationType> operationList = new ArrayList<>();
 				try {
-					actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(Long.valueOf(el.getId()), stepJson.getLong("id"),new ArrayList<String>(){
-						private static final long serialVersionUID = 1L;
-					{
-						add(ProcessTaskStepAction.WORK.getValue());
-						add(ProcessTaskStepAction.ABORT.getValue());
-						add(ProcessTaskStepAction.RECOVER.getValue());
-						add(ProcessTaskStepAction.URGE.getValue());
-						}});
+				    ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(stepId);
+				    if(processTaskStepVo != null) {
+				        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+				        if(handler != null) {
+				            handler.getOperateList(Long.valueOf(el.getId()), stepId, new ArrayList<ProcessTaskOperationType>(){
+                                private static final long serialVersionUID = 1L;
+                                {
+                                add(ProcessTaskOperationType.WORK);
+                                add(ProcessTaskOperationType.ABORT);
+                                add(ProcessTaskOperationType.RECOVER);
+                                add(ProcessTaskOperationType.URGE);
+                                }
+                            });
+				        }
+				    }
 				}catch(Exception ex) {
 					logger.error(ex.getMessage(),ex);
 				}
 				
-				if(actionList.contains(ProcessTaskStepAction.WORK.getValue())) { 
+				if(operationList.contains(ProcessTaskOperationType.WORK)) { 
 				JSONObject configJson = new JSONObject();
 					configJson.put("taskid", el.getId());
 					configJson.put("stepid", stepId);
@@ -269,13 +282,13 @@ public class WorkcenterService {
 					actionJson.put("config", configJson);
 					handleArray.add(actionJson);
 				}
-				if(actionList.contains(ProcessTaskStepAction.ABORT.getValue())) {
+				if(operationList.contains(ProcessTaskOperationType.ABORT)) {
 					isHasAbort = true; 
 				}
-				if(actionList.contains(ProcessTaskStepAction.RECOVER.getValue())) {
+				if(operationList.contains(ProcessTaskOperationType.RECOVER)) {
 					isHasRecover = true; 
 				}
-				if(actionList.contains(ProcessTaskStepAction.URGE.getValue())) {
+				if(operationList.contains(ProcessTaskOperationType.URGE)) {
 					isHasUrge = true; 
 				}
 			}

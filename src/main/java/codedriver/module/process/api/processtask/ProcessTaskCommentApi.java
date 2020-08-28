@@ -16,6 +16,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -83,9 +84,11 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 
-		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMMENT);
-		
+//		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
+//		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMMENT);
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+		handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.COMMENT, true);
 		//删除暂存
 		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 		processTaskStepDataVo.setProcessTaskId(processTaskId);
@@ -127,9 +130,9 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         }
         
         //生成活动    
-        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-        processTaskStepVo.setProcessTaskId(processTaskId);
-        processTaskStepVo.setId(processTaskStepId);
+//        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+//        processTaskStepVo.setProcessTaskId(processTaskId);
+//        processTaskStepVo.setId(processTaskStepId);
         processTaskStepVo.setParamObj(jsonObj);
         handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
         

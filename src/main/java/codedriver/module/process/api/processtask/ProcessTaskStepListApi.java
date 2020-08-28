@@ -17,7 +17,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -27,6 +27,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -72,7 +73,8 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+		ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
 		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
@@ -134,11 +136,16 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 		//其他处理步骤
 		if(CollectionUtils.isNotEmpty(resultList)) {
 			for(ProcessTaskStepVo processTaskStepVo : resultList) {
-			  //判断当前用户是否有权限查看该节点信息
-		        List<String> verifyActionList = new ArrayList<>();
-		        verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-		        List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), verifyActionList);
-		        if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
+			    //判断当前用户是否有权限查看该节点信息
+//		        List<String> verifyActionList = new ArrayList<>();
+//		        verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
+//		        List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), verifyActionList);
+//		        if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
+			    IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+			    if(handler == null) {
+			        throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+			    }
+		        if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepVo.getId(), ProcessTaskOperationType.VIEW, false)){
 		            processTaskStepVo.setIsView(1);
 		            getProcessTaskStepDetail(processTaskStepVo);
 		        }else {

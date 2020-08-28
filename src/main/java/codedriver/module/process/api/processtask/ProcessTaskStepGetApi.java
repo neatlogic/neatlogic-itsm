@@ -1,6 +1,5 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
@@ -86,8 +86,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        
-		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
+        handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
+//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
 		
 		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
         
@@ -95,11 +96,13 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
         Map<String, String> formAttributeActionMap = new HashMap<>();
 		if(processTaskStepId != null) {
-			List<String> verifyActionList = new ArrayList<>();
-			verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-			List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
-			if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){	
-			    ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
+//			List<String> verifyActionList = new ArrayList<>();
+//			verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
+//			List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
+		    
+            ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
+			if(currentProcessTaskStepVo != null){
+			    handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
 				processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
 				if(MapUtils.isNotEmpty(currentProcessTaskStepVo.getFormAttributeDataMap())) {
 				    processTaskVo.setFormAttributeDataMap(currentProcessTaskStepVo.getFormAttributeDataMap());
@@ -116,10 +119,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 			}			
 		}
 		if(StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
-		    List<String> verifyActionList = new ArrayList<>();
-	        verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
-	        List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
-	        processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, actionList.removeAll(verifyActionList) ? 1 : 0);
+//		    List<String> verifyActionList = new ArrayList<>();
+//	        verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
+//	        List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
+//            processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, actionList.removeAll(verifyActionList) ? 1 : 0);
+	        boolean isAuthority = handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.WORK, false);
+	        processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, isAuthority ? 1 : 0);
 		}
 		
 		//TODO 兼容老工单表单（判断是否存在旧表单）
@@ -171,119 +176,123 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 	private ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId) {
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
         Long processTaskId = processTaskStepVo.getProcessTaskId();
-        //获取步骤信息
-        processTaskService.setProcessTaskStepConfig(processTaskStepVo);
-        //处理人列表
-        processTaskService.setProcessTaskStepUser(processTaskStepVo);
+        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.VIEW, false)){
+          //获取步骤信息
+            processTaskService.setProcessTaskStepConfig(processTaskStepVo);
+            //处理人列表
+            processTaskService.setProcessTaskStepUser(processTaskStepVo);
 
-        /** 当前步骤特有步骤信息 **/
-        IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-        if(processStepUtilHandler == null) {
-            throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
-        }
-        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
-        //回复框内容和附件暂存回显              
-        setTemporaryData(processTaskStepVo);
-        
-        //步骤评论列表        
-        processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId));
-        
-        //获取当前用户有权限的所有子任务
-        //子任务列表
-        if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-            List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
-            if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-                Map<String, String> customButtonMap = processTaskStepVo.getCustomButtonMap();
-                for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-                    String currentUser = UserContext.get().getUserUuid(true);
-                    if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
-                        || (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
-                        if(processTaskStepSubtask.getIsAbortable() == 1) {
-                            String value = ProcessTaskStepAction.ABORTSUBTASK.getValue();
-                            String text = customButtonMap.get(value);
-                            if(StringUtils.isBlank(text)) {
-                                text = ProcessTaskStepAction.ABORTSUBTASK.getText();
+            /** 当前步骤特有步骤信息 **/
+            IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            if(processStepUtilHandler == null) {
+                throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
+            }
+            processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
+            //回复框内容和附件暂存回显              
+            setTemporaryData(processTaskStepVo);
+            
+            //步骤评论列表        
+            processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId));
+            
+            //获取当前用户有权限的所有子任务
+            //子任务列表
+            if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+                if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
+                    Map<String, String> customButtonMap = processTaskStepVo.getCustomButtonMap();
+                    for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+                        String currentUser = UserContext.get().getUserUuid(true);
+                        if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
+                            || (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
+                            if(processTaskStepSubtask.getIsAbortable() == 1) {
+                                String value = ProcessTaskStepAction.ABORTSUBTASK.getValue();
+                                String text = customButtonMap.get(value);
+                                if(StringUtils.isBlank(text)) {
+                                    text = ProcessTaskStepAction.ABORTSUBTASK.getText();
+                                }
+                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }
-                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                        }
-                        if(processTaskStepSubtask.getIsCommentable() == 1) {
-                            String value = ProcessTaskStepAction.COMMENTSUBTASK.getValue();
-                            String text = customButtonMap.get(value);
-                            if(StringUtils.isBlank(text)) {
-                                text = ProcessTaskStepAction.COMMENTSUBTASK.getText();
+                            if(processTaskStepSubtask.getIsCommentable() == 1) {
+                                String value = ProcessTaskStepAction.COMMENTSUBTASK.getValue();
+                                String text = customButtonMap.get(value);
+                                if(StringUtils.isBlank(text)) {
+                                    text = ProcessTaskStepAction.COMMENTSUBTASK.getText();
+                                }
+                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }
-                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                        }
-                        if(processTaskStepSubtask.getIsCompletable() == 1) {
-                            String value = ProcessTaskStepAction.COMPLETESUBTASK.getValue();
-                            String text = customButtonMap.get(value);
-                            if(StringUtils.isBlank(text)) {
-                                text = ProcessTaskStepAction.COMPLETESUBTASK.getText();
+                            if(processTaskStepSubtask.getIsCompletable() == 1) {
+                                String value = ProcessTaskStepAction.COMPLETESUBTASK.getValue();
+                                String text = customButtonMap.get(value);
+                                if(StringUtils.isBlank(text)) {
+                                    text = ProcessTaskStepAction.COMPLETESUBTASK.getText();
+                                }
+                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }
-                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                        }
-                        if(processTaskStepSubtask.getIsEditable() == 1) {
-                            String value = ProcessTaskStepAction.EDITSUBTASK.getValue();
-                            String text = customButtonMap.get(value);
-                            if(StringUtils.isBlank(text)) {
-                                text = ProcessTaskStepAction.EDITSUBTASK.getText();
+                            if(processTaskStepSubtask.getIsEditable() == 1) {
+                                String value = ProcessTaskStepAction.EDITSUBTASK.getValue();
+                                String text = customButtonMap.get(value);
+                                if(StringUtils.isBlank(text)) {
+                                    text = ProcessTaskStepAction.EDITSUBTASK.getText();
+                                }
+                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }
-                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                        }
-                        if(processTaskStepSubtask.getIsRedoable() == 1) {
-                            String value = ProcessTaskStepAction.REDOSUBTASK.getValue();
-                            String text = customButtonMap.get(value);
-                            if(StringUtils.isBlank(text)) {
-                                text = ProcessTaskStepAction.REDOSUBTASK.getText();
+                            if(processTaskStepSubtask.getIsRedoable() == 1) {
+                                String value = ProcessTaskStepAction.REDOSUBTASK.getValue();
+                                String text = customButtonMap.get(value);
+                                if(StringUtils.isBlank(text)) {
+                                    text = ProcessTaskStepAction.REDOSUBTASK.getText();
+                                }
+                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }
-                            processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+                            processTaskStepVo.getProcessTaskStepSubtaskList().add(processTaskStepSubtask);
                         }
-                        processTaskStepVo.getProcessTaskStepSubtaskList().add(processTaskStepSubtask);
                     }
                 }
             }
-        }
-        
-        //获取可分配处理人的步骤列表             
-        processTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
-        
-        //时效列表
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-        processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepId, processTaskVo.getWorktimeUuid()));
-        
-      //processtaskStepData
-        ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));
-        if(stepDataVo != null) {
-            JSONObject stepDataJson = stepDataVo.getData();
-            processTaskStepVo.setProcessTaskStepData(stepDataJson);
-            List<String> verifyActionList = new ArrayList<>();
-            verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
-            List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
-            if(actionList.removeAll(verifyActionList)) {//有处理权限
-                stepDataJson.put("isStepUser", 1);
-                if(processTaskStepVo.getHandler().equals(ProcessStepHandler.AUTOMATIC.getHandler())){
-                    JSONObject requestAuditJson = stepDataJson.getJSONObject("requestAudit");
-                    if(requestAuditJson.containsKey("status")
-                            &&requestAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
-                        requestAuditJson.put("isRetry", 1);
-                    }else {
-                        requestAuditJson.put("isRetry", 0);
-                    }
-                    JSONObject callbackAuditJson = stepDataJson.getJSONObject("callbackAudit");
-                    if(callbackAuditJson!=null) {
-                            if(callbackAuditJson.containsKey("status")
-                            &&callbackAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
-                                    callbackAuditJson.put("isRetry", 1);
-                            }else {
-                                callbackAuditJson.put("isRetry", 0);
-                            }
+            
+            //获取可分配处理人的步骤列表             
+            processTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
+            
+            //时效列表
+            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+            processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepId, processTaskVo.getWorktimeUuid()));
+            
+          //processtaskStepData
+            ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));
+            if(stepDataVo != null) {
+                JSONObject stepDataJson = stepDataVo.getData();
+                processTaskStepVo.setProcessTaskStepData(stepDataJson);
+//                List<String> verifyActionList = new ArrayList<>();
+//                verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
+//                List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
+                if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.WORK, false)) {//有处理权限
+                    stepDataJson.put("isStepUser", 1);
+                    if(processTaskStepVo.getHandler().equals(ProcessStepHandler.AUTOMATIC.getHandler())){
+                        JSONObject requestAuditJson = stepDataJson.getJSONObject("requestAudit");
+                        if(requestAuditJson.containsKey("status")
+                                &&requestAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+                            requestAuditJson.put("isRetry", 1);
+                        }else {
+                            requestAuditJson.put("isRetry", 0);
+                        }
+                        JSONObject callbackAuditJson = stepDataJson.getJSONObject("callbackAudit");
+                        if(callbackAuditJson!=null) {
+                                if(callbackAuditJson.containsKey("status")
+                                &&callbackAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+                                        callbackAuditJson.put("isRetry", 1);
+                                }else {
+                                    callbackAuditJson.put("isRetry", 0);
+                                }
+                        }
                     }
                 }
             }
+            /** 下一步骤列表 **/
+            processTaskService.setNextStepList(processTaskStepVo);
+            return processTaskStepVo;
         }
-        /** 下一步骤列表 **/
-        processTaskService.setNextStepList(processTaskStepVo);
-        return processTaskStepVo;
+        return null;
     }
 	/**
      * 

@@ -9,22 +9,29 @@ import java.util.function.BiPredicate;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
+import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
+import codedriver.module.process.service.ProcessTaskService;
 
 @Component
-public class StepOperateHandler extends OperationAuthHandlerBase {
+public class StepOperateHandler implements IOperationAuthHandler {
 
-    private static Map<ProcessTaskOperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
+    private Map<ProcessTaskOperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
+    @Autowired
+    private ProcessTaskService processTaskService;
 	
 	@PostConstruct
     public void init() {
@@ -38,7 +45,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return true;
             }
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-            return getProcessTaskStepConfigActionList(processTaskVo, processTaskStepVo, ProcessTaskOperationType.VIEW);
+            return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStepVo, ProcessTaskOperationType.VIEW);
         });
 	    
 	    operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFER, (processTaskId, processTaskStepId) -> {
@@ -46,7 +53,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             // 步骤状态为已激活的才能转交
             if (processTaskStepVo.getIsActive() == 1) {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                return getProcessTaskStepConfigActionList(processTaskVo, processTaskStepVo, ProcessTaskOperationType.TRANSFER);
+                return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStepVo, ProcessTaskOperationType.TRANSFER);
             }
             return false;
 	    });
@@ -55,7 +62,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
+                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
                 if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
                     if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
                         if (!currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {// 没有主处理人时是accept
@@ -71,7 +78,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
+                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
                 if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
                     if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
                         if (currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {// 有主处理人时是start
@@ -87,7 +94,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
+                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
                 if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
                     if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                         // 完成complete 暂存save 评论comment 创建子任务createsubtask
@@ -111,7 +118,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
+                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
                 if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
                     if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                         // 完成complete 暂存save 评论comment 创建子任务createsubtask
@@ -135,7 +142,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
+                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
                 if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
                     if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                         // 完成complete 暂存save 评论comment 创建子任务createsubtask
@@ -152,7 +159,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
+                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
                 if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
                     if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                         // 完成complete 暂存save 评论comment 创建子任务createsubtask

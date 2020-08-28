@@ -9,20 +9,27 @@ import java.util.function.BiPredicate;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
-import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
+import codedriver.module.process.service.ProcessTaskService;
 @Component
-public class OmnipotentOperateHandler extends OperationAuthHandlerBase {
+public class OmnipotentOperateHandler implements IOperationAuthHandler {
 
-    private static Map<ProcessTaskOperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
+    private Map<ProcessTaskOperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
+    @Autowired
+    private ProcessTaskService processTaskService;
     
     @PostConstruct
     public void init() {
@@ -31,7 +38,7 @@ public class OmnipotentOperateHandler extends OperationAuthHandlerBase {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
+                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
                 if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
                     if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                         if (currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue()) || currentUserProcessUserTypeList.contains(ProcessUserType.AGENT.getValue())) {

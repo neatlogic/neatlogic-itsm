@@ -54,7 +54,8 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-		List<ProcessTaskStepVo> processTaskStepList = handler.getUrgeableStepList(processTaskId);
+//		List<ProcessTaskStepVo> processTaskStepList = handler.getUrgeableStepList(processTaskId);
+		List<ProcessTaskStepVo> processTaskStepList = processTaskService.getUrgeableStepList(processTaskId);
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
 			for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 				/** 触发通知 **/
