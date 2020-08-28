@@ -2,9 +2,11 @@ package codedriver.module.process.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -219,4 +221,48 @@ public interface ProcessTaskService {
 	* @return boolean 如果保存成功返回true，否则返回false
 	 */
 	public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo processTaskStepReplyVo);
+	/**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取当前用户在当前步骤中工单干系人列表
+     * @param processTaskVo     工单信息
+     * @param processTaskStepId 步骤id
+     * @return List<String>
+     */
+	public List<String> getCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, Long processTaskStepId);
+	/**
+     * 
+     * @Time:2020年4月2日
+     * @Description: 获取流程节点配置中的当前用户的拥有的权限
+     * @param processTaskVo
+     * @param processTaskStepVo
+     * @param actionList                     要获取的权限集合
+     * @param currentUserProcessUserTypeList 当前用户工单干系人列表
+     * @return List<String>
+     */
+	public boolean getProcessTaskStepConfigActionList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
+	/**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取工单中当前用户能撤回的步骤列表
+     * @param processTaskId
+     * @return Set<ProcessTaskStepVo>
+     */
+	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTaskId(Long processTaskId);
+	/**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取工单中当前用户能处理的步骤列表
+     * @param processTaskId
+     * @return List<ProcessTaskStepVo>
+     */
+	public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId);
+	/**
+     * 
+     * @Time:2020年4月18日
+     * @Description: 获取工单中当前用户能催办的步骤列表
+     * @param processTaskId
+     * @return List<ProcessTaskStepVo>
+     */
+    public List<ProcessTaskStepVo> getUrgeableStepList(Long processTaskId);
 }

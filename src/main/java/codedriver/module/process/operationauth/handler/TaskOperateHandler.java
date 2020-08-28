@@ -11,22 +11,34 @@ import java.util.function.Predicate;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
+import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
+import codedriver.module.process.service.ProcessTaskService;
 
 @Component
-public class TaskOperateHandler extends OperationAuthHandlerBase {
+public class TaskOperateHandler implements IOperationAuthHandler {
 
-    private static Map<ProcessTaskOperationType, Predicate<Long>> operationBiPredicateMap = new HashMap<>();
-    
+    private Map<ProcessTaskOperationType, Predicate<Long>> operationBiPredicateMap = new HashMap<>();
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
+    @Autowired
+    private TeamMapper teamMapper;
+    @Autowired
+    private ChannelMapper channelMapper;
+    @Autowired
+    private ProcessTaskService processTaskService;
     @PostConstruct
     public void init() {
         
@@ -70,7 +82,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 processTaskStepList.addAll(startProcessTaskStepList);
                 for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        return getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.ABORT);
+                        return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.ABORT);
                     }
                 }
             }          
@@ -87,7 +99,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 processTaskStepList.addAll(startProcessTaskStepList);
                 for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                     if (processTaskStep.getIsActive().intValue() == -1) {
-                        return getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.ABORT);
+                        return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.ABORT);
                     }
                 }
             }
@@ -102,7 +114,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             processTaskStepList.addAll(startProcessTaskStepList);
             for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                 if (processTaskStep.getIsActive().intValue() == 1) {
-                    return getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.UPDATE);
+                    return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.UPDATE);
                 }
             }
             return false;
@@ -116,7 +128,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             processTaskStepList.addAll(startProcessTaskStepList);
             for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                 if (processTaskStep.getIsActive().intValue() == 1) {
-                    return getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.URGE);
+                    return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.URGE);
                 }
             }
             return false;
@@ -133,7 +145,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         
         operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskId) -> {
             // 撤销权限retreat
-            Set<ProcessTaskStepVo> retractableStepSet = getRetractableStepListByProcessTaskId(processTaskId);
+            Set<ProcessTaskStepVo> retractableStepSet = processTaskService.getRetractableStepListByProcessTaskId(processTaskId);
             if (CollectionUtils.isNotEmpty(retractableStepSet)) {
                 return true;
             }
@@ -173,4 +185,6 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
     public List<ProcessTaskOperationType> getAllOperationTypeList() {      
         return new ArrayList<>(operationBiPredicateMap.keySet());
     }
+    
+    
 }

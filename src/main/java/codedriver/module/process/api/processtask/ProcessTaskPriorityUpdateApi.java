@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
@@ -75,8 +75,8 @@ public class ProcessTaskPriorityUpdateApi extends PrivateApiComponentBase {
 		//如果优先级跟原来的优先级不一样，生成活动
 		if(!priorityUuid.equals(oldPriorityUuid)) {			
 			IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
-			
+//			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
+			handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
 			//更新优先级
 			processTaskVo.setPriorityUuid(priorityUuid);
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);

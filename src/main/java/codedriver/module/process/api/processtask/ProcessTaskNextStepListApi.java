@@ -11,9 +11,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -58,19 +59,20 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase{
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-		ProcessTaskStepAction processTaskStepAction = ProcessTaskStepAction.COMPLETE;
+        ProcessTaskOperationType operationType = ProcessTaskOperationType.COMPLETE;
 		String action = jsonObj.getString("action");
-		if(ProcessTaskStepAction.BACK.getValue().equals(action)) {
-			processTaskStepAction = ProcessTaskStepAction.BACK;
-		}else {
-			action = ProcessTaskStepAction.COMPLETE.getValue();
+		if(ProcessTaskOperationType.BACK.getValue().equals(action)) {
+		    operationType = ProcessTaskOperationType.BACK;
 		}
-		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, processTaskStepAction);
+		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+		handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, operationType, true);
+//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, processTaskStepAction);
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
 		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
 			if(processTaskStep.getIsActive() != null) {
-				if(ProcessTaskStepAction.COMPLETE.getValue().equals(action) && ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
+				if(ProcessTaskOperationType.COMPLETE == operationType && ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
 					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
 						processTaskStep.setName(processTaskStep.getAliasName());
 						processTaskStep.setFlowDirection("");
@@ -78,7 +80,7 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase{
 						processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
 					}
 					resultList.add(processTaskStep);
-				}else if(ProcessTaskStepAction.BACK.getValue().equals(action) && ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
+				}else if(ProcessTaskOperationType.BACK == operationType && ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
 					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
 						processTaskStep.setName(processTaskStep.getAliasName());
 						processTaskStep.setFlowDirection("");

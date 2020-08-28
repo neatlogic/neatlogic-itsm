@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -67,8 +67,8 @@ public class ProcessTaskTitleUpdateApi extends PrivateApiComponentBase {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(processTaskId);
 			IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
-						
+//			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
+			handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
 			//更新标题
 			processTaskVo.setTitle(title);
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);

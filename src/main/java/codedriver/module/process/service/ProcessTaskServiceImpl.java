@@ -5,10 +5,12 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -43,9 +45,12 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.FormAttributeAction;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
+import codedriver.framework.process.constvalue.ProcessStepMode;
+import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
@@ -85,6 +90,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
@@ -858,6 +864,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             if(processTaskStepVo == null) {
                 throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
             }
+            IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            if(processStepUtilHandler == null) {
+                throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+            }
             if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
                 throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
             }
@@ -866,6 +876,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             ProcessTaskStepVo nextProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(nextStepId);
             if(nextProcessTaskStepVo == null) {
                 throw new ProcessTaskStepNotFoundException(nextStepId.toString());
+            }
+            IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(nextProcessTaskStepVo.getHandler());
+            if(processStepUtilHandler == null) {
+                throw new ProcessStepUtilHandlerNotFoundException(nextProcessTaskStepVo.getHandler());
             }
             if(!processTaskId.equals(nextProcessTaskStepVo.getProcessTaskId())) {
                 throw new ProcessTaskRuntimeException("步骤：'" + nextStepId + "'不是工单：'" + processTaskId + "'的步骤");
@@ -1182,5 +1196,235 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
         }
         return isUpdate;
+    }
+    /**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取当前用户在当前步骤中工单干系人列表
+     * @param processTaskVo     工单信息
+     * @param processTaskStepId 步骤id
+     * @return List<String>
+     */
+    public List<String> getCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, Long processTaskStepId) {
+        List<String> currentUserProcessUserTypeList = new ArrayList<>();
+        currentUserProcessUserTypeList.add(UserType.ALL.getValue());
+        if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
+            currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
+        }
+        if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
+            currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
+        }
+        List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
+        List<String> majorUserUuidList = majorUserList.stream().map(ProcessTaskStepUserVo::getUserUuid).collect(Collectors.toList());
+        if (majorUserUuidList.contains(UserContext.get().getUserUuid(true))) {
+            currentUserProcessUserTypeList.add(ProcessUserType.MAJOR.getValue());
+        }
+        List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
+        List<String> minorUserUuidList = minorUserList.stream().map(ProcessTaskStepUserVo::getUserUuid).collect(Collectors.toList());
+        if (minorUserUuidList.contains(UserContext.get().getUserUuid(true))) {
+            currentUserProcessUserTypeList.add(ProcessUserType.MINOR.getValue());
+        }
+        List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.AGENT.getValue());
+        List<String> agentUserUuidList = agentUserList.stream().map(ProcessTaskStepUserVo::getUserUuid).collect(Collectors.toList());
+        if (agentUserUuidList.contains(UserContext.get().getUserUuid(true))) {
+            currentUserProcessUserTypeList.add(ProcessUserType.AGENT.getValue());
+        }
+        List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
+        if (CollectionUtils.isNotEmpty(workerList)) {
+            List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+            for (ProcessTaskStepWorkerVo worker : workerList) {
+                if (GroupSearch.USER.getValue().equals(worker.getType()) && UserContext.get().getUserUuid(true).equals(worker.getUuid())) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
+                    break;
+                } else if (GroupSearch.TEAM.getValue().equals(worker.getType()) && currentUserTeamList.contains(worker.getUuid())) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
+                    break;
+                } else if (GroupSearch.ROLE.getValue().equals(worker.getType()) && UserContext.get().getRoleUuidList().contains(worker.getUuid())) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
+                    break;
+                }
+            }
+        }
+
+        return currentUserProcessUserTypeList;
+    }
+    
+    /**
+     * 
+     * @Time:2020年4月2日
+     * @Description: 获取流程节点配置中的当前用户的拥有的权限
+     * @param processTaskVo
+     * @param processTaskStepVo
+     * @param actionList                     要获取的权限集合
+     * @param currentUserProcessUserTypeList 当前用户工单干系人列表
+     * @return List<String>
+     */
+    public boolean getProcessTaskStepConfigActionList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType) {
+        String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        JSONObject stepConfigObj = JSON.parseObject(stepConfig);
+        JSONArray authorityList = stepConfigObj.getJSONArray("authorityList");
+        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
+        if (CollectionUtils.isEmpty(authorityList)) {
+            ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+            if(processStepHandlerVo != null) {
+                JSONObject handlerConfigObj = processStepHandlerVo.getConfig();
+                if(MapUtils.isNotEmpty(handlerConfigObj)) {
+                    authorityList = handlerConfigObj.getJSONArray("authorityList");
+                }
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(authorityList)) {
+            for (int i = 0; i < authorityList.size(); i++) {
+                JSONObject authorityObj = authorityList.getJSONObject(i);
+                String action = authorityObj.getString("action");
+                if(operationType.getValue().equals(action)) {
+                    JSONArray acceptList = authorityObj.getJSONArray("acceptList");
+                    if (CollectionUtils.isNotEmpty(acceptList)) {
+                        List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepVo.getId());
+                        List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+                        for (int j = 0; j < acceptList.size(); j++) {
+                            String accept = acceptList.getString(j);
+                            String[] split = accept.split("#");
+                            if (GroupSearch.COMMON.getValue().equals(split[0])) {
+                                if (currentUserProcessUserTypeList.contains(split[1])) {
+                                    return true;
+                                }
+                            } else if (ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
+                                if (currentUserProcessUserTypeList.contains(split[1])) {
+                                    return true;
+                                }
+                            } else if (GroupSearch.USER.getValue().equals(split[0])) {
+                                if (UserContext.get().getUserUuid(true).equals(split[1])) {
+                                    return true;
+                                }
+                            } else if (GroupSearch.TEAM.getValue().equals(split[0])) {
+                                if (currentUserTeamList.contains(split[1])) {
+                                    return true;
+                                }
+                            } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
+                                if (UserContext.get().getRoleUuidList().contains(split[1])) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取工单中当前用户能撤回的步骤列表
+     * @param processTaskId
+     * @return Set<ProcessTaskStepVo>
+     */
+    public Set<ProcessTaskStepVo> getRetractableStepListByProcessTaskId(Long processTaskId) {
+        Set<ProcessTaskStepVo> resultSet = new HashSet<>();
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
+        for (ProcessTaskStepVo stepVo : processTaskStepList) {
+            /** 找到所有已激活步骤 **/
+            if (stepVo.getIsActive().equals(1)) {
+                resultSet.addAll(getRetractableStepListByProcessTaskStepId(stepVo.getId()));
+            }
+        }
+        return resultSet;
+    }
+    
+    /**
+     * 
+     * @Author: 14378
+     * @Time:2020年4月3日
+     * @Description: 获取当前步骤的前置步骤列表中处理人是当前用户的步骤列表
+     * @param processTaskStepId 已激活的步骤id
+     * @return List<ProcessTaskStepVo>
+     */
+    private List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(Long processTaskStepId) {
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        /** 所有前置步骤 **/
+        List<ProcessTaskStepVo> fromStepList = processTaskMapper.getFromProcessTaskStepByToId(processTaskStepId);
+        /** 找到所有已完成步骤 **/
+        for (ProcessTaskStepVo fromStep : fromStepList) {
+            IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromStep.getHandler());
+            if (handler != null) {
+                if (ProcessStepMode.MT == handler.getMode()) {// 手动处理节点
+                    // 获取步骤处理人
+                    List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(fromStep.getId(), ProcessUserType.MAJOR.getValue());
+                    List<String> majorUserUuidList = majorUserList.stream().map(ProcessTaskStepUserVo::getUserUuid).collect(Collectors.toList());
+                    if (majorUserUuidList.contains(UserContext.get().getUserUuid(true))) {
+                        resultList.add(fromStep);
+                    }
+                } else {// 自动处理节点，继续找前置节点
+                    resultList.addAll(getRetractableStepListByProcessTaskStepId(fromStep.getId()));
+                }
+            } else {
+                throw new ProcessStepHandlerNotFoundException(fromStep.getHandler());
+            }
+        }
+        return resultList;
+    }
+    /**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取工单中当前用户能处理的步骤列表
+     * @param processTaskId
+     * @return List<ProcessTaskStepVo>
+     */
+    public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId) {
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
+        for (ProcessTaskStepVo stepVo : processTaskStepList) {
+            /** 找到所有已激活未处理的步骤 **/
+            if (stepVo.getIsActive().equals(1)) {
+                List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(stepVo.getId());
+                for (ProcessTaskStepWorkerVo processTaskStepWorkerVo : processTaskStepWorkerList) {
+                    if (GroupSearch.USER.getValue().equals(processTaskStepWorkerVo.getType()) && UserContext.get().getUserUuid(true).equals(processTaskStepWorkerVo.getUuid())) {
+                        resultList.add(stepVo);
+                        break;
+                    } else if (GroupSearch.TEAM.getValue().equals(processTaskStepWorkerVo.getType()) && currentUserTeamList.contains(processTaskStepWorkerVo.getUuid())) {
+                        resultList.add(stepVo);
+                        break;
+                    } else if (GroupSearch.ROLE.getValue().equals(processTaskStepWorkerVo.getType()) && UserContext.get().getRoleUuidList().contains(processTaskStepWorkerVo.getUuid())) {
+                        resultList.add(stepVo);
+                        break;
+                    }
+                }
+            }
+        }
+        return resultList;
+    }
+
+    /**
+     * 
+     * @Time:2020年4月18日
+     * @Description: 获取工单中当前用户能催办的步骤列表
+     * @param processTaskId
+     * @return List<ProcessTaskStepVo>
+     */
+    public List<ProcessTaskStepVo> getUrgeableStepList(Long processTaskId) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
+        processTaskStepList.addAll(startProcessTaskStepList);
+        for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+            if (processTaskStep.getIsActive().intValue() == 1) {
+//                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStep.getId());
+//                List<String> actionList = new ArrayList<>();
+//                actionList.add(ProcessTaskStepAction.URGE.getValue());
+//                List<String> configActionList = getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, actionList, currentUserProcessUserTypeList);
+//                if (configActionList.contains(ProcessTaskStepAction.URGE.getValue())) {
+//                    resultList.add(processTaskStep);
+//                }
+                if(getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.URGE)) {
+                    resultList.add(processTaskStep);
+                }
+            }
+        }
+        return resultList;
     }
 }

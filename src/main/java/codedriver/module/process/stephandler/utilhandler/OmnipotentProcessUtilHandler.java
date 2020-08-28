@@ -280,7 +280,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
     @Override
     protected void MySetNextOperationAuthHandlerType(Builder builder) {
-        builder.setNext(OperationAuthHandlerType.AUTOMATIC);
+        builder.setNext(OperationAuthHandlerType.OMNIPOTENT);
     }
 
 }

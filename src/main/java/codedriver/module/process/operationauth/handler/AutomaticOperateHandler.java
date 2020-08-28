@@ -12,17 +12,27 @@ import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
+import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 
 @Component
-public class AutomaticOperateHandler extends OperationAuthHandlerBase {
+public class AutomaticOperateHandler implements IOperationAuthHandler {
 
     private static Map<ProcessTaskOperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
     
     @PostConstruct
     public void init() {
-        
+        operationBiPredicateMap.put(ProcessTaskOperationType.STARTPROCESS, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.START, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.ACTIVE, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.ACCEPT, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.ABORT, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVER, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.COMMENT, (processTaskId, processTaskStepId) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskId, processTaskStepId) -> false);
     }
 
 	@Override
