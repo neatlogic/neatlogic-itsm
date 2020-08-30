@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -30,6 +34,8 @@ public class StepOperateHandler implements IOperationAuthHandler {
     private Map<ProcessTaskOperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
     @Autowired
     private ProcessTaskMapper processTaskMapper;
+    @Autowired
+    private TeamMapper teamMapper;
     @Autowired
     private ProcessTaskService processTaskService;
 	
@@ -166,6 +172,28 @@ public class StepOperateHandler implements IOperationAuthHandler {
                         if (currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue()) || currentUserProcessUserTypeList.contains(ProcessUserType.AGENT.getValue())) {
                             return true;
                         }
+                    }
+                }
+            }
+            return false;
+        });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskId, processTaskStepId) -> {
+            List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+            // 有可处理步骤work
+            if (processTaskMapper.checkIsWorker(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
+                return true;
+            }
+            return false;
+        });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskId, processTaskStepId) -> {
+            // 撤销权限retreat
+            Set<ProcessTaskStepVo> retractableStepSet = processTaskService.getRetractableStepListByProcessTaskId(processTaskId);
+            if (CollectionUtils.isNotEmpty(retractableStepSet)) {
+                for(ProcessTaskStepVo processTaskStepVo : retractableStepSet) {
+                    if(Objects.equals(processTaskStepId, processTaskStepVo.getId())) {
+                        return true;
                     }
                 }
             }

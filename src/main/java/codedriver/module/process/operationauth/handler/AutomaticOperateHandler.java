@@ -18,7 +18,7 @@ import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 @Component
 public class AutomaticOperateHandler implements IOperationAuthHandler {
 
-    private static Map<ProcessTaskOperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
+    private Map<ProcessTaskOperationType, BiPredicate<Long, Long>> operationBiPredicateMap = new HashMap<>();
     
     @PostConstruct
     public void init() {
