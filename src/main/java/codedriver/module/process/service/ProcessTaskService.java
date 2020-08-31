@@ -221,15 +221,7 @@ public interface ProcessTaskService {
 	* @return boolean 如果保存成功返回true，否则返回false
 	 */
 	public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo processTaskStepReplyVo);
-	/**
-     * 
-     * @Time:2020年4月3日
-     * @Description: 获取当前用户在当前步骤中工单干系人列表
-     * @param processTaskVo     工单信息
-     * @param processTaskStepId 步骤id
-     * @return List<String>
-     */
-	public List<String> getCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, Long processTaskStepId);
+
 	/**
      * 
      * @Time:2020年4月2日

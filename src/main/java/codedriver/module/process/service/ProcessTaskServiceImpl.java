@@ -1197,58 +1197,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         return isUpdate;
     }
-    /**
-     * 
-     * @Time:2020年4月3日
-     * @Description: 获取当前用户在当前步骤中工单干系人列表
-     * @param processTaskVo     工单信息
-     * @param processTaskStepId 步骤id
-     * @return List<String>
-     */
-    @Override
-    public List<String> getCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, Long processTaskStepId) {
-        List<String> currentUserProcessUserTypeList = new ArrayList<>();
-        currentUserProcessUserTypeList.add(UserType.ALL.getValue());
-        if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
-            currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
-        }
-        if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
-            currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
-        }
-        List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
-        List<String> majorUserUuidList = majorUserList.stream().map(ProcessTaskStepUserVo::getUserUuid).collect(Collectors.toList());
-        if (majorUserUuidList.contains(UserContext.get().getUserUuid(true))) {
-            currentUserProcessUserTypeList.add(ProcessUserType.MAJOR.getValue());
-        }
-        List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
-        List<String> minorUserUuidList = minorUserList.stream().map(ProcessTaskStepUserVo::getUserUuid).collect(Collectors.toList());
-        if (minorUserUuidList.contains(UserContext.get().getUserUuid(true))) {
-            currentUserProcessUserTypeList.add(ProcessUserType.MINOR.getValue());
-        }
-        List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.AGENT.getValue());
-        List<String> agentUserUuidList = agentUserList.stream().map(ProcessTaskStepUserVo::getUserUuid).collect(Collectors.toList());
-        if (agentUserUuidList.contains(UserContext.get().getUserUuid(true))) {
-            currentUserProcessUserTypeList.add(ProcessUserType.AGENT.getValue());
-        }
-        List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
-        if (CollectionUtils.isNotEmpty(workerList)) {
-            List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-            for (ProcessTaskStepWorkerVo worker : workerList) {
-                if (GroupSearch.USER.getValue().equals(worker.getType()) && UserContext.get().getUserUuid(true).equals(worker.getUuid())) {
-                    currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
-                    break;
-                } else if (GroupSearch.TEAM.getValue().equals(worker.getType()) && currentUserTeamList.contains(worker.getUuid())) {
-                    currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
-                    break;
-                } else if (GroupSearch.ROLE.getValue().equals(worker.getType()) && UserContext.get().getRoleUuidList().contains(worker.getUuid())) {
-                    currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
-                    break;
-                }
-            }
-        }
-
-        return currentUserProcessUserTypeList;
-    }
     
     /**
      * 
