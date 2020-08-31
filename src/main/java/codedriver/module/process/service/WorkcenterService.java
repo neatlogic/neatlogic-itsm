@@ -52,7 +52,6 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -238,7 +237,6 @@ public class WorkcenterService {
 		if(CollectionUtils.isEmpty(stepArray)) {
 			return CollectionUtils.EMPTY_COLLECTION;
 		}
-		Long taskId = Long.valueOf(el.getId());
 		JSONObject handleActionJson = new JSONObject();
 		JSONArray handleArray = new JSONArray();
 		for(Object stepObj: stepArray) {
@@ -254,12 +252,11 @@ public class WorkcenterService {
 					)) {
 				List<ProcessTaskOperationType> operationList = new ArrayList<>();
 				try {
-				    ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(taskId);
 				    ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(stepId);
 				    if(processTaskStepVo != null) {
 				        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 				        if(handler != null) {
-				            handler.getOperateList(processTaskVo, processTaskStepVo, new ArrayList<ProcessTaskOperationType>(){
+				            handler.getOperateList(Long.valueOf(el.getId()), stepId, new ArrayList<ProcessTaskOperationType>(){
                                 private static final long serialVersionUID = 1L;
                                 {
                                 add(ProcessTaskOperationType.WORK);
