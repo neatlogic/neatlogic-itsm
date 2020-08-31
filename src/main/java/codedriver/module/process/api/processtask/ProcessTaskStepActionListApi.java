@@ -14,8 +14,8 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
@@ -23,11 +23,9 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
+//@Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
-	
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
@@ -59,19 +57,20 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-		ProcessTaskStepVo processTaskStepVo = null;
+		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 		Map<String, String> customButtonMap = new HashMap<>();
-		if(processTaskStepId != null) {
-			processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		if(processTaskStepVo != null) {
 			processTaskService.setProcessTaskStepConfig(processTaskStepVo);
 			customButtonMap = processTaskStepVo.getCustomButtonMap();
 			handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
 //		List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
-		List<ProcessTaskOperationType> operateList = handler.getOperateList(processTaskId, processTaskStepId);
+//		Long start = System.currentTimeMillis();
+		List<ProcessTaskOperationType> operateList = handler.getOperateList(processTaskVo, processTaskStepVo);
+//        System.out.println("aaaaaaaaaaa:" + (System.currentTimeMillis() - start));
 		//TODO automatic ，临时处理，重构后删去
 //		if(processTaskStepVo != null && ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
 ////			actionList = Arrays.asList("view", "transfer", "pocesstaskview", "work", "complete");

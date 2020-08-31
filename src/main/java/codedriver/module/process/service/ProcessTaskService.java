@@ -108,7 +108,7 @@ public interface ProcessTaskService {
 	* @param nextStepId 下一步骤id
 	* @return boolean
 	 */
-	public boolean checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId);
+	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId);
 	/**
      * 
     * @Author: linbq
@@ -118,7 +118,7 @@ public interface ProcessTaskService {
     * @param processTaskStepId 步骤id
     * @return boolean
      */
-	public boolean checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId);
+	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId);
 	/**
      * 
     * @Author: linbq
@@ -127,7 +127,7 @@ public interface ProcessTaskService {
     * @param processTaskId 工单id
     * @return boolean
      */
-	public boolean checkProcessTaskParamsIsLegal(Long processTaskId);
+	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId);
 	/**
 	 * 
 	* @Author: linbq
@@ -231,7 +231,7 @@ public interface ProcessTaskService {
      * @param operationType 
      * @return boolean
      */
-	public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
+	public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
 	/**
      * 
      * @Time:2020年4月3日
