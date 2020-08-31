@@ -33,8 +33,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
     private Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> operationBiPredicateMap = new HashMap<>();
     @Autowired
     private ProcessTaskMapper processTaskMapper;
-//    @Autowired
-//    private TeamMapper teamMapper;
     @Autowired
     private ProcessTaskService processTaskService;
 	
@@ -95,13 +93,9 @@ public class StepOperateHandler implements IOperationAuthHandler {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                     if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue()) || processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
-                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), null);
-                        for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
-                            if (processTaskStep.getIsActive() != null) {
-                                if (ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
-                                    return true;
-                                }
-                            }
+                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+                        if(CollectionUtils.isNotEmpty(processTaskStepList)) {
+                            return true;
                         }
                     }
                 }
@@ -114,12 +108,10 @@ public class StepOperateHandler implements IOperationAuthHandler {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                     if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue()) || processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
-                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), null);
+                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD.getValue());
                         for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
-                            if (processTaskStep.getIsActive() != null) {
-                                if (ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0) {
-                                    return true;
-                                }
+                            if (processTaskStep.getIsActive() != null && processTaskStep.getIsActive().intValue() != 0) {
+                                return true;
                             }
                         }
                     }

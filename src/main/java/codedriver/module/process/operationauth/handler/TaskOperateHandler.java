@@ -72,11 +72,13 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.ABORT, (processTaskVo) -> {
             // 工单状态为进行中的才能终止
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                // 终止/恢复流程abort、修改上报内容update取工单当前所有正在处理的节点权限配置的并集
-                List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
-                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
-                processTaskStepList.addAll(startProcessTaskStepList);
-                for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+                    List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
+                    processTaskVo.getStepList().addAll(startProcessTaskStepList);
+                    List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
+                    processTaskVo.getStepList().addAll(processTaskStepList);
+                }
+                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
                         return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORT);
                     }
@@ -88,11 +90,13 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.RECOVER, (processTaskVo) -> {
             // 工单状态为已终止的才能恢复
             if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
-                // 终止/恢复流程abort、修改上报内容update取工单当前所有正在处理的节点权限配置的并集
-                List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
-                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
-                processTaskStepList.addAll(startProcessTaskStepList);
-                for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+                    List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
+                    processTaskVo.getStepList().addAll(startProcessTaskStepList);
+                    List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
+                    processTaskVo.getStepList().addAll(processTaskStepList);
+                }
+                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == -1) {
                         return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORT);
                     }
@@ -102,11 +106,13 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         });
         
         operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo) -> {
-            // 终止/恢复流程abort、修改上报内容update取工单当前所有正在处理的节点权限配置的并集
-            List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
-            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
-            processTaskStepList.addAll(startProcessTaskStepList);
-            for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+            if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+                List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
+                processTaskVo.getStepList().addAll(startProcessTaskStepList);
+                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
+                processTaskVo.getStepList().addAll(processTaskStepList);
+            }
+            for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                 if (processTaskStep.getIsActive().intValue() == 1) {
                     return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.UPDATE);
                 }
@@ -115,11 +121,13 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         });
         
         operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo) -> {
-            // 终止/恢复流程abort、修改上报内容update取工单当前所有正在处理的节点权限配置的并集
-            List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
-            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
-            processTaskStepList.addAll(startProcessTaskStepList);
-            for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+            if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+                List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
+                processTaskVo.getStepList().addAll(startProcessTaskStepList);
+                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
+                processTaskVo.getStepList().addAll(processTaskStepList);
+            }
+            for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                 if (processTaskStep.getIsActive().intValue() == 1) {
                     return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE);
                 }
