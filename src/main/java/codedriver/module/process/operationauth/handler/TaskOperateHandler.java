@@ -75,6 +75,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                     processTaskVo.getStepList().addAll(startProcessTaskStepList);
                     List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
                     processTaskVo.getStepList().addAll(processTaskStepList);
+                    for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+                        processTaskService.setProcessTaskStepConfig(processTaskStep);
+                    }
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
@@ -93,6 +96,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                     processTaskVo.getStepList().addAll(startProcessTaskStepList);
                     List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
                     processTaskVo.getStepList().addAll(processTaskStepList);
+                    for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+                        processTaskService.setProcessTaskStepConfig(processTaskStep);
+                    }
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == -1) {
@@ -109,6 +115,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 processTaskVo.getStepList().addAll(startProcessTaskStepList);
                 List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
                 processTaskVo.getStepList().addAll(processTaskStepList);
+                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+                    processTaskService.setProcessTaskStepConfig(processTaskStep);
+                }
             }
             for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                 if (processTaskStep.getIsActive().intValue() == 1) {
@@ -124,6 +133,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 processTaskVo.getStepList().addAll(startProcessTaskStepList);
                 List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
                 processTaskVo.getStepList().addAll(processTaskStepList);
+                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+                    processTaskService.setProcessTaskStepConfig(processTaskStep);
+                }
             }
             for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                 if (processTaskStep.getIsActive().intValue() == 1) {

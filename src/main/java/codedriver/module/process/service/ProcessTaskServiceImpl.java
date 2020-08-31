@@ -1209,20 +1209,26 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      */
     @Override
     public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType) {
-        String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-        JSONObject stepConfigObj = JSON.parseObject(stepConfig);
-        JSONArray authorityList = stepConfigObj.getJSONArray("authorityList");
-        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
+//        String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+//        JSONObject stepConfigObj = JSON.parseObject(stepConfig);
+//        JSONArray authorityList = stepConfigObj.getJSONArray("authorityList");
+//        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
+//        if (CollectionUtils.isEmpty(authorityList)) {
+//            ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+//            if(processStepHandlerVo != null) {
+//                JSONObject handlerConfigObj = processStepHandlerVo.getConfig();
+//                if(MapUtils.isNotEmpty(handlerConfigObj)) {
+//                    authorityList = handlerConfigObj.getJSONArray("authorityList");
+//                }
+//            }
+//        }
+        JSONObject configObj = processTaskStepVo.getConfigObj();
+        JSONArray authorityList = configObj.getJSONArray("authorityList");
         if (CollectionUtils.isEmpty(authorityList)) {
-            ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-            if(processStepHandlerVo != null) {
-                JSONObject handlerConfigObj = processStepHandlerVo.getConfig();
-                if(MapUtils.isNotEmpty(handlerConfigObj)) {
-                    authorityList = handlerConfigObj.getJSONArray("authorityList");
-                }
-            }
+            JSONObject globalConfig = processTaskStepVo.getGlobalConfig();
+            authorityList = globalConfig.getJSONArray("authorityList");
         }
-
+        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
         if (CollectionUtils.isNotEmpty(authorityList)) {
             for (int i = 0; i < authorityList.size(); i++) {
                 JSONObject authorityObj = authorityList.getJSONObject(i);
