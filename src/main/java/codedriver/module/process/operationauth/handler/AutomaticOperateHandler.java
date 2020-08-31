@@ -1,10 +1,7 @@
 package codedriver.module.process.operationauth.handler;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.BiPredicate;
 
 import javax.annotation.PostConstruct;
@@ -20,7 +17,7 @@ import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 @Component
 public class AutomaticOperateHandler implements IOperationAuthHandler {
 
-    private Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> operationBiPredicateMap = new HashMap<>();
+    private final Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> operationBiPredicateMap = new HashMap<>();
     
     @PostConstruct
     public void init() {
@@ -37,37 +34,41 @@ public class AutomaticOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo) -> false);
     }
 
-	@Override
-	public Map<ProcessTaskOperationType, Boolean> getOperateMap(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
-        Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
-        for(Entry<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> entry :operationBiPredicateMap.entrySet()) {
-            resultMap.put(entry.getKey(), entry.getValue().test(processTaskVo, processTaskStepVo));
-        }
-        return resultMap;
-	}
-    
-    @Override
-    public Map<ProcessTaskOperationType, Boolean> getOperateMap(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, List<ProcessTaskOperationType> operationTypeList) {
-        Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
-        for(ProcessTaskOperationType operationType : operationTypeList) {
-            BiPredicate<ProcessTaskVo, ProcessTaskStepVo> predicate = operationBiPredicateMap.get(operationType);
-            if(predicate != null) {
-                resultMap.put(operationType, predicate.test(processTaskVo, processTaskStepVo));
-            }else {
-                resultMap.put(operationType, false);
-            }
-        }    
-        return resultMap;
-    }
+//	@Override
+//	public Map<ProcessTaskOperationType, Boolean> getOperateMap(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
+//        Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
+//        for(Entry<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> entry :operationBiPredicateMap.entrySet()) {
+//            resultMap.put(entry.getKey(), entry.getValue().test(processTaskVo, processTaskStepVo));
+//        }
+//        return resultMap;
+//	}
+//    
+//    @Override
+//    public Map<ProcessTaskOperationType, Boolean> getOperateMap(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, List<ProcessTaskOperationType> operationTypeList) {
+//        Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
+//        for(ProcessTaskOperationType operationType : operationTypeList) {
+//            BiPredicate<ProcessTaskVo, ProcessTaskStepVo> predicate = operationBiPredicateMap.get(operationType);
+//            if(predicate != null) {
+//                resultMap.put(operationType, predicate.test(processTaskVo, processTaskStepVo));
+//            }else {
+//                resultMap.put(operationType, false);
+//            }
+//        }    
+//        return resultMap;
+//    }
+//    
+//    @Override
+//    public List<ProcessTaskOperationType> getAllOperationTypeList() {      
+//        return new ArrayList<>(operationBiPredicateMap.keySet());
+//    }
 
-	@Override
-	public OperationAuthHandlerType getHandler() {
-		return OperationAuthHandlerType.AUTOMATIC;
-	}
-    
     @Override
-    public List<ProcessTaskOperationType> getAllOperationTypeList() {      
-        return new ArrayList<>(operationBiPredicateMap.keySet());
+    public OperationAuthHandlerType getHandler() {
+        return OperationAuthHandlerType.AUTOMATIC;
+    }
+    @Override
+    public Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> getOperationBiPredicateMap() {
+        return operationBiPredicateMap;
     }
 
 }
