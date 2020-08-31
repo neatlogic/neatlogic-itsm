@@ -21,6 +21,7 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
@@ -55,7 +56,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                     return true;
                 } else if (processTaskMapper.checkIsWorker(processTaskId, null, UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
                     return true;
-                } else if (processTaskMapper.checkIsProcessTaskStepUser(processTaskId, null, UserContext.get().getUserUuid(true)) > 0) {
+                } else if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskId, null, UserContext.get().getUserUuid(true))) > 0) {
                     return true;
                 }
             }
@@ -82,7 +83,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 processTaskStepList.addAll(startProcessTaskStepList);
                 for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.ABORT);
+                        return processTaskService.checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskOperationType.ABORT);
                     }
                 }
             }          
@@ -99,7 +100,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 processTaskStepList.addAll(startProcessTaskStepList);
                 for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                     if (processTaskStep.getIsActive().intValue() == -1) {
-                        return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.ABORT);
+                        return processTaskService.checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskOperationType.ABORT);
                     }
                 }
             }
@@ -114,7 +115,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             processTaskStepList.addAll(startProcessTaskStepList);
             for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                 if (processTaskStep.getIsActive().intValue() == 1) {
-                    return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.UPDATE);
+                    return processTaskService.checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskOperationType.UPDATE);
                 }
             }
             return false;
@@ -128,7 +129,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             processTaskStepList.addAll(startProcessTaskStepList);
             for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                 if (processTaskStep.getIsActive().intValue() == 1) {
-                    return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, ProcessTaskOperationType.URGE);
+                    return processTaskService.checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskOperationType.URGE);
                 }
             }
             return false;

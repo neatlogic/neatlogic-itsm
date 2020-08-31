@@ -22,6 +22,7 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
@@ -47,11 +48,11 @@ public class StepOperateHandler implements IOperationAuthHandler {
                 return true;
             } else if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
                 return true;
-            } else if (processTaskMapper.checkIsProcessTaskStepUser(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true)) > 0) {
+            } else if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true))) > 0) {
                 return true;
             }
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-            return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStepVo, ProcessTaskOperationType.VIEW);
+            return processTaskService.checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.VIEW);
         });
 	    
 	    operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFER, (processTaskId, processTaskStepId) -> {
@@ -59,7 +60,7 @@ public class StepOperateHandler implements IOperationAuthHandler {
             // 步骤状态为已激活的才能转交
             if (processTaskStepVo.getIsActive() == 1) {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                return processTaskService.getProcessTaskStepConfigActionList(processTaskVo, processTaskStepVo, ProcessTaskOperationType.TRANSFER);
+                return processTaskService.checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.TRANSFER);
             }
             return false;
 	    });
@@ -67,11 +68,11 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.ACCEPT, (processTaskId, processTaskStepId) -> {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
-                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
-                if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
-                    if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
-                        if (!currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {// 没有主处理人时是accept
+                if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
+                    List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+                    if(processTaskMapper.checkIsWorker(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
+                        if(processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true), ProcessUserType.MAJOR.getValue())) == 0) {
+                         // 没有主处理人时是accept
                             return true;
                         }
                     }
@@ -83,11 +84,11 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.START, (processTaskId, processTaskStepId) -> {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
-                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
-                if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
-                    if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
-                        if (currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue())) {// 有主处理人时是start
+                if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
+                    List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+                    if(processTaskMapper.checkIsWorker(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
+                        if(processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true), ProcessUserType.MAJOR.getValue())) > 0) {
+                            // 有主处理人时是start
                             return true;
                         }
                     }
@@ -99,23 +100,29 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.COMPLETE, (processTaskId, processTaskStepId) -> {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
-                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
-                if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
-                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                        // 完成complete 暂存save 评论comment 创建子任务createsubtask
-                        if (currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue()) || currentUserProcessUserTypeList.contains(ProcessUserType.AGENT.getValue())) {
-                            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
-                            for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
-                                if (processTaskStep.getIsActive() != null) {
-                                    if (ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
-                                        return true;
-                                    }
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
+                    boolean can = false;
+                    ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true));
+                    processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
+                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        can = true;
+                    }
+                    processTaskStepUserVo.setUserType(ProcessUserType.AGENT.getValue());
+                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        can = true;
+                    }
+                    if (can) {
+                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
+                        for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+                            if (processTaskStep.getIsActive() != null) {
+                                if (ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
+                                    return true;
                                 }
                             }
                         }
                     }
                 }
+                
             }
             return false;
         });
@@ -123,18 +130,23 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.BACK, (processTaskId, processTaskStepId) -> {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
-                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
-                if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
-                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                        // 完成complete 暂存save 评论comment 创建子任务createsubtask
-                        if (currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue()) || currentUserProcessUserTypeList.contains(ProcessUserType.AGENT.getValue())) {
-                            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
-                            for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
-                                if (processTaskStep.getIsActive() != null) {
-                                    if (ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0) {
-                                        return true;
-                                    }
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
+                    boolean can = false;
+                    ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true));
+                    processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
+                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        can = true;
+                    }
+                    processTaskStepUserVo.setUserType(ProcessUserType.AGENT.getValue());
+                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        can = true;
+                    }
+                    if (can) {
+                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
+                        for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+                            if (processTaskStep.getIsActive() != null) {
+                                if (ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0) {
+                                    return true;
                                 }
                             }
                         }
@@ -147,14 +159,15 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.SAVE, (processTaskId, processTaskStepId) -> {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
-                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
-                if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
-                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                        // 完成complete 暂存save 评论comment 创建子任务createsubtask
-                        if (currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue()) || currentUserProcessUserTypeList.contains(ProcessUserType.AGENT.getValue())) {
-                            return true;
-                        }
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
+                    ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true));
+                    processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
+                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        return true;
+                    }
+                    processTaskStepUserVo.setUserType(ProcessUserType.AGENT.getValue());
+                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        return true;
                     }
                 }
             }
@@ -164,14 +177,15 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.COMMENT, (processTaskId, processTaskStepId) -> {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
             if (processTaskStepVo.getIsActive() == 1) {
-                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-                List<String> currentUserProcessUserTypeList = processTaskService.getCurrentUserProcessUserTypeList(processTaskVo, processTaskStepId);
-                if (currentUserProcessUserTypeList.contains(ProcessUserType.WORKER.getValue())) {
-                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                        // 完成complete 暂存save 评论comment 创建子任务createsubtask
-                        if (currentUserProcessUserTypeList.contains(ProcessUserType.MAJOR.getValue()) || currentUserProcessUserTypeList.contains(ProcessUserType.AGENT.getValue())) {
-                            return true;
-                        }
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
+                    ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true));
+                    processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
+                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        return true;
+                    }
+                    processTaskStepUserVo.setUserType(ProcessUserType.AGENT.getValue());
+                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        return true;
                     }
                 }
             }

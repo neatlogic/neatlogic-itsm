@@ -233,14 +233,13 @@ public interface ProcessTaskService {
 	/**
      * 
      * @Time:2020年4月2日
-     * @Description: 获取流程节点配置中的当前用户的拥有的权限
+     * @Description: 检查当前用户是否配置该权限
      * @param processTaskVo
      * @param processTaskStepVo
-     * @param actionList                     要获取的权限集合
-     * @param currentUserProcessUserTypeList 当前用户工单干系人列表
-     * @return List<String>
+     * @param operationType 
+     * @return boolean
      */
-	public boolean getProcessTaskStepConfigActionList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
+	public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
 	/**
      * 
      * @Time:2020年4月3日

@@ -23,6 +23,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -221,7 +222,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));
         if(stepDataVo != null) {
             JSONObject stepDataJson = stepDataVo.getData();
-            stepDataJson.put("isStepUser", processTaskMapper.checkIsProcessTaskStepUser(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid())>0?1:0);
+            stepDataJson.put("isStepUser", processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid()))>0?1:0);
             processTaskStepVo.setProcessTaskStepData(stepDataJson);
         }
 	}
