@@ -221,26 +221,17 @@ public interface ProcessTaskService {
 	* @return boolean 如果保存成功返回true，否则返回false
 	 */
 	public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo processTaskStepReplyVo);
-	/**
-     * 
-     * @Time:2020年4月3日
-     * @Description: 获取当前用户在当前步骤中工单干系人列表
-     * @param processTaskVo     工单信息
-     * @param processTaskStepId 步骤id
-     * @return List<String>
-     */
-	public List<String> getCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, Long processTaskStepId);
+
 	/**
      * 
      * @Time:2020年4月2日
-     * @Description: 获取流程节点配置中的当前用户的拥有的权限
+     * @Description: 检查当前用户是否配置该权限
      * @param processTaskVo
      * @param processTaskStepVo
-     * @param actionList                     要获取的权限集合
-     * @param currentUserProcessUserTypeList 当前用户工单干系人列表
-     * @return List<String>
+     * @param operationType 
+     * @return boolean
      */
-	public boolean getProcessTaskStepConfigActionList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
+	public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
 	/**
      * 
      * @Time:2020年4月3日
