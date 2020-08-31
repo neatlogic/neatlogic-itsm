@@ -854,7 +854,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 //	}
 
     @Override
-    public boolean checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId) {
+    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
         if(processTaskVo == null) {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
@@ -871,6 +871,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             if(!processTaskId.equals(processTaskStepVo.getProcessTaskId())) {
                 throw new ProcessTaskRuntimeException("步骤：'" + processTaskStepId + "'不是工单：'" + processTaskId + "'的步骤");
             }
+            processTaskVo.setCurrentProcessTaskStep(processTaskStepVo);
         }
         if(nextStepId != null) {
             ProcessTaskStepVo nextProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(nextStepId);
@@ -885,16 +886,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 throw new ProcessTaskRuntimeException("步骤：'" + nextStepId + "'不是工单：'" + processTaskId + "'的步骤");
             }
         }
-        return true;
+        return processTaskVo;
     }
 
     @Override
-    public boolean checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId) {
+    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId) {
         return checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId, null);
     }
 
     @Override
-    public boolean checkProcessTaskParamsIsLegal(Long processTaskId) {
+    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId) {
         return checkProcessTaskParamsIsLegal(processTaskId, null, null);
     }
 
@@ -1202,27 +1203,32 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * 
      * @Time:2020年4月2日
      * @Description: 检查当前用户是否配置该权限
-     * @param processTaskVo
      * @param processTaskStepVo
      * @param operationType 
      * @return boolean
      */
     @Override
-    public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType) {
-        String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-        JSONObject stepConfigObj = JSON.parseObject(stepConfig);
-        JSONArray authorityList = stepConfigObj.getJSONArray("authorityList");
-        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
+    public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType) {
+//        String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+//        JSONObject stepConfigObj = JSON.parseObject(stepConfig);
+//        JSONArray authorityList = stepConfigObj.getJSONArray("authorityList");
+//        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
+//        if (CollectionUtils.isEmpty(authorityList)) {
+//            ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+//            if(processStepHandlerVo != null) {
+//                JSONObject handlerConfigObj = processStepHandlerVo.getConfig();
+//                if(MapUtils.isNotEmpty(handlerConfigObj)) {
+//                    authorityList = handlerConfigObj.getJSONArray("authorityList");
+//                }
+//            }
+//        }
+        JSONObject configObj = processTaskStepVo.getConfigObj();
+        JSONArray authorityList = configObj.getJSONArray("authorityList");
         if (CollectionUtils.isEmpty(authorityList)) {
-            ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-            if(processStepHandlerVo != null) {
-                JSONObject handlerConfigObj = processStepHandlerVo.getConfig();
-                if(MapUtils.isNotEmpty(handlerConfigObj)) {
-                    authorityList = handlerConfigObj.getJSONArray("authorityList");
-                }
-            }
+            JSONObject globalConfig = processTaskStepVo.getGlobalConfig();
+            authorityList = globalConfig.getJSONArray("authorityList");
         }
-
+        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
         if (CollectionUtils.isNotEmpty(authorityList)) {
             for (int i = 0; i < authorityList.size(); i++) {
                 JSONObject authorityObj = authorityList.getJSONObject(i);
@@ -1243,29 +1249,32 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                     return true;
                                 }
                             } else if (ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
-                                if(ProcessUserType.OWNER.getValue().equals(split[1])) {
-                                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
-                                        return true;
-                                    }
-                                }else if(ProcessUserType.REPORTER.getValue().equals(split[1])) {
-                                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
-                                        return true;
-                                    }
-                                }else if(ProcessUserType.MAJOR.getValue().equals(split[1])) {
-                                    processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
-                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-                                        return true;
-                                    }
-                                }else if(ProcessUserType.MINOR.getValue().equals(split[1])) {
-                                    processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
-                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-                                        return true;
-                                    }
-                                }else if(ProcessUserType.AGENT.getValue().equals(split[1])) {
-                                    processTaskStepUserVo.setUserType(ProcessUserType.AGENT.getValue());
-                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-                                        return true;
-                                    }
+//                                if(ProcessUserType.OWNER.getValue().equals(split[1])) {
+//                                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
+//                                        return true;
+//                                    }
+//                                }else if(ProcessUserType.REPORTER.getValue().equals(split[1])) {
+//                                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
+//                                        return true;
+//                                    }
+//                                }else if(ProcessUserType.MAJOR.getValue().equals(split[1])) {
+//                                    processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
+//                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+//                                        return true;
+//                                    }
+//                                }else if(ProcessUserType.MINOR.getValue().equals(split[1])) {
+//                                    processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
+//                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+//                                        return true;
+//                                    }
+//                                }else if(ProcessUserType.AGENT.getValue().equals(split[1])) {
+//                                    processTaskStepUserVo.setUserType(ProcessUserType.AGENT.getValue());
+//                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+//                                        return true;
+//                                    }
+//                                }
+                                if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(split[1])) {
+                                    return true;
                                 }
                             } else if (GroupSearch.USER.getValue().equals(split[0])) {
                                 if (UserContext.get().getUserUuid(true).equals(split[1])) {
@@ -1382,7 +1391,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      */
     @Override
     public List<ProcessTaskStepVo> getUrgeableStepList(Long processTaskId) {
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
         List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
@@ -1396,7 +1404,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 //                if (configActionList.contains(ProcessTaskStepAction.URGE.getValue())) {
 //                    resultList.add(processTaskStep);
 //                }
-                if(checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskOperationType.URGE)) {
+                if(checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE)) {
                     resultList.add(processTaskStep);
                 }
             }
