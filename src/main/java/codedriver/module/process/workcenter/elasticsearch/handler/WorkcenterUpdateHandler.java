@@ -177,6 +177,8 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 			 		.setCatalog(catalog.getUuid())
 			 		.setChannelType(channel.getChannelTypeUuid())
 			 		.setChannel(channel.getUuid())
+			 		.setProcessUuid(processTaskVo.getProcessUuid())
+			 		.setConfigHash(processTaskVo.getConfigHash())
 			 		.setContent(startContentVo)
 			 		.setStartTime(processTaskVo.getStartTime())
 			 		.setEndTime(processTaskVo.getEndTime())
