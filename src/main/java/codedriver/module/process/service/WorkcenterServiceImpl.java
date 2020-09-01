@@ -161,6 +161,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
      * @throws ParseException 
      */
     @Override
+    @Transactional
     public JSONObject doSearch(WorkcenterVo workcenterVo) throws ParseException {
         JSONObject returnObj = new JSONObject();
         // 搜索es
@@ -256,7 +257,6 @@ public class WorkcenterServiceImpl implements WorkcenterService{
      * @throws ParseException 
      */
     @Override
-    @Transactional
     public Object getStepAction(MultiAttrsObject el) throws ParseException {
         JSONArray actionArray = new JSONArray();
         JSONObject commonJson = (JSONObject)el.getJSON(ProcessFieldType.COMMON.getValue());
@@ -306,6 +306,12 @@ public class WorkcenterServiceImpl implements WorkcenterService{
             processTaskStepVo.setConfigHash(stepJson.getString("confighash"));
             processTaskStepVo.setStartTime(TimeUtil.convertStringToDate(stepJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
             processTaskStepVo.setEndTime(TimeUtil.convertStringToDate(stepJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
+            
+//            ProcessTaskVo  task1 = processTaskMapper.getProcessTaskBaseInfoById(processTaskVo.getId());
+//            ProcessTaskVo  task2 = processTaskMapper.getProcessTaskBaseInfoById(processTaskVo.getId());
+//            
+//            System.out.println(task1 == task2);
+            
             if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
                 || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
                 || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus)
