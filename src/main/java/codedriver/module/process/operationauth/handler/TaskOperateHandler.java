@@ -1,8 +1,11 @@
 package codedriver.module.process.operationauth.handler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
@@ -71,13 +74,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             // 工单状态为进行中的才能终止
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
-                    List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
-                    processTaskVo.getStepList().addAll(startProcessTaskStepList);
-                    List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
-                    processTaskVo.getStepList().addAll(processTaskStepList);
-                    for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                        processTaskService.setProcessTaskStepConfig(processTaskStep);
-                    }
+                    processTaskVo.getStepList().addAll(getProcessTaskStepVoListByProcessTaskId(processTaskVo.getId()));
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
@@ -92,13 +89,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             // 工单状态为已终止的才能恢复
             if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
                 if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
-                    List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
-                    processTaskVo.getStepList().addAll(startProcessTaskStepList);
-                    List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
-                    processTaskVo.getStepList().addAll(processTaskStepList);
-                    for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                        processTaskService.setProcessTaskStepConfig(processTaskStep);
-                    }
+                    processTaskVo.getStepList().addAll(getProcessTaskStepVoListByProcessTaskId(processTaskVo.getId()));
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == -1) {
@@ -110,38 +101,30 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         });
         
         operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo) -> {
-            if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
-                List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
-                processTaskVo.getStepList().addAll(startProcessTaskStepList);
-                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
-                processTaskVo.getStepList().addAll(processTaskStepList);
+            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+                    processTaskVo.getStepList().addAll(getProcessTaskStepVoListByProcessTaskId(processTaskVo.getId()));
+                }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                    processTaskService.setProcessTaskStepConfig(processTaskStep);
+                    if (processTaskStep.getIsActive().intValue() == 1) {
+                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.UPDATE);
+                    }
                 }
-            }
-            for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                if (processTaskStep.getIsActive().intValue() == 1) {
-                    return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.UPDATE);
-                }
-            }
+            }           
             return false;
         });
         
         operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo) -> {
-            if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
-                List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
-                processTaskVo.getStepList().addAll(startProcessTaskStepList);
-                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.PROCESS.getValue());
-                processTaskVo.getStepList().addAll(processTaskStepList);
+            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+                    processTaskVo.getStepList().addAll(getProcessTaskStepVoListByProcessTaskId(processTaskVo.getId()));
+                }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                    processTaskService.setProcessTaskStepConfig(processTaskStep);
+                    if (processTaskStep.getIsActive().intValue() == 1) {
+                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE);
+                    }
                 }
-            }
-            for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                if (processTaskStep.getIsActive().intValue() == 1) {
-                    return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE);
-                }
-            }
+            }            
             return false;
         });
         
@@ -155,41 +138,44 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         
         operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskVo, processTaskStepVo) -> {
             // 撤销权限retreat
-            Set<ProcessTaskStepVo> retractableStepSet = processTaskService.getRetractableStepListByProcessTaskId(processTaskVo.getId());
-            if (CollectionUtils.isNotEmpty(retractableStepSet)) {
-                return true;
+            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+                    processTaskVo.getStepList().addAll(getProcessTaskStepVoListByProcessTaskId(processTaskVo.getId()));
+                }
+                Set<ProcessTaskStepVo> retractableStepSet = new HashSet<>();
+                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+                    if (processTaskStep.getIsActive().intValue() == 1) {
+                        retractableStepSet.addAll(processTaskService.getRetractableStepListByProcessTaskStepId(processTaskStep.getId()));
+                    }
+                }
+                if (CollectionUtils.isNotEmpty(retractableStepSet)) {
+                    if(processTaskStepVo != null) {
+                        for(ProcessTaskStepVo processTaskStep : retractableStepSet) {
+                            if(Objects.equals(processTaskStepVo.getId(), processTaskStep.getId())) {
+                                return true;
+                            }
+                        }
+                    }else {
+                        return true;
+                    }
+                }
             }
             return false;
         });
         
     }
-//	@Override
-//	public Map<ProcessTaskOperationType, Boolean> getOperateMap(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
-//	    Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
-//	    for(Entry<ProcessTaskOperationType, Predicate<ProcessTaskVo>> entry :operationBiPredicateMap.entrySet()) {
-//	        resultMap.put(entry.getKey(), entry.getValue().test(processTaskVo));
-//	    }
-//		return resultMap;
-//	}
-//	
-//    @Override
-//    public Map<ProcessTaskOperationType, Boolean> getOperateMap(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, List<ProcessTaskOperationType> operationTypeList) {
-//        Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
-//        for(ProcessTaskOperationType operationType : operationTypeList) {
-//            Predicate<ProcessTaskVo> predicate = operationBiPredicateMap.get(operationType);
-//            if(predicate != null) {
-//                resultMap.put(operationType, predicate.test(processTaskVo));
-//            }else {
-//                resultMap.put(operationType, false);
-//            }
-//        }    
-//        return resultMap;
-//    }
-//    
-//    @Override
-//    public List<ProcessTaskOperationType> getAllOperationTypeList() {      
-//        return new ArrayList<>(operationBiPredicateMap.keySet());
-//    }
+    
+    private List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTaskId(Long processTaskId){
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
+        for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+            if(ProcessStepType.START.getValue().equals(processTaskStep.getType()) || ProcessStepType.PROCESS.getValue().equals(processTaskStep.getType())) {
+                processTaskService.setProcessTaskStepConfig(processTaskStep);
+                resultList.add(processTaskStep);
+            }
+        }
+        return resultList;
+    }
 
     @Override
     public OperationAuthHandlerType getHandler() {

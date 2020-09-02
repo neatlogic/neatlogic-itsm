@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -21,6 +22,7 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -34,6 +36,10 @@ import codedriver.module.process.notify.handler.ProcessNotifyPolicyHandler;
 @Service
 public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
+    
+    @Autowired
+    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
+    
 	@Override
 	public String getHandler() {
 		return ProcessStepHandler.OMNIPOTENT.getHandler();
@@ -90,7 +96,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		/** 查出processtask_step_subtask表中当前步骤子任务处理人列表 **/		
 		Set<String> runningSubtaskUserUuidSet = new HashSet<>();
 		Set<String> succeedSubtaskUserUuidSet = new HashSet<>();
-		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
 		for(ProcessTaskStepSubtaskVo subtaskVo : processTaskStepSubtaskList) {
 			if(ProcessTaskStatus.RUNNING.getValue().equals(subtaskVo.getStatus())) {
 				runningSubtaskUserUuidSet.add(subtaskVo.getUserUuid());

@@ -37,6 +37,7 @@ import codedriver.framework.process.exception.process.ProcessStepHandlerNotFound
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -55,6 +56,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     
     @Autowired
     private FileMapper fileMapper;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 	
 	@Override
 	public String getToken() {
@@ -198,7 +202,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             //获取当前用户有权限的所有子任务
             //子任务列表
             if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-                List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+                List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
                 if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
                     Map<String, String> customButtonMap = processTaskStepVo.getCustomButtonMap();
                     for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {

@@ -13,10 +13,11 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepSubtaskNotFoundException;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
@@ -24,9 +25,12 @@ public class ProcessTaskStepSubtaskCompleteApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-
-	@Autowired
-	private ProcessTaskService processTaskService;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
 	@Override
 	public String getToken() {
@@ -52,7 +56,7 @@ public class ProcessTaskStepSubtaskCompleteApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepSubtaskId = jsonObj.getLong("processTaskStepSubtaskId");
-		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskId);
+		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskId);
 		if(processTaskStepSubtaskVo == null) {
 			throw new ProcessTaskStepSubtaskNotFoundException(processTaskStepSubtaskId.toString());
 		}
@@ -60,7 +64,7 @@ public class ProcessTaskStepSubtaskCompleteApi extends PrivateApiComponentBase {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(processTaskStepSubtaskVo.getProcessTaskId());
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
-			processTaskService.completeSubtask(processTaskStepSubtaskVo);
+			processTaskStepSubtaskService.completeSubtask(processTaskStepSubtaskVo);
 		}else {
 			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMPLETESUBTASK.getText());
 		}

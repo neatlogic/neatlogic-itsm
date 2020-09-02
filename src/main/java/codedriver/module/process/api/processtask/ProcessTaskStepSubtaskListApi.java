@@ -18,6 +18,7 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -36,6 +37,9 @@ public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
@@ -69,7 +73,7 @@ public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
 	    if(processTaskStepVo == null) {
 	        throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 	    }
-		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
 		if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
 		    processTaskService.setProcessTaskStepConfig(processTaskStepVo);
 			Map<String, String> customButtonMap = processTaskStepVo.getCustomButtonMap();
@@ -78,7 +82,7 @@ public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
 				String currentUser = UserContext.get().getUserUuid(true);
 				if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
 						|| (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
-					List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
+					List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtask.getId());
 					Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
 					while(iterator.hasNext()) {
 						ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();

@@ -24,6 +24,7 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -53,6 +54,9 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 	CatalogMapper catalogMapper;
 	@Autowired
 	WorktimeMapper worktimeMapper;
+
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
 	public String getHandler() {
@@ -132,7 +136,7 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 				List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
 				for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
 	                if (ProcessTaskStepAction.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
-	                    startContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
+	                    startContentVo = selectContentByHashMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
 	                    break;
 	                }
 				}

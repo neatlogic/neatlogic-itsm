@@ -108,7 +108,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 				processTaskStepMap.put(stepVo.getProcessStepUuid(), stepVo);
 			}
 			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-			String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+			String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 			if (StringUtils.isNotBlank(stepConfig)) {
 				JSONObject stepConfigObj = null;
 				try {
