@@ -79,7 +79,6 @@ public class ProcessSearchApi extends PrivateApiComponentBase {
 		for(ProcessVo process : processList) {
 			count = processMapper.getProcessReferenceCount(process.getUuid());
 			process.setReferenceCount(count);
-			process.setConfig(null);
 		}	
 		resultObj.put("processList", processList);
 		return resultObj;
