@@ -107,18 +107,19 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 			processtaskScoreMapper.insertProcesstaskScore(processtaskScoreVo);
 		}
 
-//		JSONObject contentObj = new JSONObject();
+		JSONObject contentObj = new JSONObject();
 //		contentObj.put("processTaskId",processTaskId);
-//		contentObj.put("scoreTemplateId",scoreTemplateId);
+		contentObj.put("scoreTemplateId",scoreTemplateId);
 //		contentObj.put("scoreTemplateName",scoreTemplateName);
-//		contentObj.put("content",content);
-//		contentObj.put("dimensionList",dimensionArray);
+		contentObj.put("content",content);
+		contentObj.put("dimensionList",dimensionArray);
 		JSONObject paramObj = new JSONObject();
-		paramObj.put("content",dimensionArray);
+		paramObj.put("content",contentObj);
 
 
 		/**processtask_content表存储了两份数据：
-		 * 评价内容content本身和包含了评分模版名称、评分维度与分数等数据组装而成的JSON
+		 * 1、评价内容content本身
+		 * 2、由评分模版ID、评价内容、评分维度与分数组装而成的JSON
 		 */
 		if (StringUtils.isNotBlank(content)) {
 			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
