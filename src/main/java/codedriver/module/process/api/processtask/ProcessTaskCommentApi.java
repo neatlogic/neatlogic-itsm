@@ -17,7 +17,6 @@ import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
@@ -85,7 +84,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 
 //		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-//		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMMENT);
+//		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.COMMENT);
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.COMMENT, true);
@@ -106,7 +105,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo();
         processTaskStepContentVo.setProcessTaskId(processTaskId);
         processTaskStepContentVo.setProcessTaskStepId(processTaskStepId);
-        processTaskStepContentVo.setType(ProcessTaskStepAction.COMMENT.getValue());
+        processTaskStepContentVo.setType(ProcessTaskOperationType.COMMENT.getValue());
         if (StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(contentVo);

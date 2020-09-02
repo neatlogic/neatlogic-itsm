@@ -3,8 +3,6 @@ package codedriver.module.process.operationauth.handler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Objects;
 import java.util.function.BiPredicate;
 
 import javax.annotation.PostConstruct;
@@ -146,55 +144,27 @@ public class StepOperateHandler implements IOperationAuthHandler {
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo) -> {
-            // 有可处理步骤work
-            if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.WORKER.getValue())) {
-                return true;
-            }
-            return false;
-        });
-        
-        operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskVo, processTaskStepVo) -> {
-            // 撤销权限retreat
-            Set<ProcessTaskStepVo> retractableStepSet = processTaskService.getRetractableStepListByProcessTaskId(processTaskStepVo.getProcessTaskId());
-            if (CollectionUtils.isNotEmpty(retractableStepSet)) {
-                for(ProcessTaskStepVo processTaskStep : retractableStepSet) {
-                    if(Objects.equals(processTaskStepVo.getId(), processTaskStep.getId())) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        });
-	}
-	
-//	@Override
-//	public Map<ProcessTaskOperationType, Boolean> getOperateMap(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
-//        Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
-//        for(Entry<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> entry :operationBiPredicateMap.entrySet()) {
-//            resultMap.put(entry.getKey(), entry.getValue().test(processTaskVo, processTaskStepVo));
-//        }
-//        return resultMap;
-//	}
-//    
-//	@Override
-//    public Map<ProcessTaskOperationType, Boolean> getOperateMap(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo, List<ProcessTaskOperationType> operationTypeList) {
-//        Map<ProcessTaskOperationType, Boolean> resultMap = new HashMap<>();
-//        for(ProcessTaskOperationType operationType : operationTypeList) {
-//            BiPredicate<ProcessTaskVo, ProcessTaskStepVo> predicate = operationBiPredicateMap.get(operationType);
-//            if(predicate != null) {
-//                resultMap.put(operationType, predicate.test(processTaskVo, processTaskStepVo));
-//            }else {
-//                resultMap.put(operationType, false);
+//        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo) -> {
+//            // 有可处理步骤work
+//            if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.WORKER.getValue())) {
+//                return true;
 //            }
-//        }    
-//        return resultMap;
-//    }
-//    
-//    @Override
-//    public List<ProcessTaskOperationType> getAllOperationTypeList() {      
-//        return new ArrayList<>(operationBiPredicateMap.keySet());
-//    }
+//            return false;
+//        });
+//        
+//        operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskVo, processTaskStepVo) -> {
+//            // 撤销权限retreat
+//            Set<ProcessTaskStepVo> retractableStepSet = processTaskService.getRetractableStepListByProcessTaskId(processTaskStepVo.getProcessTaskId());
+//            if (CollectionUtils.isNotEmpty(retractableStepSet)) {
+//                for(ProcessTaskStepVo processTaskStep : retractableStepSet) {
+//                    if(Objects.equals(processTaskStepVo.getId(), processTaskStep.getId())) {
+//                        return true;
+//                    }
+//                }
+//            }
+//            return false;
+//        });
+	}
 
 	@Override
 	public OperationAuthHandlerType getHandler() {

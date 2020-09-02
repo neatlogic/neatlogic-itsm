@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
@@ -66,7 +66,7 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
         }
         ProcessTaskStepReplyVo oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
 		if(Objects.equals(oldReplyVo.getIsEditable(), 0)) {
-            throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.EDITCOMMENT.getText());	
+            throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.EDITCOMMENT.getText());	
 		}
 		// 锁定当前流程
         processTaskMapper.getProcessTaskLockById(oldReplyVo.getProcessTaskId());

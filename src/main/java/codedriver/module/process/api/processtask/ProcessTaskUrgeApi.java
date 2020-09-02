@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
@@ -62,7 +62,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 				handler.notify(processTaskStepVo, NotifyTriggerType.URGE);
 			}
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.URGE.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.URGE.getText());
 		}
 		/*生成催办活动*/
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();

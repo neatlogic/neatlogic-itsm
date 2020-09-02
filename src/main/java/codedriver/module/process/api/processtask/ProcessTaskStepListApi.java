@@ -33,6 +33,7 @@ import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundExc
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -48,6 +49,9 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     
     @Autowired
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 	
 	@Override
 	public String getToken() {
@@ -172,7 +176,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         //步骤评论列表
         startProcessTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(startProcessTaskStepVo.getId()));
         //子任务列表
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId());
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId());
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
             processTaskStepSubtask.setIsAbortable(0);
             processTaskStepSubtask.setIsCompletable(0);
@@ -207,7 +211,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         //步骤评论列表
         processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId()));
         //子任务列表
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId());
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId());
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
             processTaskStepSubtask.setIsAbortable(0);
             processTaskStepSubtask.setIsCompletable(0);

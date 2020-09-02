@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
@@ -64,7 +64,7 @@ public class ProcessTaskStartApi extends PrivateApiComponentBase {
 			
 		}
 		String action = jsonObj.getString("action");
-        if(ProcessTaskStepAction.ACCEPT.getValue().equals(action)) {
+        if(ProcessTaskOperationType.ACCEPT.getValue().equals(action)) {
             handler.accept(processTaskStepVo);
         }
         handler.start(processTaskStepVo);

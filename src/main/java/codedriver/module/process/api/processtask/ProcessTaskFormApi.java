@@ -20,6 +20,7 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -50,6 +51,8 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskStepDataMapper processTaskStepDataMapper;
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
 
 	@Override
 	public String getToken() {
@@ -91,16 +94,19 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 		}
 		/** 检查工单是否存在表单 **/
 		ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-		if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContent())) {
-			processTaskVo.setFormConfig(processTaskFormVo.getFormContent());			
-			List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
-			if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-				Map<String, Object> formAttributeDataMap = new HashMap<>();
-				for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-					formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-				}
-				processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
-			}
+		if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
+		    String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+            if(StringUtils.isNotBlank(formContent)) {
+                processTaskVo.setFormConfig(formContent);            
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
+                if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+                    Map<String, Object> formAttributeDataMap = new HashMap<>();
+                    for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+                        formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                    }
+                    processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
+                }
+            }
 			
 			if(processTaskStepId != null) {
 				ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);

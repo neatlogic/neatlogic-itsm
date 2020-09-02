@@ -13,6 +13,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -49,6 +50,8 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private FormMapper formMapper;
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
 	public String getToken() {
@@ -83,13 +86,17 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 				throw new ProcessTaskNotFoundException(processTaskId.toString());
 			}
 			ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-			if(processTaskFormVo == null) {
+			if(processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContentHash())) {
 				throw new FormIllegalParameterException("工单：'" + processTaskId + "'没有绑定表单");
 			}
+			String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+            if(StringUtils.isBlank(formContent)) {
+                throw new FormIllegalParameterException("工单：'" + processTaskId + "'没有绑定表单");
+            }
 			formVersionVo = new FormVersionVo();
 			formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
 			formVersionVo.setFormName(processTaskFormVo.getFormName());
-			formVersionVo.setFormConfig(processTaskFormVo.getFormContent());
+			formVersionVo.setFormConfig(formContent);
 			
 		}else if(StringUtils.isNotBlank(channelUuid)){
 			ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);

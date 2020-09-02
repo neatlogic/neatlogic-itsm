@@ -51,7 +51,7 @@ public class ProcessTaskAbortApi extends PrivateApiComponentBase {
 		if(processTaskVo == null) {
 			throw new ProcessTaskNotFoundException(processTaskId.toString());
 		}
-		processTaskVo.setConfig(processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash()).getConfig());
+//		processTaskVo.setConfig(processTaskMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash()).getConfig());
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
 		handler.abortProcessTask(processTaskVo);
 		return null;

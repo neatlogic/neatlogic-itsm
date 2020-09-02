@@ -18,6 +18,7 @@ import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetail
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -39,6 +40,9 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+	
+	@Autowired
+	private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
 	public String getToken() {
@@ -110,7 +114,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 				while(iterator.hasNext()) {
 					ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo = iterator.next();
 					if(ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-						String content = processTaskMapper.getProcessTaskContentStringByHash(processTaskStepAuditDetailVo.getNewContent());
+						String content = selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepAuditDetailVo.getNewContent());
 						if(StringUtils.isNotBlank(content)) {
 							processTaskStepAudit.setNextStepId(Long.parseLong(content));
 						}
