@@ -19,11 +19,12 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -53,6 +54,9 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 	CatalogMapper catalogMapper;
 	@Autowired
 	WorktimeMapper worktimeMapper;
+
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
 	public String getHandler() {
@@ -131,14 +135,14 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 				ProcessTaskStepVo startStepVo = stepList.get(0);
 				List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
 				for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-	                if (ProcessTaskStepAction.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
-	                    startContentVo = processTaskMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
+	                if (ProcessTaskOperationType.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
+	                    startContentVo = selectContentByHashMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
 	                    break;
 	                }
 				}
 			 }
 			 /** 获取转交记录 **/
-			 List<ProcessTaskStepAuditVo> transferAuditList = processTaskMapper.getProcessTaskAuditList(new ProcessTaskStepAuditVo(processTaskVo.getId(),ProcessTaskStepAction.TRANSFER.getValue()));
+			 List<ProcessTaskStepAuditVo> transferAuditList = processTaskMapper.getProcessTaskAuditList(new ProcessTaskStepAuditVo(processTaskVo.getId(),ProcessTaskOperationType.TRANSFER.getValue()));
 			
 			 /** 获取工单当前步骤 **/
 			 @SuppressWarnings("serial")

@@ -9,56 +9,11 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 
 public interface ProcessTaskService {
-
-	/**
-	 * 
-	* @Description: 创建子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void createSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 编辑子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void editSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 打回重做子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void redoSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 完成子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void completeSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 取消子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void abortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 回复子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public List<ProcessTaskStepSubtaskContentVo> commentSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
 	/**
 	 * 
 	* @Description: 工单上报/查看/处理页面，返回表单formConfig时，设置属性只读/隐藏控制数据
@@ -151,15 +106,6 @@ public interface ProcessTaskService {
      * 
     * @Author: linbq
     * @Time:2020年8月21日
-    * @Description: 获取步骤子任务列表
-    * @param processTaskStepId 步骤id
-    * @return List<ProcessTaskStepSubtaskVo>
-     */
-	public List<ProcessTaskStepSubtaskVo> getProcessTaskStepSubtaskListByProcessTaskStepId(Long processTaskStepId);
-	/**
-     * 
-    * @Author: linbq
-    * @Time:2020年8月21日
     * @Description: 获取可分配处理人的步骤列表
     * @param processTaskStepId 步骤id
     * @return List<ProcessTaskStepVo>
@@ -240,6 +186,15 @@ public interface ProcessTaskService {
      * @return Set<ProcessTaskStepVo>
      */
 	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTaskId(Long processTaskId);
+	/**
+     * 
+     * @Author: 14378
+     * @Time:2020年4月3日
+     * @Description: 获取当前步骤的前置步骤列表中处理人是当前用户的步骤列表
+     * @param processTaskStepId 已激活的步骤id
+     * @return List<ProcessTaskStepVo>
+     */
+    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(Long processTaskStepId);
 	/**
      * 
      * @Time:2020年4月3日

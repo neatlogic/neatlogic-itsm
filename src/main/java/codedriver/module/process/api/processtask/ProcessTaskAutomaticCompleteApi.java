@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
@@ -71,7 +71,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 		    throw new ProcessTaskStepMustBeAutomaticException();
 		}
 		jsonObj.put("processTaskId", processTaskStepVo.getProcessTaskId());
-		if(action.equals(ProcessTaskStepAction.BACK.getValue())) {
+		if(action.equals(ProcessTaskOperationType.BACK.getValue())) {
 			flowDirection = ProcessFlowDirection.BACKWARD.getValue();
 		}
 		/** 不允许多个后续步骤 **/

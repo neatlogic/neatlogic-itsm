@@ -13,7 +13,6 @@ import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
@@ -86,7 +85,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 		Long startProcessTaskStepId = processTaskStepList.get(0).getId();
 				
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-//		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
+//		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.UPDATE);
         handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
@@ -126,7 +125,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 		ProcessTaskStepReplyVo oldReplyVo = null;
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
         for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-            if (ProcessTaskStepAction.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
+            if (ProcessTaskOperationType.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
                 oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContent);
                 break;
             }

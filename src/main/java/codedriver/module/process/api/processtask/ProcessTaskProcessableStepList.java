@@ -12,7 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
@@ -66,17 +66,17 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 			while(iterator.hasNext()) {
 				ProcessTaskStepVo processTaskStepVo = iterator.next();
 				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-				if(ProcessTaskStepAction.ACCEPT.getValue().equals(action)) {
+				if(ProcessTaskOperationType.ACCEPT.getValue().equals(action)) {
 					if(CollectionUtils.isNotEmpty(majorUserList)) {
 						iterator.remove();
 					}
-				}else if(ProcessTaskStepAction.START.getValue().equals(action)) {
+				}else if(ProcessTaskOperationType.START.getValue().equals(action)) {
 					if(CollectionUtils.isEmpty(majorUserList)) {
 						iterator.remove();
 					}else if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())){
 						iterator.remove();
 					}
-				}else if(ProcessTaskStepAction.COMPLETE.getValue().equals(action)) {
+				}else if(ProcessTaskOperationType.COMPLETE.getValue().equals(action)) {
 					if(CollectionUtils.isEmpty(majorUserList)) {
 						iterator.remove();
 					}else if(ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())){

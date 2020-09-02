@@ -10,6 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -19,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
@@ -28,6 +30,9 @@ import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 
 	private final static Logger logger = LoggerFactory.getLogger(FormAuditHandler.class);
+
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
 	
 	@Override
 	public String getType() {
@@ -64,20 +69,23 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 			Map<String, String> attributeLabelMap = new HashMap<>();
 			Long processTaskId = processTaskFormAttributeDataList.get(0).getProcessTaskId();
 			ProcessTaskFormVo processTaskForm = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-			if(processTaskForm != null && StringUtils.isNotBlank(processTaskForm.getFormContent())) {
-				try {
-					JSONObject formConfig = JSON.parseObject(processTaskForm.getFormContent());
-					JSONArray controllerList = formConfig.getJSONArray("controllerList");
-					if(CollectionUtils.isNotEmpty(controllerList)) {
-						for(int i = 0; i < controllerList.size(); i++) {
-							JSONObject attributeObj = controllerList.getJSONObject(i);
-							attributeLabelMap.put(attributeObj.getString("uuid"), attributeObj.getString("label"));
-							attributeConfigMap.put(attributeObj.getString("uuid"), attributeObj.getJSONObject("config"));
-						}
-					}
-				}catch(Exception ex) {
-					logger.error("hash为" + processTaskForm.getFormContentHash() + "的processtask_form内容不是合法的JSON格式", ex);
-				}
+			if(processTaskForm != null && StringUtils.isNotBlank(processTaskForm.getFormContentHash())) {
+			    String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskForm.getFormContentHash());
+	            if(StringUtils.isNotBlank(formContent)) {
+	                try {
+	                    JSONObject formConfig = JSON.parseObject(formContent);
+	                    JSONArray controllerList = formConfig.getJSONArray("controllerList");
+	                    if(CollectionUtils.isNotEmpty(controllerList)) {
+	                        for(int i = 0; i < controllerList.size(); i++) {
+	                            JSONObject attributeObj = controllerList.getJSONObject(i);
+	                            attributeLabelMap.put(attributeObj.getString("uuid"), attributeObj.getString("label"));
+	                            attributeConfigMap.put(attributeObj.getString("uuid"), attributeObj.getJSONObject("config"));
+	                        }
+	                    }
+	                }catch(Exception ex) {
+	                    logger.error("hash为" + processTaskForm.getFormContentHash() + "的processtask_form内容不是合法的JSON格式", ex);
+	                }
+	            }
 			}
 
 			Map<String, String> oldContentMap = new HashMap<>();

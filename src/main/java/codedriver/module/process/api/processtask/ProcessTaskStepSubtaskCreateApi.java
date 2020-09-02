@@ -25,7 +25,7 @@ import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotF
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
@@ -36,9 +36,9 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private UserMapper userMapper;
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
 	@Override
 	public String getToken() {
@@ -100,7 +100,7 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		processTaskStepSubtaskVo.setParamObj(jsonObj);
-		processTaskService.createSubtask(processTaskStepSubtaskVo);
+		processTaskStepSubtaskService.createSubtask(processTaskStepSubtaskVo);
 		return null;
 	}
 

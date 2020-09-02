@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -18,9 +19,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -34,6 +36,10 @@ import codedriver.module.process.notify.handler.ProcessNotifyPolicyHandler;
 @Service
 public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
+    
+    @Autowired
+    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
+    
 	@Override
 	public String getHandler() {
 		return ProcessStepHandler.OMNIPOTENT.getHandler();
@@ -90,7 +96,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		/** 查出processtask_step_subtask表中当前步骤子任务处理人列表 **/		
 		Set<String> runningSubtaskUserUuidSet = new HashSet<>();
 		Set<String> succeedSubtaskUserUuidSet = new HashSet<>();
-		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
 		for(ProcessTaskStepSubtaskVo subtaskVo : processTaskStepSubtaskList) {
 			if(ProcessTaskStatus.RUNNING.getValue().equals(subtaskVo.getStatus())) {
 				runningSubtaskUserUuidSet.add(subtaskVo.getUserUuid());
@@ -182,14 +188,14 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		
 		/** 授权 **/
 		JSONArray authorityArray = new JSONArray();
-		ProcessTaskStepAction[] stepActions = {
-				ProcessTaskStepAction.VIEW, 
-				ProcessTaskStepAction.ABORT, 
-				ProcessTaskStepAction.TRANSFER, 
-				ProcessTaskStepAction.UPDATE, 
-				ProcessTaskStepAction.URGE
+		ProcessTaskOperationType[] stepActions = {
+				ProcessTaskOperationType.VIEW, 
+				ProcessTaskOperationType.ABORT, 
+				ProcessTaskOperationType.TRANSFER, 
+				ProcessTaskOperationType.UPDATE, 
+				ProcessTaskOperationType.URGE
 		};
-		for(ProcessTaskStepAction stepAction : stepActions) {
+		for(ProcessTaskOperationType stepAction : stepActions) {
 			authorityArray.add(new JSONObject() {{
 				this.put("action", stepAction.getValue());
 				this.put("text", stepAction.getText());
@@ -216,16 +222,16 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		
 		/** 按钮映射列表 **/
 		JSONArray customButtonArray = new JSONArray();
-		ProcessTaskStepAction[] stepButtons = {
-				ProcessTaskStepAction.COMPLETE, 
-				ProcessTaskStepAction.BACK, 
-				ProcessTaskStepAction.COMMENT, 
-				ProcessTaskStepAction.TRANSFER, 
-				ProcessTaskStepAction.START,
-				ProcessTaskStepAction.ABORT, 
-				ProcessTaskStepAction.RECOVER
+		ProcessTaskOperationType[] stepButtons = {
+				ProcessTaskOperationType.COMPLETE, 
+				ProcessTaskOperationType.BACK, 
+				ProcessTaskOperationType.COMMENT, 
+				ProcessTaskOperationType.TRANSFER, 
+				ProcessTaskOperationType.START,
+				ProcessTaskOperationType.ABORT, 
+				ProcessTaskOperationType.RECOVER
 		};
-		for(ProcessTaskStepAction stepButton : stepButtons) {
+		for(ProcessTaskOperationType stepButton : stepButtons) {
 			customButtonArray.add(new JSONObject() {{
 				this.put("name", stepButton.getValue());
 				this.put("customText", stepButton.getText());
@@ -233,15 +239,15 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 			}});
 		}
 		/** 子任务按钮映射列表 **/
-		ProcessTaskStepAction[] subtaskButtons = {
-				ProcessTaskStepAction.ABORTSUBTASK, 
-				ProcessTaskStepAction.COMMENTSUBTASK, 
-				ProcessTaskStepAction.COMPLETESUBTASK, 
-				ProcessTaskStepAction.CREATESUBTASK, 
-				ProcessTaskStepAction.REDOSUBTASK, 
-				ProcessTaskStepAction.EDITSUBTASK
+		ProcessTaskOperationType[] subtaskButtons = {
+				ProcessTaskOperationType.ABORTSUBTASK, 
+				ProcessTaskOperationType.COMMENTSUBTASK, 
+				ProcessTaskOperationType.COMPLETESUBTASK, 
+				ProcessTaskOperationType.CREATESUBTASK, 
+				ProcessTaskOperationType.REDOSUBTASK, 
+				ProcessTaskOperationType.EDITSUBTASK
 		};
-		for(ProcessTaskStepAction subtaskButton : subtaskButtons) {
+		for(ProcessTaskOperationType subtaskButton : subtaskButtons) {
 			customButtonArray.add(new JSONObject() {{
 				this.put("name", subtaskButton.getValue());
 				this.put("customText", subtaskButton.getText() + "(子任务)");

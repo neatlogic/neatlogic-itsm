@@ -48,7 +48,6 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -374,8 +373,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         if (isHasAbort || isHasRecover) {
             if (isHasAbort) {
                 JSONObject abortActionJson = new JSONObject();
-                abortActionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
-                abortActionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+                abortActionJson.put("name", ProcessTaskOperationType.ABORT.getValue());
+                abortActionJson.put("text", ProcessTaskOperationType.ABORT.getText());
                 abortActionJson.put("sort", 2);
                 JSONObject configJson = new JSONObject();
                 configJson.put("taskid", el.getId());
@@ -385,8 +384,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                 actionArray.add(abortActionJson);
             } else {
                 JSONObject recoverActionJson = new JSONObject();
-                recoverActionJson.put("name", ProcessTaskStepAction.RECOVER.getValue());
-                recoverActionJson.put("text", ProcessTaskStepAction.RECOVER.getText());
+                recoverActionJson.put("name", ProcessTaskOperationType.RECOVER.getValue());
+                recoverActionJson.put("text", ProcessTaskOperationType.RECOVER.getText());
                 recoverActionJson.put("sort", 2);
                 JSONObject configJson = new JSONObject();
                 configJson.put("taskid", el.getId());
@@ -397,8 +396,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
             }
         } else {
             JSONObject abortActionJson = new JSONObject();
-            abortActionJson.put("name", ProcessTaskStepAction.ABORT.getValue());
-            abortActionJson.put("text", ProcessTaskStepAction.ABORT.getText());
+            abortActionJson.put("name", ProcessTaskOperationType.ABORT.getValue());
+            abortActionJson.put("text", ProcessTaskOperationType.ABORT.getText());
             abortActionJson.put("sort", 2);
             abortActionJson.put("isEnable", 0);
             actionArray.add(abortActionJson);
@@ -406,8 +405,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
 
         // 催办
         JSONObject urgeActionJson = new JSONObject();
-        urgeActionJson.put("name", ProcessTaskStepAction.URGE.getValue());
-        urgeActionJson.put("text", ProcessTaskStepAction.URGE.getText());
+        urgeActionJson.put("name", ProcessTaskOperationType.URGE.getValue());
+        urgeActionJson.put("text", ProcessTaskOperationType.URGE.getText());
         urgeActionJson.put("sort", 3);
         if (isHasUrge) {
             JSONObject configJson = new JSONObject();

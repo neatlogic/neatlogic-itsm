@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -30,6 +31,9 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
@@ -70,7 +74,7 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
 		    throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
 
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
             if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus())) {
                 //如果还有子任务未完成，该步骤不能流转

@@ -15,6 +15,7 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
@@ -32,6 +33,9 @@ public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
+	
+	@Autowired
+	SelectContentByHashMapper selectContentByHashMapper;
 
 	@Override
 	public String getToken() {
@@ -65,7 +69,7 @@ public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 			//load第一次请求job
 			if(!ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))
 					&&!ProcessTaskStatus.FAILED.getValue().equals(requestStatus.getString("value"))) {
-				String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+				String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 				automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
 				automaticConfigVo.setIsRequest(true);
 				isRetry = true;
@@ -75,7 +79,7 @@ public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 				JSONObject callbackStatus = dataObject.getJSONObject("callbackAudit").getJSONObject("status");
 				if(!ProcessTaskStatus.SUCCEED.getValue().equals(callbackStatus.getString("value"))
 						&&!ProcessTaskStatus.FAILED.getValue().equals(callbackStatus.getString("value"))) {
-					String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+					String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 					automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
 					automaticConfigVo.setIsRequest(false);
 					isRetry = true;

@@ -22,7 +22,6 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
@@ -37,6 +36,7 @@ import codedriver.framework.process.exception.process.ProcessStepHandlerNotFound
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -55,6 +55,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     
     @Autowired
     private FileMapper fileMapper;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 	
 	@Override
 	public String getToken() {
@@ -88,7 +91,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
-//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskOperationType.POCESSTASKVIEW);
 		
 		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
         
@@ -97,7 +100,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Map<String, String> formAttributeActionMap = new HashMap<>();
 		if(processTaskStepId != null) {
 //			List<String> verifyActionList = new ArrayList<>();
-//			verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
+//			verifyActionList.add(ProcessTaskOperationType.VIEW.getValue());
 //			List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
 		    
             ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
@@ -198,7 +201,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             //获取当前用户有权限的所有子任务
             //子任务列表
             if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-                List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+                List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
                 if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
                     Map<String, String> customButtonMap = processTaskStepVo.getCustomButtonMap();
                     for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
@@ -206,42 +209,42 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                         if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
                             || (currentUser.equals(processTaskStepSubtask.getUserUuid()) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
                             if(processTaskStepSubtask.getIsAbortable() == 1) {
-                                String value = ProcessTaskStepAction.ABORTSUBTASK.getValue();
+                                String value = ProcessTaskOperationType.ABORTSUBTASK.getValue();
                                 String text = customButtonMap.get(value);
                                 if(StringUtils.isBlank(text)) {
-                                    text = ProcessTaskStepAction.ABORTSUBTASK.getText();
+                                    text = ProcessTaskOperationType.ABORTSUBTASK.getText();
                                 }
                                 processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }
                             if(processTaskStepSubtask.getIsCommentable() == 1) {
-                                String value = ProcessTaskStepAction.COMMENTSUBTASK.getValue();
+                                String value = ProcessTaskOperationType.COMMENTSUBTASK.getValue();
                                 String text = customButtonMap.get(value);
                                 if(StringUtils.isBlank(text)) {
-                                    text = ProcessTaskStepAction.COMMENTSUBTASK.getText();
+                                    text = ProcessTaskOperationType.COMMENTSUBTASK.getText();
                                 }
                                 processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }
                             if(processTaskStepSubtask.getIsCompletable() == 1) {
-                                String value = ProcessTaskStepAction.COMPLETESUBTASK.getValue();
+                                String value = ProcessTaskOperationType.COMPLETESUBTASK.getValue();
                                 String text = customButtonMap.get(value);
                                 if(StringUtils.isBlank(text)) {
-                                    text = ProcessTaskStepAction.COMPLETESUBTASK.getText();
+                                    text = ProcessTaskOperationType.COMPLETESUBTASK.getText();
                                 }
                                 processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }
                             if(processTaskStepSubtask.getIsEditable() == 1) {
-                                String value = ProcessTaskStepAction.EDITSUBTASK.getValue();
+                                String value = ProcessTaskOperationType.EDITSUBTASK.getValue();
                                 String text = customButtonMap.get(value);
                                 if(StringUtils.isBlank(text)) {
-                                    text = ProcessTaskStepAction.EDITSUBTASK.getText();
+                                    text = ProcessTaskOperationType.EDITSUBTASK.getText();
                                 }
                                 processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }
                             if(processTaskStepSubtask.getIsRedoable() == 1) {
-                                String value = ProcessTaskStepAction.REDOSUBTASK.getValue();
+                                String value = ProcessTaskOperationType.REDOSUBTASK.getValue();
                                 String text = customButtonMap.get(value);
                                 if(StringUtils.isBlank(text)) {
-                                    text = ProcessTaskStepAction.REDOSUBTASK.getText();
+                                    text = ProcessTaskOperationType.REDOSUBTASK.getText();
                                 }
                                 processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
                             }

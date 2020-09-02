@@ -23,7 +23,7 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -306,7 +306,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                             }
                                             processTaskStepContentVo.setProcessTaskId(processTask.getId());
                                             processTaskStepContentVo.setProcessTaskStepId(processTaskStep.getId());
-                                            processTaskStepContentVo.setType(ProcessTaskStepAction.COMMENT.getValue());
+                                            processTaskStepContentVo.setType(ProcessTaskOperationType.COMMENT.getValue());
                                             processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                                             jsonReader.endObject();
                                         }
