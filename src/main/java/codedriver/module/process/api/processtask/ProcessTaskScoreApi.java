@@ -57,7 +57,7 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "scoreTemplateId", type = ApiParamType.LONG, isRequired = true, desc = "评分模版ID"),
-		@Param(name = "scoreTemplateName", type = ApiParamType.STRING, isRequired = true, desc = "评分模版名称"),
+//		@Param(name = "scoreTemplateName", type = ApiParamType.STRING, isRequired = true, desc = "评分模版名称"),
 		@Param(name = "scoreDimensionList", type = ApiParamType.JSONARRAY, isRequired = true,
 				desc = "评分维度及分数，格式[{\"dimensionId\":133018403841111,\"dimensionName\":\"dim\",\"description\":\"see\",\"score\":3}]"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "评价内容")
@@ -73,7 +73,7 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 		//只有上报人才可评分
 		handler.verifyOperationAuthoriy(processTaskId, null, ProcessTaskOperationType.SCORE, true);
         Long scoreTemplateId = jsonObj.getLong("scoreTemplateId");
-        String scoreTemplateName = jsonObj.getString("scoreTemplateName");
+//        String scoreTemplateName = jsonObj.getString("scoreTemplateName");
         JSONArray scoreDimensionList = jsonObj.getJSONArray("scoreDimensionList");
         String content = jsonObj.getString("content");
 
@@ -90,7 +90,7 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 			dimensionIdScoreMap.put(dimensionId,score);
 
 			JSONObject dimensionObj = new JSONObject();
-			dimensionObj.put("dimensionId",dimensionId);
+//			dimensionObj.put("dimensionId",dimensionId);
 			dimensionObj.put("dimensionName",dimensionName);
 			dimensionObj.put("score",score);
 			dimensionObj.put("description",description);
@@ -107,14 +107,14 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 			processtaskScoreMapper.insertProcesstaskScore(processtaskScoreVo);
 		}
 
-		JSONObject contentObj = new JSONObject();
-		contentObj.put("processTaskId",processTaskId);
-		contentObj.put("scoreTemplateId",scoreTemplateId);
-		contentObj.put("scoreTemplateName",scoreTemplateName);
-		contentObj.put("content",content);
-		contentObj.put("dimensionList",dimensionArray);
+//		JSONObject contentObj = new JSONObject();
+//		contentObj.put("processTaskId",processTaskId);
+//		contentObj.put("scoreTemplateId",scoreTemplateId);
+//		contentObj.put("scoreTemplateName",scoreTemplateName);
+//		contentObj.put("content",content);
+//		contentObj.put("dimensionList",dimensionArray);
 		JSONObject paramObj = new JSONObject();
-		paramObj.put("content",contentObj.toJSONString());
+		paramObj.put("content",dimensionArray);
 
 
 		/**processtask_content表存储了两份数据：

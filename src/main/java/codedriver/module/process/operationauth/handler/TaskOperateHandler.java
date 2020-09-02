@@ -163,7 +163,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         });
 
         operationBiPredicateMap.put(ProcessTaskOperationType.SCORE, (processTaskVo, processTaskStepVo) -> {
-            // 评分权限retreat
+            // 评分权限score
             String userUuid = UserContext.get().getUserUuid();
             if (userUuid.equals(processTaskVo.getOwner())) {
                 return true;
