@@ -16,7 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
@@ -67,7 +67,7 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
 		}
 		ProcessTaskStepReplyVo replyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
 		if(Objects.equals(replyVo.getIsDeletable(), 0)) {
-            throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.DELETECOMMENT.getText());
+            throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.DELETECOMMENT.getText());
 		}
 		// 锁定当前流程
         processTaskMapper.getProcessTaskLockById(replyVo.getProcessTaskId());

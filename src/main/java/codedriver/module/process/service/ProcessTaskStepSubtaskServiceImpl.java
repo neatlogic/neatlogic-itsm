@@ -17,7 +17,7 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
@@ -56,7 +56,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         String content = paramObj.getString("content");
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
         processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-        processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.CREATESUBTASK.getValue(), processTaskContentVo.getHash()));
+        processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.CREATESUBTASK.getValue(), processTaskContentVo.getHash()));
 
         ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
         if(currentProcessTaskStepVo == null) {
@@ -93,7 +93,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         }
         List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(oldProcessTaskStepSubtask.getId());
         for(ProcessTaskStepSubtaskContentVo subtaskContentVo : processTaskStepSubtaskContentList) {
-            if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(subtaskContentVo.getAction())) {
+            if(ProcessTaskOperationType.CREATESUBTASK.getValue().equals(subtaskContentVo.getAction())) {
                 oldProcessTaskStepSubtask.setContentHash(subtaskContentVo.getContentHash());
             }
         }
@@ -102,7 +102,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         paramObj.remove("content");
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
         processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-        processTaskStepSubtaskMapper.updateProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(oldProcessTaskStepSubtask.getId(), ProcessTaskStepAction.CREATESUBTASK.getValue(), processTaskContentVo.getHash()));
+        processTaskStepSubtaskMapper.updateProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(oldProcessTaskStepSubtask.getId(), ProcessTaskOperationType.CREATESUBTASK.getValue(), processTaskContentVo.getHash()));
         ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
         processTaskStepSubtaskVo.setId(oldProcessTaskStepSubtask.getId());
         processTaskStepSubtaskVo.setContentHash(processTaskContentVo.getHash());
@@ -174,7 +174,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if(StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.REDOSUBTASK.getValue(), processTaskContentVo.getHash()));
+            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.REDOSUBTASK.getValue(), processTaskContentVo.getHash()));
         }
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if(handler != null) {
@@ -205,7 +205,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if(StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.COMPLETESUBTASK.getValue(), processTaskContentVo.getHash()));
+            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.COMPLETESUBTASK.getValue(), processTaskContentVo.getHash()));
         }
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if(handler != null) {
@@ -259,14 +259,14 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if(StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskStepAction.COMMENTSUBTASK.getValue(), processTaskContentVo.getHash()));
+            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.COMMENTSUBTASK.getValue(), processTaskContentVo.getHash()));
         }
         List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
         Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
         while(iterator.hasNext()) {
             ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
             if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-                if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+                if(ProcessTaskOperationType.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
                     processTaskStepSubtaskVo.setContent(processTaskStepSubtaskContentVo.getContent());
                     iterator.remove();
                 }
@@ -284,7 +284,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             while(iterator.hasNext()) {
                 ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
                 if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-                    if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+                    if(ProcessTaskOperationType.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
                         processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
                         iterator.remove();
                     }

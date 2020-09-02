@@ -15,7 +15,7 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -87,7 +87,7 @@ public class ProcessTaskStepSubtaskEditApi extends PrivateApiComponentBase {
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
 			processTaskStepSubtaskService.editSubtask(processTaskStepSubtaskVo);
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.EDITSUBTASK.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.EDITSUBTASK.getText());
 		}
 		return null;
 	}

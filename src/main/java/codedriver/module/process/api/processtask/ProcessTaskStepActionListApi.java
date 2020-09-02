@@ -23,6 +23,7 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
+//@Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 	

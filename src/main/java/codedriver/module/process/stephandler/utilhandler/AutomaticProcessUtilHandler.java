@@ -14,7 +14,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessStepHandler;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -109,14 +109,14 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		
 		/** 授权 **/
 		JSONArray authorityArray = new JSONArray();
-		ProcessTaskStepAction[] stepActions = {
-				ProcessTaskStepAction.VIEW, 
-				//ProcessTaskStepAction.ABORT, 
-				ProcessTaskStepAction.TRANSFER, 
-				ProcessTaskStepAction.UPDATE, 
-				ProcessTaskStepAction.URGE
+		ProcessTaskOperationType[] stepActions = {
+				ProcessTaskOperationType.VIEW, 
+				//ProcessTaskOperationType.ABORT, 
+				ProcessTaskOperationType.TRANSFER, 
+				ProcessTaskOperationType.UPDATE, 
+				ProcessTaskOperationType.URGE
 		};
-		for(ProcessTaskStepAction stepAction : stepActions) {
+		for(ProcessTaskOperationType stepAction : stepActions) {
 			authorityArray.add(new JSONObject() {{
 				this.put("action", stepAction.getValue());
 				this.put("text", stepAction.getText());
@@ -143,16 +143,16 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		
 		/** 按钮映射 **/
 		JSONArray customButtonArray = new JSONArray();
-		ProcessTaskStepAction[] stepButtons = {
-				ProcessTaskStepAction.COMPLETE, 
-				ProcessTaskStepAction.BACK, 
-				//ProcessTaskStepAction.COMMENT, 
-				ProcessTaskStepAction.TRANSFER, 
-				ProcessTaskStepAction.START//,
-				//ProcessTaskStepAction.ABORT, 
-				//ProcessTaskStepAction.RECOVER
+		ProcessTaskOperationType[] stepButtons = {
+				ProcessTaskOperationType.COMPLETE, 
+				ProcessTaskOperationType.BACK, 
+				//ProcessTaskOperationType.COMMENT, 
+				ProcessTaskOperationType.TRANSFER, 
+				ProcessTaskOperationType.START//,
+				//ProcessTaskOperationType.ABORT, 
+				//ProcessTaskOperationType.RECOVER
 		};
-		for(ProcessTaskStepAction stepButton : stepButtons) {
+		for(ProcessTaskOperationType stepButton : stepButtons) {
 			customButtonArray.add(new JSONObject() {{
 				this.put("name", stepButton.getValue());
 				this.put("customText", stepButton.getText());
@@ -160,15 +160,15 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 			}});
 		}
 		/** 子任务按钮映射列表 **/
-		ProcessTaskStepAction[] subtaskButtons = {
-				ProcessTaskStepAction.ABORTSUBTASK, 
-				ProcessTaskStepAction.COMMENTSUBTASK, 
-				ProcessTaskStepAction.COMPLETESUBTASK, 
-				ProcessTaskStepAction.CREATESUBTASK, 
-				ProcessTaskStepAction.REDOSUBTASK, 
-				ProcessTaskStepAction.EDITSUBTASK
+		ProcessTaskOperationType[] subtaskButtons = {
+				ProcessTaskOperationType.ABORTSUBTASK, 
+				ProcessTaskOperationType.COMMENTSUBTASK, 
+				ProcessTaskOperationType.COMPLETESUBTASK, 
+				ProcessTaskOperationType.CREATESUBTASK, 
+				ProcessTaskOperationType.REDOSUBTASK, 
+				ProcessTaskOperationType.EDITSUBTASK
 		};
-		for(ProcessTaskStepAction subtaskButton : subtaskButtons) {
+		for(ProcessTaskOperationType subtaskButton : subtaskButtons) {
 			customButtonArray.add(new JSONObject() {{
 				this.put("name", subtaskButton.getValue());
 				this.put("customText", subtaskButton.getText() + "(子任务)");

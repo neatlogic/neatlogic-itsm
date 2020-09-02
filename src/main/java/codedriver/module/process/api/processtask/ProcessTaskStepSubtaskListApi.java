@@ -16,7 +16,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -87,7 +87,7 @@ public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
 					while(iterator.hasNext()) {
 						ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
 						if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-							if(ProcessTaskStepAction.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+							if(ProcessTaskOperationType.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
 								processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
 								iterator.remove();
 							}
@@ -95,42 +95,42 @@ public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
 					}
 					processTaskStepSubtask.setContentList(processTaskStepSubtaskContentList);
 					if(processTaskStepSubtask.getIsAbortable() == 1) {
-						String value = ProcessTaskStepAction.ABORTSUBTASK.getValue();
+						String value = ProcessTaskOperationType.ABORTSUBTASK.getValue();
 						String text = customButtonMap.get(value);
 						if(StringUtils.isBlank(text)) {
-							text = ProcessTaskStepAction.ABORTSUBTASK.getText();
+							text = ProcessTaskOperationType.ABORTSUBTASK.getText();
 						}
 						processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
 					}
 					if(processTaskStepSubtask.getIsCommentable() == 1) {
-						String value = ProcessTaskStepAction.COMMENTSUBTASK.getValue();
+						String value = ProcessTaskOperationType.COMMENTSUBTASK.getValue();
 						String text = customButtonMap.get(value);
 						if(StringUtils.isBlank(text)) {
-							text = ProcessTaskStepAction.COMMENTSUBTASK.getText();
+							text = ProcessTaskOperationType.COMMENTSUBTASK.getText();
 						}
 						processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
 					}
 					if(processTaskStepSubtask.getIsCompletable() == 1) {
-						String value = ProcessTaskStepAction.COMPLETESUBTASK.getValue();
+						String value = ProcessTaskOperationType.COMPLETESUBTASK.getValue();
 						String text = customButtonMap.get(value);
 						if(StringUtils.isBlank(text)) {
-							text = ProcessTaskStepAction.COMPLETESUBTASK.getText();
+							text = ProcessTaskOperationType.COMPLETESUBTASK.getText();
 						}
 						processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
 					}
 					if(processTaskStepSubtask.getIsEditable() == 1) {
-						String value = ProcessTaskStepAction.EDITSUBTASK.getValue();
+						String value = ProcessTaskOperationType.EDITSUBTASK.getValue();
 						String text = customButtonMap.get(value);
 						if(StringUtils.isBlank(text)) {
-							text = ProcessTaskStepAction.EDITSUBTASK.getText();
+							text = ProcessTaskOperationType.EDITSUBTASK.getText();
 						}
 						processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
 					}
 					if(processTaskStepSubtask.getIsRedoable() == 1) {
-						String value = ProcessTaskStepAction.REDOSUBTASK.getValue();
+						String value = ProcessTaskOperationType.REDOSUBTASK.getValue();
 						String text = customButtonMap.get(value);
 						if(StringUtils.isBlank(text)) {
-							text = ProcessTaskStepAction.REDOSUBTASK.getText();
+							text = ProcessTaskOperationType.REDOSUBTASK.getText();
 						}
 						processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
 					}

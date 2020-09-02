@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
@@ -73,7 +73,7 @@ public class ProcessTaskStepSubtaskCommentApi extends PrivateApiComponentBase {
 			List<ProcessTaskStepSubtaskContentVo> contentList = processTaskStepSubtaskService.commentSubtask(processTaskStepSubtaskVo);
 			resultObj.put("contentList", contentList);
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMMENTSUBTASK.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.COMMENTSUBTASK.getText());
 		}
 		return resultObj;
 	}

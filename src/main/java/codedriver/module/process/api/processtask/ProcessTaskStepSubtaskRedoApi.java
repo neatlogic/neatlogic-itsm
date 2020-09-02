@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
@@ -67,7 +67,7 @@ public class ProcessTaskStepSubtaskRedoApi extends PrivateApiComponentBase {
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
 			processTaskStepSubtaskService.redoSubtask(processTaskStepSubtaskVo);
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.REDOSUBTASK.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.REDOSUBTASK.getText());
 		}
 		return null;
 	}

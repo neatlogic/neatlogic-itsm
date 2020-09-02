@@ -49,7 +49,6 @@ import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
@@ -331,7 +330,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 							ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
 							if (processHandler != null) {
 								JSONObject jsonParam = new JSONObject();
-								jsonParam.put("action", ProcessTaskStepAction.BACK.getValue());
+								jsonParam.put("action", ProcessTaskOperationType.BACK.getValue());
 								jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
 								currentProcessTaskStepVo.setParamObj(jsonParam);
 								processHandler.complete(currentProcessTaskStepVo);
@@ -736,7 +735,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
         for(ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {
-            if(ProcessTaskStepAction.COMMENT.getValue().equals(processTaskStepContentVo.getType())) {
+            if(ProcessTaskOperationType.COMMENT.getValue().equals(processTaskStepContentVo.getType())) {
                 ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
                 parseProcessTaskStepReply(processTaskStepReplyVo);
                 processTaskStepReplyList.add(processTaskStepReplyVo);
@@ -860,7 +859,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         List<Long> fileIdList = new ArrayList<>();
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
         for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-            if (ProcessTaskStepAction.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
+            if (ProcessTaskOperationType.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
                 fileIdList = processTaskMapper.getFileIdListByContentId(processTaskStepContent.getId());
                 comment.setContent(selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepContent.getContentHash()));
                 break;
@@ -904,7 +903,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
                 processTaskMapper.replaceProcessTaskContent(contentVo);
                 if(oldContentId == null) {
-                    processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskStepAction.STARTPROCESS.getValue()));
+                    processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.STARTPROCESS.getValue()));
                 }else {
                     processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
                 }
@@ -1148,9 +1147,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             if (processTaskStep.getIsActive().intValue() == 1) {
 //                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStep.getId());
 //                List<String> actionList = new ArrayList<>();
-//                actionList.add(ProcessTaskStepAction.URGE.getValue());
+//                actionList.add(ProcessTaskOperationType.URGE.getValue());
 //                List<String> configActionList = getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, actionList, currentUserProcessUserTypeList);
-//                if (configActionList.contains(ProcessTaskStepAction.URGE.getValue())) {
+//                if (configActionList.contains(ProcessTaskOperationType.URGE.getValue())) {
 //                    resultList.add(processTaskStep);
 //                }
                 if(checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE)) {
