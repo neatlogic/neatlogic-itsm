@@ -207,8 +207,18 @@ public interface ProcessTaskService {
      * 
      * @Time:2020年4月18日
      * @Description: 获取工单中当前用户能催办的步骤列表
-     * @param processTaskId
+     * @param processTaskVo
      * @return List<ProcessTaskStepVo>
      */
-    public List<ProcessTaskStepVo> getUrgeableStepList(Long processTaskId);
+    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo);/**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取当前用户在当前步骤中工单干系人列表
+     * @param processTaskVo     工单信息
+     * @param processTaskStepId 步骤id
+     * @return List<String>
+     */
+    public void setCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo);
+    
+    public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo);
 }

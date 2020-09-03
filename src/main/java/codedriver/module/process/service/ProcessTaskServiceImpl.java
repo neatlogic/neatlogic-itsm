@@ -1138,23 +1138,73 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * @return List<ProcessTaskStepVo>
      */
     @Override
-    public List<ProcessTaskStepVo> getUrgeableStepList(Long processTaskId) {
+    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        List<ProcessTaskStepVo> startProcessTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
-        processTaskStepList.addAll(startProcessTaskStepList);
+        List<ProcessTaskStepVo> processTaskStepList = getProcessTaskStepVoListByProcessTask(processTaskVo);
         for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
             if (processTaskStep.getIsActive().intValue() == 1) {
-//                List<String> currentUserProcessUserTypeList = getCurrentUserProcessUserTypeList(processTaskVo, processTaskStep.getId());
-//                List<String> actionList = new ArrayList<>();
-//                actionList.add(ProcessTaskOperationType.URGE.getValue());
-//                List<String> configActionList = getProcessTaskStepConfigActionList(processTaskVo, processTaskStep, actionList, currentUserProcessUserTypeList);
-//                if (configActionList.contains(ProcessTaskOperationType.URGE.getValue())) {
-//                    resultList.add(processTaskStep);
-//                }
                 if(checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE)) {
                     resultList.add(processTaskStep);
                 }
+            }
+        }
+        return resultList;
+    }
+    
+    /**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取当前用户在当前步骤中工单干系人列表
+     * @param processTaskVo     工单信息
+     * @param processTaskStepId 步骤id
+     * @return List<String>
+     */
+    @Override
+    public void setCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
+        Long processTaskStepId = null;
+        if(processTaskStepVo != null) {
+            processTaskStepId = processTaskStepVo.getId();
+        }
+        List<String> currentUserProcessUserTypeList = new ArrayList<>();
+        currentUserProcessUserTypeList.add(UserType.ALL.getValue());
+        if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
+            currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
+        }
+        if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
+            currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
+        }
+        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+        if(processTaskMapper.checkIsWorker(processTaskVo.getId(), processTaskStepId, UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList()) > 0) {
+            currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
+        }else {
+            currentUserProcessUserTypeList.remove(ProcessUserType.WORKER.getValue());
+        }
+        if(processTaskStepVo != null) {
+            ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid(true));
+            List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUserVo);
+            for(ProcessTaskStepUserVo processTaskStepUser : processTaskStepUserList) {
+                if(ProcessUserType.MAJOR.getValue().equals(processTaskStepUser.getUserType())) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.MAJOR.getValue());
+                }else if(ProcessUserType.MINOR.getValue().equals(processTaskStepUser.getUserType())) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.MINOR.getValue());
+                }else if(ProcessUserType.AGENT.getValue().equals(processTaskStepUser.getUserType())) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.AGENT.getValue());
+                }
+            }
+            processTaskStepVo.setCurrentUserProcessUserTypeList(currentUserProcessUserTypeList);
+        }
+        processTaskVo.setCurrentUserProcessUserTypeList(currentUserProcessUserTypeList);
+    }
+    
+    @Override
+    public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo){
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
+        for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+            if(ProcessStepType.START.getValue().equals(processTaskStep.getType()) || ProcessStepType.PROCESS.getValue().equals(processTaskStep.getType())) {
+                setProcessTaskStepConfig(processTaskStep);
+                setCurrentUserProcessUserTypeList(processTaskVo, processTaskStep);
+                resultList.add(processTaskStep);
             }
         }
         return resultList;
