@@ -55,6 +55,7 @@ public class ScoreTemplateSearchForSelectApi extends PrivateApiComponentBase{
 
 		ScoreTemplateVo scoreTemplateVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ScoreTemplateVo>() {});
 		JSONObject returnObj = new JSONObject();
+		scoreTemplateVo.setIsActive(1);
 		if(scoreTemplateVo.getNeedPage()){
 			int rowNum = scoreTemplateMapper.searchScoreTemplateCount(scoreTemplateVo);
 			returnObj.put("pageSize", scoreTemplateVo.getPageSize());
