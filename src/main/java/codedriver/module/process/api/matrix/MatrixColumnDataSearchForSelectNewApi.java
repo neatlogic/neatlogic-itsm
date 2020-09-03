@@ -216,10 +216,12 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 					throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
 				}
 			}
+			List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
+			jsonObj.put("sourceColumnList", sourceColumnList); //防止集成管理 js length 异常
 			if (CollectionUtils.isNotEmpty(valueList)) {
 				for (String value : valueList) {
 					if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
-						List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
+						
 						String[] split = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER);
 						for (int i = 0; i < split.length; i++) {
 							String column = columnList.get(i);
@@ -230,7 +232,6 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 							}
 						}
 						// dataVo.setSourceColumnList(sourceColumnList);
-						jsonObj.put("sourceColumnList", sourceColumnList);
 						integrationVo.getParamObj().putAll(jsonObj);
 						IntegrationResultVo resultVo = handler.sendRequest(integrationVo, ProcessRequestFrom.MATRIX);
 						if (StringUtils.isNotBlank(resultVo.getError())) {
@@ -252,10 +253,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 					processMatrixColumnVo.setColumn(keywordColumn);
 					processMatrixColumnVo.setExpression(Expression.LIKE.getExpression());
 					processMatrixColumnVo.setValue(dataVo.getKeyword());
-					List<ProcessMatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
-					if (CollectionUtils.isEmpty(sourceColumnList)) {
-						sourceColumnList = new ArrayList<>();
-					}
+					sourceColumnList = dataVo.getSourceColumnList();
 					sourceColumnList.add(processMatrixColumnVo);
 					jsonObj.put("sourceColumnList", sourceColumnList);
 				}
