@@ -63,6 +63,10 @@ public class ScoreTemplateGetApi extends PrivateApiComponentBase{
 			ProcessTaskVo task = processTaskMapper.getProcessTaskById(jsonObj.getLong("id"));
 			String processUuid = task.getProcessUuid();
 			scoreTemplateId = scoreTemplateMapper.getScoreTemplateIdByProcessUuid(processUuid);
+			//如果scoreTemplateId为空，则表明没有找到与工单相关联且启用的评分模版
+			if(scoreTemplateId == null){
+				return null;
+			}
 		}
 		if(scoreTemplateMapper.checkScoreTemplateExistsById(scoreTemplateId) == null){
 			throw new ScoreTemplateNotFoundException(scoreTemplateId);
