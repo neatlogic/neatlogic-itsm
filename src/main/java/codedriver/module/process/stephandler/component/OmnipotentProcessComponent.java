@@ -237,4 +237,10 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		return 1;
 	}
 
+    @Override
+    protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

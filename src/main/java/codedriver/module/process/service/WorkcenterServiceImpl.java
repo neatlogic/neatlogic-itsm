@@ -310,7 +310,6 @@ public class WorkcenterServiceImpl implements WorkcenterService{
 //            ProcessTaskVo  task2 = processTaskMapper.getProcessTaskBaseInfoById(processTaskVo.getId());
 //            
 //            System.out.println(task1 == task2);
-            
             if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
                 || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
                 || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus)
@@ -324,8 +323,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                                 private static final long serialVersionUID = 1L;
                                 {
                                 add(ProcessTaskOperationType.WORK);
-                                add(ProcessTaskOperationType.ABORT);
-                                add(ProcessTaskOperationType.RECOVER);
+                                add(ProcessTaskOperationType.ABORTPROCESSTASK);
+                                add(ProcessTaskOperationType.RECOVERPROCESSTASK);
                                 add(ProcessTaskOperationType.URGE);
                                 }
                             });
@@ -346,10 +345,10 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                     actionJson.put("config", configJson);
                     handleArray.add(actionJson);
                 }
-                if (operationList.contains(ProcessTaskOperationType.ABORT)) {
+                if (operationList.contains(ProcessTaskOperationType.ABORTPROCESSTASK)) {
                     isHasAbort = true;
                 }
-                if (operationList.contains(ProcessTaskOperationType.RECOVER)) {
+                if (operationList.contains(ProcessTaskOperationType.RECOVERPROCESSTASK)) {
                     isHasRecover = true;
                 }
                 if (operationList.contains(ProcessTaskOperationType.URGE)) {
@@ -373,8 +372,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         if (isHasAbort || isHasRecover) {
             if (isHasAbort) {
                 JSONObject abortActionJson = new JSONObject();
-                abortActionJson.put("name", ProcessTaskOperationType.ABORT.getValue());
-                abortActionJson.put("text", ProcessTaskOperationType.ABORT.getText());
+                abortActionJson.put("name", ProcessTaskOperationType.ABORTPROCESSTASK.getValue());
+                abortActionJson.put("text", ProcessTaskOperationType.ABORTPROCESSTASK.getText());
                 abortActionJson.put("sort", 2);
                 JSONObject configJson = new JSONObject();
                 configJson.put("taskid", el.getId());
@@ -384,8 +383,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                 actionArray.add(abortActionJson);
             } else {
                 JSONObject recoverActionJson = new JSONObject();
-                recoverActionJson.put("name", ProcessTaskOperationType.RECOVER.getValue());
-                recoverActionJson.put("text", ProcessTaskOperationType.RECOVER.getText());
+                recoverActionJson.put("name", ProcessTaskOperationType.RECOVERPROCESSTASK.getValue());
+                recoverActionJson.put("text", ProcessTaskOperationType.RECOVERPROCESSTASK.getText());
                 recoverActionJson.put("sort", 2);
                 JSONObject configJson = new JSONObject();
                 configJson.put("taskid", el.getId());
@@ -396,8 +395,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
             }
         } else {
             JSONObject abortActionJson = new JSONObject();
-            abortActionJson.put("name", ProcessTaskOperationType.ABORT.getValue());
-            abortActionJson.put("text", ProcessTaskOperationType.ABORT.getText());
+            abortActionJson.put("name", ProcessTaskOperationType.ABORTPROCESSTASK.getValue());
+            abortActionJson.put("text", ProcessTaskOperationType.ABORTPROCESSTASK.getText());
             abortActionJson.put("sort", 2);
             abortActionJson.put("isEnable", 0);
             actionArray.add(abortActionJson);
