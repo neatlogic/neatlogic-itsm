@@ -190,7 +190,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		JSONArray authorityArray = new JSONArray();
 		ProcessTaskOperationType[] stepActions = {
 				ProcessTaskOperationType.VIEW, 
-				ProcessTaskOperationType.ABORT, 
+				ProcessTaskOperationType.ABORTPROCESSTASK, 
 				ProcessTaskOperationType.TRANSFER, 
 				ProcessTaskOperationType.UPDATE, 
 				ProcessTaskOperationType.URGE
@@ -228,8 +228,8 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 				ProcessTaskOperationType.COMMENT, 
 				ProcessTaskOperationType.TRANSFER, 
 				ProcessTaskOperationType.START,
-				ProcessTaskOperationType.ABORT, 
-				ProcessTaskOperationType.RECOVER
+				ProcessTaskOperationType.ABORTPROCESSTASK, 
+				ProcessTaskOperationType.RECOVERPROCESSTASK
 		};
 		for(ProcessTaskOperationType stepButton : stepButtons) {
 			customButtonArray.add(new JSONObject() {{

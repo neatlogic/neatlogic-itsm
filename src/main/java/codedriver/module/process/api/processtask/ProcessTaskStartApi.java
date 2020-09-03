@@ -60,8 +60,7 @@ public class ProcessTaskStartApi extends PrivateApiComponentBase {
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		if(handler == null) {
-		    throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
-			
+		    throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());		
 		}
 		String action = jsonObj.getString("action");
         if(ProcessTaskOperationType.ACCEPT.getValue().equals(action)) {

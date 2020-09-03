@@ -314,5 +314,11 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	protected int mySaveDraft(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 1;
 	}
+
+    @Override
+    protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 	
 }

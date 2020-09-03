@@ -70,7 +70,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.ABORT, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo) -> {
             // 工单状态为进行中的才能终止
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
@@ -78,14 +78,14 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORT);
+                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK);
                     }
                 }
             }          
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVER, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK, (processTaskVo, processTaskStepVo) -> {
             // 工单状态为已终止的才能恢复
             if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
                 if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
@@ -93,7 +93,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == -1) {
-                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORT);
+                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK);
                     }
                 }
             }
