@@ -40,7 +40,8 @@ public class ScoreTemplateGetApi extends PrivateApiComponentBase{
 
 	@Input({
 			@Param( name = "id", type = ApiParamType.LONG, isRequired = true,desc = "评分模版ID或者工单ID"),
-			@Param( name = "type", type = ApiParamType.STRING, isRequired = true,desc = "区分入参【id】是评分模版ID还是工单ID")
+			@Param( name = "type", type = ApiParamType.STRING, isRequired = true,desc = "区分入参【id】是评分模版ID还是工单ID。" +
+					"score：表示入参id为评分模版ID；processtask：表示入参id为工单ID")
 	})
 	@Output({
 			@Param(name = "id", type = ApiParamType.LONG, desc = "评分模版ID"),
