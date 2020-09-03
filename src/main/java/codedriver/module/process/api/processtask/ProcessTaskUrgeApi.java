@@ -12,6 +12,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
@@ -37,7 +38,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单催办接口";
+		return "催办工单";
 	}
 
 	@Override
@@ -48,14 +49,13 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id")
 	})
-	@Description(desc = "工单完成接口")
+	@Description(desc = "催办工单")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-//		List<ProcessTaskStepVo> processTaskStepList = handler.getUrgeableStepList(processTaskId);
-		List<ProcessTaskStepVo> processTaskStepList = processTaskService.getUrgeableStepList(processTaskId);
+		List<ProcessTaskStepVo> processTaskStepList = processTaskService.getUrgeableStepList(processTaskVo);
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
 			for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 				/** 触发通知 **/
