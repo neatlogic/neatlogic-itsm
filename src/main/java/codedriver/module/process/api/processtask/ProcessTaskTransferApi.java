@@ -54,7 +54,7 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase {
 	@Input({
 			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
 			@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤Id"),
-			@Param(name = "workerList", type = ApiParamType.STRING, isRequired = true, desc = "新可处理对象列表，[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
+			@Param(name = "workerList", type = ApiParamType.NOAUTH, isRequired = true, desc = "新可处理对象列表，[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
 			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "原因")
 	})
 	@Output({})
