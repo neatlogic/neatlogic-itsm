@@ -2,7 +2,6 @@ package codedriver.module.process.service;
 
 import java.text.ParseException;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.QueryResultSet;
@@ -38,14 +37,6 @@ public interface WorkcenterService {
      * @throws ParseException 
      */
     Object getStepAction(MultiAttrsObject el) throws ParseException;
-
-    /**
-     * 根据关键字获取所有过滤选项
-     * 
-     * @param keyword
-     * @return
-     */
-    JSONArray getKeywordOptions(String keyword, Integer pageSize);
 
     /**
      * 工单中心根据条件获取工单列表数据

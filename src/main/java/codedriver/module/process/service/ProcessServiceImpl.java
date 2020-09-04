@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,9 @@ public class ProcessServiceImpl implements ProcessService {
     
     @Autowired
     private IntegrationMapper integrationMapper;
+
+	@Autowired
+	private ScoreTemplateMapper scoreTemplateMapper;
 
 	@Override
 	public int saveProcess(ProcessVo processVo) {
@@ -136,6 +140,12 @@ public class ProcessServiceImpl implements ProcessService {
 			for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
 				processMapper.insertProcessStepRel(stepRelVo);
 			}
+		}
+
+		/** 保存评分设置 */
+		if(processVo.getProcessScoreTemplateVo() != null){
+			scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(processVo.getUuid());
+			scoreTemplateMapper.insertProcessScoreTemplate(processVo.getProcessScoreTemplateVo());
 		}
 
 		return 1;

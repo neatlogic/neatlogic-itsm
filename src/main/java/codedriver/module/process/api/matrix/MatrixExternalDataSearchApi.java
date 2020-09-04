@@ -31,6 +31,7 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
+import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDispatcherVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
@@ -85,6 +86,8 @@ public class MatrixExternalDataSearchApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String matrixUuid = jsonObj.getString("matrixUuid");
+		List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
+        jsonObj.put("sourceColumnList", sourceColumnList); //防止集成管理 js length 异常
 		ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(matrixUuid);

@@ -61,8 +61,6 @@ import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFacto
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.util.TimeUtil;
-import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
-import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 
 @Service
 public class WorkcenterServiceImpl implements WorkcenterService{
@@ -434,78 +432,6 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         // 搜索es
         QueryResult result = searchTask(workcenterVo);
         return result.getTotal();
-    }
-
-    /**
-     * 根据关键字获取所有过滤选项
-     * 
-     * @param keyword
-     * @return
-     */
-    @Override
-    public JSONArray getKeywordOptions(String keyword, Integer pageSize) {
-        // 搜索标题
-        JSONArray returnArray = getKeywordOption(new ProcessTaskTitleCondition(), keyword, pageSize);
-        // 搜索ID
-        returnArray.addAll(getKeywordOption(new ProcessTaskIdCondition(), keyword, pageSize));
-        return returnArray;
-    }
-
-    /**
-     * 根据单个关键字获取过滤选项
-     * 
-     * @param keyword
-     * @return
-     */
-    private JSONArray getKeywordOption(IProcessTaskCondition condition, String keyword, Integer pageSize) {
-        JSONArray returnArray = new JSONArray();
-        WorkcenterVo workcenter = getKeywordCondition(condition, keyword);
-        workcenter.setPageSize(pageSize);
-        List<MultiAttrsObject> dataList = searchTask(workcenter).getData();
-        if (!dataList.isEmpty()) {
-            JSONObject titleObj = new JSONObject();
-            JSONArray titleDataList = new JSONArray();
-            for (MultiAttrsObject titleEl : dataList) {
-                IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(condition.getName());
-                if (column == null) {
-                    continue;
-                }
-                titleDataList.add(column.getValue(titleEl));
-            }
-            titleObj.put("dataList", titleDataList);
-            titleObj.put("value", condition.getName());
-            titleObj.put("text", condition.getDisplayName());
-            returnArray.add(titleObj);
-        }
-        return returnArray;
-    }
-
-    /**
-     * 拼接关键字过滤选项
-     * 
-     * @param type
-     *            搜索内容类型
-     * @return
-     */
-    private WorkcenterVo getKeywordCondition(IProcessTaskCondition condition, String keyword) {
-        JSONObject searchObj = new JSONObject();
-        JSONArray conditionGroupList = new JSONArray();
-        JSONObject conditionGroup = new JSONObject();
-        JSONArray conditionList = new JSONArray();
-        JSONObject conditionObj = new JSONObject();
-        conditionObj.put("name", condition.getName());
-        conditionObj.put("type", condition.getType());
-        JSONArray valueList = new JSONArray();
-        valueList.add(keyword);
-        conditionObj.put("valueList", valueList);
-        conditionObj.put("expression", Expression.LIKE.getExpression());
-        conditionList.add(conditionObj);
-        conditionGroup.put("conditionList", conditionList);
-        conditionGroupList.add(conditionGroup);
-        searchObj.put("conditionGroupList", conditionGroupList);
-
-        return new WorkcenterVo(searchObj);
-
     }
 
     /**

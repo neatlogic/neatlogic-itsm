@@ -115,7 +115,7 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 		contentObj.put("content",content);
 		contentObj.put("dimensionList",dimensionArray);
 		JSONObject paramObj = new JSONObject();
-		paramObj.put("content",contentObj);
+		paramObj.put("score",contentObj);
 
 
 		/**processtask_content表存储了两份数据：
