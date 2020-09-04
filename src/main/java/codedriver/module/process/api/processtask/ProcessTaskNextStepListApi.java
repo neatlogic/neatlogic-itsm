@@ -14,6 +14,7 @@ import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
@@ -58,16 +59,15 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase{
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         ProcessTaskOperationType operationType = ProcessTaskOperationType.COMPLETE;
 		String action = jsonObj.getString("action");
 		if(ProcessTaskOperationType.BACK.getValue().equals(action)) {
 		    operationType = ProcessTaskOperationType.BACK;
 		}
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, operationType, true);
-//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, processTaskStepAction);
+		handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, operationType, true);
 		List<ProcessTaskStepVo> resultList = new ArrayList<>();
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
 		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {

@@ -8,6 +8,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.score.ProcesstaskScoreMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.score.ProcesstaskScoreVo;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -67,11 +68,11 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
 		//只有上报人才可评分
-		handler.verifyOperationAuthoriy(processTaskId, null, ProcessTaskOperationType.SCORE, true);
+		handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.SCORE, true);
         Long scoreTemplateId = jsonObj.getLong("scoreTemplateId");
 //        String scoreTemplateName = jsonObj.getString("scoreTemplateName");
         JSONArray scoreDimensionList = jsonObj.getJSONArray("scoreDimensionList");

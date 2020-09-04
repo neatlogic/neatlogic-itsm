@@ -19,6 +19,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -64,13 +65,12 @@ public class ProcessTaskContentUpdateApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-//		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.UPDATE);
-		handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
+		handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
 		//获取开始步骤id
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
 		if(processTaskStepList.size() != 1) {

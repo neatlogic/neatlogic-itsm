@@ -22,6 +22,7 @@ import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
@@ -71,10 +72,9 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
-		ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+		ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
 
 		List<ProcessTaskStepAuditVo> resutlList = new ArrayList<>();
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
@@ -86,12 +86,6 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 				JSONObject paramObj = new JSONObject();
 				if(processTaskStepAudit.getProcessTaskStepId() != null) {
 					//判断当前用户是否有权限查看该节点信息
-//					List<String> verifyActionList = new ArrayList<>();
-//					verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-//					List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
-//					if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
-//						continue;
-//					}
 				    ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepAudit.getProcessTaskStepId());
 				    if(processTaskStepVo == null) {
 				        throw new ProcessTaskStepNotFoundException(processTaskStepAudit.getProcessTaskStepId().toString());

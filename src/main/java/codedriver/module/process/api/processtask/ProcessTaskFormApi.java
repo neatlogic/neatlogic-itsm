@@ -27,7 +27,6 @@ import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -83,15 +82,10 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-		handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
-		/** 检查工单id是否合法 **/
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-		if(processTaskVo == null) {
-			throw new ProcessTaskNotFoundException(processTaskId.toString());
-		}
+		handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+		
 		/** 检查工单是否存在表单 **/
 		ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
 		if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
@@ -109,12 +103,9 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
             }
 			
 			if(processTaskStepId != null) {
-				ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+				ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 				handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-//				List<String> verifyActionList = new ArrayList<>();
-//				verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-//				List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
-				if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.VIEW, false)){
+				if(handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.VIEW, false)){
 					/** 查出暂存数据中的表单数据**/				
 					ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 					processTaskStepDataVo.setProcessTaskId(processTaskId);
@@ -138,11 +129,8 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 					}
 				}
 			}
-						
-//			List<String> verifyActionList = new ArrayList<>();
-//			verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
-//			List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
-			if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.WORK, false)) {
+
+			if(handler.verifyOperationAuthoriy(processTaskVo, processTaskVo.getCurrentProcessTaskStep(), ProcessTaskOperationType.WORK, false)) {
 				/** 当前用户有处理权限，根据当前步骤表单属性显示设置控制表单属性展示 **/
 				Map<String, String> formAttributeActionMap = new HashMap<>();
 				List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);

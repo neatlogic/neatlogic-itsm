@@ -23,7 +23,6 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
-//@Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 	
@@ -67,27 +66,7 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 			handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
-//		List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
-//		Long start = System.currentTimeMillis();
 		List<ProcessTaskOperationType> operateList = handler.getOperateList(processTaskVo, processTaskStepVo);
-//        System.out.println("aaaaaaaaaaa:" + (System.currentTimeMillis() - start));
-		//TODO automatic ，临时处理，重构后删去
-//		if(processTaskStepVo != null && ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
-////			actionList = Arrays.asList("view", "transfer", "pocesstaskview", "work", "complete");
-//			actionList.remove(ProcessTaskStepAction.STARTPROCESS.getValue());
-//			actionList.remove(ProcessTaskStepAction.START.getValue());
-//			actionList.remove(ProcessTaskStepAction.ACTIVE.getValue());
-//			actionList.remove(ProcessTaskStepAction.RETREAT.getValue());
-//			actionList.remove(ProcessTaskStepAction.ACCEPT.getValue());
-//			actionList.remove(ProcessTaskStepAction.WORK.getValue());
-//			actionList.remove(ProcessTaskStepAction.ABORT.getValue());
-//			actionList.remove(ProcessTaskStepAction.RECOVER.getValue());
-//			actionList.remove(ProcessTaskStepAction.UPDATE.getValue());
-//			actionList.remove(ProcessTaskStepAction.COMMENT.getValue());
-//			actionList.remove(ProcessTaskStepAction.CREATESUBTASK.getValue());
-//			actionList.remove(ProcessTaskStepAction.URGE.getValue());
-//		}
-
 		for(ProcessTaskOperationType operationType : operateList) {
 		    String text = customButtonMap.get(operationType.getValue());
 		    if(StringUtils.isBlank(text)) {

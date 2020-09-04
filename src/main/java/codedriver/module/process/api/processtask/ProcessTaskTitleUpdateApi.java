@@ -58,8 +58,7 @@ public class ProcessTaskTitleUpdateApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		String oldTitle = processTaskVo.getTitle();	
 		String title = jsonObj.getString("title");
 		//如果标题跟原来的标题不一样，生成活动
@@ -67,8 +66,7 @@ public class ProcessTaskTitleUpdateApi extends PrivateApiComponentBase {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(processTaskId);
 			IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-//			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
-			handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
+			handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
 			//更新标题
 			processTaskVo.setTitle(title);
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
