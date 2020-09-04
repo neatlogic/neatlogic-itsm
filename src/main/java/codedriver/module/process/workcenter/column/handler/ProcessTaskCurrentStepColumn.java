@@ -79,7 +79,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 						if(ProcessStepHandler.CHANGEHANDLE.getHandler().equals(currentStepJson.getString("handler"))
 						    && ProcessUserType.MINOR.getValue().equals(userTypeJson.getString("usertype"))) {
 						    userTypeJson.put("usertypename", "变更步骤");
-						}else {
+						}else if(userTypeJson.getString("usertype").equals(ProcessUserType.MINOR.getValue())){
 						    userTypeJson.put("usertypename", "子任务");
 						}
 						//待处理
