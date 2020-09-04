@@ -24,6 +24,7 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
@@ -41,6 +42,8 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	static Logger logger = LoggerFactory.getLogger(AutomaticProcessComponent.class);
 	private static final ThreadLocal<List<RequestFirstThread>> AUTOMATIC_LIST = new ThreadLocal<>();
 	
+	@Autowired
+	private ProcessTaskStepDataMapper processTaskStepDataMapper;
 	@Autowired
 	ProcessTaskService processTaskService;
 	
@@ -86,7 +89,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	@Override
 	protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 		//获取参数
 		JSONObject automaticConfig = null;
 		try {
@@ -184,7 +187,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		/** 获取步骤配置信息 **/
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 
 		String executeMode = "";
 		int autoStart = 0;
@@ -314,5 +317,10 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	protected int mySaveDraft(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 1;
 	}
+
+    @Override
+    protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        return 0;
+    }
 	
 }

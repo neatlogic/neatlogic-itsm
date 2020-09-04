@@ -12,19 +12,18 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskProcessableStepList extends ApiComponentBase {
+public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -59,24 +58,24 @@ public class ProcessTaskProcessableStepList extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		List<ProcessTaskStepVo> processableStepList = ProcessStepUtilHandlerFactory.getHandler().getProcessableStepList(processTaskId);
+		List<ProcessTaskStepVo> processableStepList = processTaskService.getProcessableStepList(processTaskId);
 		String action = jsonObj.getString("action");
 		if(StringUtils.isNotBlank(action)) {
 			Iterator<ProcessTaskStepVo> iterator = processableStepList.iterator();
 			while(iterator.hasNext()) {
 				ProcessTaskStepVo processTaskStepVo = iterator.next();
 				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-				if(ProcessTaskStepAction.ACCEPT.getValue().equals(action)) {
+				if(ProcessTaskOperationType.ACCEPT.getValue().equals(action)) {
 					if(CollectionUtils.isNotEmpty(majorUserList)) {
 						iterator.remove();
 					}
-				}else if(ProcessTaskStepAction.START.getValue().equals(action)) {
+				}else if(ProcessTaskOperationType.START.getValue().equals(action)) {
 					if(CollectionUtils.isEmpty(majorUserList)) {
 						iterator.remove();
 					}else if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())){
 						iterator.remove();
 					}
-				}else if(ProcessTaskStepAction.COMPLETE.getValue().equals(action)) {
+				}else if(ProcessTaskOperationType.COMPLETE.getValue().equals(action)) {
 					if(CollectionUtils.isEmpty(majorUserList)) {
 						iterator.remove();
 					}else if(ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())){

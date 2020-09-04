@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +26,11 @@ import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.WorktimeVo;
 import codedriver.framework.process.exception.worktime.WorktimeConfigIllegalException;
 import codedriver.framework.process.exception.worktime.WorktimeNameRepeatException;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class WorktimeSaveApi extends ApiComponentBase {
+public class WorktimeSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private WorktimeMapper worktimeMapper;

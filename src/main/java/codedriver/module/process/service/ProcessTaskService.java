@@ -2,72 +2,18 @@ package codedriver.module.process.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.dto.ProcessTaskFormVo;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
-import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
-import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 
 public interface ProcessTaskService {
-	public ProcessTaskVo getProcessTaskBaseInfoById(Long processTaskId);
-
-	public ProcessTaskStepVo getProcessTaskStepDetailById(Long processTaskStepId);
-
-	public ProcessTaskStepVo getProcessTaskStepBaseInfoById(Long processTaskStepId);
-
-	public ProcessTaskFormVo getProcessTaskFormByProcessTaskId(Long processTaskId);
-
-	public List<ProcessTaskStepFormAttributeVo> getProcessTaskStepFormAttributeByStepId(ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo);
-
-	/**
-	 * 
-	* @Description: 创建子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void createSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 编辑子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void editSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 打回重做子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void redoSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 完成子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void completeSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 取消子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public void abortSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
-	/**
-	 * 
-	* @Description: 回复子任务 
-	* @param processTaskStepSubtaskVo 
-	* @return void
-	 */
-	public List<ProcessTaskStepSubtaskContentVo> commentSubtask(ProcessTaskStepSubtaskVo processTaskStepSubtaskVo);
 	/**
 	 * 
 	* @Description: 工单上报/查看/处理页面，返回表单formConfig时，设置属性只读/隐藏控制数据
@@ -78,7 +24,7 @@ public interface ProcessTaskService {
 	 */
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode);
 
-	public void parseProcessTaskStepComment(ProcessTaskStepCommentVo processTaskStepCommentVo);
+	public void parseProcessTaskStepReply(ProcessTaskStepReplyVo processTaskStepReplyVo);
 
 	/**
 	 * 执行请求
@@ -105,7 +51,7 @@ public interface ProcessTaskService {
 	* @param processTaskStepId
 	* @return Map<String,String>
 	 */
-	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
+//	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
 	
 	/**
 	 * 
@@ -117,7 +63,7 @@ public interface ProcessTaskService {
 	* @param nextStepId 下一步骤id
 	* @return boolean
 	 */
-	public boolean checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId);
+	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId);
 	/**
      * 
     * @Author: linbq
@@ -127,7 +73,7 @@ public interface ProcessTaskService {
     * @param processTaskStepId 步骤id
     * @return boolean
      */
-	public boolean checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId);
+	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId);
 	/**
      * 
     * @Author: linbq
@@ -136,7 +82,7 @@ public interface ProcessTaskService {
     * @param processTaskId 工单id
     * @return boolean
      */
-	public boolean checkProcessTaskParamsIsLegal(Long processTaskId);
+	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId);
 	/**
 	 * 
 	* @Author: linbq
@@ -146,15 +92,6 @@ public interface ProcessTaskService {
 	* @return ProcessTaskVo
 	 */
 	public ProcessTaskVo getProcessTaskDetailById(Long processTaskId);
-	/**
-	 * 
-	* @Author: linbq
-	* @Time:2020年8月21日
-	* @Description: 获取开始步骤信息 
-	* @param processTaskId 工单id
-	* @return ProcessTaskStepVo
-	 */
-	public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
 	
 	/**
      * 
@@ -164,16 +101,7 @@ public interface ProcessTaskService {
     * @param processTaskStepId 步骤id
     * @return List<ProcessTaskStepCommentVo>
      */
-	public List<ProcessTaskStepCommentVo> getProcessTaskStepCommentListByProcessTaskStepId(Long processTaskStepId);
-	/**
-     * 
-    * @Author: linbq
-    * @Time:2020年8月21日
-    * @Description: 获取步骤子任务列表
-    * @param processTaskStepId 步骤id
-    * @return List<ProcessTaskStepSubtaskVo>
-     */
-	public List<ProcessTaskStepSubtaskVo> getProcessTaskStepSubtaskListByProcessTaskStepId(Long processTaskStepId);
+	public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId, List<String> typeList);
 	/**
      * 
     * @Author: linbq
@@ -228,5 +156,69 @@ public interface ProcessTaskService {
 	* @param processTaskStepId 步骤id
 	* @return ProcessTaskStepCommentVo
 	 */
-	public ProcessTaskStepCommentVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId);
+	public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId);
+	/**
+	 * 
+	* @Author: linbq
+	* @Time:2020年8月26日
+	* @Description: TODO 
+	* @param jsonObj 
+	* @param processTaskStepReplyVo 旧的回复数据
+	* @return boolean 如果保存成功返回true，否则返回false
+	 */
+	public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo processTaskStepReplyVo);
+
+	/**
+     * 
+     * @Time:2020年4月2日
+     * @Description: 检查当前用户是否配置该权限
+     * @param processTaskVo
+     * @param processTaskStepVo
+     * @param operationType 
+     * @return boolean
+     */
+	public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
+	/**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取工单中当前用户能撤回的步骤列表
+     * @param processTaskId
+     * @return Set<ProcessTaskStepVo>
+     */
+	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTaskId(Long processTaskId);
+	/**
+     * 
+     * @Author: 14378
+     * @Time:2020年4月3日
+     * @Description: 获取当前步骤的前置步骤列表中处理人是当前用户的步骤列表
+     * @param processTaskStepId 已激活的步骤id
+     * @return List<ProcessTaskStepVo>
+     */
+    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(Long processTaskStepId);
+	/**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取工单中当前用户能处理的步骤列表
+     * @param processTaskId
+     * @return List<ProcessTaskStepVo>
+     */
+	public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId);
+	/**
+     * 
+     * @Time:2020年4月18日
+     * @Description: 获取工单中当前用户能催办的步骤列表
+     * @param processTaskVo
+     * @return List<ProcessTaskStepVo>
+     */
+    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo);/**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取当前用户在当前步骤中工单干系人列表
+     * @param processTaskVo     工单信息
+     * @param processTaskStepId 步骤id
+     * @return List<String>
+     */
+    public void setCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo);
+    
+    public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo);
 }

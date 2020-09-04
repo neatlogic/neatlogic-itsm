@@ -4,16 +4,23 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -21,18 +28,21 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ProcessTaskCompleteApi extends ApiComponentBase {
-
+public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
+	
 	@Autowired
-	private ProcessTaskMapper processTaskMapper;
+    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+	
+	@Autowired
+	private ProcessTaskStepDataMapper processTaskStepDataMapper;
 
 	@Override
 	public String getToken() {
@@ -63,23 +73,35 @@ public class ProcessTaskCompleteApi extends ApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         Long nextStepId = jsonObj.getLong("nextStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId, nextStepId);
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId, nextStepId);
+		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		if(handler == null) {
 		    throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
-		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
-        processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskMapper.getProcessTaskStepSubtaskList(processTaskStepSubtaskVo);
+
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
             if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus())) {
                 //如果还有子任务未完成，该步骤不能流转
                 throw new ProcessTaskRuntimeException("请完成所有子任务后再流转");
             }
         }
+        ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+        processTaskStepDataVo.setProcessTaskId(processTaskId);
+        processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
+        processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+        processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+        ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+        if(stepDraftSaveData != null) {
+            JSONObject dataObj = stepDraftSaveData.getData();
+            if(MapUtils.isNotEmpty(dataObj)) {
+                jsonObj.putAll(dataObj);
+            }
+        }
         processTaskStepVo.setParamObj(jsonObj);
         handler.complete(processTaskStepVo);
+        processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 		return null;
 	}
 

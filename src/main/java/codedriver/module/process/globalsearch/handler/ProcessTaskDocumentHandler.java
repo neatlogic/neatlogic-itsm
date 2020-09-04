@@ -13,6 +13,7 @@ import codedriver.framework.globalsearch.dto.DocumentVo;
 import codedriver.framework.globalsearch.dto.FieldVo;
 import codedriver.framework.globalsearch.enums.DocumentType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 
@@ -21,6 +22,9 @@ public class ProcessTaskDocumentHandler extends DocumentHandlerBase<ProcessTaskV
 	private final static int maxWord = 100;
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
 
 	@Override
 	public String getType() {
@@ -50,7 +54,7 @@ public class ProcessTaskDocumentHandler extends DocumentHandlerBase<ProcessTaskV
 				if (StringUtils.isNotBlank(sb.toString())) {
 					sb.append("|");
 				}
-				sb.append(StringUtil.removeHtml(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepContentVo.getContentHash())));
+				sb.append(StringUtil.removeHtml(selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepContentVo.getContentHash())));
 			}
 			String c = getShortcut(documentVo, "c", StringUtil.removeHtml(sb.toString()), maxWord);
 			c = c.replace("|", "<p>");
@@ -80,7 +84,7 @@ public class ProcessTaskDocumentHandler extends DocumentHandlerBase<ProcessTaskV
 					if (StringUtils.isNotBlank(sb.toString())) {
 						sb.append("|");
 					}
-					sb.append(StringUtil.removeHtml(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepContentVo.getContentHash())));
+					sb.append(StringUtil.removeHtml(selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepContentVo.getContentHash())));
 
 				}
 				field.setContent(sb.toString());

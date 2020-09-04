@@ -1,6 +1,7 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,26 +18,28 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskStepListApi extends ApiComponentBase {
+public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -46,6 +49,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
     
     @Autowired
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 	
 	@Override
 	public String getToken() {
@@ -72,11 +78,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-		if(processTaskVo == null) {
-			throw new ProcessTaskNotFoundException(processTaskId.toString());
-		}
+		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+		
 		ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
 				
 		Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
@@ -134,11 +138,12 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
 		//其他处理步骤
 		if(CollectionUtils.isNotEmpty(resultList)) {
 			for(ProcessTaskStepVo processTaskStepVo : resultList) {
-			  //判断当前用户是否有权限查看该节点信息
-		        List<String> verifyActionList = new ArrayList<>();
-		        verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-		        List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), verifyActionList);
-		        if(actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
+			    //判断当前用户是否有权限查看该节点信息
+			    IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+			    if(handler == null) {
+			        throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+			    }
+		        if(handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.VIEW, false)){
 		            processTaskStepVo.setIsView(1);
 		            getProcessTaskStepDetail(processTaskStepVo);
 		        }else {
@@ -162,9 +167,9 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
         processTaskService.setProcessTaskStepUser(startProcessTaskStepVo);
         
         //步骤评论列表
-        startProcessTaskStepVo.setCommentList(processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(startProcessTaskStepVo.getId(), Arrays.asList(ProcessTaskOperationType.COMMENT.getValue())));
         //子任务列表
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId());
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId());
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
             processTaskStepSubtask.setIsAbortable(0);
             processTaskStepSubtask.setIsCompletable(0);
@@ -180,7 +185,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
         if(startProcessStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
-        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
 	}
 
@@ -195,11 +200,17 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
         if(processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
-        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo.getId()));
+        processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
         //步骤评论列表
-        processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepVo.getId()));
+        List<String> typeList = new ArrayList<>();
+        typeList.add(ProcessTaskOperationType.COMMENT.getValue());
+        typeList.add(ProcessTaskOperationType.COMPLETE.getValue());
+        typeList.add(ProcessTaskOperationType.BACK.getValue());
+        typeList.add(ProcessTaskOperationType.RETREAT.getValue());
+        typeList.add(ProcessTaskOperationType.TRANSFER.getValue());
+        processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId(), typeList));
         //子任务列表
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId());
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId());
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
             processTaskStepSubtask.setIsAbortable(0);
             processTaskStepSubtask.setIsCompletable(0);
@@ -214,7 +225,7 @@ public class ProcessTaskStepListApi extends ApiComponentBase {
         ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));
         if(stepDataVo != null) {
             JSONObject stepDataJson = stepDataVo.getData();
-            stepDataJson.put("isStepUser", processTaskMapper.checkIsProcessTaskStepUser(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid())>0?1:0);
+            stepDataJson.put("isStepUser", processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid()))>0?1:0);
             processTaskStepVo.setProcessTaskStepData(stepDataJson);
         }
 	}

@@ -37,13 +37,13 @@ import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixCellDataGetApi extends ApiComponentBase {
+public class MatrixCellDataGetApi extends PrivateApiComponentBase {
 
 	private final static Logger logger = LoggerFactory.getLogger(MatrixCellDataGetApi.class);
 

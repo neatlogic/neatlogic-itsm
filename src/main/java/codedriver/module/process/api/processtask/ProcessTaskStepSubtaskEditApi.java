@@ -2,6 +2,8 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,28 +15,31 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepSubtaskNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
+public class ProcessTaskStepSubtaskEditApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-
-	@Autowired
-	private ProcessTaskService processTaskService;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
 	
 	@Autowired
 	private UserMapper userMapper;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
 	@Override
 	public String getToken() {
@@ -62,7 +67,7 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskStepSubtaskId = jsonObj.getLong("processTaskStepSubtaskId");
-		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskId);
+		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskId);
 		if(processTaskStepSubtaskVo == null) {
 			throw new ProcessTaskStepSubtaskNotFoundException(processTaskStepSubtaskId.toString());
 		}
@@ -80,9 +85,9 @@ public class ProcessTaskStepSubtaskEditApi extends ApiComponentBase {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(processTaskStepSubtaskVo.getProcessTaskId());
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
-			processTaskService.editSubtask(processTaskStepSubtaskVo);
+			processTaskStepSubtaskService.editSubtask(processTaskStepSubtaskVo);
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.EDITSUBTASK.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.EDITSUBTASK.getText());
 		}
 		return null;
 	}

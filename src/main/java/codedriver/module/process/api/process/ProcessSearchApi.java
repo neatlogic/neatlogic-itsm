@@ -4,6 +4,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +18,9 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessSearchApi extends ApiComponentBase {
+public class ProcessSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessMapper processMapper;
@@ -78,7 +79,6 @@ public class ProcessSearchApi extends ApiComponentBase {
 		for(ProcessVo process : processList) {
 			count = processMapper.getProcessReferenceCount(process.getUuid());
 			process.setReferenceCount(count);
-			process.setConfig(null);
 		}	
 		resultObj.put("processList", processList);
 		return resultObj;

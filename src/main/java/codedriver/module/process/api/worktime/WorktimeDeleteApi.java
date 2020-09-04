@@ -15,12 +15,12 @@ import codedriver.framework.process.exception.worktime.WorktimeNotFoundException
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class WorktimeDeleteApi extends ApiComponentBase {
+public class WorktimeDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private WorktimeMapper worktimeMapper;

@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +31,7 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
+import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDispatcherVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixFormComponentVo;
@@ -36,12 +39,11 @@ import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.MatrixService;
 @Service
 @Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixExternalDataSearchApi extends ApiComponentBase {
+public class MatrixExternalDataSearchApi extends PrivateApiComponentBase {
 
 	private final static Logger logger = LoggerFactory.getLogger(MatrixExternalDataSearchApi.class);
 	
@@ -84,6 +86,8 @@ public class MatrixExternalDataSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String matrixUuid = jsonObj.getString("matrixUuid");
+		List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
+        jsonObj.put("sourceColumnList", sourceColumnList); //防止集成管理 js length 异常
 		ProcessMatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
         if(matrixVo == null) {
         	throw new MatrixNotFoundException(matrixUuid);

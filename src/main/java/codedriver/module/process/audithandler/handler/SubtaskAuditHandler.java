@@ -1,6 +1,7 @@
 package codedriver.module.process.audithandler.handler;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -11,11 +12,14 @@ import com.google.common.base.Objects;
 
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 @Service
 public class SubtaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
-
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
+    
 	@Override
 	public String getType() {
 		return ProcessTaskAuditDetailType.SUBTASK.getValue();
@@ -25,7 +29,7 @@ public class SubtaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
 			ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});
-			processTaskStepSubtaskVo.setContent(processTaskMapper.getProcessTaskContentStringByHash(processTaskStepSubtaskVo.getContentHash()));
+			processTaskStepSubtaskVo.setContent(selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepSubtaskVo.getContentHash()));
 			JSONObject content = new JSONObject();
 			content.put("type", "content");
 			content.put("typeName", "描述");
@@ -43,7 +47,7 @@ public class SubtaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 
 			if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getOldContent())) {
 				ProcessTaskStepSubtaskVo oldProcessTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getOldContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});		
-				oldProcessTaskStepSubtaskVo.setContent(processTaskMapper.getProcessTaskContentStringByHash(oldProcessTaskStepSubtaskVo.getContentHash()));
+				oldProcessTaskStepSubtaskVo.setContent(selectContentByHashMapper.getProcessTaskContentStringByHash(oldProcessTaskStepSubtaskVo.getContentHash()));
 				if(!Objects.equal(oldProcessTaskStepSubtaskVo.getContent(), processTaskStepSubtaskVo.getContent())) {
 					content.put("oldContent", oldProcessTaskStepSubtaskVo.getContent());
 				}

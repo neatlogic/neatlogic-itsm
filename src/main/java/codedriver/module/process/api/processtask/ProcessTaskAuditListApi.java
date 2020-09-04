@@ -16,25 +16,34 @@ import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetai
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskAuditListApi extends ApiComponentBase {
+public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+	
+	@Autowired
+	private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
 	public String getToken() {
@@ -63,9 +72,9 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskStepAction.POCESSTASKVIEW);
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-		processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+		ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
 
 		List<ProcessTaskStepAuditVo> resutlList = new ArrayList<>();
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
@@ -77,12 +86,17 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 				JSONObject paramObj = new JSONObject();
 				if(processTaskStepAudit.getProcessTaskStepId() != null) {
 					//判断当前用户是否有权限查看该节点信息
-					List<String> verifyActionList = new ArrayList<>();
-					verifyActionList.add(ProcessTaskStepAction.VIEW.getValue());
-					List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), verifyActionList);
-					if(!actionList.contains(ProcessTaskStepAction.VIEW.getValue())){
-						continue;
-					}
+				    ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepAudit.getProcessTaskStepId());
+				    if(processTaskStepVo == null) {
+				        throw new ProcessTaskStepNotFoundException(processTaskStepAudit.getProcessTaskStepId().toString());
+				    }
+				    IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                    if(processStepUtilHandler == null) {
+                        throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+                    }
+                    if(!processStepUtilHandler.verifyOperationAuthoriy(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), ProcessTaskOperationType.VIEW, false)) {
+                        continue;
+                    }
 				}
 				paramObj.put("processTaskStepName", processTaskStepAudit.getProcessTaskStepName());
 				if(processTaskStepAudit.getStepStatusVo() != null) {
@@ -94,7 +108,7 @@ public class ProcessTaskAuditListApi extends ApiComponentBase {
 				while(iterator.hasNext()) {
 					ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo = iterator.next();
 					if(ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-						String content = processTaskMapper.getProcessTaskContentStringByHash(processTaskStepAuditDetailVo.getNewContent());
+						String content = selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepAuditDetailVo.getNewContent());
 						if(StringUtils.isNotBlank(content)) {
 							processTaskStepAudit.setNextStepId(Long.parseLong(content));
 						}

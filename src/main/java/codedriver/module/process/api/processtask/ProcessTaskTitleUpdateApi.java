@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -21,12 +21,12 @@ import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFacto
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
+public class ProcessTaskTitleUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -58,8 +58,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		String oldTitle = processTaskVo.getTitle();	
 		String title = jsonObj.getString("title");
 		//如果标题跟原来的标题不一样，生成活动
@@ -67,8 +66,7 @@ public class ProcessTaskTitleUpdateApi extends ApiComponentBase {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(processTaskId);
 			IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
-						
+			handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
 			//更新标题
 			processTaskVo.setTitle(title);
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);

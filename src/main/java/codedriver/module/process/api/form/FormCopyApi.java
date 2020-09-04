@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +23,11 @@ import codedriver.framework.process.exception.form.FormIllegalParameterException
 import codedriver.framework.process.exception.form.FormNameRepeatException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormVersionNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class FormCopyApi extends ApiComponentBase {
+public class FormCopyApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;

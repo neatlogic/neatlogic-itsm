@@ -2,6 +2,8 @@ package codedriver.module.process.api.form;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +16,10 @@ import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormVo;
 import codedriver.framework.process.exception.form.FormNameRepeatException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class FormUpdateApi extends ApiComponentBase {
+public class FormUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;

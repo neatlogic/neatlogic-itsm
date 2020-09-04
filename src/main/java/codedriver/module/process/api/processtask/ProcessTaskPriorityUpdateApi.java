@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
@@ -23,12 +23,12 @@ import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFacto
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
+public class ProcessTaskPriorityUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -63,20 +63,19 @@ public class ProcessTaskPriorityUpdateApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		String priorityUuid = jsonObj.getString("priorityUuid");
 		if(priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
 			throw new PriorityNotFoundException(priorityUuid);
 		}
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+
 		String oldPriorityUuid = processTaskVo.getPriorityUuid();
 		//如果优先级跟原来的优先级不一样，生成活动
 		if(!priorityUuid.equals(oldPriorityUuid)) {			
 			IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
-			
+			handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
 			//更新优先级
 			processTaskVo.setPriorityUuid(priorityUuid);
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);

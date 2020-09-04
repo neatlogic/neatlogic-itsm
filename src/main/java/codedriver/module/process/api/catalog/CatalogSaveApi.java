@@ -18,13 +18,13 @@ import codedriver.framework.process.exception.catalog.CatalogNameRepeatException
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class CatalogSaveApi extends ApiComponentBase {
+public class CatalogSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;

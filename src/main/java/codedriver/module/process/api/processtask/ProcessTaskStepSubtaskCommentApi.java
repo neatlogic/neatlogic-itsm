@@ -4,6 +4,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,25 +13,28 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepSubtaskNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class ProcessTaskStepSubtaskCommentApi extends ApiComponentBase {
+public class ProcessTaskStepSubtaskCommentApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-
-	@Autowired
-	private ProcessTaskService processTaskService;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
 	@Override
 	public String getToken() {
@@ -57,7 +62,7 @@ public class ProcessTaskStepSubtaskCommentApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
 		Long processTaskStepSubtaskId = jsonObj.getLong("processTaskStepSubtaskId");
-		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = processTaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskId);
+		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskById(processTaskStepSubtaskId);
 		if(processTaskStepSubtaskVo == null) {
 			throw new ProcessTaskStepSubtaskNotFoundException(processTaskStepSubtaskId.toString());
 		}
@@ -65,10 +70,10 @@ public class ProcessTaskStepSubtaskCommentApi extends ApiComponentBase {
 			// 锁定当前流程
 			processTaskMapper.getProcessTaskLockById(processTaskStepSubtaskVo.getProcessTaskId());
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
-			List<ProcessTaskStepSubtaskContentVo> contentList = processTaskService.commentSubtask(processTaskStepSubtaskVo);
+			List<ProcessTaskStepSubtaskContentVo> contentList = processTaskStepSubtaskService.commentSubtask(processTaskStepSubtaskVo);
 			resultObj.put("contentList", contentList);
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.COMMENTSUBTASK.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.COMMENTSUBTASK.getText());
 		}
 		return resultObj;
 	}

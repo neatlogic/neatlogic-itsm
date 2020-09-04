@@ -15,11 +15,11 @@ import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ChannelUserSaveApi extends ApiComponentBase {
+public class ChannelUserSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ChannelMapper channelMapper;

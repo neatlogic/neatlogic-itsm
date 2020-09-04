@@ -3,6 +3,8 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,15 +15,15 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ProcessTaskAutomaticRetryApi extends ApiComponentBase {
+public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -31,6 +33,9 @@ public class ProcessTaskAutomaticRetryApi extends ApiComponentBase {
 	
 	@Autowired
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
+	
+	@Autowired
+	SelectContentByHashMapper selectContentByHashMapper;
 
 	@Override
 	public String getToken() {
@@ -64,7 +69,7 @@ public class ProcessTaskAutomaticRetryApi extends ApiComponentBase {
 			//load第一次请求job
 			if(!ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))
 					&&!ProcessTaskStatus.FAILED.getValue().equals(requestStatus.getString("value"))) {
-				String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+				String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 				automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
 				automaticConfigVo.setIsRequest(true);
 				isRetry = true;
@@ -74,7 +79,7 @@ public class ProcessTaskAutomaticRetryApi extends ApiComponentBase {
 				JSONObject callbackStatus = dataObject.getJSONObject("callbackAudit").getJSONObject("status");
 				if(!ProcessTaskStatus.SUCCEED.getValue().equals(callbackStatus.getString("value"))
 						&&!ProcessTaskStatus.FAILED.getValue().equals(callbackStatus.getString("value"))) {
-					String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+					String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 					automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
 					automaticConfigVo.setIsRequest(false);
 					isRetry = true;

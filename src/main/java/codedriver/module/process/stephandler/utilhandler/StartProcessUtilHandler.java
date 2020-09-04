@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
 @Service
 public class StartProcessUtilHandler extends ProcessStepUtilHandlerBase {
@@ -16,13 +18,13 @@ public class StartProcessUtilHandler extends ProcessStepUtilHandlerBase {
 	}
 
 	@Override
-	public Object getHandlerStepInfo(Long processTaskStepId) {
+	public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object getHandlerStepInitInfo(Long processTaskStepId) {
+	public Object getHandlerStepInitInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -44,5 +46,10 @@ public class StartProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    protected IOperationAuthHandlerType MyOperationAuthHandlerType() {
+        return null;
+    }
 
 }

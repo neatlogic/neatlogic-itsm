@@ -24,13 +24,13 @@ import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelIllegalParameterException;
 import codedriver.framework.process.exception.channel.ChannelNameRepeatException;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class ChannelSaveApi extends ApiComponentBase {
+public class ChannelSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ChannelMapper channelMapper;

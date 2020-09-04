@@ -43,7 +43,7 @@ import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.MatrixService;
 
 /**
@@ -53,7 +53,7 @@ import codedriver.module.process.service.MatrixService;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixDataSearchApi extends ApiComponentBase {
+public class MatrixDataSearchApi extends PrivateApiComponentBase {
 
 	private final static Logger logger = LoggerFactory.getLogger(MatrixDataSearchApi.class);
 			

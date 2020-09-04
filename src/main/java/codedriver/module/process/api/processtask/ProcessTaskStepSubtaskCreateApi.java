@@ -2,6 +2,8 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,28 +16,29 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
+public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 	
 	@Autowired
 	private UserMapper userMapper;
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
+    
+    @Autowired
+    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
 	@Override
 	public String getToken() {
@@ -70,8 +73,11 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 		}
 		Long processTaskId = processTaskStepVo.getProcessTaskId();
-		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.CREATESUBTASK);
-		
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+		if(handler == null) {
+		    throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+		}
+		handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.CREATESUBTASK, true);
 		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
 		processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
 		processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
@@ -93,7 +99,7 @@ public class ProcessTaskStepSubtaskCreateApi extends ApiComponentBase {
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		processTaskStepSubtaskVo.setParamObj(jsonObj);
-		processTaskService.createSubtask(processTaskStepSubtaskVo);
+		processTaskStepSubtaskService.createSubtask(processTaskStepSubtaskVo);
 		return null;
 	}
 

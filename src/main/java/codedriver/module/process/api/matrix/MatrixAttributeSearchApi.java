@@ -18,7 +18,7 @@ import codedriver.framework.process.exception.matrix.MatrixExternalNotFoundExcep
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.MatrixService;
 
 import com.alibaba.fastjson.JSONObject;
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixAttributeSearchApi extends ApiComponentBase {
+public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private MatrixService matrixService;

@@ -23,12 +23,12 @@ import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
 import codedriver.framework.process.exception.matrix.MatrixExternalException;
 import codedriver.framework.process.exception.matrix.MatrixNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixDataGetApi extends ApiComponentBase {
+public class MatrixDataGetApi extends PrivateApiComponentBase {
 
     @Autowired
     private MatrixMapper matrixMapper;

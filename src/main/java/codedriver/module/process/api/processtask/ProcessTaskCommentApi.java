@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,27 +14,30 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
+import codedriver.framework.process.dto.ProcessTaskStepFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class ProcessTaskCommentApi extends ApiComponentBase {
+public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -71,19 +75,18 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
 	})
 	@Output({
-		@Param(name = "commentList", explode = ProcessTaskStepCommentVo[].class, desc = "当前步骤评论列表")
+		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")
 	})
 	@Description(desc = "工单回复接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		processTaskMapper.getProcessTaskLockById(processTaskId);
-
-		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.COMMENT);
-		
+		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
+		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+		handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.COMMENT, true);
 		//删除暂存
 		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 		processTaskStepDataVo.setProcessTaskId(processTaskId);
@@ -92,45 +95,44 @@ public class ProcessTaskCommentApi extends ApiComponentBase {
 		processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
 		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 
-		ProcessTaskStepCommentVo processTaskStepCommentVo = null;
-		
-		String content = jsonObj.getString("content");
-		if(StringUtils.isNotBlank(content)) {
-			processTaskStepCommentVo = new ProcessTaskStepCommentVo();
-			ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-			processTaskMapper.replaceProcessTaskContent(contentVo);
-			processTaskStepCommentVo.setContentHash(contentVo.getHash());
-		}
-		
-		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
-		if(CollectionUtils.isNotEmpty(fileIdList)) {
-			if(processTaskStepCommentVo == null) {
-				processTaskStepCommentVo = new ProcessTaskStepCommentVo();
-			}
-			for(Long fileId : fileIdList) {
-				if(fileMapper.getFileById(fileId) == null) {
-					throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
-				}
-			}
-			ProcessTaskContentVo fileIdListContentVo = new ProcessTaskContentVo(JSON.toJSONString(fileIdList));
-			processTaskMapper.replaceProcessTaskContent(fileIdListContentVo);
-			processTaskStepCommentVo.setFileIdListHash(fileIdListContentVo.getHash());
-		}
-		if(processTaskStepCommentVo != null) {
-			processTaskStepCommentVo.setProcessTaskId(processTaskId);
-			processTaskStepCommentVo.setProcessTaskStepId(processTaskStepId);
-			processTaskStepCommentVo.setFcu(UserContext.get().getUserUuid(true));
-			processTaskMapper.insertProcessTaskStepComment(processTaskStepCommentVo);
+		String content = jsonObj.getString("content");        
+        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+        if(StringUtils.isBlank(content) && CollectionUtils.isEmpty(fileIdList)) {
+            return null;
+        }
 
-			//生成活动	
-			ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-			processTaskStepVo.setProcessTaskId(processTaskId);
-			processTaskStepVo.setId(processTaskStepId);
-			processTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
-		}
+        ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo();
+        processTaskStepContentVo.setProcessTaskId(processTaskId);
+        processTaskStepContentVo.setProcessTaskStepId(processTaskStepId);
+        processTaskStepContentVo.setType(ProcessTaskOperationType.COMMENT.getValue());
+        if (StringUtils.isNotBlank(content)) {
+            ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+            processTaskMapper.replaceProcessTaskContent(contentVo);
+            processTaskStepContentVo.setContentHash(contentVo.getHash());
+        }
+        processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
+
+        /** 保存附件uuid **/
+        if(CollectionUtils.isNotEmpty(fileIdList)) {
+            ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
+            processTaskStepFileVo.setProcessTaskId(processTaskId);
+            processTaskStepFileVo.setProcessTaskStepId(processTaskStepId);
+            processTaskStepFileVo.setContentId(processTaskStepContentVo.getId());
+            for (Long fileId : fileIdList) {
+                if(fileMapper.getFileById(fileId) == null) {
+                    throw new FileNotFoundException(fileId);
+                }
+                processTaskStepFileVo.setFileId(fileId);
+                processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
+            }
+        }
+        
+        //生成活动    
+        processTaskStepVo.setParamObj(jsonObj);
+        handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
+        
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("commentList", processTaskService.getProcessTaskStepCommentListByProcessTaskStepId(processTaskStepId));
+		resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, Arrays.asList(ProcessTaskOperationType.COMMENT.getValue())));
 		return resultObj;
 	}
 

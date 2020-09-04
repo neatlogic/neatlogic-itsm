@@ -17,6 +17,7 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
@@ -39,6 +40,9 @@ public class ProcessTaskAutomaticJob extends JobBase {
 	
 	@Autowired
 	SchedulerMapper schedulerMapper;
+
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
 	public String getGroupName() {
@@ -157,7 +161,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 	 */
 	private void initReloadJob(AutomaticConfigVo automaticConfigVo ,ProcessTaskStepDataVo dataVo,String tenantUuid,Boolean isRequest) {
 		ProcessTaskStepVo  processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(dataVo.getProcessTaskStepId());
-		String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 		JSONObject configJson = JSONObject.parseObject(config);
 		if(configJson.containsKey("automaticConfig")) {
 			automaticConfigVo = new AutomaticConfigVo(configJson.getJSONObject("automaticConfig"));

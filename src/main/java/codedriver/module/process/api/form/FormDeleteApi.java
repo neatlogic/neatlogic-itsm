@@ -4,6 +4,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,12 +18,11 @@ import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.form.FormReferencedCannotBeDeletedException;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class FormDeleteApi extends ApiComponentBase {
+public class FormDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;

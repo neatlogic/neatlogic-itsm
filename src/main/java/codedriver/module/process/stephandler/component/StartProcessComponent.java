@@ -141,4 +141,9 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 
 	}
 
+    @Override
+    protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        return 0;
+    }
+
 }

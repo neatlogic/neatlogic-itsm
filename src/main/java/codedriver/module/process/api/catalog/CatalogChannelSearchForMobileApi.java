@@ -4,6 +4,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +20,11 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class CatalogChannelSearchForMobileApi extends ApiComponentBase {
+public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;

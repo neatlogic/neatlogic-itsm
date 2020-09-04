@@ -13,21 +13,18 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskStepActionListApi extends ApiComponentBase {
-	
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
+public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
@@ -59,44 +56,28 @@ public class ProcessTaskStepActionListApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-		ProcessTaskStepVo processTaskStepVo = null;
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
+		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 		Map<String, String> customButtonMap = new HashMap<>();
-		if(processTaskStepId != null) {
-			processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-			customButtonMap = processTaskService.getCustomButtonTextMap(processTaskStepId);
+		if(processTaskStepVo != null) {
+			processTaskService.setProcessTaskStepConfig(processTaskStepVo);
+			customButtonMap = processTaskStepVo.getCustomButtonMap();
+			handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
-		List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId);
-		//TODO automatic ，临时处理，重构后删去
-		if(processTaskStepVo != null && ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
-//			actionList = Arrays.asList("view", "transfer", "pocesstaskview", "work", "complete");
-			actionList.remove(ProcessTaskStepAction.STARTPROCESS.getValue());
-			actionList.remove(ProcessTaskStepAction.START.getValue());
-			actionList.remove(ProcessTaskStepAction.ACTIVE.getValue());
-			actionList.remove(ProcessTaskStepAction.RETREAT.getValue());
-			actionList.remove(ProcessTaskStepAction.ACCEPT.getValue());
-			actionList.remove(ProcessTaskStepAction.WORK.getValue());
-			actionList.remove(ProcessTaskStepAction.ABORT.getValue());
-			actionList.remove(ProcessTaskStepAction.RECOVER.getValue());
-			actionList.remove(ProcessTaskStepAction.UPDATE.getValue());
-			actionList.remove(ProcessTaskStepAction.COMMENT.getValue());
-			actionList.remove(ProcessTaskStepAction.CREATESUBTASK.getValue());
-			actionList.remove(ProcessTaskStepAction.URGE.getValue());
-		}
-		//
-		
-		for(String action : actionList) {
-			String text = customButtonMap.get(action);//自定义优先
-			if(StringUtils.isBlank(text)) {
-				text = ProcessTaskStepAction.getText(action);
-			}
-			if(StringUtils.isNotBlank(text)) {
-				ValueTextVo valueText = new ValueTextVo();
-				valueText.setValue(action);
-				valueText.setText(text);
-				resultList.add(valueText);
-			}
+		List<ProcessTaskOperationType> operateList = handler.getOperateList(processTaskVo, processTaskStepVo);
+		for(ProcessTaskOperationType operationType : operateList) {
+		    String text = customButtonMap.get(operationType.getValue());
+		    if(StringUtils.isBlank(text)) {
+		        text = operationType.getText();
+		    }
+		    if(StringUtils.isNotBlank(text)) {
+		        ValueTextVo valueText = new ValueTextVo();
+		        valueText.setValue(operationType.getValue());
+		        valueText.setText(text);
+		        resultList.add(valueText);
+		    }
 		}
 		return resultList;
 	}

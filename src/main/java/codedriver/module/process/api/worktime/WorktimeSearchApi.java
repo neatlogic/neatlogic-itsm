@@ -22,12 +22,12 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.WorktimeVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class WorktimeSearchApi extends ApiComponentBase {
+public class WorktimeSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private WorktimeMapper worktimeMapper;

@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessDraftVo;
@@ -47,44 +47,8 @@ public class ProcessServiceImpl implements ProcessService {
     @Autowired
     private IntegrationMapper integrationMapper;
 
-	@Override
-	public ProcessVo getProcessByUuid(String processUuid) {
-		return processMapper.getProcessByUuid(processUuid);
-	}
-
-	@Override
-	public ProcessFormVo getProcessFormByProcessUuid(String processUuid) {
-		return processMapper.getProcessFormByProcessUuid(processUuid);
-	}
-
-	@Override
-	public List<ProcessStepFormAttributeVo> getProcessStepFormAttributeByStepUuid(ProcessStepFormAttributeVo processStepFormAttributeVo) {
-		return processMapper.getProcessStepFormAttributeByStepUuid(processStepFormAttributeVo);
-	}
-
-	@Override
-	public ProcessStepVo getProcessStartStep(String processUuid) {
-		ProcessStepVo processStepVo = new ProcessStepVo();
-		processStepVo.setProcessUuid(processUuid);
-		processStepVo.setType(ProcessStepType.START.getValue());
-		List<ProcessStepVo> processStepList = processMapper.searchProcessStep(processStepVo);
-		if (processStepList != null && processStepList.size() == 1) {
-			ProcessStepVo startStep = processStepList.get(0);
-			startStep.setFormAttributeList(processMapper.getProcessStepFormAttributeByStepUuid(new ProcessStepFormAttributeVo(startStep.getUuid(), null)));
-			ProcessFormVo processFormVo = processMapper.getProcessFormByProcessUuid(processUuid);
-			if (processFormVo != null) {
-				startStep.setFormUuid(processFormVo.getFormUuid());
-			}
-			return startStep;
-		}
-		return null;
-	}
-
-	@Override
-	public List<ProcessStepVo> searchProcessStep(ProcessStepVo processStepVo) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	@Autowired
+	private ScoreTemplateMapper scoreTemplateMapper;
 
 	@Override
 	public int saveProcess(ProcessVo processVo) {
@@ -176,6 +140,12 @@ public class ProcessServiceImpl implements ProcessService {
 			for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
 				processMapper.insertProcessStepRel(stepRelVo);
 			}
+		}
+
+		/** 保存评分设置 */
+		if(processVo.getProcessScoreTemplateVo() != null && processVo.getProcessScoreTemplateVo().getIsActive() != null && processVo.getProcessScoreTemplateVo().getIsActive().intValue() == 1){
+			scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(processVo.getUuid());
+			scoreTemplateMapper.insertProcessScoreTemplate(processVo.getProcessScoreTemplateVo());
 		}
 
 		return 1;

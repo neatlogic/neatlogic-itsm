@@ -10,8 +10,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
@@ -19,13 +20,13 @@ import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFacto
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-public class ProcessTaskUrgeApi extends ApiComponentBase {
+public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
     
     @Autowired
     private ProcessTaskService processTaskService;
@@ -37,7 +38,7 @@ public class ProcessTaskUrgeApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工单催办接口";
+		return "催办工单";
 	}
 
 	@Override
@@ -48,20 +49,20 @@ public class ProcessTaskUrgeApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id")
 	})
-	@Description(desc = "工单完成接口")
+	@Description(desc = "催办工单")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-		List<ProcessTaskStepVo> processTaskStepList = handler.getUrgeableStepList(processTaskId);
+		List<ProcessTaskStepVo> processTaskStepList = processTaskService.getUrgeableStepList(processTaskVo);
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
 			for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 				/** 触发通知 **/
 				handler.notify(processTaskStepVo, NotifyTriggerType.URGE);
 			}
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.URGE.getText());
+			throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.URGE.getText());
 		}
 		/*生成催办活动*/
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();

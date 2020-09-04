@@ -11,11 +11,11 @@ import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class WorkerPolicyListApi extends ApiComponentBase {
+public class WorkerPolicyListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

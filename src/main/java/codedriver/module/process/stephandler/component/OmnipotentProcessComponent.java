@@ -76,7 +76,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		/** 获取步骤配置信息 **/
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
 
 		String executeMode = "";
 		int autoStart = 0;
@@ -150,25 +150,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			}
 		}
 		return nextStepSet;
-//		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
-//		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
-//		if (nextStepList.size() == 1) {
-//			return nextStepList;
-//		} else if (nextStepList.size() > 1) {
-//			JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-//			if (paramObj != null && paramObj.containsKey("nextStepId")) {
-//				Long nextStepId = paramObj.getLong("nextStepId");
-//				for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
-//					if (processTaskStepVo.getId().equals(nextStepId)) {
-//						returnNextStepList.add(processTaskStepVo);
-//						break;
-//					}
-//				}
-//			} else {
-//				throw new ProcessTaskException("找到多个后续节点");
-//			}
-//		}
-//		return returnNextStepList;
 	}
 
 	@Override
@@ -236,5 +217,10 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	protected int mySaveDraft(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 1;
 	}
+
+    @Override
+    protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        return 0;
+    }
 
 }

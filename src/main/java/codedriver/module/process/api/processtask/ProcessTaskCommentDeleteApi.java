@@ -1,10 +1,12 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,19 +17,19 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
-import codedriver.framework.process.constvalue.ProcessTaskStepAction;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepCommentVo;
+import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepCommentNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class ProcessTaskCommentDeleteApi extends ApiComponentBase {
+public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -54,40 +56,37 @@ public class ProcessTaskCommentDeleteApi extends ApiComponentBase {
 		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "回复id")
 	})
 	@Output({
-		@Param(name = "commentList", explode = ProcessTaskStepCommentVo[].class, desc = "当前步骤评论列表")
+		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")
 	})
 	@Description(desc = "工单回复删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long id = jsonObj.getLong("id");
-		ProcessTaskStepCommentVo oldCommentVo = processTaskMapper.getProcessTaskStepCommentById(id);
-		if(oldCommentVo == null) {
+		ProcessTaskStepContentVo processTaskStepContentVo= processTaskMapper.getProcessTaskStepContentById(id);
+		if(processTaskStepContentVo == null) {
 			throw new ProcessTaskStepCommentNotFoundException(id.toString());
 		}
-		if(Objects.equals(oldCommentVo.getIsDeletable(), 1)) {
-			// 锁定当前流程
-			processTaskMapper.getProcessTaskLockById(oldCommentVo.getProcessTaskId());
-			processTaskMapper.deleteProcessTaskStepCommentById(id);
-			
-			processTaskService.parseProcessTaskStepComment(oldCommentVo);
-			jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), oldCommentVo.getContent());
-			jsonObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(oldCommentVo.getFileIdList()));
-			
-			//生成活动
-			ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldCommentVo.getProcessTaskStepId());	
-			processTaskStepVo.setParamObj(jsonObj);
-			ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
-			
-			List<ProcessTaskStepCommentVo> processTaskStepCommentList = processTaskMapper.getProcessTaskStepCommentListByProcessTaskStepId(oldCommentVo.getProcessTaskStepId());
-			for(ProcessTaskStepCommentVo processTaskStepComment : processTaskStepCommentList) {
-				processTaskService.parseProcessTaskStepComment(processTaskStepComment);
-			}
-			JSONObject resultObj = new JSONObject();
-			resultObj.put("commentList", processTaskStepCommentList);
-			return resultObj;
-		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskStepAction.DELETECOMMENT.getText());
+		ProcessTaskStepReplyVo replyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
+		if(Objects.equals(replyVo.getIsDeletable(), 0)) {
+            throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.DELETECOMMENT.getText());
 		}
+		// 锁定当前流程
+        processTaskMapper.getProcessTaskLockById(replyVo.getProcessTaskId());
+        
+        processTaskService.parseProcessTaskStepReply(replyVo);
+        jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), replyVo.getContent());
+        jsonObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(replyVo.getFileIdList()));
+
+        processTaskMapper.deleteProcessTaskStepContentById(id);
+        processTaskMapper.deleteProcessTaskStepFileByContentId(id);
+        //生成活动
+        ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(replyVo.getProcessTaskStepId());    
+        processTaskStepVo.setParamObj(jsonObj);
+        ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
+        
+        JSONObject resultObj = new JSONObject();
+        resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(replyVo.getProcessTaskStepId(), Arrays.asList(ProcessTaskOperationType.COMMENT.getValue())));
+        return resultObj;
 	}
 
 }

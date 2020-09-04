@@ -16,9 +16,9 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
-public class ProcessCustomButtonStatusList extends ApiComponentBase {
+public class ProcessCustomButtonStatusList extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {
@@ -61,7 +61,11 @@ public class ProcessCustomButtonStatusList extends ApiComponentBase {
 			JSONArray customButtonList = handlerConfig.getJSONArray("customButtonList");
 			if(CollectionUtils.isNotEmpty(customButtonList)) {
 				resultObj.put("customButtonList", customButtonList);
-			}			
+			}
+			JSONObject notifyPolicyConfig = handlerConfig.getJSONObject("notifyPolicyConfig");
+			if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
+			    resultObj.put("notifyPolicyConfig", notifyPolicyConfig);
+			}
 		}		
 		JSONArray customStatusList = new JSONArray();
 		for (ProcessTaskStatus status : ProcessTaskStatus.values()) {

@@ -13,6 +13,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -31,12 +32,12 @@ import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class FormAttributeCheckApi extends ApiComponentBase {
+public class FormAttributeCheckApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -49,6 +50,8 @@ public class FormAttributeCheckApi extends ApiComponentBase {
 	
 	@Autowired
 	private FormMapper formMapper;
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
 	public String getToken() {
@@ -83,13 +86,17 @@ public class FormAttributeCheckApi extends ApiComponentBase {
 				throw new ProcessTaskNotFoundException(processTaskId.toString());
 			}
 			ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-			if(processTaskFormVo == null) {
+			if(processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContentHash())) {
 				throw new FormIllegalParameterException("工单：'" + processTaskId + "'没有绑定表单");
 			}
+			String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+            if(StringUtils.isBlank(formContent)) {
+                throw new FormIllegalParameterException("工单：'" + processTaskId + "'没有绑定表单");
+            }
 			formVersionVo = new FormVersionVo();
 			formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
 			formVersionVo.setFormName(processTaskFormVo.getFormName());
-			formVersionVo.setFormConfig(processTaskFormVo.getFormContent());
+			formVersionVo.setFormConfig(formContent);
 			
 		}else if(StringUtils.isNotBlank(channelUuid)){
 			ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);

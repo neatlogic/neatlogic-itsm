@@ -154,4 +154,9 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
+    @Override
+    protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        return 0;
+    }
+
 }
