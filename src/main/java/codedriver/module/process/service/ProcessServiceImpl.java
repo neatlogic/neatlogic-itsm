@@ -143,11 +143,9 @@ public class ProcessServiceImpl implements ProcessService {
 		}
 
 		/** 保存评分设置 */
-		if(processVo.getProcessScoreTemplateVo() != null){
-		    if(processVo.getProcessScoreTemplateVo().getIsActive() != null && processVo.getProcessScoreTemplateVo().getIsActive().intValue() == 1){
-                scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(processVo.getUuid());
-                scoreTemplateMapper.insertProcessScoreTemplate(processVo.getProcessScoreTemplateVo());
-            }
+		if(processVo.getProcessScoreTemplateVo() != null && processVo.getProcessScoreTemplateVo().getIsActive() != null && processVo.getProcessScoreTemplateVo().getIsActive().intValue() == 1){
+			scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(processVo.getUuid());
+			scoreTemplateMapper.insertProcessScoreTemplate(processVo.getProcessScoreTemplateVo());
 		}
 
 		return 1;
