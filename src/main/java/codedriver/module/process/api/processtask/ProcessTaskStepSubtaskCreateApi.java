@@ -73,7 +73,6 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 		}
 		Long processTaskId = processTaskStepVo.getProcessTaskId();
-//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.CREATESUBTASK);
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		if(handler == null) {
 		    throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());

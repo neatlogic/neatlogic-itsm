@@ -63,20 +63,19 @@ public class ProcessTaskPriorityUpdateApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		String priorityUuid = jsonObj.getString("priorityUuid");
 		if(priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
 			throw new PriorityNotFoundException(priorityUuid);
 		}
-        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+
 		String oldPriorityUuid = processTaskVo.getPriorityUuid();
 		//如果优先级跟原来的优先级不一样，生成活动
 		if(!priorityUuid.equals(oldPriorityUuid)) {			
 			IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-//			handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskStepAction.UPDATE);
-			handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
+			handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
 			//更新优先级
 			processTaskVo.setPriorityUuid(priorityUuid);
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);

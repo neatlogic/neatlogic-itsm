@@ -150,25 +150,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 			}
 		}
 		return nextStepSet;
-//		List<ProcessTaskStepVo> returnNextStepList = new ArrayList<>();
-//		List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(),null);
-//		if (nextStepList.size() == 1) {
-//			return nextStepList;
-//		} else if (nextStepList.size() > 1) {
-//			JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-//			if (paramObj != null && paramObj.containsKey("nextStepId")) {
-//				Long nextStepId = paramObj.getLong("nextStepId");
-//				for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
-//					if (processTaskStepVo.getId().equals(nextStepId)) {
-//						returnNextStepList.add(processTaskStepVo);
-//						break;
-//					}
-//				}
-//			} else {
-//				throw new ProcessTaskException("找到多个后续节点");
-//			}
-//		}
-//		return returnNextStepList;
 	}
 
 	@Override
@@ -239,7 +220,6 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-        // TODO Auto-generated method stub
         return 0;
     }
 

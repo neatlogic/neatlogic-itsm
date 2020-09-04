@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
@@ -144,15 +143,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                     }
                 }
                 if (CollectionUtils.isNotEmpty(retractableStepSet)) {
-                    if(processTaskStepVo != null) {
-                        for(ProcessTaskStepVo processTaskStep : retractableStepSet) {
-                            if(Objects.equals(processTaskStepVo.getId(), processTaskStep.getId())) {
-                                return true;
-                            }
-                        }
-                    }else {
-                        return true;
-                    }
+                    return true;
                 }
             }
             return false;

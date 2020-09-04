@@ -74,8 +74,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		
 		//获取开始步骤id
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
@@ -85,8 +84,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 		Long startProcessTaskStepId = processTaskStepList.get(0).getId();
 				
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-//		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.UPDATE);
-        handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
+        handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		
