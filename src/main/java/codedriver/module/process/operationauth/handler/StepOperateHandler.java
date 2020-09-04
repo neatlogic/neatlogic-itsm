@@ -1,8 +1,11 @@
 package codedriver.module.process.operationauth.handler;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiPredicate;
 
 import javax.annotation.PostConstruct;
@@ -157,6 +160,29 @@ public class StepOperateHandler implements IOperationAuthHandler {
                 if (ProcessTaskStatus.HANG.getValue().equals(processTaskStepVo.getStatus())) {
                     return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, ProcessTaskOperationType.PAUSE);
                 }              
+            }
+            return false;
+        });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.RETREATCURRENTSTEP, (processTaskVo, processTaskStepVo) -> {
+            // 撤销权限retreat
+            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+                    processTaskVo.getStepList().addAll(processTaskService.getProcessTaskStepVoListByProcessTask(processTaskVo));
+                }
+                Set<ProcessTaskStepVo> retractableStepSet = new HashSet<>();
+                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+                    if (processTaskStep.getIsActive().intValue() == 1) {
+                        retractableStepSet.addAll(processTaskService.getRetractableStepListByProcessTaskStepId(processTaskStep.getId()));
+                    }
+                }
+                if (CollectionUtils.isNotEmpty(retractableStepSet)) {
+                    for(ProcessTaskStepVo processTaskStep : retractableStepSet) {
+                        if(Objects.equals(processTaskStepVo.getId(), processTaskStep.getId())) {
+                            return true;
+                        }
+                    }
+                }
             }
             return false;
         });
