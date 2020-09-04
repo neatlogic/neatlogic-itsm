@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -53,7 +54,7 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase {
 	@Input({
 			@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
 			@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "工单步骤Id"),
-			@Param(name = "workerList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "新可处理对象列表，[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
+			@Param(name = "workerList", type = ApiParamType.NOAUTH, isRequired = true, desc = "新可处理对象列表，[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
 			@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "原因")
 	})
 	@Output({})
@@ -68,7 +69,13 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());			
 		}     
         List<ProcessTaskStepWorkerVo> processTaskStepWorkerList =  new ArrayList<ProcessTaskStepWorkerVo>();
-        List<String> workerList = JSON.parseArray(jsonObj.getString("workerList"), String.class);
+        List<String> workerList = new ArrayList<>();
+        Object workerListObj = jsonObj.get("workerList");
+        if(workerListObj instanceof JSONArray) {
+            workerList = JSON.parseArray(JSON.toJSONString(workerListObj), String.class);
+        }else if(workerListObj instanceof String) {
+            workerList.add((String)workerListObj);
+        }        
         for(String worker : workerList) {   
             String[] split = worker.split("#");
             if(GroupSearch.getValue(split[0]) != null) {

@@ -1,5 +1,6 @@
 package codedriver.module.process.api.matrix;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import codedriver.framework.process.dao.mapper.MatrixDataMapper;
 import codedriver.framework.process.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.process.dao.mapper.MatrixMapper;
 import codedriver.framework.process.dto.ProcessMatrixAttributeVo;
+import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.dto.ProcessMatrixDataVo;
 import codedriver.framework.process.dto.ProcessMatrixExternalVo;
 import codedriver.framework.process.dto.ProcessMatrixVo;
@@ -204,6 +206,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
 				}
 				returnObj.put("searchColumnDetailList", searchColumnDetailList);
 			}
+			List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
+            jsonObj.put("sourceColumnList", sourceColumnList); //防止集成管理 js length 异常
 			integrationVo.getParamObj().putAll(jsonObj);
 			IntegrationResultVo resultVo = handler.sendRequest(integrationVo, ProcessRequestFrom.MATRIX);
 			if (StringUtils.isNotBlank(resultVo.getError())) {

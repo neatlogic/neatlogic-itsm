@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,18 +92,13 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
-//		ProcessStepUtilHandlerFactory.getHandler().verifyActionAuthoriy(processTaskId, null, ProcessTaskOperationType.POCESSTASKVIEW);
 		
 		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
         
         processTaskVo.setStartProcessTaskStep(getStartProcessTaskStepByProcessTaskId(processTaskId));
 
         Map<String, String> formAttributeActionMap = new HashMap<>();
-		if(processTaskStepId != null) {
-//			List<String> verifyActionList = new ArrayList<>();
-//			verifyActionList.add(ProcessTaskOperationType.VIEW.getValue());
-//			List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
-		    
+		if(processTaskStepId != null) {		    
             ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
 			if(currentProcessTaskStepVo != null){
 			    handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
@@ -122,10 +118,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 			}			
 		}
 		if(StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
-//		    List<String> verifyActionList = new ArrayList<>();
-//	        verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
-//	        List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
-//            processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, actionList.removeAll(verifyActionList) ? 1 : 0);
 	        boolean isAuthority = handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.WORK, false);
 	        processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, isAuthority ? 1 : 0);
 		}
@@ -192,11 +184,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
             }
             processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
-            //回复框内容和附件暂存回显              
-            setTemporaryData(processTaskStepVo);
-            
+            if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.SAVE, false)){
+                //回复框内容和附件暂存回显              
+                setTemporaryData(processTaskStepVo);
+            }
             //步骤评论列表        
-            processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId));
+            processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, Arrays.asList(ProcessTaskOperationType.COMMENT.getValue())));
             
             //获取当前用户有权限的所有子任务
             //子任务列表
@@ -266,9 +259,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(stepDataVo != null) {
                 JSONObject stepDataJson = stepDataVo.getData();
                 processTaskStepVo.setProcessTaskStepData(stepDataJson);
-//                List<String> verifyActionList = new ArrayList<>();
-//                verifyActionList.add(ProcessTaskStepAction.WORK.getValue());
-//                List<String> actionList = ProcessStepUtilHandlerFactory.getHandler().getProcessTaskStepActionList(processTaskId, processTaskStepId, verifyActionList);
                 if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.WORK, false)) {//有处理权限
                     stepDataJson.put("isStepUser", 1);
                     if(processTaskStepVo.getHandler().equals(ProcessStepHandler.AUTOMATIC.getHandler())){

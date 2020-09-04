@@ -155,4 +155,10 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		return 0;
 	}
 
+    @Override
+    protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

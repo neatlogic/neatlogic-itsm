@@ -61,8 +61,6 @@ import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFacto
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.util.TimeUtil;
-import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
-import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 
 @Service
 public class WorkcenterServiceImpl implements WorkcenterService{
@@ -310,7 +308,6 @@ public class WorkcenterServiceImpl implements WorkcenterService{
 //            ProcessTaskVo  task2 = processTaskMapper.getProcessTaskBaseInfoById(processTaskVo.getId());
 //            
 //            System.out.println(task1 == task2);
-            
             if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
                 || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
                 || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus)
@@ -324,8 +321,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                                 private static final long serialVersionUID = 1L;
                                 {
                                 add(ProcessTaskOperationType.WORK);
-                                add(ProcessTaskOperationType.ABORT);
-                                add(ProcessTaskOperationType.RECOVER);
+                                add(ProcessTaskOperationType.ABORTPROCESSTASK);
+                                add(ProcessTaskOperationType.RECOVERPROCESSTASK);
                                 add(ProcessTaskOperationType.URGE);
                                 }
                             });
@@ -346,10 +343,10 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                     actionJson.put("config", configJson);
                     handleArray.add(actionJson);
                 }
-                if (operationList.contains(ProcessTaskOperationType.ABORT)) {
+                if (operationList.contains(ProcessTaskOperationType.ABORTPROCESSTASK)) {
                     isHasAbort = true;
                 }
-                if (operationList.contains(ProcessTaskOperationType.RECOVER)) {
+                if (operationList.contains(ProcessTaskOperationType.RECOVERPROCESSTASK)) {
                     isHasRecover = true;
                 }
                 if (operationList.contains(ProcessTaskOperationType.URGE)) {
@@ -373,8 +370,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         if (isHasAbort || isHasRecover) {
             if (isHasAbort) {
                 JSONObject abortActionJson = new JSONObject();
-                abortActionJson.put("name", ProcessTaskOperationType.ABORT.getValue());
-                abortActionJson.put("text", ProcessTaskOperationType.ABORT.getText());
+                abortActionJson.put("name", ProcessTaskOperationType.ABORTPROCESSTASK.getValue());
+                abortActionJson.put("text", ProcessTaskOperationType.ABORTPROCESSTASK.getText());
                 abortActionJson.put("sort", 2);
                 JSONObject configJson = new JSONObject();
                 configJson.put("taskid", el.getId());
@@ -384,8 +381,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                 actionArray.add(abortActionJson);
             } else {
                 JSONObject recoverActionJson = new JSONObject();
-                recoverActionJson.put("name", ProcessTaskOperationType.RECOVER.getValue());
-                recoverActionJson.put("text", ProcessTaskOperationType.RECOVER.getText());
+                recoverActionJson.put("name", ProcessTaskOperationType.RECOVERPROCESSTASK.getValue());
+                recoverActionJson.put("text", ProcessTaskOperationType.RECOVERPROCESSTASK.getText());
                 recoverActionJson.put("sort", 2);
                 JSONObject configJson = new JSONObject();
                 configJson.put("taskid", el.getId());
@@ -396,8 +393,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
             }
         } else {
             JSONObject abortActionJson = new JSONObject();
-            abortActionJson.put("name", ProcessTaskOperationType.ABORT.getValue());
-            abortActionJson.put("text", ProcessTaskOperationType.ABORT.getText());
+            abortActionJson.put("name", ProcessTaskOperationType.ABORTPROCESSTASK.getValue());
+            abortActionJson.put("text", ProcessTaskOperationType.ABORTPROCESSTASK.getText());
             abortActionJson.put("sort", 2);
             abortActionJson.put("isEnable", 0);
             actionArray.add(abortActionJson);
@@ -435,78 +432,6 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         // 搜索es
         QueryResult result = searchTask(workcenterVo);
         return result.getTotal();
-    }
-
-    /**
-     * 根据关键字获取所有过滤选项
-     * 
-     * @param keyword
-     * @return
-     */
-    @Override
-    public JSONArray getKeywordOptions(String keyword, Integer pageSize) {
-        // 搜索标题
-        JSONArray returnArray = getKeywordOption(new ProcessTaskTitleCondition(), keyword, pageSize);
-        // 搜索ID
-        returnArray.addAll(getKeywordOption(new ProcessTaskIdCondition(), keyword, pageSize));
-        return returnArray;
-    }
-
-    /**
-     * 根据单个关键字获取过滤选项
-     * 
-     * @param keyword
-     * @return
-     */
-    private JSONArray getKeywordOption(IProcessTaskCondition condition, String keyword, Integer pageSize) {
-        JSONArray returnArray = new JSONArray();
-        WorkcenterVo workcenter = getKeywordCondition(condition, keyword);
-        workcenter.setPageSize(pageSize);
-        List<MultiAttrsObject> dataList = searchTask(workcenter).getData();
-        if (!dataList.isEmpty()) {
-            JSONObject titleObj = new JSONObject();
-            JSONArray titleDataList = new JSONArray();
-            for (MultiAttrsObject titleEl : dataList) {
-                IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(condition.getName());
-                if (column == null) {
-                    continue;
-                }
-                titleDataList.add(column.getValue(titleEl));
-            }
-            titleObj.put("dataList", titleDataList);
-            titleObj.put("value", condition.getName());
-            titleObj.put("text", condition.getDisplayName());
-            returnArray.add(titleObj);
-        }
-        return returnArray;
-    }
-
-    /**
-     * 拼接关键字过滤选项
-     * 
-     * @param type
-     *            搜索内容类型
-     * @return
-     */
-    private WorkcenterVo getKeywordCondition(IProcessTaskCondition condition, String keyword) {
-        JSONObject searchObj = new JSONObject();
-        JSONArray conditionGroupList = new JSONArray();
-        JSONObject conditionGroup = new JSONObject();
-        JSONArray conditionList = new JSONArray();
-        JSONObject conditionObj = new JSONObject();
-        conditionObj.put("name", condition.getName());
-        conditionObj.put("type", condition.getType());
-        JSONArray valueList = new JSONArray();
-        valueList.add(keyword);
-        conditionObj.put("valueList", valueList);
-        conditionObj.put("expression", Expression.LIKE.getExpression());
-        conditionList.add(conditionObj);
-        conditionGroup.put("conditionList", conditionList);
-        conditionGroupList.add(conditionGroup);
-        searchObj.put("conditionGroupList", conditionGroupList);
-
-        return new WorkcenterVo(searchObj);
-
     }
 
     /**
