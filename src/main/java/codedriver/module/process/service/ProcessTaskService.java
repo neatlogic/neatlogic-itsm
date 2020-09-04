@@ -101,7 +101,7 @@ public interface ProcessTaskService {
     * @param processTaskStepId 步骤id
     * @return List<ProcessTaskStepCommentVo>
      */
-	public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId);
+	public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId, List<String> typeList);
 	/**
      * 
     * @Author: linbq

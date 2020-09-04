@@ -40,7 +40,12 @@ public class WorkerAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 
 	private String parse(String content) {
 		List<Map<String, String>> resultList = new ArrayList<>();
-		List<String> workerList = JSON.parseArray(content, String.class);
+		List<String> workerList = new ArrayList<>();
+		if(content.startsWith("[") && content.endsWith("]")) {
+		    workerList = JSON.parseArray(content, String.class);
+		}else {
+		    workerList.add(content);
+		}
 		for(String worker : workerList) {
 			String[] split = worker.split("#");
 			if(GroupSearch.USER.getValue().equals(split[0])) {
