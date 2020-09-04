@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -136,7 +137,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
         
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId));
+		resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, Arrays.asList(ProcessTaskOperationType.COMMENT.getValue())));
 		return resultObj;
 	}
 

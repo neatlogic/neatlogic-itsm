@@ -731,11 +731,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId) {
+    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId, List<String> typeList) {
         List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
         for(ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {
-            if(ProcessTaskOperationType.COMMENT.getValue().equals(processTaskStepContentVo.getType())) {
+            if(typeList.contains(processTaskStepContentVo.getType())) {
                 ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
                 parseProcessTaskStepReply(processTaskStepReplyVo);
                 processTaskStepReplyList.add(processTaskStepReplyVo);

@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -188,7 +189,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 setTemporaryData(processTaskStepVo);
             }
             //步骤评论列表        
-            processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId));
+            processTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, Arrays.asList(ProcessTaskOperationType.COMMENT.getValue())));
             
             //获取当前用户有权限的所有子任务
             //子任务列表
