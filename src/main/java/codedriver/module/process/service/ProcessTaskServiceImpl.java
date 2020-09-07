@@ -727,6 +727,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
             }
         }
+		/** 获取评分信息 */
+		String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskId);
+		processTaskVo.setScoreInfo(scoreInfo);
         return processTaskVo;
     }
 
