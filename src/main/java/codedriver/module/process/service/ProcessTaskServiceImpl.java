@@ -545,12 +545,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		//获取步骤信息
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		setProcessTaskStepConfig(processTaskStepVo);
-//		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-//		processTaskStepVo.setConfig(stepConfig);
-//		ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-//		if(processStepHandlerVo != null) {
-//			processTaskStepVo.setGlobalConfig(processStepHandlerVo.getConfig());					
-//		}
+		
 		//处理人列表
 		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(majorUserList)) {
