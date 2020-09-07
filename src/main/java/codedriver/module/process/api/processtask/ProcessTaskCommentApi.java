@@ -27,6 +27,7 @@ import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -81,14 +82,11 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		processTaskMapper.getProcessTaskLockById(processTaskId);
-
-//		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-//		handler.verifyActionAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.COMMENT);
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
+		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.COMMENT, true);
+		handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.COMMENT, true);
 		//删除暂存
 		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 		processTaskStepDataVo.setProcessTaskId(processTaskId);
@@ -130,9 +128,6 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         }
         
         //生成活动    
-//        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-//        processTaskStepVo.setProcessTaskId(processTaskId);
-//        processTaskStepVo.setId(processTaskStepId);
         processTaskStepVo.setParamObj(jsonObj);
         handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
         

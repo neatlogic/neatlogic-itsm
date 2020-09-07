@@ -9,24 +9,27 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
 public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
@@ -38,7 +41,13 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 	private ProcessTaskMapper processTaskMapper;
 	
 	@Autowired
+	private ProcessTaskService processTaskService;
+	
+	@Autowired
 	private ProcessMapper processMapper;
+	
+	@Autowired
+    private ProcessTaskStepDataMapper processTaskStepDataMapper;
 	
 	@Override
 	public String getToken() {
@@ -100,10 +109,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 		
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		if(processTaskId != null) {
-			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-			if(processTaskVo == null) {
-				throw new ProcessTaskNotFoundException(processTaskId.toString());
-			}
+			processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 			List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
 			if(processTaskStepList.size() != 1) {
 				throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
@@ -121,12 +127,24 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 		}
 		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startTaskStep.getHandler());
-		if(handler != null) {
-			startTaskStep.setParamObj(jsonObj);
-			handler.saveDraft(startTaskStep);
-		}else {
+		if(handler == null) {
 			throw new ProcessStepHandlerNotFoundException(startTaskStep.getHandler());
 		}
+
+        startTaskStep.setParamObj(jsonObj);
+        handler.saveDraft(startTaskStep);
+        if(processTaskMapper.checkProcessTaskhasForm(startTaskStep.getProcessTaskId()) > 0) {
+            // 保存组件联动导致隐藏的属性uuid列表
+            ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+            processTaskStepDataVo.setProcessTaskId(startTaskStep.getProcessTaskId());
+            processTaskStepDataVo.setProcessTaskStepId(startTaskStep.getId());
+            processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+            processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+            processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+            processTaskStepDataVo.setData(jsonObj.toJSONString());
+            processTaskStepDataVo.setIsAutoGenerateId(true);
+            processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
+        }
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("processTaskId", startTaskStep.getProcessTaskId());
 		resultObj.put("processTaskStepId", startTaskStep.getId());

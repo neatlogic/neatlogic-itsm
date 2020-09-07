@@ -24,6 +24,7 @@ import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
@@ -41,6 +42,8 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	static Logger logger = LoggerFactory.getLogger(AutomaticProcessComponent.class);
 	private static final ThreadLocal<List<RequestFirstThread>> AUTOMATIC_LIST = new ThreadLocal<>();
 	
+	@Autowired
+	private ProcessTaskStepDataMapper processTaskStepDataMapper;
 	@Autowired
 	ProcessTaskService processTaskService;
 	
@@ -317,7 +320,6 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-        // TODO Auto-generated method stub
         return 0;
     }
 	
