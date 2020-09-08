@@ -59,6 +59,6 @@ public interface WorkcenterService {
      */
     JSONObject getSearchIterate(QueryResultSet resultSet, WorkcenterVo workcenterVo);
 
-    JSONObject doSingleSearch(WorkcenterVo workcenterVo) throws ParseException;
+    JSONObject doSingleSearch(Long processtaskId) throws ParseException;
 
 }
