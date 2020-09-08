@@ -60,7 +60,7 @@ public class WorkcenterStepActionGetApi extends PrivateApiComponentBase {
 				.set(0,taskId);
 
 		WorkcenterVo workcenterVo = JSON.parseObject(jsonObject.toJSONString(), new TypeReference<WorkcenterVo>(){});
-		JSONObject result = workcenterService.doSearch(workcenterVo);
+		JSONObject result = workcenterService.doSingleSearch(workcenterVo);
 		JSONObject json = null;
 		if(result != null){
 			JSONArray tbodyList = result.getJSONArray("tbodyList");

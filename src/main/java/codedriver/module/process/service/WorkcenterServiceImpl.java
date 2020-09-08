@@ -659,4 +659,32 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         returnObj.put("tbodyList", dataList);
         return returnObj;
     }
+
+    @Override
+    public JSONObject doSingleSearch(WorkcenterVo workcenterVo) throws ParseException{
+        JSONObject returnObj = new JSONObject();
+        // 搜索es
+        // Date time1 = new Date();
+        QueryResult result = searchTask(workcenterVo);
+        // Date time11 = new Date();
+        // System.out.println("searchCostTime:"+(time11.getTime()-time1.getTime()));
+        List<MultiAttrsObject> resultData = result.getData();
+        // 返回的数据重新加工
+        List<JSONObject> dataList = new ArrayList<JSONObject>();
+        if (!resultData.isEmpty()) {
+            for (MultiAttrsObject el : resultData) {
+                JSONObject taskJson = new JSONObject();
+                taskJson.put("taskid", el.getId());
+                // route 供前端跳转路由信息
+                JSONObject routeJson = new JSONObject();
+                routeJson.put("taskid", el.getId());
+                taskJson.put("route", routeJson);
+                // action 操作
+                taskJson.put("action", getStepAction(el));
+                dataList.add(taskJson);
+            }
+        }
+        returnObj.put("tbodyList", dataList);
+        return returnObj;
+    }
 }
