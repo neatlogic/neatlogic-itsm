@@ -42,8 +42,8 @@ public class ChannelTypeRelationSaveApi extends PrivateApiComponentBase {
 		@Param(name = "id", type = ApiParamType.LONG, desc = "服务类型关系id"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
         @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否激活"),
-		@Param(name = "source", type = ApiParamType.STRING, isRequired = true, desc = "来源服务类型uuid"),
-		@Param(name = "target", type = ApiParamType.STRING, isRequired = true, desc = "目标服务类型uuid")
+		@Param(name = "sourceList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "来源服务类型uuid列表"),
+		@Param(name = "targetList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "目标服务类型uuid列表")
 	})
 	@Output({
 		@Param(name = "Return", type = ApiParamType.LONG, desc = "服务类型关系id")
@@ -63,7 +63,15 @@ public class ChannelTypeRelationSaveApi extends PrivateApiComponentBase {
 	            throw new ChannelTypeRelationNotFoundException(id);
 	        }
 	        channelMapper.updateChannelTypeRelationById(channelTypeRelationVo);
+	        channelMapper.deleteChannelTypeRelationSourceByChannelTypeRelationId(id);
+	        channelMapper.deleteChannelTypeRelationTargetByChannelTypeRelationId(id);
 	    }
+	    for(String source : channelTypeRelationVo.getSourceList()) {
+	        channelMapper.insertChannelTypeRelationSource(channelTypeRelationVo.getId(), source);	        
+	    }
+	    for(String target : channelTypeRelationVo.getTargetList()) {
+            channelMapper.insertChannelTypeRelationTarget(channelTypeRelationVo.getId(), target);           
+        }
 		return channelTypeRelationVo.getId();
 	}
 

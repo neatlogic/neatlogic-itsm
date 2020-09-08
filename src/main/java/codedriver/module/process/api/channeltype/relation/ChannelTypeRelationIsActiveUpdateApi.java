@@ -7,8 +7,8 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -38,17 +38,23 @@ public class ChannelTypeRelationIsActiveUpdateApi extends PrivateApiComponentBas
 	}
 
 	@Input({
-		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),
+		@Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否激活")
 	})
 	@Description(desc = "启用或禁用服务类型关系")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-	    ChannelTypeRelationVo channelTypeRelationVo = JSON.toJavaObject(jsonObj, ChannelTypeRelationVo.class);
-	    if(channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationVo.getId()) > 0) {
-	        throw new ChannelTypeRelationNotFoundException(channelTypeRelationVo.getId());
+	    Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");    
+	    ChannelTypeRelationVo channelTypeRelationVo = channelMapper.getChannelTypeRelationById(channelTypeRelationId);
+	    if(channelTypeRelationVo == null) {
+	        throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
 	    }
-	    channelMapper.updateChannelTypeRelationIsActiveById(channelTypeRelationVo);
+	    Integer isActive = jsonObj.getInteger("isActive");
+	    if(Objects.equal(isActive, channelTypeRelationVo.getIsActive())) {    
+	        return null;
+	    }
+	    channelTypeRelationVo.setIsActive(isActive);
+	    channelMapper.updateChannelTypeRelationById(channelTypeRelationVo);
 		return null;
 	}
 

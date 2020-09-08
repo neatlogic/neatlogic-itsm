@@ -4,6 +4,8 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +52,10 @@ public class ChannelTypeRelationGetApi extends PrivateApiComponentBase {
 		if(channelTypeRelationVo == null) {
 		    throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
 		}
+		List<String> sourceList = channelMapper.getChannelTypeRelationSourceListByChannelTypeRelationId(channelTypeRelationId);
+		channelTypeRelationVo.setSourceList(sourceList);
+		List<String> targetList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+		channelTypeRelationVo.setTargetList(targetList);
 		return channelTypeRelationVo;
 	}
 

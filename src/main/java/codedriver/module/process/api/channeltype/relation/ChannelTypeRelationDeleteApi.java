@@ -43,6 +43,8 @@ public class ChannelTypeRelationDeleteApi extends PrivateApiComponentBase {
 	    Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
 	    //TODO linbq 判断是否能删除
 	    channelMapper.deleteChannelTypeRelationById(channelTypeRelationId);
+        channelMapper.deleteChannelTypeRelationSourceByChannelTypeRelationId(channelTypeRelationId);
+        channelMapper.deleteChannelTypeRelationTargetByChannelTypeRelationId(channelTypeRelationId);
 		return null;
 	}
 

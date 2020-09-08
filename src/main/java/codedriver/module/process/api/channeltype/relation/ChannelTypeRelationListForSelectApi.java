@@ -15,25 +15,26 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
+public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ChannelMapper channelMapper;
 
 	@Override
 	public String getToken() {
-		return "process/channeltype/relation/list";
+		return "process/channeltype/relation/list/forselect";
 	}
 
 	@Override
 	public String getName() {
-		return "查询服务类型关系列表";
+		return "查询服务类型关系列表（下拉框专用）";
 	}
 
 	@Override
@@ -49,14 +50,14 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
         @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
 	})
 	@Output({
-		@Param(name = "tbodyList", explode = ChannelTypeRelationVo[].class, desc = "服务类型关系列表"),
+		@Param(name = "list", explode = ValueTextVo[].class, desc = "服务类型关系列表"),
 		@Param(explode = BasePageVo.class)
 	})
 	@Description(desc = "查询服务类型关系列表")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    JSONObject resultObj = new JSONObject();
-	    resultObj.put("tbodyList", new ArrayList<>());
+	    resultObj.put("list", new ArrayList<>());
 	    ChannelTypeRelationVo channelTypeRelationVo = JSON.toJavaObject(jsonObj, ChannelTypeRelationVo.class);
  	    int pageCount = 0;
  	    if(channelTypeRelationVo.getNeedPage()) {
@@ -68,9 +69,8 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
  	        resultObj.put("rowNum", rowNum);
  	    }
  	   if(!channelTypeRelationVo.getNeedPage() || channelTypeRelationVo.getCurrentPage() <= pageCount) {
- 	        List<ChannelTypeRelationVo> channelTypeRelationList = channelMapper.getChannelTypeRelationList(channelTypeRelationVo);
- 	        //TODO linbq引用数量
- 	       resultObj.put("tbodyList", channelTypeRelationList);
+ 	        List<ValueTextVo> list = channelMapper.getChannelTypeRelationListForSelect(channelTypeRelationVo);
+ 	       resultObj.put("list", list);
 	    }
 		return resultObj;
 	}
