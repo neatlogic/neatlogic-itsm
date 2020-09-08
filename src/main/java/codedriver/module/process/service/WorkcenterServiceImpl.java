@@ -654,7 +654,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     }
 
     @Override
-    public JSONObject doSingleSearch(Long processtaskId) throws ParseException{
+    public JSONObject doSearch(Long processtaskId) throws ParseException{
         ProcessTaskVo processTask = processTaskMapper.getProcessTaskAndStepById(processtaskId);
         JSONObject taskJson = null;
         if (processTask != null) {
