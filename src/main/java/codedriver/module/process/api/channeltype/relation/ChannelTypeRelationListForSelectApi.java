@@ -43,7 +43,7 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, isRequired = true, desc = "关系名称，关键字搜索"),
+		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关系名称，关键字搜索"),
         @Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
         @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
         @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),

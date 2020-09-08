@@ -5,7 +5,9 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dto.ChannelTypeRelationChannelVo;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
 
 @Service
@@ -42,7 +45,7 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, isRequired = true, desc = "关系名称，关键字搜索"),
+		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关系名称，关键字搜索"),
         @Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
         @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
         @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
@@ -69,8 +72,22 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
  	    }
  	   if(!channelTypeRelationVo.getNeedPage() || channelTypeRelationVo.getCurrentPage() <= pageCount) {
  	        List<ChannelTypeRelationVo> channelTypeRelationList = channelMapper.getChannelTypeRelationList(channelTypeRelationVo);
- 	        //TODO linbq引用数量
- 	       resultObj.put("tbodyList", channelTypeRelationList);
+ 	        List<Long> channelTypeRelationIdList = new ArrayList<>();
+ 	        Map<Long, ChannelTypeRelationVo> channelTypeRelationMap = new HashMap<>();
+ 	        for(ChannelTypeRelationVo channelTypeRelation : channelTypeRelationList) {
+ 	           channelTypeRelationIdList.add(channelTypeRelation.getId());
+ 	           channelTypeRelationMap.put(channelTypeRelation.getId(), channelTypeRelation);
+ 	        }
+ 	        List<ChannelTypeRelationChannelVo> channelTypeRelationSourceList = channelMapper.getChannelTypeRelationSourceListByChannelTypeRelationIdList(channelTypeRelationIdList);
+ 	        for(ChannelTypeRelationChannelVo channelTypeRelationChannelVo : channelTypeRelationSourceList) {
+ 	           channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo()).getSourceList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
+ 	        }
+ 	        List<ChannelTypeRelationChannelVo> channelTypeRelationTargetList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationIdList(channelTypeRelationIdList);
+ 	        for(ChannelTypeRelationChannelVo channelTypeRelationChannelVo : channelTypeRelationTargetList) {
+               channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo()).getTargetList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
+            }
+// 	        List<ChannelTypeRelationVo> channelTypeRelationReferenceCountList = channelMapper.getChannelTypeRelationReferenceCountListByChannelTypeRelationIdList(channelTypeRelationIdList);
+ 	        resultObj.put("tbodyList", channelTypeRelationList);
 	    }
 		return resultObj;
 	}
