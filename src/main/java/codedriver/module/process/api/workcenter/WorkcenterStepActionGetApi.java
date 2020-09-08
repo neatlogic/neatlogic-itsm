@@ -40,7 +40,7 @@ public class WorkcenterStepActionGetApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long taskId = jsonObj.getLong("taskId");
-		JSONObject result = workcenterService.doSingleSearch(taskId);
+		JSONObject result = workcenterService.doSearch(taskId);
 		return result;
 	}
 }
