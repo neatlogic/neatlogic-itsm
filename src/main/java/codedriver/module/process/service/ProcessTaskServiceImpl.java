@@ -123,9 +123,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	private IntegrationMapper integrationMapper;
 	
 	@Autowired
-	private ProcessStepHandlerMapper processStepHandlerMapper;
-	
-	@Autowired
 	private PriorityMapper priorityMapper;
 	
 	@Autowired
@@ -547,12 +544,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId) {
 		//获取步骤信息
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-		processTaskStepVo.setConfig(stepConfig);
-		ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-		if(processStepHandlerVo != null) {
-			processTaskStepVo.setGlobalConfig(processStepHandlerVo.getConfig());					
-		}
+		setProcessTaskStepConfig(processTaskStepVo);
+		
 		//处理人列表
 		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(majorUserList)) {
@@ -727,6 +720,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
             }
         }
+		/** 获取评分信息 */
+		String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskId);
+		processTaskVo.setScoreInfo(scoreInfo);
         return processTaskVo;
     }
 
@@ -844,11 +840,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Override
     public void setProcessTaskStepConfig(ProcessTaskStepVo processTaskStepVo) {
-        String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-        processTaskStepVo.setConfig(stepConfig);
-        ProcessStepHandlerVo processStepHandlerConfig = stepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-        if(processStepHandlerConfig != null) {
-            processTaskStepVo.setGlobalConfig(processStepHandlerConfig.getConfig());                    
+        if(processTaskStepVo != null) {
+            String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            processTaskStepVo.setConfig(stepConfig);
+            IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            if(processStepUtilHandler == null) {
+                throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+            }
+            ProcessStepHandlerVo processStepHandlerConfig = stepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+            processTaskStepVo.setGlobalConfig(processStepUtilHandler.makeupConfig(processStepHandlerConfig != null ? processStepHandlerConfig.getConfig() : null));
         }
     }
 
@@ -960,7 +960,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         JSONArray authorityList = configObj.getJSONArray("authorityList");
         if (CollectionUtils.isEmpty(authorityList)) {
             JSONObject globalConfig = processTaskStepVo.getGlobalConfig();
-            authorityList = globalConfig.getJSONArray("authorityList");
+            if(MapUtils.isNotEmpty(globalConfig)) {
+                authorityList = globalConfig.getJSONArray("authorityList");
+            }
         }
         // 如果步骤自定义权限设置为空，则用组件的全局权限设置
         if (CollectionUtils.isNotEmpty(authorityList)) {
