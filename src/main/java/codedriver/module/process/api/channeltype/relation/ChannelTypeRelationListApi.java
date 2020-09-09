@@ -94,13 +94,13 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
  	        for(ChannelTypeRelationChannelVo channelTypeRelationChannelVo : channelTypeRelationSourceList) {
  	           ChannelTypeRelationVo channelTypeRelation = channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo());
  	           channelTypeRelation.getSourceList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
- 	           channelTypeRelation.getSourceVoList().add(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid()));
+ 	           channelTypeRelation.getSourceVoList().add(new ChannelTypeVo(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid())));
  	        }
  	        List<ChannelTypeRelationChannelVo> channelTypeRelationTargetList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationIdList(channelTypeRelationIdList);
  	        for(ChannelTypeRelationChannelVo channelTypeRelationChannelVo : channelTypeRelationTargetList) {
  	           ChannelTypeRelationVo channelTypeRelation = channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo());
  	           channelTypeRelation.getTargetList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
- 	           channelTypeRelation.getTargetVoList().add(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid()));
+ 	           channelTypeRelation.getTargetVoList().add(new ChannelTypeVo(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid())));
             }
 // 	        List<ChannelTypeRelationVo> channelTypeRelationReferenceCountList = channelMapper.getChannelTypeRelationReferenceCountListByChannelTypeRelationIdList(channelTypeRelationIdList);
  	        resultObj.put("tbodyList", channelTypeRelationList);
