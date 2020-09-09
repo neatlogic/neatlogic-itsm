@@ -75,7 +75,7 @@ public class ChannelTypeSearchForSelectApi extends PrivateApiComponentBase {
 		List<ValueTextVo> channelTypeList = channelMapper.searchChannelTypeListForSelect(channelTypeVo);
 		Integer needAllOption = jsonObj.getInteger("needAllOption");
 		if(Objects.equal(needAllOption, 1)) {
-		    channelTypeList.add(new ValueTextVo("all", "所有"));
+		    channelTypeList.add(0, new ValueTextVo("all", "所有"));
 		}
 		resultObj.put("list", channelTypeList);
 		return resultObj;
