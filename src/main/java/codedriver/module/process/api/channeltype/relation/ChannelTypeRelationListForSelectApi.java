@@ -45,6 +45,7 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关系名称，关键字搜索"),
         @Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
+        @Param(name = "source", type = ApiParamType.STRING, xss = true, desc = "来源服务类型uuid"),
         @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
         @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
         @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
@@ -61,7 +62,7 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
 	    ChannelTypeRelationVo channelTypeRelationVo = JSON.toJavaObject(jsonObj, ChannelTypeRelationVo.class);
  	    int pageCount = 0;
  	    if(channelTypeRelationVo.getNeedPage()) {
- 	        int rowNum = channelMapper.getChannelTypeRelationCount(channelTypeRelationVo);
+ 	        int rowNum = channelMapper.getChannelTypeRelationCountForSelect(channelTypeRelationVo);
  	        pageCount = PageUtil.getPageCount(rowNum, channelTypeRelationVo.getPageSize());
  	        resultObj.put("currentPage", channelTypeRelationVo.getCurrentPage());
  	        resultObj.put("pageSize", channelTypeRelationVo.getPageSize());

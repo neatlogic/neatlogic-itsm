@@ -21,6 +21,7 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationChannelVo;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
+import codedriver.framework.process.dto.ChannelTypeVo;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -78,13 +79,28 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
  	           channelTypeRelationIdList.add(channelTypeRelation.getId());
  	           channelTypeRelationMap.put(channelTypeRelation.getId(), channelTypeRelation);
  	        }
+ 	        Map<String, ChannelTypeVo> channelTypeMap = new HashMap<>();
+ 	        ChannelTypeVo all = new ChannelTypeVo();
+ 	        all.setUuid("all");
+ 	        all.setName("所有");
+ 	        channelTypeMap.put("all", all);
+ 	        ChannelTypeVo channelTypeVo = new ChannelTypeVo();
+ 	        channelTypeVo.setNeedPage(false);
+ 	        List<ChannelTypeVo> channelTypeList = channelMapper.searchChannelTypeList(channelTypeVo);
+ 	        for(ChannelTypeVo channelType : channelTypeList) {
+ 	           channelTypeMap.put(channelType.getUuid(), channelType);
+ 	        }
  	        List<ChannelTypeRelationChannelVo> channelTypeRelationSourceList = channelMapper.getChannelTypeRelationSourceListByChannelTypeRelationIdList(channelTypeRelationIdList);
  	        for(ChannelTypeRelationChannelVo channelTypeRelationChannelVo : channelTypeRelationSourceList) {
- 	           channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo()).getSourceList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
+ 	           ChannelTypeRelationVo channelTypeRelation = channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo());
+ 	           channelTypeRelation.getSourceList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
+ 	           channelTypeRelation.getSourceVoList().add(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid()));
  	        }
  	        List<ChannelTypeRelationChannelVo> channelTypeRelationTargetList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationIdList(channelTypeRelationIdList);
  	        for(ChannelTypeRelationChannelVo channelTypeRelationChannelVo : channelTypeRelationTargetList) {
-               channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo()).getTargetList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
+ 	           ChannelTypeRelationVo channelTypeRelation = channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo());
+ 	           channelTypeRelation.getTargetList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
+ 	           channelTypeRelation.getTargetVoList().add(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid()));
             }
 // 	        List<ChannelTypeRelationVo> channelTypeRelationReferenceCountList = channelMapper.getChannelTypeRelationReferenceCountListByChannelTypeRelationIdList(channelTypeRelationIdList);
  	        resultObj.put("tbodyList", channelTypeRelationList);
