@@ -6,6 +6,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
@@ -17,6 +18,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNot
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
+@Transactional
 public class ChannelTypeRelationIsActiveUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired

@@ -9,6 +9,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -21,6 +22,7 @@ import codedriver.module.process.service.CatalogService;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Transactional
 public class CatalogChannelTreeApi extends PrivateApiComponentBase {
 
 	@Autowired

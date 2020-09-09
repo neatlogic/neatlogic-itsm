@@ -6,6 +6,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -14,6 +15,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 
 @Service
 @OperationType(type = OperationTypeEnum.DELETE)
+@Transactional
 public class ChannelTypeRelationDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
