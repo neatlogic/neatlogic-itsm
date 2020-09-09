@@ -5,10 +5,12 @@ import java.util.List;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -96,7 +98,14 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
         if(stepDraftSaveData != null) {
             JSONObject dataObj = stepDraftSaveData.getData();
             if(MapUtils.isNotEmpty(dataObj)) {
-                jsonObj.putAll(dataObj);
+                JSONArray formAttributeDataList = dataObj.getJSONArray("formAttributeDataList");
+                if(CollectionUtils.isNotEmpty(formAttributeDataList)) {
+                    jsonObj.put("formAttributeDataList", formAttributeDataList);
+                }
+                JSONArray hidecomponentList = dataObj.getJSONArray("hidecomponentList");
+                if(CollectionUtils.isNotEmpty(hidecomponentList)) {
+                    jsonObj.put("hidecomponentList", hidecomponentList);
+                }
             }
         }
         processTaskStepVo.setParamObj(jsonObj);
