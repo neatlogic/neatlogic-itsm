@@ -1,6 +1,7 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -85,7 +86,13 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
         ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
         
         JSONObject resultObj = new JSONObject();
-        resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(replyVo.getProcessTaskStepId(), Arrays.asList(ProcessTaskOperationType.COMMENT.getValue())));
+        List<String> typeList = new ArrayList<>();
+        typeList.add(ProcessTaskOperationType.COMMENT.getValue());
+        typeList.add(ProcessTaskOperationType.COMPLETE.getValue());
+        typeList.add(ProcessTaskOperationType.BACK.getValue());
+        typeList.add(ProcessTaskOperationType.RETREAT.getValue());
+        typeList.add(ProcessTaskOperationType.TRANSFER.getValue());
+        resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(replyVo.getProcessTaskStepId(), typeList));
         return resultObj;
 	}
 

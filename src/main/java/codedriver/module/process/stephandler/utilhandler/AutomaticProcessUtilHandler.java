@@ -160,21 +160,21 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 			}});
 		}
 		/** 子任务按钮映射列表 **/
-		ProcessTaskOperationType[] subtaskButtons = {
-				ProcessTaskOperationType.ABORTSUBTASK, 
-				ProcessTaskOperationType.COMMENTSUBTASK, 
-				ProcessTaskOperationType.COMPLETESUBTASK, 
-				ProcessTaskOperationType.CREATESUBTASK, 
-				ProcessTaskOperationType.REDOSUBTASK, 
-				ProcessTaskOperationType.EDITSUBTASK
-		};
-		for(ProcessTaskOperationType subtaskButton : subtaskButtons) {
-			customButtonArray.add(new JSONObject() {{
-				this.put("name", subtaskButton.getValue());
-				this.put("customText", subtaskButton.getText() + "(子任务)");
-				this.put("value", "");
-			}});
-		}
+//		ProcessTaskOperationType[] subtaskButtons = {
+//				ProcessTaskOperationType.ABORTSUBTASK, 
+//				ProcessTaskOperationType.COMMENTSUBTASK, 
+//				ProcessTaskOperationType.COMPLETESUBTASK, 
+//				ProcessTaskOperationType.CREATESUBTASK, 
+//				ProcessTaskOperationType.REDOSUBTASK, 
+//				ProcessTaskOperationType.EDITSUBTASK
+//		};
+//		for(ProcessTaskOperationType subtaskButton : subtaskButtons) {
+//			customButtonArray.add(new JSONObject() {{
+//				this.put("name", subtaskButton.getValue());
+//				this.put("customText", subtaskButton.getText() + "(子任务)");
+//				this.put("value", "");
+//			}});
+//		}
 		JSONArray customButtonList = configObj.getJSONArray("customButtonList");
 		if(CollectionUtils.isNotEmpty(customButtonList)) {
 			Map<String, String> customButtonMap = new HashMap<>();

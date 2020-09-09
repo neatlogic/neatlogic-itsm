@@ -1,9 +1,10 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,8 +70,6 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-//		@Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "表单属性数据列表"),
-//		@Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "联动隐藏表单属性列表"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
 		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
 	})
@@ -93,7 +92,19 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 		processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
 		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
 		processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
-		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+		ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+        if(stepDraftSaveData != null) {
+            JSONObject dataObj = stepDraftSaveData.getData();
+            if(MapUtils.isNotEmpty(dataObj)) {
+                dataObj.remove("content");
+                dataObj.remove("fileIdList");
+            }
+            if(MapUtils.isNotEmpty(dataObj)) {
+                processTaskStepDataMapper.replaceProcessTaskStepData(stepDraftSaveData);
+            }else {
+                processTaskStepDataMapper.deleteProcessTaskStepData(stepDraftSaveData);             
+            }
+        }
 
 		String content = jsonObj.getString("content");        
         List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
@@ -132,7 +143,13 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
         
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, Arrays.asList(ProcessTaskOperationType.COMMENT.getValue())));
+        List<String> typeList = new ArrayList<>();
+        typeList.add(ProcessTaskOperationType.COMMENT.getValue());
+        typeList.add(ProcessTaskOperationType.COMPLETE.getValue());
+        typeList.add(ProcessTaskOperationType.BACK.getValue());
+        typeList.add(ProcessTaskOperationType.RETREAT.getValue());
+        typeList.add(ProcessTaskOperationType.TRANSFER.getValue());
+		resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
 		return resultObj;
 	}
 
