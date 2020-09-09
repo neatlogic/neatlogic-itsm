@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import java.text.ParseException;
 
+import codedriver.framework.process.dto.ProcessTaskVo;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.QueryResultSet;
@@ -60,5 +61,7 @@ public interface WorkcenterService {
     JSONObject getSearchIterate(QueryResultSet resultSet, WorkcenterVo workcenterVo);
 
     JSONObject doSearch(Long processtaskId) throws ParseException;
+
+    JSONObject getProcessTaskESObject(ProcessTaskVo processTaskVo);
 
 }
