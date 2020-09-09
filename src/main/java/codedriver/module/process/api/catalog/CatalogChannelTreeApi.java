@@ -74,13 +74,6 @@ public class CatalogChannelTreeApi extends PrivateApiComponentBase {
                     for(CatalogVo catalogVo : catalogList) {
                         uuidKeyMap.put(catalogVo.getUuid(), catalogVo);         
                     }
-//                    for(CatalogVo catalogVo : catalogList) {
-//                        String parentUuid = catalogVo.getParentUuid();
-//                        CatalogVo parent = uuidKeyMap.get(parentUuid);
-//                        if(parent != null) {
-//                            catalogVo.setParent(parent);
-//                        }               
-//                    }
                 }
 
                 for(ChannelVo channelVo : channelList) {
