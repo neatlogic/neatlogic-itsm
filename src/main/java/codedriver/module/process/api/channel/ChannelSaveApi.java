@@ -20,10 +20,12 @@ import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelPriorityVo;
+import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelIllegalParameterException;
 import codedriver.framework.process.exception.channel.ChannelNameRepeatException;
+import codedriver.framework.process.exception.channel.ChannelRelationSettingException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -80,8 +82,10 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 		@Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "关联优先级列表"),
 		@Param(name = "priorityUuidList[0]", type = ApiParamType.STRING, isRequired = false, desc = "优先级uuid"),
 		@Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
-		@Param(name = "channelTypeUuid", type = ApiParamType.STRING, desc = "服务类型uuid")
-		})
+		@Param(name = "channelTypeUuid", type = ApiParamType.STRING, desc = "服务类型uuid"),
+		@Param(name = "allowTranferReport", type = ApiParamType.ENUM, rule = "0,1", desc = "是否允许转报"),//TODO linbq必填
+		@Param(name = "channelRelationList", type = ApiParamType.JSONARRAY, desc = "转报设置列表")
+	})
 	@Output({
 		@Param(name = "Return", type = ApiParamType.STRING, desc = "服务通道uuid")
 	})
@@ -144,6 +148,30 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 			for(AuthorityVo authorityVo : authorityList) {
 				channelMapper.insertChannelAuthority(authorityVo,channelVo.getUuid());
 			}
+		}
+		/** 转报设置逻辑，允许转报后，转报设置必填 **/
+		channelMapper.deleteChannelRelationBySource(channelVo.getUuid());
+		channelMapper.deleteChannelRelationAuthorityBySource(channelVo.getUuid());
+		if(channelVo.getAllowTranferReport() == 1) {
+		    if(CollectionUtils.isEmpty(channelVo.getChannelRelationList())) {
+		        throw new ChannelRelationSettingException();
+		    }
+		    for(ChannelRelationVo channelRelationVo : channelVo.getChannelRelationList()) {
+		        channelRelationVo.setSource(channelVo.getUuid());
+		        for(String target : channelRelationVo.getTargetList()) {
+		            channelRelationVo.setTarget(target);
+	                channelMapper.insertChannelRelation(channelRelationVo);
+		        }
+		        for(String authority : channelRelationVo.getAuthorityList()) {
+		            if(authority.contains("#")) {
+		                String[] split = authority.split("#");
+	                    channelRelationVo.setType(split[0]);
+	                    channelRelationVo.setUuid(split[1]);
+	                    channelMapper.insertChannelRelationAuthority(channelRelationVo);    
+		            }
+		            	            
+		        }
+		    }
 		}
 		return uuid;
 	}
