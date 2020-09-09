@@ -57,7 +57,7 @@ public class ChannelTypeRelationSaveApi extends PrivateApiComponentBase {
 	    }
 	    Long id = jsonObj.getLong("id");
 	    if(id == null) {
-	        channelMapper.insertChannelRelation(channelTypeRelationVo);
+	        channelMapper.insertChannelTypeRelation(channelTypeRelationVo);
 	    }else {
 	        if(channelMapper.checkChannelTypeRelationIsExists(id) == 0) {
 	            throw new ChannelTypeRelationNotFoundException(id);

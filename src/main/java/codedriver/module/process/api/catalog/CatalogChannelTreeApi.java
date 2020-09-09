@@ -53,7 +53,7 @@ public class CatalogChannelTreeApi extends PrivateApiComponentBase {
 	@Output({
 		@Param(name="Return",explode = CatalogVo[].class,desc="服务目录及通道树")
 	})
-	@Description(desc = "服务目录及通道树查询接口")
+	@Description(desc = "查询服务目录及通道树")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
