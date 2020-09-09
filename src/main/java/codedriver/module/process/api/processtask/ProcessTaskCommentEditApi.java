@@ -1,6 +1,7 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +84,13 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
         }
         
         JSONObject resultObj = new JSONObject();
-        resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(oldReplyVo.getProcessTaskStepId(), Arrays.asList(ProcessTaskOperationType.COMMENT.getValue())));
+        List<String> typeList = new ArrayList<>();
+        typeList.add(ProcessTaskOperationType.COMMENT.getValue());
+        typeList.add(ProcessTaskOperationType.COMPLETE.getValue());
+        typeList.add(ProcessTaskOperationType.BACK.getValue());
+        typeList.add(ProcessTaskOperationType.RETREAT.getValue());
+        typeList.add(ProcessTaskOperationType.TRANSFER.getValue());
+        resultObj.put("commentList", processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(oldReplyVo.getProcessTaskStepId(), typeList));
         return resultObj;
 	}
 }
