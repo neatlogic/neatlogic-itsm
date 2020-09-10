@@ -106,6 +106,10 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
                 if(CollectionUtils.isNotEmpty(hidecomponentList)) {
                     jsonObj.put("hidecomponentList", hidecomponentList);
                 }
+                JSONObject handlerStepInfo = dataObj.getJSONObject("handlerStepInfo");
+                if(MapUtils.isNotEmpty(handlerStepInfo)) {
+                    jsonObj.put("handlerStepInfo", handlerStepInfo);
+                }
             }
         }
         processTaskStepVo.setParamObj(jsonObj);
