@@ -22,7 +22,6 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
-import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
@@ -99,11 +98,8 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
         if(channelTypeRelationId != null && channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
-        ChannelRelationVo channelRelationVo = new ChannelRelationVo();
-        channelRelationVo.setSource(channelUuid);
-        channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
-        List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
-        if(CollectionUtils.isEmpty(channelRelationTargetList)) {
+        List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(channelUuid, channelTypeRelationId);
+        if(CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
             return resultObj;
         }
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
