@@ -78,6 +78,7 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 		    channel.setIsFavorite(1);
 		}
 		/** 转报设置 **/
+		channel.getChannelRelationList().clear();
 		List<ChannelRelationVo> channelRelationList = channelMapper.getChannelRelationListBySource(uuid);
 		if(CollectionUtils.isNotEmpty(channelRelationList)) {
 		    channel.setAllowTranferReport(1);
