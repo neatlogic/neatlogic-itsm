@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,6 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
-import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
@@ -99,11 +99,8 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
         if(channelTypeRelationId != null && channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
-        ChannelRelationVo channelRelationVo = new ChannelRelationVo();
-        channelRelationVo.setSource(channelUuid);
-        channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
-        List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
-        if(CollectionUtils.isEmpty(channelRelationTargetList)) {
+        List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(channelUuid, channelTypeRelationId);
+        if(CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
             return resultObj;
         }
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
@@ -112,12 +109,15 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 		if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
 			return resultObj;
 		}
-
+		List<String> authorizedUuidList = ListUtils.retainAll(currentUserAuthorizedChannelUuidList, channelRelationTargetChannelUuidList);
+		if(CollectionUtils.isEmpty(authorizedUuidList)) {
+		    return resultObj;
+		}
 		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
 		ChannelVo channel = new ChannelVo();
 		channel.setKeyword(basePageVo.getKeyword());
 		channel.setIsActive(1);
-		channel.setAuthorizedUuidList(currentUserAuthorizedChannelUuidList);
+		channel.setAuthorizedUuidList(authorizedUuidList);
 		channel.setNeedPage(false);
 		List<ChannelVo> channelList = channelMapper.searchChannelList(channel);
 		if(CollectionUtils.isEmpty(channelList)) {
@@ -151,7 +151,7 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 			//排序
 			Collections.sort(catalogList);
 			//查出有已启用且有授权服务的目录uuid
-			List<String>hasActiveChannelCatalogUuidList = channelList.stream().map(ChannelVo::getParentUuid).collect(Collectors.toList());
+			List<String> hasActiveChannelCatalogUuidList = channelList.stream().map(ChannelVo::getParentUuid).collect(Collectors.toList());
 			List<Map<String, Object>> calalogBreadcrumbList = new ArrayList<>();
 			for(CatalogVo catalogVo : catalogList) {
 				if(!CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {//root根目录不返回

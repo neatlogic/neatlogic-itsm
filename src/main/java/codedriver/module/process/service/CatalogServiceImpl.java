@@ -18,6 +18,7 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
+import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 
@@ -185,5 +186,58 @@ public class CatalogServiceImpl implements CatalogService {
         rootCatalog.setLft(1);
         rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.intValue() + 1);
         return rootCatalog;
+    }
+
+    @Override
+    public List<String> getChannelUuidListInTheCatalogUuidList(List<String> catalogUuidList) {
+        if(CollectionUtils.isNotEmpty(catalogUuidList)) {
+            List<String> parentUuidList = new ArrayList<>();
+            for(String catalogUuid : catalogUuidList) {
+                if(!parentUuidList.contains(catalogUuid)) {
+                    CatalogVo catalogVo = catalogMapper.getCatalogByUuid(catalogUuid);
+                    if(catalogVo != null) {
+                        List<String> uuidList = catalogMapper.getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
+                        for(String uuid : uuidList) {
+                            if(!parentUuidList.contains(uuid)) {
+                                parentUuidList.add(uuid);
+                            }
+                        }
+                    }
+                }
+            }
+            return channelMapper.getChannelUuidListByParentUuidList(parentUuidList);
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<String> getChannelRelationTargetChannelUuidList(String channelUuid, Long channelTypeRelationId) {
+        ChannelRelationVo channelRelationVo = new ChannelRelationVo();
+        channelRelationVo.setSource(channelUuid);
+        channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
+        List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
+        if(CollectionUtils.isNotEmpty(channelRelationTargetList)) {
+            List<String> targetChannelUuidList = new ArrayList<>();
+            List<String> targetCatalogUuidList = new ArrayList<>();
+            for(ChannelRelationVo channelRelation : channelRelationTargetList) {
+                if("channel".equals(channelRelation.getType())) {
+                    targetChannelUuidList.add(channelRelation.getTarget());
+                }else if("catalog".equals(channelRelation.getType())) {
+                    targetCatalogUuidList.add(channelRelation.getTarget());
+                }
+            }
+            if(CollectionUtils.isNotEmpty(targetCatalogUuidList)) {
+                List<String> channelUuidList = getChannelUuidListInTheCatalogUuidList(targetCatalogUuidList);
+                if(CollectionUtils.isNotEmpty(channelUuidList)) {
+                    for(String targetChannelUuid : channelUuidList) {
+                        if(!targetChannelUuidList.contains(targetChannelUuid)) {
+                            targetChannelUuidList.add(targetChannelUuid);
+                        }
+                    }
+                }
+            }
+            return targetChannelUuidList;
+        }
+        return new ArrayList<>();
     }
 }
