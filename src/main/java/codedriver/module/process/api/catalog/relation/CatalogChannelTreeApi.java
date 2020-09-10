@@ -1,4 +1,4 @@
-package codedriver.module.process.api.catalog;
+package codedriver.module.process.api.catalog.relation;
 
 import java.util.*;
 
