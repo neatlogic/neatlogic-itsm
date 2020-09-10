@@ -158,9 +158,13 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 		    }
 		    for(ChannelRelationVo channelRelationVo : channelVo.getChannelRelationList()) {
 		        channelRelationVo.setSource(channelVo.getUuid());
-		        for(String target : channelRelationVo.getTargetList()) {
-		            channelRelationVo.setTarget(target);
-	                channelMapper.insertChannelRelation(channelRelationVo);
+		        for(String typeAndtarget : channelRelationVo.getTargetList()) {
+		            if(typeAndtarget.contains("#")) {
+		                String[] split = typeAndtarget.split("#");
+		                channelRelationVo.setType(split[0]);
+	                    channelRelationVo.setTarget(split[1]);
+	                    channelMapper.insertChannelRelation(channelRelationVo);
+		            }
 		        }
 		        for(String authority : channelRelationVo.getAuthorityList()) {
 		            if(authority.contains("#")) {

@@ -83,7 +83,7 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 		    channel.setAllowTranferReport(1);
 		    Map<Long, List<String>> channelRelationTargetMap = new HashMap<>();
 		    for(ChannelRelationVo channelRelationVo : channelRelationList) {
-		        channelRelationTargetMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getTarget());
+		        channelRelationTargetMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getTarget());
 		    }
 		    Map<Long, List<String>> channelRelationAuthorityMap = new HashMap<>();
 	        List<ChannelRelationVo> channelRelationAuthorityList = channelMapper.getChannelRelationAuthorityListBySource(uuid);
