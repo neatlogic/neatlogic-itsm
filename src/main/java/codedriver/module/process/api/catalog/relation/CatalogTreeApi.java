@@ -10,6 +10,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -87,10 +88,10 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 	        if(CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
 	          //已授权的服务uuid
 	            List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
-	            currentUserAuthorizedChannelUuidList.retainAll(channelRelationTargetChannelUuidList);
-	            if(CollectionUtils.isNotEmpty(currentUserAuthorizedChannelUuidList)) {
+	            List<String> authorizedUuidList = ListUtils.retainAll(currentUserAuthorizedChannelUuidList, channelRelationTargetChannelUuidList);
+	            if(CollectionUtils.isNotEmpty(authorizedUuidList)) {
 	              //查出有已启用且有授权服务的目录uuid
-	                List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedChannelUuidList);
+	                List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(authorizedUuidList);
 
 	                //构建一个虚拟的root目录
 	                CatalogVo rootCatalogVo = catalogService.buildRootCatalog();
