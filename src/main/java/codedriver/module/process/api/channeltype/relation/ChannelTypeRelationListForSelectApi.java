@@ -15,10 +15,12 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
 
@@ -28,6 +30,9 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
 
 	@Autowired
 	private ChannelMapper channelMapper;
+    
+    @Autowired
+    private TeamMapper teamMapper;
 
 	@Override
 	public String getToken() {
@@ -72,7 +77,8 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
         String sourceChannelUuid = jsonObj.getString("sourceChannelUuid");
         if(StringUtils.isNotBlank(sourceChannelUuid)) {
             channelTypeRelationVo.setUseIdList(true);
-            List<Long> channelTypeRelationIdList = channelMapper.getChannelTypeRelationIdListBySourceChannelUuid(sourceChannelUuid);
+            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+            List<Long> channelTypeRelationIdList = channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(sourceChannelUuid, UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList());
             channelTypeRelationVo.setIdList(channelTypeRelationIdList);
         }
         if(!channelTypeRelationVo.isUseIdList() || CollectionUtils.isNotEmpty(channelTypeRelationVo.getIdList())) {
