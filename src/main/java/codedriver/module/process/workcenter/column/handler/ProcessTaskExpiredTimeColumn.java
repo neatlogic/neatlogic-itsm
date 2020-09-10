@@ -42,6 +42,10 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 				JSONObject slaTimeJson = processTaskSla.getJSONObject("slaTimeVo");
 				Long expireTime = slaTimeJson.getLong("expireTime");
 				Long realExpireTime = slaTimeJson.getLong("realExpireTime");
+                Long expireTimeLong = slaTimeJson.getLong("expireTimeLong");
+                Long realExpireTimeLong = slaTimeJson.getLong("realExpireTimeLong");
+                expireTime = expireTime == null ? expireTimeLong : expireTime;
+                realExpireTime = realExpireTime == null ? realExpireTimeLong : realExpireTime;
 				if(expireTime != null) {
 					long timeLeft = worktimeMapper.calculateCostTime(worktimeUuid, System.currentTimeMillis(),expireTime);
 					tmpJson.put("timeLeft", timeLeft);
