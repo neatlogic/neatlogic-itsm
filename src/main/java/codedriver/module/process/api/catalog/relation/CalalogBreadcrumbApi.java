@@ -102,7 +102,7 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
         ChannelRelationVo channelRelationVo = new ChannelRelationVo();
         channelRelationVo.setSource(channelUuid);
         channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
-        List<String> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
+        List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
         if(CollectionUtils.isEmpty(channelRelationTargetList)) {
             return resultObj;
         }

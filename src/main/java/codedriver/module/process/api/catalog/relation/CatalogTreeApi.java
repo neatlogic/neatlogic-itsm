@@ -83,15 +83,27 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 		ChannelRelationVo channelRelationVo = new ChannelRelationVo();
 		channelRelationVo.setSource(channelUuid);
 		channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
-		List<String> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
+		List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
 		if(CollectionUtils.isNotEmpty(channelRelationTargetList)) {
+		    List<String> targetChannelUuidList = new ArrayList<>();
+		    List<String> targetCatalogUuidList = new ArrayList<>();
+		    for(ChannelRelationVo channelRelation : channelRelationTargetList) {
+		        if("channel".equals(channelRelation.getType())) {
+		            targetChannelUuidList.add(channelRelation.getTarget());
+		        }else if("catalog".equals(channelRelation.getType())) {
+		            targetCatalogUuidList.add(channelRelation.getTarget());
+		        }
+		    }
+//		    if(CollectionUtils.isNotEmpty(targetCatalogUuidList)) {
+//		        catalogService.getChannelUuidListInTheCatalogUuidList(targetCatalogUuidList);
+//		    }
 		    List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
 	        //已授权的目录uuid
 	        List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 	        if(CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
 	          //已授权的服务uuid
 	            List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
-	            currentUserAuthorizedChannelUuidList.retainAll(channelRelationTargetList);
+	            currentUserAuthorizedChannelUuidList.retainAll(targetChannelUuidList);
 	            if(CollectionUtils.isNotEmpty(currentUserAuthorizedChannelUuidList)) {
 	              //查出有已启用且有授权服务的目录uuid
 	                List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedChannelUuidList);
