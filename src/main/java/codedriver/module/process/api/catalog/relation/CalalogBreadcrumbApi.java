@@ -100,7 +100,7 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
         List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(channelUuid, channelTypeRelationId);
-        if(CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
+        if(CollectionUtils.isEmpty(channelRelationTargetChannelUuidList)) {
             return resultObj;
         }
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
@@ -164,6 +164,7 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 					}
 				}
 			}
+			
 			if(basePageVo.getNeedPage()) {
 				int rowNum = calalogBreadcrumbList.size();
 				int pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
@@ -175,13 +176,36 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 				if(fromIndex < rowNum) {
 					int toIndex = fromIndex + basePageVo.getPageSize();
 					toIndex = toIndex >  rowNum ? rowNum : toIndex;
-					resultObj.put("breadcrumbList", calalogBreadcrumbList.subList(fromIndex, toIndex));
+					calalogBreadcrumbList = calalogBreadcrumbList.subList(fromIndex, toIndex);
+//					resultObj.put("breadcrumbList", calalogBreadcrumbList.subList(fromIndex, toIndex));
 				}
-			}else {
-				resultObj.put("breadcrumbList", calalogBreadcrumbList);
+			}
+			if(CollectionUtils.isNotEmpty(calalogBreadcrumbList)) {
+			    ChannelVo channelVo = new ChannelVo();
+			    channelVo.setKeyword(basePageVo.getKeyword());
+			    channelVo.setIsActive(1);
+			    channelVo.setAuthorizedUuidList(authorizedUuidList);
+			    channelVo.setPageSize(8);
+			    for(Map<String, Object> calalogBreadcrumb : calalogBreadcrumbList) {
+			        channelVo.setParentUuid((String)calalogBreadcrumb.get("uuid"));
+			        calalogBreadcrumb.put("channelData", getChannelData(channelVo));
+			    }
+			    resultObj.put("breadcrumbList", calalogBreadcrumbList);
 			}
 		}
         return resultObj;
 	}
 
+	private JSONObject getChannelData(ChannelVo channelVo) {
+	    JSONObject resultObj = new JSONObject();
+	    int rowNum = channelMapper.searchChannelCount(channelVo);
+        int pageCount = PageUtil.getPageCount(rowNum,channelVo.getPageSize());
+        resultObj.put("currentPage",channelVo.getCurrentPage());
+        resultObj.put("pageSize",channelVo.getPageSize());
+        resultObj.put("pageCount", pageCount);
+        resultObj.put("rowNum", rowNum);
+        List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);       
+        resultObj.put("channelList", channelList);
+	    return resultObj;
+	}
 }
