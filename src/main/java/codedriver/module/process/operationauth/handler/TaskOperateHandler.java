@@ -160,6 +160,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             return false;
         });
         
+        operationBiPredicateMap.put(ProcessTaskOperationType.TRANFERREPORT, (processTaskVo, processTaskStepVo) -> {
+            return true;
+        });
     }
 
     @Override

@@ -36,7 +36,7 @@ public class CheckboxHandler implements IFormAttributeHandler {
 			List<String> textList = new ArrayList<>();
 			String dataSource = configObj.getString("dataSource");
 			if("static".equals(dataSource)) {
-				Map<String, String> valueTextMap = new HashMap<>();
+				Map<Object, String> valueTextMap = new HashMap<>();
 				List<ValueTextVo> dataList = JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("dataList")), ValueTextVo.class);
 				if(CollectionUtils.isNotEmpty(dataList)) {
 					for(ValueTextVo data : dataList) {
