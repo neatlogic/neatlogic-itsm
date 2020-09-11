@@ -1,11 +1,15 @@
 package codedriver.module.process.api.channel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +21,11 @@ import com.google.common.base.Objects;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import codedriver.module.process.service.CatalogService;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -29,6 +36,8 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private CatalogService catalogService;
+	@Autowired
+    private TeamMapper teamMapper;
 	
 	@Override
 	public String getToken() {
@@ -53,7 +62,9 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 		@Param(name = "isAuthenticate", type = ApiParamType.ENUM, desc = "是否需要鉴权", rule = "0,1"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
+        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "服务类型关系id"),
+        @Param(name = "channelUuid", type = ApiParamType.STRING, desc = "服务uuid")
 		})
 	@Output({
 		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
@@ -66,26 +77,52 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
+		resultObj.put("channelList", new ArrayList<>());
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
 		channelVo.setUserUuid(UserContext.get().getUserUuid(true));
+		boolean hasData = true;
 		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
 		if(Objects.equal(isAuthenticate, 1)) {
+		    List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		    List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		    if(CollectionUtils.isNotEmpty(authorizedChannelUuidList)) {
+		        String channelUuid = jsonObj.getString("channelUuid");
+	            if(StringUtils.isNotBlank(channelUuid) && channelMapper.checkChannelIsExists(channelUuid) == 0) {
+	                throw new ChannelNotFoundException(channelUuid);
+	            }
+	            Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
+	            if(channelTypeRelationId != null && channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
+	                throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
+	            }
+	            if(StringUtils.isNotBlank(channelUuid) && channelTypeRelationId != null) {
+	                List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(channelUuid, channelTypeRelationId);
+	                if(CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
+	                    channelVo.setAuthorizedUuidList(ListUtils.retainAll(authorizedChannelUuidList, channelRelationTargetChannelUuidList));
+	                }                
+	            }else {
+	                channelVo.setAuthorizedUuidList(authorizedChannelUuidList);
+	            }
+		    }	    	        
 			//查出当前用户已授权的服务
-			channelVo.setAuthorizedUuidList(catalogService.getCurrentUserAuthorizedChannelUuidList());
+//			channelVo.setAuthorizedUuidList(catalogService.getCurrentUserAuthorizedChannelUuidList());
 			channelVo.setIsActive(1);
+			hasData = CollectionUtils.isNotEmpty(channelVo.getAuthorizedUuidList());
 		}
-		if(channelVo.getNeedPage()) {
-			int rowNum = channelMapper.searchChannelCount(channelVo);
-			int pageCount = PageUtil.getPageCount(rowNum,channelVo.getPageSize());
-			channelVo.setPageCount(pageCount);
-			channelVo.setRowNum(rowNum);
-			resultObj.put("currentPage",channelVo.getCurrentPage());
-			resultObj.put("pageSize",channelVo.getPageSize());
-			resultObj.put("pageCount", pageCount);
-			resultObj.put("rowNum", rowNum);
-		}			
-		List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);		
-		resultObj.put("channelList", channelList);
+		if(hasData) {
+		    int pageCount = 0;
+		    if(channelVo.getNeedPage()) {
+	            int rowNum = channelMapper.searchChannelCount(channelVo);
+	            pageCount = PageUtil.getPageCount(rowNum,channelVo.getPageSize());
+	            resultObj.put("currentPage",channelVo.getCurrentPage());
+	            resultObj.put("pageSize",channelVo.getPageSize());
+	            resultObj.put("pageCount", pageCount);
+	            resultObj.put("rowNum", rowNum);
+	        }           
+		    if(!channelVo.getNeedPage() || channelVo.getCurrentPage() <= pageCount) {
+	            List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);       
+	            resultObj.put("channelList", channelList);
+		    }
+		}		
 		return resultObj;
 	}
 
