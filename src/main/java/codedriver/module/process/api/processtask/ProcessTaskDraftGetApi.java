@@ -21,7 +21,6 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
@@ -30,8 +29,6 @@ import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
-import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -75,9 +72,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
-
-    @Autowired
-    private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
 	public String getToken() {
@@ -147,6 +141,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 	                startProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
 	            }
 			}
+			
 			return processTaskVo;
 		}else if(channelUuid != null){
 			ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
@@ -215,8 +210,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
 			Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
 			if(fromProcessTaskId != null) {
-			    processTaskVo.setFromId(fromProcessTaskId);
-			    processTaskVo.setFromProcessTaskVo(getFromProcessTasById(fromProcessTaskId));
+			    //processTaskVo.setFromProcessTaskId(fromProcessTaskId);
+			    processTaskVo.setFromProcessTaskVo(processTaskService.getFromProcessTasById(fromProcessTaskId));
 			}
 			if(StringUtils.isNotBlank(processVo.getFormUuid())) {
 				FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());
@@ -264,23 +259,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
     }
-	
-	private ProcessTaskVo getFromProcessTasById(Long processTaskId) {
-        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        //获取工单表单信息
-        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-        if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-            String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-            if(StringUtils.isNotBlank(formContent)) {
-                processTaskVo.setFormConfig(formContent);            
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
-                for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                    processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-                }
-            }
-        }
-	    return processTaskVo;
-	}
 
 	private void transferFormAttributeValue(ProcessTaskVo fromProcessTaskVo, ProcessTaskVo toProcessTaskVo) {
 	    Map<String, String> labelUuidMap = new HashMap<>();
