@@ -82,7 +82,6 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 		
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 
-//		CatalogVo rootCatalog = catalogMapper.getCatalogByUuid(CatalogVo.ROOT_UUID);
 		//构建一个虚拟的root目录
 		CatalogVo rootCatalogVo = catalogService.buildRootCatalog();
 		//查出所有目录

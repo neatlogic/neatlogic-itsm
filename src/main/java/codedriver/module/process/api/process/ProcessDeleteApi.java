@@ -1,5 +1,6 @@
 package codedriver.module.process.api.process;
 
+import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -27,6 +28,9 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 
     @Autowired
     private NotifyPolicyInvokerManager notifyPolicyInvokerManager;
+
+	@Autowired
+	private ScoreTemplateMapper scoreTemplateMapper;
 	
 	@Override
 	public String getToken() {
@@ -71,6 +75,8 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 		processMapper.deleteProcessFormByProcessUuid(uuid);
 		processMapper.deleteProcessSlaByProcessUuid(uuid);
 		notifyPolicyInvokerManager.removeInvoker(uuid);
+		//删除关联的评分模版
+		scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
 		return uuid;
 	}
 
