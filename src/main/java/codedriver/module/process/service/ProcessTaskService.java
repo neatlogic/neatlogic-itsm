@@ -221,4 +221,6 @@ public interface ProcessTaskService {
     public void setCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo);
     
     public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo);
+    
+    public ProcessTaskVo getFromProcessTasById(Long processTaskId);
 }

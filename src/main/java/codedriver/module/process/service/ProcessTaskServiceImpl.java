@@ -723,6 +723,17 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		/** 获取评分信息 */
 		String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskId);
 		processTaskVo.setScoreInfo(scoreInfo);
+		
+		/** 转报数据 **/
+		Long fromProcessTaskId = processTaskMapper.getFromProcessTaskIdByToProcessTaskId(processTaskId);
+        if(fromProcessTaskId != null) {
+            //processTaskVo.setFromProcessTaskId(fromProcessTaskId);
+            processTaskVo.setFromProcessTaskVo(getFromProcessTasById(fromProcessTaskId));
+        }
+        Long toProcessTaskId = processTaskMapper.getLastToProcessTaskIdByFromProcessTaskId(processTaskId);
+        if(toProcessTaskId != null) {
+            processTaskVo.setToProcessTaskVo(processTaskMapper.getProcessTaskBaseInfoById(toProcessTaskId));
+        }
         return processTaskVo;
     }
 
@@ -1203,5 +1214,23 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
         }
         return resultList;
+    }    
+
+    @Override
+    public ProcessTaskVo getFromProcessTasById(Long processTaskId) {
+        ProcessTaskVo processTaskVo = checkProcessTaskParamsIsLegal(processTaskId);
+        //获取工单表单信息
+        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
+        if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
+            String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+            if(StringUtils.isNotBlank(formContent)) {
+                processTaskVo.setFormConfig(formContent);            
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
+                for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+                    processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                }
+            }
+        }
+        return processTaskVo;
     }
 }
