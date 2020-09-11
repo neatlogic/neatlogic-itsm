@@ -24,6 +24,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessStepVo;
@@ -89,7 +90,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 	
 	@Input({
 		@Param(name="processTaskId", type = ApiParamType.LONG, desc="工单id，从工单中心进入上报页时，传processTaskId"),
-		@Param(name="channelUuid", type = ApiParamType.STRING, desc="服务uuid，从服务目录进入上报页时，传channelUuid")
+		@Param(name="channelUuid", type = ApiParamType.STRING, desc="服务uuid，从服务目录进入上报页时，传channelUuid"),
+        @Param(name="fromProcessTaskId", type = ApiParamType.LONG, desc="来源工单id，从转报进入上报页时，传fromProcessTaskId"),
+		@Param(name="channelTypeRelationId", type = ApiParamType.LONG, desc="关系类型id，从转报进入上报页时，传channelTypeRelationId")
 	})
 	@Output({
 		@Param(explode = ProcessTaskVo.class, desc = "工单信息")
@@ -138,6 +141,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 	                startProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
 	            }
 			}
+			
 			return processTaskVo;
 		}else if(channelUuid != null){
 			ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
@@ -204,13 +208,20 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 			
 			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
+			Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
+			if(fromProcessTaskId != null) {
+			    //processTaskVo.setFromProcessTaskId(fromProcessTaskId);
+			    processTaskVo.setFromProcessTaskVo(processTaskService.getFromProcessTasById(fromProcessTaskId));
+			}
 			if(StringUtils.isNotBlank(processVo.getFormUuid())) {
 				FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());
 				if(formVersion == null) {
 					throw new FormActiveVersionNotFoundExcepiton(processVo.getFormUuid());
 				}
 				processTaskVo.setFormConfig(formVersion.getFormConfig());
-				
+				if(processTaskVo.getFromProcessTaskVo() != null && StringUtils.isNotBlank(processTaskVo.getFromProcessTaskVo().getFormConfig())) {
+				    transferFormAttributeValue(processTaskVo.getFromProcessTaskVo(), processTaskVo);
+				}
 				List<ProcessStepFormAttributeVo> processStepFormAttributeList = processMapper.getProcessStepFormAttributeByStepUuid(startProcessTaskStepVo.getProcessStepUuid());
 				if(CollectionUtils.isNotEmpty(processStepFormAttributeList)) {
 					Map<String, String> formAttributeActionMap = new HashMap<>();
@@ -248,4 +259,26 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
     }
+
+	private void transferFormAttributeValue(ProcessTaskVo fromProcessTaskVo, ProcessTaskVo toProcessTaskVo) {
+	    Map<String, String> labelUuidMap = new HashMap<>();
+	    FormVersionVo fromFormVersion = new FormVersionVo();
+	    fromFormVersion.setFormConfig(fromProcessTaskVo.getFormConfig());
+	    List<FormAttributeVo> fromFormAttributeList = fromFormVersion.getFormAttributeList();
+	    for(FormAttributeVo formAttributeVo : fromFormAttributeList) {
+	        labelUuidMap.put(formAttributeVo.getLabel(), formAttributeVo.getUuid());
+	    }
+	    Map<String, Object> formAttributeDataMap = fromProcessTaskVo.getFormAttributeDataMap();
+	    FormVersionVo toFormVersion = new FormVersionVo();
+	    toFormVersion.setFormConfig(toProcessTaskVo.getFormConfig());
+	    for(FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
+	        String fromFormAttributeUuid = labelUuidMap.get(formAttributeVo.getLabel());
+	        if(StringUtils.isNotBlank(fromFormAttributeUuid)) {
+	            Object data = formAttributeDataMap.get(fromFormAttributeUuid);
+	            if(data != null) {
+	                toProcessTaskVo.getFormAttributeDataMap().put(formAttributeVo.getUuid(), data);
+	            }
+	        }
+	    }
+	}
 }

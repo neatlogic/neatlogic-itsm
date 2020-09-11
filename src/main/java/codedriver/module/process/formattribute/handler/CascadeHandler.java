@@ -13,13 +13,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.dto.AttributeDataVo;
-import codedriver.framework.process.dto.ProcessMatrixColumnVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.restful.core.IApiComponent;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
-import codedriver.module.process.api.matrix.MatrixColumnDataSearchForSelectNewApi;
+import codedriver.framework.restful.dto.ApiVo;
 
 @Component
 public class CascadeHandler implements IFormAttributeHandler {
@@ -74,19 +75,22 @@ public class CascadeHandler implements IFormAttributeHandler {
 				String matrixUuid = configObj.getString("matrixUuid");
 				List<ValueTextVo> mappingList = JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("mapping")), ValueTextVo.class);
 				if(StringUtils.isNotBlank(matrixUuid) && CollectionUtils.isNotEmpty(valueList) && CollectionUtils.isNotEmpty(mappingList)) {
-					MatrixColumnDataSearchForSelectNewApi restComponent = (MatrixColumnDataSearchForSelectNewApi)PrivateApiComponentFactory.getInstance(MatrixColumnDataSearchForSelectNewApi.class.getName());
-					if (restComponent != null) {
-						if(valueList.size() > 0 && mappingList.size() > 0) {
-							List<ProcessMatrixColumnVo> sourceColumnList = new ArrayList<>();
-							textList.add(getText(matrixUuid, mappingList.get(0), valueList.get(0), sourceColumnList, restComponent));
-							if(valueList.size() > 1 && mappingList.size() > 1) {
-								textList.add(getText(matrixUuid, mappingList.get(1), valueList.get(1), sourceColumnList, restComponent));
-								if(valueList.size() > 2 && mappingList.size() > 2) {
-									textList.add(getText(matrixUuid, mappingList.get(2), valueList.get(2), sourceColumnList, restComponent));
-								}
-							}
-						}
-					}
+				    ApiVo api = PrivateApiComponentFactory.getApiByToken("matrix/column/data/search/forselect/new");
+				    if(api != null) {
+				        IApiComponent  restComponent = PrivateApiComponentFactory.getInstance(api.getHandler());
+    					if (restComponent != null) {
+    						if(valueList.size() > 0 && mappingList.size() > 0) {
+    							List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
+    							textList.add(getText(matrixUuid, mappingList.get(0), valueList.get(0), sourceColumnList, restComponent,api));
+    							if(valueList.size() > 1 && mappingList.size() > 1) {
+    								textList.add(getText(matrixUuid, mappingList.get(1), valueList.get(1), sourceColumnList, restComponent,api));
+    								if(valueList.size() > 2 && mappingList.size() > 2) {
+    									textList.add(getText(matrixUuid, mappingList.get(2), valueList.get(2), sourceColumnList, restComponent,api));
+    								}
+    							}
+    						}
+    					}
+				    }
 				}
 			}
 			return textList;
@@ -94,7 +98,7 @@ public class CascadeHandler implements IFormAttributeHandler {
 		return dataObj;
 	}
 
-	private String getText(String matrixUuid, ValueTextVo mapping, String value, List<ProcessMatrixColumnVo> sourceColumnList, MatrixColumnDataSearchForSelectNewApi restComponent) {
+	private String getText(String matrixUuid, ValueTextVo mapping, String value, List<MatrixColumnVo> sourceColumnList, IApiComponent  restComponent,ApiVo api) {
 	    if(StringUtils.isBlank(value)) {
 	        return value;
 	    }
@@ -103,13 +107,13 @@ public class CascadeHandler implements IFormAttributeHandler {
 			JSONObject paramObj = new JSONObject();
 			paramObj.put("matrixUuid", matrixUuid);
 			List<String> columnList = new ArrayList<>();
-			columnList.add(mapping.getValue());
+			columnList.add((String)mapping.getValue());
 			columnList.add(mapping.getText());
 			paramObj.put("columnList", columnList);			
-			sourceColumnList.add(new ProcessMatrixColumnVo(mapping.getValue(), split[0]));
-			sourceColumnList.add(new ProcessMatrixColumnVo(mapping.getText(), split[1]));
+			sourceColumnList.add(new MatrixColumnVo((String)mapping.getValue(), split[0]));
+			sourceColumnList.add(new MatrixColumnVo(mapping.getText(), split[1]));
 			paramObj.put("sourceColumnList", sourceColumnList);
-			JSONObject resultObj = (JSONObject) restComponent.myDoService(paramObj);
+			JSONObject resultObj = (JSONObject) restComponent.doService(api,paramObj);
 			JSONArray columnDataList = resultObj.getJSONArray("columnDataList");
 			for(int i = 0; i < columnDataList.size(); i++) {
 				JSONObject firstObj = columnDataList.getJSONObject(i);

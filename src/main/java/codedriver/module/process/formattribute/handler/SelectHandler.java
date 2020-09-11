@@ -39,7 +39,7 @@ public class SelectHandler implements IFormAttributeHandler {
 			if("static".equals(dataSource)) {
 				List<ValueTextVo> dataList = JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("dataList")), ValueTextVo.class);
 				if(CollectionUtils.isNotEmpty(dataList)) {
-					Map<String, String> valueTextMap = new HashMap<>();
+					Map<Object, String> valueTextMap = new HashMap<>();
 					for(ValueTextVo data : dataList) {
 						valueTextMap.put(data.getValue(), data.getText());
 					}
