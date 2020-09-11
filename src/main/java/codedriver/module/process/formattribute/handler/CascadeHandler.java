@@ -107,10 +107,10 @@ public class CascadeHandler implements IFormAttributeHandler {
 			JSONObject paramObj = new JSONObject();
 			paramObj.put("matrixUuid", matrixUuid);
 			List<String> columnList = new ArrayList<>();
-			columnList.add(mapping.getValue());
+			columnList.add((String)mapping.getValue());
 			columnList.add(mapping.getText());
 			paramObj.put("columnList", columnList);			
-			sourceColumnList.add(new MatrixColumnVo(mapping.getValue(), split[0]));
+			sourceColumnList.add(new MatrixColumnVo((String)mapping.getValue(), split[0]));
 			sourceColumnList.add(new MatrixColumnVo(mapping.getText(), split[1]));
 			paramObj.put("sourceColumnList", sourceColumnList);
 			JSONObject resultObj = (JSONObject) restComponent.doService(api,paramObj);
