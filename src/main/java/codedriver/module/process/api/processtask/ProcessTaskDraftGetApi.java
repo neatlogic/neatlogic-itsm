@@ -97,7 +97,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 	@Input({
 		@Param(name="processTaskId", type = ApiParamType.LONG, desc="工单id，从工单中心进入上报页时，传processTaskId"),
 		@Param(name="channelUuid", type = ApiParamType.STRING, desc="服务uuid，从服务目录进入上报页时，传channelUuid"),
-        @Param(name="fromProcessTaskId", type = ApiParamType.LONG, desc="来源工单id，从转报进入上报页时，传processTaskId")
+        @Param(name="fromProcessTaskId", type = ApiParamType.LONG, desc="来源工单id，从转报进入上报页时，传fromProcessTaskId"),
+		@Param(name="channelTypeRelationId", type = ApiParamType.LONG, desc="关系类型id，从转报进入上报页时，传channelTypeRelationId")
 	})
 	@Output({
 		@Param(explode = ProcessTaskVo.class, desc = "工单信息")
