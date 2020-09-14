@@ -100,6 +100,7 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
+import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 
 @Service
@@ -695,6 +696,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if(processTaskVo.getEndTime() != null) {
             long timeCost = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), processTaskVo.getStartTime().getTime(), processTaskVo.getEndTime().getTime());
             processTaskVo.setTimeCost(timeCost);
+            processTaskVo.setTimeCostStr(TimeUtil.millisecondsTranferMaxTimeUnit(timeCost));
         }
         
         //获取工单表单信息
