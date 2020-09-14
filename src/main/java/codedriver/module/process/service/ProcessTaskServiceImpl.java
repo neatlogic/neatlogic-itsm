@@ -1233,6 +1233,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
             }
         }
+        //获取开始步骤id
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+        if(processTaskStepList.size() != 1) {
+            throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
+        }
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         return processTaskVo;
     }
 }
