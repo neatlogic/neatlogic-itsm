@@ -73,7 +73,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
             processTaskRelationVo.setChannelTypeRelationId(channelTypeRelationId);
             for(Long taskId : processTaskIdList) {
                 processTaskRelationVo.setTarget(taskId);
-                processTaskMapper.insertProcessTaskRelation(processTaskRelationVo);
+                processTaskMapper.replaceProcessTaskRelation(processTaskRelationVo);                  
             }
         }
         return null;
