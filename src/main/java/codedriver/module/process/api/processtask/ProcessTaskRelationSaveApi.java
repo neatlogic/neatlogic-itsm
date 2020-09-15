@@ -38,7 +38,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "processtask/relataion/save";
+        return "processtask/relation/save";
     }
 
     @Override
