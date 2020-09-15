@@ -23,6 +23,7 @@ import codedriver.framework.process.dto.ProcessTaskStepSubtaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -76,7 +77,7 @@ public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
 		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
 		if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
 		    processTaskService.setProcessTaskStepConfig(processTaskStepVo);
-			Map<String, String> customButtonMap = processTaskStepVo.getCustomButtonMap();
+			Map<String, String> customButtonMap = ProcessStepUtilHandlerFactory.getHandler().getCustomButtonMapByProcessTaskStepId(processTaskStepId);
 			List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
 			for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
 				String currentUser = UserContext.get().getUserUuid(true);

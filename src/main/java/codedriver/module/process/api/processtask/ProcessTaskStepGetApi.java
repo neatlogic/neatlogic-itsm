@@ -202,7 +202,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                 List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
                 if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-                    Map<String, String> customButtonMap = processTaskStepVo.getCustomButtonMap();
+                    Map<String, String> customButtonMap = handler.getCustomButtonMapByProcessTaskStepId(processTaskStepVo.getId());
                     for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
                         String currentUser = UserContext.get().getUserUuid(true);
                         if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
