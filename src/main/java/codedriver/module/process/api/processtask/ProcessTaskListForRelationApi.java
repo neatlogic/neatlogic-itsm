@@ -19,6 +19,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.OperationType;
@@ -41,12 +42,12 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "processtask/list/forselect";
+        return "processtask/list/forrelation";
     }
 
     @Override
     public String getName() {
-        return "查询工单列表";
+        return "查询工单列表(关联工单专用)";
     }
 
     @Override
@@ -66,6 +67,7 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
         @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "工单列表"),
         @Param(explode = BasePageVo.class)
     })
+    @Description(desc = "查询工单列表(关联工单专用)")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
