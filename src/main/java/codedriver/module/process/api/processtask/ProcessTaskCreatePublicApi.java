@@ -19,7 +19,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ProcessTaskCreateApi extends PublicApiComponentBase {
+public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 
   
 	@Override
