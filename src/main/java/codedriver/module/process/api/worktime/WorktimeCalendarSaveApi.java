@@ -140,8 +140,8 @@ public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 						continue;
 					}
 
-					int classType = dateObj.getIntValue("classType");
-					if(classType > 3) {//被选中的日期
+					int selected = dateObj.getIntValue("selected");
+					if(selected == 1) {//被选中的日期
 						resultList.add(dateObj.getString("name"));
 					}
 				}
