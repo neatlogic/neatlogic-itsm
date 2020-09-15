@@ -28,7 +28,7 @@ import codedriver.module.process.service.CatalogService;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskListForSelectApi extends PrivateApiComponentBase {
+public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
     
     @Autowired
     private ChannelMapper channelMapper;
@@ -55,7 +55,7 @@ public class ProcessTaskListForSelectApi extends PrivateApiComponentBase {
     }
 
     @Input({
-        @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "模糊匹配，支持标题与工单id"),
+        @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "模糊匹配，支持标题"),
         @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),        
         @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid"),
         @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
