@@ -709,8 +709,16 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     public JSONObject getProcessTaskESObject(ProcessTaskVo processTaskVo) {
         /** 获取服务信息 **/
         ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+        if(channel == null){
+            channel = new ChannelVo();
+        }
         /** 获取服务目录信息 **/
-        CatalogVo catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+        CatalogVo catalog = null;
+        if(StringUtils.isBlank(channel.getParentUuid())){
+            catalog = new CatalogVo();
+        }else{
+            catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+        }
         /** 获取开始节点内容信息 **/
         ProcessTaskContentVo startContentVo = null;
         List<ProcessTaskStepVo> stepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
