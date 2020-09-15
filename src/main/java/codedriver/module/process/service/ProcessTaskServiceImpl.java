@@ -1221,6 +1221,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public ProcessTaskVo getFromProcessTasById(Long processTaskId) {
         ProcessTaskVo processTaskVo = checkProcessTaskParamsIsLegal(processTaskId);
+        ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+        if(channelVo != null) {
+            ChannelTypeVo channelTypeVo =  channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+            if(channelTypeVo == null) {
+                channelTypeVo = new ChannelTypeVo();
+                channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
+            }
+            processTaskVo.setChannelType(channelTypeVo);
+        }
         //获取工单表单信息
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
         if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
