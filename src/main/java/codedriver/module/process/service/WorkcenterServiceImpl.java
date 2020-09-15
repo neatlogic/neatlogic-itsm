@@ -714,10 +714,11 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         }
         /** 获取服务目录信息 **/
         CatalogVo catalog = null;
-        if(StringUtils.isBlank(channel.getParentUuid())){
-            catalog = new CatalogVo();
-        }else{
+        if(StringUtils.isNotBlank(channel.getParentUuid())){
             catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+        }
+        if(catalog == null){
+            catalog = new CatalogVo();
         }
         /** 获取开始节点内容信息 **/
         ProcessTaskContentVo startContentVo = null;
