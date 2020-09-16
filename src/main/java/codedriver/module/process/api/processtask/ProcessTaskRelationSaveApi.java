@@ -67,12 +67,13 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
         }
         List<Long> relationProcessTaskIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("relationProcessTaskIdList")), Long.class);
         if(CollectionUtils.isNotEmpty(relationProcessTaskIdList)) {
-            List<Long> processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(relationProcessTaskIdList);
-            ProcessTaskRelationVo processTaskRelationVo = new ProcessTaskRelationVo();
-            processTaskRelationVo.setSource(processTaskId);
-            processTaskRelationVo.setChannelTypeRelationId(channelTypeRelationId);
+            List<Long> processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(relationProcessTaskIdList);      
             for(Long taskId : processTaskIdList) {
+                ProcessTaskRelationVo processTaskRelationVo = new ProcessTaskRelationVo();
+                processTaskRelationVo.setSource(processTaskId);
+                processTaskRelationVo.setChannelTypeRelationId(channelTypeRelationId);  
                 processTaskRelationVo.setTarget(taskId);
+                System.out.println(taskId);
                 processTaskMapper.replaceProcessTaskRelation(processTaskRelationVo);                  
             }
         }
