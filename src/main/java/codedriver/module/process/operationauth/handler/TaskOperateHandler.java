@@ -18,7 +18,10 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dto.CatalogVo;
+import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
@@ -33,6 +36,8 @@ public class TaskOperateHandler implements IOperationAuthHandler {
     private TeamMapper teamMapper;
     @Autowired
     private ChannelMapper channelMapper;
+    @Autowired
+    private CatalogMapper catalogMapper;
     @Autowired
     private ProcessTaskService processTaskService;
     @PostConstruct
@@ -161,7 +166,44 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         });
         
         operationBiPredicateMap.put(ProcessTaskOperationType.TRANFERREPORT, (processTaskVo, processTaskStepVo) -> {
-            return true;
+            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+            List<Long> channelTypeRelationIdList = channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList());
+            if(CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
+                ChannelRelationVo channelRelationVo = new ChannelRelationVo();
+                channelRelationVo.setSource(processTaskVo.getChannelUuid());
+                for(Long channelTypeRelationId : channelTypeRelationIdList) {
+                    channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
+                    List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
+                    if(CollectionUtils.isNotEmpty(channelRelationTargetList)) {
+                        List<String> channelTypeUuidList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+                        if(channelTypeUuidList.contains("all")) {
+                            channelTypeUuidList.clear();
+                        }
+                        for(ChannelRelationVo channelRelation : channelRelationTargetList) {
+                            if("channel".equals(channelRelation.getType())) {
+                                return true;
+                            }else if("catalog".equals(channelRelation.getType())) {
+                                if(channelMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
+                                    return true;
+                                }else {
+                                    CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelRelation.getTarget());
+                                    if(catalogVo != null) {
+                                        List<String> uuidList = catalogMapper.getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
+                                        for(String uuid : uuidList) {
+                                            if(!channelRelation.getTarget().equals(uuid)) {
+                                                if(channelMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
+                                                    return true; 
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } 
+                }
+            }
+            return false;
         });
     }
 
