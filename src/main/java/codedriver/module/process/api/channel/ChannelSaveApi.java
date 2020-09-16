@@ -71,6 +71,7 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 		@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作流uuid"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活", rule = "0,1"),
 		@Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作时间窗口uuid"),
+		@Param(name = "support", type = ApiParamType.STRING, isRequired = true, desc = "使用范围，all/pc/mobile"),
 		@Param(name = "desc", type = ApiParamType.STRING, desc = "服务说明", maxLength = 200, xss = true),
 		@Param(name = "icon", type = ApiParamType.STRING, desc = "图标"),
 		@Param(name = "color", type = ApiParamType.STRING, desc = "颜色"),
