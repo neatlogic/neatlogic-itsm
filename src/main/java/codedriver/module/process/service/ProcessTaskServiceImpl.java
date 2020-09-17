@@ -732,9 +732,21 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             //processTaskVo.setFromProcessTaskId(fromProcessTaskId);
             processTaskVo.setFromProcessTaskVo(getFromProcessTasById(fromProcessTaskId));
         }
-        Long toProcessTaskId = processTaskMapper.getLastToProcessTaskIdByFromProcessTaskId(processTaskId);
-        if(toProcessTaskId != null) {
-            processTaskVo.setToProcessTaskVo(processTaskMapper.getProcessTaskBaseInfoById(toProcessTaskId));
+        List<Long> toProcessTaskIdList = processTaskMapper.getToProcessTaskIdListByFromProcessTaskId(processTaskId);
+        for(Long toProcessTaskId : toProcessTaskIdList) {
+            ProcessTaskVo toProcessTaskVo = processTaskMapper.getProcessTaskBaseInfoById(toProcessTaskId);
+            if(toProcessTaskVo != null) {
+                ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+                if(channel != null) {
+                    ChannelTypeVo channelTypeVo =  channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+                    if(channelTypeVo == null) {
+                        channelTypeVo = new ChannelTypeVo();
+                        channelTypeVo.setUuid(channel.getChannelTypeUuid());
+                    }
+                    processTaskVo.setChannelType(channelTypeVo);
+                }
+                processTaskVo.getToProcessTaskList().add(toProcessTaskVo);
+            }
         }
         return processTaskVo;
     }
