@@ -23,7 +23,7 @@ public class ProcessTaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBa
     
 	@Override
 	public String getType() {
-		return ProcessTaskAuditDetailType.PROCESSTASKLIST.getValue();
+		return ProcessTaskAuditDetailType.PROCESSTASK.getValue();
 	}
 
 	@Override
