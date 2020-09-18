@@ -690,7 +690,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 channelTypeVo = new ChannelTypeVo();
                 channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
             }
-            processTaskVo.setChannelType(channelTypeVo);
+            processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
         }
         //耗时
         if(processTaskVo.getEndTime() != null) {
@@ -729,13 +729,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		/** 转报数据 **/
 		Long fromProcessTaskId = processTaskMapper.getFromProcessTaskIdByToProcessTaskId(processTaskId);
         if(fromProcessTaskId != null) {
-            //processTaskVo.setFromProcessTaskId(fromProcessTaskId);
-            processTaskVo.setFromProcessTaskVo(getFromProcessTasById(fromProcessTaskId));
+            processTaskVo.getTranferReportProcessTaskList().add(getFromProcessTasById(fromProcessTaskId));
         }
         List<Long> toProcessTaskIdList = processTaskMapper.getToProcessTaskIdListByFromProcessTaskId(processTaskId);
         for(Long toProcessTaskId : toProcessTaskIdList) {
             ProcessTaskVo toProcessTaskVo = processTaskMapper.getProcessTaskBaseInfoById(toProcessTaskId);
             if(toProcessTaskVo != null) {
+                toProcessTaskVo.setTranferReportDirection("to");
                 ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
                 if(channel != null) {
                     ChannelTypeVo channelTypeVo =  channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
@@ -743,9 +743,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                         channelTypeVo = new ChannelTypeVo();
                         channelTypeVo.setUuid(channel.getChannelTypeUuid());
                     }
-                    processTaskVo.setChannelType(channelTypeVo);
+                    processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
                 }
-                processTaskVo.getToProcessTaskList().add(toProcessTaskVo);
+                processTaskVo.getTranferReportProcessTaskList().add(toProcessTaskVo);
             }
         }
         return processTaskVo;
@@ -1240,7 +1240,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 channelTypeVo = new ChannelTypeVo();
                 channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
             }
-            processTaskVo.setChannelType(channelTypeVo);
+            processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
         }
         //获取工单表单信息
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
@@ -1262,6 +1262,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
         startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
+        processTaskVo.setTranferReportDirection("from");
         return processTaskVo;
     }
 }
