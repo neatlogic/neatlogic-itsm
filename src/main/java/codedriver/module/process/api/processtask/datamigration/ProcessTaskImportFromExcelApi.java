@@ -4,10 +4,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.file.FileUploadException;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dao.mapper.PriorityMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.form.FormHasNoAttributeException;
@@ -25,6 +22,7 @@ import codedriver.module.process.api.processtask.ProcessTaskStartProcessApi;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +56,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
     private UserMapper userMapper;
     @Autowired
     private PriorityMapper priorityMapper;
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getToken() {
@@ -115,6 +115,9 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         for(Map.Entry<String, MultipartFile> file : multipartFileMap.entrySet()) {
             multipartFile = file.getValue();
             Map<String, Object> data = ExcelUtil.getExcelData(multipartFile);
+            if(MapUtils.isEmpty(data)){
+                throw  new FileUploadException("Excel内容为空");
+            }
             List<String> headerList = (List<String>)data.get("header");
             List<Map<String, Object>> contentList = (List<Map<String, Object>>) data.get("content");
             if(CollectionUtils.isNotEmpty(headerList) && CollectionUtils.isNotEmpty(contentList)){
@@ -129,10 +132,28 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 List<JSONObject> taskList = parseTaskList(channelUuid, formAttributeList, contentList);
                 List<JSONObject> canSaveTaskList = null;
                 List<JSONObject> cannotSaveTaskList = null;
+                List<ProcessTaskImportAuditVo> successAuditVoList = new ArrayList<>();
+                List<ProcessTaskImportAuditVo> errorAuditVoList = new ArrayList<>();
                 if(CollectionUtils.isNotEmpty(taskList)){
-                    canSaveTaskList = taskList.stream().filter(json -> "success".equals(json.getJSONObject("status").getString("reportStatus"))).collect(Collectors.toList());
-                    cannotSaveTaskList = taskList.stream().filter(json -> "error".equals(json.getJSONObject("status").getString("reportStatus"))).collect(Collectors.toList());
+                    canSaveTaskList = taskList.stream().filter(json -> "success".equals(json.getString("importStatus"))).collect(Collectors.toList());
+                    cannotSaveTaskList = taskList.stream().filter(json -> "error".equals(json.getString("importStatus"))).collect(Collectors.toList());
                 }
+                /** 先把没有通过检验的待上报工单记录起来 */
+                if(CollectionUtils.isNotEmpty(cannotSaveTaskList)){
+                    for(JSONObject jsonObj : cannotSaveTaskList){
+                        ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
+                        auditVo.setChannelUuid(channelUuid);
+                        auditVo.setTitle(jsonObj.getString("title"));
+                        auditVo.setStatus(0);
+                        auditVo.setErrorReason(jsonObj.getString("importFailReason"));
+                        auditVo.setOwner(jsonObj.getString("owner"));
+                        errorAuditVoList.add(auditVo);
+                    }
+                }
+                if(CollectionUtils.isNotEmpty(errorAuditVoList)){
+                    processTaskMapper.batchInsertProcessTaskImportAudit(errorAuditVoList);
+                }
+                /** 提交通过校验的待上报工单 */
                 if(CollectionUtils.isNotEmpty(canSaveTaskList)){
                     ProcessTaskDraftSaveApi drafSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
                     for(JSONObject jsonObj : canSaveTaskList){
@@ -151,7 +172,18 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                         //流转
                         ProcessTaskStartProcessApi startProcessApi  = (ProcessTaskStartProcessApi)PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
                         startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()),saveResultObj);
+                        ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
+                        auditVo.setProcesstaskId(saveResultObj.getLong("processTaskId"));
+                        auditVo.setChannelUuid(channelUuid);
+                        auditVo.setTitle(jsonObj.getString("title"));
+                        auditVo.setStatus(1);
+                        auditVo.setOwner(jsonObj.getString("owner"));
+                        successAuditVoList.add(auditVo);
                     }
+                }
+                /** 记录上报成功的工单 */
+                if(CollectionUtils.isNotEmpty(successAuditVoList)){
+                    processTaskMapper.batchInsertProcessTaskImportAudit(successAuditVoList);
                 }
                 JSONObject result = new JSONObject();
                 result.put("cannotSaveTaskList",cannotSaveTaskList);
@@ -166,9 +198,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         for(Map<String, Object> map : contentList){
             JSONObject task = new JSONObject();
             JSONArray formAttributeDataList = new JSONArray();
-            JSONObject status = new JSONObject();
-            String reportStatus = "success";
-            String reportFailReason = null;
+            String importStatus = "success";
+            String importFailReason = null;
 
             task.put("channelUuid",channelUuid);
             for(Map.Entry<String,Object> entry : map.entrySet()){
@@ -176,8 +207,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                     if(entry.getValue() != null && StringUtils.isNotBlank(entry.getValue().toString())){
                         task.put("title",entry.getValue().toString());
                     }else{
-                        reportStatus = "error";
-                        reportFailReason = "工单标题为空";
+                        importStatus = "error";
+                        importFailReason = "工单标题为空";
                     }
                 }else if("请求人".equals(entry.getKey())){
                     if(entry.getValue() != null && StringUtils.isNotBlank(entry.getValue().toString())){
@@ -185,44 +216,52 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                         if(user != null){
                             task.put("owner",user.getUuid());
                         }else{
-                            reportStatus = "error";
-                            reportFailReason = "请求人：" + entry.getValue().toString() + "不存在";
+                            importStatus = "error";
+                            importFailReason = "请求人：" + entry.getValue().toString() + "不存在";
                         }
                     }else{
-                        reportStatus = "error";
-                        reportFailReason = "请求人为空";
+                        importStatus = "error";
+                        importFailReason = "请求人为空";
                     }
                 }else if("优先级".equals(entry.getKey())){
                     if(entry.getValue() != null && StringUtils.isNotBlank(entry.getValue().toString())){
                         PriorityVo priority = priorityMapper.getPriorityByName(entry.getValue().toString());
-                        if(priority != null){
-                            task.put("priorityUuid",priority.getUuid());
+                        List<ChannelPriorityVo> priorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+                        List<String> priorityUuidList = null;
+                        if(CollectionUtils.isNotEmpty(priorityList)){
+                            priorityUuidList = priorityList.stream().map(ChannelPriorityVo::getPriorityUuid).collect(Collectors.toList());
+                        }
+                        if(priority == null){
+                            importStatus = "error";
+                            importFailReason = "优先级：" + entry.getValue().toString() + "不存在";
+                        }else if(CollectionUtils.isNotEmpty(priorityUuidList) && !priorityUuidList.contains(priority.getUuid())){
+                            importStatus = "error";
+                            importFailReason = "优先级：" + entry.getValue().toString() + "与服务优先级不匹配";
                         }else{
-                            reportStatus = "error";
-                            reportFailReason = "优先级：" + entry.getValue().toString() + "不存在";
+                            task.put("priorityUuid",priority.getUuid());
                         }
                     }else{
-                        reportStatus = "error";
-                        reportFailReason = "优先级为空";
+                        importStatus = "error";
+                        importFailReason = "优先级为空";
                     }
                 }else if("描述".equals(entry.getKey())){
                     task.put("content",entry.getValue());
-                }
-
-                for(FormAttributeVo att: formAttributeList){
-                    if(att.getLabel().equals(entry.getKey())){
-                        JSONObject formdata = new JSONObject();
-                        formdata.put("attributeUuid",att.getUuid());
-                        formdata.put("handler",att.getHandler());
-                        // TODO 多个值时待处理，如果是日期等特殊类型待校验和转换
-                        formdata.put("dataList",entry.getValue().toString());
-                        formAttributeDataList.add(formdata);
-                        break;
+                }else{
+                    for(FormAttributeVo att: formAttributeList){
+                        if(att.getLabel().equals(entry.getKey())){
+                            JSONObject formdata = new JSONObject();
+                            formdata.put("attributeUuid",att.getUuid());
+                            formdata.put("handler",att.getHandler());
+                            // TODO 多个值时待处理，如果是日期等特殊类型待校验和转换，要根据不同的handler校验
+                            formdata.put("dataList",entry.getValue().toString());
+                            formAttributeDataList.add(formdata);
+                            break;
+                        }
                     }
                 }
-                status.put("reportStatus",reportStatus);
-                status.put("reportFailReason",reportFailReason);
-                task.put("status",status);
+
+                task.put("importStatus",importStatus);
+                task.put("importFailReason",importFailReason);
                 task.put("formAttributeDataList",formAttributeDataList);
                 task.put("hidecomponentList",new JSONArray());
             }
