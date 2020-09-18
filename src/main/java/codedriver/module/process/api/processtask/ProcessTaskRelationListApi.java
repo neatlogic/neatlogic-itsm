@@ -24,6 +24,7 @@ import codedriver.framework.process.dto.ChannelTypeRelationVo;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
+import codedriver.framework.process.dto.ProcessTaskStatusVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -118,8 +119,8 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                 ProcessTaskVo processTask = processTaskMap.get(processTaskRelation.getProcessTaskId());
                 if(processTask != null) {
                     processTaskRelation.setTilte(processTask.getTitle());
-                    processTaskRelation.setStatusVo(processTask.getStatusVo());
-                    processTaskRelation.setChannelTypeVo(processTask.getChannelType());
+                    processTaskRelation.setStatusVo(new ProcessTaskStatusVo(processTask.getStatus()));
+                    processTaskRelation.setChannelTypeVo(new ChannelTypeVo(processTask.getChannelType()));
                 }
             }
             resultObj.put("processTaskRelationList", processTaskRelationList);
