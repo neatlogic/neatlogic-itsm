@@ -173,7 +173,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                         ProcessTaskStartProcessApi startProcessApi  = (ProcessTaskStartProcessApi)PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
                         startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()),saveResultObj);
                         ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
-                        auditVo.setProcesstaskId(saveResultObj.getLong("processTaskId"));
+                        auditVo.setProcessTaskId(saveResultObj.getLong("processTaskId"));
                         auditVo.setChannelUuid(channelUuid);
                         auditVo.setTitle(jsonObj.getString("title"));
                         auditVo.setStatus(1);
