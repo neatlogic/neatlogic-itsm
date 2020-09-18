@@ -119,7 +119,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 throw  new FileUploadException("Excel内容为空");
             }
             List<String> headerList = (List<String>)data.get("header");
-            List<Map<String, Object>> contentList = (List<Map<String, Object>>) data.get("content");
+            List<Map<String, String>> contentList = (List<Map<String, String>>) data.get("content");
             if(CollectionUtils.isNotEmpty(headerList) && CollectionUtils.isNotEmpty(contentList)){
                 if (!headerList.contains("标题") || !headerList.contains("请求人") || !headerList.contains("优先级")) {
                     throw new ProcessTaskExcelMissColumnException("Excel中缺少标题、请求人或者优先级");
@@ -193,39 +193,39 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         return null;
     }
 
-    private List<JSONObject> parseTaskList(String channelUuid, List<FormAttributeVo> formAttributeList, List<Map<String, Object>> contentList) {
+    private List<JSONObject> parseTaskList(String channelUuid, List<FormAttributeVo> formAttributeList, List<Map<String, String>> contentList) {
         List<JSONObject> taskList = new ArrayList<>();
-        for(Map<String, Object> map : contentList){
+        for(Map<String, String> map : contentList){
             JSONObject task = new JSONObject();
             JSONArray formAttributeDataList = new JSONArray();
             String importStatus = "success";
             String importFailReason = null;
 
             task.put("channelUuid",channelUuid);
-            for(Map.Entry<String,Object> entry : map.entrySet()){
+            for(Map.Entry<String,String> entry : map.entrySet()){
                 if("标题".equals(entry.getKey())){
-                    if(entry.getValue() != null && StringUtils.isNotBlank(entry.getValue().toString())){
-                        task.put("title",entry.getValue().toString());
+                    if(StringUtils.isNotBlank(entry.getValue())){
+                        task.put("title",entry.getValue());
                     }else{
                         importStatus = "error";
                         importFailReason = "工单标题为空";
                     }
                 }else if("请求人".equals(entry.getKey())){
-                    if(entry.getValue() != null && StringUtils.isNotBlank(entry.getValue().toString())){
-                        UserVo user = userMapper.getUserByUserId(entry.getValue().toString());
+                    if(StringUtils.isNotBlank(entry.getValue())){
+                        UserVo user = userMapper.getUserByUserId(entry.getValue());
                         if(user != null){
                             task.put("owner",user.getUuid());
                         }else{
                             importStatus = "error";
-                            importFailReason = "请求人：" + entry.getValue().toString() + "不存在";
+                            importFailReason = "请求人：" + entry.getValue() + "不存在";
                         }
                     }else{
                         importStatus = "error";
                         importFailReason = "请求人为空";
                     }
                 }else if("优先级".equals(entry.getKey())){
-                    if(entry.getValue() != null && StringUtils.isNotBlank(entry.getValue().toString())){
-                        PriorityVo priority = priorityMapper.getPriorityByName(entry.getValue().toString());
+                    if(StringUtils.isNotBlank(entry.getValue())){
+                        PriorityVo priority = priorityMapper.getPriorityByName(entry.getValue());
                         List<ChannelPriorityVo> priorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
                         List<String> priorityUuidList = null;
                         if(CollectionUtils.isNotEmpty(priorityList)){
@@ -233,10 +233,10 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                         }
                         if(priority == null){
                             importStatus = "error";
-                            importFailReason = "优先级：" + entry.getValue().toString() + "不存在";
+                            importFailReason = "优先级：" + entry.getValue() + "不存在";
                         }else if(CollectionUtils.isNotEmpty(priorityUuidList) && !priorityUuidList.contains(priority.getUuid())){
                             importStatus = "error";
-                            importFailReason = "优先级：" + entry.getValue().toString() + "与服务优先级不匹配";
+                            importFailReason = "优先级：" + entry.getValue() + "与服务优先级不匹配";
                         }else{
                             task.put("priorityUuid",priority.getUuid());
                         }
@@ -253,7 +253,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                             formdata.put("attributeUuid",att.getUuid());
                             formdata.put("handler",att.getHandler());
                             // TODO 多个值时待处理，如果是日期等特殊类型待校验和转换，要根据不同的handler校验
-                            formdata.put("dataList",entry.getValue().toString());
+                            formdata.put("dataList",entry.getValue());
                             formAttributeDataList.add(formdata);
                             break;
                         }
