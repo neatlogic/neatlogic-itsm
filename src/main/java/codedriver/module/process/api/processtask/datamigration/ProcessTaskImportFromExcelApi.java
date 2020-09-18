@@ -186,7 +186,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                     processTaskMapper.batchInsertProcessTaskImportAudit(successAuditVoList);
                 }
                 JSONObject result = new JSONObject();
-                result.put("cannotSaveTaskList",cannotSaveTaskList);
+                result.put("successCount",CollectionUtils.isNotEmpty(successAuditVoList) ? successAuditVoList.size() : 0);
+                result.put("errorCount",CollectionUtils.isNotEmpty(errorAuditVoList) ? errorAuditVoList.size() : 0);
                 return result;
             }
         }
