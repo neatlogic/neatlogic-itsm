@@ -102,7 +102,10 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
  	           channelTypeRelation.getTargetList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
  	           channelTypeRelation.getTargetVoList().add(new ChannelTypeVo(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid())));
             }
-// 	        List<ChannelTypeRelationVo> channelTypeRelationReferenceCountList = channelMapper.getChannelTypeRelationReferenceCountListByChannelTypeRelationIdList(channelTypeRelationIdList);
+ 	        List<ChannelTypeRelationVo> channelTypeRelationReferenceCountList = channelMapper.getChannelTypeRelationReferenceCountListByChannelTypeRelationIdList(channelTypeRelationIdList);
+ 	        for(ChannelTypeRelationVo channelTypeRelation : channelTypeRelationReferenceCountList) {
+ 	           channelTypeRelationMap.computeIfAbsent(channelTypeRelation.getId(), v -> new ChannelTypeRelationVo()).setReferenceCount(channelTypeRelation.getReferenceCount());
+ 	        }
  	        resultObj.put("tbodyList", channelTypeRelationList);
 	    }
 		return resultObj;

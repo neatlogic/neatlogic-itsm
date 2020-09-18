@@ -186,6 +186,14 @@ public class StepOperateHandler implements IOperationAuthHandler {
             }
             return false;
         });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo) -> {
+            // 有可处理步骤work
+            if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.WORKER.getValue())) {
+                return true;
+            }
+            return false;
+        });
 	}
 
 	@Override

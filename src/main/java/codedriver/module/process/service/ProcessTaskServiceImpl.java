@@ -100,6 +100,7 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
+import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 
 @Service
@@ -689,12 +690,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 channelTypeVo = new ChannelTypeVo();
                 channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
             }
-            processTaskVo.setChannelType(channelTypeVo);
+            processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
         }
         //耗时
         if(processTaskVo.getEndTime() != null) {
             long timeCost = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(), processTaskVo.getStartTime().getTime(), processTaskVo.getEndTime().getTime());
             processTaskVo.setTimeCost(timeCost);
+            processTaskVo.setTimeCostStr(TimeUtil.millisecondsTranferMaxTimeUnit(timeCost));
         }
         
         //获取工单表单信息
@@ -727,12 +729,24 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		/** 转报数据 **/
 		Long fromProcessTaskId = processTaskMapper.getFromProcessTaskIdByToProcessTaskId(processTaskId);
         if(fromProcessTaskId != null) {
-            //processTaskVo.setFromProcessTaskId(fromProcessTaskId);
-            processTaskVo.setFromProcessTaskVo(getFromProcessTasById(fromProcessTaskId));
+            processTaskVo.getTranferReportProcessTaskList().add(getFromProcessTasById(fromProcessTaskId));
         }
-        Long toProcessTaskId = processTaskMapper.getLastToProcessTaskIdByFromProcessTaskId(processTaskId);
-        if(toProcessTaskId != null) {
-            processTaskVo.setToProcessTaskVo(processTaskMapper.getProcessTaskBaseInfoById(toProcessTaskId));
+        List<Long> toProcessTaskIdList = processTaskMapper.getToProcessTaskIdListByFromProcessTaskId(processTaskId);
+        for(Long toProcessTaskId : toProcessTaskIdList) {
+            ProcessTaskVo toProcessTaskVo = processTaskMapper.getProcessTaskBaseInfoById(toProcessTaskId);
+            if(toProcessTaskVo != null) {
+                toProcessTaskVo.setTranferReportDirection("to");
+                ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+                if(channel != null) {
+                    ChannelTypeVo channelTypeVo =  channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+                    if(channelTypeVo == null) {
+                        channelTypeVo = new ChannelTypeVo();
+                        channelTypeVo.setUuid(channel.getChannelTypeUuid());
+                    }
+                    processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+                }
+                processTaskVo.getTranferReportProcessTaskList().add(toProcessTaskVo);
+            }
         }
         return processTaskVo;
     }
@@ -1219,6 +1233,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public ProcessTaskVo getFromProcessTasById(Long processTaskId) {
         ProcessTaskVo processTaskVo = checkProcessTaskParamsIsLegal(processTaskId);
+        ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+        if(channelVo != null) {
+            ChannelTypeVo channelTypeVo =  channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+            if(channelTypeVo == null) {
+                channelTypeVo = new ChannelTypeVo();
+                channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
+            }
+            processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+        }
         //获取工单表单信息
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
         if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
@@ -1231,6 +1254,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
             }
         }
+        //获取开始步骤id
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+        if(processTaskStepList.size() != 1) {
+            throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
+        }
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
+        processTaskVo.setTranferReportDirection("from");
         return processTaskVo;
     }
 }

@@ -1,7 +1,38 @@
 package codedriver.module.process.service;
 
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.internal.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.techsure.multiattrsearch.MultiAttrsQuery;
+import com.techsure.multiattrsearch.QueryResultSet;
+import com.techsure.multiattrsearch.query.QueryParser;
+import com.techsure.multiattrsearch.query.QueryResult;
+import com.techsure.multiattrsearch.util.ESQueryUtil;
+
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.util.PageUtil;
@@ -16,10 +47,29 @@ import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
-import codedriver.framework.process.constvalue.*;
-import codedriver.framework.process.dao.mapper.*;
+import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
+import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.dto.*;
+import codedriver.framework.process.dto.CatalogVo;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.FormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskContentVo;
+import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.framework.process.dto.ProcessTaskSlaVo;
+import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -27,26 +77,6 @@ import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.util.TimeUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.MultiAttrsQuery;
-import com.techsure.multiattrsearch.QueryResultSet;
-import com.techsure.multiattrsearch.query.QueryParser;
-import com.techsure.multiattrsearch.query.QueryResult;
-import com.techsure.multiattrsearch.util.ESQueryUtil;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.text.ParseException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class WorkcenterServiceImpl implements WorkcenterService{
@@ -80,6 +110,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     public QueryResult searchTask(WorkcenterVo workcenterVo) {
         String selectColumn = "*";
         String where = assembleWhere(workcenterVo);
+        //待办条件
         if (workcenterVo.getIsMeWillDo() == 1) {
             String meWillDoCondition = getMeWillDoCondition(workcenterVo);
             if (StringUtils.isBlank(where)) {
@@ -88,11 +119,43 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                 where = where + " and " + meWillDoCondition;
             }
         }
+        //设备服务过滤
+        if(!DeviceType.ALL.getValue().equals(workcenterVo.getDevice())) {
+            String deviceCondition = getChannelDeviceCondition(workcenterVo);
+            if (StringUtils.isNotBlank(deviceCondition)) {
+                if (StringUtils.isBlank(where)) {
+                    where = " where " + deviceCondition;
+                } else {
+                    where = where + " and " + deviceCondition;
+                }
+            }
+        }
         String orderBy = "order by common.starttime desc";
         String sql =
             String.format("select %s from %s %s %s limit %d,%d", selectColumn, TenantContext.get().getTenantUuid(),
                 where, orderBy, workcenterVo.getStartNum(), workcenterVo.getPageSize());
         return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME), sql);
+    }
+    
+    /**
+     * 
+     *  获取设备（移动端|pc端）服务过滤条件
+     */
+    private String getChannelDeviceCondition(WorkcenterVo workcenterVo) {
+        String deviceCondition = StringUtils.EMPTY;
+        ChannelVo channelVo = new ChannelVo();
+        channelVo.setSupport(workcenterVo.getDevice());
+        List<ChannelVo>  channelList = channelMapper.searchChannelList(channelVo);
+        List<String> channelUuidList = new ArrayList<String>();
+        for(ChannelVo channel : channelList) {
+            channelUuidList.add(channel.getUuid());
+        }
+        if(CollectionUtils.isNotEmpty(channelUuidList)){
+            String channelUuids = String.format("'%s'", StringUtil.join(channelUuidList.toArray(new String[0]), "','"));
+            deviceCondition = String.format(Expression.INCLUDE.getExpressionEs(),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CHANNEL.getValue()),channelUuids);;
+            
+        }
+        return deviceCondition;
     }
 
     /**
@@ -206,7 +269,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         // Date time22 = new Date();
         // System.out.println("矫正headerCostTime:"+(time22.getTime()-time2.getTime()));
         if (!resultData.isEmpty()) {
-            Date time3 = new Date();
+            //Date time3 = new Date();
             for (MultiAttrsObject el : resultData) {
                 JSONObject taskJson = new JSONObject();
                 taskJson.put("taskid", el.getId());
@@ -222,8 +285,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                 taskJson.put("action", getStepAction(el));
                 dataList.add(taskJson);
             }
-            Date time33 = new Date();
-            System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
+            //Date time33 = new Date();
+            //System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
         }
         returnObj.put("theadList", theadList);
         returnObj.put("tbodyList", dataList);
@@ -709,8 +772,17 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     public JSONObject getProcessTaskESObject(ProcessTaskVo processTaskVo) {
         /** 获取服务信息 **/
         ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+        if(channel == null){
+            channel = new ChannelVo();
+        }
         /** 获取服务目录信息 **/
-        CatalogVo catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+        CatalogVo catalog = null;
+        if(StringUtils.isNotBlank(channel.getParentUuid())){
+            catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+        }
+        if(catalog == null){
+            catalog = new CatalogVo();
+        }
         /** 获取开始节点内容信息 **/
         ProcessTaskContentVo startContentVo = null;
         List<ProcessTaskStepVo> stepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
