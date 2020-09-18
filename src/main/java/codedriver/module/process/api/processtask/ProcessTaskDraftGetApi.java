@@ -163,7 +163,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 			}
 			ProcessTaskVo processTaskVo = new ProcessTaskVo();
 			processTaskVo.setIsAutoGenerateId(false);
-			processTaskVo.setChannelType(channelTypeVo);
+			processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
 			processTaskVo.setChannelUuid(channelUuid);
 			processTaskVo.setProcessUuid(channel.getProcessUuid());
 			processTaskVo.setWorktimeUuid(channel.getWorktimeUuid());
@@ -210,8 +210,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
 			Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
 			if(fromProcessTaskId != null) {
-			    //processTaskVo.setFromProcessTaskId(fromProcessTaskId);
-			    processTaskVo.setFromProcessTaskVo(processTaskService.getFromProcessTasById(fromProcessTaskId));
+			    processTaskVo.getTranferReportProcessTaskList().add(processTaskService.getFromProcessTasById(fromProcessTaskId));
 			}
 			if(StringUtils.isNotBlank(processVo.getFormUuid())) {
 				FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());
@@ -219,8 +218,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 					throw new FormActiveVersionNotFoundExcepiton(processVo.getFormUuid());
 				}
 				processTaskVo.setFormConfig(formVersion.getFormConfig());
-				if(processTaskVo.getFromProcessTaskVo() != null && StringUtils.isNotBlank(processTaskVo.getFromProcessTaskVo().getFormConfig())) {
-				    transferFormAttributeValue(processTaskVo.getFromProcessTaskVo(), processTaskVo);
+				if(CollectionUtils.isNotEmpty(processTaskVo.getTranferReportProcessTaskList()) && StringUtils.isNotBlank(processTaskVo.getTranferReportProcessTaskList().get(0).getFormConfig())) {
+				    transferFormAttributeValue(processTaskVo.getTranferReportProcessTaskList().get(0), processTaskVo);
 				}
 				List<ProcessStepFormAttributeVo> processStepFormAttributeList = processMapper.getProcessStepFormAttributeByStepUuid(startProcessTaskStepVo.getProcessStepUuid());
 				if(CollectionUtils.isNotEmpty(processStepFormAttributeList)) {

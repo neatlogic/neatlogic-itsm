@@ -92,7 +92,6 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
         }
         if(!processTaskRelationVo.getNeedPage() || processTaskRelationVo.getCurrentPage() <= pageCount) {
             Set<Long> processTaskIdSet = new HashSet<>();
-//            Set<Long> channelTypeRelationIdSet = new HashSet<>();
             List<ProcessTaskRelationVo> processTaskRelationList = processTaskMapper.getProcessTaskRelationList(processTaskRelationVo);            
             for(ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
                 processTaskIdSet.add(processTaskRelation.getProcessTaskId());
@@ -100,13 +99,7 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                 if(channelTypeRelationVo != null) {
                     processTaskRelation.setChannelTypeRelationName(channelTypeRelationVo.getName());
                 }
-//                channelTypeRelationIdSet.add(processTaskRelation.getChannelTypeRelationId());
             }
-//            Map<Long, String> channelTypeRelationNameMap = new HashMap<>();
-//            List<ChannelTypeRelationVo> channelTypeRelationList = channelMapper.getChannelTypeRelationListByIdSet(channelTypeRelationIdSet);
-//            for(ChannelTypeRelationVo channelTypeRelationVo : channelTypeRelationList) {
-//                channelTypeRelationNameMap.put(channelTypeRelationVo.getId(), channelTypeRelationVo.getName());
-//            }
             Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
             List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndIdList(null, new ArrayList<>(processTaskIdSet), null, null);
             for(ProcessTaskVo processTask : processTaskList) {
@@ -117,12 +110,11 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                         channelTypeVo = new ChannelTypeVo();
                         channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
                     }
-                    processTask.setChannelType(channelTypeVo);
+                    processTask.setChannelType(new ChannelTypeVo(channelTypeVo));
                 }
                 processTaskMap.put(processTask.getId(), processTask);
             }
             for(ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
-//                processTaskRelation.setChannelTypeRelationName(channelTypeRelationNameMap.get(processTaskRelation.getChannelTypeRelationId()));
                 ProcessTaskVo processTask = processTaskMap.get(processTaskRelation.getProcessTaskId());
                 if(processTask != null) {
                     processTaskRelation.setTilte(processTask.getTitle());
