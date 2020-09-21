@@ -115,7 +115,9 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 						|| ProcessFormHandler.FORMDYNAMICLIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
 						|| ProcessFormHandler.FORMSTATICLIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
 						) {
-					content.put("newContent", "已更新");
+				    if(!attributeDataVo.dataIsEmpty()) {
+	                    content.put("newContent", "已更新");			        
+				    }
 				}else {
 					String oldContent = oldContentMap.get(attributeDataVo.getAttributeUuid());
 					if(oldContent != null) {
