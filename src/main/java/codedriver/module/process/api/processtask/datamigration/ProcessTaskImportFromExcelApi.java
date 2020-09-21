@@ -279,25 +279,74 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                                 importFailReason = "表单属性：" + entry.getKey() + "不能为空";
                                 break;
                             }
-                            /** 如果是下拉框、单选钮、复选框，则校验是否在表单配置的可选值范围内 */
-                            //TODO 复选框要单独判断，要根据text获取value
-                            if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMSELECT.getHandler().equals(att.getHandler()) || ProcessFormHandler.FORMRADIO.getHandler().equals(att.getHandler())
-                                    || ProcessFormHandler.FORMCHECKBOX.getHandler().equals(att.getHandler()))){
-                                String config = att.getConfig();
-                                JSONObject configObj = JSONObject.parseObject(config);
-                                JSONArray dataList = configObj.getJSONArray("dataList");
-                                List<JSONObject> dataJsonList = null;
-                                if(CollectionUtils.isNotEmpty(dataList)){
-                                    dataJsonList = dataList.toJavaList(JSONObject.class);
+                            String config = att.getConfig();
+                            JSONObject configObj = JSONObject.parseObject(config);
+                            JSONArray dataList = configObj.getJSONArray("dataList");
+                            List<JSONObject> dataJsonList = null;
+                            if(CollectionUtils.isNotEmpty(dataList)){
+                                dataJsonList = dataList.toJavaList(JSONObject.class);
+                            }
+                            List<String> textList = null;
+                            if(CollectionUtils.isNotEmpty(dataJsonList)){
+                                textList = dataJsonList.stream().map(obj -> obj.getString("text")).collect(Collectors.toList());
+                            }
+                            Object data = entry.getValue();
+                            /** 如果是文本框或者文本域，那么要校验字符长度 */
+                            if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMINPUT.getHandler().equals(att.getHandler()))){
+                                Integer inputMaxlength = configObj.getInteger("inputMaxlength");
+                                if(inputMaxlength != null && entry.getValue().length() > inputMaxlength.intValue()){
+                                    importStatus = "error";
+                                    importFailReason = entry.getKey() + "过长，不可超过" + inputMaxlength + "个字符";
+                                    break;
                                 }
-                                List<String> valueList = null;
-                                if(CollectionUtils.isNotEmpty(dataJsonList)){
-                                    valueList = dataJsonList.stream().map(obj -> obj.getString("text")).collect(Collectors.toList());
+                            }
+                            if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMTEXTAREA.getHandler().equals(att.getHandler()))){
+                                Integer textareaMaxlength = configObj.getInteger("textareaMaxlength");
+                                if(textareaMaxlength != null && entry.getValue().length() > textareaMaxlength.intValue()){
+                                    importStatus = "error";
+                                    importFailReason = entry.getKey() + "过长，不可超过" + textareaMaxlength + "个字符";
+                                    break;
                                 }
-                                if(CollectionUtils.isNotEmpty(valueList) && !valueList.contains(entry.getValue())){
+                            }
+                            /** 如果是下拉框、单选钮，则校验是否在表单配置的可选值范围内 */
+                            if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMSELECT.getHandler().equals(att.getHandler()) || ProcessFormHandler.FORMRADIO.getHandler().equals(att.getHandler()))){
+                                if(CollectionUtils.isNotEmpty(textList) && textList.contains(entry.getValue())){
+                                    for(JSONObject json : dataJsonList){
+                                        if(json.getString("text").equals(entry.getValue())){
+                                            data = json.getString("value");
+                                            break;
+                                        }
+                                    }
+                                }else if(CollectionUtils.isNotEmpty(textList) && !textList.contains(entry.getValue())){
                                     importStatus = "error";
                                     importFailReason = entry.getKey() + "：" + entry.getValue() + "不在合法的值范围内";
                                     break;
+                                }
+                            }
+                            /** 如果是复选框，那么就校验每一个值是否在候选值范围内 */
+                            if(StringUtils.isNotBlank(entry.getValue()) && ProcessFormHandler.FORMCHECKBOX.getHandler().equals(att.getHandler())){
+                                data = new JSONArray();
+                                if(!entry.getValue().contains(",") && CollectionUtils.isNotEmpty(textList) && textList.contains(entry.getValue())){
+                                    for(JSONObject json : dataJsonList){
+                                        if(json.getString("text").equals(entry.getValue())){
+                                            ((JSONArray) data).add(json.getString("value"));
+                                            break;
+                                        }
+                                    }
+                                }else if(entry.getValue().contains(",") && CollectionUtils.isNotEmpty(textList)){
+                                    String[] dataArray = entry.getValue().split(",");
+                                    for(String str : dataArray){
+                                        for(JSONObject json : dataJsonList){
+                                            if(json.getString("text").equals(str)){
+                                                ((JSONArray) data).add(json.getString("value"));
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                if(CollectionUtils.isEmpty((JSONArray) data)){
+                                    importStatus = "error";
+                                    importFailReason = entry.getKey() + "：" + entry.getValue() + "不在合法的值范围内，多个值需要以英文\",\"隔开";
                                 }
                             }
                             /** 如果是日期或时间，则校验是否符合日期|时间格式 */
@@ -312,7 +361,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                                 break;
                             }
 
-                            formdata.put("dataList",entry.getValue());
+                            formdata.put("dataList",data);
                             formAttributeDataList.add(formdata);
                             break;
                         }
