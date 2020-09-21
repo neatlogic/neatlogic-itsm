@@ -206,7 +206,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         for(Map.Entry<String,String> entry : map.entrySet()){
             if("标题".equals(entry.getKey())){
                 if(StringUtils.isNotBlank(entry.getValue())){
-                        task.put("title",entry.getValue());
+                    task.put("title",entry.getValue());
                 }else{
                     importStatus = "error";
                     importFailReason = "工单标题为空";
