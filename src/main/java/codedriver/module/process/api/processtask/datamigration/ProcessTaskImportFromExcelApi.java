@@ -4,6 +4,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.file.FileUploadException;
+import codedriver.framework.process.constvalue.ProcessFormHandler;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
@@ -37,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
@@ -45,6 +47,9 @@ import java.util.stream.Collectors;
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiComponentBase {
     static Logger logger = LoggerFactory.getLogger(ProcessTaskImportFromExcelApi.class);
+
+    private static final Pattern dataRegex = Pattern.compile("^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\\s([0-1][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$");
+    private static final Pattern timeRegex = Pattern.compile("^([0-1][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$");
 
     @Autowired
     private ChannelMapper channelMapper;
@@ -80,10 +85,14 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         /**
-         * 根据服务ID寻找对应的流程和表单，以此判断导入的excel格式是否合法
+         * 整体思路：
+         * 1、根据channelUuid查询服务、流程和表单
+         * 2、获取表单属性列表，首先校验EXCEL中是否包含请求人、标题、优先级以及必填的表单字段
+         * 3、读取Excel内容，校验每行数据，以importStatus区分是否通过校验
+         * 4、记录未通过校验的工单
+         * 5、批量上报通过校验的工单
+         * 6、记录通过校验的工单
          */
-        // TODO 记录导入记录
-        // TODO 校验表单数据
         String channelUuid = paramObj.getString("channelUuid");
         ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
         if(channel == null){
@@ -97,9 +106,11 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         if(processForm == null || formMapper.checkFormIsExists(processForm.getFormUuid()) == 0){
             throw new FormNotFoundException(processForm.getFormUuid());
         }
-        List<String> channelUuidList = new ArrayList<>();
-        channelUuidList.add(channelUuid);
-        List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeListByChannelUuidList(channelUuidList);
+        FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
+        List<FormAttributeVo> formAttributeList = null;
+        if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
+            formAttributeList = formVersionVo.getFormAttributeList();
+        }
         if(CollectionUtils.isEmpty(formAttributeList)){
             throw new FormHasNoAttributeException(processForm.getFormUuid());
         }
@@ -125,7 +136,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                     throw new ProcessTaskExcelMissColumnException("Excel中缺少标题、请求人或者优先级");
                 }
                 for(FormAttributeVo att: formAttributeList){
-                    if(!headerList.contains(att.getLabel()) && att.getIsRequiredFromConfig() == true){
+                    if(!headerList.contains(att.getLabel()) && att.isRequired()){
                         throw new ProcessTaskExcelMissColumnException("Excel中缺少" + att.getLabel());
                     }
                 }
@@ -194,6 +205,15 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         return null;
     }
 
+    /**
+     * 组装暂存上报工单列表
+     * importStatus区分可上报与不可上报的工单
+     * 通过校验的工单：importStatus=success，反之：importStatus=error
+     * @param channelUuid
+     * @param formAttributeList
+     * @param contentList
+     * @return
+     */
     private List<JSONObject> parseTaskList(String channelUuid, List<FormAttributeVo> formAttributeList, List<Map<String, String>> contentList) {
         List<JSONObject> taskList = new ArrayList<>();
         for(Map<String, String> map : contentList){
@@ -253,7 +273,45 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                             JSONObject formdata = new JSONObject();
                             formdata.put("attributeUuid",att.getUuid());
                             formdata.put("handler",att.getHandler());
-                            // TODO 多个值时待处理，如果是日期等特殊类型待校验和转换，要根据不同的handler校验
+                            /** 先校验必填 */
+                            if(att.isRequired() && StringUtils.isBlank(entry.getValue())){
+                                importStatus = "error";
+                                importFailReason = "表单属性：" + entry.getKey() + "不能为空";
+                                break;
+                            }
+                            /** 如果是下拉框、单选钮、复选框，则校验是否在表单配置的可选值范围内 */
+                            //TODO 复选框要单独判断，要根据text获取value
+                            if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMSELECT.getHandler().equals(att.getHandler()) || ProcessFormHandler.FORMRADIO.getHandler().equals(att.getHandler())
+                                    || ProcessFormHandler.FORMCHECKBOX.getHandler().equals(att.getHandler()))){
+                                String config = att.getConfig();
+                                JSONObject configObj = JSONObject.parseObject(config);
+                                JSONArray dataList = configObj.getJSONArray("dataList");
+                                List<JSONObject> dataJsonList = null;
+                                if(CollectionUtils.isNotEmpty(dataList)){
+                                    dataJsonList = dataList.toJavaList(JSONObject.class);
+                                }
+                                List<String> valueList = null;
+                                if(CollectionUtils.isNotEmpty(dataJsonList)){
+                                    valueList = dataJsonList.stream().map(obj -> obj.getString("text")).collect(Collectors.toList());
+                                }
+                                if(CollectionUtils.isNotEmpty(valueList) && !valueList.contains(entry.getValue())){
+                                    importStatus = "error";
+                                    importFailReason = entry.getKey() + "：" + entry.getValue() + "不在合法的值范围内";
+                                    break;
+                                }
+                            }
+                            /** 如果是日期或时间，则校验是否符合日期|时间格式 */
+                            if(StringUtils.isNotBlank(entry.getValue()) && ProcessFormHandler.FORMDATE.getHandler().equals(att.getHandler()) && !dataRegex.matcher(entry.getValue()).matches()){
+                                importStatus = "error";
+                                importFailReason = entry.getKey() + "：" + entry.getValue() + "不符合日期格式，正确的日期格式为：2020-09-24 06:06:06";
+                                break;
+                            }
+                            if(StringUtils.isNotBlank(entry.getValue()) && ProcessFormHandler.FORMTIME.getHandler().equals(att.getHandler()) && !timeRegex.matcher(entry.getValue()).matches()){
+                                importStatus = "error";
+                                importFailReason = entry.getKey() + "：" + entry.getValue() + "不符合时间格式，正确的时间格式为：10:06:03";
+                                break;
+                            }
+
                             formdata.put("dataList",entry.getValue());
                             formAttributeDataList.add(formdata);
                             break;
