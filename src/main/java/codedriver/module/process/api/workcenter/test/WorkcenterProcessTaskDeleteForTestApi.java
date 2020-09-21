@@ -12,9 +12,9 @@ import com.techsure.multiattrsearch.MultiAttrsObjectPool;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.workcenter.elasticsearch.handler.WorkcenterUpdateHandler;
 
 @Transactional
 @Service
@@ -43,7 +43,7 @@ public class WorkcenterProcessTaskDeleteForTestApi extends PrivateApiComponentBa
 		JSONArray taskIdList = jsonObj.getJSONArray("taskIdList");
 		Integer from = jsonObj.getInteger("from");
 		Integer to = jsonObj.getInteger("to");
-		MultiAttrsObjectPool  poll = ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME);
+		MultiAttrsObjectPool  poll = ElasticSearchPoolManager.getObjectPool(WorkcenterUpdateHandler.POOL_NAME);
 		poll.checkout(TenantContext.get().getTenantUuid());
 		if(from != null && to != null) {
 			for(Integer i=from;i<to;i++) {
