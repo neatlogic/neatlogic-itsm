@@ -122,6 +122,9 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         MultipartFile multipartFile = null;
         for(Map.Entry<String, MultipartFile> file : multipartFileMap.entrySet()) {
             multipartFile = file.getValue();
+            if(!multipartFile.getOriginalFilename().endsWith("xlsx")){
+                throw new FileUploadException("文件格式不正确，请导入.xlsx格式文件");
+            }
             Map<String, Object> data = ExcelUtil.getExcelData(multipartFile);
             if(MapUtils.isEmpty(data)){
                 throw  new FileUploadException("Excel内容为空");
