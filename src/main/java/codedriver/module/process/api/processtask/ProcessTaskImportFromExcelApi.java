@@ -86,9 +86,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
          * 1、根据channelUuid查询服务、流程和表单
          * 2、获取表单属性列表，首先校验EXCEL中是否包含请求人、标题、优先级以及必填的表单字段
          * 3、读取Excel内容，校验每行数据，以importStatus区分是否通过校验
-         * 4、记录未通过校验的工单
-         * 5、批量上报通过校验的工单
-         * 6、记录通过校验的工单
+         * 4、批量上报通过校验的工单
+         * 6、保存导入记录
          */
         String channelUuid = paramObj.getString("channelUuid");
         ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
@@ -140,39 +139,22 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                         throw new ProcessTaskExcelMissColumnException("Excel中缺少" + att.getLabel());
                     }
                 }
-                List<JSONObject> taskList = parseTaskList(channelUuid, formAttributeList, contentList);
-                List<JSONObject> canSaveTaskList = null;
-                List<JSONObject> cannotSaveTaskList = null;
-                List<ProcessTaskImportAuditVo> successAuditVoList = new ArrayList<>();
-                List<ProcessTaskImportAuditVo> errorAuditVoList = new ArrayList<>();
-                if(CollectionUtils.isNotEmpty(taskList)){
-                    canSaveTaskList = taskList.stream().filter(json -> "success".equals(json.getString("importStatus"))).collect(Collectors.toList());
-                    cannotSaveTaskList = taskList.stream().filter(json -> "error".equals(json.getString("importStatus"))).collect(Collectors.toList());
-                }
-                /** 先把没有通过检验的待上报工单记录起来 */
-                if(CollectionUtils.isNotEmpty(cannotSaveTaskList)){
-                    for(JSONObject jsonObj : cannotSaveTaskList){
-                        ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
-                        auditVo.setChannelUuid(channelUuid);
-                        auditVo.setTitle(jsonObj.getString("title"));
-                        auditVo.setStatus(0);
-                        auditVo.setErrorReason(jsonObj.getString("importFailReason"));
-                        auditVo.setOwner(jsonObj.getString("owner"));
-                        errorAuditVoList.add(auditVo);
-                    }
-                }
-                if(CollectionUtils.isNotEmpty(errorAuditVoList)){
-                    processTaskMapper.batchInsertProcessTaskImportAudit(errorAuditVoList);
-                }
-                /** 提交通过校验的待上报工单 */
-                if(CollectionUtils.isNotEmpty(canSaveTaskList)){
-                    ProcessTaskDraftSaveApi drafSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-                    for(JSONObject jsonObj : canSaveTaskList){
-                        JSONObject saveResultObj = JSONObject.parseObject(drafSaveApi.doService(PrivateApiComponentFactory.getApiByToken(drafSaveApi.getToken()), jsonObj).toString());
+                List<ProcessTaskImportAuditVo> auditVoList = new ArrayList<>();
+                ProcessTaskDraftSaveApi drafSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
+                ProcessTaskProcessableStepList stepListApi  = (ProcessTaskProcessableStepList)PrivateApiComponentFactory.getInstance(ProcessTaskProcessableStepList.class.getName());
+                ProcessTaskStartProcessApi startProcessApi  = (ProcessTaskStartProcessApi)PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
+                int successCount = 0;
+                for(Map<String, String> map : contentList){
+                    JSONObject task = parseTask(channelUuid, formAttributeList, map);
+                    ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
+                    auditVo.setChannelUuid(channelUuid);
+                    auditVo.setTitle(task.getString("title"));
+                    auditVo.setOwner(task.getString("owner"));
+                    if("success".equals(task.getString("importStatus"))){
+                        JSONObject saveResultObj = JSONObject.parseObject(drafSaveApi.doService(PrivateApiComponentFactory.getApiByToken(drafSaveApi.getToken()), task).toString());
                         saveResultObj.put("action", "start");
 
                         //查询可执行下一步骤
-                        ProcessTaskProcessableStepList stepListApi  = (ProcessTaskProcessableStepList)PrivateApiComponentFactory.getInstance(ProcessTaskProcessableStepList.class.getName());
                         Object nextStepListObj = stepListApi.doService(PrivateApiComponentFactory.getApiByToken(stepListApi.getToken()),saveResultObj);
                         List<ProcessTaskStepVo> nextStepList  =  (List<ProcessTaskStepVo>)nextStepListObj;
                         if(CollectionUtils.isEmpty(nextStepList) && nextStepList.size() != 1) {
@@ -181,24 +163,24 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                         saveResultObj.put("nextStepId", nextStepList.get(0).getId());
 
                         //流转
-                        ProcessTaskStartProcessApi startProcessApi  = (ProcessTaskStartProcessApi)PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
                         startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()),saveResultObj);
-                        ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
                         auditVo.setProcessTaskId(saveResultObj.getLong("processTaskId"));
-                        auditVo.setChannelUuid(channelUuid);
-                        auditVo.setTitle(jsonObj.getString("title"));
                         auditVo.setStatus(1);
-                        auditVo.setOwner(jsonObj.getString("owner"));
-                        successAuditVoList.add(auditVo);
+                        successCount++;
+                    }else{
+                        auditVo.setStatus(0);
+                        auditVo.setErrorReason(task.getString("importFailReason"));
                     }
+                    auditVoList.add(auditVo);
                 }
-                /** 记录上报成功的工单 */
-                if(CollectionUtils.isNotEmpty(successAuditVoList)){
-                    processTaskMapper.batchInsertProcessTaskImportAudit(successAuditVoList);
+
+                /** 保存导入日志 */
+                if(CollectionUtils.isNotEmpty(auditVoList)){
+                    processTaskMapper.batchInsertProcessTaskImportAudit(auditVoList);
                 }
                 JSONObject result = new JSONObject();
-                result.put("successCount",CollectionUtils.isNotEmpty(successAuditVoList) ? successAuditVoList.size() : 0);
-                result.put("errorCount",CollectionUtils.isNotEmpty(errorAuditVoList) ? errorAuditVoList.size() : 0);
+                result.put("successCount",successCount);
+                result.put("totalCount",contentList.size());
                 return result;
             }
         }
@@ -206,175 +188,170 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
     }
 
     /**
-     * 组装暂存上报工单列表
+     * 组装暂存上报工单
      * importStatus区分可上报与不可上报的工单
      * 通过校验的工单：importStatus=success，反之：importStatus=error
      * @param channelUuid
      * @param formAttributeList
-     * @param contentList
+     * @param map
      * @return
      */
-    private List<JSONObject> parseTaskList(String channelUuid, List<FormAttributeVo> formAttributeList, List<Map<String, String>> contentList) {
-        List<JSONObject> taskList = new ArrayList<>();
-        for(Map<String, String> map : contentList){
-            JSONObject task = new JSONObject();
-            JSONArray formAttributeDataList = new JSONArray();
-            String importStatus = "success";
-            String importFailReason = null;
+    private JSONObject parseTask(String channelUuid, List<FormAttributeVo> formAttributeList, Map<String, String> map) {
+        JSONObject task = new JSONObject();
+        JSONArray formAttributeDataList = new JSONArray();
+        String importStatus = "success";
+        String importFailReason = null;
 
-            task.put("channelUuid",channelUuid);
-            for(Map.Entry<String,String> entry : map.entrySet()){
-                if("标题".equals(entry.getKey())){
-                    if(StringUtils.isNotBlank(entry.getValue())){
+        task.put("channelUuid",channelUuid);
+        for(Map.Entry<String,String> entry : map.entrySet()){
+            if("标题".equals(entry.getKey())){
+                if(StringUtils.isNotBlank(entry.getValue())){
                         task.put("title",entry.getValue());
-                    }else{
-                        importStatus = "error";
-                        importFailReason = "工单标题为空";
-                    }
-                }else if("请求人".equals(entry.getKey())){
-                    if(StringUtils.isNotBlank(entry.getValue())){
-                        UserVo user = userMapper.getUserByUserId(entry.getValue());
-                        if(user != null){
-                            task.put("owner",user.getUuid());
-                        }else{
-                            importStatus = "error";
-                            importFailReason = "请求人：" + entry.getValue() + "不存在";
-                        }
-                    }else{
-                        importStatus = "error";
-                        importFailReason = "请求人为空";
-                    }
-                }else if("优先级".equals(entry.getKey())){
-                    if(StringUtils.isNotBlank(entry.getValue())){
-                        PriorityVo priority = priorityMapper.getPriorityByName(entry.getValue());
-                        List<ChannelPriorityVo> priorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
-                        List<String> priorityUuidList = null;
-                        if(CollectionUtils.isNotEmpty(priorityList)){
-                            priorityUuidList = priorityList.stream().map(ChannelPriorityVo::getPriorityUuid).collect(Collectors.toList());
-                        }
-                        if(priority == null){
-                            importStatus = "error";
-                            importFailReason = "优先级：" + entry.getValue() + "不存在";
-                        }else if(CollectionUtils.isNotEmpty(priorityUuidList) && !priorityUuidList.contains(priority.getUuid())){
-                            importStatus = "error";
-                            importFailReason = "优先级：" + entry.getValue() + "与服务优先级不匹配";
-                        }else{
-                            task.put("priorityUuid",priority.getUuid());
-                        }
-                    }else{
-                        importStatus = "error";
-                        importFailReason = "优先级为空";
-                    }
-                }else if("描述".equals(entry.getKey())){
-                    task.put("content",entry.getValue());
                 }else{
-                    for(FormAttributeVo att: formAttributeList){
-                        if(att.getLabel().equals(entry.getKey())){
-                            JSONObject formdata = new JSONObject();
-                            formdata.put("attributeUuid",att.getUuid());
-                            formdata.put("handler",att.getHandler());
-                            /** 先校验必填 */
-                            if(att.isRequired() && StringUtils.isBlank(entry.getValue())){
+                    importStatus = "error";
+                    importFailReason = "工单标题为空";
+                }
+            }else if("请求人".equals(entry.getKey())){
+                if(StringUtils.isNotBlank(entry.getValue())){
+                    UserVo user = userMapper.getUserByUserId(entry.getValue());
+                    if(user != null){
+                        task.put("owner",user.getUuid());
+                    }else{
+                        importStatus = "error";
+                        importFailReason = "请求人：" + entry.getValue() + "不存在";
+                    }
+                }else{
+                    importStatus = "error";
+                    importFailReason = "请求人为空";
+                }
+            }else if("优先级".equals(entry.getKey())){
+                if(StringUtils.isNotBlank(entry.getValue())){
+                    PriorityVo priority = priorityMapper.getPriorityByName(entry.getValue());
+                    List<ChannelPriorityVo> priorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+                    List<String> priorityUuidList = null;
+                    if(CollectionUtils.isNotEmpty(priorityList)){
+                        priorityUuidList = priorityList.stream().map(ChannelPriorityVo::getPriorityUuid).collect(Collectors.toList());
+                    }
+                    if(priority == null){
+                        importStatus = "error";
+                        importFailReason = "优先级：" + entry.getValue() + "不存在";
+                    }else if(CollectionUtils.isNotEmpty(priorityUuidList) && !priorityUuidList.contains(priority.getUuid())){
+                        importStatus = "error";
+                        importFailReason = "优先级：" + entry.getValue() + "与服务优先级不匹配";
+                    }else{
+                        task.put("priorityUuid",priority.getUuid());
+                    }
+                }else{
+                    importStatus = "error";
+                    importFailReason = "优先级为空";
+                }
+            }else if("描述".equals(entry.getKey())){
+                task.put("content",entry.getValue());
+            }else{
+                for(FormAttributeVo att: formAttributeList){
+                    if(att.getLabel().equals(entry.getKey())){
+                        JSONObject formdata = new JSONObject();
+                        formdata.put("attributeUuid",att.getUuid());
+                        formdata.put("handler",att.getHandler());
+                        /** 先校验必填 */
+                        if(att.isRequired() && StringUtils.isBlank(entry.getValue())){
+                            importStatus = "error";
+                            importFailReason = "表单属性：" + entry.getKey() + "不能为空";
+                            break;
+                        }
+                        String config = att.getConfig();
+                        JSONObject configObj = JSONObject.parseObject(config);
+                        JSONArray dataList = configObj.getJSONArray("dataList");
+                        List<JSONObject> dataJsonList = null;
+                        if(CollectionUtils.isNotEmpty(dataList)){
+                            dataJsonList = dataList.toJavaList(JSONObject.class);
+                        }
+                        List<String> textList = null;
+                        if(CollectionUtils.isNotEmpty(dataJsonList)){
+                            textList = dataJsonList.stream().map(obj -> obj.getString("text")).collect(Collectors.toList());
+                        }
+                        Object data = entry.getValue();
+                        /** 如果是文本框或者文本域，那么要校验字符长度 */
+                        if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMINPUT.getHandler().equals(att.getHandler()))){
+                            Integer inputMaxlength = configObj.getInteger("inputMaxlength");
+                            if(inputMaxlength != null && entry.getValue().length() > inputMaxlength.intValue()){
                                 importStatus = "error";
-                                importFailReason = "表单属性：" + entry.getKey() + "不能为空";
+                                importFailReason = entry.getKey() + "过长，不可超过" + inputMaxlength + "个字符";
                                 break;
                             }
-                            String config = att.getConfig();
-                            JSONObject configObj = JSONObject.parseObject(config);
-                            JSONArray dataList = configObj.getJSONArray("dataList");
-                            List<JSONObject> dataJsonList = null;
-                            if(CollectionUtils.isNotEmpty(dataList)){
-                                dataJsonList = dataList.toJavaList(JSONObject.class);
+                        }
+                        if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMTEXTAREA.getHandler().equals(att.getHandler()))){
+                            Integer textareaMaxlength = configObj.getInteger("textareaMaxlength");
+                            if(textareaMaxlength != null && entry.getValue().length() > textareaMaxlength.intValue()){
+                                importStatus = "error";
+                                importFailReason = entry.getKey() + "过长，不可超过" + textareaMaxlength + "个字符";
+                                break;
                             }
-                            List<String> textList = null;
-                            if(CollectionUtils.isNotEmpty(dataJsonList)){
-                                textList = dataJsonList.stream().map(obj -> obj.getString("text")).collect(Collectors.toList());
-                            }
-                            Object data = entry.getValue();
-                            /** 如果是文本框或者文本域，那么要校验字符长度 */
-                            if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMINPUT.getHandler().equals(att.getHandler()))){
-                                Integer inputMaxlength = configObj.getInteger("inputMaxlength");
-                                if(inputMaxlength != null && entry.getValue().length() > inputMaxlength.intValue()){
-                                    importStatus = "error";
-                                    importFailReason = entry.getKey() + "过长，不可超过" + inputMaxlength + "个字符";
-                                    break;
-                                }
-                            }
-                            if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMTEXTAREA.getHandler().equals(att.getHandler()))){
-                                Integer textareaMaxlength = configObj.getInteger("textareaMaxlength");
-                                if(textareaMaxlength != null && entry.getValue().length() > textareaMaxlength.intValue()){
-                                    importStatus = "error";
-                                    importFailReason = entry.getKey() + "过长，不可超过" + textareaMaxlength + "个字符";
-                                    break;
-                                }
-                            }
-                            /** 如果是下拉框、单选钮，则校验是否在表单配置的可选值范围内 */
-                            if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMSELECT.getHandler().equals(att.getHandler()) || ProcessFormHandler.FORMRADIO.getHandler().equals(att.getHandler()))){
-                                if(CollectionUtils.isNotEmpty(textList) && textList.contains(entry.getValue())){
-                                    for(JSONObject json : dataJsonList){
-                                        if(json.getString("text").equals(entry.getValue())){
-                                            data = json.getString("value");
-                                            break;
-                                        }
+                        }
+                        /** 如果是下拉框、单选钮，则校验是否在表单配置的可选值范围内 */
+                        if(StringUtils.isNotBlank(entry.getValue()) && (ProcessFormHandler.FORMSELECT.getHandler().equals(att.getHandler()) || ProcessFormHandler.FORMRADIO.getHandler().equals(att.getHandler()))){
+                            if(CollectionUtils.isNotEmpty(textList) && textList.contains(entry.getValue())){
+                                for(JSONObject json : dataJsonList){
+                                    if(json.getString("text").equals(entry.getValue())){
+                                        data = json.getString("value");
+                                        break;
                                     }
-                                }else if(CollectionUtils.isNotEmpty(textList) && !textList.contains(entry.getValue())){
-                                    importStatus = "error";
-                                    importFailReason = entry.getKey() + "：" + entry.getValue() + "不在合法的值范围内";
-                                    break;
                                 }
+                            }else if(CollectionUtils.isNotEmpty(textList) && !textList.contains(entry.getValue())){
+                                importStatus = "error";
+                                importFailReason = entry.getKey() + "：" + entry.getValue() + "不在合法的值范围内";
+                                break;
                             }
-                            /** 如果是复选框，那么就校验每一个值是否在候选值范围内 */
-                            if(StringUtils.isNotBlank(entry.getValue()) && ProcessFormHandler.FORMCHECKBOX.getHandler().equals(att.getHandler())){
-                                data = new JSONArray();
-                                if(!entry.getValue().contains(",") && CollectionUtils.isNotEmpty(textList) && textList.contains(entry.getValue())){
+                        }
+                        /** 如果是复选框，那么就校验每一个值是否在候选值范围内 */
+                        if(StringUtils.isNotBlank(entry.getValue()) && ProcessFormHandler.FORMCHECKBOX.getHandler().equals(att.getHandler())){
+                            data = new JSONArray();
+                            if(!entry.getValue().contains(",") && CollectionUtils.isNotEmpty(textList) && textList.contains(entry.getValue())){
+                                for(JSONObject json : dataJsonList){
+                                    if(json.getString("text").equals(entry.getValue())){
+                                        ((JSONArray) data).add(json.getString("value"));
+                                        break;
+                                    }
+                                }
+                            }else if(entry.getValue().contains(",") && CollectionUtils.isNotEmpty(textList)){
+                                String[] dataArray = entry.getValue().split(",");
+                                for(String str : dataArray){
                                     for(JSONObject json : dataJsonList){
-                                        if(json.getString("text").equals(entry.getValue())){
+                                        if(json.getString("text").equals(str)){
                                             ((JSONArray) data).add(json.getString("value"));
                                             break;
                                         }
                                     }
-                                }else if(entry.getValue().contains(",") && CollectionUtils.isNotEmpty(textList)){
-                                    String[] dataArray = entry.getValue().split(",");
-                                    for(String str : dataArray){
-                                        for(JSONObject json : dataJsonList){
-                                            if(json.getString("text").equals(str)){
-                                                ((JSONArray) data).add(json.getString("value"));
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                                if(CollectionUtils.isEmpty((JSONArray) data)){
-                                    importStatus = "error";
-                                    importFailReason = entry.getKey() + "：" + entry.getValue() + "不在合法的值范围内，多个值需要以英文\",\"隔开";
                                 }
                             }
-                            /** 如果是日期或时间，则校验是否符合日期|时间格式 */
-                            if(StringUtils.isNotBlank(entry.getValue()) && ProcessFormHandler.FORMDATE.getHandler().equals(att.getHandler()) && !dataRegex.matcher(entry.getValue()).matches()){
+                            if(CollectionUtils.isEmpty((JSONArray) data)){
                                 importStatus = "error";
-                                importFailReason = entry.getKey() + "：" + entry.getValue() + "不符合日期格式，正确的日期格式为：2020-09-24 06:06:06";
-                                break;
+                                importFailReason = entry.getKey() + "：" + entry.getValue() + "不在合法的值范围内，多个值需要以英文\",\"隔开";
                             }
-                            if(StringUtils.isNotBlank(entry.getValue()) && ProcessFormHandler.FORMTIME.getHandler().equals(att.getHandler()) && !timeRegex.matcher(entry.getValue()).matches()){
-                                importStatus = "error";
-                                importFailReason = entry.getKey() + "：" + entry.getValue() + "不符合时间格式，正确的时间格式为：10:06:03";
-                                break;
-                            }
-
-                            formdata.put("dataList",data);
-                            formAttributeDataList.add(formdata);
+                        }
+                        /** 如果是日期或时间，则校验是否符合日期|时间格式 */
+                        if(StringUtils.isNotBlank(entry.getValue()) && ProcessFormHandler.FORMDATE.getHandler().equals(att.getHandler()) && !dataRegex.matcher(entry.getValue()).matches()){
+                            importStatus = "error";
+                            importFailReason = entry.getKey() + "：" + entry.getValue() + "不符合日期格式，正确格式为：2020-09-24 06:06:06";
                             break;
                         }
+                        if(StringUtils.isNotBlank(entry.getValue()) && ProcessFormHandler.FORMTIME.getHandler().equals(att.getHandler()) && !timeRegex.matcher(entry.getValue()).matches()){
+                            importStatus = "error";
+                            importFailReason = entry.getKey() + "：" + entry.getValue() + "不符合时间格式，正确格式为：10:06:03";
+                            break;
+                        }
+
+                        formdata.put("dataList",data);
+                        formAttributeDataList.add(formdata);
+                        break;
                     }
                 }
-
-                task.put("importStatus",importStatus);
-                task.put("importFailReason",importFailReason);
-                task.put("formAttributeDataList",formAttributeDataList);
-                task.put("hidecomponentList",new JSONArray());
             }
-            taskList.add(task);
         }
-        return taskList;
+        task.put("importStatus",importStatus);
+        task.put("importFailReason",importFailReason);
+        task.put("formAttributeDataList",formAttributeDataList);
+        task.put("hidecomponentList",new JSONArray());
+        return task;
     }
 }
