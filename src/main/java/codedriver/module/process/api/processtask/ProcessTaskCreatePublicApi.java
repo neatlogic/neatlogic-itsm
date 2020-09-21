@@ -35,10 +35,10 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 	@SuppressWarnings("unchecked")
     @Input({
         @Param(name="channelUuid", type= ApiParamType.STRING, isRequired=true, desc="服务uuid"),
-        @Param(name="title", type=ApiParamType.STRING, maxLength = 80, desc = "标题"),
-        @Param(name="owner", type=ApiParamType.STRING, desc="请求人"),
+        @Param(name="title", type=ApiParamType.STRING, isRequired=true, maxLength = 80, desc = "标题"),
+        @Param(name="owner", type=ApiParamType.STRING, isRequired=true, desc="请求人"),
         @Param(name="reporter", type=ApiParamType.STRING, desc="代报人"),
-        @Param(name="priorityUuid", type=ApiParamType.STRING, desc="优先级uuid"),
+        @Param(name="priorityUuid", type=ApiParamType.STRING, isRequired=true, desc="优先级uuid"),
         @Param(name="formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
         @Param(name="hidecomponentList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "联动隐藏表单属性列表"),
         @Param(name="content", type=ApiParamType.STRING, desc = "描述"),
@@ -54,6 +54,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 	    JSONObject result = new JSONObject();
 	    
 	    //暂存
+	    jsonObj.put("isNeedValid", 1);
 	    ProcessTaskDraftSaveApi drafSaveApi = (ProcessTaskDraftSaveApi)PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
 	    JSONObject saveResultObj =  JSONObject.parseObject(drafSaveApi.doService(PrivateApiComponentFactory.getApiByToken(drafSaveApi.getToken()), jsonObj).toString());
 	    saveResultObj.put("action", "start");
@@ -69,7 +70,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 	    
 	    //流转
 	    ProcessTaskStartProcessApi startProcessApi  = (ProcessTaskStartProcessApi)PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
-        startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()),saveResultObj);
+	    System.out.println(startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()),saveResultObj));
         
         result.put("processTaskId", saveResultObj.getString("processTaskId"));
 		return result;
