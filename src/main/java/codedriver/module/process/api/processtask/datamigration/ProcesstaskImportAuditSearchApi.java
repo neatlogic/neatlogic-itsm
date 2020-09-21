@@ -39,13 +39,13 @@ public class ProcesstaskImportAuditSearchApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "processTaskId",
-					type = ApiParamType.LONG,
-					desc = "工单ID"),
-			@Param(name = "title",
+			@Param(name = "keyword",
 					type = ApiParamType.STRING,
-					desc = "标题",
+					desc = "关键词",
 					xss = true),
+			@Param(name = "status",
+					type = ApiParamType.INTEGER,
+					desc = "上报状态"),
 			@Param(name = "currentPage",
 					type = ApiParamType.INTEGER,
 					desc = "当前页"),
