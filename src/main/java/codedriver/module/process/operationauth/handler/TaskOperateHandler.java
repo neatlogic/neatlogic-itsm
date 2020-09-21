@@ -26,6 +26,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
+import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Component
@@ -38,6 +39,8 @@ public class TaskOperateHandler implements IOperationAuthHandler {
     private ChannelMapper channelMapper;
     @Autowired
     private CatalogMapper catalogMapper;
+    @Autowired
+    private CatalogService catalogService;
     @Autowired
     private ProcessTaskService processTaskService;
     @PostConstruct
@@ -204,6 +207,14 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 }
             }
             return false;
+        });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.COPYPROCESSTASK, (processTaskVo, processTaskStepVo) -> {
+            if(catalogService.channelIsAuthority(processTaskVo.getChannelUuid())) {
+                return true;
+            }else {
+                return false;
+            }
         });
     }
 

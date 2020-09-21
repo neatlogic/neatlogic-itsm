@@ -24,6 +24,7 @@ import codedriver.framework.process.dto.ChannelTypeRelationVo;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
+import codedriver.framework.process.dto.ProcessTaskStatusVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -92,7 +93,6 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
         }
         if(!processTaskRelationVo.getNeedPage() || processTaskRelationVo.getCurrentPage() <= pageCount) {
             Set<Long> processTaskIdSet = new HashSet<>();
-//            Set<Long> channelTypeRelationIdSet = new HashSet<>();
             List<ProcessTaskRelationVo> processTaskRelationList = processTaskMapper.getProcessTaskRelationList(processTaskRelationVo);            
             for(ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
                 processTaskIdSet.add(processTaskRelation.getProcessTaskId());
@@ -100,13 +100,7 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                 if(channelTypeRelationVo != null) {
                     processTaskRelation.setChannelTypeRelationName(channelTypeRelationVo.getName());
                 }
-//                channelTypeRelationIdSet.add(processTaskRelation.getChannelTypeRelationId());
             }
-//            Map<Long, String> channelTypeRelationNameMap = new HashMap<>();
-//            List<ChannelTypeRelationVo> channelTypeRelationList = channelMapper.getChannelTypeRelationListByIdSet(channelTypeRelationIdSet);
-//            for(ChannelTypeRelationVo channelTypeRelationVo : channelTypeRelationList) {
-//                channelTypeRelationNameMap.put(channelTypeRelationVo.getId(), channelTypeRelationVo.getName());
-//            }
             Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
             List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndIdList(null, new ArrayList<>(processTaskIdSet), null, null);
             for(ProcessTaskVo processTask : processTaskList) {
@@ -117,17 +111,16 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                         channelTypeVo = new ChannelTypeVo();
                         channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
                     }
-                    processTask.setChannelType(channelTypeVo);
+                    processTask.setChannelType(new ChannelTypeVo(channelTypeVo));
                 }
                 processTaskMap.put(processTask.getId(), processTask);
             }
             for(ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
-//                processTaskRelation.setChannelTypeRelationName(channelTypeRelationNameMap.get(processTaskRelation.getChannelTypeRelationId()));
                 ProcessTaskVo processTask = processTaskMap.get(processTaskRelation.getProcessTaskId());
                 if(processTask != null) {
                     processTaskRelation.setTilte(processTask.getTitle());
-                    processTaskRelation.setStatusVo(processTask.getStatusVo());
-                    processTaskRelation.setChannelTypeVo(processTask.getChannelType());
+                    processTaskRelation.setStatusVo(new ProcessTaskStatusVo(processTask.getStatus()));
+                    processTaskRelation.setChannelTypeVo(new ChannelTypeVo(processTask.getChannelType()));
                 }
             }
             resultObj.put("processTaskRelationList", processTaskRelationList);
