@@ -54,7 +54,7 @@ public class UserAgentSaveApi extends PrivateApiComponentBase {
 		}
 		if(userMapper.checkAgentExists(userAgentVo.getAgentUuid()) > 0){
 			UserVo agent = userMapper.getUserByUuid(userAgentVo.getAgentUuid());
-			throw new UserAgentRepeatException("用户：" + agent.getUserId() + "已存在与其他用户的代理关系");
+			throw new UserAgentRepeatException("用户：" + agent.getUserId() + "已存在代理关系");
 		}
 		userAgentVo.setUserUuid(UserContext.get().getUserUuid());
 		userAgentVo.setFunc("processtask");
