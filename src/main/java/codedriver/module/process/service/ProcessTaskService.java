@@ -107,11 +107,22 @@ public interface ProcessTaskService {
      * 
     * @Author: linbq
     * @Time:2020年8月21日
-    * @Description: 获取可分配处理人的步骤列表
-    * @param processTaskStepId 步骤id
+    * @Description: 获取需指派处理人的步骤列表
+    * @param processTaskId 工单id
+    * @param processStepUuid 流程步骤uuid
     * @return List<ProcessTaskStepVo>
      */
-	public List<ProcessTaskStepVo> getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(Long processTaskId, String processStepUuid);
+	public List<ProcessTaskStepVo> getAssignableWorkerStepList(Long processTaskId, String processStepUuid);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取需指派处理人的步骤列表
+    * @param processUuid 流程uuid
+    * @param processStepUuid 流程步骤uuid
+    * @return List<ProcessTaskStepVo>
+     */
+	public List<ProcessTaskStepVo> getAssignableWorkerStepList(String processUuid, String processStepUuid);
 	/**
      * 
     * @Author: linbq

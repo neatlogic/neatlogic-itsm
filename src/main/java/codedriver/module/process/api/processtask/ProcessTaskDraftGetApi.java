@@ -10,13 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.constvalue.ProcessStepType;
-import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -28,7 +26,6 @@ import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -119,8 +116,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 	        }
 		    
 		    ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
-			//获取可分配处理人的步骤列表				
-			startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getProcessStepUuid()));
+			//获取须指派的步骤列表				
+			startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getProcessStepUuid()));
 			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 			
 			if(StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
@@ -145,25 +142,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
             ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
             //获取须指派的步骤列表 
-            List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = processMapper.getProcessStepWorkerPolicyListByProcessUuid(processTaskVo.getProcessUuid());
-            if(CollectionUtils.isNotEmpty(processStepWorkerPolicyList)) {
-                List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
-                for(ProcessStepWorkerPolicyVo workerPolicyVo : processStepWorkerPolicyList) {
-                    if(WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
-                        List<String> processStepUuidList = JSON.parseArray(workerPolicyVo.getConfigObj().getString("processStepUuidList"), String.class);
-                        for(String processStepUuid : processStepUuidList) {
-                            if(startProcessTaskStepVo.getProcessStepUuid().equals(processStepUuid)) {
-                                ProcessStepVo processStep = processMapper.getProcessStepByUuid(workerPolicyVo.getProcessStepUuid());
-                                ProcessTaskStepVo assignableWorkerStep = new ProcessTaskStepVo(processStep);
-                                assignableWorkerStep.setIsAutoGenerateId(false);
-                                assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
-                                assignableWorkerStepList.add(assignableWorkerStep);
-                            }
-                        }
-                    }
-                }
-                startProcessTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
-            }
+            startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getProcessStepUuid()));
             startProcessTaskStepVo.setIsAutoGenerateId(false);
             startProcessTaskStepVo.setId(null);
             processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
@@ -215,25 +194,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 			startProcessTaskStepVo.setIsAutoGenerateId(false);
 			
 			//获取须指派的步骤列表 	
-			List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = processMapper.getProcessStepWorkerPolicyListByProcessUuid(channel.getProcessUuid());
-			if(CollectionUtils.isNotEmpty(processStepWorkerPolicyList)) {
-				List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
-				for(ProcessStepWorkerPolicyVo workerPolicyVo : processStepWorkerPolicyList) {
-					if(WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
-						List<String> processStepUuidList = JSON.parseArray(workerPolicyVo.getConfigObj().getString("processStepUuidList"), String.class);
-						for(String processStepUuid : processStepUuidList) {
-							if(startProcessTaskStepVo.getProcessStepUuid().equals(processStepUuid)) {
-								ProcessStepVo processStep = processMapper.getProcessStepByUuid(workerPolicyVo.getProcessStepUuid());
-								ProcessTaskStepVo assignableWorkerStep = new ProcessTaskStepVo(processStep);
-								assignableWorkerStep.setIsAutoGenerateId(false);
-								assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
-								assignableWorkerStepList.add(assignableWorkerStep);
-							}
-						}
-					}
-				}
-				startProcessTaskStepVo.setAssignableWorkerStepList(assignableWorkerStepList);
-			}
+			startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(channel.getProcessUuid(), startProcessTaskStepVo.getProcessStepUuid()));
 			
 			processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 

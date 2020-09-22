@@ -58,6 +58,7 @@ import codedriver.framework.process.constvalue.automatic.FailPolicy;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
@@ -68,6 +69,8 @@ import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
+import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -147,6 +150,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
+    
+    @Autowired
+    private ProcessMapper processMapper;
 	
 	@Override
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode) {
@@ -568,10 +574,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		return processTaskStepVo;
 	}
 	
-//	public static void main(String[] args) {
-//		Pattern pattern = Pattern.compile("(5|4).*");
-//		System.out.println( pattern.matcher("300").matches());
-//	}
+	public static void main(String[] args) {
+		Pattern pattern = Pattern.compile("(5|4).*");
+		System.out.println( pattern.matcher("300").matches());
+	}
 
 //	@Override
 //	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId) {
@@ -771,8 +777,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public List<ProcessTaskStepVo> getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(Long processTaskId,
-        String processStepUuid) {
+    public List<ProcessTaskStepVo> getAssignableWorkerStepList(Long processTaskId, String processStepUuid) {
         ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
         processTaskStepWorkerPolicyVo.setProcessTaskId(processTaskId);
         List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
@@ -794,10 +799,32 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
             }
             return assignableWorkerStepList;
-        }
+        }      
         return new ArrayList<>();
     }
-
+    @Override
+    public List<ProcessTaskStepVo> getAssignableWorkerStepList(String processUuid, String processStepUuid) {
+        List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = processMapper.getProcessStepWorkerPolicyListByProcessUuid(processUuid);
+        if(CollectionUtils.isNotEmpty(processStepWorkerPolicyList)) {
+            List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
+            for(ProcessStepWorkerPolicyVo workerPolicyVo : processStepWorkerPolicyList) {
+                if(WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
+                    List<String> processStepUuidList = JSON.parseArray(workerPolicyVo.getConfigObj().getString("processStepUuidList"), String.class);
+                    for(String stepUuid : processStepUuidList) {
+                        if(processStepUuid.equals(stepUuid)) {
+                            ProcessStepVo processStep = processMapper.getProcessStepByUuid(workerPolicyVo.getProcessStepUuid());
+                            ProcessTaskStepVo assignableWorkerStep = new ProcessTaskStepVo(processStep);
+                            assignableWorkerStep.setIsAutoGenerateId(false);
+                            assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
+                            assignableWorkerStepList.add(assignableWorkerStep);
+                        }
+                    }
+                }
+            }
+            return assignableWorkerStepList;
+        }        
+        return new ArrayList<>();
+    }
     @Override
     public List<ProcessTaskSlaTimeVo> getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(Long processTaskStepId,
         String worktimeUuid) {

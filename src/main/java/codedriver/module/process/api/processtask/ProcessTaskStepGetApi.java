@@ -255,7 +255,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             }
             
             //获取可分配处理人的步骤列表             
-            processTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
+            processTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
             
             //时效列表
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
