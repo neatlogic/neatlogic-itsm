@@ -3,14 +3,16 @@ package codedriver.module.process.api.processtask;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.exception.file.FileUploadException;
+import codedriver.framework.exception.file.EmptyExcelException;
+import codedriver.framework.exception.file.ExcelFormatIllegalException;
+import codedriver.framework.exception.file.FileNotUploadException;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.form.FormHasNoAttributeException;
 import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskExcelMissColumnException;
+import codedriver.framework.exception.file.ExcelMissColumnException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
@@ -109,27 +111,27 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
         //如果没有导入文件, 抛异常
         if(multipartFileMap == null || multipartFileMap.isEmpty()) {
-            throw new FileUploadException("没有导入文件");
+            throw new FileNotUploadException();
         }
         MultipartFile multipartFile = null;
         for(Map.Entry<String, MultipartFile> file : multipartFileMap.entrySet()) {
             multipartFile = file.getValue();
             if(!multipartFile.getOriginalFilename().endsWith(".xlsx")){
-                throw new FileUploadException("文件格式不正确，请导入.xlsx格式文件");
+                throw new ExcelFormatIllegalException(".xlsx");
             }
             Map<String, Object> data = ExcelUtil.getExcelData(multipartFile);
             if(MapUtils.isEmpty(data)){
-                throw  new FileUploadException("Excel内容为空");
+                throw new EmptyExcelException();
             }
             List<String> headerList = (List<String>)data.get("header");
             List<Map<String, String>> contentList = (List<Map<String, String>>) data.get("content");
             if(CollectionUtils.isNotEmpty(headerList) && CollectionUtils.isNotEmpty(contentList)){
                 if (!headerList.contains("标题") || !headerList.contains("请求人") || !headerList.contains("优先级")) {
-                    throw new ProcessTaskExcelMissColumnException("Excel中缺少标题、请求人或者优先级");
+                    throw new ExcelMissColumnException("标题、请求人或者优先级");
                 }
                 for(FormAttributeVo att: formAttributeList){
                     if(!headerList.contains(att.getLabel()) && att.isRequired()){
-                        throw new ProcessTaskExcelMissColumnException("Excel中缺少" + att.getLabel());
+                        throw new ExcelMissColumnException(att.getLabel());
                     }
                 }
                 List<ProcessTaskImportAuditVo> auditVoList = new ArrayList<>();
