@@ -212,9 +212,16 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                         JSONObject formdata = new JSONObject();
                         formdata.put("attributeUuid",att.getUuid());
                         formdata.put("handler",att.getHandler());
-                        formdata.put("dataList",entry.getValue());
-                        formAttributeDataList.add(formdata);
-                        break;
+                        if(StringUtils.isNotBlank(entry.getValue()) && entry.getValue().startsWith("[") && entry.getValue().endsWith("]")){
+                            JSONArray dataList = JSONArray.parseArray(entry.getValue());
+                            formdata.put("dataList",dataList);
+                            formAttributeDataList.add(formdata);
+                            break;
+                        }else{
+                            formdata.put("dataList",entry.getValue());
+                            formAttributeDataList.add(formdata);
+                            break;
+                        }
                     }
                 }
             }
