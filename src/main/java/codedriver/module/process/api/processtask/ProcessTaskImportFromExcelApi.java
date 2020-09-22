@@ -189,24 +189,16 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             if("标题".equals(entry.getKey())){
                 task.put("title",entry.getValue());
             }else if("请求人".equals(entry.getKey())){
-                if(StringUtils.isNotBlank(entry.getValue())){
-                    UserVo user = userMapper.getUserByUserId(entry.getValue());
-                    if(user != null){
-                        task.put("owner",user.getUuid());
-                    }else{
-                        task.put("owner" ,null);
-                    }
+                UserVo user = null;
+                if(StringUtils.isNotBlank(entry.getValue()) && (user = userMapper.getUserByUserId(entry.getValue())) != null){
+                    task.put("owner",user.getUuid());
                 }else{
                     task.put("owner" ,null);
                 }
             }else if("优先级".equals(entry.getKey())){
-                if(StringUtils.isNotBlank(entry.getValue())){
-                    PriorityVo priority = priorityMapper.getPriorityByName(entry.getValue());
-                    if(priority != null){
-                        task.put("priorityUuid",priority.getUuid());
-                    }else{
-                        task.put("priorityUuid",entry.getValue());
-                    }
+                PriorityVo priority = null;
+                if(StringUtils.isNotBlank(entry.getValue()) && (priority = priorityMapper.getPriorityByName(entry.getValue())) != null){
+                    task.put("priorityUuid",priority.getUuid());
                 }else{
                     task.put("priorityUuid",null);
                 }
