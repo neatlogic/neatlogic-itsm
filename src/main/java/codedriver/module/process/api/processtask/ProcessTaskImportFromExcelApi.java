@@ -129,7 +129,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 if (!headerList.contains("标题") || !headerList.contains("请求人") || !headerList.contains("优先级")) {
                     throw new ExcelMissColumnException("标题、请求人或者优先级");
                 }
-                for(FormAttributeVo att: formAttributeList){
+                for(FormAttributeVo att : formAttributeList){
                     if(!headerList.contains(att.getLabel()) && att.isRequired()){
                         throw new ExcelMissColumnException(att.getLabel());
                     }
