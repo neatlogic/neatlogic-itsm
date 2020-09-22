@@ -95,6 +95,7 @@ import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stepremind.core.ProcessTaskStepRemindTypeFactory;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -108,6 +109,8 @@ import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
+	
+	private Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -565,10 +568,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		return processTaskStepVo;
 	}
 	
-	public static void main(String[] args) {
-		Pattern pattern = Pattern.compile("(5|4).*");
-		System.out.println( pattern.matcher("300").matches());
-	}
+//	public static void main(String[] args) {
+//		Pattern pattern = Pattern.compile("(5|4).*");
+//		System.out.println( pattern.matcher("300").matches());
+//	}
 
 //	@Override
 //	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId) {
@@ -1269,7 +1272,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Override
     public List<ProcessTaskStepRemindVo> getProcessTaskStepRemindListByProcessTaskStepId(Long processTaskStepId) {
-        List<ProcessTaskStepRemindVo> processTaskStepRemindList = processTaskMapper.getProcessTaskStepRemindListByProcessTaskStepId();
-        return null;
+        List<ProcessTaskStepRemindVo> processTaskStepRemindList = processTaskMapper.getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
+        for(ProcessTaskStepRemindVo processTaskStepRemindVo : processTaskStepRemindList) {
+            processTaskStepRemindVo.setActionName(ProcessTaskStepRemindTypeFactory.getText(processTaskStepRemindVo.getAction()));
+            String contentHash = processTaskStepRemindVo.getContentHash();
+            if(StringUtils.isNotBlank(contentHash)) {
+                String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
+                processTaskStepRemindVo.setDetail(content);
+                processTaskStepRemindVo.setContent(pattern_html.matcher(content).replaceAll(""));
+            }
+        }
+        return processTaskStepRemindList;
     }
 }
