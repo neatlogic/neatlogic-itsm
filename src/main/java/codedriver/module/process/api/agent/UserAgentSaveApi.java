@@ -5,8 +5,9 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAgentVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.exception.user.UserAgentIllegalException;
+import codedriver.framework.exception.user.AgentIsUserSelfException;
 import codedriver.framework.exception.user.UserAgentRepeatException;
+import codedriver.framework.exception.user.UserHasAgentException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -47,14 +48,14 @@ public class UserAgentSaveApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		UserAgentVo userAgentVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserAgentVo>() {});
 		if(UserContext.get().getUserUuid().equals(userAgentVo.getAgentUuid())){
-			throw new UserAgentIllegalException("请不要授权给自己");
+			throw new AgentIsUserSelfException();
 		}
 		if(userMapper.checkAgentExists(UserContext.get().getUserUuid()) > 0){
-			throw new UserAgentRepeatException("请删除当前授权用户再进行新的授权");
+			throw new UserHasAgentException();
 		}
 		if(userMapper.checkAgentExists(userAgentVo.getAgentUuid()) > 0){
 			UserVo agent = userMapper.getUserByUuid(userAgentVo.getAgentUuid());
-			throw new UserAgentRepeatException("用户：" + agent.getUserId() + "已存在代理关系");
+			throw new UserAgentRepeatException(agent.getUserId());
 		}
 		userAgentVo.setUserUuid(UserContext.get().getUserUuid());
 		userAgentVo.setFunc("processtask");
