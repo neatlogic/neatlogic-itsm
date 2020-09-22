@@ -29,6 +29,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -260,7 +261,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
             processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepId, processTaskVo.getWorktimeUuid()));
             
-          //processtaskStepData
+            //processtaskStepData
             ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));
             if(stepDataVo != null) {
                 JSONObject stepDataJson = stepDataVo.getData();
@@ -289,6 +290,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             }
             /** 下一步骤列表 **/
             processTaskService.setNextStepList(processTaskStepVo);
+            
+            /** 提醒列表 **/
+            List<ProcessTaskStepRemindVo> processTaskStepRemindList = processTaskService.getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
+            processTaskStepVo.setProcessTaskStepRemindList(processTaskStepRemindList);
             return processTaskStepVo;
         }
         return null;

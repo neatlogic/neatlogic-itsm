@@ -78,6 +78,7 @@ import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFileVo;
+import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
@@ -1264,5 +1265,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         processTaskVo.setTranferReportDirection("from");
         return processTaskVo;
+    }
+
+    @Override
+    public List<ProcessTaskStepRemindVo> getProcessTaskStepRemindListByProcessTaskStepId(Long processTaskStepId) {
+        List<ProcessTaskStepRemindVo> processTaskStepRemindList = processTaskMapper.getProcessTaskStepRemindListByProcessTaskStepId();
+        return null;
     }
 }

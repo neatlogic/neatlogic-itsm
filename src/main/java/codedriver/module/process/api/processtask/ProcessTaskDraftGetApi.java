@@ -144,7 +144,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 throw new ProcessTaskNoPermissionException("上报");
             }
             ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
-            //获取可分配处理人的步骤列表 
+            //获取须指派的步骤列表 
             List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = processMapper.getProcessStepWorkerPolicyListByProcessUuid(processTaskVo.getProcessUuid());
             if(CollectionUtils.isNotEmpty(processStepWorkerPolicyList)) {
                 List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
@@ -214,7 +214,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 			ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(processStepList.get(0));
 			startProcessTaskStepVo.setIsAutoGenerateId(false);
 			
-			//获取可分配处理人的步骤列表	
+			//获取须指派的步骤列表 	
 			List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = processMapper.getProcessStepWorkerPolicyListByProcessUuid(channel.getProcessUuid());
 			if(CollectionUtils.isNotEmpty(processStepWorkerPolicyList)) {
 				List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
