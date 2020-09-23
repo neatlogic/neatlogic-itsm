@@ -1,27 +1,28 @@
 package codedriver.module.process.workcenter.elasticsearch.handler;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
-import codedriver.framework.elasticsearch.core.EsHandlerBase;
-import codedriver.framework.process.dao.mapper.*;
-import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.module.process.service.WorkcenterService;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
-import com.techsure.multiattrsearch.MultiAttrsObjectPool;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.ListIterator;
 
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.ListIterator;
+import com.alibaba.fastjson.JSONObject;
+
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.elasticsearch.core.EsHandlerBase;
+import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.WorktimeMapper;
+import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.module.process.service.WorkcenterService;
 
 @Service
 public class WorkcenterUpdateHandler extends EsHandlerBase {
@@ -45,14 +46,19 @@ public class WorkcenterUpdateHandler extends EsHandlerBase {
 
 
 	@Override
-	public String getHandler() {
-		return "processtask-update";
+	public String getDocument() {
+		return "processtask";
 	}
 
 	@Override
-	public String getHandlerName() {
-		return "更新es工单信息";
+	public String getDocumentName() {
+		return "es工单信息";
 	}
+	
+	@Override
+    public String getDocumentId() {
+        return "taskId";
+    }
 	
 	@Override
 	public JSONObject getConfig(List<Object> params) {
@@ -102,23 +108,14 @@ public class WorkcenterUpdateHandler extends EsHandlerBase {
 	}
 	
 	@Override
-	public void doService(JSONObject paramJson) {
+	public JSONObject mySave(JSONObject paramJson) {
 		 Long taskId = paramJson.getLong("taskId");
-		 String tenantUuid = paramJson.getString("tenantUuid");
-		 MultiAttrsObjectPool pool = getObjectPool(POOL_NAME,tenantUuid);
-		 MultiAttrsObjectPatch patch = pool.save(taskId.toString());
 		 /** 获取工单信息 **/
 		 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(taskId);
+		 JSONObject esObject = null;
 		 if(processTaskVo != null) {
-			 JSONObject esObject = workcenterService.getProcessTaskESObject(processTaskVo);
-			 if(MapUtils.isNotEmpty(esObject)){
-				 patch.set("form", esObject.getJSONArray("form"));
-				 patch.set("common", esObject.getJSONObject("common"));
-				 patch.commit();
-			 }
-		 }else {
-			 ElasticSearchPoolManager.getObjectPool(POOL_NAME).delete(taskId.toString());
+			 esObject = workcenterService.getProcessTaskESObject(processTaskVo);
 		 }
+		 return esObject;
 	}
-
 }

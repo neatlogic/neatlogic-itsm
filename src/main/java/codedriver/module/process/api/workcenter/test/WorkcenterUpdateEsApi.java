@@ -73,7 +73,7 @@ public class WorkcenterUpdateEsApi extends PrivateApiComponentBase {
 			paramObj.put("taskId", processTaskVo.getId());
 			paramObj.put("tenantUuid", TenantContext.get().getTenantUuid());
 			try {
-				ElasticSearchFactory.getHandler("processtask-update").doService(paramObj);
+				ElasticSearchFactory.getHandler("processtask-update").save(paramObj,paramObj.getString("taskId"));
 			}catch(Exception e) {
 				poll.delete(processTaskVo.getId().toString());
 			}
