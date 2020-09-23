@@ -95,7 +95,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
 		
 		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
-        
+        if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
+            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.END.getValue());
+            if(processTaskStepList.size() == 1) {
+                processTaskVo.setRedoStepList(processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepList.get(0).getId()));
+            }
+        }
         processTaskVo.setStartProcessTaskStep(getStartProcessTaskStepByProcessTaskId(processTaskId));
 
         Map<String, String> formAttributeActionMap = new HashMap<>();
@@ -289,8 +294,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 }
             }
             /** 下一步骤列表 **/
-            processTaskService.setNextStepList(processTaskStepVo);
-            
+            processTaskStepVo.setForwardNextStepList(processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));
+            processTaskStepVo.setBackwardNextStepList(processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));;
             /** 提醒列表 **/
             List<ProcessTaskStepRemindVo> processTaskStepRemindList = processTaskService.getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
             processTaskStepVo.setProcessTaskStepRemindList(processTaskStepRemindList);

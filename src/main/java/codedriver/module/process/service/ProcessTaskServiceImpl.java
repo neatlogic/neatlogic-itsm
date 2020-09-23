@@ -333,7 +333,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
 					audit.put("failedReason","");
 					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
-						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
+						List<ProcessTaskStepVo> backStepList = getBackwardNextStepListByProcessTaskStepId(currentProcessTaskStepVo.getId());
 						if(backStepList.size() == 1) {
 							ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
 							if (processHandler != null) {
@@ -532,24 +532,24 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 * @param processTaskStepId
 	 * @return
 	 */
-	private List<ProcessTaskStepVo> getbackStepList(Long processTaskStepId){
-		List<ProcessTaskStepVo> resultList = new ArrayList<>();
-		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
-		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
-			if(processTaskStep.getIsActive() != null) {
-				if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
-					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-						processTaskStep.setName(processTaskStep.getAliasName());
-						processTaskStep.setFlowDirection("");
-					}else {
-						processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
-					}
-					resultList.add(processTaskStep);
-				}
-			}
-		}
-		return resultList;
-	}
+//	private List<ProcessTaskStepVo> getbackStepList(Long processTaskStepId){
+//		List<ProcessTaskStepVo> resultList = new ArrayList<>();
+//		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
+//		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
+//			if(processTaskStep.getIsActive() != null) {
+//				if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
+//					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+//						processTaskStep.setName(processTaskStep.getAliasName());
+//						processTaskStep.setFlowDirection("");
+//					}else {
+//						processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
+//					}
+//					resultList.add(processTaskStep);
+//				}
+//			}
+//		}
+//		return resultList;
+//	}
 	
 	@Override
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId) {
@@ -856,30 +856,37 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public void setNextStepList(ProcessTaskStepVo processTaskStepVo) {
-        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), null);
+    public List<ProcessTaskStepVo> getForwardNextStepListByProcessTaskStepId(Long processTaskStepId) {
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId, ProcessFlowDirection.FORWARD.getValue());
         for(ProcessTaskStepVo processTaskStep : nextStepList) {
-            if(processTaskStep.getIsActive() != null) {
-                if(ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
-                    if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-                        processTaskStep.setName(processTaskStep.getAliasName());
-                        processTaskStep.setFlowDirection("");
-                    }else {
-                        processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
-                    }
-                    processTaskStepVo.getForwardNextStepList().add(processTaskStep);
-                }else if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
-                    if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-                        processTaskStep.setName(processTaskStep.getAliasName());
-                        processTaskStep.setFlowDirection("");
-                    }else {
-                        processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
-                    }
-                    processTaskStepVo.getBackwardNextStepList().add(processTaskStep);
-                }
+            if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+                processTaskStep.setName(processTaskStep.getAliasName());
+                processTaskStep.setFlowDirection("");
+            }else {
+                processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
             }
+            resultList.add(processTaskStep);
         }
-        
+        return resultList;
+    }
+
+    @Override
+    public List<ProcessTaskStepVo> getBackwardNextStepListByProcessTaskStepId(Long processTaskStepId) {
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId, ProcessFlowDirection.BACKWARD.getValue());
+        for(ProcessTaskStepVo processTaskStep : nextStepList) {
+            if(!Objects.equals(processTaskStep.getIsActive(), 0)){
+                if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+                    processTaskStep.setName(processTaskStep.getAliasName());
+                    processTaskStep.setFlowDirection("");
+                }else {
+                    processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
+                }
+                resultList.add(processTaskStep);
+            }
+        }    
+        return resultList;   
     }
 
     @Override

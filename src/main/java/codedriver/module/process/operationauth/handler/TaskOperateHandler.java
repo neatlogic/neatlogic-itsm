@@ -15,11 +15,13 @@ import org.springframework.stereotype.Component;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -33,6 +35,8 @@ import codedriver.module.process.service.ProcessTaskService;
 public class TaskOperateHandler implements IOperationAuthHandler {
 
     private Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> operationBiPredicateMap = new HashMap<>();
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
     @Autowired
     private TeamMapper teamMapper;
     @Autowired
@@ -215,6 +219,19 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             }else {
                 return false;
             }
+        });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.REDO, (processTaskVo, processTaskStepVo) -> {
+            if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
+                //获取结束步骤id
+                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.END.getValue());
+                if(processTaskStepList.size() == 1) {
+                    if(CollectionUtils.isNotEmpty(processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepList.get(0).getId()))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         });
     }
 
