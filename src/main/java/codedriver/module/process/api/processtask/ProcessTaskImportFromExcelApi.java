@@ -21,6 +21,11 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +35,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 @SuppressWarnings("deprecation")
 @Service
@@ -97,7 +101,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             if(!multipartFile.getOriginalFilename().endsWith(".xlsx")){
                 throw new ExcelFormatIllegalException(".xlsx");
             }
-            Map<String, Object> data = ExcelUtil.getTaskDataFromFirstSheet(multipartFile);
+            Map<String, Object> data = getTaskDataFromFirstSheet(multipartFile);
             if(MapUtils.isEmpty(data)){
                 throw new EmptyExcelException();
             }
@@ -235,5 +239,87 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         task.put("formAttributeDataList",formAttributeDataList);
         task.put("hidecomponentList",new JSONArray());
         return task;
+    }
+
+    private Map<String, Object> getTaskDataFromFirstSheet(MultipartFile file) throws Exception {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        try {
+            Workbook wb = new XSSFWorkbook(file.getInputStream());
+            if(wb == null){
+                throw new EmptyExcelException();
+            }
+
+            List<String> headerList = new ArrayList<String>();
+            List<Map<String, String>> contentList = new ArrayList<Map<String, String>>();
+            List<String> channelData = new ArrayList<>();
+            resultMap.put("header", headerList);
+            resultMap.put("content", contentList);
+            resultMap.put("channelData",channelData);
+
+            Sheet sheet = wb.getSheetAt(0);
+            if (sheet == null) {
+                throw new EmptyExcelException();
+            }
+            Row channelRow = sheet.getRow(0);
+            if(channelRow == null){
+                throw new ExcelLostChannelUuidException();
+            }
+            //读取服务信息
+            for(int i = 0;i < channelRow.getPhysicalNumberOfCells();i++){
+                Cell cell = channelRow.getCell(i);
+                if (cell != null) {
+                    String content = ExcelUtil.getCellContent(cell);
+                    if(StringUtils.isNotBlank(content)){
+                        channelData.add(content);
+                    }
+                }
+            }
+
+            Row headRow = sheet.getRow(1);
+            if(headRow == null){
+                throw new EmptyExcelException();
+            }
+            List<Integer> cellIndex = new ArrayList<>();
+            Iterator<Cell> cellIterator = headRow.cellIterator();
+            while(cellIterator.hasNext()){
+                Cell cell = cellIterator.next();
+                if (cell != null) {
+                    String content = ExcelUtil.getCellContent(cell);
+                    if(StringUtils.isNotBlank(content)){
+                        headerList.add(content);
+                        cellIndex.add(cell.getColumnIndex());
+                    }
+                }
+            }
+            if(CollectionUtils.isEmpty(headerList) && CollectionUtils.isEmpty(cellIndex)){
+                throw new EmptyExcelException();
+            }
+            for (int r = 2; r <= sheet.getLastRowNum(); r++) {
+                Row row = sheet.getRow(r);
+                if (row != null) {
+                    Map<String, String> contentMap = new HashMap<>(cellIndex.size() + 1);
+                    for (int ci = 0; ci < cellIndex.size(); ci++) {
+                        Cell cell = row.getCell(cellIndex.get(ci));
+                        if (cell != null) {
+                            String content = ExcelUtil.getCellContent(cell);
+                            contentMap.put(headerList.get(ci), content);
+                        }else{
+                            contentMap.put(headerList.get(ci), null);
+                        }
+                    }
+                    contentList.add(contentMap);
+                }
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+        finally {
+            try {
+                file.getInputStream().close();
+            } catch (IOException ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
+        return resultMap;
     }
 }
