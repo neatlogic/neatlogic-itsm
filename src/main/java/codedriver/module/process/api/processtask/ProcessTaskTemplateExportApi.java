@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,10 +96,15 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         headerList.add(1,"请求人");
         headerList.add(2,"优先级");
         headerList.add(headerList.size(),"描述");
+        List<String> channelData = new ArrayList<>();
+        channelData.add("服务名称：");
+        channelData.add(channel.getName());
+        channelData.add("服务UUID(禁止修改)：");
+        channelData.add(channelUuid);
         OutputStream os = null;
         Workbook workbook = new XSSFWorkbook();
         try{
-            ExcelUtil.exportData(workbook,headerList,null,null,25,0);
+            ExcelUtil.exportProcessTaskTemplate(workbook,headerList,null,null,channelData,25);
             String fileNameEncode = channel.getName() + "-上报模版.xlsx";
             Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
             if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
