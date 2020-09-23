@@ -19,6 +19,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
@@ -26,6 +27,8 @@ import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
+import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -69,6 +72,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
 	public String getToken() {
@@ -134,22 +140,85 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 			
 			return processTaskVo;
 		}else if(copyProcessTaskId != null){
-		    processTaskService.checkProcessTaskParamsIsLegal(copyProcessTaskId);
-            ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(copyProcessTaskId);
+		    ProcessTaskVo oldProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(copyProcessTaskId);
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
-            if(!catalogService.channelIsAuthority(processTaskVo.getChannelUuid())){
+            if(!catalogService.channelIsAuthority(oldProcessTaskVo.getChannelUuid())){
                 throw new ProcessTaskNoPermissionException("上报");
             }
-            ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
-            //获取须指派的步骤列表 
-            startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getProcessStepUuid()));
+            //获取旧工单表单信息
+            ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(copyProcessTaskId);
+            if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
+                String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+                if(StringUtils.isNotBlank(formContent)) {
+                    oldProcessTaskVo.setFormConfig(formContent);            
+                    List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(copyProcessTaskId);
+                    for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
+                        oldProcessTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
+                    }
+                }
+            }
+            
+            ChannelVo channel = channelMapper.getChannelByUuid(oldProcessTaskVo.getChannelUuid());
+            ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+            ProcessVo processVo = processMapper.getProcessByUuid(channel.getProcessUuid());
+            ProcessTaskVo processTaskVo = new ProcessTaskVo();
+            processTaskVo.setIsAutoGenerateId(false);
+            processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+            processTaskVo.setChannelUuid(oldProcessTaskVo.getChannelUuid());
+            processTaskVo.setProcessUuid(channel.getProcessUuid());
+            processTaskVo.setWorktimeUuid(channel.getWorktimeUuid());
+            processTaskVo.setConfig(processVo.getConfig());
+            processTaskVo.setTitle(oldProcessTaskVo.getTitle());
+            List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(oldProcessTaskVo.getChannelUuid());
+            for(ChannelPriorityVo channelPriority : channelPriorityList) {
+                if(oldProcessTaskVo.getPriorityUuid().equals(channelPriority.getPriorityUuid())) {
+                    processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+                    break;
+                }else if(channelPriority.getIsDefault().intValue() == 1) {
+                    processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+                }
+            }
+            
+            ProcessTaskStepVo oldStartProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
+            
+            ProcessStepVo processStepVo = new ProcessStepVo();
+            processStepVo.setProcessUuid(channel.getProcessUuid());
+            processStepVo.setType(ProcessStepType.START.getValue());
+            List<ProcessStepVo> processStepList = processMapper.searchProcessStep(processStepVo);
+            if(processStepList.size() != 1) {
+                throw new ProcessTaskRuntimeException("流程：'" + channel.getProcessUuid() + "'有" + processStepList.size() + "个开始步骤");
+            }
+            ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(processStepList.get(0));
             startProcessTaskStepVo.setIsAutoGenerateId(false);
-            startProcessTaskStepVo.setId(null);
+            startProcessTaskStepVo.setComment(oldStartProcessTaskStepVo.getComment());
+            startProcessTaskStepVo.setHandlerStepInfo(oldStartProcessTaskStepVo.getHandlerStepInfo());
+            //获取须指派的步骤列表    
+            startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(channel.getProcessUuid(), startProcessTaskStepVo.getProcessStepUuid()));
+            
             processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
             
-            processTaskVo.setIsAutoGenerateId(false);
-            processTaskVo.setId(null);
-            processTaskVo.getTranferReportProcessTaskList().clear();
+            if(StringUtils.isNotBlank(processVo.getFormUuid())) {
+                FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());
+                if(formVersion == null) {
+                    throw new FormActiveVersionNotFoundExcepiton(processVo.getFormUuid());
+                }
+                processTaskVo.setFormConfig(formVersion.getFormConfig());
+                if(StringUtils.isNotBlank(oldProcessTaskVo.getFormConfig())) {
+                    transferFormAttributeValue(oldProcessTaskVo, processTaskVo);
+                }
+                List<ProcessStepFormAttributeVo> processStepFormAttributeList = processMapper.getProcessStepFormAttributeByStepUuid(startProcessTaskStepVo.getProcessStepUuid());
+                if(CollectionUtils.isNotEmpty(processStepFormAttributeList)) {
+                    Map<String, String> formAttributeActionMap = new HashMap<>();
+                    List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = new ArrayList<>();
+                    for(ProcessStepFormAttributeVo processStepFormAttribute : processStepFormAttributeList) {
+                        formAttributeActionMap.put(processStepFormAttribute.getAttributeUuid(), processStepFormAttribute.getAction());
+                        processTaskStepFormAttributeList.add(new ProcessTaskStepFormAttributeVo(processStepFormAttribute));
+                    }
+                    processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
+                    startProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
+                }
+            }
+
             return processTaskVo;
         }else if(channelUuid != null){
 			ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
