@@ -135,12 +135,21 @@ public interface ProcessTaskService {
 	/**
      * 
     * @Author: linbq
-    * @Time:2020年8月21日
-    * @Description: 设置下一步骤列表
-    * @param ProcessTaskStepVo 步骤信息
-    * @return void
+    * @Time:2020年9月23日
+    * @Description: 获取前进步骤列表
+    * @param processTaskStepId 步骤id
+    * @return List<ProcessTaskStepVo>
      */
-	public void setNextStepList(ProcessTaskStepVo processTaskStepVo);
+	public List<ProcessTaskStepVo> getForwardNextStepListByProcessTaskStepId(Long processTaskStepId);
+	/**
+     * 
+    * @Author: linbq
+    * @Time:2020年9月23日
+    * @Description: 获取回退步骤列表
+    * @param processTaskStepId 步骤id
+    * @return List<ProcessTaskStepVo>
+     */
+    public List<ProcessTaskStepVo> getBackwardNextStepListByProcessTaskStepId(Long processTaskStepId);
 
 	/**
 	 * 

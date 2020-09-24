@@ -15,11 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
@@ -30,8 +28,6 @@ import codedriver.module.process.service.ProcessTaskService;
 public class StepOperateHandler implements IOperationAuthHandler {
 
     private final Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> operationBiPredicateMap = new HashMap<>();
-    @Autowired
-    private ProcessTaskMapper processTaskMapper;
     @Autowired
     private ProcessTaskService processTaskService;
 	
@@ -92,8 +88,9 @@ public class StepOperateHandler implements IOperationAuthHandler {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                     if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue()) || processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
-                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
-                        if(CollectionUtils.isNotEmpty(processTaskStepList)) {
+                        List<ProcessTaskStepVo> forwardNextStepList = processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId());
+                        if(CollectionUtils.isNotEmpty(forwardNextStepList)) {
+                            processTaskStepVo.setForwardNextStepList(forwardNextStepList);
                             return true;
                         }
                     }
@@ -107,11 +104,10 @@ public class StepOperateHandler implements IOperationAuthHandler {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                     if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue()) || processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
-                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD.getValue());
-                        for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
-                            if (processTaskStep.getIsActive() != null && processTaskStep.getIsActive().intValue() != 0) {
-                                return true;
-                            }
+                        List<ProcessTaskStepVo> backwardNextStepList = processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId());
+                        if(CollectionUtils.isNotEmpty(backwardNextStepList)) {
+                            processTaskStepVo.setBackwardNextStepList(backwardNextStepList);
+                            return true;
                         }
                     }
                 }
