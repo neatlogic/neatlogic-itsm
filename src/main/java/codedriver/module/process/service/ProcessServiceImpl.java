@@ -65,6 +65,7 @@ public class ProcessServiceImpl implements ProcessService {
 			processMapper.deleteProcessFormByProcessUuid(uuid);
 			processMapper.deleteProcessSlaByProcessUuid(uuid);
 			notifyPolicyInvokerManager.removeInvoker(uuid);
+            scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
 			processMapper.updateProcess(processVo);
 		} else {
 			processVo.setFcu(UserContext.get().getUserUuid(true));
@@ -143,11 +144,8 @@ public class ProcessServiceImpl implements ProcessService {
 		}
 
 		/** 保存评分设置 */
-		if(processVo.getProcessScoreTemplateVo() != null && processVo.getProcessScoreTemplateVo().getIsActive() != null){
-			scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(processVo.getUuid());
-			if(processVo.getProcessScoreTemplateVo().getIsActive().intValue() == 1){
-				scoreTemplateMapper.insertProcessScoreTemplate(processVo.getProcessScoreTemplateVo());
-			}
+		if(processVo.getProcessScoreTemplateVo() != null){
+			scoreTemplateMapper.insertProcessScoreTemplate(processVo.getProcessScoreTemplateVo());
 		}
 
 		return 1;

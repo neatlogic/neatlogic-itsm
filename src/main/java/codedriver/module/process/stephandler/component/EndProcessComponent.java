@@ -101,7 +101,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		ProcessTaskVo processTaskVo = new ProcessTaskVo();
 		processTaskVo.setStatus(ProcessTaskStatus.SUCCEED.getValue());
 		processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
-		processTaskMapper.updateProcessTaskStatus(processTaskVo);
+//		processTaskMapper.updateProcessTaskStatus(processTaskVo);
 		//自动评分
 		AutoScoreHandler.autoScore(processTaskVo);
 		return 0;
