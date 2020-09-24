@@ -10,20 +10,23 @@ import java.util.function.BiPredicate;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelRelationVo;
+import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
@@ -47,6 +50,8 @@ public class TaskOperateHandler implements IOperationAuthHandler {
     private CatalogService catalogService;
     @Autowired
     private ProcessTaskService processTaskService;
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
     @PostConstruct
     public void init() {
         
@@ -223,12 +228,17 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         
         operationBiPredicateMap.put(ProcessTaskOperationType.REDO, (processTaskVo, processTaskStepVo) -> {
             if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
-                //获取结束步骤id
-                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.END.getValue());
-                if(processTaskStepList.size() == 1) {
-                    if(CollectionUtils.isNotEmpty(processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepList.get(0).getId()))) {
-                        return true;
-                    }
+                ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskVo.getId());
+                if(processTaskScoreTemplateVo != null) {
+                   if(StringUtils.isNotBlank(processTaskScoreTemplateVo.getConfigHash())) {
+                       String configStr = selectContentByHashMapper.getProcessTaskScoreTempleteConfigStringIsByHash(processTaskScoreTemplateVo.getConfigHash());
+                       if(StringUtils.isNotBlank(configStr)) {
+                           processTaskScoreTemplateVo.setConfig(configStr);
+                           if(CollectionUtils.isNotEmpty(processTaskScoreTemplateVo.getConfig().getJSONArray("stepUuidList"))) {
+                               return true;
+                           }
+                       }
+                   }
                 }
             }
             return false;
