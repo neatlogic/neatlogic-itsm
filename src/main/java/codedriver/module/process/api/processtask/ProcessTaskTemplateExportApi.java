@@ -19,7 +19,7 @@ import codedriver.framework.util.ExcelUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
@@ -95,10 +97,15 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         headerList.add(1,"请求人");
         headerList.add(2,"优先级");
         headerList.add(headerList.size(),"描述");
+        List<String> channelData = new ArrayList<>();
+        channelData.add("服务名称：");
+        channelData.add(channel.getName());
+        channelData.add("服务UUID(禁止修改)：");
+        channelData.add(channelUuid);
         OutputStream os = null;
         Workbook workbook = new XSSFWorkbook();
         try{
-            ExcelUtil.exportData(workbook,headerList,null,null,25,0);
+            exportProcessTaskTemplate(workbook,headerList,null,null,channelData,25);
             String fileNameEncode = channel.getName() + "-上报模版.xlsx";
             Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
             if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
@@ -120,5 +127,25 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         }
 
         return null;
+    }
+
+    private Workbook exportProcessTaskTemplate(Workbook workbook, List<String> headerList, List<String> columnList, List<Map<String,Object>> dataMapList, List<String> channelData, Integer columnWidth) throws Exception {
+        // 生成一个表格
+        Sheet sheet = workbook.createSheet();
+        // 设置sheet名字
+        workbook.setSheetName(0,"sheet");
+        Map<String, CellStyle> cellStyle = ExcelUtil.getRowCellStyle(workbook);
+        CellStyle firstRowcellStyle = cellStyle.get("firstRowcellStyle");
+        CellStyle rowcellStyle = cellStyle.get("rowcellStyle");
+
+        /** 生成服务信息行 */
+        Row channelRow = sheet.createRow(0);
+        for(int i = 0;i < channelData.size();i++){
+            Cell cell = channelRow.createCell(i);
+            cell.setCellValue(channelData.get(i));
+        }
+
+        ExcelUtil.createRows(headerList, columnList, dataMapList, columnWidth, sheet, firstRowcellStyle, rowcellStyle, 1);
+        return workbook;
     }
 }

@@ -145,6 +145,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         String deviceCondition = StringUtils.EMPTY;
         ChannelVo channelVo = new ChannelVo();
         channelVo.setSupport(workcenterVo.getDevice());
+        channelVo.setUserUuid(UserContext.get().getUserUuid(true));
+        channelVo.setNeedPage(false);
         List<ChannelVo>  channelList = channelMapper.searchChannelList(channelVo);
         List<String> channelUuidList = new ArrayList<String>();
         for(ChannelVo channel : channelList) {
