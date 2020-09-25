@@ -70,13 +70,13 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.util.TimeUtil;
+import codedriver.module.process.workcenter.elasticsearch.handler.WorkcenterUpdateHandler;
 
 @Service
 public class WorkcenterServiceImpl implements WorkcenterService{
@@ -134,7 +134,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         String sql =
             String.format("select %s from %s %s %s limit %d,%d", selectColumn, TenantContext.get().getTenantUuid(),
                 where, orderBy, workcenterVo.getStartNum(), workcenterVo.getPageSize());
-        return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME), sql);
+        return ESQueryUtil.query(ElasticSearchPoolManager.getObjectPool(WorkcenterUpdateHandler.POOL_NAME), sql);
     }
     
     /**
@@ -145,6 +145,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         String deviceCondition = StringUtils.EMPTY;
         ChannelVo channelVo = new ChannelVo();
         channelVo.setSupport(workcenterVo.getDevice());
+        channelVo.setUserUuid(UserContext.get().getUserUuid(true));
+        channelVo.setNeedPage(false);
         List<ChannelVo>  channelList = channelMapper.searchChannelList(channelVo);
         List<String> channelUuidList = new ArrayList<String>();
         for(ChannelVo channel : channelList) {
@@ -565,7 +567,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
             String.format("select %s from %s %s %s limit %d,%d", selectColumn, TenantContext.get().getTenantUuid(),
                 where, orderBy, workcenterVo.getStartNum(), workcenterVo.getPageSize());
         QueryParser parser =
-            ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME).createQueryParser();
+            ElasticSearchPoolManager.getObjectPool(WorkcenterUpdateHandler.POOL_NAME).createQueryParser();
         MultiAttrsQuery query = parser.parse(sql);
         return query.iterate();
     }

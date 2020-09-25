@@ -61,7 +61,13 @@ public class CatalogChannelTreeApi extends PrivateApiComponentBase {
 		Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
 		List<String> channelTypeUuidList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
         if(CollectionUtils.isNotEmpty(channelTypeUuidList)) {
-            List<ChannelVo> channelList = channelMapper.getChannelListByChannelTypeUuidList(channelTypeUuidList);
+            List<ChannelVo> channelList = new ArrayList<>();
+            if(channelTypeUuidList.contains("all")) {
+                channelList = channelMapper.getChannelListForTree(null);
+            }else {
+                channelList = channelMapper.getChannelListByChannelTypeUuidList(channelTypeUuidList);
+            }
+            
             if(CollectionUtils.isNotEmpty(channelList)) {
                 Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
                 if(catalogMapper.checkLeftRightCodeIsWrong() > 0) {

@@ -10,8 +10,10 @@ import java.util.function.BiPredicate;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -20,12 +22,16 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelRelationVo;
+import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
+import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Component
@@ -33,13 +39,19 @@ public class TaskOperateHandler implements IOperationAuthHandler {
 
     private Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> operationBiPredicateMap = new HashMap<>();
     @Autowired
+    private ProcessTaskMapper processTaskMapper;
+    @Autowired
     private TeamMapper teamMapper;
     @Autowired
     private ChannelMapper channelMapper;
     @Autowired
     private CatalogMapper catalogMapper;
     @Autowired
+    private CatalogService catalogService;
+    @Autowired
     private ProcessTaskService processTaskService;
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
     @PostConstruct
     public void init() {
         
@@ -201,6 +213,32 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                             }
                         }
                     } 
+                }
+            }
+            return false;
+        });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.COPYPROCESSTASK, (processTaskVo, processTaskStepVo) -> {
+            if(catalogService.channelIsAuthority(processTaskVo.getChannelUuid())) {
+                return true;
+            }else {
+                return false;
+            }
+        });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.REDO, (processTaskVo, processTaskStepVo) -> {
+            if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
+                ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskVo.getId());
+                if(processTaskScoreTemplateVo != null) {
+                   if(StringUtils.isNotBlank(processTaskScoreTemplateVo.getConfigHash())) {
+                       String configStr = selectContentByHashMapper.getProcessTaskScoreTempleteConfigStringIsByHash(processTaskScoreTemplateVo.getConfigHash());
+                       if(StringUtils.isNotBlank(configStr)) {
+                           processTaskScoreTemplateVo.setConfig(configStr);
+                           if(CollectionUtils.isNotEmpty(processTaskScoreTemplateVo.getConfig().getJSONArray("stepUuidList"))) {
+                               return true;
+                           }
+                       }
+                   }
                 }
             }
             return false;

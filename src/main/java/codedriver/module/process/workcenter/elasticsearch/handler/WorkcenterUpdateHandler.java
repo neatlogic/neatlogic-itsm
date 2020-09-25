@@ -2,14 +2,16 @@ package codedriver.module.process.workcenter.elasticsearch.handler;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
+import codedriver.framework.elasticsearch.core.EsHandlerBase;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.module.process.service.WorkcenterService;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
+import com.techsure.multiattrsearch.MultiAttrsObjectPool;
+
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +24,10 @@ import java.util.List;
 import java.util.ListIterator;
 
 @Service
-public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
+public class WorkcenterUpdateHandler extends EsHandlerBase {
 	Logger logger = LoggerFactory.getLogger(WorkcenterUpdateHandler.class);
+	
+	public final static String POOL_NAME = "processtask";
 	@Autowired
 	WorkcenterMapper workcenterMapper;
 	@Autowired
@@ -101,8 +105,8 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 	public void doService(JSONObject paramJson) {
 		 Long taskId = paramJson.getLong("taskId");
 		 String tenantUuid = paramJson.getString("tenantUuid");
-		 getObjectPool().checkout(tenantUuid);
-		 MultiAttrsObjectPatch patch = getObjectPool().save(taskId.toString());
+		 MultiAttrsObjectPool pool = getObjectPool(POOL_NAME,tenantUuid);
+		 MultiAttrsObjectPatch patch = pool.save(taskId.toString());
 		 /** 获取工单信息 **/
 		 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(taskId);
 		 if(processTaskVo != null) {
@@ -113,7 +117,7 @@ public class WorkcenterUpdateHandler extends ProcessTaskEsHandlerBase {
 				 patch.commit();
 			 }
 		 }else {
-			 ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME).delete(taskId.toString());
+			 ElasticSearchPoolManager.getObjectPool(POOL_NAME).delete(taskId.toString());
 		 }
 	}
 

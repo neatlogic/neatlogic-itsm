@@ -1,18 +1,12 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
@@ -24,9 +18,6 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskNextStepListApi extends PrivateApiComponentBase{
-
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
@@ -68,30 +59,11 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase{
 		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, operationType, true);
-		List<ProcessTaskStepVo> resultList = new ArrayList<>();
-		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
-		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
-			if(processTaskStep.getIsActive() != null) {
-				if(ProcessTaskOperationType.COMPLETE == operationType && ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
-					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-						processTaskStep.setName(processTaskStep.getAliasName());
-						processTaskStep.setFlowDirection("");
-					}else {
-						processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
-					}
-					resultList.add(processTaskStep);
-				}else if(ProcessTaskOperationType.BACK == operationType && ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
-					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-						processTaskStep.setName(processTaskStep.getAliasName());
-						processTaskStep.setFlowDirection("");
-					}else {
-						processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
-					}
-					resultList.add(processTaskStep);
-				}
-			}
+		if(operationType == ProcessTaskOperationType.COMPLETE) {
+		    return processTaskStepVo.getForwardNextStepList();
+		}else {
+		    return processTaskStepVo.getBackwardNextStepList();
 		}
-		return resultList;
 	}
 
 }

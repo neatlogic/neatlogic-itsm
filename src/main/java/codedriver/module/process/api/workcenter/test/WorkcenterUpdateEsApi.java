@@ -16,7 +16,6 @@ import codedriver.framework.elasticsearch.core.ElasticSearchFactory;
 import codedriver.framework.elasticsearch.core.ElasticSearchPoolManager;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.elasticsearch.core.ProcessTaskEsHandlerBase;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -24,6 +23,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.workcenter.elasticsearch.handler.WorkcenterUpdateHandler;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterUpdateEsApi extends PrivateApiComponentBase {
@@ -66,7 +66,7 @@ public class WorkcenterUpdateEsApi extends PrivateApiComponentBase {
 		String toDate = jsonObj.getString("toDate");
 		List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskListByKeywordAndIdList(null,taskIdList,fromDate,toDate);
 		
-		MultiAttrsObjectPool  poll = ElasticSearchPoolManager.getObjectPool(ProcessTaskEsHandlerBase.POOL_NAME);
+		MultiAttrsObjectPool  poll = ElasticSearchPoolManager.getObjectPool(WorkcenterUpdateHandler.POOL_NAME);
 		poll.checkout(TenantContext.get().getTenantUuid());
 		for(ProcessTaskVo processTaskVo :processTaskVoList) {
 			JSONObject paramObj = new JSONObject();

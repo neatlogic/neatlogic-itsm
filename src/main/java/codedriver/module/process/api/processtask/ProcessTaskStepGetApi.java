@@ -26,9 +26,13 @@ import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
+import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
+import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -52,7 +56,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 	private ProcessTaskService processTaskService;
     
     @Autowired
-    ProcessTaskStepDataMapper processTaskStepDataMapper;
+    private ProcessTaskStepDataMapper processTaskStepDataMapper;
     
     @Autowired
     private FileMapper fileMapper;
@@ -60,6 +64,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     @Autowired
     private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 	
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
+    
+    @Autowired
+    private ScoreTemplateMapper scoreTemplateMapper;
+    
 	@Override
 	public String getToken() {
 		return "processtask/step/get";
@@ -94,7 +104,21 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
 		
 		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
-        
+		
+        if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
+            ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
+            if(processTaskScoreTemplateVo != null) {
+               if(StringUtils.isNotBlank(processTaskScoreTemplateVo.getConfigHash())) {
+                   String configStr = selectContentByHashMapper.getProcessTaskScoreTempleteConfigStringIsByHash(processTaskScoreTemplateVo.getConfigHash());
+                   if(StringUtils.isNotBlank(configStr)) {
+                       processTaskScoreTemplateVo.setConfig(configStr);
+                       List<String> stepUuidList = JSON.parseArray(JSON.toJSONString(processTaskScoreTemplateVo.getConfig().getJSONArray("stepUuidList")), String.class);
+                       processTaskVo.setRedoStepList(processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuidList(processTaskId, stepUuidList));
+                   }
+               }
+               processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
+            }
+        }
         processTaskVo.setStartProcessTaskStep(getStartProcessTaskStepByProcessTaskId(processTaskId));
 
         Map<String, String> formAttributeActionMap = new HashMap<>();
@@ -254,13 +278,13 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             }
             
             //获取可分配处理人的步骤列表             
-            processTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
+            processTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
             
             //时效列表
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
             processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepId, processTaskVo.getWorktimeUuid()));
             
-          //processtaskStepData
+            //processtaskStepData
             ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));
             if(stepDataVo != null) {
                 JSONObject stepDataJson = stepDataVo.getData();
@@ -288,7 +312,11 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 }
             }
             /** 下一步骤列表 **/
-            processTaskService.setNextStepList(processTaskStepVo);
+            processTaskStepVo.setForwardNextStepList(processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));
+            processTaskStepVo.setBackwardNextStepList(processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));;
+            /** 提醒列表 **/
+            List<ProcessTaskStepRemindVo> processTaskStepRemindList = processTaskService.getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
+            processTaskStepVo.setProcessTaskStepRemindList(processTaskStepRemindList);
             return processTaskStepVo;
         }
         return null;

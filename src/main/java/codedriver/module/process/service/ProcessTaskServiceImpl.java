@@ -58,6 +58,7 @@ import codedriver.framework.process.constvalue.automatic.FailPolicy;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
@@ -68,6 +69,8 @@ import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
+import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -78,6 +81,7 @@ import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFileVo;
+import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
@@ -94,6 +98,7 @@ import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stepremind.core.ProcessTaskStepRemindTypeFactory;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -107,6 +112,8 @@ import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
+	
+	private Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
 	
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -143,6 +150,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
+    
+    @Autowired
+    private ProcessMapper processMapper;
 	
 	@Override
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode) {
@@ -323,7 +333,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
 					audit.put("failedReason","");
 					if(FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
-						List<ProcessTaskStepVo> backStepList = getbackStepList(currentProcessTaskStepVo.getId());
+						List<ProcessTaskStepVo> backStepList = getBackwardNextStepListByProcessTaskStepId(currentProcessTaskStepVo.getId());
 						if(backStepList.size() == 1) {
 							ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
 							if (processHandler != null) {
@@ -522,24 +532,24 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 * @param processTaskStepId
 	 * @return
 	 */
-	private List<ProcessTaskStepVo> getbackStepList(Long processTaskStepId){
-		List<ProcessTaskStepVo> resultList = new ArrayList<>();
-		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
-		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
-			if(processTaskStep.getIsActive() != null) {
-				if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
-					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-						processTaskStep.setName(processTaskStep.getAliasName());
-						processTaskStep.setFlowDirection("");
-					}else {
-						processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
-					}
-					resultList.add(processTaskStep);
-				}
-			}
-		}
-		return resultList;
-	}
+//	private List<ProcessTaskStepVo> getbackStepList(Long processTaskStepId){
+//		List<ProcessTaskStepVo> resultList = new ArrayList<>();
+//		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
+//		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
+//			if(processTaskStep.getIsActive() != null) {
+//				if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
+//					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+//						processTaskStep.setName(processTaskStep.getAliasName());
+//						processTaskStep.setFlowDirection("");
+//					}else {
+//						processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
+//					}
+//					resultList.add(processTaskStep);
+//				}
+//			}
+//		}
+//		return resultList;
+//	}
 	
 	@Override
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId) {
@@ -767,8 +777,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public List<ProcessTaskStepVo> getAssignableWorkerStepListByProcessTaskIdAndProcessStepUuid(Long processTaskId,
-        String processStepUuid) {
+    public List<ProcessTaskStepVo> getAssignableWorkerStepList(Long processTaskId, String processStepUuid) {
         ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
         processTaskStepWorkerPolicyVo.setProcessTaskId(processTaskId);
         List<ProcessTaskStepWorkerPolicyVo> processTaskStepWorkerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
@@ -790,10 +799,32 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
             }
             return assignableWorkerStepList;
-        }
+        }      
         return new ArrayList<>();
     }
-
+    @Override
+    public List<ProcessTaskStepVo> getAssignableWorkerStepList(String processUuid, String processStepUuid) {
+        List<ProcessStepWorkerPolicyVo> processStepWorkerPolicyList = processMapper.getProcessStepWorkerPolicyListByProcessUuid(processUuid);
+        if(CollectionUtils.isNotEmpty(processStepWorkerPolicyList)) {
+            List<ProcessTaskStepVo> assignableWorkerStepList = new ArrayList<>();
+            for(ProcessStepWorkerPolicyVo workerPolicyVo : processStepWorkerPolicyList) {
+                if(WorkerPolicy.PRESTEPASSIGN.getValue().equals(workerPolicyVo.getPolicy())) {
+                    List<String> processStepUuidList = JSON.parseArray(workerPolicyVo.getConfigObj().getString("processStepUuidList"), String.class);
+                    for(String stepUuid : processStepUuidList) {
+                        if(processStepUuid.equals(stepUuid)) {
+                            ProcessStepVo processStep = processMapper.getProcessStepByUuid(workerPolicyVo.getProcessStepUuid());
+                            ProcessTaskStepVo assignableWorkerStep = new ProcessTaskStepVo(processStep);
+                            assignableWorkerStep.setIsAutoGenerateId(false);
+                            assignableWorkerStep.setIsRequired(workerPolicyVo.getConfigObj().getInteger("isRequired"));
+                            assignableWorkerStepList.add(assignableWorkerStep);
+                        }
+                    }
+                }
+            }
+            return assignableWorkerStepList;
+        }        
+        return new ArrayList<>();
+    }
     @Override
     public List<ProcessTaskSlaTimeVo> getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(Long processTaskStepId,
         String worktimeUuid) {
@@ -825,30 +856,37 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public void setNextStepList(ProcessTaskStepVo processTaskStepVo) {
-        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepVo.getId(), null);
+    public List<ProcessTaskStepVo> getForwardNextStepListByProcessTaskStepId(Long processTaskStepId) {
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId, ProcessFlowDirection.FORWARD.getValue());
         for(ProcessTaskStepVo processTaskStep : nextStepList) {
-            if(processTaskStep.getIsActive() != null) {
-                if(ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
-                    if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-                        processTaskStep.setName(processTaskStep.getAliasName());
-                        processTaskStep.setFlowDirection("");
-                    }else {
-                        processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
-                    }
-                    processTaskStepVo.getForwardNextStepList().add(processTaskStep);
-                }else if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
-                    if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-                        processTaskStep.setName(processTaskStep.getAliasName());
-                        processTaskStep.setFlowDirection("");
-                    }else {
-                        processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
-                    }
-                    processTaskStepVo.getBackwardNextStepList().add(processTaskStep);
-                }
+            if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+                processTaskStep.setName(processTaskStep.getAliasName());
+                processTaskStep.setFlowDirection("");
+            }else {
+                processTaskStep.setFlowDirection(ProcessFlowDirection.FORWARD.getText());
             }
+            resultList.add(processTaskStep);
         }
-        
+        return resultList;
+    }
+
+    @Override
+    public List<ProcessTaskStepVo> getBackwardNextStepListByProcessTaskStepId(Long processTaskStepId) {
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId, ProcessFlowDirection.BACKWARD.getValue());
+        for(ProcessTaskStepVo processTaskStep : nextStepList) {
+            if(!Objects.equals(processTaskStep.getIsActive(), 0)){
+                if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
+                    processTaskStep.setName(processTaskStep.getAliasName());
+                    processTaskStep.setFlowDirection("");
+                }else {
+                    processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
+                }
+                resultList.add(processTaskStep);
+            }
+        }    
+        return resultList;   
     }
 
     @Override
@@ -1264,5 +1302,20 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         processTaskVo.setTranferReportDirection("from");
         return processTaskVo;
+    }
+
+    @Override
+    public List<ProcessTaskStepRemindVo> getProcessTaskStepRemindListByProcessTaskStepId(Long processTaskStepId) {
+        List<ProcessTaskStepRemindVo> processTaskStepRemindList = processTaskMapper.getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
+        for(ProcessTaskStepRemindVo processTaskStepRemindVo : processTaskStepRemindList) {
+            processTaskStepRemindVo.setActionName(ProcessTaskStepRemindTypeFactory.getText(processTaskStepRemindVo.getAction()));
+            String contentHash = processTaskStepRemindVo.getContentHash();
+            if(StringUtils.isNotBlank(contentHash)) {
+                String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
+                processTaskStepRemindVo.setDetail(content);
+                processTaskStepRemindVo.setContent(pattern_html.matcher(content).replaceAll(""));
+            }
+        }
+        return processTaskStepRemindList;
     }
 }
