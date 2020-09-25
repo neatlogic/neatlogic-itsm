@@ -31,7 +31,7 @@ public class ProcessTaskStepRedoApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "重新激活步骤";
+        return "打回重做步骤";
     }
 
     @Override
@@ -44,7 +44,7 @@ public class ProcessTaskStepRedoApi extends PrivateApiComponentBase {
         @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "激活步骤Id"),
         @Param(name = "content", type = ApiParamType.STRING, desc = "原因")
     })
-    @Description(desc = "重新激活步骤")
+    @Description(desc = "打回重做步骤")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
@@ -53,7 +53,7 @@ public class ProcessTaskStepRedoApi extends PrivateApiComponentBase {
         ProcessTaskStepVo currentProcessTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         currentProcessTaskStepVo.setParamObj(jsonObj);
-        handler.active(currentProcessTaskStepVo);
+        handler.redo(currentProcessTaskStepVo);
         return null;
     }
 
