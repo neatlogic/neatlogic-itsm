@@ -15,10 +15,12 @@ import com.techsure.multiattrsearch.MultiAttrsObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.elasticsearch.core.ElasticSearchFactory;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
@@ -89,7 +91,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
        JSONArray returnArray = new JSONArray();
        WorkcenterVo workcenter = getKeywordConditionMB(conditionList,keyword);
        workcenter.setPageSize(pageSize);
-       List<MultiAttrsObject> dataList = workcenterService.searchTask(workcenter).getData();
+       List<MultiAttrsObject> dataList = ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).search(workcenter).getData();
        if (!dataList.isEmpty()) {
            JSONObject titleObj = new JSONObject();
            JSONArray resultDateList = new JSONArray();
@@ -182,7 +184,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
         JSONArray returnArray = new JSONArray();
         WorkcenterVo workcenter = getKeywordConditionPC(condition, keyword);
         workcenter.setPageSize(pageSize);
-        List<MultiAttrsObject> dataList = workcenterService.searchTask(workcenter).getData();
+        List<MultiAttrsObject> dataList = ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).search(workcenter).getData();
         if (!dataList.isEmpty()) {
             JSONObject titleObj = new JSONObject();
             JSONArray titleDataList = new JSONArray();
