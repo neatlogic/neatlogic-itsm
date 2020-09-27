@@ -97,6 +97,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 												userJson.put("type", GroupSearch.USER.getValue());
 												userJson.put("worker", user);
 												userJson.put("workername", userVo.getUserName());
+												userJson.put("workerAvatar", userVo.getAvatar());
 												userArrayTmp.add(userJson);
 											}
 										}else if(user.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
@@ -119,7 +120,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 											}
 										}
 									}
-									
+
 								}
 								userTypeJson.put("workerlist", userArrayTmp);
 								userTypeJson.put("userlist", CollectionUtils.EMPTY_COLLECTION);
@@ -136,6 +137,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 											JSONObject userJson = new JSONObject();
 											userJson.put("useruuid", user);
 											userJson.put("username", userVo.getUserName());
+											userJson.put("userAvatar", userVo.getAvatar());
 											userArrayTmp.add(userJson);
 										}
 									}
