@@ -43,14 +43,6 @@ public interface CatalogService {
      * @return
      */
     public CatalogVo buildRootCatalog();
-    /**
-     * 
-    * @Time:2020年9月10日
-    * @Description: 查询catalogUuidList下的所有服务uuid列表，向下穿透 
-    * @param targetCatalogUuidList 
-    * @return List<String>
-     */
-    public List<String> getChannelUuidListInTheCatalogUuidList(List<String> catalogUuidList);
     
     public List<String> getChannelRelationTargetChannelUuidList(String channelUuid, Long channelTypeRelationId);
 }
