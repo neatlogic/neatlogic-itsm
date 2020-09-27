@@ -15,6 +15,7 @@ import codedriver.framework.elasticsearch.core.ElasticSearchFactory;
 import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -68,7 +69,7 @@ public class EsProcessTaskActionApi extends PrivateApiComponentBase {
 		    action = "update"; 
 		}
 		List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskListByKeywordAndIdList(null,taskIdList,fromDate,toDate);
-		IElasticSearchHandler  handler = ElasticSearchFactory.getHandler("processtask");
+		IElasticSearchHandler  handler = ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue());
 		for(ProcessTaskVo processTaskVo :processTaskVoList) {
 			JSONObject paramObj = new JSONObject();
 			paramObj.put("taskId", processTaskVo.getId());

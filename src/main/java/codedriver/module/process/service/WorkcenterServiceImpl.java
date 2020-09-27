@@ -52,6 +52,7 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
@@ -94,7 +95,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         JSONObject returnObj = new JSONObject();
         // 搜索es
         // Date time1 = new Date();
-        QueryResult result = ElasticSearchFactory.getHandler("processtask").search(workcenterVo);
+        QueryResult result = ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).search(workcenterVo);
         // Date time11 = new Date();
         // System.out.println("searchCostTime:"+(time11.getTime()-time1.getTime()));
         List<MultiAttrsObject> resultData = result.getData();
@@ -243,7 +244,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     @Override
     public Integer doSearchCount(WorkcenterVo workcenterVo) {
         // 搜索es
-        QueryResult result = ElasticSearchFactory.getHandler("processtask").search(workcenterVo);
+        QueryResult result = ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).search(workcenterVo);
         return result.getTotal();
     }
 
@@ -302,7 +303,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     
     @Override
     public QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo) {
-        return ElasticSearchFactory.getHandler("processtask").iterateSearch(workcenterVo);
+        return ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).iterateSearch(workcenterVo);
     }
 
     public Object getStepAction(ProcessTaskVo processTaskVo){

@@ -44,6 +44,7 @@ import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.service.WorkcenterService;
 
@@ -70,7 +71,7 @@ public class EsProcessTaskHandler extends EsHandlerBase {
 
 	@Override
 	public String getDocument() {
-		return "processtask";
+		return ESHandler.PROCESSTASK.getValue();
 	}
 	
 	@Override
@@ -91,7 +92,7 @@ public class EsProcessTaskHandler extends EsHandlerBase {
 	}
 
     @Override
-    public <T> String mySql(T t) {
+    public <T> String myBuildSql(T t) {
         WorkcenterVo workcenterVo = (WorkcenterVo)t;
         JSONArray resultColumnArray = workcenterVo.getResultColumnList();
         String selectColumn = "*";
