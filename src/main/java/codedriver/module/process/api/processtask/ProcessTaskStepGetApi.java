@@ -113,7 +113,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                    if(StringUtils.isNotBlank(configStr)) {
                        processTaskScoreTemplateVo.setConfig(configStr);
                        List<String> stepUuidList = JSON.parseArray(JSON.toJSONString(processTaskScoreTemplateVo.getConfig().getJSONArray("stepUuidList")), String.class);
-                       processTaskVo.setRedoStepList(processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuidList(processTaskId, stepUuidList));
+                       if(CollectionUtils.isNotEmpty(stepUuidList)) {
+                           processTaskVo.setRedoStepList(processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuidList(processTaskId, stepUuidList));
+                       }
                    }
                }
                processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
