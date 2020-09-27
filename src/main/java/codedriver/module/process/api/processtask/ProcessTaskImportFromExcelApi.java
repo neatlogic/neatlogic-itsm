@@ -7,8 +7,6 @@ import codedriver.framework.exception.file.*;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.form.FormHasNoAttributeException;
-import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -121,29 +119,29 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             if(processMapper.checkProcessIsExists(processUuid) == 0) {
                 throw new ProcessNotFoundException(processUuid);
             }
-            ProcessFormVo processForm = processMapper.getProcessFormByProcessUuid(processUuid);
-            if(processForm == null || formMapper.checkFormIsExists(processForm.getFormUuid()) == 0){
-                throw new FormNotFoundException(processForm.getFormUuid());
-            }
-            FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
             List<FormAttributeVo> formAttributeList = null;
-            if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
-                formAttributeList = formVersionVo.getFormAttributeList();
+            ProcessFormVo processForm = processMapper.getProcessFormByProcessUuid(processUuid);
+            if(processForm != null && formMapper.checkFormIsExists(processForm.getFormUuid()) > 0){
+                FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
+                if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
+                    formAttributeList = formVersionVo.getFormAttributeList();
+                }
             }
-            if(CollectionUtils.isEmpty(formAttributeList)){
-                throw new FormHasNoAttributeException(processForm.getFormUuid());
-            }
+
             List<String> headerList = (List<String>)data.get("header");
             List<Map<String, String>> contentList = (List<Map<String, String>>) data.get("content");
             if(CollectionUtils.isNotEmpty(headerList) && CollectionUtils.isNotEmpty(contentList)){
                 if (!headerList.contains("标题") || !headerList.contains("请求人") || !headerList.contains("优先级")) {
                     throw new ExcelMissColumnException("标题、请求人或者优先级");
                 }
-                for(FormAttributeVo att : formAttributeList){
-                    if(!headerList.contains(att.getLabel()) && att.isRequired()){
-                        throw new ExcelMissColumnException(att.getLabel());
+                if(CollectionUtils.isNotEmpty(formAttributeList)){
+                    for(FormAttributeVo att : formAttributeList){
+                        if(!headerList.contains(att.getLabel()) && att.isRequired()){
+                            throw new ExcelMissColumnException(att.getLabel());
+                        }
                     }
                 }
+
                 List<ProcessTaskImportAuditVo> auditVoList = new ArrayList<>();
                 ProcessTaskCreatePublicApi taskCreatePublicApi = (ProcessTaskCreatePublicApi)PublicApiComponentFactory.getInstance(ProcessTaskCreatePublicApi.class.getName());
                 int successCount = 0;
@@ -217,20 +215,22 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             }else if("描述".equals(entry.getKey())){
                 task.put("content",entry.getValue());
             }else{
-                for(FormAttributeVo att: formAttributeList){
-                    if(att.getLabel().equals(entry.getKey())){
-                        JSONObject formdata = new JSONObject();
-                        formdata.put("attributeUuid",att.getUuid());
-                        formdata.put("handler",att.getHandler());
-                        if(StringUtils.isNotBlank(entry.getValue()) && entry.getValue().startsWith("[") && entry.getValue().endsWith("]")){
-                            JSONArray dataList = JSONArray.parseArray(entry.getValue());
-                            formdata.put("dataList",dataList);
-                            formAttributeDataList.add(formdata);
-                            break;
-                        }else{
-                            formdata.put("dataList",entry.getValue());
-                            formAttributeDataList.add(formdata);
-                            break;
+                if(CollectionUtils.isNotEmpty(formAttributeList)){
+                    for(FormAttributeVo att: formAttributeList){
+                        if(att.getLabel().equals(entry.getKey())){
+                            JSONObject formdata = new JSONObject();
+                            formdata.put("attributeUuid",att.getUuid());
+                            formdata.put("handler",att.getHandler());
+                            if(StringUtils.isNotBlank(entry.getValue()) && entry.getValue().startsWith("[") && entry.getValue().endsWith("]")){
+                                JSONArray dataList = JSONArray.parseArray(entry.getValue());
+                                formdata.put("dataList",dataList);
+                                formAttributeDataList.add(formdata);
+                                break;
+                            }else{
+                                formdata.put("dataList",entry.getValue());
+                                formAttributeDataList.add(formdata);
+                                break;
+                            }
                         }
                     }
                 }
