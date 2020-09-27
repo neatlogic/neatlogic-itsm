@@ -96,6 +96,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 												JSONObject userJson = new JSONObject();
 												userJson.put("type", GroupSearch.USER.getValue());
 												userJson.put("worker", user);
+												userJson.put("avatar",userVo.getAvatar());
 												userJson.put("workername", userVo.getUserName());
 												userArrayTmp.add(userJson);
 											}
@@ -136,6 +137,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 											JSONObject userJson = new JSONObject();
 											userJson.put("useruuid", user);
 											userJson.put("username", userVo.getUserName());
+											userJson.put("avatar", userVo.getAvatar());
 											userArrayTmp.add(userJson);
 										}
 									}
