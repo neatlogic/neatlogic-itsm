@@ -188,8 +188,7 @@ public class CatalogServiceImpl implements CatalogService {
         return rootCatalog;
     }
 
-    @Override
-    public List<String> getChannelUuidListInTheCatalogUuidList(List<String> catalogUuidList) {
+    private List<String> getChannelUuidListInTheCatalogUuidList(List<String> catalogUuidList, List<String> channelTypeUuidList) {
         if(CollectionUtils.isNotEmpty(catalogUuidList)) {
             List<String> parentUuidList = new ArrayList<>();
             for(String catalogUuid : catalogUuidList) {
@@ -205,7 +204,7 @@ public class CatalogServiceImpl implements CatalogService {
                     }
                 }
             }
-            return channelMapper.getChannelUuidListByParentUuidList(parentUuidList);
+            return channelMapper.getChannelUuidListByParentUuidListAndChannelTypeUuidList(parentUuidList, channelTypeUuidList);
         }
         return new ArrayList<>();
     }
@@ -227,7 +226,11 @@ public class CatalogServiceImpl implements CatalogService {
                 }
             }
             if(CollectionUtils.isNotEmpty(targetCatalogUuidList)) {
-                List<String> channelUuidList = getChannelUuidListInTheCatalogUuidList(targetCatalogUuidList);
+                List<String> channelTypeUuidList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+                if(channelTypeUuidList.contains("all")) {
+                    channelTypeUuidList.clear();
+                }
+                List<String> channelUuidList = getChannelUuidListInTheCatalogUuidList(targetCatalogUuidList, channelTypeUuidList);
                 if(CollectionUtils.isNotEmpty(channelUuidList)) {
                     for(String targetChannelUuid : channelUuidList) {
                         if(!targetChannelUuidList.contains(targetChannelUuid)) {
