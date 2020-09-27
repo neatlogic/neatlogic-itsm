@@ -2,23 +2,14 @@ package codedriver.module.process.service;
 
 import java.text.ParseException;
 
-import codedriver.framework.process.dto.ProcessTaskVo;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.QueryResultSet;
-import com.techsure.multiattrsearch.query.QueryResult;
 
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 
 public interface WorkcenterService {
-
-    /**
-     * 搜索工单
-     * 
-     * @param workcenterVo
-     * @return
-     */
-    QueryResult searchTask(WorkcenterVo workcenterVo);
 
     /**
      * 工单中心根据条件获取工单列表数据
