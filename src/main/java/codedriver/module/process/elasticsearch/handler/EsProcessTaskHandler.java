@@ -45,6 +45,7 @@ import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.service.WorkcenterService;
 
@@ -84,9 +85,11 @@ public class EsProcessTaskHandler extends EsHandlerBase {
 		 Long taskId = paramJson.getLong("processTaskId");
 		 /** 获取工单信息 **/
 		 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(taskId);
-		 JSONObject esObject = null;
+		 JSONObject esObject = new JSONObject();
 		 if(processTaskVo != null) {
 			 esObject = workcenterService.getProcessTaskESObject(processTaskVo);
+		 }else {
+		     throw new ProcessTaskNotFoundException(taskId.toString());
 		 }
 		 return esObject;
 	}
