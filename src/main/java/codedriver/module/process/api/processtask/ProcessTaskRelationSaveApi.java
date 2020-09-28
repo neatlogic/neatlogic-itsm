@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -21,6 +22,7 @@ import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -70,7 +72,11 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-        handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.TRANFERREPORT, true);
+        try {
+            handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.TRANFERREPORT, true);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
         Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
         if(channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);

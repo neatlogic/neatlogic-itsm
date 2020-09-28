@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -62,7 +63,11 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 				handler.notify(processTaskStepVo, NotifyTriggerType.URGE);
 			}
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.URGE.getText());
+			try {
+	            throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.URGE.getText());
+	        }catch(ProcessTaskNoPermissionException e) {
+	            throw new PermissionDeniedException();
+	        }
 		}
 		/*生成催办活动*/
 		ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();

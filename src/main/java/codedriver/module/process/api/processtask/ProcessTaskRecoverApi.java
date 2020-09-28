@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 
 @Service
@@ -45,7 +47,11 @@ public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		ProcessStepHandlerFactory.getHandler().recoverProcessTask(processTaskVo);
+		try {
+	        ProcessStepHandlerFactory.getHandler().recoverProcessTask(processTaskVo);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
 		return null;
 	}
 

@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -23,7 +24,6 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepCommentNotFoundException;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
@@ -69,7 +69,8 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
 		}
 		ProcessTaskStepReplyVo replyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
 		if(Objects.equals(replyVo.getIsDeletable(), 0)) {
-            throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.DELETECOMMENT.getText());
+            // throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.DELETECOMMENT.getText());
+		    throw new PermissionDeniedException();
 		}
 		// 锁定当前流程
         processTaskMapper.getProcessTaskLockById(replyVo.getProcessTaskId());

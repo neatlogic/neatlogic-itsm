@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -29,6 +30,7 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
@@ -48,6 +50,9 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 	
 	@Autowired
     private ProcessTaskStepDataMapper processTaskStepDataMapper;
+    
+    @Autowired
+    private CatalogService catalogService;
 	
 	@Override
 	public String getToken() {
@@ -118,6 +123,11 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 			}
 			startTaskStep = processTaskStepList.get(0);
 		}else {
+            /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
+            if(!catalogService.channelIsAuthority(channelUuid)){
+                //throw new ProcessTaskNoPermissionException("上报");
+                throw new PermissionDeniedException();
+            }
 			List<ProcessStepVo> processStepList = processMapper.getProcessStepDetailByProcessUuid(processUuid);
 			if(CollectionUtils.isNotEmpty(processStepList)) {
 				for(ProcessStepVo processStepVo : processStepList) {

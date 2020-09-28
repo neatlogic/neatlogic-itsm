@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -21,6 +22,7 @@ import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -70,7 +72,11 @@ public class ProcessTaskContentUpdateApi extends PrivateApiComponentBase {
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-		handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
+		try {
+	        handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
 		//获取开始步骤id
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
 		if(processTaskStepList.size() != 1) {

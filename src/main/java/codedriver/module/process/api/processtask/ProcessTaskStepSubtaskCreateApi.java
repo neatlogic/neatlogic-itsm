@@ -15,6 +15,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -22,6 +23,7 @@ import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -77,7 +79,11 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
 		if(handler == null) {
 		    throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
-		handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.CREATESUBTASK, true);
+		try {
+	        handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.CREATESUBTASK, true);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
 		ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
 		processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
 		processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
