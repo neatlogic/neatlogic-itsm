@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
@@ -24,6 +25,7 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -74,7 +76,11 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-		ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+        try {
+            ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
 
 		List<ProcessTaskStepAuditVo> resutlList = new ArrayList<>();
 		ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();

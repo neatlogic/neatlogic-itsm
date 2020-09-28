@@ -14,13 +14,12 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepSubtaskNotFoundException;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 
@@ -87,7 +86,8 @@ public class ProcessTaskStepSubtaskEditApi extends PrivateApiComponentBase {
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
 			processTaskStepSubtaskService.editSubtask(processTaskStepSubtaskVo);
 		}else {
-			throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.EDITSUBTASK.getText());
+			//throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.EDITSUBTASK.getText());
+            throw new PermissionDeniedException();
 		}
 		return null;
 	}

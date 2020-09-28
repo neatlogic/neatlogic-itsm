@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 
@@ -47,7 +49,11 @@ public class ProcessTaskAbortApi extends PrivateApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
-		handler.abortProcessTask(processTaskVo);
+		try {
+	        handler.abortProcessTask(processTaskVo);
+		}catch(ProcessTaskNoPermissionException e) {
+		    throw new PermissionDeniedException();
+		}
 		return null;
 	}
 

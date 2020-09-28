@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -20,6 +21,7 @@ import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
@@ -77,7 +79,11 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
 		if(handler == null) {
 		    throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
-		handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.SAVE, true);
+		try {
+	        handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.SAVE, true);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
 		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(true);
 		processTaskStepDataVo.setProcessTaskId(processTaskId);
 		processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
