@@ -14,7 +14,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessTaskRetreatableStepList extends PrivateApiComponentBase {
+public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase {
     
     @Autowired
     private ProcessTaskService processTaskService;
