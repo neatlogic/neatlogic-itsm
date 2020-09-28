@@ -809,6 +809,9 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         /** 时效列表 **/
         List<ProcessTaskSlaVo> processTaskSlaList = processTaskMapper.getProcessTaskSlaByProcessTaskId(processTaskVo.getId());
 
+        /** 关注此工单的用户列表 */
+        List<String> focusUsers = processTaskMapper.getFocusUsersOfProcessTask(processTaskVo.getId());
+
         //form
         JSONArray formArray = new JSONArray();
         List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
@@ -849,6 +852,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                 .setTransferFromUserList(transferAuditList)
                 .setWorktime(channel.getWorktimeUuid())
                 .setExpiredTime(processTaskSlaList)
+                .setFocusUsers(focusUsers)
                 .build();
         JSONObject esObject = new JSONObject();
         esObject.put("form",formArray);
