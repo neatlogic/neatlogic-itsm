@@ -1106,13 +1106,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * @return Set<ProcessTaskStepVo>
      */
     @Override
-    public Set<ProcessTaskStepVo> getRetractableStepListByProcessTaskId(Long processTaskId) {
+    public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo) {
         Set<ProcessTaskStepVo> resultSet = new HashSet<>();
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
-        for (ProcessTaskStepVo stepVo : processTaskStepList) {
+        List<ProcessTaskStepVo> stepVoList = getProcessTaskStepVoListByProcessTask(processTaskVo);
+//        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
+        for (ProcessTaskStepVo stepVo : stepVoList) {
             /** 找到所有已激活步骤 **/
             if (stepVo.getIsActive().equals(1)) {
-                resultSet.addAll(getRetractableStepListByProcessTaskStepId(stepVo.getId()));
+                resultSet.addAll(getRetractableStepListByProcessTaskStepId(stepVoList, stepVo.getId()));
             }
         }
         return resultSet;
@@ -1127,30 +1128,30 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * @return List<ProcessTaskStepVo>
      */
     @Override
-    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(Long processTaskStepId) {
+    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(List<ProcessTaskStepVo> processTaskStepList, Long processTaskStepId) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
         /** 所有前置步骤 **/
         List<ProcessTaskStepVo> fromStepList = processTaskMapper.getFromProcessTaskStepByToId(processTaskStepId);
-        if(CollectionUtils.isNotEmpty(fromStepList)) {
-            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(fromStepList.get(0).getProcessTaskId());
-            /** 找到所有已完成步骤 **/
-            for (ProcessTaskStepVo fromStep : fromStepList) {
-                IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromStep.getHandler());
-                if (handler != null) {
-                    if (ProcessStepMode.MT == handler.getMode()) {// 手动处理节点
-                        setCurrentUserProcessUserTypeList(processTaskVo, fromStep);
-                        setProcessTaskStepConfig(fromStep);
-                        if(checkOperationAuthIsConfigured(fromStep, ProcessTaskOperationType.RETREATCURRENTSTEP)) {
-                            resultList.add(fromStep);
+        /** 找到所有已完成步骤 **/
+        for (ProcessTaskStepVo fromStep : fromStepList) {
+            IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromStep.getHandler());
+            if (handler != null) {
+                if (ProcessStepMode.MT == handler.getMode()) {// 手动处理节点
+                    for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+                        if(processTaskStepVo.getId().equals(fromStep.getId())) {
+                            if(checkOperationAuthIsConfigured(processTaskStepVo, ProcessTaskOperationType.RETREATCURRENTSTEP)) {
+                                resultList.add(fromStep);
+                            }
                         }
-                    } else {// 自动处理节点，继续找前置节点
-                        resultList.addAll(getRetractableStepListByProcessTaskStepId(fromStep.getId()));
                     }
-                } else {
-                    throw new ProcessStepHandlerNotFoundException(fromStep.getHandler());
+                } else {// 自动处理节点，继续找前置节点
+                    resultList.addAll(getRetractableStepListByProcessTaskStepId(processTaskStepList, fromStep.getId()));
                 }
+            } else {
+                throw new ProcessStepHandlerNotFoundException(fromStep.getHandler());
             }
         }
+        
         return resultList;
     }
     /**
@@ -1260,16 +1261,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     
     @Override
     public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo){
-        List<ProcessTaskStepVo> resultList = new ArrayList<>();
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
-            if(ProcessStepType.START.getValue().equals(processTaskStep.getType()) || ProcessStepType.PROCESS.getValue().equals(processTaskStep.getType())) {
-                setProcessTaskStepConfig(processTaskStep);
-                setCurrentUserProcessUserTypeList(processTaskVo, processTaskStep);
-                resultList.add(processTaskStep);
-            }
+            setProcessTaskStepConfig(processTaskStep);
+            setCurrentUserProcessUserTypeList(processTaskVo, processTaskStep);
         }
-        return resultList;
+        return processTaskStepList;
     }    
 
     @Override

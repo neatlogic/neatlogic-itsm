@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -43,8 +44,8 @@ public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        return processTaskService.getRetractableStepListByProcessTaskId(processTaskId);
+		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        return processTaskService.getRetractableStepListByProcessTask(processTaskVo);
 	}
 
 }

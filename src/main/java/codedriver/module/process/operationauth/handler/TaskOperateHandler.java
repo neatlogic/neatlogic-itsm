@@ -156,7 +156,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 Set<ProcessTaskStepVo> retractableStepSet = new HashSet<>();
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        retractableStepSet.addAll(processTaskService.getRetractableStepListByProcessTaskStepId(processTaskStep.getId()));
+                        retractableStepSet.addAll(processTaskService.getRetractableStepListByProcessTaskStepId(processTaskVo.getStepList(), processTaskStep.getId()));
                     }
                 }
                 if (CollectionUtils.isNotEmpty(retractableStepSet)) {

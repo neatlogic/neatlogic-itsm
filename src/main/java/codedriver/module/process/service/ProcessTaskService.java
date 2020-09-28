@@ -203,19 +203,20 @@ public interface ProcessTaskService {
      * 
      * @Time:2020年4月3日
      * @Description: 获取工单中当前用户能撤回的步骤列表
-     * @param processTaskId
+     * @param processTask
      * @return Set<ProcessTaskStepVo>
      */
-	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTaskId(Long processTaskId);
+	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo);
 	/**
      * 
      * @Author: 14378
      * @Time:2020年4月3日
      * @Description: 获取当前步骤的前置步骤列表中处理人是当前用户的步骤列表
+     * @param processTaskStepList 步骤列表
      * @param processTaskStepId 已激活的步骤id
      * @return List<ProcessTaskStepVo>
      */
-    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(Long processTaskStepId);
+    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(List<ProcessTaskStepVo> processTaskStepList, Long processTaskStepId);
 	/**
      * 
      * @Time:2020年4月3日
