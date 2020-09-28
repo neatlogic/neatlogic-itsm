@@ -44,7 +44,7 @@ public class ProcessTaskRetreatableStepList extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		return processTaskService.getRetractableStepListByProcessTaskId(processTaskId);
+        return processTaskService.getRetractableStepListByProcessTaskId(processTaskId);
 	}
 
 }

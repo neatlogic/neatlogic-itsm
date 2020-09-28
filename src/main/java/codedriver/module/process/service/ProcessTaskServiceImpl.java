@@ -1131,22 +1131,24 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
         /** 所有前置步骤 **/
         List<ProcessTaskStepVo> fromStepList = processTaskMapper.getFromProcessTaskStepByToId(processTaskStepId);
-        /** 找到所有已完成步骤 **/
-        for (ProcessTaskStepVo fromStep : fromStepList) {
-            IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromStep.getHandler());
-            if (handler != null) {
-                if (ProcessStepMode.MT == handler.getMode()) {// 手动处理节点
-                    // 获取步骤处理人
-                    List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(fromStep.getId(), ProcessUserType.MAJOR.getValue());
-                    List<String> majorUserUuidList = majorUserList.stream().map(ProcessTaskStepUserVo::getUserUuid).collect(Collectors.toList());
-                    if (majorUserUuidList.contains(UserContext.get().getUserUuid(true))) {
-                        resultList.add(fromStep);
+        if(CollectionUtils.isNotEmpty(fromStepList)) {
+            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(fromStepList.get(0).getProcessTaskId());
+            /** 找到所有已完成步骤 **/
+            for (ProcessTaskStepVo fromStep : fromStepList) {
+                IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromStep.getHandler());
+                if (handler != null) {
+                    if (ProcessStepMode.MT == handler.getMode()) {// 手动处理节点
+                        setCurrentUserProcessUserTypeList(processTaskVo, fromStep);
+                        setProcessTaskStepConfig(fromStep);
+                        if(checkOperationAuthIsConfigured(fromStep, ProcessTaskOperationType.RETREATCURRENTSTEP)) {
+                            resultList.add(fromStep);
+                        }
+                    } else {// 自动处理节点，继续找前置节点
+                        resultList.addAll(getRetractableStepListByProcessTaskStepId(fromStep.getId()));
                     }
-                } else {// 自动处理节点，继续找前置节点
-                    resultList.addAll(getRetractableStepListByProcessTaskStepId(fromStep.getId()));
+                } else {
+                    throw new ProcessStepHandlerNotFoundException(fromStep.getHandler());
                 }
-            } else {
-                throw new ProcessStepHandlerNotFoundException(fromStep.getHandler());
             }
         }
         return resultList;
