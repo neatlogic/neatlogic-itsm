@@ -2,7 +2,9 @@ package codedriver.module.process.groupsearch;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -26,9 +28,17 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> List<T> search(JSONObject jsonObj) {
+		List<Object> includeList = jsonObj.getJSONArray("includeList");
+		if(CollectionUtils.isEmpty(includeList)) {
+			includeList = new ArrayList<Object>();
+		}
+		List<String> includeStrList = includeList.stream().map(object -> object.toString()).collect(Collectors.toList());
 		List<String> userTypeList = new ArrayList<String>();
 		for (ProcessUserType s : ProcessUserType.values()) {
-			if(s.getText().contains(jsonObj.getString("keyword"))) {
+			if(s.getIsShow() && s.getText().contains(jsonObj.getString("keyword"))) {
+				userTypeList.add(s.getValue());
+			}
+			if(includeStrList.contains(getHeader() + s.getValue())){
 				userTypeList.add(s.getValue());
 			}
 		}
