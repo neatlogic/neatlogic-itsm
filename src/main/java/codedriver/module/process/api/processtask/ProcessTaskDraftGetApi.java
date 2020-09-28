@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
@@ -39,7 +40,6 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -112,7 +112,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 		    ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
 	        /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
 	        if(!catalogService.channelIsAuthority(processTaskVo.getChannelUuid())){
-	            throw new ProcessTaskNoPermissionException("上报");
+	            //throw new ProcessTaskNoPermissionException("上报");
+	            throw new PermissionDeniedException();
 	        }
 	        
 	        String owner = processTaskVo.getOwner();
@@ -143,7 +144,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 		    ProcessTaskVo oldProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(copyProcessTaskId);
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
             if(!catalogService.channelIsAuthority(oldProcessTaskVo.getChannelUuid())){
-                throw new ProcessTaskNoPermissionException("上报");
+                //throw new ProcessTaskNoPermissionException("上报");
+                throw new PermissionDeniedException();
             }
             //获取旧工单表单信息
             ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(copyProcessTaskId);
@@ -227,7 +229,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 			}
 			/** 判断当前用户是否拥有channelUuid服务的上报权限 **/
 			if(!catalogService.channelIsAuthority(channelUuid)){
-				throw new ProcessTaskNoPermissionException("上报");
+				//throw new ProcessTaskNoPermissionException("上报");
+				throw new PermissionDeniedException();
 			}
 			ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
 			if(channelTypeVo == null) {

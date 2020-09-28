@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -60,10 +62,14 @@ public class ProcessTaskStartApi extends PrivateApiComponentBase {
 		    throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());		
 		}
 		String action = jsonObj.getString("action");
-        if(ProcessTaskOperationType.ACCEPT.getValue().equals(action)) {
-            handler.accept(processTaskStepVo);
+        try {
+            if(ProcessTaskOperationType.ACCEPT.getValue().equals(action)) {
+                handler.accept(processTaskStepVo);
+            }
+            handler.start(processTaskStepVo);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
         }
-        handler.start(processTaskStepVo);
 		return null;
 	}
 
