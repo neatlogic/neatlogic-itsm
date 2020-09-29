@@ -1,10 +1,16 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskRelationVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -15,6 +21,9 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @OperationType(type = OperationTypeEnum.DELETE)
 public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
 
+    @Autowired
+    ProcessTaskMapper taskMapper;
+    
     @Override
     public String getToken() {
         return "processtask/delete";
@@ -22,7 +31,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "批量删除工单";
+        return "删除工单";
     }
 
     @Override
@@ -30,12 +39,29 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         return null;
     }
     @Input({
-        @Param(name = "processTaskIdList", type = ApiParamType.JSONARRAY, desc = "工单id列表", isRequired = true)
+        @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id", isRequired = true)
     })
-    @Description(desc = "批量删除工单")
+    @Description(desc = "删除工单")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        // TODO Auto-generated method stub
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        //sla通知
+        //taskMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
+        //关系
+        List<ProcessTaskRelationVo>  relationList = taskMapper.getProcessTaskRelationList(new ProcessTaskRelationVo(processTaskId));
+        for(ProcessTaskRelationVo relation : relationList) {
+            taskMapper.deleteProcessTaskRelationById(relation.getId());
+        }
+        //表单值
+        taskMapper.deleteProcessTaskFormAttributeDataByProcessTaskId(processTaskId);
+        //关注人
+        taskMapper.deleteProcessTaskFocus(new ProcessTaskVo(processTaskId), null);
+        //流程汇聚
+        taskMapper.deleteProcessTaskConvergeByProcessTaskId(processTaskId);
+        //指派
+        taskMapper.deleteProcessTaskAssignWorkerByProcessTaskId(processTaskId);
+        
+        
         return null;
     }
 
