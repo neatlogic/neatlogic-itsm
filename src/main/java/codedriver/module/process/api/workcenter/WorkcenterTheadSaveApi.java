@@ -42,11 +42,11 @@ public class WorkcenterTheadSaveApi extends PrivateApiComponentBase {
 		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid",isRequired = true),
 		@Param(name="theadList", type = ApiParamType.JSONARRAY, desc="分类uuid",isRequired = true),
 		@Param(name="theadList[0].name", type = ApiParamType.STRING, desc="字段名"),
-		@Param(name="theadList[1].width", type = ApiParamType.INTEGER, desc="字段宽度"),
-		@Param(name="theadList[2].isShow", type = ApiParamType.INTEGER, desc="字段是否展示"),
-		@Param(name="theadList[3].type", type = ApiParamType.STRING, desc="字段类型"),
-		@Param(name="theadList[4].sort", type = ApiParamType.INTEGER, desc="字段排序"),
-		@Param(name="theadList[5].isAbled", type = ApiParamType.INTEGER, desc="字段是否可用")
+		@Param(name="theadList[0].width", type = ApiParamType.INTEGER, desc="字段宽度"),
+		@Param(name="theadList[0].isShow", type = ApiParamType.INTEGER, desc="字段是否展示"),
+		@Param(name="theadList[0].type", type = ApiParamType.STRING, desc="字段类型"),
+		@Param(name="theadList[0].sort", type = ApiParamType.INTEGER, desc="字段排序"),
+		@Param(name="theadList[0].isAbled", type = ApiParamType.INTEGER, desc="字段是否可用")
 	})
 	@Output({
 		
