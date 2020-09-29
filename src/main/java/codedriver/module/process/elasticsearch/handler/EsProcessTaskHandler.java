@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
@@ -75,11 +74,6 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
     @Override
     public String getDocument() {
         return ESHandler.PROCESSTASK.getValue();
-    }
-
-    @Override
-    public String getDocumentId() {
-        return "taskId";
     }
 
     @Override
