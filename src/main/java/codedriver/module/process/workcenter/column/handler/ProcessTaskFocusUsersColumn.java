@@ -17,9 +17,15 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 		return "focususers";
 	}
 
+	/** 此列在工单中心不需要中文名，也不需要可拖拽，所以displayName为空且isAbled为false */
 	@Override
 	public String getDisplayName() {
-		return "关注此工单的用户";
+		return "";
+	}
+
+	@Override
+	public Boolean getIsAbled() {
+		return false;
 	}
 
 	@Override
