@@ -13,14 +13,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ProcessTaskFocusToggleApi extends PrivateApiComponentBase {
+public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public String getToken() {
-		return "processtask/focus/toggle";
+		return "processtask/focus/update";
 	}
 
 	@Override
