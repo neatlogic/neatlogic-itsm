@@ -17,15 +17,15 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 		return "focususers";
 	}
 
-	/** 此列在工单中心不需要中文名，也不需要可拖拽，所以displayName为空且isAbled为false */
+	/** 此列在工单中心不需要中文名，也不需要可拖拽，所以displayName为空且disable为true */
 	@Override
 	public String getDisplayName() {
 		return "";
 	}
 
 	@Override
-	public Boolean getIsAbled() {
-		return false;
+	public Boolean getDisabled() {
+		return true;
 	}
 
 	@Override
