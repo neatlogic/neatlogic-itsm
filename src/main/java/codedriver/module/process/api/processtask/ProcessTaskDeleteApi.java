@@ -10,6 +10,8 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
+import codedriver.framework.process.dto.ProcessTaskSlaVo;
+import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
@@ -45,8 +47,21 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
+        
+        
+        //taskMapper.deleteProcessTaskStepRemind(processTaskStepRemindVo)
+        //步骤附件
+        taskMapper.deleteProcessTaskStepFileByProcessTaskId(processTaskId);
+        //步骤回复内容
+        taskMapper.deleteProcessTaskStepContentByProcessTaskId(processTaskId);
+        //活动记录
+        taskMapper.deleteProcessTaskStepAuditByProcessTaskId(processTaskId);
         //sla通知
-        //taskMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
+        List<ProcessTaskSlaVo> processTaskSlaList = taskMapper.getProcessTaskSlaByProcessTaskId(processTaskId);
+        for(ProcessTaskSlaVo processTaskSla : processTaskSlaList) {
+            taskMapper.deleteProcessTaskSlaTransferBySlaId(processTaskSla.getId());
+            taskMapper.deleteProcessTaskSlaNotifyById(processTaskSla.getId());
+        }
         //关系
         List<ProcessTaskRelationVo>  relationList = taskMapper.getProcessTaskRelationList(new ProcessTaskRelationVo(processTaskId));
         for(ProcessTaskRelationVo relation : relationList) {
