@@ -1161,31 +1161,34 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * @param processTaskId
      * @return List<ProcessTaskStepVo>
      */
-    @Override
-    public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId) {
-        List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
-        for (ProcessTaskStepVo stepVo : processTaskStepList) {
-            /** 找到所有已激活未处理的步骤 **/
-            if (stepVo.getIsActive().equals(1)) {
-                List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(stepVo.getId());
-                for (ProcessTaskStepWorkerVo processTaskStepWorkerVo : processTaskStepWorkerList) {
-                    if (GroupSearch.USER.getValue().equals(processTaskStepWorkerVo.getType()) && UserContext.get().getUserUuid(true).equals(processTaskStepWorkerVo.getUuid())) {
-                        resultList.add(stepVo);
-                        break;
-                    } else if (GroupSearch.TEAM.getValue().equals(processTaskStepWorkerVo.getType()) && currentUserTeamList.contains(processTaskStepWorkerVo.getUuid())) {
-                        resultList.add(stepVo);
-                        break;
-                    } else if (GroupSearch.ROLE.getValue().equals(processTaskStepWorkerVo.getType()) && UserContext.get().getRoleUuidList().contains(processTaskStepWorkerVo.getUuid())) {
-                        resultList.add(stepVo);
-                        break;
-                    }
-                }
-            }
-        }
-        return resultList;
-    }
+//    @Override
+//    public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId) {
+//        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+//        List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+//        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
+//        for (ProcessTaskStepVo stepVo : processTaskStepList) {
+//            /** 找到所有已激活未处理的步骤 **/
+//            if (stepVo.getIsActive().equals(1)) {
+////                List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(stepVo.getId());
+////                for (ProcessTaskStepWorkerVo processTaskStepWorkerVo : processTaskStepWorkerList) {
+////                    if (GroupSearch.USER.getValue().equals(processTaskStepWorkerVo.getType()) && UserContext.get().getUserUuid(true).equals(processTaskStepWorkerVo.getUuid())) {
+////                        resultList.add(stepVo);
+////                        break;
+////                    } else if (GroupSearch.TEAM.getValue().equals(processTaskStepWorkerVo.getType()) && currentUserTeamList.contains(processTaskStepWorkerVo.getUuid())) {
+////                        resultList.add(stepVo);
+////                        break;
+////                    } else if (GroupSearch.ROLE.getValue().equals(processTaskStepWorkerVo.getType()) && UserContext.get().getRoleUuidList().contains(processTaskStepWorkerVo.getUuid())) {
+////                        resultList.add(stepVo);
+////                        break;
+////                    }
+////                }
+//                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
+//                    resultList.add(stepVo);
+//                }
+//            }
+//        }
+//        return resultList;
+//    }
 
     /**
      * 

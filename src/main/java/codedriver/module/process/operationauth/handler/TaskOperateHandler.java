@@ -89,7 +89,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK);
+                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                            return true;
+                        }
                     }
                 }
             }          
@@ -104,7 +106,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == -1) {
-                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK);
+                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -118,7 +122,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.UPDATE);
+                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.UPDATE)) {
+                            return true;
+                        }
                     }
                 }
             }           
@@ -132,7 +138,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        return processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE);
+                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE)) {
+                            return true;
+                        }
                     }
                 }
             }            
