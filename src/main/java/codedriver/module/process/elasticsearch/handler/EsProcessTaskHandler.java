@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -32,7 +34,7 @@ import codedriver.framework.dto.condition.ConditionGroupRelVo;
 import codedriver.framework.dto.condition.ConditionGroupVo;
 import codedriver.framework.dto.condition.ConditionRelVo;
 import codedriver.framework.dto.condition.ConditionVo;
-import codedriver.framework.elasticsearch.core.EsHandlerBase;
+import codedriver.framework.elasticsearch.core.ElasticSearchHandlerBase;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
@@ -50,53 +52,54 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.service.WorkcenterService;
 
 @Service
-public class EsProcessTaskHandler extends EsHandlerBase {
-	Logger logger = LoggerFactory.getLogger(EsProcessTaskHandler.class);
-	
-	@Autowired
-	WorkcenterMapper workcenterMapper;
-	@Autowired
-	FormMapper formMapper;
-	@Autowired
-	ProcessTaskMapper processTaskMapper;
-	@Autowired
-	ChannelMapper channelMapper;
-	@Autowired
-	CatalogMapper catalogMapper;
-	@Autowired
-	WorktimeMapper worktimeMapper;
-	@Autowired
-	WorkcenterService workcenterService;
-	@Autowired
+public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo, QueryResult> {
+    Logger logger = LoggerFactory.getLogger(EsProcessTaskHandler.class);
+
+    @Autowired
+    WorkcenterMapper workcenterMapper;
+    @Autowired
+    FormMapper formMapper;
+    @Autowired
+    ProcessTaskMapper processTaskMapper;
+    @Autowired
+    ChannelMapper channelMapper;
+    @Autowired
+    CatalogMapper catalogMapper;
+    @Autowired
+    WorktimeMapper worktimeMapper;
+    @Autowired
+    WorkcenterService workcenterService;
+    @Autowired
     UserMapper userMapper;
 
-	@Override
-	public String getDocument() {
-		return ESHandler.PROCESSTASK.getValue();
-	}
-	
-	@Override
+    @Override
+    public String getDocument() {
+        return ESHandler.PROCESSTASK.getValue();
+    }
+
+    @Override
     public String getDocumentId() {
         return "taskId";
     }
-		
-	@Override
-	public JSONObject mySave(JSONObject paramJson) {
-		 Long taskId = paramJson.getLong("processTaskId");
-		 /** 获取工单信息 **/
-		 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(taskId);
-		 JSONObject esObject = new JSONObject();
-		 if(processTaskVo != null) {
-			 esObject = workcenterService.getProcessTaskESObject(processTaskVo);
-		 }else {
-		     throw new ProcessTaskNotFoundException(taskId.toString());
-		 }
-		 return esObject;
-	}
 
     @Override
-    public <T> String myBuildSql(T t) {
-        WorkcenterVo workcenterVo = (WorkcenterVo)t;
+    public JSONObject mySave(JSONObject paramJson) {
+        Long taskId = paramJson.getLong("processTaskId");
+        /** 获取工单信息 **/
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(taskId);
+        JSONObject esObject = new JSONObject();
+        if (processTaskVo != null) {
+            esObject = workcenterService.getProcessTaskESObject(processTaskVo);
+        } else {
+            throw new ProcessTaskNotFoundException(taskId.toString());
+        }
+        return esObject;
+    }
+
+    @Override
+    public String buildSql(WorkcenterVo workcenterVo) {
+        // WorkcenterVo workcenterVo = (WorkcenterVo)t;
+
         JSONArray resultColumnArray = workcenterVo.getResultColumnList();
         String selectColumn = "*";
         //
@@ -108,7 +111,7 @@ public class EsProcessTaskHandler extends EsHandlerBase {
             }
         }
         String where = assembleWhere(workcenterVo);
-        //待办条件
+        // 待办条件
         if (workcenterVo.getIsMeWillDo() == 1) {
             String meWillDoCondition = getMeWillDoCondition(workcenterVo);
             if (StringUtils.isBlank(where)) {
@@ -117,8 +120,8 @@ public class EsProcessTaskHandler extends EsHandlerBase {
                 where = where + " and " + meWillDoCondition;
             }
         }
-        //设备服务过滤
-        if(!DeviceType.ALL.getValue().equals(workcenterVo.getDevice())) {
+        // 设备服务过滤
+        if (!DeviceType.ALL.getValue().equals(workcenterVo.getDevice())) {
             String deviceCondition = getChannelDeviceCondition(workcenterVo);
             if (StringUtils.isNotBlank(deviceCondition)) {
                 if (StringUtils.isBlank(where)) {
@@ -134,11 +137,10 @@ public class EsProcessTaskHandler extends EsHandlerBase {
                 where, orderBy, workcenterVo.getStartNum(), workcenterVo.getPageSize());
         return sql;
     }
-    
-    
+
     /**
      * 
-     *  获取设备（移动端|pc端）服务过滤条件
+     * 获取设备（移动端|pc端）服务过滤条件
      */
     private String getChannelDeviceCondition(WorkcenterVo workcenterVo) {
         String deviceCondition = StringUtils.EMPTY;
@@ -146,15 +148,16 @@ public class EsProcessTaskHandler extends EsHandlerBase {
         channelVo.setSupport(workcenterVo.getDevice());
         channelVo.setUserUuid(UserContext.get().getUserUuid(true));
         channelVo.setNeedPage(false);
-        List<ChannelVo>  channelList = channelMapper.searchChannelList(channelVo);
+        List<ChannelVo> channelList = channelMapper.searchChannelList(channelVo);
         List<String> channelUuidList = new ArrayList<String>();
-        for(ChannelVo channel : channelList) {
+        for (ChannelVo channel : channelList) {
             channelUuidList.add(channel.getUuid());
         }
-        if(CollectionUtils.isNotEmpty(channelUuidList)){
+        if (CollectionUtils.isNotEmpty(channelUuidList)) {
             String channelUuids = String.format("'%s'", StringUtil.join(channelUuidList.toArray(new String[0]), "','"));
-            deviceCondition = String.format(Expression.INCLUDE.getExpressionEs(),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CHANNEL.getValue()),channelUuids);;
-            
+            deviceCondition = String.format(Expression.INCLUDE.getExpressionEs(),
+                ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CHANNEL.getValue()), channelUuids);;
+
         }
         return deviceCondition;
     }
@@ -207,8 +210,7 @@ public class EsProcessTaskHandler extends EsHandlerBase {
         // String.join("','",userList))) ;
         return meWillDoSql;
     }
-    
-    
+
     /**
      * 拼接where条件
      * 
@@ -376,5 +378,9 @@ public class EsProcessTaskHandler extends EsHandlerBase {
         return whereSb.toString() + ")";
     }
 
-    
+    @Override
+    protected QueryResult makeupQueryResult(QueryResult result) {
+       return result;
+    }
+
 }

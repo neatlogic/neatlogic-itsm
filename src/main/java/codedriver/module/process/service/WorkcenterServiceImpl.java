@@ -27,6 +27,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.elasticsearch.core.ElasticSearchFactory;
+import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -61,7 +62,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.util.TimeUtil;
 
 @Service
-public class WorkcenterServiceImpl implements WorkcenterService{
+public class WorkcenterServiceImpl implements WorkcenterService {
     Logger logger = LoggerFactory.getLogger(WorkcenterServiceImpl.class);
     @Autowired
     WorkcenterMapper workcenterMapper;
@@ -87,7 +88,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
      * 
      * @param workcenterVo
      * @return
-     * @throws ParseException 
+     * @throws ParseException
      */
     @Override
     @Transactional
@@ -95,9 +96,11 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         JSONObject returnObj = new JSONObject();
         // 搜索es
         // Date time1 = new Date();
-        QueryResult result = ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).search(workcenterVo);
+        IElasticSearchHandler<WorkcenterVo, QueryResult> esHandler =
+            ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         // Date time11 = new Date();
         // System.out.println("searchCostTime:"+(time11.getTime()-time1.getTime()));
+        QueryResult result = esHandler.search(workcenterVo);
         List<MultiAttrsObject> resultData = result.getData();
         // 返回的数据重新加工
         List<JSONObject> dataList = new ArrayList<JSONObject>();
@@ -144,7 +147,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         // Date time22 = new Date();
         // System.out.println("矫正headerCostTime:"+(time22.getTime()-time2.getTime()));
         if (!resultData.isEmpty()) {
-            //Date time3 = new Date();
+            // Date time3 = new Date();
             for (MultiAttrsObject el : resultData) {
                 JSONObject taskJson = new JSONObject();
                 taskJson.put("taskid", el.getId());
@@ -160,8 +163,8 @@ public class WorkcenterServiceImpl implements WorkcenterService{
                 taskJson.put("action", getStepAction(el));
                 dataList.add(taskJson);
             }
-            //Date time33 = new Date();
-            //System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
+            // Date time33 = new Date();
+            // System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
         }
         returnObj.put("theadList", theadList);
         returnObj.put("tbodyList", dataList);
@@ -183,7 +186,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
      * @param MultiAttrsObject
      *            el
      * @return
-     * @throws ParseException 
+     * @throws ParseException
      */
     @Override
     public Object getStepAction(MultiAttrsObject el) throws ParseException {
@@ -191,7 +194,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         if (commonJson == null) {
             return CollectionUtils.EMPTY_COLLECTION;
         }
-        //task
+        // task
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
         processTaskVo.setId(Long.valueOf(el.getId()));
         processTaskVo.setTitle(commonJson.getString(ProcessWorkcenterField.TITLE.getValue()));
@@ -203,9 +206,11 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         processTaskVo.setOwner(commonJson.getString(ProcessWorkcenterField.OWNER.getValue()));
         processTaskVo.setReporter(commonJson.getString(ProcessWorkcenterField.REPORTER.getValue()));
         processTaskVo.setWorktimeUuid(commonJson.getString(ProcessWorkcenterField.WOKRTIME.getValue()));
-        processTaskVo.setStartTime(TimeUtil.convertStringToDate(commonJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
-        processTaskVo.setEndTime(TimeUtil.convertStringToDate(commonJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
-        //step
+        processTaskVo.setStartTime(
+            TimeUtil.convertStringToDate(commonJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
+        processTaskVo
+            .setEndTime(TimeUtil.convertStringToDate(commonJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
+        // step
         JSONArray stepArray = null;
         try {
             stepArray = (JSONArray)commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
@@ -217,7 +222,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         }
         List<ProcessTaskStepVo> stepList = new ArrayList<>();
         for (Object stepObj : stepArray) {
-            JSONObject stepJson = (JSONObject) stepObj;
+            JSONObject stepJson = (JSONObject)stepObj;
             ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
             processTaskStepVo.setId(stepJson.getLong("id"));
             processTaskStepVo.setProcessTaskId(processTaskVo.getId());
@@ -226,8 +231,10 @@ public class WorkcenterServiceImpl implements WorkcenterService{
             processTaskStepVo.setType(stepJson.getString("type"));
             processTaskStepVo.setHandler(stepJson.getString("handler"));
             processTaskStepVo.setConfigHash(stepJson.getString("confighash"));
-            processTaskStepVo.setStartTime(TimeUtil.convertStringToDate(stepJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
-            processTaskStepVo.setEndTime(TimeUtil.convertStringToDate(stepJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
+            processTaskStepVo.setStartTime(
+                TimeUtil.convertStringToDate(stepJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
+            processTaskStepVo
+                .setEndTime(TimeUtil.convertStringToDate(stepJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
             processTaskStepVo.setIsActive(stepJson.getInteger("isactive"));
             stepList.add(processTaskStepVo);
         }
@@ -244,8 +251,9 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     @Override
     public Integer doSearchCount(WorkcenterVo workcenterVo) {
         // 搜索es
-        QueryResult result = ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).search(workcenterVo);
-        return result.getTotal();
+        IElasticSearchHandler<WorkcenterVo, ?> esHandler =
+            ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue());
+        return esHandler.searchCount(workcenterVo);
     }
 
     /**
@@ -278,7 +286,7 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     }
 
     @Override
-    public JSONObject doSearch(Long processtaskId) throws ParseException{
+    public JSONObject doSearch(Long processtaskId) throws ParseException {
         ProcessTaskVo processTask = processTaskMapper.getProcessTaskAndStepById(processtaskId);
         JSONObject taskJson = null;
         if (processTask != null) {
@@ -300,13 +308,13 @@ public class WorkcenterServiceImpl implements WorkcenterService{
         }
         return taskJson;
     }
-    
+
     @Override
     public QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo) {
         return ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).iterateSearch(workcenterVo);
     }
 
-    public Object getStepAction(ProcessTaskVo processTaskVo){
+    public Object getStepAction(ProcessTaskVo processTaskVo) {
         List<ProcessTaskStepVo> stepList = processTaskVo.getStepList();
         if (CollectionUtils.isEmpty(stepList)) {
             return CollectionUtils.EMPTY_COLLECTION;
@@ -328,23 +336,24 @@ public class WorkcenterServiceImpl implements WorkcenterService{
             step.setProcessTaskId(processTaskVo.getId());
 
             if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
-                    || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
-                    || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus)
-                    || (ProcessTaskStatus.PENDING.getValue().equals(processTaskStatus) && isActive == 1))) {
+                || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
+                || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus)
+                || (ProcessTaskStatus.PENDING.getValue().equals(processTaskStatus) && isActive == 1))) {
                 List<ProcessTaskOperationType> operationList = new ArrayList<>();
                 try {
                     if (step.getHandler() != null) {
                         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(step.getHandler());
                         if (handler != null) {
-                            operationList = handler.getOperateList(processTaskVo, step, new ArrayList<ProcessTaskOperationType>(){
-                                private static final long serialVersionUID = 1L;
-                                {
-                                    add(ProcessTaskOperationType.WORK);
-                                    add(ProcessTaskOperationType.ABORTPROCESSTASK);
-                                    add(ProcessTaskOperationType.RECOVERPROCESSTASK);
-                                    add(ProcessTaskOperationType.URGE);
-                                }
-                            });
+                            operationList =
+                                handler.getOperateList(processTaskVo, step, new ArrayList<ProcessTaskOperationType>() {
+                                    private static final long serialVersionUID = 1L;
+                                    {
+                                        add(ProcessTaskOperationType.WORK);
+                                        add(ProcessTaskOperationType.ABORTPROCESSTASK);
+                                        add(ProcessTaskOperationType.RECOVERPROCESSTASK);
+                                        add(ProcessTaskOperationType.URGE);
+                                    }
+                                });
                         }
                     }
                 } catch (Exception ex) {
@@ -441,9 +450,9 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     }
 
     private JSONObject assembleSingleProcessTask(ProcessTaskVo processTaskVo) {
-        if(processTaskVo != null) {
+        if (processTaskVo != null) {
             JSONObject esObject = getProcessTaskESObject(processTaskVo);
-            if(MapUtils.isNotEmpty(esObject)){
+            if (MapUtils.isNotEmpty(esObject)) {
                 return esObject.getJSONObject("common");
             }
             return null;
@@ -455,91 +464,91 @@ public class WorkcenterServiceImpl implements WorkcenterService{
     public JSONObject getProcessTaskESObject(ProcessTaskVo processTaskVo) {
         /** 获取服务信息 **/
         ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-        if(channel == null){
+        if (channel == null) {
             channel = new ChannelVo();
         }
         /** 获取服务目录信息 **/
         CatalogVo catalog = null;
-        if(StringUtils.isNotBlank(channel.getParentUuid())){
+        if (StringUtils.isNotBlank(channel.getParentUuid())) {
             catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
         }
-        if(catalog == null){
+        if (catalog == null) {
             catalog = new CatalogVo();
         }
         /** 获取开始节点内容信息 **/
         ProcessTaskContentVo startContentVo = null;
-        List<ProcessTaskStepVo> stepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
+        List<ProcessTaskStepVo> stepList = processTaskMapper
+            .getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
         if (stepList.size() == 1) {
             ProcessTaskStepVo startStepVo = stepList.get(0);
-            List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
-            for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
+            List<ProcessTaskStepContentVo> processTaskStepContentList =
+                processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
+            for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
                 if (ProcessTaskOperationType.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
-                    startContentVo = selectContentByHashMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
+                    startContentVo =
+                        selectContentByHashMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
                     break;
                 }
             }
         }
         /** 获取转交记录 **/
-        List<ProcessTaskStepAuditVo> transferAuditList = processTaskMapper.getProcessTaskAuditList(new ProcessTaskStepAuditVo(processTaskVo.getId(),ProcessTaskOperationType.TRANSFER.getValue()));
+        List<ProcessTaskStepAuditVo> transferAuditList = processTaskMapper.getProcessTaskAuditList(
+            new ProcessTaskStepAuditVo(processTaskVo.getId(), ProcessTaskOperationType.TRANSFER.getValue()));
 
         /** 获取工单当前步骤 **/
         @SuppressWarnings("serial")
-        List<ProcessTaskStepVo>  processTaskStepList = processTaskMapper.getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(processTaskVo.getId(),new ArrayList<String>() {{add(ProcessStepType.PROCESS.getValue());add(ProcessStepType.START.getValue());}},null);
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper
+            .getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(processTaskVo.getId(), new ArrayList<String>() {
+                {
+                    add(ProcessStepType.PROCESS.getValue());
+                    add(ProcessStepType.START.getValue());
+                }
+            }, null);
         WorkcenterFieldBuilder builder = new WorkcenterFieldBuilder();
 
         /** 时效列表 **/
-        List<ProcessTaskSlaVo> processTaskSlaList = processTaskMapper.getProcessTaskSlaByProcessTaskId(processTaskVo.getId());
+        List<ProcessTaskSlaVo> processTaskSlaList =
+            processTaskMapper.getProcessTaskSlaByProcessTaskId(processTaskVo.getId());
 
         /** 关注此工单的用户列表 */
         List<String> focusUsers = processTaskMapper.getFocusUsersOfProcessTask(processTaskVo.getId());
 
-        //form
+        // form
         JSONArray formArray = new JSONArray();
-        List<ProcessTaskFormAttributeDataVo> formAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
+        List<ProcessTaskFormAttributeDataVo> formAttributeDataList =
+            processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
-            if(attributeData.getType().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
-                    ||attributeData.getType().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-                    ||attributeData.getType().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
-                    ||attributeData.getType().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
+            if (attributeData.getType().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
+                || attributeData.getType().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
+                || attributeData.getType().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
+                || attributeData.getType().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())) {
                 continue;
             }
             JSONObject formJson = new JSONObject();
             formJson.put("key", attributeData.getAttributeUuid());
             Object dataObj = attributeData.getDataObj();
-            if(dataObj == null) {
+            if (dataObj == null) {
                 continue;
             }
-            formJson.put("value_"+ProcessFormHandler.getDataType(attributeData.getType()),dataObj);
+            formJson.put("value_" + ProcessFormHandler.getDataType(attributeData.getType()), dataObj);
             formArray.add(formJson);
         }
 
-        //common
-        JSONObject WorkcenterFieldJson = builder
-                .setId(processTaskVo.getId().toString())
-                .setTitle(processTaskVo.getTitle())
-                .setStatus(processTaskVo.getStatus())
-                .setPriority(processTaskVo.getPriorityUuid())
-                .setCatalog(catalog.getUuid())
-                .setChannelType(channel.getChannelTypeUuid())
-                .setChannel(channel.getUuid())
-                .setProcessUuid(processTaskVo.getProcessUuid())
-                .setConfigHash(processTaskVo.getConfigHash())
-                .setContent(startContentVo)
-                .setStartTime(processTaskVo.getStartTime())
-                .setEndTime(processTaskVo.getEndTime())
-                .setOwner(processTaskVo.getOwner())
-                .setReporter(processTaskVo.getReporter(),processTaskVo.getOwner())
-                .setStepList(processTaskStepList)
-                .setTransferFromUserList(transferAuditList)
-                .setWorktime(channel.getWorktimeUuid())
-                .setExpiredTime(processTaskSlaList)
-                .setFocusUsers(focusUsers)
-                .build();
+        // common
+        JSONObject WorkcenterFieldJson = builder.setId(processTaskVo.getId().toString())
+            .setTitle(processTaskVo.getTitle()).setStatus(processTaskVo.getStatus())
+            .setPriority(processTaskVo.getPriorityUuid()).setCatalog(catalog.getUuid())
+            .setChannelType(channel.getChannelTypeUuid()).setChannel(channel.getUuid())
+            .setProcessUuid(processTaskVo.getProcessUuid()).setConfigHash(processTaskVo.getConfigHash())
+            .setContent(startContentVo).setStartTime(processTaskVo.getStartTime())
+            .setEndTime(processTaskVo.getEndTime()).setOwner(processTaskVo.getOwner())
+            .setReporter(processTaskVo.getReporter(), processTaskVo.getOwner()).setStepList(processTaskStepList)
+            .setTransferFromUserList(transferAuditList).setWorktime(channel.getWorktimeUuid())
+            .setExpiredTime(processTaskSlaList).setFocusUsers(focusUsers).build();
         JSONObject esObject = new JSONObject();
-        esObject.put("form",formArray);
-        esObject.put("common",WorkcenterFieldJson);
+        esObject.put("form", formArray);
+        esObject.put("common", WorkcenterFieldJson);
         return esObject;
     }
 
-   
 }
