@@ -32,7 +32,7 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 			String userUuid = "user#" + UserContext.get().getUserUuid();
 			isCurrentUserFocus = focusUsers.contains(userUuid);
 		}
-		focusUserObj.put("isCurrentUserFocus",isCurrentUserFocus);
+		focusUserObj.put("isCurrentUserFocus",isCurrentUserFocus ? 1 : 0);
 		return focusUserObj;
 	}
 

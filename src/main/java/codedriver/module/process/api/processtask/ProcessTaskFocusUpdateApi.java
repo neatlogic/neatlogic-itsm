@@ -3,6 +3,7 @@ package codedriver.module.process.api.processtask;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskFocusRepeatException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -38,7 +39,7 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 			@Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单Id", isRequired = true),
 			@Param(name = "isFocus", type = ApiParamType.ENUM, desc = "是否关注工单(1：关注；0：取消关注)", isRequired = true,rule = "0,1")
 	})
-	@Output({})
+	@Output({@Param(name="isFocus", type = ApiParamType.INTEGER, desc="是否关注工单")})
 	@Description(desc = "切换工单关注状态")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
@@ -48,9 +49,9 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 			if(processTaskMapper.checkProcessTaskFocusExists(processTaskId,userUuid) > 0){
 				throw new ProcessTaskFocusRepeatException(processTaskId);
 			}
-			processTaskMapper.insertProcessTaskFocus(processTaskId,userUuid);
+			processTaskMapper.insertProcessTaskFocus(new ProcessTaskVo(processTaskId),userUuid);
 		}else{
-			processTaskMapper.deleteProcessTaskFocus(processTaskId,userUuid);
+			processTaskMapper.deleteProcessTaskFocus(new ProcessTaskVo(processTaskId),userUuid);
 		}
 		JSONObject result = new JSONObject();
 		result.put("isFocus",isFocus);
