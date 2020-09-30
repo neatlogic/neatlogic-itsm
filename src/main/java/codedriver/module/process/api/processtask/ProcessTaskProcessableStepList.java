@@ -133,7 +133,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
         for (ProcessTaskStepVo stepVo : processTaskStepList) {
             /** 找到所有已激活未处理的步骤 **/
             if (stepVo.getIsActive().equals(1)) {
-                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
+                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), null, UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
                     resultList.add(stepVo);
                 }
             }
