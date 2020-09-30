@@ -77,6 +77,7 @@ import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
+import codedriver.framework.process.dto.ProcessTaskStepAgentVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -1241,6 +1242,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskStepVo.getCurrentUserProcessUserTypeList().addAll(processTaskVo.getCurrentUserProcessUserTypeList());
             if(processTaskMapper.checkIsWorker(processTaskVo.getId(), processTaskStepVo.getId(), null, UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList()) > 0) {
                 processTaskStepVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.WORKER.getValue());
+                processTaskVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.WORKER.getValue());
             }
             ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid(true));
             List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUserVo);
@@ -1249,6 +1251,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     processTaskStepVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.MAJOR.getValue());
                 }else if(ProcessUserType.MINOR.getValue().equals(processTaskStepUser.getUserType())) {
                     processTaskStepVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.MINOR.getValue());
+                }
+            }
+            if(!processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
+                ProcessTaskStepAgentVo processTaskStepAgentVo = processTaskMapper.getProcessTaskStepAgentByProcessTaskStepId(processTaskStepVo.getId());
+                if(processTaskStepAgentVo != null) {
+                    if(UserContext.get().getUserUuid(true).equals(processTaskStepAgentVo.getUserUuid())) {
+                        processTaskStepVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.MAJOR.getValue());
+                        processTaskStepVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.WORKER.getValue());
+                        processTaskVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.WORKER.getValue());
+                    }
                 }
             }
         }
