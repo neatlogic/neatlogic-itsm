@@ -9,8 +9,6 @@ import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.dto.ProcessFormVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.form.FormHasNoAttributeException;
-import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -81,18 +79,19 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
             throw new ProcessNotFoundException(processUuid);
         }
         ProcessFormVo processForm = processMapper.getProcessFormByProcessUuid(processUuid);
-        if(processForm == null || formMapper.checkFormIsExists(processForm.getFormUuid()) == 0){
-            throw new FormNotFoundException(processForm.getFormUuid());
-        }
-        FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
         List<FormAttributeVo> formAttributeList = null;
-        if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
-            formAttributeList = formVersionVo.getFormAttributeList();
+        List<String> headerList = null;
+        if(processForm != null && formMapper.checkFormIsExists(processForm.getFormUuid()) > 0){
+            FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
+            if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
+                formAttributeList = formVersionVo.getFormAttributeList();
+            }
         }
         if(CollectionUtils.isEmpty(formAttributeList)){
-            throw new FormHasNoAttributeException(processForm.getFormUuid());
+            headerList = new ArrayList<>();
+        }else{
+            headerList = formAttributeList.stream().map(FormAttributeVo::getLabel).collect(Collectors.toList());
         }
-        List<String> headerList = formAttributeList.stream().map(FormAttributeVo::getLabel).collect(Collectors.toList());
         headerList.add(0,"标题");
         headerList.add(1,"请求人");
         headerList.add(2,"优先级");

@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
@@ -25,6 +26,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -113,7 +115,11 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
             }
         }
         processTaskStepVo.setParamObj(jsonObj);
-        handler.complete(processTaskStepVo);
+        try {
+            handler.complete(processTaskStepVo);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 		return null;
 	}

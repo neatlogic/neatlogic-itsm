@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.file.FileNotFoundException;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -29,6 +30,7 @@ import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -85,7 +87,11 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.COMMENT, true);
+		try {
+	        handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.COMMENT, true);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
 		//删除暂存
 		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 		processTaskStepDataVo.setProcessTaskId(processTaskId);

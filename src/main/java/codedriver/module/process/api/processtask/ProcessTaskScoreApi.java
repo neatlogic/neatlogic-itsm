@@ -1,7 +1,9 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -48,7 +50,11 @@ public class ProcessTaskScoreApi extends PrivateApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		processTaskVo.setParamObj(jsonObj);
-		ProcessStepHandlerFactory.getHandler().scoreProcessTask(processTaskVo);
+		try {
+	        ProcessStepHandlerFactory.getHandler().scoreProcessTask(processTaskVo);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
 		return null;
 	}
 

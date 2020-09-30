@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -53,7 +55,11 @@ public class ProcessTaskStepRedoApi extends PrivateApiComponentBase {
         ProcessTaskStepVo currentProcessTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         currentProcessTaskStepVo.setParamObj(jsonObj);
-        handler.redo(currentProcessTaskStepVo);
+        try {
+            handler.redo(currentProcessTaskStepVo);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
         return null;
     }
 

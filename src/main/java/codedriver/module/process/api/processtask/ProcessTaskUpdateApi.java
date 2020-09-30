@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
@@ -22,6 +23,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -84,7 +86,11 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 		Long startProcessTaskStepId = processTaskStepList.get(0).getId();
 				
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-        handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
+        try {
+            handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.UPDATE, true);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
 		// 锁定当前流程
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		

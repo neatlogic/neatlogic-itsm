@@ -16,11 +16,13 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
@@ -80,7 +82,11 @@ public class ProcessTaskTransferApi extends PrivateApiComponentBase {
             }
         }
         processTaskStepVo.setParamObj(jsonObj);
-        handler.transfer(processTaskStepVo,processTaskStepWorkerList);
+        try {
+            handler.transfer(processTaskStepVo,processTaskStepWorkerList);
+        }catch(ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
+        }
 		return null;
 	}
 

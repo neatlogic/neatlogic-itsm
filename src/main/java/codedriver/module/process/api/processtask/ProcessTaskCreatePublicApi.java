@@ -70,7 +70,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 	    
 	    //流转
 	    ProcessTaskStartProcessApi startProcessApi  = (ProcessTaskStartProcessApi)PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
-	    System.out.println(startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()),saveResultObj));
+	    startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()),saveResultObj);
         
         result.put("processTaskId", saveResultObj.getString("processTaskId"));
 		return result;
