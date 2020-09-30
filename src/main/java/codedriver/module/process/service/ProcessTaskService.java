@@ -224,7 +224,7 @@ public interface ProcessTaskService {
      * @param processTaskId
      * @return List<ProcessTaskStepVo>
      */
-	public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId);
+//	public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId);
 	/**
      * 
      * @Time:2020年4月18日

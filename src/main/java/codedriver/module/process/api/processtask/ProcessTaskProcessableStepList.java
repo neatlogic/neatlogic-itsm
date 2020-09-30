@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,7 +11,10 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessUserType;
@@ -30,6 +34,12 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
     
     @Autowired
     private ProcessTaskService processTaskService;
+    
+    @Autowired
+    private TeamMapper teamMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -58,7 +68,29 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		List<ProcessTaskStepVo> processableStepList = processTaskService.getProcessableStepList(processTaskId);
+		List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId);
+		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
+        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+        if(StringUtils.isNotBlank(userUuid)) {
+            List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+            String currentUserUuid = UserContext.get().getUserUuid(true);
+            String currentUserId = UserContext.get().getUserId(true);
+            String currentUserName = UserContext.get().getUserName();
+            List<String> currentRoleUuidList = UserContext.get().getRoleUuidList();
+            UserContext.get().setUserUuid(userUuid);
+            UserContext.get().setUserId(null);
+            UserContext.get().setUserName(null);
+            UserContext.get().setRoleUuidList(roleUuidList);
+            for(ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId)) {
+                if(!processableStepList.contains(processTaskStepVo)) {
+                    processableStepList.add(processTaskStepVo);
+                }
+            }
+            UserContext.get().setUserUuid(currentUserUuid);
+            UserContext.get().setUserId(currentUserId);
+            UserContext.get().setUserName(currentUserName);
+            UserContext.get().setRoleUuidList(currentRoleUuidList);
+        }
 		String action = jsonObj.getString("action");
 		if(StringUtils.isNotBlank(action)) {
 			Iterator<ProcessTaskStepVo> iterator = processableStepList.iterator();
@@ -86,5 +118,26 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 		}
 		return processableStepList;
 	}
-
+	
+	/**
+     * 
+     * @Time:2020年4月3日
+     * @Description: 获取工单中当前用户能处理的步骤列表
+     * @param processTaskId
+     * @return List<ProcessTaskStepVo>
+     */
+	private List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId) {
+        List<ProcessTaskStepVo> resultList = new ArrayList<>();
+        List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
+        for (ProcessTaskStepVo stepVo : processTaskStepList) {
+            /** 找到所有已激活未处理的步骤 **/
+            if (stepVo.getIsActive().equals(1)) {
+                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), null, UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
+                    resultList.add(stepVo);
+                }
+            }
+        }
+        return resultList;
+    }
 }
