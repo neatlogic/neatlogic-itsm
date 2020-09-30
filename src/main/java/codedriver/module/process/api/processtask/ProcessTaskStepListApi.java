@@ -163,7 +163,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
+//        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
         processTaskService.setProcessTaskStepUser(startProcessTaskStepVo);
         
         //步骤评论列表
@@ -191,7 +191,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 
 	private void getProcessTaskStepDetail(ProcessTaskStepVo processTaskStepVo) {
 	    //获取步骤配置信息
-        processTaskService.setProcessTaskStepConfig(processTaskStepVo);
+//        processTaskService.setProcessTaskStepConfig(processTaskStepVo);
         //处理人列表
         processTaskService.setProcessTaskStepUser(processTaskStepVo);
 

@@ -309,7 +309,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
+//        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
 
         startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
         /** 当前步骤特有步骤信息 **/

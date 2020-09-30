@@ -45,14 +45,6 @@ public interface ProcessTaskService {
 	 * @param currentProcessTaskStepVo
 	 */
 	public void initJob(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo, JSONObject data);
-	/**
-	 * 
-	* @Time:2020年7月28日
-	* @Description: 获取自定义按钮映射数据
-	* @param processTaskStepId
-	* @return Map<String,String>
-	 */
-//	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId);
 	
 	/**
 	 * 
@@ -160,15 +152,7 @@ public interface ProcessTaskService {
 	* @return void
 	 */
 	public void setProcessTaskStepUser(ProcessTaskStepVo processTaskStepVo);
-	/**
-	 * 
-	* @Author: linbq
-	* @Time:2020年8月24日
-	* @Description: 设置步骤配置、处理器全局配置信息 
-	* @param processTaskStepVo 
-	* @return void
-	 */
-	public void setProcessTaskStepConfig(ProcessTaskStepVo processTaskStepVo);
+
 	/**
 	 * 
 	* @Author: linbq
@@ -217,14 +201,7 @@ public interface ProcessTaskService {
      * @return List<ProcessTaskStepVo>
      */
     public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(List<ProcessTaskStepVo> processTaskStepList, Long processTaskStepId);
-	/**
-     * 
-     * @Time:2020年4月3日
-     * @Description: 获取工单中当前用户能处理的步骤列表
-     * @param processTaskId
-     * @return List<ProcessTaskStepVo>
-     */
-//	public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId);
+
 	/**
      * 
      * @Time:2020年4月18日
@@ -232,15 +209,7 @@ public interface ProcessTaskService {
      * @param processTaskVo
      * @return List<ProcessTaskStepVo>
      */
-    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo);/**
-     * 
-     * @Time:2020年4月3日
-     * @Description: 获取当前用户在当前步骤中工单干系人列表
-     * @param processTaskVo     工单信息
-     * @param processTaskStepId 步骤id
-     * @return List<String>
-     */
-    public void setCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo);
+    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo);
     
     public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo);
     

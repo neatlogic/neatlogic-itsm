@@ -174,7 +174,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
+//        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
 
         startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
         /** 当前步骤特有步骤信息 **/
@@ -200,7 +200,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.VIEW, false)){
           //获取步骤信息
-            processTaskService.setProcessTaskStepConfig(processTaskStepVo);
+//            processTaskService.setProcessTaskStepConfig(processTaskStepVo);
             //处理人列表
             processTaskService.setProcessTaskStepUser(processTaskStepVo);
 

@@ -61,7 +61,7 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 		Map<String, String> customButtonMap = new HashMap<>();
 		if(processTaskStepVo != null) {
-			processTaskService.setProcessTaskStepConfig(processTaskStepVo);
+//			processTaskService.setProcessTaskStepConfig(processTaskStepVo);
 			customButtonMap = ProcessStepUtilHandlerFactory.getHandler().getCustomButtonMapByProcessTaskStepId(processTaskStepId);
 			handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		}

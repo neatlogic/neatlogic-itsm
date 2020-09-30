@@ -31,7 +31,6 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
@@ -41,9 +40,6 @@ public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
     
     @Autowired
     private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
-	
-	@Autowired
-	private ProcessTaskService processTaskService;
 
 	@Override
 	public String getToken() {
@@ -76,7 +72,7 @@ public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
 	    }
 		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
 		if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-		    processTaskService.setProcessTaskStepConfig(processTaskStepVo);
+//		    processTaskService.setProcessTaskStepConfig(processTaskStepVo);
 			Map<String, String> customButtonMap = ProcessStepUtilHandlerFactory.getHandler().getCustomButtonMapByProcessTaskStepId(processTaskStepId);
 			List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
 			for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
