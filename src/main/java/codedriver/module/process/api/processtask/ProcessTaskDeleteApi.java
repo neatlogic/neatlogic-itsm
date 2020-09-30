@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.elasticsearch.core.ElasticSearchFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -24,6 +25,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @Transactional
+@AuthAction(name = "PROCESSTASK_MODIFY")
 @OperationType(type = OperationTypeEnum.DELETE)
 public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
 
