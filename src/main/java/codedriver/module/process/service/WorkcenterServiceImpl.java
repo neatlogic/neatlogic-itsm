@@ -144,6 +144,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 theadList.add(new WorkcenterTheadVo(column));
             }
         }
+        theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         // Date time22 = new Date();
         // System.out.println("矫正headerCostTime:"+(time22.getTime()-time2.getTime()));
         if (!resultData.isEmpty()) {

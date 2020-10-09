@@ -59,7 +59,7 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 
 	@Override
 	public Integer getSort() {
-		return 15;
+		return -1;
 	}
 
 }
