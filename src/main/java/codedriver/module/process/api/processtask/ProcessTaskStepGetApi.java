@@ -174,7 +174,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-//        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
 
         startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
         /** 当前步骤特有步骤信息 **/
@@ -182,6 +181,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         if(startProcessStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
+        startProcessStepUtilHandler.setProcessTaskStepConfig(startProcessTaskStepVo);
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
     }
@@ -199,8 +199,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.VIEW, false)){
-          //获取步骤信息
-//            processTaskService.setProcessTaskStepConfig(processTaskStepVo);
             //处理人列表
             processTaskService.setProcessTaskStepUser(processTaskStepVo);
 
@@ -209,6 +207,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(processStepUtilHandler == null) {
                 throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
             }
+            //获取步骤信息
+            processStepUtilHandler.setProcessTaskStepConfig(processTaskStepVo);
             processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
             if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.SAVE, false)){
                 //回复框内容和附件暂存回显              

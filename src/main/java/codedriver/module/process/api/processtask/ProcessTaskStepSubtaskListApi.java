@@ -72,7 +72,6 @@ public class ProcessTaskStepSubtaskListApi extends PrivateApiComponentBase {
 	    }
 		List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
 		if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-//		    processTaskService.setProcessTaskStepConfig(processTaskStepVo);
 			Map<String, String> customButtonMap = ProcessStepUtilHandlerFactory.getHandler().getCustomButtonMapByProcessTaskStepId(processTaskStepId);
 			List<ProcessTaskStepSubtaskVo> subtaskList = new ArrayList<>();
 			for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {

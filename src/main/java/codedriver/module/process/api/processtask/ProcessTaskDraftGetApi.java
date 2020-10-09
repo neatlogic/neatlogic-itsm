@@ -309,14 +309,14 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-//        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
-
+        
         startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
         /** 当前步骤特有步骤信息 **/
         IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if(startProcessStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
+        startProcessStepUtilHandler.setProcessTaskStepConfig(startProcessTaskStepVo);
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
     }
