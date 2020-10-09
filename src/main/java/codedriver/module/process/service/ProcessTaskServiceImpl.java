@@ -59,7 +59,6 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
@@ -68,7 +67,6 @@ import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.PriorityVo;
-import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
@@ -144,9 +142,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     
     @Autowired
     private CatalogMapper catalogMapper;
-
-    @Autowired
-    private ProcessStepHandlerMapper stepHandlerMapper;
 
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
@@ -528,36 +523,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		return integrationParam;
 	}
-		
-	/**
-	 * 获取工单回退步骤列表
-	 * @param processTaskStepId
-	 * @return
-	 */
-//	private List<ProcessTaskStepVo> getbackStepList(Long processTaskStepId){
-//		List<ProcessTaskStepVo> resultList = new ArrayList<>();
-//		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,null);
-//		for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
-//			if(processTaskStep.getIsActive() != null) {
-//				if(ProcessFlowDirection.BACKWARD.getValue().equals(processTaskStep.getFlowDirection()) && processTaskStep.getIsActive().intValue() != 0){
-//					if(StringUtils.isNotBlank(processTaskStep.getAliasName())) {
-//						processTaskStep.setName(processTaskStep.getAliasName());
-//						processTaskStep.setFlowDirection("");
-//					}else {
-//						processTaskStep.setFlowDirection(ProcessFlowDirection.BACKWARD.getText());
-//					}
-//					resultList.add(processTaskStep);
-//				}
-//			}
-//		}
-//		return resultList;
-//	}
 	
 	@Override
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId) {
 		//获取步骤信息
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-		setProcessTaskStepConfig(processTaskStepVo);
+		ProcessStepUtilHandlerFactory.getHandler().setProcessTaskStepConfig(processTaskStepVo);
 		
 		//处理人列表
 		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
@@ -566,9 +537,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
 		processTaskStepVo.setMinorUserList(minorUserList);
-		
-//		List<ProcessTaskStepUserVo> agentUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.AGENT.getValue());
-//		processTaskStepVo.setAgentUserList(agentUserList);
 		
 		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
 		processTaskStepVo.setWorkerList(workerList);
@@ -580,48 +548,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		Pattern pattern = Pattern.compile("(5|4).*");
 		System.out.println( pattern.matcher("300").matches());
 	}
-
-//	@Override
-//	public Map<String, String> getCustomButtonTextMap(Long processTaskStepId) {
-//		Map<String, String> customButtonMap = new HashMap<>();
-//		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
-//		if(processTaskStepVo == null) {
-//			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
-//		}
-//		/** 节点管理按钮映射 **/
-//		ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-//		if(processStepHandlerVo != null) {
-//			JSONObject globalConfig = processStepHandlerVo.getConfig();
-//			if(MapUtils.isNotEmpty(globalConfig)) {
-//				JSONArray customButtonList = globalConfig.getJSONArray("customButtonList");
-//				if(CollectionUtils.isNotEmpty(customButtonList)) {
-//					for(int i = 0; i < customButtonList.size(); i++) {
-//						JSONObject customButton = customButtonList.getJSONObject(i);
-//						String value = customButton.getString("value");
-//						if(StringUtils.isNotBlank(value)) {
-//							customButtonMap.put(customButton.getString("name"), value);
-//						}
-//					}
-//				}
-//			}
-//		}
-//		/** 节点设置按钮映射 **/
-//		String stepConfig = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-//		JSONObject stepConfigObj = JSON.parseObject(stepConfig);
-//		if(MapUtils.isNotEmpty(stepConfigObj)) {
-//			JSONArray customButtonList = stepConfigObj.getJSONArray("customButtonList");
-//			if(CollectionUtils.isNotEmpty(customButtonList)) {
-//				for(int i = 0; i < customButtonList.size(); i++) {
-//					JSONObject customButton = customButtonList.getJSONObject(i);
-//					String value = customButton.getString("value");
-//					if(StringUtils.isNotBlank(value)) {
-//						customButtonMap.put(customButton.getString("name"), value);
-//					}
-//				}
-//			}
-//		}
-//		return customButtonMap;
-//	}
 
     @Override
     public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId) {
@@ -900,21 +826,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
         }
         processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
-//        processTaskStepVo.setAgentUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.AGENT.getValue()));
-    }
-
-    @Override
-    public void setProcessTaskStepConfig(ProcessTaskStepVo processTaskStepVo) {
-        if(processTaskStepVo != null) {
-            String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-            processTaskStepVo.setConfig(stepConfig);
-            IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-            if(processStepUtilHandler == null) {
-                throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
-            }
-            ProcessStepHandlerVo processStepHandlerConfig = stepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-            processTaskStepVo.setGlobalConfig(processStepUtilHandler.makeupConfig(processStepHandlerConfig != null ? processStepHandlerConfig.getConfig() : null));
-        }
     }
 
     @Override
@@ -1109,7 +1020,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo) {
         Set<ProcessTaskStepVo> resultSet = new HashSet<>();
         List<ProcessTaskStepVo> stepVoList = getProcessTaskStepVoListByProcessTask(processTaskVo);
-//        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskStepVo stepVo : stepVoList) {
             /** 找到所有已激活步骤 **/
             if (stepVo.getIsActive().equals(1)) {
@@ -1154,41 +1064,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         
         return resultList;
     }
-    /**
-     * 
-     * @Time:2020年4月3日
-     * @Description: 获取工单中当前用户能处理的步骤列表
-     * @param processTaskId
-     * @return List<ProcessTaskStepVo>
-     */
-//    @Override
-//    public List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId) {
-//        List<ProcessTaskStepVo> resultList = new ArrayList<>();
-//        List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-//        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
-//        for (ProcessTaskStepVo stepVo : processTaskStepList) {
-//            /** 找到所有已激活未处理的步骤 **/
-//            if (stepVo.getIsActive().equals(1)) {
-////                List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(stepVo.getId());
-////                for (ProcessTaskStepWorkerVo processTaskStepWorkerVo : processTaskStepWorkerList) {
-////                    if (GroupSearch.USER.getValue().equals(processTaskStepWorkerVo.getType()) && UserContext.get().getUserUuid(true).equals(processTaskStepWorkerVo.getUuid())) {
-////                        resultList.add(stepVo);
-////                        break;
-////                    } else if (GroupSearch.TEAM.getValue().equals(processTaskStepWorkerVo.getType()) && currentUserTeamList.contains(processTaskStepWorkerVo.getUuid())) {
-////                        resultList.add(stepVo);
-////                        break;
-////                    } else if (GroupSearch.ROLE.getValue().equals(processTaskStepWorkerVo.getType()) && UserContext.get().getRoleUuidList().contains(processTaskStepWorkerVo.getUuid())) {
-////                        resultList.add(stepVo);
-////                        break;
-////                    }
-////                }
-//                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
-//                    resultList.add(stepVo);
-//                }
-//            }
-//        }
-//        return resultList;
-//    }
 
     /**
      * 
@@ -1211,61 +1086,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         return resultList;
     }
     
-    /**
-     * 
-     * @Time:2020年4月3日
-     * @Description: 获取当前用户在当前步骤中工单干系人列表
-     * @param processTaskVo     工单信息
-     * @param processTaskStepId 步骤id
-     * @return List<String>
-     */
-    @Override
-    public void setCurrentUserProcessUserTypeList(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
-        if(!processTaskVo.getCurrentUserProcessUserTypeList().contains(UserType.ALL.getValue())) {
-            processTaskVo.getCurrentUserProcessUserTypeList().add(UserType.ALL.getValue());
-        }
-        if(!processTaskVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.OWNER.getValue())) {
-            if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
-                processTaskVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.OWNER.getValue());
-            }
-        }
-        
-        if(!processTaskVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.REPORTER.getValue())) {
-            if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
-                processTaskVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.REPORTER.getValue());
-            }
-        }
-        
-        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));           
-        if(processTaskStepVo != null) {
-            processTaskStepVo.getCurrentUserProcessUserTypeList().addAll(processTaskVo.getCurrentUserProcessUserTypeList());
-            if(processTaskMapper.checkIsWorker(processTaskVo.getId(), processTaskStepVo.getId(), null, UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList()) > 0) {
-                processTaskStepVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.WORKER.getValue());
-            }
-            ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid(true));
-            List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUserVo);
-            for(ProcessTaskStepUserVo processTaskStepUser : processTaskStepUserList) {
-                if(ProcessUserType.MAJOR.getValue().equals(processTaskStepUser.getUserType())) {
-                    processTaskStepVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.MAJOR.getValue());
-                }else if(ProcessUserType.MINOR.getValue().equals(processTaskStepUser.getUserType())) {
-                    processTaskStepVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.MINOR.getValue());
-                }
-            }
-        }
-        
-        if(!processTaskVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.WORKER.getValue())) {
-            if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList()) > 0) {
-                processTaskVo.getCurrentUserProcessUserTypeList().add(ProcessUserType.WORKER.getValue());
-            }
-        } 
-    }
-    
     @Override
     public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo){
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
-            setProcessTaskStepConfig(processTaskStep);
-            setCurrentUserProcessUserTypeList(processTaskVo, processTaskStep);
+            ProcessStepUtilHandlerFactory.getHandler().setProcessTaskStepConfig(processTaskStep);
+            ProcessStepUtilHandlerFactory.getHandler().setCurrentUserProcessUserTypeList(processTaskVo, processTaskStep);
         }
         return processTaskStepList;
     }    
