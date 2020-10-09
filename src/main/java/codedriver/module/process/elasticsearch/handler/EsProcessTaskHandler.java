@@ -77,8 +77,7 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
     }
 
     @Override
-    public JSONObject mySave(JSONObject paramJson) {
-        Long taskId = paramJson.getLong("processTaskId");
+    public JSONObject mySave(Long taskId) {
         /** 获取工单信息 **/
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(taskId);
         JSONObject esObject = new JSONObject();
@@ -150,7 +149,7 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         if (CollectionUtils.isNotEmpty(channelUuidList)) {
             String channelUuids = String.format("'%s'", StringUtil.join(channelUuidList.toArray(new String[0]), "','"));
             deviceCondition = String.format(Expression.INCLUDE.getExpressionEs(),
-                ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CHANNEL.getValue()), channelUuids);;
+                ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CHANNEL.getValue()), channelUuids);
 
         }
         return deviceCondition;
