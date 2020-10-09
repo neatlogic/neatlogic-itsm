@@ -18,6 +18,8 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
@@ -30,6 +32,7 @@ import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
+import codedriver.framework.process.dto.ProcessTaskStepAgentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
@@ -69,6 +72,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     
     @Autowired
     private ScoreTemplateMapper scoreTemplateMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
     
 	@Override
 	public String getToken() {
@@ -319,6 +325,15 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             /** 提醒列表 **/
             List<ProcessTaskStepRemindVo> processTaskStepRemindList = processTaskService.getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
             processTaskStepVo.setProcessTaskStepRemindList(processTaskStepRemindList);
+            
+            ProcessTaskStepAgentVo processTaskStepAgentVo = processTaskMapper.getProcessTaskStepAgentByProcessTaskStepId(processTaskStepId);
+            if(processTaskStepAgentVo != null) {
+                processTaskStepVo.setOriginalUser(processTaskStepAgentVo.getUserUuid());
+                UserVo userVo = userMapper.getUserByUuid(processTaskStepAgentVo.getUserUuid());
+                if(userVo != null) {
+                    processTaskStepVo.setOriginalUserName(userVo.getUserName());
+                }
+            }
             return processTaskStepVo;
         }
         return null;
