@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 @Service
@@ -107,6 +108,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             if(CollectionUtils.isEmpty(channelData) || channelData.size() != 4){
                 throw new ExcelLostChannelUuidException();
             }
+            /** 从excel首行第四列取出服务UUID */
             String channelUuid = channelData.get(3);
             if(StringUtils.isBlank(channelUuid)){
                 throw new ExcelLostChannelUuidException();
@@ -131,6 +133,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             List<String> headerList = (List<String>)data.get("header");
             List<Map<String, String>> contentList = (List<Map<String, String>>) data.get("content");
             if(CollectionUtils.isNotEmpty(headerList) && CollectionUtils.isNotEmpty(contentList)){
+                /** 去除表头中的必填提示文字 */
+                headerList = headerList.stream().map(header -> header = header.replace("(必填)","")).collect(Collectors.toList());
                 if (!headerList.contains("标题") || !headerList.contains("请求人") || !headerList.contains("优先级")) {
                     throw new ExcelMissColumnException("标题、请求人或者优先级");
                 }
