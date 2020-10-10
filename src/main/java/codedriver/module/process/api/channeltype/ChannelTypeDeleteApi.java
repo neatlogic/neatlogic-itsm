@@ -1,5 +1,6 @@
 package codedriver.module.process.api.channeltype;
 
+import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -47,6 +48,9 @@ public class ChannelTypeDeleteApi extends PrivateApiComponentBase {
 		String uuid = jsonObj.getString("uuid");
 		if(channelMapper.checkChannelTypeIsExists(uuid) == 0) {
 			throw new ChannelTypeNotFoundException(uuid);
+		}
+		if(channelMapper.checkChannelTypeHasReference(uuid) > 0){
+			throw new ChannelTypeHasReferenceException(uuid);
 		}
 		channelMapper.deleteChannelTypeByUuid(uuid);
 		return null;
