@@ -220,6 +220,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 								}
 							}else if(mode == 1){
 								action = formAttributeActionMap.get(attributeObj.getString("uuid"));
+								if(StringUtils.isBlank(action)) {
+								    action = formAttributeActionMap.get("all");
+								}
 							}
 							if(FormAttributeAction.READ.getValue().equals(action)) {
 								attributeObj.put("isReadonly", true);
