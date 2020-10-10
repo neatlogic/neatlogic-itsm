@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.elasticsearch.core.ElasticSearchFactory;
+import codedriver.framework.elasticsearch.core.ElasticSearchHandlerFactory;
 import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -68,7 +68,7 @@ public class EsProcessTaskActionApi extends PrivateApiComponentBase {
         }
         List<ProcessTaskVo> processTaskVoList =
             processTaskMapper.getProcessTaskListByKeywordAndIdList(null, taskIdList, fromDate, toDate);
-        IElasticSearchHandler handler = ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue());
+        IElasticSearchHandler handler = ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         for (ProcessTaskVo processTaskVo : processTaskVoList) {
             // JSONObject paramObj = new JSONObject();
             // paramObj.put("taskId", processTaskVo.getId());

@@ -16,7 +16,7 @@ import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
-import codedriver.framework.elasticsearch.core.ElasticSearchFactory;
+import codedriver.framework.elasticsearch.core.ElasticSearchHandlerFactory;
 import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
@@ -90,7 +90,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
         WorkcenterVo workcenter = getKeywordConditionMB(conditionList, keyword);
         workcenter.setPageSize(pageSize);
         IElasticSearchHandler<WorkcenterVo, QueryResult> esHandler =
-            ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue());
+            ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         List<MultiAttrsObject> dataList = esHandler.search(workcenter).getData();
         if (!dataList.isEmpty()) {
             JSONObject titleObj = new JSONObject();
@@ -183,7 +183,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
         WorkcenterVo workcenter = getKeywordConditionPC(condition, keyword);
         workcenter.setPageSize(pageSize);
         IElasticSearchHandler<WorkcenterVo, QueryResult> esHandler =
-            ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue());
+            ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         List<MultiAttrsObject> dataList = esHandler.search(workcenter).getData();
         if (!dataList.isEmpty()) {
             JSONObject titleObj = new JSONObject();
