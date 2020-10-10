@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.elasticsearch.core.ElasticSearchFactory;
+import codedriver.framework.elasticsearch.core.ElasticSearchHandlerFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
@@ -97,7 +97,7 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         taskMapper.deleteProcessTaskByProcessTaskId(processTaskId);
         
         /** 删除es对应工单信息 **/
-        ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).delete(processTaskId.toString());
+        ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).delete(processTaskId.toString());
         return null;
     }
 

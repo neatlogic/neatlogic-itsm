@@ -26,7 +26,7 @@ import com.techsure.multiattrsearch.query.QueryResult;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.elasticsearch.core.ElasticSearchFactory;
+import codedriver.framework.elasticsearch.core.ElasticSearchHandlerFactory;
 import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
@@ -97,7 +97,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         // 搜索es
         // Date time1 = new Date();
         IElasticSearchHandler<WorkcenterVo, QueryResult> esHandler =
-            ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue());
+            ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         // Date time11 = new Date();
         // System.out.println("searchCostTime:"+(time11.getTime()-time1.getTime()));
         QueryResult result = esHandler.search(workcenterVo);
@@ -252,7 +252,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     public Integer doSearchCount(WorkcenterVo workcenterVo) {
         // 搜索es
         IElasticSearchHandler<WorkcenterVo, ?> esHandler =
-            ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue());
+            ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         return esHandler.searchCount(workcenterVo);
     }
 
@@ -311,7 +311,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
 
     @Override
     public QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo) {
-        return ElasticSearchFactory.getHandler(ESHandler.PROCESSTASK.getValue()).iterateSearch(workcenterVo);
+        return ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).iterateSearch(workcenterVo);
     }
 
     public Object getStepAction(ProcessTaskVo processTaskVo) {

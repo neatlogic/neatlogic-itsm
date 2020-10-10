@@ -372,8 +372,8 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
     }
 
     @Override
-    protected QueryResult makeupQueryResult(QueryResult result) {
-       return result;
+    protected QueryResult makeupQueryResult(WorkcenterVo workcenterVo, QueryResult result) {
+        return result;
     }
 
 }
