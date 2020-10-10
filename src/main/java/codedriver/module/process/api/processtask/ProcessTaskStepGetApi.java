@@ -18,6 +18,8 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.constvalue.ProcessStepType;
@@ -30,6 +32,7 @@ import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
+import codedriver.framework.process.dto.ProcessTaskStepAgentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
@@ -69,6 +72,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     
     @Autowired
     private ScoreTemplateMapper scoreTemplateMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
     
 	@Override
 	public String getToken() {
@@ -174,7 +180,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         }
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-        processTaskService.setProcessTaskStepConfig(startProcessTaskStepVo);
 
         startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
         /** 当前步骤特有步骤信息 **/
@@ -182,6 +187,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         if(startProcessStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
+        startProcessStepUtilHandler.setProcessTaskStepConfig(startProcessTaskStepVo);
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
     }
@@ -199,8 +205,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.VIEW, false)){
-          //获取步骤信息
-            processTaskService.setProcessTaskStepConfig(processTaskStepVo);
             //处理人列表
             processTaskService.setProcessTaskStepUser(processTaskStepVo);
 
@@ -209,6 +213,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(processStepUtilHandler == null) {
                 throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
             }
+            //获取步骤信息
+            processStepUtilHandler.setProcessTaskStepConfig(processTaskStepVo);
             processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
             if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.SAVE, false)){
                 //回复框内容和附件暂存回显              
@@ -319,6 +325,15 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             /** 提醒列表 **/
             List<ProcessTaskStepRemindVo> processTaskStepRemindList = processTaskService.getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
             processTaskStepVo.setProcessTaskStepRemindList(processTaskStepRemindList);
+            
+            ProcessTaskStepAgentVo processTaskStepAgentVo = processTaskMapper.getProcessTaskStepAgentByProcessTaskStepId(processTaskStepId);
+            if(processTaskStepAgentVo != null) {
+                processTaskStepVo.setOriginalUser(processTaskStepAgentVo.getUserUuid());
+                UserVo userVo = userMapper.getUserByUuid(processTaskStepAgentVo.getUserUuid());
+                if(userVo != null) {
+                    processTaskStepVo.setOriginalUserName(userVo.getUserName());
+                }
+            }
             return processTaskStepVo;
         }
         return null;
