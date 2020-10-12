@@ -34,6 +34,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
@@ -75,11 +76,11 @@ import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
-import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
@@ -497,8 +498,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	 * 拼装入参数
 	 * @param automaticConfigVo
 	 * @return
+	 * @throws Exception 
 	 */
-	private JSONObject getIntegrationParam(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
+	private JSONObject getIntegrationParam(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
 		ProcessTaskStepVo stepVo = getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
 		ProcessTaskVo processTaskVo = getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
 		processTaskVo.setCurrentProcessTaskStep(stepVo);
@@ -553,10 +555,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	}
 
     @Override
-    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId) {
+    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId) throws Exception {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
         if(processTaskVo == null) {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
+        }
+        if(processTaskVo.getIsShow() != 1) {
+            throw new PermissionDeniedException();
         }
         if(processTaskStepId != null) {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
@@ -589,17 +594,17 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId) {
+    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId) throws Exception {
         return checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId, null);
     }
 
     @Override
-    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId) {
+    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId) throws Exception {
         return checkProcessTaskParamsIsLegal(processTaskId, null, null);
     }
 
     @Override
-    public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) {
+    public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) throws Exception {
       //获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
         //获取工单流程图信息
@@ -1100,7 +1105,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }    
 
     @Override
-    public ProcessTaskVo getFromProcessTasById(Long processTaskId) {
+    public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception {
         ProcessTaskVo processTaskVo = checkProcessTaskParamsIsLegal(processTaskId);
         ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
         if(channelVo != null) {

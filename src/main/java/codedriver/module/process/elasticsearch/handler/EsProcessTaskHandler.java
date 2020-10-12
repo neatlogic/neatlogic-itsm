@@ -95,7 +95,7 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
 
         JSONArray resultColumnArray = workcenterVo.getResultColumnList();
         String selectColumn = "*";
-        //
+        //选择展示字段
         if (!CollectionUtils.isEmpty(resultColumnArray)) {
             List<String> columnResultList = new ArrayList<String>();
             for (Object column : resultColumnArray) {
@@ -105,37 +105,39 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         }
         String where = assembleWhere(workcenterVo);
         // 待办条件
-        if (workcenterVo.getIsMeWillDo() == 1) {
-            String meWillDoCondition = getMeWillDoCondition(workcenterVo);
-            if (StringUtils.isBlank(where)) {
-                where = " where " + meWillDoCondition;
-            } else {
-                where = where + " and " + meWillDoCondition;
-            }
-        }
+        where = getMeWillDoCondition(workcenterVo,where);
+        
         // 设备服务过滤
-        if (!DeviceType.ALL.getValue().equals(workcenterVo.getDevice())) {
-            String deviceCondition = getChannelDeviceCondition(workcenterVo);
-            if (StringUtils.isNotBlank(deviceCondition)) {
-                if (StringUtils.isBlank(where)) {
-                    where = " where " + deviceCondition;
-                } else {
-                    where = where + " and " + deviceCondition;
-                }
-            }
-        }
+        where = getChannelDeviceCondition(workcenterVo,where);
+        
+        //隐藏工单过滤
+        where = getIsShowCondition(workcenterVo,where);
+        
         String orderBy = "order by common.starttime desc";
         String sql =
             String.format("select %s from %s %s %s limit %d,%d", selectColumn, TenantContext.get().getTenantUuid(),
                 where, orderBy, workcenterVo.getStartNum(), workcenterVo.getPageSize());
         return sql;
     }
+    
+    /*
+     * 隐藏工单过滤
+     */
+    private String getIsShowCondition(WorkcenterVo workcenterVo,String where) {
+        String isShowCondition = String.format(Expression.UNEQUAL.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.IS_SHOW.getValue()), 0);
+        if (StringUtils.isBlank(where)) {
+            where = " where " + isShowCondition;
+        } else {
+            where = where + " and " + isShowCondition;
+        }
+        return where;
+    }
 
     /**
      * 
      * 获取设备（移动端|pc端）服务过滤条件
      */
-    private String getChannelDeviceCondition(WorkcenterVo workcenterVo) {
+    private String getChannelDeviceCondition(WorkcenterVo workcenterVo,String where) {
         String deviceCondition = StringUtils.EMPTY;
         ChannelVo channelVo = new ChannelVo();
         channelVo.setSupport(workcenterVo.getDevice());
@@ -152,7 +154,17 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
                 ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CHANNEL.getValue()), channelUuids);
 
         }
-        return deviceCondition;
+        
+        if (!DeviceType.ALL.getValue().equals(workcenterVo.getDevice())) {
+            if (StringUtils.isNotBlank(deviceCondition)) {
+                if (StringUtils.isBlank(where)) {
+                    where = " where " + deviceCondition;
+                } else {
+                    where = where + " and " + deviceCondition;
+                }
+            }
+        }
+        return where;
     }
 
     /**
@@ -161,7 +173,7 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
      * @return
      */
     @Deprecated
-    private String getMeWillDoCondition(WorkcenterVo workcenterVo) {
+    private String getMeWillDoCondition(WorkcenterVo workcenterVo,String where) {
         String meWillDoSql = StringUtils.EMPTY;
         // status
         List<String> statusList = Arrays.asList(ProcessTaskStatus.RUNNING.getValue()).stream()
@@ -201,7 +213,16 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         // meWillDoSql = String.format(" common.step.usertypelist.list.value contains any ( %s ) and
         // common.step.usertypelist.list.status contains any ('pending','doing')", String.format(" '%s' ",
         // String.join("','",userList))) ;
-        return meWillDoSql;
+        
+        
+        if (workcenterVo.getIsMeWillDo() == 1) {
+            if (StringUtils.isBlank(where)) {
+                where = " where " + meWillDoSql;
+            } else {
+                where = where + " and " + meWillDoSql;
+            }
+        }
+        return where;
     }
 
     /**
