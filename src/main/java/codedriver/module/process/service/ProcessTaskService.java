@@ -55,8 +55,9 @@ public interface ProcessTaskService {
 	* @param processTaskStepId 步骤id
 	* @param nextStepId 下一步骤id
 	* @return boolean
+	 * @throws Exception 
 	 */
-	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId);
+	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId) throws Exception;
 	/**
      * 
     * @Author: linbq
@@ -65,8 +66,9 @@ public interface ProcessTaskService {
     * @param processTaskId 工单id
     * @param processTaskStepId 步骤id
     * @return boolean
+	 * @throws Exception 
      */
-	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId);
+	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId) throws Exception;
 	/**
      * 
     * @Author: linbq
@@ -74,8 +76,9 @@ public interface ProcessTaskService {
     * @Description: 检查工单参数是否合法 
     * @param processTaskId 工单id
     * @return boolean
+	 * @throws Exception 
      */
-	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId);
+	public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId) throws Exception;
 	/**
 	 * 
 	* @Author: linbq
@@ -83,8 +86,9 @@ public interface ProcessTaskService {
 	* @Description: 获取工单信息 
 	* @param processTaskId 工单id
 	* @return ProcessTaskVo
+	 * @throws Exception 
 	 */
-	public ProcessTaskVo getProcessTaskDetailById(Long processTaskId);
+	public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) throws Exception;
 	
 	/**
      * 
@@ -213,7 +217,7 @@ public interface ProcessTaskService {
     
     public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo);
     
-    public ProcessTaskVo getFromProcessTasById(Long processTaskId);
+    public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception;
 
     public List<ProcessTaskStepRemindVo> getProcessTaskStepRemindListByProcessTaskStepId(Long processTaskStepId);
 }
