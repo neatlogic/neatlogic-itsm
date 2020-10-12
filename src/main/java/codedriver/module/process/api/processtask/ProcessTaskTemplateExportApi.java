@@ -80,21 +80,24 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         }
         ProcessFormVo processForm = processMapper.getProcessFormByProcessUuid(processUuid);
         List<FormAttributeVo> formAttributeList = null;
-        List<String> headerList = null;
+        List<String> headerList = new ArrayList<>();
         if(processForm != null && formMapper.checkFormIsExists(processForm.getFormUuid()) > 0){
             FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
             if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
                 formAttributeList = formVersionVo.getFormAttributeList();
             }
         }
-        if(CollectionUtils.isEmpty(formAttributeList)){
-            headerList = new ArrayList<>();
-        }else{
-            headerList = formAttributeList.stream().map(FormAttributeVo::getLabel).collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(formAttributeList)){
+            for(FormAttributeVo vo : formAttributeList){
+                if(vo.isRequired()){
+                    vo.setLabel(vo.getLabel() + "(必填)");
+                }
+                headerList.add(vo.getLabel());
+            }
         }
-        headerList.add(0,"标题");
-        headerList.add(1,"请求人");
-        headerList.add(2,"优先级");
+        headerList.add(0,"标题(必填)");
+        headerList.add(1,"请求人(必填)");
+        headerList.add(2,"优先级(必填)");
         headerList.add(headerList.size(),"描述");
         List<String> channelData = new ArrayList<>();
         channelData.add("服务名称：");
