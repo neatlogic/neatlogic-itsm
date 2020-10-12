@@ -108,17 +108,10 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         where = getMeWillDoCondition(workcenterVo,where);
         
         // 设备服务过滤
-        if (!DeviceType.ALL.getValue().equals(workcenterVo.getDevice())) {
-            String deviceCondition = getChannelDeviceCondition(workcenterVo);
-            if (StringUtils.isNotBlank(deviceCondition)) {
-                if (StringUtils.isBlank(where)) {
-                    where = " where " + deviceCondition;
-                } else {
-                    where = where + " and " + deviceCondition;
-                }
-            }
-        }
-        //是否隐藏工单过滤
+        where = getChannelDeviceCondition(workcenterVo,where);
+        
+        //隐藏工单过滤
+        where = getIsShowCondition(workcenterVo,where);
         
         String orderBy = "order by common.starttime desc";
         String sql =
@@ -127,18 +120,24 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         return sql;
     }
     
-    private String getIsShowCondition(WorkcenterVo workcenterVo) {
-        String isShowCondition = StringUtils.EMPTY;
-        
-        
-        return isShowCondition;
+    /*
+     * 隐藏工单过滤
+     */
+    private String getIsShowCondition(WorkcenterVo workcenterVo,String where) {
+        String isShowCondition = String.format(Expression.UNEQUAL.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.IS_SHOW.getValue()), 0);
+        if (StringUtils.isBlank(where)) {
+            where = " where " + isShowCondition;
+        } else {
+            where = where + " and " + isShowCondition;
+        }
+        return where;
     }
 
     /**
      * 
      * 获取设备（移动端|pc端）服务过滤条件
      */
-    private String getChannelDeviceCondition(WorkcenterVo workcenterVo) {
+    private String getChannelDeviceCondition(WorkcenterVo workcenterVo,String where) {
         String deviceCondition = StringUtils.EMPTY;
         ChannelVo channelVo = new ChannelVo();
         channelVo.setSupport(workcenterVo.getDevice());
@@ -155,7 +154,17 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
                 ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CHANNEL.getValue()), channelUuids);
 
         }
-        return deviceCondition;
+        
+        if (!DeviceType.ALL.getValue().equals(workcenterVo.getDevice())) {
+            if (StringUtils.isNotBlank(deviceCondition)) {
+                if (StringUtils.isBlank(where)) {
+                    where = " where " + deviceCondition;
+                } else {
+                    where = where + " and " + deviceCondition;
+                }
+            }
+        }
+        return where;
     }
 
     /**
