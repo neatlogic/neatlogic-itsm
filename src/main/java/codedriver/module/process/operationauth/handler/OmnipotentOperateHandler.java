@@ -30,9 +30,6 @@ public class OmnipotentOperateHandler implements IOperationAuthHandler {
                     if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
                         return true;
                     }
-                    if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
-                        return true;
-                    }
                 }
             }
             return false;

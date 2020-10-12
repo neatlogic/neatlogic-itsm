@@ -42,8 +42,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
                 return true;
             }else if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MINOR.getValue())) {
                 return true;
-            }else if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
-                return true;
             }
             return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, ProcessTaskOperationType.VIEW);
         });
@@ -87,7 +85,7 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.COMPLETE, (processTaskVo, processTaskStepVo) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue()) || processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
+                    if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
                         List<ProcessTaskStepVo> forwardNextStepList = processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId());
                         if(CollectionUtils.isNotEmpty(forwardNextStepList)) {
                             processTaskStepVo.setForwardNextStepList(forwardNextStepList);
@@ -103,7 +101,7 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.BACK, (processTaskVo, processTaskStepVo) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue()) || processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
+                    if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
                         List<ProcessTaskStepVo> backwardNextStepList = processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId());
                         if(CollectionUtils.isNotEmpty(backwardNextStepList)) {
                             processTaskStepVo.setBackwardNextStepList(backwardNextStepList);
@@ -121,9 +119,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
                     if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
                         return true;
                     }
-                    if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
-                        return true;
-                    }
                 }
             }
             return false;
@@ -133,9 +128,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                     if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
-                        return true;
-                    }
-                    if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.AGENT.getValue())) {
                         return true;
                     }
                 }
