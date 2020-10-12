@@ -42,7 +42,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 
 	@Override
 	public Integer getSort() {
-		return 10;
+		return 13;
 	}
 
 	@Override
