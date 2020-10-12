@@ -25,7 +25,9 @@ import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.elasticsearch.core.ElasticSearchHandlerFactory;
 import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
@@ -54,12 +56,15 @@ import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
+import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.util.TimeUtil;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
 
 @Service
 public class WorkcenterServiceImpl implements WorkcenterService {
@@ -82,6 +87,9 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     WorktimeMapper worktimeMapper;
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
+    
+    @Autowired
+    RoleMapper roleMapper;
 
     /**
      * 工单中心根据条件获取工单列表数据
@@ -212,6 +220,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             TimeUtil.convertStringToDate(commonJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
         processTaskVo
             .setEndTime(TimeUtil.convertStringToDate(commonJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
+        processTaskVo.setIsShow(commonJson.getInteger("isShow") == null ?1:commonJson.getInteger("isShow"));  
         // step
         JSONArray stepArray = null;
         try {
@@ -448,6 +457,39 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         }
 
         actionArray.add(urgeActionJson);
+        
+        //隐藏/显示，删除
+        if(CollectionUtils.isNotEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid(true),PROCESSTASK_MODIFY.class.getSimpleName())))&&CollectionUtils.isNotEmpty(roleMapper.getRoleByUuidList(UserContext.get().getRoleUuidList()))) {
+            JSONObject showHideActionJson = new JSONObject();
+            int isShowParam = 1;
+            if(processTaskVo.getIsShow() == 1) {
+                showHideActionJson.put("name", ProcessTaskOperationType.HIDE.getValue());
+                showHideActionJson.put("text", ProcessTaskOperationType.HIDE.getText());
+                isShowParam = 0;
+            }else {
+                showHideActionJson.put("name", ProcessTaskOperationType.SHOW.getValue());
+                showHideActionJson.put("text", ProcessTaskOperationType.SHOW.getText());
+            }
+            showHideActionJson.put("isEnable", 1);
+            showHideActionJson.put("sort", 4);
+            JSONObject configJson = new JSONObject();
+            configJson.put("taskid", processTaskVo.getId());
+            configJson.put("interfaceurl", String.format("api/rest/processtask/show/hide?processTaskId=%s&isShow=%d" , processTaskVo.getId(),isShowParam));
+            showHideActionJson.put("config", configJson);
+            actionArray.add(showHideActionJson);
+            
+            //删除
+            JSONObject deleteActionJson = new JSONObject();
+            deleteActionJson.put("name", ProcessTaskOperationType.DELETE.getValue());
+            deleteActionJson.put("text", ProcessTaskOperationType.DELETE.getText());
+            deleteActionJson.put("isEnable", 1);
+            deleteActionJson.put("sort", 5);
+            configJson = new JSONObject();
+            configJson.put("taskid", processTaskVo.getId());
+            configJson.put("interfaceurl", String.format("api/rest/processtask/delete?processTaskId=%s" , processTaskVo.getId()));
+            deleteActionJson.put("config", configJson);
+            actionArray.add(deleteActionJson);
+        }
 
         actionArray.sort(Comparator.comparing(obj -> ((JSONObject)obj).getInteger("sort")));
         return actionArray;
