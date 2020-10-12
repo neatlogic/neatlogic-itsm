@@ -96,6 +96,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         JSONObject returnObj = new JSONObject();
         // 搜索es
         // Date time1 = new Date();
+        @SuppressWarnings("unchecked")
         IElasticSearchHandler<WorkcenterVo, QueryResult> esHandler =
             ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         // Date time11 = new Date();
@@ -249,6 +250,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
      * @param workcenterVo
      * @return
      */
+    @SuppressWarnings("unchecked")
     @Override
     public Integer doSearchCount(WorkcenterVo workcenterVo) {
         // 搜索es
@@ -310,6 +312,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         return taskJson;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo) {
         return ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).iterateSearch(workcenterVo);
@@ -545,7 +548,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             .setEndTime(processTaskVo.getEndTime()).setOwner(processTaskVo.getOwner())
             .setReporter(processTaskVo.getReporter(), processTaskVo.getOwner()).setStepList(processTaskStepList)
             .setTransferFromUserList(transferAuditList).setWorktime(channel.getWorktimeUuid())
-            .setExpiredTime(processTaskSlaList).setFocusUsers(focusUsers).build();
+            .setExpiredTime(processTaskSlaList).setFocusUsers(focusUsers)
+            .setIsShow(processTaskVo.getIsShow()).build();
         JSONObject esObject = new JSONObject();
         esObject.put("form", formArray);
         esObject.put("common", WorkcenterFieldJson);
