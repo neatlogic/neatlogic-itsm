@@ -5,6 +5,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskFocusRepeatException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -45,6 +46,9 @@ public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		int isFocus = jsonObj.getIntValue("isFocus");
 		String userUuid = UserContext.get().getUserUuid();
+		if(processTaskMapper.getProcessTaskById(processTaskId) == null){
+			throw new ProcessTaskNotFoundException(processTaskId.toString());
+		}
 		if(isFocus == 1){
 			if(processTaskMapper.checkProcessTaskFocusExists(processTaskId,userUuid) > 0){
 				throw new ProcessTaskFocusRepeatException(processTaskId);
