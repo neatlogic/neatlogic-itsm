@@ -24,10 +24,10 @@ import com.techsure.multiattrsearch.QueryResultSet;
 import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.elasticsearch.core.ElasticSearchHandlerFactory;
 import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
@@ -56,7 +56,6 @@ import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
-import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
@@ -64,7 +63,6 @@ import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
-import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
 
 @Service
 public class WorkcenterServiceImpl implements WorkcenterService {
@@ -102,6 +100,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     @Transactional
     public JSONObject doSearch(WorkcenterVo workcenterVo) throws ParseException {
         JSONObject returnObj = new JSONObject();
+        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         // 搜索es
         // Date time1 = new Date();
         @SuppressWarnings("unchecked")
@@ -170,7 +169,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 routeJson.put("taskid", el.getId());
                 taskJson.put("route", routeJson);
                 // action 操作
-                taskJson.put("action", getStepAction(el));
+                taskJson.put("action", getStepAction(el,isHasProcessTaskAuth));
                 dataList.add(taskJson);
             }
             // Date time33 = new Date();
@@ -199,7 +198,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
      * @throws ParseException
      */
     @Override
-    public Object getStepAction(MultiAttrsObject el) throws ParseException {
+    public Object getStepAction(MultiAttrsObject el,Boolean isHasProcessTaskAuth) throws ParseException {
         JSONObject commonJson = (JSONObject)el.getJSON(ProcessFieldType.COMMON.getValue());
         if (commonJson == null) {
             return CollectionUtils.EMPTY_COLLECTION;
@@ -220,7 +219,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             TimeUtil.convertStringToDate(commonJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
         processTaskVo
             .setEndTime(TimeUtil.convertStringToDate(commonJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
-        processTaskVo.setIsShow(commonJson.getInteger("isShow") == null ?1:commonJson.getInteger("isShow"));  
+        processTaskVo.setIsShow(commonJson.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()) == null ?1:commonJson.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()));  
+        processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
         // step
         JSONArray stepArray = null;
         try {
@@ -299,9 +299,11 @@ public class WorkcenterServiceImpl implements WorkcenterService {
 
     @Override
     public JSONObject doSearch(Long processtaskId) throws ParseException {
+        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         ProcessTaskVo processTask = processTaskMapper.getProcessTaskAndStepById(processtaskId);
         JSONObject taskJson = null;
         if (processTask != null) {
+            processTask.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
             JSONObject task = assembleSingleProcessTask(processTask);
             taskJson = new JSONObject();
             Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
@@ -317,6 +319,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             taskJson.put("route", routeJson);
             // action 操作
             taskJson.put("action", getStepAction(processTask));
+            //显示/隐藏
+            taskJson.put("isShow", task.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()));
         }
         return taskJson;
     }
@@ -459,7 +463,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         actionArray.add(urgeActionJson);
         
         //隐藏/显示，删除
-        if(CollectionUtils.isNotEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid(true),PROCESSTASK_MODIFY.class.getSimpleName())))&&CollectionUtils.isNotEmpty(roleMapper.getRoleByUuidList(UserContext.get().getRoleUuidList()))) {
+        if (processTaskVo.getParamObj().getBoolean("isHasProcessTaskAuth")) {
             JSONObject showHideActionJson = new JSONObject();
             int isShowParam = 1;
             if(processTaskVo.getIsShow() == 1) {
