@@ -28,7 +28,7 @@ public interface WorkcenterService {
      * @return
      * @throws ParseException 
      */
-    Object getStepAction(MultiAttrsObject el) throws ParseException;
+    Object getStepAction(MultiAttrsObject el,Boolean isHasProcessTaskAuth) throws ParseException;
 
     /**
      * 工单中心根据条件获取工单列表数据

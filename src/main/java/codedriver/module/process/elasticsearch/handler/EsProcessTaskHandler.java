@@ -23,6 +23,7 @@ import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.GroupSearch;
@@ -48,6 +49,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.service.WorkcenterService;
 
 @Service
@@ -111,7 +113,9 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         where = getChannelDeviceCondition(workcenterVo,where);
         
         //隐藏工单过滤
-        where = getIsShowCondition(workcenterVo,where);
+        if (!AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName())) {
+            where = getIsShowCondition(workcenterVo,where);
+        }
         
         String orderBy = "order by common.starttime desc";
         String sql =
