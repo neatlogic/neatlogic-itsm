@@ -44,6 +44,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 	{
 		map.put("willdo", sql->getMeWillDoCondition());
 		map.put("done", sql->getMeDoneCondition());
+		map.put("myfocus", sql->getMyFocusCondition());
 	}
 	
 	@Autowired
@@ -77,6 +78,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 		JSONArray dataList = new JSONArray();
 		dataList.add(new ValueTextVo("willdo", "待办"));
 		dataList.add(new ValueTextVo("done", "已办"));
+		dataList.add(new ValueTextVo("myfocus", "已关注"));
 		
 		JSONObject config = new JSONObject();
 		config.put("type", formHandlerType);
@@ -166,6 +168,11 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 		return sql;
 	}
 
+	private String getMyFocusCondition() {
+	    String sql = StringUtils.EMPTY;
+	    sql = String.format(Expression.INCLUDE.getExpressionEs(), ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.FOCUS_USERS.getValue()), String.format(" '%s' ",GroupSearch.USER.getValuePlugin()+ UserContext.get().getUserUuid()));
+	    return sql;
+	}
 	@Override
 	public Object valueConversionText(Object value, JSONObject config) {
 		// TODO Auto-generated method stub
