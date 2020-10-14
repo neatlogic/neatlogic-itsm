@@ -607,6 +607,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) throws Exception {
       //获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+        //判断当前用户是否关注该工单
+		if(processTaskVo != null && processTaskMapper.checkProcessTaskFocusExists(processTaskId,UserContext.get().getUserUuid()) > 0){
+			processTaskVo.setIsFocus(1);
+		}
         //获取工单流程图信息
         ProcessTaskConfigVo processTaskConfig = selectContentByHashMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
         if(processTaskConfig == null) {
