@@ -2,21 +2,30 @@ package codedriver.module.process.condition.handler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.constvalue.FormHandlerType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.common.constvalue.FormHandlerType;
+import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Component
 public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -64,6 +73,44 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 	public ParamType getParamType() {
 		return ParamType.ARRAY;
 	}
+	
+	@Override
+    protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
+        String where = StringUtils.EMPTY;
+       
+        ConditionVo condition = conditionList.get(index);
+        String expression = Expression.getExpressionEs(condition.getExpression());
+           
+        List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+        //替换“当前登录人标识”为当前登录用户 
+        String loginUser = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue();
+        String vipUser = GroupSearch.COMMON.getValuePlugin() + UserType.VIP_USER.getValue();
+        if(valueList.contains(loginUser)||valueList.contains(vipUser)) {
+            Iterator<String>  valueIterator = valueList.iterator();
+            if(valueIterator.hasNext()) {
+                String value = valueIterator.next();
+                if(value.equals(loginUser)) {
+                    valueIterator.remove();
+                    valueList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
+                }else if(value.equals(vipUser)) {
+                    valueIterator.remove();
+                    List<UserVo> userVoList = userMapper.getUserVip();
+                    if(CollectionUtils.isNotEmpty(userVoList)) {
+                        for(UserVo user : userVoList) {
+                            valueList.add(GroupSearch.USER.getValuePlugin()+user.getUuid());
+                        }
+                    }
+                }
+            }
+        }
+        String value = String.join("','", valueList);
+        if(StringUtils.isNotBlank(value.toString())) {
+            value = String.format("'%s'",  value);
+        }
+        where = String.format(expression,ProcessWorkcenterField.getConditionValue(condition.getName()),value);
+        return where;
+    }
+	
 
 	@Override
 	public Object valueConversionText(Object value, JSONObject config) {
