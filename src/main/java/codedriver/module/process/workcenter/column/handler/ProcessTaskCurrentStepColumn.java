@@ -138,6 +138,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 											userJson.put("useruuid", user);
 											userJson.put("username", userVo.getUserName());
 											userJson.put("userAvatar", userVo.getAvatar());
+											userJson.put("userVipLevel", userVo.getVipLevel());
 											userArrayTmp.add(userJson);
 										}
 									}
