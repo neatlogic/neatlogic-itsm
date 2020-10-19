@@ -2,7 +2,6 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
