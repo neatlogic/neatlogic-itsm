@@ -100,6 +100,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     @Transactional
     public JSONObject doSearch(WorkcenterVo workcenterVo) throws ParseException {
         JSONObject returnObj = new JSONObject();
+        JSONArray sortColumnList = new JSONArray();
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         // 搜索es
         // Date time1 = new Date();
@@ -151,6 +152,10 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
                 theadList.add(new WorkcenterTheadVo(column));
             }
+            //如果需要排序
+            if(column.getIsSort()) {
+                sortColumnList.add(column.getName());
+            }
         }
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         // Date time22 = new Date();
@@ -175,6 +180,13 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             // Date time33 = new Date();
             // System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
         }
+        
+        //字段排序
+        JSONArray sortList = workcenterVo.getSortList();
+        if(CollectionUtils.isEmpty(sortList)) {
+            sortList = sortColumnList;
+        }
+        returnObj.put("sortList", sortList);
         returnObj.put("theadList", theadList);
         returnObj.put("tbodyList", dataList);
         returnObj.put("rowNum", result.getTotal());
