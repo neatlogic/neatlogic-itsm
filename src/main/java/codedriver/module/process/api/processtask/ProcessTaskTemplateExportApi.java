@@ -1,21 +1,21 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.process.constvalue.ProcessStepHandler;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.dto.ProcessFormVo;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.ExcelUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,7 +35,6 @@ import java.util.Map;
 
 @SuppressWarnings("deprecation")
 @Service
-@Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponentBase {
     static Logger logger = LoggerFactory.getLogger(ProcessTaskTemplateExportApi.class);
@@ -77,6 +75,50 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         if(processMapper.checkProcessIsExists(processUuid) == 0) {
             throw new ProcessNotFoundException(processUuid);
         }
+        /** 判断要不要生成“描述”列
+         * 1、从stepList获取开始节点
+         * 2、从connectionList获取开始节点后的第一个节点
+         * 3、从stepList获取开始节点后的第一个节点是否启用描述框
+         */
+        int isNeedContent = 0;
+        ProcessVo process = processMapper.getProcessBaseInfoByUuid(processUuid);
+        JSONObject configObj = process.getConfigObj();
+        if(MapUtils.isNotEmpty(configObj)){
+            JSONObject processConfig = configObj.getJSONObject("process");
+            JSONArray stepList = processConfig.getJSONArray("stepList");
+            if(MapUtils.isNotEmpty(processConfig) && CollectionUtils.isNotEmpty(stepList)){
+                /** 获取开始节点UUID */
+                String startUuid = "";
+                for(Object obj : stepList){
+                    JSONObject jsonObject = JSONObject.parseObject(obj.toString());
+                    if(ProcessStepHandler.START.getHandler().equals(jsonObject.getString("handler"))){
+                        startUuid = jsonObject.getString("uuid");
+                        break;
+                    }
+                }
+                JSONArray connectionList = processConfig.getJSONArray("connectionList");
+                /** 获取开始节点后的第一个节点UUID */
+                String firstStepUuid = "";
+                if(CollectionUtils.isNotEmpty(connectionList)){
+                    for(Object obj : connectionList){
+                        JSONObject jsonObject = JSONObject.parseObject(obj.toString());
+                        if(jsonObject.getString("fromStepUuid").equals(startUuid)){
+                            firstStepUuid = jsonObject.getString("toStepUuid");
+                            break;
+                        }
+                    }
+                }
+                /** 获取开始节点后的第一个节点是否启用描述框 */
+                for(Object obj : stepList){
+                    JSONObject jsonObject = JSONObject.parseObject(obj.toString());
+                    if(jsonObject.getString("uuid").equals(firstStepUuid)){
+                        isNeedContent = jsonObject.getJSONObject("stepConfig").getJSONObject("workerPolicyConfig").getIntValue("isNeedContent");
+                        break;
+                    }
+                }
+            }
+        }
+
         ProcessFormVo processForm = processMapper.getProcessFormByProcessUuid(processUuid);
         List<FormAttributeVo> formAttributeList = null;
         List<String> headerList = new ArrayList<>();
@@ -97,7 +139,9 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         headerList.add(0,"标题(必填)");
         headerList.add(1,"请求人(必填)");
         headerList.add(2,"优先级(必填)");
-        headerList.add(headerList.size(),"描述");
+        if(isNeedContent == 1){
+            headerList.add(headerList.size(),"描述");
+        }
         List<String> channelData = new ArrayList<>();
         channelData.add("服务名称：");
         channelData.add(channel.getName());
