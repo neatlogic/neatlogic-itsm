@@ -93,5 +93,10 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 	public Integer getSort() {
 		return 14;
 	}
+	
+	@Override
+	public Boolean getIsSort() {
+	    return true;
+	}
 
 }

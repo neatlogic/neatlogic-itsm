@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -117,7 +118,7 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
             where = getIsShowCondition(workcenterVo,where);
         }
         
-        String orderBy = "order by common.starttime desc";
+        String orderBy = assembleOrderBy(workcenterVo);
         String sql =
             String.format("select %s from %s %s %s limit %d,%d", selectColumn, TenantContext.get().getTenantUuid(),
                 where, orderBy, workcenterVo.getStartNum(), workcenterVo.getPageSize());
@@ -229,6 +230,36 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         return where;
     }
 
+    /**
+    * @Author 89770
+    * @Time 2020年10月19日  
+    * @Description:  拼接order条件 
+    * @Param 
+    * @return
+     */
+    private String assembleOrderBy(WorkcenterVo workcenterVo) {
+        StringBuilder orderSb = new StringBuilder(" order by ");
+        List<String> orderList = new ArrayList<String>();
+        
+        JSONArray sortJsonArray = workcenterVo.getSortList();
+        if(CollectionUtils.isNotEmpty(sortJsonArray)) {
+            for(Object sortObj : sortJsonArray) {
+                JSONObject sortJson = JSONObject.parseObject(sortObj.toString());
+                for(Entry<String, Object> entry : sortJson.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue().toString();
+                    IProcessTaskCondition condition = (IProcessTaskCondition)ConditionHandlerFactory.getHandler(key);
+                    orderList.add(condition.getEsOrderBy(value));
+                }
+            }
+            orderSb.append(String.join(",", orderList));
+        }else {
+            orderSb.append(String.format(" %s DESC ",ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STARTTIME.getValue())));
+        }
+        return orderSb.toString();
+    }
+    
+    
     /**
      * 拼接where条件
      * 

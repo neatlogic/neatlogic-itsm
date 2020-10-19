@@ -6,6 +6,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -47,6 +48,7 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 		@Param(name = "isMeWillDo", type = ApiParamType.INTEGER, desc = "是否带我处理的，1：是；0：否"),
 		@Param(name = "conditionGroupList", type = ApiParamType.JSONARRAY, desc = "条件组条件", isRequired = false),
 		@Param(name = "conditionGroupRelList", type = ApiParamType.JSONARRAY, desc = "条件组连接类型", isRequired = false),
+		@Param(name = "sortList", type = ApiParamType.JSONARRAY, desc = "排序", isRequired = false),
 		@Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "显示的字段", isRequired = false),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目", isRequired = false)
@@ -67,6 +69,7 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 			Integer currentPage = jsonObj.getInteger("currentPage");
 			Integer pageSize = jsonObj.getInteger("pageSize");
 			Integer isMeWillDo = jsonObj.getInteger("isMeWillDo");
+			JSONArray sortList = jsonObj.getJSONArray("sortList");
 			List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
 			if(CollectionUtils.isNotEmpty(workcenterList)) {
 				jsonObj = JSONObject.parseObject(workcenterList.get(0).getConditionConfig());
@@ -74,6 +77,9 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 				jsonObj.put("currentPage", currentPage);
 				jsonObj.put("pageSize", pageSize);
 				jsonObj.put("isMeWillDo", isMeWillDo);
+				if(CollectionUtils.isNotEmpty(sortList)) {
+				    jsonObj.put("sortList", sortList);
+				}
 			}
 		}
 		return workcenterService.doSearch(new WorkcenterVo(jsonObj));
