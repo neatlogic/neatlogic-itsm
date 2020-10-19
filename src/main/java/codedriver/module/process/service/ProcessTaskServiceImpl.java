@@ -111,45 +111,45 @@ import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
-	
+
 	private Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
-	
+
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-	
+
 	@Autowired
 	private UserMapper userMapper;
-	
+
 	@Autowired
 	private TeamMapper teamMapper;
-	
+
 	@Autowired
 	private FileMapper fileMapper;
-	
+
 	@Autowired
 	private IntegrationMapper integrationMapper;
-	
+
 	@Autowired
 	private PriorityMapper priorityMapper;
-	
+
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
 	@Autowired
 	private WorktimeMapper worktimeMapper;
-	
+
 	@Autowired
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
-    
+
     @Autowired
     private CatalogMapper catalogMapper;
 
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
-    
+
     @Autowired
     private ProcessMapper processMapper;
-	
+
 	@Override
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode) {
 		Map<String, Object> formAttributeDataMap = processTaskVo.getFormAttributeDataMap();
@@ -165,7 +165,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					if(CollectionUtils.isNotEmpty(controllerList)) {
 						List<String> currentUserProcessUserTypeList = new ArrayList<>();
 						List<String> currentUserTeamList = new ArrayList<>();
-						if(mode == 0) {					
+						if(mode == 0) {
 							currentUserProcessUserTypeList.add(UserType.ALL.getValue());
 							if(UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
 								currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
@@ -179,7 +179,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 								formAttributeActionMap = new HashMap<>();
 							}
 						}
-						
+
 						for(int i = 0; i < controllerList.size(); i++) {
 							JSONObject attributeObj = controllerList.getJSONObject(i);
 							String action = FormAttributeAction.HIDE.getValue();
@@ -243,7 +243,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				logger.error("表单配置不是合法的JSON格式", ex);
 			}
 		}
-		
+
 	}
 
 	@Override
@@ -255,7 +255,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		if(CollectionUtils.isNotEmpty(fileIdList)) {
             processTaskStepReplyVo.setFileIdList(fileIdList);
             processTaskStepReplyVo.setFileList(fileMapper.getFileListByIdList(fileIdList));
-        }			
+        }
 		if(StringUtils.isNotBlank(processTaskStepReplyVo.getLcu())) {
 			UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepReplyVo.getLcu());
 			if(user != null) {
@@ -269,7 +269,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		    processTaskStepReplyVo.setFcuInfo(user.getUserInfo());
 		}
 	}
-	
+
 	@Override
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
 		IntegrationResultVo resultVo = null;
@@ -360,7 +360,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					//continue
 				}
 	    	}
-			
+
 		}catch(Exception ex) {
 			logger.error(ex.getMessage(),ex);
 			audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
@@ -381,7 +381,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		return isUnloadJob;
 	}
-	
+
 	@Override
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo,AutomaticConfigVo automaticConfigVo,JSONObject data,String type) {
 		JSONObject failConfig = new JSONObject();
@@ -426,7 +426,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		return data;
 	}
-	
+
 	@Override
 	public void initJob(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo,JSONObject data) {
 		IJob jobHandler = SchedulerManager.getHandler(ProcessTaskAutomaticJob.class.getName());
@@ -443,10 +443,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			throw new ScheduleHandlerNotFoundException(ProcessTaskAutomaticJob.class.getName());
 		}
 	}
-	
+
 	/**
 	 * @Description: 判断条件是否成立
-	 * @Param: 
+	 * @Param:
 	 * @return: boolean
 	 */
 	private Boolean predicate(JSONObject config,IntegrationResultVo resultVo,Boolean isSuccess) {
@@ -493,12 +493,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 拼装入参数
 	 * @param automaticConfigVo
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private JSONObject getIntegrationParam(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
 		ProcessTaskStepVo stepVo = getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
@@ -521,20 +521,20 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					integrationParam.put(name, processTaskJson.get(value));
 				}else if(type.equals("integration")){
 					integrationParam.put(name, resultJson.get(value));
-				}else{//常量 
+				}else{//常量
 					integrationParam.put(name, value);
 				}
 			}
 		}
 		return integrationParam;
 	}
-	
+
 	@Override
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId) {
 		//获取步骤信息
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		ProcessStepUtilHandlerFactory.getHandler().setProcessTaskStepConfig(processTaskStepVo);
-		
+
 		//处理人列表
 		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(majorUserList)) {
@@ -542,13 +542,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
 		processTaskStepVo.setMinorUserList(minorUserList);
-		
+
 		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
 		processTaskStepVo.setWorkerList(workerList);
 
 		return processTaskStepVo;
 	}
-	
+
 	public static void main(String[] args) {
 		Pattern pattern = Pattern.compile("(5|4).*");
 		System.out.println( pattern.matcher("300").matches());
