@@ -261,12 +261,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			if(user != null) {
 			    processTaskStepReplyVo.setLcuName(user.getUserName());
 			    processTaskStepReplyVo.setLcuInfo(user.getUserInfo());
+			    processTaskStepReplyVo.setLcuVipLevel(user.getVipLevel());
 			}
 		}
 		UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepReplyVo.getFcu());
 		if(user != null) {
 		    processTaskStepReplyVo.setFcuName(user.getUserName());
 		    processTaskStepReplyVo.setFcuInfo(user.getUserInfo());
+		    processTaskStepReplyVo.setFcuVipLevel(user.getVipLevel());
 		}
 	}
 
