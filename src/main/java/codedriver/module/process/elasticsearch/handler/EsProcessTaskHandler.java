@@ -249,7 +249,11 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
                     String key = entry.getKey();
                     String value = entry.getValue().toString();
                     IProcessTaskCondition condition = (IProcessTaskCondition)ConditionHandlerFactory.getHandler(key);
-                    orderList.add(condition.getEsOrderBy(value));
+                    if(condition != null) {
+                        orderList.add(condition.getEsOrderBy(value));
+                    }else {
+                        //Condition 不存在
+                    }
                 }
             }
             orderSb.append(String.join(",", orderList));
