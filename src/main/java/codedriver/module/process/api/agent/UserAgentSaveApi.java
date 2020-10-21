@@ -6,6 +6,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAgentVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.AgentIsUserSelfException;
+import codedriver.framework.exception.user.UserAgentLoopException;
 import codedriver.framework.exception.user.UserAgentRepeatException;
 import codedriver.framework.exception.user.UserHasAgentException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -50,12 +51,20 @@ public class UserAgentSaveApi extends PrivateApiComponentBase {
 		if(UserContext.get().getUserUuid().equals(userAgentVo.getAgentUuid())){
 			throw new AgentIsUserSelfException();
 		}
-		if(userMapper.checkAgentExists(UserContext.get().getUserUuid()) > 0){
+		/** 检查当前用户是否已存在代理对象 */
+		if(userMapper.checkUserExistsInUserAgent(UserContext.get().getUserUuid()) > 0){
 			throw new UserHasAgentException();
 		}
-		if(userMapper.checkAgentExists(userAgentVo.getAgentUuid()) > 0){
+		/** 检查目标代理对象是否已经代理了其他用户 */
+		if(userMapper.checkAgentExistsInUserAgent(userAgentVo.getAgentUuid()) > 0){
 			UserVo agent = userMapper.getUserByUuid(userAgentVo.getAgentUuid());
 			throw new UserAgentRepeatException(agent.getUserId());
+		}
+		/** 如果A已经是B的代理人，则不允许A设置代理人为B */
+		if(userMapper.checkExistsAgentLoop(userAgentVo.getAgentUuid(),UserContext.get().getUserUuid()) > 0){
+			UserVo user = userMapper.getUserByUuid(UserContext.get().getUserUuid());
+			UserVo agent = userMapper.getUserByUuid(userAgentVo.getAgentUuid());
+			throw new UserAgentLoopException(user.getUserId(),agent.getUserId());
 		}
 		userAgentVo.setUserUuid(UserContext.get().getUserUuid());
 		userAgentVo.setFunc("processtask");
