@@ -85,7 +85,7 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
         Object value = valueList.get(0);
         if ("1".equals(value)) {
             where = String.format(Expression.LESSTHAN.getExpressionEs(),
-                ProcessWorkcenterField.getConditionValue(condition.getName()) + ".slaTimeVo.expireTimeLong",
+                ProcessWorkcenterField.getConditionValue(condition.getName()),
                 System.currentTimeMillis());
         } else { // TODO es 封装暂时不支持 判断空key
             // where =
