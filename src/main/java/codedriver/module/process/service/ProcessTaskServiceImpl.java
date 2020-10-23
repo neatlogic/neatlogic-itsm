@@ -947,8 +947,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType) {
         JSONObject configObj = processTaskStepVo.getConfigObj();
-        JSONArray authorityList = configObj.getJSONArray("authorityList");
-        if (CollectionUtils.isEmpty(authorityList)) {
+        JSONArray authorityList = null;
+        if (configObj != null && CollectionUtils.isEmpty(authorityList)) {
+            authorityList = configObj.getJSONArray("authorityList");
             JSONObject globalConfig = processTaskStepVo.getGlobalConfig();
             if(MapUtils.isNotEmpty(globalConfig)) {
                 authorityList = globalConfig.getJSONArray("authorityList");
