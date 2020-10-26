@@ -20,7 +20,6 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Component
 public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -84,7 +83,7 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
 	        value = "0";
 	    }
         value = String.format(" %s ",  value);
-        where = String.format(expression,ProcessWorkcenterField.getConditionValue(condition.getName()),value);
+        where = String.format(expression,this.getEsName(),value);
         return where;
     }
 

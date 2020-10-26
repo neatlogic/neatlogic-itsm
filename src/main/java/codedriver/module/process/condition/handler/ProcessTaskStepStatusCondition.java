@@ -47,6 +47,11 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	public String getType() {
 		return ProcessFieldType.COMMON.getValue();
 	}
+	
+	@Override
+    public String getMyEsName() {
+        return String.format(" %s.%s", getType(),"step.status");
+    }
 
 	@Override
 	public JSONObject getConfig() {		

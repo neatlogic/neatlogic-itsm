@@ -25,7 +25,6 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Component
 public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -107,7 +106,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
         if(StringUtils.isNotBlank(value.toString())) {
             value = String.format("'%s'",  value);
         }
-        where = String.format(expression,ProcessWorkcenterField.getConditionValue(condition.getName()),value);
+        where = String.format(expression,this.getEsName(),value);
         return where;
     }
 	

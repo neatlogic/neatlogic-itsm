@@ -72,6 +72,11 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 	}
 	
 	@Override
+	public String getMyEsName() {
+	    return String.format(" %s.%s", getType(),"step.usertypelist.userlist");
+	}
+	
+	@Override
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
 		List<ConditionVo> stepStatusConditionList = conditionList.stream().filter(con->con.getName().equals(ProcessWorkcenterField.STEP_STATUS.getValue())).collect(Collectors.toList());
@@ -117,7 +122,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 				}
 			}
 			String value = String.join("','",userList);
-			return String.format(Expression.INCLUDE.getExpressionEs(),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP_USER.getValue()),String.format("'%s'",  value));
+			return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),String.format("'%s'",  value));
 		}
 		return null;
 	}
