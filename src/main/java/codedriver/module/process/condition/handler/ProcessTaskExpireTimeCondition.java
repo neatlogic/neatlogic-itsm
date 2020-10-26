@@ -13,11 +13,13 @@ import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Component
 public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -46,10 +48,10 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
     public String getType() {
         return ProcessFieldType.COMMON.getValue();
     }
-    
+
     @Override
     public String getMyEsName() {
-        return String.format(" %s.%s", getType(),"expiretime.slaTimeVo.expireTimeLong");
+        return String.format(" %s.%s", getType(), "expiretime.slaTimeVo.expireTimeLong");
     }
 
     @Override
@@ -88,8 +90,9 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
         List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
         Object value = valueList.get(0);
         if ("1".equals(value)) {
-            where = String.format(Expression.LESSTHAN.getExpressionEs(),this.getEsName(),
-                System.currentTimeMillis());
+            //进行中 超时单
+            where = String.format(Expression.LESSTHAN.getExpressionEs(), this.getEsName(), System.currentTimeMillis())
+                + " and "  +String.format(Expression.INCLUDE.getExpressionEs(),((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.STATUS.getValue())).getEsName(), "'running'");
         } else { // TODO es 封装暂时不支持 判断空key
             // where =
             // String.format(Expression.EQUAL.getExpressionEs(),ProcessWorkcenterField.getConditionValue(condition.getName())+".slaTimeVo.expireTimeLong",null)
@@ -104,14 +107,13 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
     @Override
     public String getMyEsOrderBy(String sortType) {
         String orderBy = StringUtils.EMPTY;
-        if("DESC".equalsIgnoreCase(sortType.trim())) {
+        if ("DESC".equalsIgnoreCase(sortType.trim())) {
             sortType = "ASC";
-        }else {
+        } else {
             sortType = "DESC";
         }
         if (StringUtils.isBlank(orderBy)) {
-            orderBy = String.format(" %s %s ", this.getEsName(),
-                sortType.toUpperCase());
+            orderBy = String.format(" %s %s ", this.getEsName(), sortType.toUpperCase());
         }
         return orderBy;
     }
