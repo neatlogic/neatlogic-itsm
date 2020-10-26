@@ -13,13 +13,11 @@ import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Component
 public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -90,9 +88,9 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
         List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
         Object value = valueList.get(0);
         if ("1".equals(value)) {
-            //进行中 超时单
-            where = String.format(Expression.LESSTHAN.getExpressionEs(), this.getEsName(), System.currentTimeMillis())
-                + " and "  +String.format(Expression.INCLUDE.getExpressionEs(),((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.STATUS.getValue())).getEsName(), "'running'");
+            // 超时单
+            where = String.format(Expression.LESSTHAN.getExpressionEs(), this.getEsName(), System.currentTimeMillis());
+                //+ " and "  +String.format(Expression.INCLUDE.getExpressionEs(),((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.STATUS.getValue())).getEsName(), "'running'");
         } else { // TODO es 封装暂时不支持 判断空key
             // where =
             // String.format(Expression.EQUAL.getExpressionEs(),ProcessWorkcenterField.getConditionValue(condition.getName())+".slaTimeVo.expireTimeLong",null)
