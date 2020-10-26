@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.common.constvalue.TeamUserTitle;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -68,27 +67,28 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 		List<String> resultList = new ArrayList<>();
 		String teamUserTitle = configObj.getString("teamUserTitle");
 		if(StringUtils.isNotBlank(teamUserTitle)) {
-			TeamLevel teamLevel = null;
-			if(TeamUserTitle.GROUPLEADER.getValue().equals(teamUserTitle)) {
-				teamLevel = TeamLevel.GROUP;
-			}else if(TeamUserTitle.COMPANYLEADER.getValue().equals(teamUserTitle)) {
-				teamLevel = TeamLevel.COMPANY;
-			}else if(TeamUserTitle.CENTERLEADER.getValue().equals(teamUserTitle)) {
-				teamLevel = TeamLevel.CENTER;
-			}else if(TeamUserTitle.DEPARTMENTLEADER.getValue().equals(teamUserTitle)) {
-				teamLevel = TeamLevel.DEPARTMENT;
-			}else if(TeamUserTitle.TEAMLEADER.getValue().equals(teamUserTitle)) {
-				teamLevel = TeamLevel.TEAM;
-			}else {
-				return resultList;
-			}
+//			TeamLevel teamLevel = null;
+//			if(TeamUserTitle.GROUPLEADER.getValue().equals(teamUserTitle)) {
+//				teamLevel = TeamLevel.GROUP;
+//			}else if(TeamUserTitle.COMPANYLEADER.getValue().equals(teamUserTitle)) {
+//				teamLevel = TeamLevel.COMPANY;
+//			}else if(TeamUserTitle.CENTERLEADER.getValue().equals(teamUserTitle)) {
+//				teamLevel = TeamLevel.CENTER;
+//			}else if(TeamUserTitle.DEPARTMENTLEADER.getValue().equals(teamUserTitle)) {
+//				teamLevel = TeamLevel.DEPARTMENT;
+//			}else if(TeamUserTitle.TEAMLEADER.getValue().equals(teamUserTitle)) {
+//				teamLevel = TeamLevel.TEAM;
+//			}else {
+//				return resultList;
+//			}
 			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
 			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTask.getOwner());
 			if(CollectionUtils.isNotEmpty(teamUuidList)) {
 				List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
 				if(CollectionUtils.isNotEmpty(teamList)) {
 					for(TeamVo teamVo : teamList) {
-						List<String> userUuidList = teamMapper.getTeamUserUuidListByLftRhtLevelTitle(teamVo.getLft(), teamVo.getRht(), teamLevel.getValue(), teamUserTitle);
+//						List<String> userUuidList = teamMapper.getTeamUserUuidListByLftRhtLevelTitle(teamVo.getLft(), teamVo.getRht(), teamLevel.getValue(), teamUserTitle);
+						List<String> userUuidList = teamMapper.getTeamUserUuidListByLftRhtTitle(teamVo.getLft(), teamVo.getRht(), teamUserTitle);
 						if(CollectionUtils.isNotEmpty(userUuidList)) {
 							resultList.addAll(userUuidList);
 						}
