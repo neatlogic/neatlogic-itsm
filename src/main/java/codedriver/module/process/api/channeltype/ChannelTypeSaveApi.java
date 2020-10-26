@@ -1,5 +1,6 @@
 package codedriver.module.process.api.channeltype;
 
+import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -17,6 +18,9 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNameRepeatException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
+
+import java.util.Objects;
+
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
@@ -69,6 +73,9 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 		if(uuid != null) {
 			if(channelMapper.checkChannelTypeIsExists(uuid) == 0) {
 				throw new PriorityNotFoundException(uuid);
+			}
+			if(channelMapper.checkChannelTypeHasReference(uuid) > 0 && Objects.equals(channelTypeVo.getIsActive(),0)){
+				throw new ChannelTypeHasReferenceException(channelTypeVo.getName(),"禁用");
 			}
 			channelMapper.updateChannelTypeByUuid(channelTypeVo);
 		}else {
