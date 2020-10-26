@@ -505,6 +505,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	private JSONObject getIntegrationParam(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
 		ProcessTaskStepVo stepVo = getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
 		ProcessTaskVo processTaskVo = getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskVo.setStartProcessTaskStep(getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
 		processTaskVo.setCurrentProcessTaskStep(stepVo);
 		JSONObject processTaskJson = ProcessTaskUtil.getProcessFieldData(processTaskVo,true);
 		JSONObject resultJson = automaticConfigVo.getResultJson();
@@ -1160,5 +1161,34 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
         }
         return processTaskStepRemindList;
+    }
+    
+    /**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取开始步骤信息 
+    * @param processTaskId 工单id
+    * @return ProcessTaskStepVo
+     */
+    @Override
+    public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
+        //获取开始步骤id
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+        if(processTaskStepList.size() != 1) {
+            throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
+        }
+
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
+
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        /** 当前步骤特有步骤信息 **/
+        IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+        if(startProcessStepUtilHandler == null) {
+            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+        }
+        startProcessStepUtilHandler.setProcessTaskStepConfig(startProcessTaskStepVo);
+        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
+        return startProcessTaskStepVo;
     }
 }

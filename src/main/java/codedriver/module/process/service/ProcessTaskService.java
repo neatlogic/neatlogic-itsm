@@ -220,4 +220,14 @@ public interface ProcessTaskService {
     public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception;
 
     public List<ProcessTaskStepRemindVo> getProcessTaskStepRemindListByProcessTaskStepId(Long processTaskStepId);
+
+    /**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取开始步骤信息 
+    * @param processTaskId 工单id
+    * @return ProcessTaskStepVo
+     */
+    public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
 }
