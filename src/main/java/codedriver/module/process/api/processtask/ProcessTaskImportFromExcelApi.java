@@ -164,8 +164,16 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                         auditVo.setStatus(1);
                         successCount++;
                     }catch (Exception e){
+                        String errMsg = e.getMessage();
+                        if(errMsg.contains("title")){
+                            errMsg = errMsg.replace("title","标题");
+                        }else if(errMsg.contains("owner")){
+                            errMsg = errMsg.replace("owner","请求人");
+                        }else if(errMsg.contains("priorityUuid")){
+                            errMsg = errMsg.replace("priorityUuid","优先级");
+                        }
                         auditVo.setStatus(0);
-                        auditVo.setErrorReason(e.getMessage());
+                        auditVo.setErrorReason(errMsg);
                     }
                     auditVoList.add(auditVo);
                 }
