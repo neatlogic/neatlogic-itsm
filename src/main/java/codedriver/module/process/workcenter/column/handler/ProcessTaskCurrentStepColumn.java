@@ -98,6 +98,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 												userJson.put("worker", user);
 												userJson.put("workername", userVo.getUserName());
 												userJson.put("workerAvatar", userVo.getAvatar());
+												userJson.put("workerVipLevel",userVo.getVipLevel());
 												userArrayTmp.add(userJson);
 											}
 										}else if(user.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
@@ -138,6 +139,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 											userJson.put("useruuid", user);
 											userJson.put("username", userVo.getUserName());
 											userJson.put("userAvatar", userVo.getAvatar());
+											userJson.put("userVipLevel", userVo.getVipLevel());
 											userArrayTmp.add(userJson);
 										}
 									}

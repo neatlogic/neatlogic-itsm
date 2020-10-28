@@ -84,5 +84,5 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 		}		
 		return value;
 	}
-
+	
 }

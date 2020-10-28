@@ -68,7 +68,7 @@ public class EsProcessTaskActionApi extends PrivateApiComponentBase {
         }
         List<ProcessTaskVo> processTaskVoList =
             processTaskMapper.getProcessTaskListByKeywordAndIdList(null, taskIdList, fromDate, toDate);
-        IElasticSearchHandler handler = ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
+        IElasticSearchHandler<?, ?> handler = ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         for (ProcessTaskVo processTaskVo : processTaskVoList) {
             // JSONObject paramObj = new JSONObject();
             // paramObj.put("taskId", processTaskVo.getId());
@@ -78,6 +78,7 @@ public class EsProcessTaskActionApi extends PrivateApiComponentBase {
                     handler.save(processTaskVo.getId());
                 } catch (Exception e) {
                     handler.delete(processTaskVo.getId().toString());
+                    throw new RuntimeException(e.getCause().getMessage());
                 }
             } else {
                 handler.delete(processTaskVo.getId().toString());

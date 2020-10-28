@@ -22,7 +22,6 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.constvalue.ProcessStepHandler;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
@@ -30,24 +29,27 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
-import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
 import codedriver.framework.process.dto.ProcessTaskStepAgentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
@@ -127,8 +129,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
             }
         }
-        processTaskVo.setStartProcessTaskStep(getStartProcessTaskStepByProcessTaskId(processTaskId));
-
+        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
         Map<String, String> formAttributeActionMap = new HashMap<>();
 		if(processTaskStepId != null) {		    
             ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
@@ -164,33 +165,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         resultObj.put("processTask", processTaskVo);
 		return resultObj;
 	}
-	/**
-     * 
-    * @Author: linbq
-    * @Time:2020年8月21日
-    * @Description: 获取开始步骤信息 
-    * @param processTaskId 工单id
-    * @return ProcessTaskStepVo
-     */
-	public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
-        //获取开始步骤id
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
-        if(processTaskStepList.size() != 1) {
-            throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
-        }
-
-        ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-
-        startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
-        /** 当前步骤特有步骤信息 **/
-        IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
-        if(startProcessStepUtilHandler == null) {
-            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
-        }
-        startProcessStepUtilHandler.setProcessTaskStepConfig(startProcessTaskStepVo);
-        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
-        return startProcessTaskStepVo;
-    }
 	
 	/**
      * 
@@ -297,7 +271,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(stepDataVo != null) {
                 JSONObject stepDataJson = stepDataVo.getData();
                 processTaskStepVo.setProcessTaskStepData(stepDataJson);
-                if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.WORK, false)) {//有处理权限
+                if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.COMPLETE, false)) {//有处理权限
                     stepDataJson.put("isStepUser", 1);
                     if(processTaskStepVo.getHandler().equals(ProcessStepHandler.AUTOMATIC.getHandler())){
                         JSONObject requestAuditJson = stepDataJson.getJSONObject("requestAudit");

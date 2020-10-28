@@ -1,5 +1,6 @@
 package codedriver.module.process.api.channeltype;
 
+import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -50,7 +51,8 @@ public class ChannelTypeDeleteApi extends PrivateApiComponentBase {
 			throw new ChannelTypeNotFoundException(uuid);
 		}
 		if(channelMapper.checkChannelTypeHasReference(uuid) > 0){
-			throw new ChannelTypeHasReferenceException(uuid);
+			ChannelTypeVo type = channelMapper.getChannelTypeByUuid(uuid);
+			throw new ChannelTypeHasReferenceException(type.getName(),"删除");
 		}
 		channelMapper.deleteChannelTypeByUuid(uuid);
 		return null;

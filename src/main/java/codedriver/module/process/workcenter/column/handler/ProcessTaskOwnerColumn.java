@@ -1,6 +1,5 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,10 +35,9 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 		if(userVo != null) {
 			userJson.put("username", userVo.getUserName());
 			//获取用户头像
-			if(MapUtils.isNotEmpty(userVo.getUserInfoObj()) && StringUtils.isNotBlank(userVo.getUserInfoObj().getString("avatar"))){
-				userJson.put("avatar", userVo.getUserInfoObj().getString("avatar"));
-			}
-
+			userJson.put("avatar", userVo.getAvatar());
+			//获取用户VIP等级
+			userJson.put("vipLevel",userVo.getVipLevel());
 		}
 		userJson.put("useruuid", userUuid);
 		return userJson;

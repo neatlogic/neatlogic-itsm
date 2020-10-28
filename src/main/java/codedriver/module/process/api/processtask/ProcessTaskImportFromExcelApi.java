@@ -164,8 +164,16 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                         auditVo.setStatus(1);
                         successCount++;
                     }catch (Exception e){
+                        String errMsg = e.getMessage();
+                        if(errMsg.contains("title")){
+                            errMsg = errMsg.replace("title","标题");
+                        }else if(errMsg.contains("owner")){
+                            errMsg = errMsg.replace("owner","请求人");
+                        }else if(errMsg.contains("priorityUuid")){
+                            errMsg = errMsg.replace("priorityUuid","优先级");
+                        }
                         auditVo.setStatus(0);
-                        auditVo.setErrorReason(e.getMessage());
+                        auditVo.setErrorReason(errMsg);
                     }
                     auditVoList.add(auditVo);
                 }
@@ -200,28 +208,29 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         JSONArray formAttributeDataList = new JSONArray();
         task.put("channelUuid",channelUuid);
         for(Map.Entry<String,String> entry : map.entrySet()){
-            if("标题".equals(entry.getKey())){
+            String key = entry.getKey().replace("(必填)","");
+            if("标题".equals(key)){
                 task.put("title",entry.getValue());
-            }else if("请求人".equals(entry.getKey())){
+            }else if("请求人".equals(key)){
                 UserVo user = null;
                 if(StringUtils.isNotBlank(entry.getValue()) && (user = userMapper.getUserByUserId(entry.getValue())) != null){
                     task.put("owner",user.getUuid());
                 }else{
                     task.put("owner" ,null);
                 }
-            }else if("优先级".equals(entry.getKey())){
+            }else if("优先级".equals(key)){
                 PriorityVo priority = null;
                 if(StringUtils.isNotBlank(entry.getValue()) && (priority = priorityMapper.getPriorityByName(entry.getValue())) != null){
                     task.put("priorityUuid",priority.getUuid());
                 }else{
                     task.put("priorityUuid",null);
                 }
-            }else if("描述".equals(entry.getKey())){
+            }else if("描述".equals(key)){
                 task.put("content",entry.getValue());
             }else{
                 if(CollectionUtils.isNotEmpty(formAttributeList)){
                     for(FormAttributeVo att: formAttributeList){
-                        if(att.getLabel().equals(entry.getKey())){
+                        if(att.getLabel().equals(key)){
                             JSONObject formdata = new JSONObject();
                             formdata.put("attributeUuid",att.getUuid());
                             formdata.put("handler",att.getHandler());

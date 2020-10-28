@@ -34,6 +34,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
@@ -75,11 +76,11 @@ import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
-import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFileVo;
 import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
@@ -110,45 +111,45 @@ import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
-	
+
 	private Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
-	
+
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
-	
+
 	@Autowired
 	private UserMapper userMapper;
-	
+
 	@Autowired
 	private TeamMapper teamMapper;
-	
+
 	@Autowired
 	private FileMapper fileMapper;
-	
+
 	@Autowired
 	private IntegrationMapper integrationMapper;
-	
+
 	@Autowired
 	private PriorityMapper priorityMapper;
-	
+
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
 	@Autowired
 	private WorktimeMapper worktimeMapper;
-	
+
 	@Autowired
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
-    
+
     @Autowired
     private CatalogMapper catalogMapper;
 
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
-    
+
     @Autowired
     private ProcessMapper processMapper;
-	
+
 	@Override
 	public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo, Map<String, String> formAttributeActionMap, int mode) {
 		Map<String, Object> formAttributeDataMap = processTaskVo.getFormAttributeDataMap();
@@ -164,7 +165,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					if(CollectionUtils.isNotEmpty(controllerList)) {
 						List<String> currentUserProcessUserTypeList = new ArrayList<>();
 						List<String> currentUserTeamList = new ArrayList<>();
-						if(mode == 0) {					
+						if(mode == 0) {
 							currentUserProcessUserTypeList.add(UserType.ALL.getValue());
 							if(UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
 								currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
@@ -178,7 +179,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 								formAttributeActionMap = new HashMap<>();
 							}
 						}
-						
+
 						for(int i = 0; i < controllerList.size(); i++) {
 							JSONObject attributeObj = controllerList.getJSONObject(i);
 							String action = FormAttributeAction.HIDE.getValue();
@@ -242,7 +243,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 				logger.error("表单配置不是合法的JSON格式", ex);
 			}
 		}
-		
+
 	}
 
 	@Override
@@ -254,21 +255,23 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		if(CollectionUtils.isNotEmpty(fileIdList)) {
             processTaskStepReplyVo.setFileIdList(fileIdList);
             processTaskStepReplyVo.setFileList(fileMapper.getFileListByIdList(fileIdList));
-        }			
+        }
 		if(StringUtils.isNotBlank(processTaskStepReplyVo.getLcu())) {
 			UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepReplyVo.getLcu());
 			if(user != null) {
 			    processTaskStepReplyVo.setLcuName(user.getUserName());
 			    processTaskStepReplyVo.setLcuInfo(user.getUserInfo());
+			    processTaskStepReplyVo.setLcuVipLevel(user.getVipLevel());
 			}
 		}
 		UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepReplyVo.getFcu());
 		if(user != null) {
 		    processTaskStepReplyVo.setFcuName(user.getUserName());
 		    processTaskStepReplyVo.setFcuInfo(user.getUserInfo());
+		    processTaskStepReplyVo.setFcuVipLevel(user.getVipLevel());
 		}
 	}
-	
+
 	@Override
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
 		IntegrationResultVo resultVo = null;
@@ -359,7 +362,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					//continue
 				}
 	    	}
-			
+
 		}catch(Exception ex) {
 			logger.error(ex.getMessage(),ex);
 			audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
@@ -380,7 +383,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		return isUnloadJob;
 	}
-	
+
 	@Override
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo,AutomaticConfigVo automaticConfigVo,JSONObject data,String type) {
 		JSONObject failConfig = new JSONObject();
@@ -425,7 +428,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		return data;
 	}
-	
+
 	@Override
 	public void initJob(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo,JSONObject data) {
 		IJob jobHandler = SchedulerManager.getHandler(ProcessTaskAutomaticJob.class.getName());
@@ -442,10 +445,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			throw new ScheduleHandlerNotFoundException(ProcessTaskAutomaticJob.class.getName());
 		}
 	}
-	
+
 	/**
 	 * @Description: 判断条件是否成立
-	 * @Param: 
+	 * @Param:
 	 * @return: boolean
 	 */
 	private Boolean predicate(JSONObject config,IntegrationResultVo resultVo,Boolean isSuccess) {
@@ -492,15 +495,17 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 拼装入参数
 	 * @param automaticConfigVo
 	 * @return
+	 * @throws Exception
 	 */
-	private JSONObject getIntegrationParam(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
+	private JSONObject getIntegrationParam(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) throws Exception {
 		ProcessTaskStepVo stepVo = getProcessTaskStepDetailInfoById(currentProcessTaskStepVo.getId());
 		ProcessTaskVo processTaskVo = getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
+		processTaskVo.setStartProcessTaskStep(getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
 		processTaskVo.setCurrentProcessTaskStep(stepVo);
 		JSONObject processTaskJson = ProcessTaskUtil.getProcessFieldData(processTaskVo,true);
 		JSONObject resultJson = automaticConfigVo.getResultJson();
@@ -519,20 +524,20 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 					integrationParam.put(name, processTaskJson.get(value));
 				}else if(type.equals("integration")){
 					integrationParam.put(name, resultJson.get(value));
-				}else{//常量 
+				}else{//常量
 					integrationParam.put(name, value);
 				}
 			}
 		}
 		return integrationParam;
 	}
-	
+
 	@Override
 	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId) {
 		//获取步骤信息
 		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
 		ProcessStepUtilHandlerFactory.getHandler().setProcessTaskStepConfig(processTaskStepVo);
-		
+
 		//处理人列表
 		List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MAJOR.getValue());
 		if(CollectionUtils.isNotEmpty(majorUserList)) {
@@ -540,23 +545,26 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		}
 		List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
 		processTaskStepVo.setMinorUserList(minorUserList);
-		
+
 		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
 		processTaskStepVo.setWorkerList(workerList);
 
 		return processTaskStepVo;
 	}
-	
+
 	public static void main(String[] args) {
 		Pattern pattern = Pattern.compile("(5|4).*");
 		System.out.println( pattern.matcher("300").matches());
 	}
 
     @Override
-    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId) {
+    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId, Long nextStepId) throws Exception {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
         if(processTaskVo == null) {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
+        }
+        if(processTaskVo.getIsShow() != 1) {
+            throw new PermissionDeniedException();
         }
         if(processTaskStepId != null) {
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
@@ -589,19 +597,23 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId) {
+    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId, Long processTaskStepId) throws Exception {
         return checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId, null);
     }
 
     @Override
-    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId) {
+    public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId) throws Exception {
         return checkProcessTaskParamsIsLegal(processTaskId, null, null);
     }
 
     @Override
-    public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) {
+    public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) throws Exception {
       //获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+        //判断当前用户是否关注该工单
+		if(processTaskVo != null && processTaskMapper.checkProcessTaskFocusExists(processTaskId,UserContext.get().getUserUuid()) > 0){
+			processTaskVo.setIsFocus(1);
+		}
         //获取工单流程图信息
         ProcessTaskConfigVo processTaskConfig = selectContentByHashMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
         if(processTaskConfig == null) {
@@ -936,8 +948,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType) {
         JSONObject configObj = processTaskStepVo.getConfigObj();
-        JSONArray authorityList = configObj.getJSONArray("authorityList");
-        if (CollectionUtils.isEmpty(authorityList)) {
+        JSONArray authorityList = null;
+        if (configObj != null && CollectionUtils.isEmpty(authorityList)) {
+            authorityList = configObj.getJSONArray("authorityList");
             JSONObject globalConfig = processTaskStepVo.getGlobalConfig();
             if(MapUtils.isNotEmpty(globalConfig)) {
                 authorityList = globalConfig.getJSONArray("authorityList");
@@ -1100,7 +1113,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }    
 
     @Override
-    public ProcessTaskVo getFromProcessTasById(Long processTaskId) {
+    public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception {
         ProcessTaskVo processTaskVo = checkProcessTaskParamsIsLegal(processTaskId);
         ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
         if(channelVo != null) {
@@ -1148,5 +1161,34 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
         }
         return processTaskStepRemindList;
+    }
+    
+    /**
+     * 
+    * @Author: linbq
+    * @Time:2020年8月21日
+    * @Description: 获取开始步骤信息 
+    * @param processTaskId 工单id
+    * @return ProcessTaskStepVo
+     */
+    @Override
+    public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
+        //获取开始步骤id
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
+        if(processTaskStepList.size() != 1) {
+            throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
+        }
+
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
+
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        /** 当前步骤特有步骤信息 **/
+        IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+        if(startProcessStepUtilHandler == null) {
+            throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
+        }
+        startProcessStepUtilHandler.setProcessTaskStepConfig(startProcessTaskStepVo);
+        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
+        return startProcessTaskStepVo;
     }
 }

@@ -2,20 +2,24 @@ package codedriver.module.process.condition.handler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionVo;
@@ -63,12 +67,17 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 
 	@Override
 	public Integer getSort() {
-		return 10;
+		return 12;
 	}
 
 	@Override
 	public ParamType getParamType() {
 		return ParamType.ARRAY;
+	}
+	
+	@Override
+	public String getMyEsName() {
+	    return String.format(" %s.%s", getType(),"step.usertypelist.userlist");
 	}
 	
 	@Override
@@ -93,6 +102,9 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 			}
 			List<String> userList = new ArrayList<String>();
 			for(String user : stepUserValueList) {
+			    if(user.equals(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue())) {
+			        user = GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid();
+                }
 				for(String stepStatus : stepStatusValueList) {
 					userList.add(user);
 					//如果是待处理状态，则需额外匹配角色和组
@@ -117,9 +129,27 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 				}
 			}
 			String value = String.join("','",userList);
-			return String.format(Expression.INCLUDE.getExpressionEs(),ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP_USER.getValue()),String.format("'%s'",  value));
+			return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),String.format("'%s'",  value));
+		}else {
+		    List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+	        //替换“当前登录人标识”为当前登录用户 
+	        String loginUser = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue();
+	        if(valueList.contains(loginUser)) {
+	            Iterator<String>  valueIterator = valueList.iterator();
+	            if(valueIterator.hasNext()) {
+	                String value = valueIterator.next();
+	                if(value.equals(loginUser)) {
+	                    valueIterator.remove();
+	                    valueList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
+	                }
+	            }
+	        }
+	        String value = String.join("','", valueList);
+	        if(StringUtils.isNotBlank(value.toString())) {
+	            value = String.format("'%s'",  value);
+	        }
+	        return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),value);
 		}
-		return null;
 	}
 
 	@Override

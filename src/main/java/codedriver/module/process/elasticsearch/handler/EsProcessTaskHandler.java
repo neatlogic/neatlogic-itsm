@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,6 +24,7 @@ import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.GroupSearch;
@@ -48,6 +50,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.service.WorkcenterService;
 
 @Service
@@ -95,47 +98,51 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
 
         JSONArray resultColumnArray = workcenterVo.getResultColumnList();
         String selectColumn = "*";
-        //
+        //选择展示字段
         if (!CollectionUtils.isEmpty(resultColumnArray)) {
             List<String> columnResultList = new ArrayList<String>();
             for (Object column : resultColumnArray) {
-                columnResultList.add(ProcessWorkcenterField.getConditionValue(column.toString()));
+                columnResultList.add(((IProcessTaskCondition)ConditionHandlerFactory.getHandler(column.toString())).getEsName());
                 selectColumn = String.join(",", columnResultList);
             }
         }
         String where = assembleWhere(workcenterVo);
         // 待办条件
-        if (workcenterVo.getIsMeWillDo() == 1) {
-            String meWillDoCondition = getMeWillDoCondition(workcenterVo);
-            if (StringUtils.isBlank(where)) {
-                where = " where " + meWillDoCondition;
-            } else {
-                where = where + " and " + meWillDoCondition;
-            }
-        }
+        where = getMeWillDoCondition(workcenterVo,where);
+        
         // 设备服务过滤
-        if (!DeviceType.ALL.getValue().equals(workcenterVo.getDevice())) {
-            String deviceCondition = getChannelDeviceCondition(workcenterVo);
-            if (StringUtils.isNotBlank(deviceCondition)) {
-                if (StringUtils.isBlank(where)) {
-                    where = " where " + deviceCondition;
-                } else {
-                    where = where + " and " + deviceCondition;
-                }
-            }
+        where = getChannelDeviceCondition(workcenterVo,where);
+        
+        //隐藏工单过滤
+        if (!AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName())) {
+            where = getIsShowCondition(workcenterVo,where);
         }
-        String orderBy = "order by common.starttime desc";
+        
+        String orderBy = assembleOrderBy(workcenterVo);
         String sql =
             String.format("select %s from %s %s %s limit %d,%d", selectColumn, TenantContext.get().getTenantUuid(),
                 where, orderBy, workcenterVo.getStartNum(), workcenterVo.getPageSize());
         return sql;
+    }
+    
+    /*
+     * 隐藏工单过滤
+     */
+    private String getIsShowCondition(WorkcenterVo workcenterVo,String where) {
+        String isShowCondition = String.format(Expression.UNEQUAL.getExpressionEs(), ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.IS_SHOW.getValue())).getEsName(), 0);
+        if (StringUtils.isBlank(where)) {
+            where = " where " + isShowCondition;
+        } else {
+            where = where + " and " + isShowCondition;
+        }
+        return where;
     }
 
     /**
      * 
      * 获取设备（移动端|pc端）服务过滤条件
      */
-    private String getChannelDeviceCondition(WorkcenterVo workcenterVo) {
+    private String getChannelDeviceCondition(WorkcenterVo workcenterVo,String where) {
         String deviceCondition = StringUtils.EMPTY;
         ChannelVo channelVo = new ChannelVo();
         channelVo.setSupport(workcenterVo.getDevice());
@@ -149,10 +156,20 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         if (CollectionUtils.isNotEmpty(channelUuidList)) {
             String channelUuids = String.format("'%s'", StringUtil.join(channelUuidList.toArray(new String[0]), "','"));
             deviceCondition = String.format(Expression.INCLUDE.getExpressionEs(),
-                ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.CHANNEL.getValue()), channelUuids);
+                ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.CHANNEL.getValue())).getEsName(), channelUuids);
 
         }
-        return deviceCondition;
+        
+        if (!DeviceType.ALL.getValue().equals(workcenterVo.getDevice())) {
+            if (StringUtils.isNotBlank(deviceCondition)) {
+                if (StringUtils.isBlank(where)) {
+                    where = " where " + deviceCondition;
+                } else {
+                    where = where + " and " + deviceCondition;
+                }
+            }
+        }
+        return where;
     }
 
     /**
@@ -161,20 +178,20 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
      * @return
      */
     @Deprecated
-    private String getMeWillDoCondition(WorkcenterVo workcenterVo) {
+    private String getMeWillDoCondition(WorkcenterVo workcenterVo,String where) {
         String meWillDoSql = StringUtils.EMPTY;
         // status
         List<String> statusList = Arrays.asList(ProcessTaskStatus.RUNNING.getValue()).stream()
             .map(object -> object.toString()).collect(Collectors.toList());
         String statusSql = String.format(Expression.INCLUDE.getExpressionEs(),
-            ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STATUS.getValue()),
+            ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.STATUS.getValue())).getEsName(),
             String.format(" '%s' ", String.join("','", statusList)));
         // common.step.filtstatus
         List<String> stepStatusList =
             Arrays.asList(ProcessTaskStatus.PENDING.getValue(), ProcessTaskStatus.RUNNING.getValue()).stream()
                 .map(object -> object.toString()).collect(Collectors.toList());
         String stepStatusSql = String.format(Expression.INCLUDE.getExpressionEs(),
-            ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue()) + ".filtstatus",
+            ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+ ".filtstatus",
             String.format(" '%s' ", String.join("','", stepStatusList)));
         // common.step.usertypelist.userlist
         List<String> userList = new ArrayList<String>();
@@ -201,9 +218,52 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         // meWillDoSql = String.format(" common.step.usertypelist.list.value contains any ( %s ) and
         // common.step.usertypelist.list.status contains any ('pending','doing')", String.format(" '%s' ",
         // String.join("','",userList))) ;
-        return meWillDoSql;
+        
+        
+        if (workcenterVo.getIsMeWillDo() == 1) {
+            if (StringUtils.isBlank(where)) {
+                where = " where " + meWillDoSql;
+            } else {
+                where = where + " and " + meWillDoSql;
+            }
+        }
+        return where;
     }
 
+    /**
+    * @Author 89770
+    * @Time 2020年10月19日  
+    * @Description:  拼接order条件 
+    * @Param 
+    * @return
+     */
+    private String assembleOrderBy(WorkcenterVo workcenterVo) {
+        StringBuilder orderSb = new StringBuilder(" order by ");
+        List<String> orderList = new ArrayList<String>();
+        
+        JSONArray sortJsonArray = workcenterVo.getSortList();
+        if(CollectionUtils.isNotEmpty(sortJsonArray)) {
+            for(Object sortObj : sortJsonArray) {
+                JSONObject sortJson = JSONObject.parseObject(sortObj.toString());
+                for(Entry<String, Object> entry : sortJson.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue().toString();
+                    IProcessTaskCondition condition = (IProcessTaskCondition)ConditionHandlerFactory.getHandler(key);
+                    if(condition != null) {
+                        orderList.add(condition.getEsOrderBy(value));
+                    }else {
+                        //Condition 不存在
+                    }
+                }
+            }
+            orderSb.append(String.join(",", orderList));
+        }else {
+            orderSb.append(String.format(" %s DESC ",((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.STARTTIME.getValue())).getEsName()));
+        }
+        return orderSb.toString();
+    }
+    
+    
     /**
      * 拼接where条件
      * 
@@ -256,7 +316,14 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
                 if (condition.getName().endsWith(ProcessWorkcenterField.ABOUTME.getValue())) {
                     nestedBasisCount = nestedBasisCount + 2;
                 }
-                if (!condition.getType().equals("form") && ProcessWorkcenterField.getConditionValue(condition.getName())
+                String[] valueList = null;
+                if(condition.getValueList()!= null && condition.getValueList() instanceof JSONArray) {
+                    List<String> tmpList = JSONObject.parseArray(condition.getValueList().toString(), String.class);
+                    valueList =  tmpList.toArray(new String[tmpList.size()]);
+                }else {
+                    valueList = new String[] {condition.getValueList().toString()};
+                }
+                if (!condition.getType().equals("form") && ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(condition.getName())).getEsName(valueList).trim()
                     .startsWith(ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue()))) {
                     nestedBasisCount++;
                 }
@@ -288,6 +355,7 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
                         andConditionList.add(condition);
                     }
                 }
+                //当相近and连接的condition装载完后，按name 排序
                 if (i == conditionList.size() - 1) {
                     andConditionList.add(condition);
                     Collections.sort(andConditionList, new Comparator<Object>() {
@@ -296,8 +364,8 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
                             try {
                                 ConditionVo obj1 = (ConditionVo)o1;
                                 ConditionVo obj2 = (ConditionVo)o2;
-                                return ProcessWorkcenterField.getConditionValue(obj1.getName())
-                                    .compareTo(ProcessWorkcenterField.getConditionValue(obj2.getName()));
+                                return ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(obj1.getName())).getEsName()
+                                    .compareTo(((IProcessTaskCondition)ConditionHandlerFactory.getHandler(obj2.getName())).getEsName());
                             } catch (Exception ex) {
 
                             }
@@ -331,6 +399,25 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
 
                 for (int andIndex = 0; andIndex < andConditionTmpList.size(); andIndex++) {
                     ConditionVo condition = andConditionTmpList.get(andIndex);
+                    String[] valueList = null;
+                    //nested 不同path 前缀则需 分开 中括号 括起来
+                    if(isNested&&andIndex != 0) {
+                       int tempIndex = andIndex - 1;
+                       ConditionVo preCondition =andConditionTmpList.get(tempIndex);
+                       
+                       if(condition.getValueList()!= null && condition.getValueList() instanceof JSONArray) {
+                           List<String> tmpList = JSONObject.parseArray(condition.getValueList().toString(), String.class);
+                           valueList =  tmpList.toArray(new String[tmpList.size()]);
+                       }else {
+                           valueList = new String[] {condition.getValueList().toString()};
+                       }
+                       String prePrefix = ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(preCondition.getName())).getEsPath(valueList);
+                       String prefix = ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(condition.getName())).getEsPath(valueList);
+                       if(!prefix.startsWith(prePrefix)) {
+                           whereSb.append(" ] and [ ");
+                       }
+                    }
+                    
                     IProcessTaskCondition workcenterCondition =
                         (IProcessTaskCondition)ConditionHandlerFactory.getHandler(condition.getName());
                     if (condition.getType().equals("form")) {
@@ -338,8 +425,23 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
                     } else {
                         String conditionWhere = workcenterCondition.getEsWhere(andConditionTmpList, andIndex);
                         whereSb.append(conditionWhere);
-                        if (andIndex != andConditionTmpList.size() - 1
-                            && !andConditionTmpList.get(andIndex + 1).getType().equals("form")) {
+                        boolean comparePrefix = true;
+                        if(isNested && andIndex+1 < andConditionTmpList.size()) {
+                            ConditionVo nextCondition = andConditionTmpList.get(andIndex + 1);
+                            if(nextCondition.getValueList()!= null && nextCondition.getValueList() instanceof JSONArray) {
+                                List<String> tmpList = JSONObject.parseArray(nextCondition.getValueList().toString(), String.class);
+                                valueList =  tmpList.toArray(new String[tmpList.size()]);
+                            }else {
+                                valueList = new String[] {nextCondition.getValueList().toString()};
+                            }
+                            String prefix = ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(condition.getName())).getEsPath(valueList);
+                            String nextprefix = ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(nextCondition.getName())).getEsPath(valueList);
+                            if(!nextprefix.startsWith(prefix)) {
+                                comparePrefix = false;
+                            }
+                        }
+                        if (andIndex != andConditionTmpList.size() - 1 && !andConditionTmpList.get(andIndex + 1).getType().equals("form") && comparePrefix
+                            ) {
                             whereSb.append(" and ");
                         }
                     }
