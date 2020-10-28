@@ -271,7 +271,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(stepDataVo != null) {
                 JSONObject stepDataJson = stepDataVo.getData();
                 processTaskStepVo.setProcessTaskStepData(stepDataJson);
-                if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.WORK, false)) {//有处理权限
+                if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.COMPLETE, false)) {//有处理权限
                     stepDataJson.put("isStepUser", 1);
                     if(processTaskStepVo.getHandler().equals(ProcessStepHandler.AUTOMATIC.getHandler())){
                         JSONObject requestAuditJson = stepDataJson.getJSONObject("requestAudit");
