@@ -63,6 +63,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.module.process.workcenter.action.WorkcenterActionBuilder;
 
 @Service
 public class WorkcenterServiceImpl implements WorkcenterService {
@@ -85,7 +86,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     WorktimeMapper worktimeMapper;
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
-    
+
     @Autowired
     RoleMapper roleMapper;
 
@@ -152,12 +153,13 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
                 theadList.add(new WorkcenterTheadVo(column));
             }
-            //如果需要排序
-            if(column.getIsSort()) {
+            // 如果需要排序
+            if (column.getIsSort()) {
                 sortColumnList.add(column.getName());
             }
         }
-        theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
+        theadList =
+            theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         // Date time22 = new Date();
         // System.out.println("矫正headerCostTime:"+(time22.getTime()-time2.getTime()));
         if (!resultData.isEmpty()) {
@@ -174,16 +176,16 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 routeJson.put("taskid", el.getId());
                 taskJson.put("route", routeJson);
                 // action 操作
-                taskJson.put("action", getStepAction(el,isHasProcessTaskAuth));
+                taskJson.put("action", getStepAction(el, isHasProcessTaskAuth));
                 dataList.add(taskJson);
             }
             // Date time33 = new Date();
             // System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
         }
-        
-        //字段排序
+
+        // 字段排序
         JSONArray sortList = workcenterVo.getSortList();
-        if(CollectionUtils.isEmpty(sortList)) {
+        if (CollectionUtils.isEmpty(sortList)) {
             sortList = sortColumnList;
         }
         returnObj.put("sortList", sortList);
@@ -210,7 +212,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
      * @throws ParseException
      */
     @Override
-    public Object getStepAction(MultiAttrsObject el,Boolean isHasProcessTaskAuth) throws ParseException {
+    public Object getStepAction(MultiAttrsObject el, Boolean isHasProcessTaskAuth) throws ParseException {
         JSONObject commonJson = (JSONObject)el.getJSON(ProcessFieldType.COMMON.getValue());
         if (commonJson == null) {
             return CollectionUtils.EMPTY_COLLECTION;
@@ -231,7 +233,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             TimeUtil.convertStringToDate(commonJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
         processTaskVo
             .setEndTime(TimeUtil.convertStringToDate(commonJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
-        processTaskVo.setIsShow(commonJson.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()) == null ?1:commonJson.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()));  
+        processTaskVo.setIsShow(commonJson.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()) == null ? 1
+            : commonJson.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()));
         processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
         // step
         JSONArray stepArray = null;
@@ -261,8 +264,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             processTaskStepVo.setIsActive(stepJson.getInteger("isactive"));
             stepList.add(processTaskStepVo);
         }
-        JSONArray actionArray = getStepActionArray(processTaskVo, stepList);
-        return actionArray;
+        JSONObject actionJson = getStepActionArray(processTaskVo, stepList);
+        return actionJson;
     }
 
     /**
@@ -331,7 +334,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             taskJson.put("route", routeJson);
             // action 操作
             taskJson.put("action", getStepAction(processTask));
-            //显示/隐藏
+            // 显示/隐藏
             taskJson.put("isShow", task.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()));
         }
         return taskJson;
@@ -348,17 +351,15 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         if (CollectionUtils.isEmpty(stepList)) {
             return CollectionUtils.EMPTY_COLLECTION;
         }
-        JSONArray actionArray = getStepActionArray(processTaskVo, stepList);
-        return actionArray;
+        JSONObject actionJson = getStepActionArray(processTaskVo, stepList);
+        return actionJson;
     }
 
-    private JSONArray getStepActionArray(ProcessTaskVo processTaskVo, List<ProcessTaskStepVo> stepList) {
-        JSONArray actionArray = new JSONArray();
+    private JSONObject getStepActionArray(ProcessTaskVo processTaskVo, List<ProcessTaskStepVo> stepList) {
         String processTaskStatus = processTaskVo.getStatus();
         Boolean isHasAbort = false;
         Boolean isHasRecover = false;
         Boolean isHasUrge = false;
-        JSONObject handleActionJson = new JSONObject();
         JSONArray handleArray = new JSONArray();
         for (ProcessTaskStepVo step : stepList) {
             Integer isActive = step.getIsActive();
@@ -411,104 +412,34 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 }
             }
         }
-
-        handleActionJson.put("name", "handle");
-        handleActionJson.put("text", "处理");
-        handleActionJson.put("sort", 2);
-        if (CollectionUtils.isNotEmpty(handleArray)) {
-            handleActionJson.put("handleList", handleArray);
-            handleActionJson.put("isEnable", 1);
-        } else {
-            handleActionJson.put("isEnable", 0);
-        }
-
-        actionArray.add(handleActionJson);
-        // abort|recover
-        if (isHasAbort || isHasRecover) {
-            if (isHasAbort) {
-                JSONObject abortActionJson = new JSONObject();
-                abortActionJson.put("name", ProcessTaskOperationType.ABORTPROCESSTASK.getValue());
-                abortActionJson.put("text", ProcessTaskOperationType.ABORTPROCESSTASK.getText());
-                abortActionJson.put("sort", 2);
-                JSONObject configJson = new JSONObject();
-                configJson.put("taskid", processTaskVo.getId());
-                configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId=" + processTaskVo.getId());
-                abortActionJson.put("config", configJson);
-                abortActionJson.put("isEnable", 1);
-                actionArray.add(abortActionJson);
-            } else {
-                JSONObject recoverActionJson = new JSONObject();
-                recoverActionJson.put("name", ProcessTaskOperationType.RECOVERPROCESSTASK.getValue());
-                recoverActionJson.put("text", ProcessTaskOperationType.RECOVERPROCESSTASK.getText());
-                recoverActionJson.put("sort", 2);
-                JSONObject configJson = new JSONObject();
-                configJson.put("taskid", processTaskVo.getId());
-                configJson.put("interfaceurl", "api/rest/processtask/recover?processTaskId=" + processTaskVo.getId());
-                recoverActionJson.put("config", configJson);
-                recoverActionJson.put("isEnable", 1);
-                actionArray.add(recoverActionJson);
+        //返回实际操作按钮
+        /**
+         * 实质性操作按钮：如“处理”、“取消”、“催办”，根据用户权限展示 ;次要的操作按钮：如“隐藏”、“删除”，只有管理员可见
+         * 移动端按钮展示规则：
+         * 1、工单显示时，优先展示实质性的按钮，次要的操作按钮收起到“更多”中；如果没有任何实质性的操作按钮，则将次要按钮放出来（管理员可见）；
+         * 2、工单隐藏时，仅“显示”、“删除”按钮放出来，其他实质性按钮需要等工单显示后才会展示；
+         */
+        JSONObject action = new JSONObject();
+        WorkcenterActionBuilder workcenterFirstActionBuilder = new WorkcenterActionBuilder();
+        JSONArray workcenterFirstActionArray =  workcenterFirstActionBuilder.setHandleAction(handleArray)
+            .setAbortRecoverAction(isHasAbort, isHasRecover, processTaskVo).setUrgeAction(isHasUrge, processTaskVo).build();
+        Boolean isNeedFirstAction = false;
+        for(Object firstAction :workcenterFirstActionArray) {
+            JSONObject firstActionJson = JSONObject.parseObject(firstAction.toString());
+            if(firstActionJson.getInteger("isEnable") == 1) {
+                isNeedFirstAction = true;
             }
-        } else {
-            JSONObject abortActionJson = new JSONObject();
-            abortActionJson.put("name", ProcessTaskOperationType.ABORTPROCESSTASK.getValue());
-            abortActionJson.put("text", ProcessTaskOperationType.ABORTPROCESSTASK.getText());
-            abortActionJson.put("sort", 2);
-            abortActionJson.put("isEnable", 0);
-            actionArray.add(abortActionJson);
         }
-
-        // 催办
-        JSONObject urgeActionJson = new JSONObject();
-        urgeActionJson.put("name", ProcessTaskOperationType.URGE.getValue());
-        urgeActionJson.put("text", ProcessTaskOperationType.URGE.getText());
-        urgeActionJson.put("sort", 3);
-        if (isHasUrge) {
-            JSONObject configJson = new JSONObject();
-            configJson.put("taskid", processTaskVo.getId());
-            configJson.put("interfaceurl", "api/rest/processtask/urge?processTaskId=" + processTaskVo.getId());
-            urgeActionJson.put("config", configJson);
-            urgeActionJson.put("isEnable", 1);
-        } else {
-            urgeActionJson.put("isEnable", 0);
+        WorkcenterActionBuilder workcenterSecondActionBuilder = new WorkcenterActionBuilder();
+        JSONArray workcenterSecondActionJson =  workcenterSecondActionBuilder.setShowHideAction(processTaskVo).setDeleteAction(processTaskVo).build();
+        if(isNeedFirstAction) {
+            action.put("firstActionList", workcenterFirstActionArray);
+            action.put("secondActionList", workcenterSecondActionJson);
+        }else {
+            action.put("firstActionList", workcenterSecondActionJson);
+            action.put("secondActionList", new JSONArray());
         }
-
-        actionArray.add(urgeActionJson);
-        
-        //隐藏/显示，删除
-        if (processTaskVo.getParamObj().getBoolean("isHasProcessTaskAuth")) {
-            JSONObject showHideActionJson = new JSONObject();
-            int isShowParam = 1;
-            if(processTaskVo.getIsShow() == 1) {
-                showHideActionJson.put("name", ProcessTaskOperationType.HIDE.getValue());
-                showHideActionJson.put("text", ProcessTaskOperationType.HIDE.getText());
-                isShowParam = 0;
-            }else {
-                showHideActionJson.put("name", ProcessTaskOperationType.SHOW.getValue());
-                showHideActionJson.put("text", ProcessTaskOperationType.SHOW.getText());
-            }
-            showHideActionJson.put("isEnable", 1);
-            showHideActionJson.put("sort", 4);
-            JSONObject configJson = new JSONObject();
-            configJson.put("taskid", processTaskVo.getId());
-            configJson.put("interfaceurl", String.format("api/rest/processtask/show/hide?processTaskId=%s&isShow=%d" , processTaskVo.getId(),isShowParam));
-            showHideActionJson.put("config", configJson);
-            actionArray.add(showHideActionJson);
-            
-            //删除
-            JSONObject deleteActionJson = new JSONObject();
-            deleteActionJson.put("name", ProcessTaskOperationType.DELETE.getValue());
-            deleteActionJson.put("text", ProcessTaskOperationType.DELETE.getText());
-            deleteActionJson.put("isEnable", 1);
-            deleteActionJson.put("sort", 5);
-            configJson = new JSONObject();
-            configJson.put("taskid", processTaskVo.getId());
-            configJson.put("interfaceurl", String.format("api/rest/processtask/delete?processTaskId=%s" , processTaskVo.getId()));
-            deleteActionJson.put("config", configJson);
-            actionArray.add(deleteActionJson);
-        }
-
-        actionArray.sort(Comparator.comparing(obj -> ((JSONObject)obj).getInteger("sort")));
-        return actionArray;
+        return action;
     }
 
     private JSONObject assembleSingleProcessTask(ProcessTaskVo processTaskVo) {
@@ -606,8 +537,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             .setEndTime(processTaskVo.getEndTime()).setOwner(processTaskVo.getOwner())
             .setReporter(processTaskVo.getReporter(), processTaskVo.getOwner()).setStepList(processTaskStepList)
             .setTransferFromUserList(transferAuditList).setWorktime(channel.getWorktimeUuid())
-            .setExpiredTime(processTaskSlaList).setFocusUsers(focusUsers)
-            .setIsShow(processTaskVo.getIsShow()).build();
+            .setExpiredTime(processTaskSlaList).setFocusUsers(focusUsers).setIsShow(processTaskVo.getIsShow()).build();
         JSONObject esObject = new JSONObject();
         esObject.put("form", formArray);
         esObject.put("common", WorkcenterFieldJson);
