@@ -161,7 +161,7 @@ public interface ProcessTaskService {
 	 * 
 	* @Author: linbq
 	* @Time:2020年8月24日
-	* @Description: 获取步骤描述内容及附件列表 
+	* @Description: 获取开始步骤描述内容及附件列表 
 	* @param processTaskStepId 步骤id
 	* @return ProcessTaskStepCommentVo
 	 */
@@ -230,4 +230,6 @@ public interface ProcessTaskService {
     * @return ProcessTaskStepVo
      */
     public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
+
+    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskId(Long processTaskId, List<String> typeList);
 }
