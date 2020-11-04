@@ -167,6 +167,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         if(oldFormPropMap != null&&oldFormPropMap.size()>0) {
             processTaskVo.setIsHasOldFormProp(1);
         }
+        
+        //标签列表
+        processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
 		
 		JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);
