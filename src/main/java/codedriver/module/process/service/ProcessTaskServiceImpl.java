@@ -844,7 +844,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId) {
+    public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepId(Long processTaskStepId) {
         ProcessTaskStepReplyVo comment = new ProcessTaskStepReplyVo();
         //获取上报描述内容
         List<Long> fileIdList = new ArrayList<>();
@@ -1142,7 +1142,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
         }
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepId(startProcessTaskStepVo.getId()));
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         processTaskVo.setTranferReportDirection("from");
         return processTaskVo;
@@ -1181,7 +1181,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
 
-        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepId(startProcessTaskStepVo.getId()));
         /** 当前步骤特有步骤信息 **/
         IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if(startProcessStepUtilHandler == null) {

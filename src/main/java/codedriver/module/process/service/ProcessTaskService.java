@@ -165,7 +165,7 @@ public interface ProcessTaskService {
 	* @param processTaskStepId 步骤id
 	* @return ProcessTaskStepCommentVo
 	 */
-	public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId);
+	public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepId(Long processTaskStepId);
 	/**
 	 * 
 	* @Author: linbq
