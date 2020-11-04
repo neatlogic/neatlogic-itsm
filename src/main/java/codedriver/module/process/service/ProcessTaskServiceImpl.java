@@ -844,7 +844,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId) {
+    public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepId(Long processTaskStepId) {
         ProcessTaskStepReplyVo comment = new ProcessTaskStepReplyVo();
         //获取上报描述内容
         List<Long> fileIdList = new ArrayList<>();
@@ -977,30 +977,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                     return true;
                                 }
                             } else if (ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
-//                                if(ProcessUserType.OWNER.getValue().equals(split[1])) {
-//                                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
-//                                        return true;
-//                                    }
-//                                }else if(ProcessUserType.REPORTER.getValue().equals(split[1])) {
-//                                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
-//                                        return true;
-//                                    }
-//                                }else if(ProcessUserType.MAJOR.getValue().equals(split[1])) {
-//                                    processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
-//                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-//                                        return true;
-//                                    }
-//                                }else if(ProcessUserType.MINOR.getValue().equals(split[1])) {
-//                                    processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
-//                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-//                                        return true;
-//                                    }
-//                                }else if(ProcessUserType.AGENT.getValue().equals(split[1])) {
-//                                    processTaskStepUserVo.setUserType(ProcessUserType.AGENT.getValue());
-//                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-//                                        return true;
-//                                    }
-//                                }
                                 if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(split[1])) {
                                     return true;
                                 }
@@ -1142,7 +1118,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
         }
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepId(startProcessTaskStepVo.getId()));
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         processTaskVo.setTranferReportDirection("from");
         return processTaskVo;
@@ -1181,7 +1157,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
 
-        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepId(startProcessTaskStepVo.getId()));
         /** 当前步骤特有步骤信息 **/
         IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if(startProcessStepUtilHandler == null) {
@@ -1190,5 +1166,25 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         startProcessStepUtilHandler.setProcessTaskStepConfig(startProcessTaskStepVo);
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
+    }
+
+    @Override
+    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskId(Long processTaskId, List<String> typeList) {
+        List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
+        Map<Long, String> processTaskStepNameMap = new HashMap<>();
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
+        for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+            processTaskStepNameMap.put(processTaskStepVo.getId(), processTaskStepVo.getName());
+        }
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskId(processTaskId);
+        for(ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {
+            if(typeList.contains(processTaskStepContentVo.getType())) {
+                ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
+                parseProcessTaskStepReply(processTaskStepReplyVo);
+                processTaskStepReplyVo.setProcessTaskStepName(processTaskStepNameMap.get(processTaskStepReplyVo.getProcessTaskStepId()));
+                processTaskStepReplyList.add(processTaskStepReplyVo);
+            }
+        }
+        return processTaskStepReplyList;
     }
 }
