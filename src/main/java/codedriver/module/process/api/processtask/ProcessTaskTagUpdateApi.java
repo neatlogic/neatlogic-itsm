@@ -3,7 +3,6 @@ package codedriver.module.process.api.processtask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -39,6 +38,7 @@ public class ProcessTaskTagUpdateApi extends PrivateApiComponentBase{
     }
     @Input({
         @Param(name="processTaskId", type = ApiParamType.LONG, desc="工单id",isRequired=true), 
+        @Param(name="processTaskStepId", type = ApiParamType.LONG, desc="工单步骤id",isRequired=true), 
         @Param(name="tagList", type=ApiParamType.JSONARRAY, desc = "标签列表",isRequired=true)
     })
     @Output({
@@ -48,8 +48,8 @@ public class ProcessTaskTagUpdateApi extends PrivateApiComponentBase{
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
-        JSONArray tagArray = jsonObj.getJSONArray("tagList");
-        processTaskService.updateTag(processTaskId, tagArray);
+        Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+        processTaskService.updateTag(processTaskId, processTaskStepId,jsonObj);
         return null;
     }
 

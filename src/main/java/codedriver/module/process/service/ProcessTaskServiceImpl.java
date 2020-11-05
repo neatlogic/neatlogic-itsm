@@ -49,6 +49,7 @@ import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -93,6 +94,7 @@ import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
@@ -1193,7 +1195,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     
     @Transactional
     @Override
-    public void updateTag(Long processTaskId,JSONArray tagArray) {
+    public void updateTag(Long processTaskId,Long processTaskStepId,JSONObject jsonObj) throws PermissionDeniedException {
+        JSONArray tagArray = jsonObj.getJSONArray("tagList");
+        List<ProcessTagVo>  oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
         processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
         if(CollectionUtils.isNotEmpty(tagArray)) {
             List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
@@ -1212,6 +1216,29 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId,processTagVo.getId()));
             }
             processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
+            
+            //生成活动
+            IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
+            try {
+                handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
+            }catch(ProcessTaskNoPermissionException e) {
+                throw new PermissionDeniedException();
+            }
+            List<String> oldTagNameList = new ArrayList<String>();
+            for(ProcessTagVo tag:oldTagList) {
+                oldTagNameList.add(tag.getName());
+            }
+            ProcessTaskContentVo oldTagContentVo = new ProcessTaskContentVo(String.join(",", oldTagNameList));
+            processTaskMapper.replaceProcessTaskContent(oldTagContentVo);
+            if(StringUtils.isNotBlank(oldTagContentVo.getHash())) {
+                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), oldTagContentVo.getHash());
+                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
+            }
+            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+            processTaskStepVo.setProcessTaskId(processTaskId);
+            processTaskStepVo.setId(processTaskStepId);
+            processTaskStepVo.setParamObj(jsonObj);
+            handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
         }   
     }
 }

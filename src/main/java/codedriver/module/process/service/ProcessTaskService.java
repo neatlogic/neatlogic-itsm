@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
@@ -241,5 +241,5 @@ public interface ProcessTaskService {
     * @Param 
     * @return
      */
-    public void updateTag(Long processTaskId, JSONArray tagArray);
+    public void updateTag(Long processTaskId,Long processTaskStepId,JSONObject jsonObj)throws PermissionDeniedException;
 }
