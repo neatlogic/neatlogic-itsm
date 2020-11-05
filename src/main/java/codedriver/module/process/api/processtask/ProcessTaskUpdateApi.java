@@ -1,11 +1,16 @@
 package codedriver.module.process.api.processtask;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -15,11 +20,14 @@ import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
+import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTagVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
+import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskTagVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
@@ -44,6 +52,9 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private PriorityMapper priorityMapper;
+	
+	@Autowired
+    private ProcessMapper processMapper;
     
     @Autowired
     private ProcessTaskService processTaskService;
@@ -66,9 +77,10 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 	@Input({
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
-		@Param(name = "title", type = ApiParamType.STRING, xss = true, maxLength = 80, isRequired = true, desc = "标题"),
-		@Param(name = "priorityUuid", type = ApiParamType.STRING, isRequired = true, desc = "优先级uuid"),
+		@Param(name = "title", type = ApiParamType.STRING, xss = true, maxLength = 80, desc = "标题"),
+		@Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
+		@Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "标签列表"),
 		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
 	})
 	@Description(desc = "更新工单信息")
@@ -97,7 +109,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 		boolean isUpdate = false;
 		String oldTitle = processTaskVo.getTitle();	
 		String title = jsonObj.getString("title");
-		if(!title.equals(oldTitle)) {	
+		if(StringUtils.isNotBlank(title)&&!title.equals(oldTitle)) {	
 			isUpdate = true;
 			processTaskVo.setTitle(title);
 			ProcessTaskContentVo oldTitleContentVo = new ProcessTaskContentVo(oldTitle);
@@ -109,11 +121,11 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 		
 
 		String priorityUuid = jsonObj.getString("priorityUuid");
-		if(priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
-			throw new PriorityNotFoundException(priorityUuid);
-		}
 		String oldPriorityUuid = processTaskVo.getPriorityUuid();
-		if(!priorityUuid.equals(oldPriorityUuid)) {	
+		if(StringUtils.isNotBlank(priorityUuid)&&!priorityUuid.equals(oldPriorityUuid)) {	
+		    if(priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
+	            throw new PriorityNotFoundException(priorityUuid);
+	        }
 			isUpdate = true;
 			processTaskVo.setPriorityUuid(priorityUuid);
 			ProcessTaskContentVo oldPriorityUuidContentVo = new ProcessTaskContentVo(oldPriorityUuid);
@@ -126,6 +138,46 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 			processTaskMapper.updateProcessTaskTitleOwnerPriorityUuid(processTaskVo);
 		}
 		
+		//跟新标签
+		JSONArray tagArray = jsonObj.getJSONArray("tagList");
+        List<ProcessTagVo>  oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
+        List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
+        processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
+        if(CollectionUtils.isNotEmpty(tagArray)) {
+            List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
+            List<String> notExistTagList = tagNameList.stream().filter(a->!existTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList());
+            List<ProcessTagVo> notExistTagVoList = new ArrayList<ProcessTagVo>();
+            for(String tagName : notExistTagList) {
+                notExistTagVoList.add(new ProcessTagVo(tagName));
+            }
+            if(CollectionUtils.isNotEmpty(notExistTagVoList)) {
+                processMapper.insertProcessTag(notExistTagVoList);
+                existTagList.addAll(notExistTagVoList);
+            }
+            List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
+            for(ProcessTagVo processTagVo : existTagList) {
+                processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId,processTagVo.getId()));
+            }
+            processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
+        }   
+        int diffCount = tagNameList.stream().filter(a->!oldTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList()).size();
+        if(tagNameList.size() != oldTagList.size() || diffCount >0) {
+            List<String> oldTagNameList = new ArrayList<String>();
+            for(ProcessTagVo tag:oldTagList) {
+                oldTagNameList.add(tag.getName());
+            }
+            ProcessTaskContentVo oldTagContentVo = new ProcessTaskContentVo(String.join(",", oldTagNameList));
+            processTaskMapper.replaceProcessTaskContent(oldTagContentVo);
+            if(StringUtils.isNotBlank(oldTagContentVo.getHash())) {
+                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), oldTagContentVo.getHash());
+                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
+            }
+            isUpdate = true;
+        }else {
+            jsonObj.remove(ProcessTaskAuditDetailType.TAGLIST.getParamName());
+        }
+        
+        
 		ProcessTaskStepReplyVo oldReplyVo = null;
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
         for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
@@ -139,7 +191,12 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             oldReplyVo.setProcessTaskId(processTaskId);
             oldReplyVo.setProcessTaskStepId(startProcessTaskStepId);
         }
-        isUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
+        Boolean tmpIsUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo) ;
+        if(tmpIsUpdate) {
+            isUpdate = true;
+        }
+        
+        
 
 		//生成活动
 		if(isUpdate) {
@@ -149,6 +206,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);	
 		}
+		
 		return null;
 	}
 
