@@ -295,6 +295,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 					startProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
 				}
 			}
+			 //标签列表
+	        processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
 			return processTaskVo;
 		}else {
 			throw new ProcessTaskRuntimeException("参数'processTaskId'、'copyProcessTaskId'和'channelUuid'，至少要传一个");
