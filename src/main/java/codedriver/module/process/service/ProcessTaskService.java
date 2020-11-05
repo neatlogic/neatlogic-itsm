@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -232,4 +233,13 @@ public interface ProcessTaskService {
     public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
 
     public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskId(Long processTaskId, List<String> typeList);
+
+    /**
+    * @Author 89770
+    * @Time 2020年11月5日  
+    * @Description: 跟新标签
+    * @Param 
+    * @return
+     */
+    public void updateTag(Long processTaskId, JSONArray tagArray);
 }

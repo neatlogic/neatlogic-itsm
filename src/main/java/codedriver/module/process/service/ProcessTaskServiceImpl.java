@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -70,6 +71,7 @@ import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
+import codedriver.framework.process.dto.ProcessTagVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -85,6 +87,7 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.dto.ProcessTaskTagVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
@@ -1186,5 +1189,29 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
         }
         return processTaskStepReplyList;
+    }
+    
+    @Transactional
+    @Override
+    public void updateTag(Long processTaskId,JSONArray tagArray) {
+        processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
+        if(CollectionUtils.isNotEmpty(tagArray)) {
+            List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
+            List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
+            List<String> notExistTagList = tagNameList.stream().filter(a->!existTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList());
+            List<ProcessTagVo> notExistTagVoList = new ArrayList<ProcessTagVo>();
+            for(String tagName : notExistTagList) {
+                notExistTagVoList.add(new ProcessTagVo(tagName));
+            }
+            if(CollectionUtils.isNotEmpty(notExistTagVoList)) {
+                processMapper.insertProcessTag(notExistTagVoList);
+                existTagList.addAll(notExistTagVoList);
+            }
+            List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
+            for(ProcessTagVo processTagVo : existTagList) {
+                processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId,processTagVo.getId()));
+            }
+            processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
+        }   
     }
 }
