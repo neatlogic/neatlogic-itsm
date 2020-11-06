@@ -431,12 +431,18 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             }
         }
         WorkcenterActionBuilder workcenterSecondActionBuilder = new WorkcenterActionBuilder();
-        JSONArray workcenterSecondActionJson =  workcenterSecondActionBuilder.setShowHideAction(processTaskVo).setDeleteAction(processTaskVo).build();
+        JSONArray workcenterSecondActionJsonArray =  workcenterSecondActionBuilder.setShowHideAction(processTaskVo).setDeleteAction(processTaskVo).build();
+        for(Object workcenterSecondActionObj :workcenterSecondActionJsonArray) {
+            JSONObject workcenterSecondActionJson = JSONObject.parseObject(workcenterSecondActionObj.toString());
+            if(ProcessTaskOperationType.SHOW.getValue().equals(workcenterSecondActionJson.getString("name"))) {
+                isNeedFirstAction = false;
+            }
+        }
         if(isNeedFirstAction) {
             action.put("firstActionList", workcenterFirstActionArray);
-            action.put("secondActionList", workcenterSecondActionJson);
+            action.put("secondActionList", workcenterSecondActionJsonArray);
         }else {
-            action.put("firstActionList", workcenterSecondActionJson);
+            action.put("firstActionList", workcenterSecondActionJsonArray);
             action.put("secondActionList", new JSONArray());
         }
         return action;
