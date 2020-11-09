@@ -142,6 +142,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
 			if(currentProcessTaskStepVo != null){
 			    handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+	            if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.SAVE, false)){
+	                //回复框内容和附件暂存回显              
+	                setTemporaryData(processTaskVo, currentProcessTaskStepVo);
+	            }
 				processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
 				if(MapUtils.isNotEmpty(currentProcessTaskStepVo.getFormAttributeDataMap())) {
 				    processTaskVo.setFormAttributeDataMap(currentProcessTaskStepVo.getFormAttributeDataMap());
@@ -200,10 +204,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             //获取步骤信息
             processStepUtilHandler.setProcessTaskStepConfig(processTaskStepVo);
             processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
-            if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.SAVE, false)){
-                //回复框内容和附件暂存回显              
-                setTemporaryData(processTaskStepVo);
-            }
             //步骤评论列表
             List<String> typeList = new ArrayList<>();
             typeList.add(ProcessTaskOperationType.COMMENT.getValue());
@@ -330,7 +330,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     * @param ProcessTaskStepVo 步骤信息
     * @return void
      */
-	private void setTemporaryData(ProcessTaskStepVo processTaskStepVo) {
+	private void setTemporaryData(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
         processTaskStepDataVo.setProcessTaskStepId(processTaskStepVo.getId());
@@ -361,6 +361,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 JSONObject handlerStepInfo = dataObj.getJSONObject("handlerStepInfo");
                 if(handlerStepInfo != null) {
                     processTaskStepVo.setHandlerStepInfo(handlerStepInfo);
+                }
+                String priorityUuid = dataObj.getString("priorityUuid");
+                if(StringUtils.isNotBlank(priorityUuid)) {
+                    processTaskVo.setPriorityUuid(priorityUuid);
                 }
             }
         }
