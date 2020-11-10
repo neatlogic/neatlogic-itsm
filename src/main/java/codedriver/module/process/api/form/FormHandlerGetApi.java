@@ -53,7 +53,7 @@ public class FormHandlerGetApi extends PrivateApiComponentBase {
 			JSONObject formHandlerObj = new JSONObject();
 			formHandlerObj.put("handler", s.getHandler());
 			formHandlerObj.put("handlerName", s.getHandlerName());
-			formHandlerObj.put("handlerType", s.getType(ProcessConditionModel.SIMPLE.getValue()).toString());
+			formHandlerObj.put("handlerType", s.getHandlerType(ProcessConditionModel.SIMPLE.getValue()).toString());
 			List<Expression> expressionList = s.getExpressionList();
 			JSONArray expressiobArray = new JSONArray();
 			for(Expression expression:expressionList) {
