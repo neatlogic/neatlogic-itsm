@@ -6,6 +6,7 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.dto.ConditionParamVo;
-import codedriver.framework.notify.dto.ExpressionVo;
+import codedriver.framework.dto.ExpressionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
@@ -77,11 +78,21 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 				if(paramType != null) {
 					conditionParamVo.setParamType(paramType.getName());
 					conditionParamVo.setParamTypeName(paramType.getText());
-					conditionParamVo.setDefaultExpression(paramType.getDefaultExpression().getExpression());
-					for(Expression expression:paramType.getExpressionList()) {
-						conditionParamVo.getExpressionList().add(new ExpressionVo(expression));
-					}
-				}				
+//					conditionParamVo.setDefaultExpression(paramType.getDefaultExpression().getExpression());
+//					for(Expression expression:paramType.getExpressionList()) {
+//						conditionParamVo.getExpressionList().add(new ExpressionVo(expression));
+//					}
+				}
+                Expression expression = condition.getExpression();
+                if(expression != null) {
+                    conditionParamVo.setDefaultExpression(expression.getExpression());
+                }
+                List<Expression> expressionList = condition.getExpressionList();
+                if(CollectionUtils.isNotEmpty(expressionList)) {
+                    for(Expression exp : expressionList) {
+                        conditionParamVo.getExpressionList().add(new ExpressionVo(exp));                
+                    }
+                }				
 				resultArray.add(conditionParamVo);
 			}
 		}
@@ -93,6 +104,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 				if( formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
 						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
 						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMPRIORITY.getHandler())
 						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())){
 					continue;
 				}
@@ -123,10 +135,16 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 				if(paramType != null) {
 					conditionParamVo.setParamType(paramType.getName());
 					conditionParamVo.setParamTypeName(paramType.getText());
-					conditionParamVo.setDefaultExpression(paramType.getDefaultExpression().getExpression());
-					for(Expression expression:paramType.getExpressionList()) {
-						conditionParamVo.getExpressionList().add(new ExpressionVo(expression));
-					}
+				}
+				Expression expression = ProcessFormHandler.getExpression(formAttributeVo.getHandler());
+				if(expression != null) {
+	                conditionParamVo.setDefaultExpression(expression.getExpression());
+				}
+				List<Expression> expressionList = ProcessFormHandler.getExpressionList(formAttributeVo.getHandler());
+				if(CollectionUtils.isNotEmpty(expressionList)) {
+				    for(Expression exp : expressionList) {
+		                conditionParamVo.getExpressionList().add(new ExpressionVo(exp));		        
+				    }
 				}
 				
 				resultArray.add(conditionParamVo);
