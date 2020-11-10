@@ -16,7 +16,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.exception.type.ParamIrregularException;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
@@ -48,7 +48,7 @@ public class DateHandler implements IFormAttributeHandler {
 	
 	@Override
 	public String getType() {
-		return ProcessFormHandler.FORMDATE.getHandler();
+		return ProcessFormHandlerType.FORMDATE.getHandler();
 	}
 
 	@Override

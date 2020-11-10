@@ -12,7 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
@@ -22,7 +22,7 @@ public class SelectHandler implements IFormAttributeHandler {
 
 	@Override
 	public String getType() {
-		return ProcessFormHandler.FORMSELECT.getHandler();
+		return ProcessFormHandlerType.FORMSELECT.getHandler();
 	}
 
 	@Override

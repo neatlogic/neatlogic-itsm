@@ -18,7 +18,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
@@ -66,12 +66,12 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
 		if(condition !=null&&StringUtils.isNotBlank(condition.getName())) {
-			if(condition.getHandler().equals(ProcessFormHandler.FORMDATE.getHandler())) {
+			if(condition.getHandler().equals(ProcessFormHandlerType.FORMDATE.getHandler())) {
 				return getDateEsWhere(condition,conditionList);
 			}else {
 				String where = "(";
 				String formKey = condition.getName();
-				String formValueKey = "form.value_"+ProcessFormHandler.getDataType(condition.getHandler()).toLowerCase();
+				String formValueKey = "form.value_"+ProcessFormHandlerType.getDataType(condition.getHandler()).toLowerCase();
 				Object value = StringUtils.EMPTY;
 				if(condition.getValueList() instanceof String) {
 					value = condition.getValueList();
@@ -116,9 +116,9 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 									return text;
 								}else if(text instanceof List){
 									List<String> textList = JSON.parseArray(JSON.toJSONString(text), String.class);
-									if(ProcessFormHandler.FORMDATE.getHandler().equals(formAttribute.getHandler()) || ProcessFormHandler.FORMTIME.getHandler().equals(formAttribute.getHandler())) {
+									if(ProcessFormHandlerType.FORMDATE.getHandler().equals(formAttribute.getHandler()) || ProcessFormHandlerType.FORMTIME.getHandler().equals(formAttribute.getHandler())) {
 										return String.join("-", textList);
-									}else if(ProcessFormHandler.FORMCASCADELIST.getHandler().equals(formAttribute.getHandler())){
+									}else if(ProcessFormHandlerType.FORMCASCADELIST.getHandler().equals(formAttribute.getHandler())){
 										return String.join("/", textList);
 									}else {
 										return String.join("、", textList);

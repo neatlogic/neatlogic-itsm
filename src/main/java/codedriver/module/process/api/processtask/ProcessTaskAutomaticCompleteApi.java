@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -67,7 +67,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 		if(processTaskStepVo == null) {
 			throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
 		}
-		if(ProcessStepHandler.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
+		if(ProcessStepHandlerType.AUTOMATIC.getHandler().equals(processTaskStepVo.getHandler())) {
 		    throw new ProcessTaskStepMustBeAutomaticException();
 		}
 		jsonObj.put("processTaskId", processTaskStepVo.getProcessTaskId());

@@ -1,7 +1,7 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -91,7 +91,7 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
                 String startUuid = "";
                 for(Object obj : stepList){
                     JSONObject jsonObject = JSONObject.parseObject(obj.toString());
-                    if(ProcessStepHandler.START.getHandler().equals(jsonObject.getString("handler"))){
+                    if(ProcessStepHandlerType.START.getHandler().equals(jsonObject.getString("handler"))){
                         startUuid = jsonObject.getString("uuid");
                         break;
                     }

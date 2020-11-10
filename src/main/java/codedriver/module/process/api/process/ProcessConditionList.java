@@ -25,7 +25,7 @@ import codedriver.framework.dto.ExpressionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 
@@ -101,11 +101,11 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 		if(StringUtils.isNotBlank(formUuid)) {
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
-				if( formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMPRIORITY.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())){
+				if( formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDIVIDER.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDYNAMICLIST.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMSTATICLIST.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMPRIORITY.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMLINK.getHandler())){
 					continue;
 				}
 				formAttributeVo.setType("form");
@@ -118,29 +118,29 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 				conditionParamVo.setType(formAttributeVo.getType());
 				conditionParamVo.setHandler(formAttributeVo.getHandler());
 				conditionParamVo.setConfig(formAttributeVo.getConfig());
-				if(ProcessFormHandler.FORMDATE.getHandler().equals(formAttributeVo.getHandler())) {
+				if(ProcessFormHandlerType.FORMDATE.getHandler().equals(formAttributeVo.getHandler())) {
 					JSONObject config = conditionParamVo.getConfig();
 					if(MapUtils.isNotEmpty(config)) {
 						config.put("type", "datetimerange");
 						conditionParamVo.setConfig(config.toJSONString());
 					}
-				}else if(ProcessFormHandler.FORMTIME.getHandler().equals(formAttributeVo.getHandler())) {
+				}else if(ProcessFormHandlerType.FORMTIME.getHandler().equals(formAttributeVo.getHandler())) {
 					JSONObject config = conditionParamVo.getConfig();
 					if(MapUtils.isNotEmpty(config)) {
 						config.put("type", "timerange");
 						conditionParamVo.setConfig(config.toJSONString());
 					}
 				}
-				ParamType paramType = ProcessFormHandler.getParamType(formAttributeVo.getHandler());
+				ParamType paramType = ProcessFormHandlerType.getParamType(formAttributeVo.getHandler());
 				if(paramType != null) {
 					conditionParamVo.setParamType(paramType.getName());
 					conditionParamVo.setParamTypeName(paramType.getText());
 				}
-				Expression expression = ProcessFormHandler.getExpression(formAttributeVo.getHandler());
+				Expression expression = ProcessFormHandlerType.getExpression(formAttributeVo.getHandler());
 				if(expression != null) {
 	                conditionParamVo.setDefaultExpression(expression.getExpression());
 				}
-				List<Expression> expressionList = ProcessFormHandler.getExpressionList(formAttributeVo.getHandler());
+				List<Expression> expressionList = ProcessFormHandlerType.getExpressionList(formAttributeVo.getHandler());
 				if(CollectionUtils.isNotEmpty(expressionList)) {
 				    for(Expression exp : expressionList) {
 		                conditionParamVo.getExpressionList().add(new ExpressionVo(exp));		        

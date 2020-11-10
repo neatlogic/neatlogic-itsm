@@ -3,7 +3,7 @@ package codedriver.module.process.api.processstep;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
 import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
@@ -80,7 +80,7 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                     	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());
                     	JSONObject notifyPolicyInvokerConfig = new JSONObject();
                     	notifyPolicyInvokerConfig.put("function", "processstephandler");
-                    	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandler.getName(stepHandlerVo.getHandler()));
+                    	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandlerType.getName(stepHandlerVo.getHandler()));
                     	notifyPolicyInvokerConfig.put("handler", stepHandlerVo.getHandler());
                     	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
                     	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);

@@ -16,7 +16,7 @@ import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.restful.annotation.Description;
@@ -99,10 +99,10 @@ public class ProcessGetConditionApi extends PrivateApiComponentBase {
 			String formUuid = jsonObj.getString("formUuid");
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
-				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())){
+				if(formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDIVIDER.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDYNAMICLIST.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMSTATICLIST.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMLINK.getHandler())){
 					continue;
 				}
 				formAttributeVo.setType("form");

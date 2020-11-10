@@ -9,7 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.IProcessFormHandler;
+import codedriver.framework.process.constvalue.IProcessFormHandlerType;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
@@ -51,14 +51,14 @@ public class FormHandlerListApi extends PrivateApiComponentBase {
 
     static {
         if (isUninitialized) {
-            synchronized (IProcessFormHandler.class) {
+            synchronized (IProcessFormHandlerType.class) {
                 if (isUninitialized) {
                     Reflections reflections = new Reflections("codedriver");
-                    Set<Class<? extends IProcessFormHandler>> classSet =
-                        reflections.getSubTypesOf(IProcessFormHandler.class);
-                    for (Class<? extends IProcessFormHandler> c : classSet) {
+                    Set<Class<? extends IProcessFormHandlerType>> classSet =
+                        reflections.getSubTypesOf(IProcessFormHandlerType.class);
+                    for (Class<? extends IProcessFormHandlerType> c : classSet) {
                         try {
-                            for (IProcessFormHandler type : c.getEnumConstants()) {
+                            for (IProcessFormHandlerType type : c.getEnumConstants()) {
                                 JSONObject jsonObj = new JSONObject();
                                 jsonObj.put("handler", type.getHandler());
                                 jsonObj.put("name", type.getHandlerName());

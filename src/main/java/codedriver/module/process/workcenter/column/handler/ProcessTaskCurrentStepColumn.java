@@ -22,7 +22,7 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
@@ -76,7 +76,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 					while(userTypeIterator.hasNext()) {
 						JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
 						//判断子任务|变更步骤
-						if(ProcessStepHandler.CHANGEHANDLE.getHandler().equals(currentStepJson.getString("handler"))
+						if(ProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(currentStepJson.getString("handler"))
 						    && ProcessUserType.MINOR.getValue().equals(userTypeJson.getString("usertype"))) {
 						    userTypeJson.put("usertypename", "变更步骤");
 						}else if(ProcessUserType.MINOR.getValue().equals(userTypeJson.getString("usertype"))){

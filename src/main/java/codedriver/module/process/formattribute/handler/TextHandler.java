@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
@@ -14,7 +14,7 @@ public class TextHandler implements IFormAttributeHandler {
 
 	@Override
 	public String getType() {
-		return ProcessFormHandler.FORMINPUT.getHandler();
+		return ProcessFormHandlerType.FORMINPUT.getHandler();
 	}
 
 	@Override

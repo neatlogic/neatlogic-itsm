@@ -13,7 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 
 @Service
@@ -49,7 +49,7 @@ public class FormHandlerGetApi extends PrivateApiComponentBase {
 	@Description(desc = "表单组件获取接口")
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray resultArray = new JSONArray();
-		for (ProcessFormHandler s : ProcessFormHandler.values()) {
+		for (ProcessFormHandlerType s : ProcessFormHandlerType.values()) {
 			JSONObject formHandlerObj = new JSONObject();
 			formHandlerObj.put("handler", s.getHandler());
 			formHandlerObj.put("handlerName", s.getHandlerName());

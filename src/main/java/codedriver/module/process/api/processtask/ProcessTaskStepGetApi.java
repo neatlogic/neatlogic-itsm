@@ -21,7 +21,7 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
@@ -283,7 +283,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 processTaskStepVo.setProcessTaskStepData(stepDataJson);
                 if(handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.COMPLETE, false)) {//有处理权限
                     stepDataJson.put("isStepUser", 1);
-                    if(processTaskStepVo.getHandler().equals(ProcessStepHandler.AUTOMATIC.getHandler())){
+                    if(processTaskStepVo.getHandler().equals(ProcessStepHandlerType.AUTOMATIC.getHandler())){
                         JSONObject requestAuditJson = stepDataJson.getJSONObject("requestAudit");
                         if(requestAuditJson.containsKey("status")
                                 &&requestAuditJson.getJSONObject("status").getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {

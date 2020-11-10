@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -93,10 +93,10 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
 			ListIterator<FormAttributeVo> formiterator =  formAttributeList.listIterator();
 			while(formiterator.hasNext()) {
 				FormAttributeVo formAttributeVo = formiterator.next();
-				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
-						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
-						||formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())){
+				if(formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMCASCADELIST.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDIVIDER.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDYNAMICLIST.getHandler())
+						||formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMSTATICLIST.getHandler())){
 					formiterator.remove();
 					continue;
 				}

@@ -20,7 +20,7 @@ import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.constvalue.SystemUser;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
@@ -50,12 +50,12 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.AUTOMATIC.getHandler();
+		return ProcessStepHandlerType.AUTOMATIC.getHandler();
 	}
 	
 	@Override
 	public String getType() {
-		return ProcessStepHandler.AUTOMATIC.getType();
+		return ProcessStepHandlerType.AUTOMATIC.getType();
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getName() {
-		return ProcessStepHandler.AUTOMATIC.getName();
+		return ProcessStepHandlerType.AUTOMATIC.getName();
 	}
 
 	@Override

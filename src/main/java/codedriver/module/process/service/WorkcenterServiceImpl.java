@@ -33,7 +33,7 @@ import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -517,10 +517,10 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         List<ProcessTaskFormAttributeDataVo> formAttributeDataList =
             processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
-            if (attributeData.getType().equals(ProcessFormHandler.FORMCASCADELIST.getHandler())
-                || attributeData.getType().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-                || attributeData.getType().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
-                || attributeData.getType().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())) {
+            if (attributeData.getType().equals(ProcessFormHandlerType.FORMCASCADELIST.getHandler())
+                || attributeData.getType().equals(ProcessFormHandlerType.FORMDIVIDER.getHandler())
+                || attributeData.getType().equals(ProcessFormHandlerType.FORMDYNAMICLIST.getHandler())
+                || attributeData.getType().equals(ProcessFormHandlerType.FORMSTATICLIST.getHandler())) {
                 continue;
             }
             JSONObject formJson = new JSONObject();
@@ -529,7 +529,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             if (dataObj == null) {
                 continue;
             }
-            formJson.put("value_" + ProcessFormHandler.getDataType(attributeData.getType()), dataObj);
+            formJson.put("value_" + ProcessFormHandlerType.getDataType(attributeData.getType()), dataObj);
             formArray.add(formJson);
         }
 

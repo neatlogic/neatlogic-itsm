@@ -29,7 +29,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
@@ -49,12 +49,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getName() {
-		return ProcessStepHandler.CONDITION.getName();
+		return ProcessStepHandlerType.CONDITION.getName();
 	}
 
 	@Override
 	public String getType() {
-		return ProcessStepHandler.CONDITION.getType();
+		return ProcessStepHandlerType.CONDITION.getType();
 	}
 
 	@SuppressWarnings("serial")
@@ -83,7 +83,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.CONDITION.getHandler();
+		return ProcessStepHandlerType.CONDITION.getHandler();
 	}
 
 	@Override

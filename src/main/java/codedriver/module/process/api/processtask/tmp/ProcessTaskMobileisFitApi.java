@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -55,16 +55,16 @@ public class ProcessTaskMobileisFitApi extends PrivateApiComponentBase {
 		result.put("isfit", true);
 		//屏蔽节点
 		List<String> blackList = new ArrayList<>();
-		blackList.add(ProcessStepHandler.CHANGECREATE.getHandler());
-		blackList.add(ProcessStepHandler.CHANGEHANDLE.getHandler());
+		blackList.add(ProcessStepHandlerType.CHANGECREATE.getHandler());
+		blackList.add(ProcessStepHandlerType.CHANGEHANDLE.getHandler());
 		//blackList.add(ProcessStepHandler.EVENT.getHandler());
-		blackList.add(ProcessStepHandler.AUTOMATIC.getHandler());
+		blackList.add(ProcessStepHandlerType.AUTOMATIC.getHandler());
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(jsonObj.getLong("processTaskId"));
 		for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 			String handler = processTaskStepVo.getHandler().toLowerCase();
 			if(blackList.contains(handler)) {
 				result.put("isfit", false);
-				result.put("msg", String.format("抱歉！移动端暂时不支持查看/处理含有‘%s’步骤节点的工单", ProcessStepHandler.getName(handler)));
+				result.put("msg", String.format("抱歉！移动端暂时不支持查看/处理含有‘%s’步骤节点的工单", ProcessStepHandlerType.getName(handler)));
 				break;
 			}
 		}

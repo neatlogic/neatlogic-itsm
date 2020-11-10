@@ -16,7 +16,7 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -64,7 +64,7 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
 				ProcessTaskFormAttributeDataVo processTaskFormAttributeData = processTaskMapper.getProcessTaskFormAttributeDataByProcessTaskIdAndAttributeUuid(processTaskFormAttributeDataVo);
 				if(processTaskFormAttributeData != null) {
 					/** 只有表单属性类型为用户选择器才生效**/
-					if(ProcessFormHandler.FORMUSERSELECT.getHandler().equals(processTaskFormAttributeData.getType())) {
+					if(ProcessFormHandlerType.FORMUSERSELECT.getHandler().equals(processTaskFormAttributeData.getType())) {
 						Object dataObj = processTaskFormAttributeData.getDataObj();
 						if(dataObj != null) {
 							List<String> dataList = new ArrayList<>();
