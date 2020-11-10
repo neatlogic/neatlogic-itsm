@@ -3,6 +3,7 @@ package codedriver.module.process.api.processtask;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,6 +69,13 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		for(int i = 0; i < 10; i++) {
+		    if(processTaskMapper.getProcessTaskStepInOperationCountByProcessTaskId(processTaskId) == 0) {
+		        break;
+		    }
+            TimeUnit.MILLISECONDS.sleep(30);
+		}
+		    
 		List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId);
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
         String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
