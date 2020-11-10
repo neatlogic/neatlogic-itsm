@@ -20,7 +20,7 @@ import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.dto.ConditionParamVo;
-import codedriver.framework.notify.dto.ExpressionVo;
+import codedriver.framework.dto.ExpressionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
@@ -123,10 +123,8 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 				if(paramType != null) {
 					conditionParamVo.setParamType(paramType.getName());
 					conditionParamVo.setParamTypeName(paramType.getText());
-					conditionParamVo.setDefaultExpression(paramType.getDefaultExpression().getExpression());
-					for(Expression expression:paramType.getExpressionList()) {
-						conditionParamVo.getExpressionList().add(new ExpressionVo(expression));
-					}
+	                conditionParamVo.setDefaultExpression(formAttributeVo.getDefaultExpression().getExpression());
+	                conditionParamVo.setExpressionList(formAttributeVo.getExpressionList());
 				}
 				
 				resultArray.add(conditionParamVo);
