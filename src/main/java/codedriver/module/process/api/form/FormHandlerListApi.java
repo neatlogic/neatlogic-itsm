@@ -64,6 +64,12 @@ public class FormHandlerListApi extends PrivateApiComponentBase {
                                 jsonObj.put("name", type.getHandlerName());
                                 jsonObj.put("icon", type.getIcon());
                                 jsonObj.put("type", type.getType());
+                                jsonObj.put("isConditionable", type.isConditionable());
+                                jsonObj.put("isExtendable", type.isExtendable());
+                                jsonObj.put("isFilterable", type.isFilterable());
+                                jsonObj.put("isShowable", type.isShowable());
+                                jsonObj.put("isValueable", type.isValueable());
+                                jsonObj.put("module", type.getModule());
                                 handlerList.add(jsonObj);
                             }
                         } catch (Exception e) {
