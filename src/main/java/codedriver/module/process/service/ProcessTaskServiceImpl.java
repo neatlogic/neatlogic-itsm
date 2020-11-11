@@ -1173,25 +1173,25 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         return startProcessTaskStepVo;
     }
 
-    @Override
-    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskId(Long processTaskId, List<String> typeList) {
-        List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
-        Map<Long, String> processTaskStepNameMap = new HashMap<>();
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
-        for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-            processTaskStepNameMap.put(processTaskStepVo.getId(), processTaskStepVo.getName());
-        }
-        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskId(processTaskId);
-        for(ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {
-            if(typeList.contains(processTaskStepContentVo.getType())) {
-                ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
-                parseProcessTaskStepReply(processTaskStepReplyVo);
-                processTaskStepReplyVo.setProcessTaskStepName(processTaskStepNameMap.get(processTaskStepReplyVo.getProcessTaskStepId()));
-                processTaskStepReplyList.add(processTaskStepReplyVo);
-            }
-        }
-        return processTaskStepReplyList;
-    }
+//    @Override
+//    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskId(Long processTaskId, List<String> typeList) {
+//        List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
+//        Map<Long, String> processTaskStepNameMap = new HashMap<>();
+//        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
+//        for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+//            processTaskStepNameMap.put(processTaskStepVo.getId(), processTaskStepVo.getName());
+//        }
+//        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskId(processTaskId);
+//        for(ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {
+//            if(typeList.contains(processTaskStepContentVo.getType())) {
+//                ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
+//                parseProcessTaskStepReply(processTaskStepReplyVo);
+//                processTaskStepReplyVo.setProcessTaskStepName(processTaskStepNameMap.get(processTaskStepReplyVo.getProcessTaskStepId()));
+//                processTaskStepReplyList.add(processTaskStepReplyVo);
+//            }
+//        }
+//        return processTaskStepReplyList;
+//    }
     
     @Transactional
     @Override
