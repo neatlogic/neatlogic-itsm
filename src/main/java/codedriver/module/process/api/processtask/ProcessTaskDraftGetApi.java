@@ -138,7 +138,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 	                startProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
 	            }
 			}
-			
+			 //标签列表
+            processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
 			return processTaskVo;
 		}else if(copyProcessTaskId != null){
 		    ProcessTaskVo oldProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(copyProcessTaskId);
@@ -220,7 +221,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                     startProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
                 }
             }
-
+            //标签列表
+            processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
             return processTaskVo;
         }else if(channelUuid != null){
 			ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
@@ -310,7 +312,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
         
-        startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepId(startProcessTaskStepVo.getId()));
         /** 当前步骤特有步骤信息 **/
         IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if(startProcessStepUtilHandler == null) {

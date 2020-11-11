@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -17,20 +16,18 @@ import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-@Service
+//@Service
 //@Transactional
-@OperationType(type = OperationTypeEnum.SEARCH)
+//@OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessGetConditionApi extends PrivateApiComponentBase {
 
 	@Autowired
@@ -102,10 +99,10 @@ public class ProcessGetConditionApi extends PrivateApiComponentBase {
 			String formUuid = jsonObj.getString("formUuid");
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
-				if(formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDIVIDER.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMDYNAMICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMSTATICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandler.FORMLINK.getHandler())){
+				if(formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDIVIDER.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDYNAMICLIST.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMSTATICLIST.getHandler())
+						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMLINK.getHandler())){
 					continue;
 				}
 				formAttributeVo.setType("form");

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -24,12 +24,12 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getName() {
-		return ProcessStepHandler.DISTRIBUTARY.getName();
+		return ProcessStepHandlerType.DISTRIBUTARY.getName();
 	}
 
 	@Override
 	public String getType() {
-		return ProcessStepHandler.DISTRIBUTARY.getType();
+		return ProcessStepHandlerType.DISTRIBUTARY.getType();
 	}
 
 	@SuppressWarnings("serial")
@@ -58,7 +58,7 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.DISTRIBUTARY.getHandler();
+		return ProcessStepHandlerType.DISTRIBUTARY.getHandler();
 	}
 
 	@Override

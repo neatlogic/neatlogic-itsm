@@ -1,5 +1,6 @@
 package codedriver.module.process.condition.handler;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -58,6 +59,16 @@ public class ProcessTaskContentCondition extends ProcessTaskConditionBase implem
 	@Override
 	public ParamType getParamType() {
 		return ParamType.STRING;
+	}
+	
+	@Override
+	public Expression getExpression() {
+	    return Expression.LIKE;
+	}
+	
+	@Override
+	public List<Expression> getExpressionList() {
+	    return Arrays.asList(Expression.LIKE,Expression.NOTLIKE);
 	}
 	
 	@Override

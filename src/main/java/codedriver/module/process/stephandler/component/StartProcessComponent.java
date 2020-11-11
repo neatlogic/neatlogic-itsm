@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
@@ -19,12 +19,12 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.START.getHandler();
+		return ProcessStepHandlerType.START.getHandler();
 	}
 
 	@Override
 	public String getType() {
-		return ProcessStepHandler.START.getType();
+		return ProcessStepHandlerType.START.getType();
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class StartProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getName() {
-		return ProcessStepHandler.START.getName();
+		return ProcessStepHandlerType.START.getName();
 	}
 
 	@Override

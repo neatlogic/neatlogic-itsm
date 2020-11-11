@@ -18,7 +18,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
-import codedriver.framework.process.constvalue.ProcessFormHandler;
+import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -58,7 +58,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 			if(index != -1) {
 				iterator.remove();
 				oldProcessTaskFormAttributeDataList.remove(index);
-			}else if(ProcessFormHandler.FORMDIVIDER.getHandler().equals(processTaskFormAttributeDataVo.getType())) {//删除分割线
+			}else if(ProcessFormHandlerType.FORMDIVIDER.getHandler().equals(processTaskFormAttributeDataVo.getType())) {//删除分割线
 				iterator.remove();
 			}
 		}
@@ -111,9 +111,9 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 			for(ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataList) {
 				JSONObject content  = new JSONObject();
 				content.put("label", attributeLabelMap.get(attributeDataVo.getAttributeUuid()));
-				if(ProcessFormHandler.FORMCASCADELIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
-						|| ProcessFormHandler.FORMDYNAMICLIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
-						|| ProcessFormHandler.FORMSTATICLIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
+				if(ProcessFormHandlerType.FORMCASCADELIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
+						|| ProcessFormHandlerType.FORMDYNAMICLIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
+						|| ProcessFormHandlerType.FORMSTATICLIST.getHandler().equalsIgnoreCase(attributeDataVo.getType()) 
 						) {
 				    if(!attributeDataVo.dataIsEmpty()) {
 	                    content.put("newContent", "已更新");			        

@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -48,6 +49,7 @@ import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -70,6 +72,7 @@ import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
+import codedriver.framework.process.dto.ProcessTagVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -85,11 +88,13 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.dto.ProcessTaskTagVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
@@ -844,7 +849,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepIdId(Long processTaskStepId) {
+    public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepId(Long processTaskStepId) {
         ProcessTaskStepReplyVo comment = new ProcessTaskStepReplyVo();
         //获取上报描述内容
         List<Long> fileIdList = new ArrayList<>();
@@ -977,30 +982,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                     return true;
                                 }
                             } else if (ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
-//                                if(ProcessUserType.OWNER.getValue().equals(split[1])) {
-//                                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
-//                                        return true;
-//                                    }
-//                                }else if(ProcessUserType.REPORTER.getValue().equals(split[1])) {
-//                                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
-//                                        return true;
-//                                    }
-//                                }else if(ProcessUserType.MAJOR.getValue().equals(split[1])) {
-//                                    processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
-//                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-//                                        return true;
-//                                    }
-//                                }else if(ProcessUserType.MINOR.getValue().equals(split[1])) {
-//                                    processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
-//                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-//                                        return true;
-//                                    }
-//                                }else if(ProcessUserType.AGENT.getValue().equals(split[1])) {
-//                                    processTaskStepUserVo.setUserType(ProcessUserType.AGENT.getValue());
-//                                    if(processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
-//                                        return true;
-//                                    }
-//                                }
                                 if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(split[1])) {
                                     return true;
                                 }
@@ -1142,7 +1123,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
         }
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepId(startProcessTaskStepVo.getId()));
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
         processTaskVo.setTranferReportDirection("from");
         return processTaskVo;
@@ -1181,7 +1162,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
         ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
 
-        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepIdId(startProcessTaskStepVo.getId()));
+        startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepId(startProcessTaskStepVo.getId()));
         /** 当前步骤特有步骤信息 **/
         IProcessStepUtilHandler startProcessStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if(startProcessStepUtilHandler == null) {
@@ -1190,5 +1171,74 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         startProcessStepUtilHandler.setProcessTaskStepConfig(startProcessTaskStepVo);
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
+    }
+
+    @Override
+    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskId(Long processTaskId, List<String> typeList) {
+        List<ProcessTaskStepReplyVo> processTaskStepReplyList = new ArrayList<>();
+        Map<Long, String> processTaskStepNameMap = new HashMap<>();
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(processTaskId);
+        for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+            processTaskStepNameMap.put(processTaskStepVo.getId(), processTaskStepVo.getName());
+        }
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskId(processTaskId);
+        for(ProcessTaskStepContentVo processTaskStepContentVo : processTaskStepContentList) {
+            if(typeList.contains(processTaskStepContentVo.getType())) {
+                ProcessTaskStepReplyVo processTaskStepReplyVo = new ProcessTaskStepReplyVo(processTaskStepContentVo);
+                parseProcessTaskStepReply(processTaskStepReplyVo);
+                processTaskStepReplyVo.setProcessTaskStepName(processTaskStepNameMap.get(processTaskStepReplyVo.getProcessTaskStepId()));
+                processTaskStepReplyList.add(processTaskStepReplyVo);
+            }
+        }
+        return processTaskStepReplyList;
+    }
+    
+    @Transactional
+    @Override
+    public void updateTag(Long processTaskId,Long processTaskStepId,JSONObject jsonObj) throws PermissionDeniedException {
+        JSONArray tagArray = jsonObj.getJSONArray("tagList");
+        List<ProcessTagVo>  oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
+        processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
+        if(CollectionUtils.isNotEmpty(tagArray)) {
+            List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
+            List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
+            List<String> notExistTagList = tagNameList.stream().filter(a->!existTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList());
+            List<ProcessTagVo> notExistTagVoList = new ArrayList<ProcessTagVo>();
+            for(String tagName : notExistTagList) {
+                notExistTagVoList.add(new ProcessTagVo(tagName));
+            }
+            if(CollectionUtils.isNotEmpty(notExistTagVoList)) {
+                processMapper.insertProcessTag(notExistTagVoList);
+                existTagList.addAll(notExistTagVoList);
+            }
+            List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
+            for(ProcessTagVo processTagVo : existTagList) {
+                processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId,processTagVo.getId()));
+            }
+            processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
+            
+            //生成活动
+            IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
+            try {
+                handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
+            }catch(ProcessTaskNoPermissionException e) {
+                throw new PermissionDeniedException();
+            }
+            List<String> oldTagNameList = new ArrayList<String>();
+            for(ProcessTagVo tag:oldTagList) {
+                oldTagNameList.add(tag.getName());
+            }
+            ProcessTaskContentVo oldTagContentVo = new ProcessTaskContentVo(String.join(",", oldTagNameList));
+            processTaskMapper.replaceProcessTaskContent(oldTagContentVo);
+            if(StringUtils.isNotBlank(oldTagContentVo.getHash())) {
+                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), oldTagContentVo.getHash());
+                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
+            }
+            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+            processTaskStepVo.setProcessTaskId(processTaskId);
+            processTaskStepVo.setId(processTaskStepId);
+            processTaskStepVo.setParamObj(jsonObj);
+            handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
+        }   
     }
 }

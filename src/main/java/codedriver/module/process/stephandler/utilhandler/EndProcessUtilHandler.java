@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
@@ -14,7 +14,7 @@ public class EndProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.END.getHandler();
+		return ProcessStepHandlerType.END.getHandler();
 	}
 
 	@Override

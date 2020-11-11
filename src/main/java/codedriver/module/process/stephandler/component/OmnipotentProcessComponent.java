@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessStepHandler;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
@@ -31,12 +31,12 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getHandler() {
-		return ProcessStepHandler.OMNIPOTENT.getHandler();
+		return ProcessStepHandlerType.OMNIPOTENT.getHandler();
 	}
 
 	@Override
 	public String getType() {
-		return ProcessStepHandler.OMNIPOTENT.getType();
+		return ProcessStepHandlerType.OMNIPOTENT.getType();
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	public String getName() {
-		return ProcessStepHandler.OMNIPOTENT.getName();
+		return ProcessStepHandlerType.OMNIPOTENT.getName();
 	}
 
 	@Override
