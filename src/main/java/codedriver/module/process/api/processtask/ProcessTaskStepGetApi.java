@@ -25,10 +25,12 @@ import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
 import codedriver.framework.process.dto.ProcessTaskStepAgentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -77,6 +79,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private PriorityMapper priorityMapper;
     
 	@Override
 	public String getToken() {
@@ -112,14 +117,14 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
 		
 		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
-		List<String> typeList = new ArrayList<>();
-        typeList.add(ProcessTaskOperationType.COMMENT.getValue());
-        typeList.add(ProcessTaskOperationType.COMPLETE.getValue());
-        typeList.add(ProcessTaskOperationType.BACK.getValue());
-        typeList.add(ProcessTaskOperationType.RETREAT.getValue());
-        typeList.add(ProcessTaskOperationType.TRANSFER.getValue());
-		List<ProcessTaskStepReplyVo> processTaskStepReplyList = processTaskService.getProcessTaskStepReplyListByProcessTaskId(processTaskId, typeList);
-		processTaskVo.setCommentList(processTaskStepReplyList);
+//		List<String> typeList = new ArrayList<>();
+//        typeList.add(ProcessTaskOperationType.COMMENT.getValue());
+//        typeList.add(ProcessTaskOperationType.COMPLETE.getValue());
+//        typeList.add(ProcessTaskOperationType.BACK.getValue());
+//        typeList.add(ProcessTaskOperationType.RETREAT.getValue());
+//        typeList.add(ProcessTaskOperationType.TRANSFER.getValue());
+//		List<ProcessTaskStepReplyVo> processTaskStepReplyList = processTaskService.getProcessTaskStepReplyListByProcessTaskId(processTaskId, typeList);
+//		processTaskVo.setCommentList(processTaskStepReplyList);
         if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
             ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
             if(processTaskScoreTemplateVo != null) {
@@ -365,6 +370,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 String priorityUuid = dataObj.getString("priorityUuid");
                 if(StringUtils.isNotBlank(priorityUuid)) {
                     processTaskVo.setPriorityUuid(priorityUuid);
+                    PriorityVo priorityVo = priorityMapper.getPriorityByUuid(priorityUuid);
+                    if(priorityVo == null) {
+                        priorityVo = new PriorityVo();
+                        priorityVo.setUuid(priorityUuid);
+                    }
+                    processTaskVo.setPriority(priorityVo);
                 }
             }
         }
