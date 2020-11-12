@@ -22,9 +22,9 @@ import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.ExpressionVo;
-import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.constvalue.ConditionFormOptions;
+import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
-import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -64,7 +64,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		//固定字段条件
 		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
-			if(condition instanceof IProcessTaskCondition && ProcessField.getValue(condition.getName()) != null) {
+			if(ConditionProcessTaskOptions.getConditionProcessTaskOprion(condition.getName()) != null) {
 				ConditionParamVo conditionParamVo = new ConditionParamVo();
 				conditionParamVo.setName(condition.getName());
 				conditionParamVo.setLabel(condition.getDisplayName());
@@ -101,11 +101,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 		if(StringUtils.isNotBlank(formUuid)) {
 			List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
 			for(FormAttributeVo formAttributeVo : formAttrList) {
-				if( formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDIVIDER.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDYNAMICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMSTATICLIST.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMPRIORITY.getHandler())
-						|| formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMLINK.getHandler())){
+				if(ConditionFormOptions.getConditionFormOption(formAttributeVo.getHandler()) == null){
 					continue;
 				}
 				formAttributeVo.setType("form");
