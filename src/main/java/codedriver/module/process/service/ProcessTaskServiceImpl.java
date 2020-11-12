@@ -870,6 +870,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Override
     public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo oldReplyVo) {
+        String content = jsonObj.getString("content");
+        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+        if(content == null && fileIdList == null) {
+            return false;
+        }
         Long processTaskId = oldReplyVo.getProcessTaskId();
         Long processTaskStepId = oldReplyVo.getProcessTaskStepId();
         boolean isUpdate = false;
@@ -885,11 +890,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             oldFileIdList = oldReplyVo.getFileIdList();
         }
         /** 保存新附件uuid **/
-        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
         if(fileIdList == null) {
             fileIdList = new ArrayList<>();
         }
-        String content = jsonObj.getString("content");
+        
         if(StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
             if(Objects.equals(oldContentHash, contentVo.getHash())) {
