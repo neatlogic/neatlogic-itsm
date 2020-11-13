@@ -203,7 +203,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 		    processTaskStepVo.setId(processTaskStepId);
 			processTaskStepVo.setParamObj(jsonObj);
 			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
-			handler.calculateSla(new ProcessTaskVo(processTaskId));
+			handler.calculateSla(new ProcessTaskVo(processTaskId), false);
 		}
 		
 		return null;
