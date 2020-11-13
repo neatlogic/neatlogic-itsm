@@ -17,6 +17,7 @@ import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.ExpressionVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
@@ -52,7 +53,7 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 				param.setLabel(condition.getDisplayName());
 				param.setController(condition.getHandler(conditionModel));
 				if(condition.getConfig() != null) {
-					param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
+//					param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
 					param.setConfig(condition.getConfig().toJSONString());
 				}
 				param.setType(condition.getType());
@@ -72,6 +73,38 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 		}
 		return notifyPolicyParamList;
 	}
+
+    @Override
+    protected List<ConditionParamVo> mySystemConditionOptionList() {
+        List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
+        String conditionModel = ProcessConditionModel.CUSTOM.getValue();
+        for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
+            if(ConditionProcessTaskOptions.getConditionProcessTaskOprion(condition.getName()) != null) {
+                ConditionParamVo param = new ConditionParamVo();
+                param.setName(condition.getName());
+                param.setLabel(condition.getDisplayName());
+                param.setController(condition.getHandler(conditionModel));
+                if(condition.getConfig() != null) {
+//                    param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
+                    param.setConfig(condition.getConfig().toJSONString());
+                }
+                param.setType(condition.getType());
+                ParamType paramType = condition.getParamType();
+                if(paramType != null) {
+                    param.setParamType(paramType.getName());
+                    param.setParamTypeName(paramType.getText());
+                    param.setDefaultExpression(paramType.getDefaultExpression().getExpression());
+                    for(Expression expression : paramType.getExpressionList()) {
+                        param.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
+                    }
+                }
+                
+                param.setIsEditable(0);
+                notifyPolicyParamList.add(param);
+            }           
+        }
+        return notifyPolicyParamList;
+    }
 
 	@Override
 	protected void myAuthorityConfig(JSONObject config) {
