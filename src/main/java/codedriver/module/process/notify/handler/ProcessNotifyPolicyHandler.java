@@ -71,6 +71,15 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 				notifyPolicyParamList.add(param);
 			}			
 		}
+		ConditionParamVo param = new ConditionParamVo();
+        param.setName("form");
+        param.setLabel("表单");
+        param.setType("form");
+        param.setParamType("map");
+        param.setParamTypeName("键值对");
+        param.setFreemarkerTemplate("<#list DATA.form?keys as key>${key}：${DATA.form[key]}<#if key_has_next><br></#if></#list>");
+        param.setIsEditable(0);
+        notifyPolicyParamList.add(param);
 		return notifyPolicyParamList;
 	}
 
