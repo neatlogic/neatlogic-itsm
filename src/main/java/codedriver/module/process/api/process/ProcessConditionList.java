@@ -70,7 +70,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 				conditionParamVo.setLabel(condition.getDisplayName());
 				conditionParamVo.setController(condition.getHandler(conditionModel));
 				if(condition.getConfig() != null) {
-					conditionParamVo.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
+//					conditionParamVo.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
 					conditionParamVo.setConfig(condition.getConfig().toJSONString());
 				}
 				conditionParamVo.setType(condition.getType());
@@ -110,7 +110,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 				conditionParamVo.setName(formAttributeVo.getUuid());
 				conditionParamVo.setLabel(formAttributeVo.getLabel());
 				conditionParamVo.setController(formAttributeVo.getHandlerType());
-				conditionParamVo.setIsMultiple(formAttributeVo.getIsMultiple());
+//				conditionParamVo.setIsMultiple(formAttributeVo.getIsMultiple());
 				conditionParamVo.setType(formAttributeVo.getType());
 				conditionParamVo.setHandler(formAttributeVo.getHandler());
 				conditionParamVo.setConfig(formAttributeVo.getConfig());
