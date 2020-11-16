@@ -98,6 +98,23 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
 								}
 							}
 						}
+					}else if(ProcessFormHandlerType.FORMSELECT.getHandler().equals(processTaskFormAttributeData.getType())) {
+					    Object dataObj = processTaskFormAttributeData.getDataObj();
+                        if(dataObj != null) {
+                            List<String> dataList = new ArrayList<>();
+                            if(dataObj instanceof String) {
+                                dataList.add((String)dataObj);
+                            }else if(dataObj instanceof JSONArray) {
+                                dataList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
+                            }
+                            if(CollectionUtils.isNotEmpty(dataList)) {
+                                for(String value : dataList) {
+                                    if(userMapper.checkUserIsExists(value) > 0) {
+                                        processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), value, ProcessUserType.MAJOR.getValue()));
+                                    }
+                                }
+                            }
+                        }
 					}
 				}
 			}			
