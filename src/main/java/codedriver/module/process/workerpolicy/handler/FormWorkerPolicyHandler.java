@@ -24,6 +24,7 @@ import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
 
 @Service
@@ -109,8 +110,13 @@ public class FormWorkerPolicyHandler implements IWorkerPolicyHandler {
                             }
                             if(CollectionUtils.isNotEmpty(dataList)) {
                                 for(String value : dataList) {
-                                    if(userMapper.checkUserIsExists(value) > 0) {
-                                        processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), value, ProcessUserType.MAJOR.getValue()));
+                                    if(StringUtils.isNotBlank(value)) {
+                                        if(value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
+                                            value = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER)[0];
+                                        }
+                                        if(userMapper.checkUserIsExists(value) > 0) {
+                                            processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), GroupSearch.USER.getValue(), value, ProcessUserType.MAJOR.getValue()));
+                                        }
                                     }
                                 }
                             }

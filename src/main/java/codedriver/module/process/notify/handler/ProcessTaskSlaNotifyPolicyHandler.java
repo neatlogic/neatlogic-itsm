@@ -71,8 +71,8 @@ public class ProcessTaskSlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         param.setName("form");
         param.setLabel("表单");
         param.setType("form");
-        param.setParamType("map");
-        param.setParamTypeName("键值对");
+        param.setParamType(ParamType.ARRAY.getName());
+        param.setParamTypeName(ParamType.ARRAY.getText());
         param.setFreemarkerTemplate("<#list DATA.form?keys as key>${key}：${DATA.form[key]}<#if key_has_next><br></#if></#list>");
         param.setIsEditable(0);
         notifyPolicyParamList.add(param);
