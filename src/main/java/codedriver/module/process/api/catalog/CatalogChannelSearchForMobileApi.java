@@ -20,6 +20,7 @@ import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
 import codedriver.module.process.service.CatalogService;
 
 @Service
@@ -65,7 +66,6 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
 		JSONArray listArray = new JSONArray();
-		resultObj.put("list", listArray);
 		String catalogUuid = jsonObj.getString("catalogUuid");
 		ChannelVo paramChannel = new ChannelVo();
 		//查出所有授权的服务目录
@@ -73,18 +73,25 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 		//如果服务目录catalogUuid == 0，则展示所有一级服务目录,否则仅展示对应的catalogUuid
 		if(catalogUuid.equals(CatalogVo.ROOT_UUID)) {
 			catalogUuid = null;
+    		//找到root目录下所有有权限的一级服务目录
+    		List<CatalogVo> firstCatalogList = catalogMapper.getAuthorizedCatalogList(
+    				UserContext.get().getUserUuid(),
+    				teamUuidList,
+    				UserContext.get().getRoleUuidList()
+    				,CatalogVo.ROOT_UUID,
+    				catalogUuid);
+    		//获取以上一级服务目录下的所有有权限的服务目录&&服务
+    		for(CatalogVo firstCatalog: firstCatalogList) {
+    			listArray.add(catalogService.getCatalogChannelByCatalogUuid(firstCatalog));
+    		}
+		}else {
+		    CatalogVo catalog = catalogMapper.getCatalogByUuid(catalogUuid);
+		    if(catalog == null) {
+	            throw new CatalogNotFoundException(catalogUuid);
+	        }
+		    listArray = catalogService.getCatalogChannelByCatalogUuid(catalog).getJSONArray("list");
 		}
-		//找到root目录下所有有权限的一级服务目录
-		List<CatalogVo> firstCatalogList = catalogMapper.getAuthorizedCatalogList(
-				UserContext.get().getUserUuid(),
-				teamUuidList,
-				UserContext.get().getRoleUuidList()
-				,CatalogVo.ROOT_UUID,
-				catalogUuid);
-		//获取以上一级服务目录下的所有有权限的服务目录&&服务
-		for(CatalogVo firstCatalog: firstCatalogList) {
-			listArray.addAll(catalogService.getCatalogChannelByCatalogUuid(firstCatalog));
-		}
+		resultObj.put("list", listArray);
 		/** 获取对应目录下的收藏服务 **/
 		paramChannel.setIsFavorite(1);
 		paramChannel.setUserUuid(UserContext.get().getUserUuid(true));

@@ -2,7 +2,7 @@ package codedriver.module.process.service;
 
 import java.util.List;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.dto.CatalogVo;
 
@@ -36,7 +36,7 @@ public interface CatalogService {
 	 * @param catalog
 	 * @return JSONArray
 	 */
-	public JSONArray getCatalogChannelByCatalogUuid(CatalogVo catalog);
+	public JSONObject getCatalogChannelByCatalogUuid(CatalogVo catalog);
     /**
      * @Time:2020年7月7日
      * @Description:构造一个虚拟的root节点

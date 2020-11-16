@@ -145,8 +145,7 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	@Override
-	public JSONArray getCatalogChannelByCatalogUuid(CatalogVo catalog) {
-		JSONArray listArray = new JSONArray();
+	public JSONObject getCatalogChannelByCatalogUuid(CatalogVo catalog) {
 		JSONArray sonListArray = new JSONArray();
 		JSONObject catalogParentJson = new JSONObject();
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
@@ -172,8 +171,7 @@ public class CatalogServiceImpl implements CatalogService {
 			channelJson.put("type", "channel");
 			sonListArray.add(channelJson);
 		}
-		listArray.add(catalogParentJson);
-		return listArray;
+		return catalogParentJson;
 	}
 
     @Override
