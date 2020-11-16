@@ -1,12 +1,16 @@
 package codedriver.module.process.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -143,12 +147,70 @@ public class CatalogServiceImpl implements CatalogService {
 		
 		return false;
 	}
+	
+	@Override
+    public List<CatalogVo> getCatalogByCatalogParentUuid(String catalogUuid) {
+	    List<CatalogVo> cataLogVoList = new ArrayList<>();
+        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+        //已授权的服务uuid
+        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+        if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
+            return cataLogVoList;
+        }
+        ChannelVo channel = new ChannelVo();
+        channel.setIsActive(1);
+        channel.setAuthorizedUuidList(currentUserAuthorizedChannelUuidList);
+        channel.setNeedPage(false);
+        List<ChannelVo> channelList = channelMapper.searchChannelList(channel);
+        //查出有已启用且有授权服务的目录uuid
+        Set<String>hasActiveChannelCatalogUuidSet = new HashSet<>();
+        for(ChannelVo channelVo :channelList) {
+            String parentUuids = channelVo.getParentUuids();
+            if(StringUtils.isNotBlank(parentUuids)) {
+                hasActiveChannelCatalogUuidSet.addAll(Arrays.asList(channelVo.getParentUuids().split(",")));
+            }
+        }
+       
+        //catalog
+        List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
+                UserContext.get().getUserUuid(),
+                teamUuidList,
+                UserContext.get().getRoleUuidList(),
+                catalogUuid,
+                null);
+        for(CatalogVo catalogVo : catalogList) {
+            if(hasActiveChannelCatalogUuidSet.contains(catalogVo.getUuid())) {
+                cataLogVoList.add(catalogVo);
+            }
+        }
+        return cataLogVoList;
+	}
 
 	@Override
-	public JSONObject getCatalogChannelByCatalogUuid(CatalogVo catalog) {
-		JSONArray sonListArray = new JSONArray();
-		JSONObject catalogParentJson = new JSONObject();
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+	public JSONObject getCatalogChannelByCatalogUuid(CatalogVo catalog,Boolean isNeedChannel) {
+	    JSONArray sonListArray = new JSONArray();
+        JSONObject catalogParentJson = new JSONObject();
+        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+	    //已授权的服务uuid
+        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+        if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
+            return catalogParentJson;
+        }
+        ChannelVo channel = new ChannelVo();
+        channel.setIsActive(1);
+        channel.setAuthorizedUuidList(currentUserAuthorizedChannelUuidList);
+        channel.setNeedPage(false);
+        List<ChannelVo> channelList = channelMapper.searchChannelList(channel);
+        //查出有已启用且有授权服务的目录uuid
+        Set<String>hasActiveChannelCatalogUuidSet = new HashSet<>();
+        for(ChannelVo channelVo :channelList) {
+            String parentUuids = channelVo.getParentUuids();
+            if(StringUtils.isNotBlank(parentUuids)) {
+                hasActiveChannelCatalogUuidSet.addAll(Arrays.asList(channelVo.getParentUuids().split(",")));
+            }
+        }
+        
+        //
 		catalogParentJson.put("uuid", catalog.getUuid());
 		catalogParentJson.put("name", catalog.getName());
 		catalogParentJson.put("list", sonListArray);
@@ -162,14 +224,18 @@ public class CatalogServiceImpl implements CatalogService {
 		for(CatalogVo catalogVo : catalogList) {
 			JSONObject catalogJson = (JSONObject) JSONObject.toJSON(catalogVo);
 			catalogJson.put("type", "catalog");
-			sonListArray.add(catalogJson);
+			if(hasActiveChannelCatalogUuidSet.contains(catalogJson.getString("uuid"))) {
+			    sonListArray.add(catalogJson);
+			}
 		}
 		//channel
-		List<ChannelVo> channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),teamUuidList,UserContext.get().getRoleUuidList(),catalog.getUuid());
-		for(ChannelVo channelVo : channelList) {
-			JSONObject channelJson = (JSONObject) JSONObject.toJSON(channelVo);
-			channelJson.put("type", "channel");
-			sonListArray.add(channelJson);
+		if(isNeedChannel ==null || isNeedChannel) {
+    		channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),teamUuidList,UserContext.get().getRoleUuidList(),catalog.getUuid());
+    		for(ChannelVo channelVo : channelList) {
+    			JSONObject channelJson = (JSONObject) JSONObject.toJSON(channelVo);
+    			channelJson.put("type", "channel");
+    			sonListArray.add(channelJson);
+    		}
 		}
 		return catalogParentJson;
 	}
