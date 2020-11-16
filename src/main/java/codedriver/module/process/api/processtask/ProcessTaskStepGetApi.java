@@ -117,14 +117,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
 		
 		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
-//		List<String> typeList = new ArrayList<>();
-//        typeList.add(ProcessTaskOperationType.COMMENT.getValue());
-//        typeList.add(ProcessTaskOperationType.COMPLETE.getValue());
-//        typeList.add(ProcessTaskOperationType.BACK.getValue());
-//        typeList.add(ProcessTaskOperationType.RETREAT.getValue());
-//        typeList.add(ProcessTaskOperationType.TRANSFER.getValue());
-//		List<ProcessTaskStepReplyVo> processTaskStepReplyList = processTaskService.getProcessTaskStepReplyListByProcessTaskId(processTaskId, typeList);
-//		processTaskVo.setCommentList(processTaskStepReplyList);
+
         if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
             ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
             if(processTaskScoreTemplateVo != null) {
