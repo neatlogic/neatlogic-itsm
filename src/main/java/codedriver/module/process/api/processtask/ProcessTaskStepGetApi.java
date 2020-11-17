@@ -50,6 +50,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.common.config.ProcessConfig;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 @Service
@@ -173,6 +174,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         //标签列表
         processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
 		
+        //移动端默认展开表单
+        processTaskVo.setMobileFormUIType(Integer.valueOf(ProcessConfig.MOBILE_FORM_UI_TYPE()));
 		JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);
 		return resultObj;
