@@ -89,7 +89,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 
 	@Override
 	public void initJob(String tenantUuid) {
-		List<ProcessTaskStepDataVo> dataList = processTaskStepDataMapper.searchProcessTaskStepData(new ProcessTaskStepDataVo(null,null,ProcessTaskStepDataType.AUTOMATIC.getValue()));
+		List<ProcessTaskStepDataVo> dataList = processTaskStepDataMapper.searchProcessTaskStepData(new ProcessTaskStepDataVo(null,null,ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserId()));
 		AutomaticConfigVo automaticConfigVo = null;
 		for(ProcessTaskStepDataVo dataVo : dataList) {
 			JSONObject dataObject = dataVo.getData();
@@ -125,7 +125,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			//excute
 			Boolean isUnloadJob = processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
 			//update nextFireTime
-			ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue());
+			ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserId());
 			ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
 			JSONObject data = stepData.getData();// (JSONObject) jobObject.getData("data");
 			if(data != null) {
@@ -142,7 +142,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 					audit.remove("nextFireTime");
 				}
 				processTaskStepDataVo.setData(data.toJSONString());
-				processTaskStepDataVo.setFcu("system");
+				processTaskStepDataVo.setFcu(SystemUser.SYSTEM.getUserId());
 				processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
 			}
 			//

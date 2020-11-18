@@ -28,6 +28,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -281,7 +282,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo,ProcessTaskStepVo currentProcessTaskStepVo) {
 		IntegrationResultVo resultVo = null;
 		Boolean isUnloadJob = false;
-		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue()));
+		ProcessTaskStepDataVo auditDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserId()));
 		JSONObject data = auditDataVo.getData();
 		String integrationUuid = automaticConfigVo.getBaseIntegrationUuid();
 		JSONObject successConfig = automaticConfigVo.getBaseSuccessConfig();
@@ -383,7 +384,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			isUnloadJob = true;
 		}finally {
 			auditDataVo.setData(data.toJSONString());
-			auditDataVo.setFcu("system");
+			auditDataVo.setFcu(SystemUser.SYSTEM.getUserId());
 			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}
 		return isUnloadJob;
@@ -408,10 +409,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 			if(automaticConfigVo.getBaseSuccessConfig() == null) {
 				requestAudit.put("successConfig",successConfig);
 			}
-			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessTaskStepDataType.AUTOMATIC.getValue());
+			ProcessTaskStepDataVo auditDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId(), ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserId());
 			auditDataVo.setData(data.toJSONString());
-			auditDataVo.setFcu(UserContext.get().getUserUuid());
-			auditDataVo.setFcu("system");
 			processTaskStepDataMapper.replaceProcessTaskStepData(auditDataVo);
 		}else {//init callback
 			JSONObject callbackAudit = new JSONObject();

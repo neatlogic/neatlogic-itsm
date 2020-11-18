@@ -163,13 +163,12 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 			}else {//loadJob,定时执行第一次请求
 				//初始化audit执行状态
 				JSONObject audit = null;
-				ProcessTaskStepDataVo data = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue()));
+				ProcessTaskStepDataVo data = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserId()));
 				JSONObject dataObject = data.getData();
 				audit = dataObject.getJSONObject("requestAudit");
 				audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
 				processTaskService.initJob(automaticConfigVo,currentProcessTaskStepVo,dataObject);
 				data.setData(dataObject.toJSONString());
-				data.setFcu("system");
 				processTaskStepDataMapper.replaceProcessTaskStepData(data);
 			}
 		}
