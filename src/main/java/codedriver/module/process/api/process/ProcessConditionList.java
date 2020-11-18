@@ -63,26 +63,22 @@ public class ProcessConditionList extends PrivateApiComponentBase {
 		JSONArray resultArray = new JSONArray();
 		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		//固定字段条件
-		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
-			if(ConditionProcessTaskOptions.getConditionProcessTaskOprion(condition.getName()) != null) {
-				ConditionParamVo conditionParamVo = new ConditionParamVo();
-				conditionParamVo.setName(condition.getName());
-				conditionParamVo.setLabel(condition.getDisplayName());
-				conditionParamVo.setController(condition.getHandler(conditionModel));
-				if(condition.getConfig() != null) {
-//					conditionParamVo.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
-					conditionParamVo.setConfig(condition.getConfig().toJSONString());
-				}
-				conditionParamVo.setType(condition.getType());
-				ParamType paramType = condition.getParamType();
-				if(paramType != null) {
-					conditionParamVo.setParamType(paramType.getName());
-					conditionParamVo.setParamTypeName(paramType.getText());
-//					conditionParamVo.setDefaultExpression(paramType.getDefaultExpression().getExpression());
-//					for(Expression expression:paramType.getExpressionList()) {
-//						conditionParamVo.getExpressionList().add(new ExpressionVo(expression));
-//					}
-				}
+		for(ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {
+            IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
+            if(condition != null) {
+                ConditionParamVo conditionParamVo = new ConditionParamVo();
+                conditionParamVo.setName(condition.getName());
+                conditionParamVo.setLabel(condition.getDisplayName());
+                conditionParamVo.setController(condition.getHandler(conditionModel));
+                if(condition.getConfig() != null) {
+                    conditionParamVo.setConfig(condition.getConfig().toJSONString());
+                }
+                conditionParamVo.setType(condition.getType());
+                ParamType paramType = condition.getParamType();
+                if(paramType != null) {
+                    conditionParamVo.setParamType(paramType.getName());
+                    conditionParamVo.setParamTypeName(paramType.getText());
+                }
                 Expression expression = condition.getExpression();
                 if(expression != null) {
                     conditionParamVo.setDefaultExpression(expression.getExpression());
@@ -92,10 +88,11 @@ public class ProcessConditionList extends PrivateApiComponentBase {
                     for(Expression exp : expressionList) {
                         conditionParamVo.getExpressionList().add(new ExpressionVo(exp));                
                     }
-                }				
-				resultArray.add(conditionParamVo);
-			}
-		}
+                }               
+                resultArray.add(conditionParamVo);
+            }
+        }
+
 		//表单条件
 		String formUuid = jsonObj.getString("formUuid");
 		if(StringUtils.isNotBlank(formUuid)) {
