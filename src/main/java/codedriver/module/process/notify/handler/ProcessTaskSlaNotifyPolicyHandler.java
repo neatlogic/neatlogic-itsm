@@ -60,11 +60,6 @@ public class ProcessTaskSlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         for(ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {
             IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
             if(condition != null) {
-                
-            }
-        }
-        for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
-            if(ConditionProcessTaskOptions.getConditionProcessTaskOprion(condition.getName()) != null) {
                 ConditionParamVo param = new ConditionParamVo();
                 param.setName(condition.getName());
                 param.setLabel(condition.getDisplayName());
