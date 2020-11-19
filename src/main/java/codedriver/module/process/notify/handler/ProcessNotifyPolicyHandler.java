@@ -16,12 +16,12 @@ import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.ExpressionVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
-import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
-import codedriver.framework.process.constvalue.ProcessField;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
+import codedriver.framework.process.constvalue.ProcessTaskParams;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
+import codedriver.framework.process.notify.core.SubtaskNotifyTriggerType;
 @Component
 public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 
@@ -34,52 +34,27 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	public List<ValueTextVo> myNotifyTriggerList() {
 		List<ValueTextVo> returnList = new ArrayList<>();
 		for (NotifyTriggerType notifyTriggerType : NotifyTriggerType.values()) {
-			if(NotifyTriggerType.TIMEOUT == notifyTriggerType) {
-				continue;
-			}
 			returnList.add(new ValueTextVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText()));
 		}
+		for (SubtaskNotifyTriggerType notifyTriggerType : SubtaskNotifyTriggerType.values()) {
+            returnList.add(new ValueTextVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText()));
+        }
 		return returnList;
 	}
 
 	@Override
 	protected List<ConditionParamVo> mySystemParamList() {
 		List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
-		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
-		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
-			if(condition instanceof IProcessTaskCondition && ProcessField.getValue(condition.getName()) != null) {
-				ConditionParamVo param = new ConditionParamVo();
-				param.setName(condition.getName());
-				param.setLabel(condition.getDisplayName());
-				param.setController(condition.getHandler(conditionModel));
-				if(condition.getConfig() != null) {
-//					param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
-					param.setConfig(condition.getConfig().toJSONString());
-				}
-				param.setType(condition.getType());
-				ParamType paramType = condition.getParamType();
-				if(paramType != null) {
-					param.setParamType(paramType.getName());
-					param.setParamTypeName(paramType.getText());
-					param.setDefaultExpression(paramType.getDefaultExpression().getExpression());
-					for(Expression expression : paramType.getExpressionList()) {
-						param.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
-					}
-				}
-				
-				param.setIsEditable(0);
-				notifyPolicyParamList.add(param);
-			}			
+		for(ProcessTaskParams processTaskParams : ProcessTaskParams.values()) {
+		    ConditionParamVo param = new ConditionParamVo();
+		    param.setName(processTaskParams.getValue());
+            param.setLabel(processTaskParams.getText());
+            param.setParamType(processTaskParams.getParamType().getName());
+            param.setParamTypeName(processTaskParams.getParamType().getText());
+            param.setFreemarkerTemplate(processTaskParams.getFreemarkerTemplate());
+            param.setIsEditable(0);
+            notifyPolicyParamList.add(param);
 		}
-		ConditionParamVo param = new ConditionParamVo();
-        param.setName("form");
-        param.setLabel("表单");
-        param.setType("form");
-        param.setParamType(ParamType.ARRAY.getName());
-        param.setParamTypeName(ParamType.ARRAY.getText());
-        param.setFreemarkerTemplate("<#list DATA.form?keys as key>${key}：${DATA.form[key]}<#if key_has_next><br></#if></#list>");
-        param.setIsEditable(0);
-        notifyPolicyParamList.add(param);
 		return notifyPolicyParamList;
 	}
 
@@ -87,14 +62,14 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     protected List<ConditionParamVo> mySystemConditionOptionList() {
         List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
         String conditionModel = ProcessConditionModel.CUSTOM.getValue();
-        for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
-            if(ConditionProcessTaskOptions.getConditionProcessTaskOprion(condition.getName()) != null) {
+        for(ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {
+            IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
+            if(condition != null) {
                 ConditionParamVo param = new ConditionParamVo();
                 param.setName(condition.getName());
                 param.setLabel(condition.getDisplayName());
                 param.setController(condition.getHandler(conditionModel));
                 if(condition.getConfig() != null) {
-//                    param.setIsMultiple(condition.getConfig().getBoolean("isMultiple"));
                     param.setConfig(condition.getConfig().toJSONString());
                 }
                 param.setType(condition.getType());
@@ -110,7 +85,7 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
                 
                 param.setIsEditable(0);
                 notifyPolicyParamList.add(param);
-            }           
+            }
         }
         return notifyPolicyParamList;
     }
