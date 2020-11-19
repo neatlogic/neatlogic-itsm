@@ -20,7 +20,7 @@ import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskParams;
-import codedriver.framework.process.notify.core.NotifyTriggerType;
+import codedriver.framework.process.notify.core.SlaNotifyTriggerType;
 
 @Component
 public class ProcessTaskSlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
@@ -33,7 +33,9 @@ public class ProcessTaskSlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	@Override
 	protected List<ValueTextVo> myNotifyTriggerList() {
 		List<ValueTextVo> returnList = new ArrayList<>();
-		returnList.add(new ValueTextVo(NotifyTriggerType.TIMEOUT.getTrigger(), NotifyTriggerType.TIMEOUT.getText()));
+		for (SlaNotifyTriggerType notifyTriggerType : SlaNotifyTriggerType.values()) {
+            returnList.add(new ValueTextVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText()));
+        }
 		return returnList;
 	}
 

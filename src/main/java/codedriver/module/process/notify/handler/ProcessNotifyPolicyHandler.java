@@ -21,6 +21,7 @@ import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskParams;
 import codedriver.framework.process.notify.core.NotifyTriggerType;
+import codedriver.framework.process.notify.core.SubtaskNotifyTriggerType;
 @Component
 public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 
@@ -33,11 +34,11 @@ public class ProcessNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	public List<ValueTextVo> myNotifyTriggerList() {
 		List<ValueTextVo> returnList = new ArrayList<>();
 		for (NotifyTriggerType notifyTriggerType : NotifyTriggerType.values()) {
-			if(NotifyTriggerType.TIMEOUT == notifyTriggerType) {
-				continue;
-			}
 			returnList.add(new ValueTextVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText()));
 		}
+		for (SubtaskNotifyTriggerType notifyTriggerType : SubtaskNotifyTriggerType.values()) {
+            returnList.add(new ValueTextVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText()));
+        }
 		return returnList;
 	}
 
