@@ -106,7 +106,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 					if (workerPolicyHandler != null) {
 						List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
 						/** 顺序分配处理人 **/
-						if ("sort".equals(executeMode) && CollectionUtils.isEmpty(tmpWorkerList)) {
+						if ("sort".equals(executeMode) && CollectionUtils.isNotEmpty(tmpWorkerList)) {
 							// 找到处理人，则退出
 							workerList.addAll(tmpWorkerList);
 							break;
