@@ -5,60 +5,55 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.FormHandlerBase;
 
 @Component
-public class EditorHandler extends FormHandlerBase {
+public class DynamicListHandler extends FormHandlerBase {
 
     @Override
     public String getHandler() {
-        return "formeditor";
-    }
-
-    @Override
-    public String getHandlerType(String model) {
-        if (model != null && model.equals(ProcessConditionModel.CUSTOM.getValue())) {
-            return "input";
-        }
-        return "editor";
+        return "formdynamiclist";
     }
 
     @Override
     public boolean valid(AttributeDataVo attributeDataVo, JSONObject configObj) throws AttributeValidException {
-        return false;
+        return true;
     }
 
     @Override
     public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
-        return attributeDataVo.getData();
+        if (!attributeDataVo.dataIsEmpty()) {
+            return "已更新";
+        } else {
+            return "";
+        }
     }
 
     @Override
     public String getHandlerName() {
-        return "富文本框";
+        return "动态列表";
     }
 
     @Override
     public String getIcon() {
-        return "ts-viewmodule";
+        return "ts-viewlist";
     }
 
     @Override
     public ParamType getParamType() {
-        return ParamType.STRING;
+        return null;
     }
 
     @Override
     public String getDataType() {
-        return "string";
+        return null;
     }
 
     @Override
     public boolean isConditionable() {
-        return true;
+        return false;
     }
 
     @Override
@@ -68,12 +63,12 @@ public class EditorHandler extends FormHandlerBase {
 
     @Override
     public boolean isValueable() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isFilterable() {
-        return true;
+        return false;
     }
 
     @Override
@@ -88,7 +83,7 @@ public class EditorHandler extends FormHandlerBase {
 
     @Override
     public boolean isForTemplate() {
-        return true;
+        return false;
     }
 
     @Override
@@ -96,4 +91,8 @@ public class EditorHandler extends FormHandlerBase {
         return true;
     }
 
+    @Override
+    public String getHandlerType(String model) {
+        return null;
+    }
 }

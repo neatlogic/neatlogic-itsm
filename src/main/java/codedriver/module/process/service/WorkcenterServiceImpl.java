@@ -33,7 +33,6 @@ import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessFormHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -56,6 +55,8 @@ import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
+import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
@@ -412,36 +413,37 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 }
             }
         }
-        //返回实际操作按钮
+        // 返回实际操作按钮
         /**
-         * 实质性操作按钮：如“处理”、“取消”、“催办”，根据用户权限展示 ;次要的操作按钮：如“隐藏”、“删除”，只有管理员可见
-         * 移动端按钮展示规则：
+         * 实质性操作按钮：如“处理”、“取消”、“催办”，根据用户权限展示 ;次要的操作按钮：如“隐藏”、“删除”，只有管理员可见 移动端按钮展示规则：
          * 1、工单显示时，优先展示实质性的按钮，次要的操作按钮收起到“更多”中；如果没有任何实质性的操作按钮，则将次要按钮放出来（管理员可见）；
          * 2、工单隐藏时，仅“显示”、“删除”按钮放出来，其他实质性按钮需要等工单显示后才会展示；
          */
         JSONObject action = new JSONObject();
         WorkcenterActionBuilder workcenterFirstActionBuilder = new WorkcenterActionBuilder();
-        JSONArray workcenterFirstActionArray =  workcenterFirstActionBuilder.setHandleAction(handleArray)
-            .setAbortRecoverAction(isHasAbort, isHasRecover, processTaskVo).setUrgeAction(isHasUrge, processTaskVo).build();
+        JSONArray workcenterFirstActionArray = workcenterFirstActionBuilder.setHandleAction(handleArray)
+            .setAbortRecoverAction(isHasAbort, isHasRecover, processTaskVo).setUrgeAction(isHasUrge, processTaskVo)
+            .build();
         Boolean isNeedFirstAction = false;
-        for(Object firstAction :workcenterFirstActionArray) {
+        for (Object firstAction : workcenterFirstActionArray) {
             JSONObject firstActionJson = JSONObject.parseObject(firstAction.toString());
-            if(firstActionJson.getInteger("isEnable") == 1) {
+            if (firstActionJson.getInteger("isEnable") == 1) {
                 isNeedFirstAction = true;
             }
         }
         WorkcenterActionBuilder workcenterSecondActionBuilder = new WorkcenterActionBuilder();
-        JSONArray workcenterSecondActionJsonArray =  workcenterSecondActionBuilder.setShowHideAction(processTaskVo).setDeleteAction(processTaskVo).build();
-        for(Object workcenterSecondActionObj :workcenterSecondActionJsonArray) {
+        JSONArray workcenterSecondActionJsonArray =
+            workcenterSecondActionBuilder.setShowHideAction(processTaskVo).setDeleteAction(processTaskVo).build();
+        for (Object workcenterSecondActionObj : workcenterSecondActionJsonArray) {
             JSONObject workcenterSecondActionJson = JSONObject.parseObject(workcenterSecondActionObj.toString());
-            if(ProcessTaskOperationType.SHOW.getValue().equals(workcenterSecondActionJson.getString("name"))) {
+            if (ProcessTaskOperationType.SHOW.getValue().equals(workcenterSecondActionJson.getString("name"))) {
                 isNeedFirstAction = false;
             }
         }
-        if(isNeedFirstAction) {
+        if (isNeedFirstAction) {
             action.put("firstActionList", workcenterFirstActionArray);
             action.put("secondActionList", workcenterSecondActionJsonArray);
-        }else {
+        } else {
             action.put("firstActionList", workcenterSecondActionJsonArray);
             action.put("secondActionList", new JSONArray());
         }
@@ -517,10 +519,12 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         List<ProcessTaskFormAttributeDataVo> formAttributeDataList =
             processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskFormAttributeDataVo attributeData : formAttributeDataList) {
-            if (attributeData.getType().equals(ProcessFormHandlerType.FORMCASCADELIST.getHandler())
+            IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(attributeData.getType());
+            if (formHandler != null && !formHandler.isConditionable()) {
+                /*if (attributeData.getType().equals(ProcessFormHandlerType.FORMCASCADELIST.getHandler())
                 || attributeData.getType().equals(ProcessFormHandlerType.FORMDIVIDER.getHandler())
                 || attributeData.getType().equals(ProcessFormHandlerType.FORMDYNAMICLIST.getHandler())
-                || attributeData.getType().equals(ProcessFormHandlerType.FORMSTATICLIST.getHandler())) {
+                || attributeData.getType().equals(ProcessFormHandlerType.FORMSTATICLIST.getHandler())) {*/
                 continue;
             }
             JSONObject formJson = new JSONObject();
@@ -529,7 +533,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             if (dataObj == null) {
                 continue;
             }
-            formJson.put("value_" + ProcessFormHandlerType.getDataType(attributeData.getType()), dataObj);
+            formJson.put("value_" + formHandler.getDataType(), dataObj);
             formArray.add(formJson);
         }
 

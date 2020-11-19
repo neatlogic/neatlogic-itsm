@@ -10,16 +10,11 @@ import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.FormHandlerBase;
 
 @Component
-public class TextHandler extends FormHandlerBase {
+public class LinkHandler extends FormHandlerBase {
 
     @Override
     public String getHandler() {
-        return "forminput";
-    }
-
-    @Override
-    public String getHandlerType(String model) {
-        return "input";
+        return "formlink";
     }
 
     @Override
@@ -34,7 +29,7 @@ public class TextHandler extends FormHandlerBase {
 
     @Override
     public String getHandlerName() {
-        return "文本框";
+        return "链接";
     }
 
     @Override
@@ -54,7 +49,7 @@ public class TextHandler extends FormHandlerBase {
 
     @Override
     public boolean isConditionable() {
-        return true;
+        return false;
     }
 
     @Override
@@ -64,12 +59,12 @@ public class TextHandler extends FormHandlerBase {
 
     @Override
     public boolean isValueable() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isFilterable() {
-        return true;
+        return false;
     }
 
     @Override
@@ -84,12 +79,17 @@ public class TextHandler extends FormHandlerBase {
 
     @Override
     public boolean isForTemplate() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isAudit() {
-        return true;
+        return false;
+    }
+
+    @Override
+    public String getHandlerType(String model) {
+        return null;
     }
 
 }

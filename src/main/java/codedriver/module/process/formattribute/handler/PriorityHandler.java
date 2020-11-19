@@ -7,19 +7,14 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
-import codedriver.framework.process.formattribute.core.FormHandlerBase;
+import codedriver.framework.process.formattribute.core.ControlHandlerBase;
 
 @Component
-public class TextHandler extends FormHandlerBase {
+public class PriorityHandler extends ControlHandlerBase {
 
     @Override
     public String getHandler() {
-        return "forminput";
-    }
-
-    @Override
-    public String getHandlerType(String model) {
-        return "input";
+        return "formpriority";
     }
 
     @Override
@@ -34,12 +29,12 @@ public class TextHandler extends FormHandlerBase {
 
     @Override
     public String getHandlerName() {
-        return "文本框";
+        return "修改优先级";
     }
 
     @Override
     public String getIcon() {
-        return "ts-textmodule";
+        return "ts-user";
     }
 
     @Override
@@ -54,7 +49,7 @@ public class TextHandler extends FormHandlerBase {
 
     @Override
     public boolean isConditionable() {
-        return true;
+        return false;
     }
 
     @Override
@@ -64,12 +59,12 @@ public class TextHandler extends FormHandlerBase {
 
     @Override
     public boolean isValueable() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isFilterable() {
-        return true;
+        return false;
     }
 
     @Override
@@ -84,12 +79,17 @@ public class TextHandler extends FormHandlerBase {
 
     @Override
     public boolean isForTemplate() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isAudit() {
-        return true;
+        return false;
+    }
+
+    @Override
+    public String getHandlerType(String model) {
+        return null;
     }
 
 }
