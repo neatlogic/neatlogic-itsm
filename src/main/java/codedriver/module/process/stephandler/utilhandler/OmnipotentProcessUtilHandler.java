@@ -282,6 +282,16 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		notifyPolicyObj.put("handler", StepNotifyPolicyHandler.class.getName());
 		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
 		
+		/** 动作 **/
+		JSONArray actionList = configObj.getJSONArray("actionList");
+		if(actionList == null) {
+		    actionList = new JSONArray();
+		}
+        resultObj.put("actionList", actionList);
+        JSONObject actionConfig = new JSONObject();
+		actionConfig.put("handler", StepNotifyPolicyHandler.class.getName());
+		actionConfig.put("integrationHandler", "");
+		resultObj.put("actionConfig", actionConfig);
 		return resultObj;
 	}
 

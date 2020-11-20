@@ -181,7 +181,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		}
 		notifyPolicyObj.put("handler", StepNotifyPolicyHandler.class.getName());
 		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
-		
+
 		return resultObj;
 	}
 
