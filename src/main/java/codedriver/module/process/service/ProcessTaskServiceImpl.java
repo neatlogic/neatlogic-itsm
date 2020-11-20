@@ -1012,6 +1012,72 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     
     /**
      * 
+     * @Time:2020年4月2日
+     * @Description: 检查当前用户是否配置该权限
+     * @param processTaskStepVo
+     * @param operationType 
+     * @return boolean
+     */
+    @Override
+    public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType) {
+        JSONArray authorityList = null;
+        String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+        if(StringUtils.isNotBlank(config)) {
+            JSONObject configObj = JSONObject.parseObject(config);
+            if(MapUtils.isNotEmpty(configObj)) {
+                JSONObject process = configObj.getJSONObject("process");
+                if(MapUtils.isNotEmpty(process)) {
+                    JSONObject processConfig = process.getJSONObject("processConfig");
+                    if(MapUtils.isNotEmpty(processConfig)) {
+                        authorityList = processConfig.getJSONArray("authorityList");
+                    }
+                }
+            }
+        }
+
+        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
+        if (CollectionUtils.isNotEmpty(authorityList)) {
+            for (int i = 0; i < authorityList.size(); i++) {
+                JSONObject authorityObj = authorityList.getJSONObject(i);
+                String action = authorityObj.getString("action");
+                if(operationType.getValue().equals(action)) {
+                    JSONArray acceptList = authorityObj.getJSONArray("acceptList");
+                    if (CollectionUtils.isNotEmpty(acceptList)) {
+                        List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+                        for (int j = 0; j < acceptList.size(); j++) {
+                            String accept = acceptList.getString(j);
+                            String[] split = accept.split("#");
+                            if (GroupSearch.COMMON.getValue().equals(split[0])) {
+                                if (UserType.ALL.getValue().equals(split[1])) {
+                                    return true;
+                                }
+                            } else if (ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
+                                if(processTaskVo.getCurrentUserProcessUserTypeList().contains(split[1])) {
+                                    return true;
+                                }
+                            } else if (GroupSearch.USER.getValue().equals(split[0])) {
+                                if (UserContext.get().getUserUuid(true).equals(split[1])) {
+                                    return true;
+                                }
+                            } else if (GroupSearch.TEAM.getValue().equals(split[0])) {
+                                if (currentUserTeamList.contains(split[1])) {
+                                    return true;
+                                }
+                            } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
+                                if (UserContext.get().getRoleUuidList().contains(split[1])) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * 
      * @Time:2020年4月3日
      * @Description: 获取工单中当前用户能撤回的步骤列表
      * @param processTaskId

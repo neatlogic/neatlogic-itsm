@@ -84,15 +84,18 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo) -> {
             // 工单状态为进行中的才能终止
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
-                    processTaskVo.getStepList().addAll(processTaskService.getProcessTaskStepVoListByProcessTask(processTaskVo));
-                }
-                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                    if (processTaskStep.getIsActive().intValue() == 1) {
-                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK)) {
-                            return true;
-                        }
-                    }
+//                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+//                    processTaskVo.getStepList().addAll(processTaskService.getProcessTaskStepVoListByProcessTask(processTaskVo));
+//                }
+//                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+//                    if (processTaskStep.getIsActive().intValue() == 1) {
+//                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+//                            return true;
+//                        }
+//                    }
+//                }
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                    return true;
                 }
             }          
             return false;
@@ -101,15 +104,18 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK, (processTaskVo, processTaskStepVo) -> {
             // 工单状态为已终止的才能恢复
             if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
-                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
-                    processTaskVo.getStepList().addAll(processTaskService.getProcessTaskStepVoListByProcessTask(processTaskVo));
-                }
-                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                    if (processTaskStep.getIsActive().intValue() == -1) {
-                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK)) {
-                            return true;
-                        }
-                    }
+//                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+//                    processTaskVo.getStepList().addAll(processTaskService.getProcessTaskStepVoListByProcessTask(processTaskVo));
+//                }
+//                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+//                    if (processTaskStep.getIsActive().intValue() == -1) {
+//                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+//                            return true;
+//                        }
+//                    }
+//                }
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                    return true;
                 }
             }
             return false;
@@ -117,15 +123,18 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         
         operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
-                    processTaskVo.getStepList().addAll(processTaskService.getProcessTaskStepVoListByProcessTask(processTaskVo));
-                }
-                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                    if (processTaskStep.getIsActive().intValue() == 1) {
-                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.UPDATE)) {
-                            return true;
-                        }
-                    }
+//                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+//                    processTaskVo.getStepList().addAll(processTaskService.getProcessTaskStepVoListByProcessTask(processTaskVo));
+//                }
+//                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+//                    if (processTaskStep.getIsActive().intValue() == 1) {
+//                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.UPDATE)) {
+//                            return true;
+//                        }
+//                    }
+//                }
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                    return true;
                 }
             }           
             return false;
@@ -133,15 +142,18 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         
         operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
-                    processTaskVo.getStepList().addAll(processTaskService.getProcessTaskStepVoListByProcessTask(processTaskVo));
-                }
-                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                    if (processTaskStep.getIsActive().intValue() == 1) {
-                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE)) {
-                            return true;
-                        }
-                    }
+//                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+//                    processTaskVo.getStepList().addAll(processTaskService.getProcessTaskStepVoListByProcessTask(processTaskVo));
+//                }
+//                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+//                    if (processTaskStep.getIsActive().intValue() == 1) {
+//                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, ProcessTaskOperationType.URGE)) {
+//                            return true;
+//                        }
+//                    }
+//                }
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                    return true;
                 }
             }            
             return false;
