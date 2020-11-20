@@ -14,7 +14,6 @@ import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.notify.handler.TaskStepNotifyPolicyHandler;
 import codedriver.framework.process.notify.handler.TaskNotifyPolicyHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
@@ -137,7 +136,7 @@ public class EndProcessUtilHandler extends ProcessStepUtilHandlerBase {
         }
         JSONObject actionConfig = new JSONObject();
         actionConfig.put("actionList", actionList);
-        actionConfig.put("handler", TaskStepNotifyPolicyHandler.class.getName());
+        actionConfig.put("handler", TaskNotifyPolicyHandler.class.getName());
         actionConfig.put("integrationHandler", "");
         resultObj.put("actionConfig", actionConfig);
         return resultObj;
