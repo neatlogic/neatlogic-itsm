@@ -14,7 +14,6 @@ import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.notify.handler.TaskStepNotifyPolicyHandler;
 import codedriver.framework.process.notify.handler.TaskNotifyPolicyHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
@@ -90,37 +89,6 @@ public class EndProcessUtilHandler extends ProcessStepUtilHandlerBase {
         }
         resultObj.put("authorityList", authorityArray);
         
-        /** 按钮映射列表 **/
-//        JSONArray customButtonArray = new JSONArray();
-//        ProcessTaskOperationType[] stepButtons = {
-//                ProcessTaskOperationType.ABORTPROCESSTASK, 
-//                ProcessTaskOperationType.RECOVERPROCESSTASK
-//        };
-//        for(ProcessTaskOperationType stepButton : stepButtons) {
-//            customButtonArray.add(new JSONObject() {{
-//                this.put("name", stepButton.getValue());
-//                this.put("customText", stepButton.getText());
-//                this.put("value", "");
-//            }});
-//        }
-//        
-//        JSONArray customButtonList = configObj.getJSONArray("customButtonList");
-//        if(CollectionUtils.isNotEmpty(customButtonList)) {
-//            Map<String, String> customButtonMap = new HashMap<>();
-//            for(int i = 0; i < customButtonList.size(); i++) {
-//                JSONObject customButton = customButtonList.getJSONObject(i);
-//                customButtonMap.put(customButton.getString("name"), customButton.getString("value"));
-//            }
-//            for(int i = 0; i < customButtonArray.size(); i++) {
-//                JSONObject customButton = customButtonArray.getJSONObject(i);
-//                String value = customButtonMap.get(customButton.getString("name"));
-//                if(StringUtils.isNotBlank(value)) {
-//                    customButton.put("value", value);
-//                }
-//            }
-//        }
-//        resultObj.put("customButtonList", customButtonArray);
-        
         /** 通知 **/
         JSONObject notifyPolicyObj = new JSONObject();
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
@@ -131,13 +99,11 @@ public class EndProcessUtilHandler extends ProcessStepUtilHandlerBase {
         resultObj.put("notifyPolicyConfig", notifyPolicyObj);
         
         /** 动作 **/
-        JSONArray actionList = configObj.getJSONArray("actionList");
-        if(actionList == null) {
-            actionList = new JSONArray();
+        JSONObject actionConfig = configObj.getJSONObject("actionConfig");
+        if(actionConfig == null) {
+            actionConfig = new JSONObject();
         }
-        JSONObject actionConfig = new JSONObject();
-        actionConfig.put("actionList", actionList);
-        actionConfig.put("handler", TaskStepNotifyPolicyHandler.class.getName());
+        actionConfig.put("handler", TaskNotifyPolicyHandler.class.getName());
         actionConfig.put("integrationHandler", "");
         resultObj.put("actionConfig", actionConfig);
         return resultObj;

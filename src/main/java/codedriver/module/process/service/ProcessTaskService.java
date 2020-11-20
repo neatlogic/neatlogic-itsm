@@ -188,6 +188,17 @@ public interface ProcessTaskService {
      * @return boolean
      */
 	public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
+	
+	/**
+     * 
+     * @Time:2020年4月2日
+     * @Description: 检查当前用户是否配置该权限
+     * @param processTaskVo
+     * @param processTaskStepVo
+     * @param operationType 
+     * @return boolean
+     */
+    public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType);
 	/**
      * 
      * @Time:2020年4月3日
