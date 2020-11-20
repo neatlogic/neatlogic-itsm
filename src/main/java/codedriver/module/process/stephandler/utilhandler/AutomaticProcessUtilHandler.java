@@ -18,7 +18,7 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.notify.handler.StepNotifyPolicyHandler;
+import codedriver.framework.process.notify.handler.TaskStepNotifyPolicyHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
@@ -179,7 +179,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
 			notifyPolicyObj.putAll(notifyPolicyConfig);
 		}
-		notifyPolicyObj.put("handler", StepNotifyPolicyHandler.class.getName());
+		notifyPolicyObj.put("handler", TaskStepNotifyPolicyHandler.class.getName());
 		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
 
 		return resultObj;
