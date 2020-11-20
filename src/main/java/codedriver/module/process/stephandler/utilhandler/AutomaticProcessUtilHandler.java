@@ -18,10 +18,10 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.notify.handler.StepNotifyPolicyHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
-import codedriver.module.process.notify.handler.ProcessNotifyPolicyHandler;
 @Service
 public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 
@@ -111,10 +111,9 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		JSONArray authorityArray = new JSONArray();
 		ProcessTaskOperationType[] stepActions = {
 				ProcessTaskOperationType.VIEW, 
-				//ProcessTaskOperationType.ABORT, 
 				ProcessTaskOperationType.TRANSFER, 
-				ProcessTaskOperationType.UPDATE, 
-				ProcessTaskOperationType.URGE
+//				ProcessTaskOperationType.UPDATE, 
+//				ProcessTaskOperationType.URGE
 		};
 		for(ProcessTaskOperationType stepAction : stepActions) {
 			authorityArray.add(new JSONObject() {{
@@ -146,11 +145,8 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		ProcessTaskOperationType[] stepButtons = {
 				ProcessTaskOperationType.COMPLETE, 
 				ProcessTaskOperationType.BACK, 
-				//ProcessTaskOperationType.COMMENT, 
 				ProcessTaskOperationType.TRANSFER, 
-				ProcessTaskOperationType.START//,
-				//ProcessTaskOperationType.ABORT, 
-				//ProcessTaskOperationType.RECOVER
+				ProcessTaskOperationType.START
 		};
 		for(ProcessTaskOperationType stepButton : stepButtons) {
 			customButtonArray.add(new JSONObject() {{
@@ -159,22 +155,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 				this.put("value", "");
 			}});
 		}
-		/** 子任务按钮映射列表 **/
-//		ProcessTaskOperationType[] subtaskButtons = {
-//				ProcessTaskOperationType.ABORTSUBTASK, 
-//				ProcessTaskOperationType.COMMENTSUBTASK, 
-//				ProcessTaskOperationType.COMPLETESUBTASK, 
-//				ProcessTaskOperationType.CREATESUBTASK, 
-//				ProcessTaskOperationType.REDOSUBTASK, 
-//				ProcessTaskOperationType.EDITSUBTASK
-//		};
-//		for(ProcessTaskOperationType subtaskButton : subtaskButtons) {
-//			customButtonArray.add(new JSONObject() {{
-//				this.put("name", subtaskButton.getValue());
-//				this.put("customText", subtaskButton.getText() + "(子任务)");
-//				this.put("value", "");
-//			}});
-//		}
+
 		JSONArray customButtonList = configObj.getJSONArray("customButtonList");
 		if(CollectionUtils.isNotEmpty(customButtonList)) {
 			Map<String, String> customButtonMap = new HashMap<>();
@@ -198,7 +179,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
 			notifyPolicyObj.putAll(notifyPolicyConfig);
 		}
-		notifyPolicyObj.put("handler", ProcessNotifyPolicyHandler.class.getName());
+		notifyPolicyObj.put("handler", StepNotifyPolicyHandler.class.getName());
 		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
 		
 		return resultObj;
