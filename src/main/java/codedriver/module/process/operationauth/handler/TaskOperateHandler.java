@@ -67,9 +67,6 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 } else if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, UserContext.get().getUserUuid(), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
                     return true;
                 }
-//                else if (processTaskVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.WORKER.getValue())) {
-//                    return true;
-//                }
             }
             return false;
         });
@@ -127,9 +124,6 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, UserContext.get().getUserUuid(), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
                 return true;
             }
-//            if (processTaskVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.WORKER.getValue())) {
-//                return true;
-//            }
             return false;
         });
         

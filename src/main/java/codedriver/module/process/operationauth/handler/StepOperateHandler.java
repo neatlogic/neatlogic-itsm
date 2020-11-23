@@ -47,12 +47,7 @@ public class StepOperateHandler implements IOperationAuthHandler {
                 return true;
             } else if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid())) > 0) {
                 return true;
-            } 
-//            else if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
-//                return true;
-//            }else if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MINOR.getValue())) {
-//                return true;
-//            }
+            }
             return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.VIEW);
         });
 	    
@@ -74,12 +69,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
                             return true;
                         }
                     }
-//                    if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.WORKER.getValue())) {
-//                        if(!processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
-//                         // 没有主处理人时是accept
-//                            return true;
-//                        }
-//                    }
                 }
             }
             return false;
@@ -95,12 +84,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
                             return true;
                         }
                     }
-//                    if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.WORKER.getValue())) {
-//                        if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
-//                            // 有主处理人时是start
-//                            return true;
-//                        }
-//                    }
                 }
             }
             return false;
@@ -109,7 +92,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.COMPLETE, (processTaskVo, processTaskStepVo) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    //if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
                     if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid(), ProcessUserType.MAJOR.getValue())) > 0) {
                         List<ProcessTaskStepVo> forwardNextStepList = processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId());
                         if(CollectionUtils.isNotEmpty(forwardNextStepList)) {
@@ -126,7 +108,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.BACK, (processTaskVo, processTaskStepVo) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    //if (processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
                     if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid(), ProcessUserType.MAJOR.getValue())) > 0) {
                         List<ProcessTaskStepVo> backwardNextStepList = processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId());
                         if(CollectionUtils.isNotEmpty(backwardNextStepList)) {
@@ -142,7 +123,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.SAVE, (processTaskVo, processTaskStepVo) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    //if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
                     if(processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid(), ProcessUserType.MAJOR.getValue())) > 0) {
                         return true;
                     }
@@ -154,7 +134,6 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.COMMENT, (processTaskVo, processTaskStepVo) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    //if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MAJOR.getValue())) {
                     if(processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid(), ProcessUserType.MAJOR.getValue())) > 0) {
                         return true;
                     }

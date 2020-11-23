@@ -55,7 +55,6 @@ public class ProcessTaskStepStatusListApi extends PrivateApiComponentBase {
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
 	        for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 	            processTaskService.setProcessTaskStepUser(processTaskStepVo);
-//	            ProcessStepUtilHandlerFactory.getHandler().setProcessTaskStepConfig(processTaskStepVo);
 			}
 		}	
 		return processTaskStepList;

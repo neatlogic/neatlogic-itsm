@@ -66,7 +66,6 @@ public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase {
             UserContext.get().setUserId(null);
             UserContext.get().setUserName(null);
             UserContext.get().setRoleUuidList(roleUuidList);
-//            processTaskVo.getCurrentUserProcessUserTypeList().clear();
             Set<ProcessTaskStepVo> retractableStepList = processTaskService.getRetractableStepListByProcessTask(processTaskVo);
             for(ProcessTaskStepVo processTaskStepVo : retractableStepList) {
                 if(!resultList.contains(processTaskStepVo)) {

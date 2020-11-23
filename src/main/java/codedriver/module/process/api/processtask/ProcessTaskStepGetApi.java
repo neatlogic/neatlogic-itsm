@@ -202,8 +202,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(processStepUtilHandler == null) {
                 throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
             }
-            //获取步骤信息
-//            processStepUtilHandler.setProcessTaskStepConfig(processTaskStepVo);
             processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
             //步骤评论列表
             List<String> typeList = new ArrayList<>();

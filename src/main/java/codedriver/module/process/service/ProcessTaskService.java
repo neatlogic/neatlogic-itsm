@@ -35,8 +35,6 @@ public interface ProcessTaskService {
 	 */
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
 
-//	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId);
-
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo, AutomaticConfigVo automaticConfig,
 			JSONObject data, String type);
 
@@ -227,8 +225,6 @@ public interface ProcessTaskService {
      */
     public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo);
     
-//    public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo);
-    
     public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception;
 
     public List<ProcessTaskStepRemindVo> getProcessTaskStepRemindListByProcessTaskStepId(Long processTaskStepId);
@@ -242,8 +238,6 @@ public interface ProcessTaskService {
     * @return ProcessTaskStepVo
      */
     public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
-
-//    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskId(Long processTaskId, List<String> typeList);
 
     /**
     * @Author 89770
