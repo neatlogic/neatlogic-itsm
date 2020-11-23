@@ -35,8 +35,6 @@ public interface ProcessTaskService {
 	 */
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
 
-	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId);
-
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo, AutomaticConfigVo automaticConfig,
 			JSONObject data, String type);
 
@@ -187,7 +185,7 @@ public interface ProcessTaskService {
      * @param operationType 
      * @return boolean
      */
-	public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
+	public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter, ProcessTaskOperationType operationType);
 	
 	/**
      * 
@@ -216,7 +214,7 @@ public interface ProcessTaskService {
      * @param processTaskStepId 已激活的步骤id
      * @return List<ProcessTaskStepVo>
      */
-    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(List<ProcessTaskStepVo> processTaskStepList, Long processTaskStepId);
+    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo, Long processTaskStepId);
 
 	/**
      * 
@@ -226,8 +224,6 @@ public interface ProcessTaskService {
      * @return List<ProcessTaskStepVo>
      */
     public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo);
-    
-    public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo);
     
     public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception;
 
@@ -242,8 +238,6 @@ public interface ProcessTaskService {
     * @return ProcessTaskStepVo
      */
     public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
-
-//    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskId(Long processTaskId, List<String> typeList);
 
     /**
     * @Author 89770

@@ -11,7 +11,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -56,7 +55,6 @@ public class ProcessTaskStepStatusListApi extends PrivateApiComponentBase {
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
 	        for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 	            processTaskService.setProcessTaskStepUser(processTaskStepVo);
-	            ProcessStepUtilHandlerFactory.getHandler().setProcessTaskStepConfig(processTaskStepVo);
 			}
 		}	
 		return processTaskStepList;

@@ -185,7 +185,6 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         if(startProcessStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
-        startProcessStepUtilHandler.setProcessTaskStepConfig(startProcessTaskStepVo);
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
 	}
@@ -199,8 +198,6 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         if(processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
-        //获取步骤配置信息
-        processStepUtilHandler.setProcessTaskStepConfig(processTaskStepVo);
         processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
         //步骤评论列表
         List<String> typeList = new ArrayList<>();
