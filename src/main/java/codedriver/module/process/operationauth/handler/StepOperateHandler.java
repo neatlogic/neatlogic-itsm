@@ -53,13 +53,13 @@ public class StepOperateHandler implements IOperationAuthHandler {
 //            }else if(processTaskStepVo.getCurrentUserProcessUserTypeList().contains(ProcessUserType.MINOR.getValue())) {
 //                return true;
 //            }
-            return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, ProcessTaskOperationType.VIEW);
+            return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.VIEW);
         });
 	    
 	    operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFER, (processTaskVo, processTaskStepVo) -> {
             // 步骤状态为已激活的才能转交
             if (processTaskStepVo.getIsActive() == 1) {
-                return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, ProcessTaskOperationType.TRANSFER);
+                return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.TRANSFER);
             }
             return false;
 	    });
@@ -166,7 +166,7 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.PAUSE, (processTaskVo, processTaskStepVo) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-                    return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, ProcessTaskOperationType.PAUSE);
+                    return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.PAUSE);
                 }              
             }
             return false;
@@ -174,7 +174,7 @@ public class StepOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.RECOVER, (processTaskVo, processTaskStepVo) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.HANG.getValue().equals(processTaskStepVo.getStatus())) {
-                    return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, ProcessTaskOperationType.PAUSE);
+                    return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.PAUSE);
                 }              
             }
             return false;
@@ -189,7 +189,7 @@ public class StepOperateHandler implements IOperationAuthHandler {
                 Set<ProcessTaskStepVo> retractableStepSet = new HashSet<>();
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        retractableStepSet.addAll(processTaskService.getRetractableStepListByProcessTaskStepId(processTaskVo.getStepList(), processTaskStep.getId()));
+                        retractableStepSet.addAll(processTaskService.getRetractableStepListByProcessTaskStepId(processTaskVo, processTaskStep.getId()));
                     }
                 }
                 if (CollectionUtils.isNotEmpty(retractableStepSet)) {
