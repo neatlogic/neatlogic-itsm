@@ -203,7 +203,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
             }
             //获取步骤信息
-            processStepUtilHandler.setProcessTaskStepConfig(processTaskStepVo);
+//            processStepUtilHandler.setProcessTaskStepConfig(processTaskStepVo);
             processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
             //步骤评论列表
             List<String> typeList = new ArrayList<>();
@@ -219,7 +219,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                 List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
                 if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-                    Map<String, String> customButtonMap = handler.getCustomButtonMapByProcessTaskStepId(processTaskStepVo.getId());
+                    Map<String, String> customButtonMap = handler.getCustomButtonMapByConfigHashAndHandler(processTaskStepVo.getConfigHash(), processTaskStepVo.getHandler());
                     for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
                         String currentUser = UserContext.get().getUserUuid(true);
                         if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
