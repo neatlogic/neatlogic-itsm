@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -112,7 +113,6 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
-import codedriver.framework.util.JSONUtil;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 
@@ -962,7 +962,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter, ProcessTaskOperationType operationType) {
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-        JSONArray authorityList = JSONUtil.getJSONArray(stepConfig, "authorityList");
+        JSONArray authorityList = (JSONArray)JSONPath.read(stepConfig, "authorityList");
         if(CollectionUtils.isEmpty(authorityList)) {
             IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
             if(processStepUtilHandler == null) {
@@ -970,7 +970,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
             ProcessStepHandlerVo processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
             JSONObject globalConfig = processStepUtilHandler.makeupConfig(processStepHandlerConfig != null ? processStepHandlerConfig.getConfig() : null);
-            authorityList = JSONUtil.getJSONArray(globalConfig, "authorityList");
+            authorityList = (JSONArray)JSONPath.read(globalConfig.toJSONString(), "authorityList");
         }
         
         // 如果步骤自定义权限设置为空，则用组件的全局权限设置
@@ -991,7 +991,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType) {
         String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-        JSONArray authorityList = JSONUtil.getJSONArray(config, "process.processConfig.authorityList");
+        JSONArray authorityList = (JSONArray)JSONPath.read(config, "process.processConfig.authorityList");
         // 如果步骤自定义权限设置为空，则用组件的全局权限设置
         if (CollectionUtils.isNotEmpty(authorityList)) {
             return checkOperationAuthIsConfigured(processTaskVo.getId(), null, processTaskVo.getOwner(), processTaskVo.getReporter(), operationType, authorityList);
