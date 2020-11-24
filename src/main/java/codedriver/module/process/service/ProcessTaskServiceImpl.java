@@ -1118,11 +1118,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
-        for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
-            if (processTaskStep.getIsActive().intValue() == 1) {
-                if(checkOperationAuthIsConfigured(processTaskStep, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.URGE)) {
-                    resultList.add(processTaskStep);
+        if(checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.URGE)) {
+            List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
+            for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
+                if (processTaskStep.getIsActive().intValue() == 1) {
+                        resultList.add(processTaskStep);
                 }
             }
         }
