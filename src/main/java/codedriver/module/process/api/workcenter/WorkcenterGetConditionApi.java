@@ -3,6 +3,9 @@ package codedriver.module.process.api.workcenter;
 import java.util.Collections;
 import java.util.Comparator;
 
+import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.module.process.condition.handler.ProcessTaskIsShowCondition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,11 +68,13 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 		//固定字段条件
 		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
 			//不支持endTime过滤，如果是简单模式 title、id、content 不返回
+			//没有工单管理权限则不显示“是否隐藏工单”选项
 			if(conditionModel.equals(ProcessConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
 					||condition.getName().equals(ProcessWorkcenterField.ID.getValue())||condition.getName().equals(ProcessWorkcenterField.CONTENT.getValue()))
 					||condition.getName().equals(ProcessWorkcenterField.ENDTIME.getValue())
 					||ProcessWorkcenterField.getValue(condition.getName())== null
 					||!(condition instanceof IProcessTaskCondition)
+					|| (!AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName()) && (condition instanceof ProcessTaskIsShowCondition))
 					) {
 				continue;
 			}
