@@ -251,6 +251,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         }
         task.put("formAttributeDataList",formAttributeDataList);
         task.put("hidecomponentList",new JSONArray());
+        task.put("readcomponentList",new JSONArray());
         return task;
     }
 
