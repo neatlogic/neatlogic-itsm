@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -75,6 +76,8 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         if(processMapper.checkProcessIsExists(processUuid) == 0) {
             throw new ProcessNotFoundException(processUuid);
         }
+        boolean isShowAllAttr = false;
+        List<String> showAttrs = new ArrayList<>();
         /** 判断要不要生成“描述”列
          * 1、从stepList获取开始节点
          * 2、从connectionList获取开始节点后的第一个节点
@@ -118,7 +121,35 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
                 }
 
                 /** 获取可编辑的表单属性UUID */
-
+                JSONObject formConfig = processConfig.getJSONObject("formConfig");
+                if(MapUtils.isNotEmpty(formConfig)){
+                    JSONArray authorityList = formConfig.getJSONArray("authorityList");
+                    if(CollectionUtils.isNotEmpty(authorityList)){
+                        for(Object o : authorityList){
+                            JSONObject object = JSONObject.parseObject(o.toString());
+                            String action = object.getString("action");
+                            JSONArray attributeUuidList = object.getJSONArray("attributeUuidList");
+                            JSONArray processStepUuidList = object.getJSONArray("processStepUuidList");
+                            String type = object.getString("type");
+                            /** authorityList中存在可编辑与隐藏的表单属性配置
+                             * 取可编辑的配置，且只取以组件为单位的属性
+                             * 如果发现有配置为"all"的配置项，则退出循环
+                             */
+                            if(CollectionUtils.isNotEmpty(processStepUuidList) && processStepUuidList.contains(firstStepUuid)
+                            && StringUtils.isNotBlank(action) && "edit".equals(action)
+                            && StringUtils.isNotBlank(type) && "component".equals(type)
+                            && CollectionUtils.isNotEmpty(attributeUuidList)){
+                                if(attributeUuidList.size() == 1 && "all".equals(attributeUuidList.get(0).toString())){
+                                    isShowAllAttr = true;
+                                    showAttrs.clear();
+                                    break;
+                                }else{
+                                    showAttrs.addAll(attributeUuidList.toJavaList(String.class));
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -132,11 +163,19 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
             }
         }
         if(CollectionUtils.isNotEmpty(formAttributeList)){
-            for(FormAttributeVo vo : formAttributeList){
-                if(vo.isRequired()){
-                    vo.setLabel(vo.getLabel() + "(必填)");
+            Iterator<FormAttributeVo> iterator = formAttributeList.iterator();
+            while (iterator.hasNext()){
+                FormAttributeVo next = iterator.next();
+                /**
+                 * 默认所有表单属性都是只读的
+                 * 如果有配置所有属性可编辑，或者发现某些属性可编辑，则列在表头上
+                 */
+                if(isShowAllAttr || (CollectionUtils.isNotEmpty(showAttrs) && showAttrs.contains(next.getUuid()))){
+                    if(next.isRequired()){
+                        next.setLabel(next.getLabel() + "(必填)");
+                    }
+                    headerList.add(next.getLabel());
                 }
-                headerList.add(vo.getLabel());
             }
         }
         headerList.add(0,"标题(必填)");
