@@ -8,14 +8,19 @@ import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.framework.util.ExcelUtil;
+import codedriver.module.process.formattribute.handler.DivideHandler;
+import codedriver.module.process.formattribute.handler.LinkHandler;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -121,12 +126,55 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             if(processMapper.checkProcessIsExists(processUuid) == 0) {
                 throw new ProcessNotFoundException(processUuid);
             }
+
+            ProcessVo process = processMapper.getProcessBaseInfoByUuid(processUuid);
+            JSONObject configObj = process.getConfigObj();
+            boolean allAttrCanEdit = false;
+            Set<String> showAttrs = new HashSet<>();
+            Set<Integer> showAttrRows = new HashSet<>();
+            JSONArray readComponentList = new JSONArray();
+            /** 判断是否所有表单属性可编辑&获取可编辑的表单属性或行号 */
+            allAttrCanEdit = ProcessConfigUtil.getEditableFormAttr(configObj, showAttrs, showAttrRows);
+
             List<FormAttributeVo> formAttributeList = null;
             ProcessFormVo processForm = processMapper.getProcessFormByProcessUuid(processUuid);
             if(processForm != null && formMapper.checkFormIsExists(processForm.getFormUuid()) > 0){
                 FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
                 if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
                     formAttributeList = formVersionVo.getFormAttributeList();
+                    /** 如果不是所有属性都可编辑且配置了可编辑的行，那么就根据行号查找可编辑的属性 */
+                    String formConfig = formVersionVo.getFormConfig();
+                    JSONArray tableList = (JSONArray) JSONPath.read(formConfig, "sheetsConfig.tableList");
+                    if(!allAttrCanEdit && CollectionUtils.isNotEmpty(tableList) && CollectionUtils.isNotEmpty(showAttrRows)){
+                        List<Integer> list = showAttrRows.stream().sorted().collect(Collectors.toList());
+                        for(Integer i : list){
+                            JSONArray array = JSONArray.parseArray(tableList.get(i-1).toString());
+                            for(Object o : array){
+                                if(JSONObject.parseObject(o.toString()) != null && JSONObject.parseObject(o.toString()).getJSONObject("component") != null){
+                                    String handler = JSONPath.read(o.toString(),"component.handler").toString();
+                                    /** 过滤掉分割线与链接 */
+                                    if(!(FormAttributeHandlerFactory.getHandler(handler) instanceof DivideHandler)
+                                            && !(FormAttributeHandlerFactory.getHandler(handler) instanceof LinkHandler))
+                                        showAttrs.add(JSONObject.parseObject(o.toString()).getJSONObject("component").getString("uuid"));
+                                }
+                            }
+                        }
+                    }
+                    if(CollectionUtils.isNotEmpty(formAttributeList)){
+                        if(!allAttrCanEdit){
+                            Iterator<FormAttributeVo> iterator = formAttributeList.iterator();
+                            while (iterator.hasNext()){
+                                FormAttributeVo next = iterator.next();
+                                /** 过滤掉分割线与链接 */
+                                if((FormAttributeHandlerFactory.getHandler(next.getHandler()) instanceof DivideHandler)
+                                        || (FormAttributeHandlerFactory.getHandler(next.getHandler()) instanceof LinkHandler)
+                                        || !(CollectionUtils.isNotEmpty(showAttrs) && showAttrs.contains(next.getUuid()))){
+                                    iterator.remove();
+                                    readComponentList.add(next.getUuid());
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -151,7 +199,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 int successCount = 0;
                 /** 上报工单 */
                 for(Map<String, String> map : contentList){
-                    JSONObject task = parseTask(channelUuid, formAttributeList, map);
+                    JSONObject task = parseTask(channelUuid, formAttributeList, map,readComponentList);
                     ProcessTaskImportAuditVo auditVo = new ProcessTaskImportAuditVo();
                     auditVo.setChannelUuid(channelUuid);
                     auditVo.setTitle(task.getString("title"));
@@ -201,9 +249,10 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
      * @param channelUuid
      * @param formAttributeList
      * @param map
+     * @param readComponentList 只读的表单属性
      * @return
      */
-    private JSONObject parseTask(String channelUuid, List<FormAttributeVo> formAttributeList, Map<String, String> map) {
+    private JSONObject parseTask(String channelUuid, List<FormAttributeVo> formAttributeList, Map<String, String> map,JSONArray readComponentList) {
         JSONObject task = new JSONObject();
         JSONArray formAttributeDataList = new JSONArray();
         task.put("channelUuid",channelUuid);
@@ -251,7 +300,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
         }
         task.put("formAttributeDataList",formAttributeDataList);
         task.put("hidecomponentList",new JSONArray());
-        task.put("readcomponentList",new JSONArray());
+        task.put("readcomponentList",readComponentList);
         return task;
     }
 

@@ -1,7 +1,6 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -9,6 +8,7 @@ import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
@@ -19,7 +19,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -78,84 +77,16 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         if(processMapper.checkProcessIsExists(processUuid) == 0) {
             throw new ProcessNotFoundException(processUuid);
         }
-        boolean isShowAllAttr = false;
+        boolean allAttrCanEdit = false;
         Set<String> showAttrs = new HashSet<>();
         Set<Integer> showAttrRows = new HashSet<>();
         int isNeedContent = 0;
         ProcessVo process = processMapper.getProcessBaseInfoByUuid(processUuid);
         JSONObject configObj = process.getConfigObj();
-        if(MapUtils.isNotEmpty(configObj)){
-            /** 判断要不要生成“描述”列
-             * 1、从stepList获取开始节点
-             * 2、从connectionList获取开始节点后的第一个节点
-             * 3、从stepList获取开始节点后的第一个节点是否启用描述框
-             */
-            JSONObject processConfig = configObj.getJSONObject("process");
-            JSONArray stepList = processConfig.getJSONArray("stepList");
-            if(MapUtils.isNotEmpty(processConfig) && CollectionUtils.isNotEmpty(stepList)){
-                /** 获取开始节点UUID */
-                String startUuid = "";
-                for(Object obj : stepList){
-                    JSONObject jsonObject = JSONObject.parseObject(obj.toString());
-                    if(ProcessStepHandlerType.START.getHandler().equals(jsonObject.getString("handler"))){
-                        startUuid = jsonObject.getString("uuid");
-                        break;
-                    }
-                }
-                JSONArray connectionList = processConfig.getJSONArray("connectionList");
-                /** 获取开始节点后的第一个节点UUID */
-                String firstStepUuid = "";
-                if(CollectionUtils.isNotEmpty(connectionList)){
-                    for(Object obj : connectionList){
-                        JSONObject jsonObject = JSONObject.parseObject(obj.toString());
-                        if(jsonObject.getString("fromStepUuid").equals(startUuid)){
-                            firstStepUuid = jsonObject.getString("toStepUuid");
-                            break;
-                        }
-                    }
-                }
-                /** 获取开始节点后的第一个节点是否启用描述框 */
-                for(Object obj : stepList){
-                    JSONObject jsonObject = JSONObject.parseObject(obj.toString());
-                    if(jsonObject.getString("uuid").equals(firstStepUuid)){
-                        isNeedContent = jsonObject.getJSONObject("stepConfig").getJSONObject("workerPolicyConfig").getIntValue("isNeedContent");
-                        break;
-                    }
-                }
-
-                /** 获取可编辑的表单属性UUID */
-                JSONArray authorityList = (JSONArray) JSONPath.read(processConfig.toJSONString(), "formConfig.authorityList");
-                if(CollectionUtils.isNotEmpty(authorityList)){
-                    for(Object o : authorityList){
-                        JSONObject object = JSONObject.parseObject(o.toString());
-                        String action = object.getString("action");
-                        JSONArray attributeUuidList = object.getJSONArray("attributeUuidList");
-                        JSONArray processStepUuidList = object.getJSONArray("processStepUuidList");
-                        String type = object.getString("type");
-                        /** authorityList中存在可编辑与隐藏的表单属性配置
-                         * 取可编辑的配置，如果以组件为单位，则直接记录属性UUID
-                         * 如果以行为单位，则记录下可编辑的行
-                         * 如果发现有attributeUuidList为"all"的配置项，则退出循环
-                         */
-                        if(CollectionUtils.isNotEmpty(processStepUuidList) && processStepUuidList.contains(firstStepUuid)
-                        && StringUtils.isNotBlank(action) && "edit".equals(action) && CollectionUtils.isNotEmpty(attributeUuidList)
-                        && StringUtils.isNotBlank(type)){
-                            if("component".equals(type)){
-                                if("all".equals(attributeUuidList.get(0).toString())){
-                                    isShowAllAttr = true;
-                                    showAttrs.clear();
-                                    break;
-                                }else{
-                                    showAttrs.addAll(attributeUuidList.toJavaList(String.class));
-                                }
-                            }else if("row".equals(type)){
-                                showAttrRows.addAll(attributeUuidList.toJavaList(Integer.class));
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        /** 判断是否需要描述框 */
+        isNeedContent = ProcessConfigUtil.getIsNeedContent(configObj);
+        /** 判断是否所有表单属性可编辑&获取可编辑的表单属性或行号 */
+        allAttrCanEdit = ProcessConfigUtil.getEditableFormAttr(configObj, showAttrs, showAttrRows);
 
         ProcessFormVo processForm = processMapper.getProcessFormByProcessUuid(processUuid);
         List<FormAttributeVo> formAttributeList = null;
@@ -164,10 +95,10 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
             FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
             if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
                 formAttributeList = formVersionVo.getFormAttributeList();
-                /** 如果不是所有属性都可编辑，那么就根据行号查找可编辑的属性 */
+                /** 如果不是所有属性都可编辑且配置了可编辑的行，那么就根据行号查找可编辑的属性 */
                 String formConfig = formVersionVo.getFormConfig();
                 JSONArray tableList = (JSONArray)JSONPath.read(formConfig, "sheetsConfig.tableList");
-                if(!isShowAllAttr && CollectionUtils.isNotEmpty(tableList) && CollectionUtils.isNotEmpty(showAttrRows)){
+                if(!allAttrCanEdit && CollectionUtils.isNotEmpty(tableList) && CollectionUtils.isNotEmpty(showAttrRows)){
                     List<Integer> list = showAttrRows.stream().sorted().collect(Collectors.toList());
                     for(Integer i : list){
                         JSONArray array = JSONArray.parseArray(tableList.get(i-1).toString());
@@ -197,7 +128,7 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
                  * 默认所有表单属性都是只读的
                  * 如果有配置所有属性可编辑，或者发现某些属性可编辑，则列在表头上
                  */
-                if(isShowAllAttr || (CollectionUtils.isNotEmpty(showAttrs) && showAttrs.contains(next.getUuid()))){
+                if(allAttrCanEdit || (CollectionUtils.isNotEmpty(showAttrs) && showAttrs.contains(next.getUuid()))){
                     if(next.isRequired()){
                         next.setLabel(next.getLabel() + "(必填)");
                     }
