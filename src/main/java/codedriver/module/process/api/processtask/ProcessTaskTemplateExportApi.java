@@ -8,12 +8,16 @@ import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.ExcelUtil;
+import codedriver.module.process.formattribute.handler.DivideHandler;
+import codedriver.module.process.formattribute.handler.LinkHandler;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,10 +33,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 @Service
@@ -77,16 +79,17 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
             throw new ProcessNotFoundException(processUuid);
         }
         boolean isShowAllAttr = false;
-        List<String> showAttrs = new ArrayList<>();
-        /** 判断要不要生成“描述”列
-         * 1、从stepList获取开始节点
-         * 2、从connectionList获取开始节点后的第一个节点
-         * 3、从stepList获取开始节点后的第一个节点是否启用描述框
-         */
+        Set<String> showAttrs = new HashSet<>();
+        Set<Integer> showAttrRows = new HashSet<>();
         int isNeedContent = 0;
         ProcessVo process = processMapper.getProcessBaseInfoByUuid(processUuid);
         JSONObject configObj = process.getConfigObj();
         if(MapUtils.isNotEmpty(configObj)){
+            /** 判断要不要生成“描述”列
+             * 1、从stepList获取开始节点
+             * 2、从connectionList获取开始节点后的第一个节点
+             * 3、从stepList获取开始节点后的第一个节点是否启用描述框
+             */
             JSONObject processConfig = configObj.getJSONObject("process");
             JSONArray stepList = processConfig.getJSONArray("stepList");
             if(MapUtils.isNotEmpty(processConfig) && CollectionUtils.isNotEmpty(stepList)){
@@ -121,31 +124,32 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
                 }
 
                 /** 获取可编辑的表单属性UUID */
-                JSONObject formConfig = processConfig.getJSONObject("formConfig");
-                if(MapUtils.isNotEmpty(formConfig)){
-                    JSONArray authorityList = formConfig.getJSONArray("authorityList");
-                    if(CollectionUtils.isNotEmpty(authorityList)){
-                        for(Object o : authorityList){
-                            JSONObject object = JSONObject.parseObject(o.toString());
-                            String action = object.getString("action");
-                            JSONArray attributeUuidList = object.getJSONArray("attributeUuidList");
-                            JSONArray processStepUuidList = object.getJSONArray("processStepUuidList");
-                            String type = object.getString("type");
-                            /** authorityList中存在可编辑与隐藏的表单属性配置
-                             * 取可编辑的配置，且只取以组件为单位的属性
-                             * 如果发现有配置为"all"的配置项，则退出循环
-                             */
-                            if(CollectionUtils.isNotEmpty(processStepUuidList) && processStepUuidList.contains(firstStepUuid)
-                            && StringUtils.isNotBlank(action) && "edit".equals(action)
-                            && StringUtils.isNotBlank(type) && "component".equals(type)
-                            && CollectionUtils.isNotEmpty(attributeUuidList)){
-                                if(attributeUuidList.size() == 1 && "all".equals(attributeUuidList.get(0).toString())){
+                JSONArray authorityList = (JSONArray) JSONPath.read(processConfig.toJSONString(), "formConfig.authorityList");
+                if(CollectionUtils.isNotEmpty(authorityList)){
+                    for(Object o : authorityList){
+                        JSONObject object = JSONObject.parseObject(o.toString());
+                        String action = object.getString("action");
+                        JSONArray attributeUuidList = object.getJSONArray("attributeUuidList");
+                        JSONArray processStepUuidList = object.getJSONArray("processStepUuidList");
+                        String type = object.getString("type");
+                        /** authorityList中存在可编辑与隐藏的表单属性配置
+                         * 取可编辑的配置，如果以组件为单位，则直接记录属性UUID
+                         * 如果以行为单位，则记录下可编辑的行
+                         * 如果发现有attributeUuidList为"all"的配置项，则退出循环
+                         */
+                        if(CollectionUtils.isNotEmpty(processStepUuidList) && processStepUuidList.contains(firstStepUuid)
+                        && StringUtils.isNotBlank(action) && "edit".equals(action) && CollectionUtils.isNotEmpty(attributeUuidList)
+                        && StringUtils.isNotBlank(type)){
+                            if("component".equals(type)){
+                                if("all".equals(attributeUuidList.get(0).toString())){
                                     isShowAllAttr = true;
                                     showAttrs.clear();
                                     break;
                                 }else{
                                     showAttrs.addAll(attributeUuidList.toJavaList(String.class));
                                 }
+                            }else if("row".equals(type)){
+                                showAttrRows.addAll(attributeUuidList.toJavaList(Integer.class));
                             }
                         }
                     }
@@ -160,12 +164,35 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
             FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processForm.getFormUuid());
             if (formVersionVo != null && StringUtils.isNotBlank(formVersionVo.getFormConfig())) {
                 formAttributeList = formVersionVo.getFormAttributeList();
+                /** 如果不是所有属性都可编辑，那么就根据行号查找可编辑的属性 */
+                String formConfig = formVersionVo.getFormConfig();
+                JSONArray tableList = (JSONArray)JSONPath.read(formConfig, "sheetsConfig.tableList");
+                if(!isShowAllAttr && CollectionUtils.isNotEmpty(tableList) && CollectionUtils.isNotEmpty(showAttrRows)){
+                    List<Integer> list = showAttrRows.stream().sorted().collect(Collectors.toList());
+                    for(Integer i : list){
+                        JSONArray array = JSONArray.parseArray(tableList.get(i-1).toString());
+                        for(Object o : array){
+                            if(JSONObject.parseObject(o.toString()) != null && JSONObject.parseObject(o.toString()).getJSONObject("component") != null){
+                                String handler = JSONPath.read(o.toString(),"component.handler").toString();
+                                /** 过滤掉分割线与链接 */
+                                if(!(FormAttributeHandlerFactory.getHandler(handler) instanceof DivideHandler)
+                                        && !(FormAttributeHandlerFactory.getHandler(handler) instanceof LinkHandler))
+                                showAttrs.add(JSONObject.parseObject(o.toString()).getJSONObject("component").getString("uuid"));
+                            }
+                        }
+                    }
+                }
             }
         }
         if(CollectionUtils.isNotEmpty(formAttributeList)){
             Iterator<FormAttributeVo> iterator = formAttributeList.iterator();
             while (iterator.hasNext()){
                 FormAttributeVo next = iterator.next();
+                /** 过滤掉分割线与链接 */
+                if((FormAttributeHandlerFactory.getHandler(next.getHandler()) instanceof DivideHandler)
+                        || (FormAttributeHandlerFactory.getHandler(next.getHandler()) instanceof LinkHandler)){
+                    continue;
+                }
                 /**
                  * 默认所有表单属性都是只读的
                  * 如果有配置所有属性可编辑，或者发现某些属性可编辑，则列在表头上
