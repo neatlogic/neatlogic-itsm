@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +16,9 @@ import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
-import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
-import codedriver.framework.process.workerpolicy.core.WorkerPolicyHandlerFactory;
 
 @Service
 public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
@@ -73,54 +68,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 	
 	@Override
-	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
-		/** 获取步骤配置信息 **/
-		ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-
-		String executeMode = "";
-		int autoStart = 0;
-		try {
-			JSONObject stepConfigObj = JSONObject.parseObject(stepConfig);
-			currentProcessTaskStepVo.getParamObj().putAll(stepConfigObj);
-			if (MapUtils.isNotEmpty(stepConfigObj)) {
-				JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
-				if(MapUtils.isNotEmpty(stepConfigObj)) {
-					executeMode = workerPolicyConfig.getString("executeMode");
-					autoStart = workerPolicyConfig.getIntValue("autoStart");
-				}
-			}
-		} catch (Exception ex) {
-			logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式", ex);
-		}
-		
-		/** 如果workerList.size()>0，说明已经存在过处理人，则继续使用旧处理人，否则启用分派 **/
-		if (CollectionUtils.isEmpty(workerList))  {
-			/** 分配处理人 **/
-			ProcessTaskStepWorkerPolicyVo processTaskStepWorkerPolicyVo = new ProcessTaskStepWorkerPolicyVo();
-			processTaskStepWorkerPolicyVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-			List<ProcessTaskStepWorkerPolicyVo> workerPolicyList = processTaskMapper.getProcessTaskStepWorkerPolicy(processTaskStepWorkerPolicyVo);
-			if (CollectionUtils.isNotEmpty(workerPolicyList)) {
-				for (ProcessTaskStepWorkerPolicyVo workerPolicyVo : workerPolicyList) {
-					IWorkerPolicyHandler workerPolicyHandler = WorkerPolicyHandlerFactory.getHandler(workerPolicyVo.getPolicy());
-					if (workerPolicyHandler != null) {
-						List<ProcessTaskStepWorkerVo> tmpWorkerList = workerPolicyHandler.execute(workerPolicyVo, currentProcessTaskStepVo);
-						/** 顺序分配处理人 **/
-						if ("sort".equals(executeMode) && CollectionUtils.isNotEmpty(tmpWorkerList)) {
-							// 找到处理人，则退出
-							workerList.addAll(tmpWorkerList);
-							break;
-						} else if ("batch".equals(executeMode)) {
-							// 去重取并集
-							tmpWorkerList.removeAll(workerList);
-							workerList.addAll(tmpWorkerList);
-						}
-					}
-				}
-			}
-		}
-		
-		return autoStart;
+	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {	    
+		return defaultAssign(currentProcessTaskStepVo, workerList);
 	}
 
 	@Override
