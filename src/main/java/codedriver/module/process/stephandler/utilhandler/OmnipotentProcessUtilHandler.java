@@ -108,7 +108,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		/** 查出processtask_step_worker表中当前步骤子任务处理人列表 **/
 		Set<String> workerMinorUserUuidSet = new HashSet<>();
 		Set<String> workerMinorUserUuidSet2 = new HashSet<>();
-		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
+		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(processTaskId, processTaskStepId);
 		for(ProcessTaskStepWorkerVo workerVo : workerList) {
 			if(ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
 				workerMinorUserUuidSet.add(workerVo.getUuid());
