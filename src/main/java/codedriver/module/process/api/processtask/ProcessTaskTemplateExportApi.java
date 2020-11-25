@@ -103,15 +103,17 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
                     List<Integer> list = showAttrRows.stream().sorted().collect(Collectors.toList());
                     for(Integer i : list){
                         JSONArray array = tableList.getJSONArray(i-1);
-                        for(int j = 0;j < array.size();j++){
-                            if(StringUtils.isNotBlank(array.get(j).toString())){
-                                JSONObject object = array.getJSONObject(j);
-                                if(MapUtils.isNotEmpty(object) && MapUtils.isNotEmpty(object.getJSONObject("component"))){
-                                    String handler = JSONPath.read(object.toJSONString(),"component.handler").toString();
-                                    /** 过滤掉分割线与链接 */
-                                    if(!(FormAttributeHandlerFactory.getHandler(handler) instanceof DivideHandler)
-                                            && !(FormAttributeHandlerFactory.getHandler(handler) instanceof LinkHandler))
-                                        showAttrs.add(object.getJSONObject("component").getString("uuid"));
+                        if(CollectionUtils.isNotEmpty(array)){
+                            for(int j = 0;j < array.size();j++){
+                                if(StringUtils.isNotBlank(array.get(j).toString())){
+                                    JSONObject object = array.getJSONObject(j);
+                                    if(MapUtils.isNotEmpty(object) && MapUtils.isNotEmpty(object.getJSONObject("component"))){
+                                        String handler = JSONPath.read(object.toJSONString(),"component.handler").toString();
+                                        /** 过滤掉分割线与链接 */
+                                        if(!(FormAttributeHandlerFactory.getHandler(handler) instanceof DivideHandler)
+                                                && !(FormAttributeHandlerFactory.getHandler(handler) instanceof LinkHandler))
+                                            showAttrs.add(object.getJSONObject("component").getString("uuid"));
+                                    }
                                 }
                             }
                         }
