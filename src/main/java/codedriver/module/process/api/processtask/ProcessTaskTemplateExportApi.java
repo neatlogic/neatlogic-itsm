@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -101,14 +102,17 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
                 if(!allAttrCanEdit && CollectionUtils.isNotEmpty(tableList) && CollectionUtils.isNotEmpty(showAttrRows)){
                     List<Integer> list = showAttrRows.stream().sorted().collect(Collectors.toList());
                     for(Integer i : list){
-                        JSONArray array = JSONArray.parseArray(tableList.get(i-1).toString());
-                        for(Object o : array){
-                            if(JSONObject.parseObject(o.toString()) != null && JSONObject.parseObject(o.toString()).getJSONObject("component") != null){
-                                String handler = JSONPath.read(o.toString(),"component.handler").toString();
-                                /** 过滤掉分割线与链接 */
-                                if(!(FormAttributeHandlerFactory.getHandler(handler) instanceof DivideHandler)
-                                        && !(FormAttributeHandlerFactory.getHandler(handler) instanceof LinkHandler))
-                                showAttrs.add(JSONObject.parseObject(o.toString()).getJSONObject("component").getString("uuid"));
+                        JSONArray array = tableList.getJSONArray(i-1);
+                        for(int j = 0;j < array.size();j++){
+                            if(StringUtils.isNotBlank(array.get(j).toString())){
+                                JSONObject object = array.getJSONObject(j);
+                                if(MapUtils.isNotEmpty(object) && MapUtils.isNotEmpty(object.getJSONObject("component"))){
+                                    String handler = JSONPath.read(object.toJSONString(),"component.handler").toString();
+                                    /** 过滤掉分割线与链接 */
+                                    if(!(FormAttributeHandlerFactory.getHandler(handler) instanceof DivideHandler)
+                                            && !(FormAttributeHandlerFactory.getHandler(handler) instanceof LinkHandler))
+                                        showAttrs.add(object.getJSONObject("component").getString("uuid"));
+                                }
                             }
                         }
                     }
