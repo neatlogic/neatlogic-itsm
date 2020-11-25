@@ -54,34 +54,19 @@ public class CascadeHandler extends FormHandlerBase {
             List<String> valueList = JSON.parseArray(JSON.toJSONString(dataObj), String.class);
             String dataSource = configObj.getString("dataSource");
             if ("static".equals(dataSource)) {
-                if (valueList.size() > 0) {
+                if(CollectionUtils.isNotEmpty(valueList)) {
                     JSONArray dataList = configObj.getJSONArray("dataList");
-                    for (int i = 0; i < dataList.size(); i++) {
-                        JSONObject firstObj = dataList.getJSONObject(i);
-                        if (Objects.equals(firstObj.getString("value"), valueList.get(0))) {
-                            textList.add(firstObj.getString("text"));
-                            if (valueList.size() > 1) {
-                                JSONArray secondChildren = firstObj.getJSONArray("children");
-                                for (int j = 0; j < secondChildren.size(); j++) {
-                                    JSONObject secondObj = secondChildren.getJSONObject(j);
-                                    if (Objects.equals(secondObj.getString("value"), valueList.get(1))) {
-                                        textList.add(secondObj.getString("text"));
-                                        if (valueList.size() > 2) {
-                                            JSONArray thirdChildren = secondObj.getJSONArray("children");
-                                            for (int k = 0; k < thirdChildren.size(); k++) {
-                                                JSONObject thirdObj = thirdChildren.getJSONObject(k);
-                                                if (Objects.equals(thirdObj.getString("value"), valueList.get(2))) {
-                                                    textList.add(secondObj.getString("text"));
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                    for(String value : valueList) {
+                        for(int i = 0; i < dataList.size(); i++) {
+                            JSONObject dataObject = dataList.getJSONObject(i);
+                            if(Objects.equals(dataObject.getString("value"), value)) {
+                                textList.add(dataObject.getString("text"));
+                                dataList = dataObject.getJSONArray("children");
+                                break;
                             }
                         }
                     }
                 }
-
             } else {// 其他，如动态数据源
                 String matrixUuid = configObj.getString("matrixUuid");
                 List<ValueTextVo> mappingList =
