@@ -66,4 +66,10 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	public Integer getSort() {
 		return 8;
 	}
+
+	@Override
+	public Object getSimpleValue(JSONObject json) {
+		String channelType = json.getJSONObject(this.getName()).getString("text");
+		return channelType;
+	}
 }

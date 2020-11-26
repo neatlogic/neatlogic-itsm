@@ -164,4 +164,9 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 	public Boolean getMyIsShow() {
 		return false;
 	}
+
+	@Override
+	public Object getSimpleValue(JSONObject json) {
+		return null;
+	}
 }

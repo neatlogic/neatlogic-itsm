@@ -58,4 +58,9 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase  implements 
 		return 7;
 	}
 
+	@Override
+	public Object getSimpleValue(JSONObject json) {
+		String catalogName = json.getString(this.getName());
+		return catalogName;
+	}
 }

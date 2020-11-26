@@ -70,4 +70,10 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase  implements 
 	public Integer getSort() {
 		return 9;
 	}
+
+	@Override
+	public Object getSimpleValue(JSONObject json) {
+		String channelName = json.getString(this.getName());
+		return channelName;
+	}
 }

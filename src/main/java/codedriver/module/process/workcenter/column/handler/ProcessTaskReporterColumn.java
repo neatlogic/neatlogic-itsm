@@ -63,4 +63,9 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 		return 4;
 	}
 
+	@Override
+	public Object getSimpleValue(JSONObject json) {
+		String username = json.getJSONObject(this.getName()).getString("username");
+		return username;
+	}
 }

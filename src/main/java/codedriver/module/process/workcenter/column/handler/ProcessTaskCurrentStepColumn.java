@@ -177,4 +177,16 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 	public Integer getSort() {
 		return 5;
 	}
+
+	@Override
+	public Object getSimpleValue(JSONObject json) {
+		StringBuilder sb = new StringBuilder();
+		JSONArray array = json.getJSONArray(this.getName());
+		if(CollectionUtils.isNotEmpty(array)){
+			for(int i = 0;i < array.size();i++){
+				sb.append(array.getJSONObject(i).getString("name"));
+			}
+		}
+		return sb.toString();
+	}
 }
