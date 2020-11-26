@@ -49,8 +49,10 @@ public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements I
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
-		String endTime = json.getString(this.getName());
-		return endTime;
+	public Object getSimpleValue(Object json) {
+		if(json != null){
+			return json.toString();
+		}
+		return null;
 	}
 }

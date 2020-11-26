@@ -98,27 +98,29 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
+	public Object getSimpleValue(Object json) {
 		StringBuilder sb = new StringBuilder();
-		JSONArray array = json.getJSONArray(this.getName());
-		if(CollectionUtils.isNotEmpty(array)){
-			for(int i = 0;i < array.size();i++){
-				JSONObject object = array.getJSONObject(i);
-				Long expireTime = object.getLong("expireTime");
-				Long willOverTime = object.getLong("willOverTime");
-				long time;
-				if(willOverTime != null && System.currentTimeMillis() > willOverTime){
-					time = System.currentTimeMillis() - willOverTime;
-					sb.append(object.getString("slaName"))
-							.append("距离超时：")
-							.append(Math.floor(time / (1000 * 60 * 60 * 24)))
-							.append("天;");
-				}else if(expireTime != null && System.currentTimeMillis() > expireTime){
-					time = System.currentTimeMillis() - expireTime;
-					sb.append(object.getString("slaName"))
-							.append("已超时：")
-							.append(Math.floor(time / (1000 * 60 * 60 * 24)))
-							.append("天;");
+		if(json != null){
+			JSONArray array = JSONArray.parseArray(json.toString());
+			if(CollectionUtils.isNotEmpty(array)){
+				for(int i = 0;i < array.size();i++){
+					JSONObject object = array.getJSONObject(i);
+					Long expireTime = object.getLong("expireTime");
+					Long willOverTime = object.getLong("willOverTime");
+					long time;
+					if(willOverTime != null && System.currentTimeMillis() > willOverTime){
+						time = System.currentTimeMillis() - willOverTime;
+						sb.append(object.getString("slaName"))
+								.append("距离超时：")
+								.append(Math.floor(time / (1000 * 60 * 60 * 24)))
+								.append("天;");
+					}else if(expireTime != null && System.currentTimeMillis() > expireTime){
+						time = System.currentTimeMillis() - expireTime;
+						sb.append(object.getString("slaName"))
+								.append("已超时：")
+								.append(Math.floor(time / (1000 * 60 * 60 * 24)))
+								.append("天;");
+					}
 				}
 			}
 		}

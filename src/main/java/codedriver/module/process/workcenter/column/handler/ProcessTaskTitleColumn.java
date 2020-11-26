@@ -47,7 +47,10 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
-		return json.getString(this.getName());
+	public Object getSimpleValue(Object json) {
+		if(json != null){
+			return json.toString();
+		}
+		return null;
 	}
 }

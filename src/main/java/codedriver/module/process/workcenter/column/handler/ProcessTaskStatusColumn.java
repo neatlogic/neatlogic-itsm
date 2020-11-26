@@ -59,8 +59,11 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
-		String status = json.getJSONObject(this.getName()).getString("text");
+	public Object getSimpleValue(Object json) {
+		String status = null;
+		if(json != null){
+			status = JSONObject.parseObject(json.toString()).getString("text");
+		}
 		return status;
 	}
 }

@@ -54,8 +54,10 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
     }
 
     @Override
-    public Object getSimpleValue(JSONObject json) {
-        String createTime = json.getString(this.getName());
-        return createTime;
+    public Object getSimpleValue(Object json) {
+        if(json != null){
+            return json.toString();
+        }
+        return null;
     }
 }

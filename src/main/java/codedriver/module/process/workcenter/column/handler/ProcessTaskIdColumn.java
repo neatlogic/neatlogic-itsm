@@ -48,8 +48,10 @@ public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProce
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
-		String id = json.getString(this.getName());
-		return id;
+	public Object getSimpleValue(Object json) {
+		if(json != null){
+			return json.toString();
+		}
+		return null;
 	}
 }

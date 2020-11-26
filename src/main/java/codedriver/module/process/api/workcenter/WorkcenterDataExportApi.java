@@ -1,8 +1,10 @@
 package codedriver.module.process.api.workcenter;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -11,10 +13,11 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.ExcelUtil;
 import codedriver.module.process.service.WorkcenterService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.techsure.multiattrsearch.QueryResultSet;
+import com.techsure.multiattrsearch.query.QueryResult;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +46,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 
 	@Override
 	public String getName() {
-		return "工单中心导出接口";
+		return "导出工单中心分类数据";
 	}
 
 	@Override
@@ -52,68 +55,73 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 	}
 
 	@Input({
-			@Param(name = "uuid", type = ApiParamType.STRING, desc = "分类uuid,有则去数据库获取对应分类的条件，无则根据传的过滤条件查询"),
-			@Param(name = "isMeWillDo", type = ApiParamType.INTEGER, desc = "是否带我处理的，1：是；0：否"),
-			@Param(name = "conditionGroupList", type = ApiParamType.JSONARRAY, desc = "条件组条件", isRequired = false),
-			@Param(name = "conditionGroupRelList", type = ApiParamType.JSONARRAY, desc = "条件组连接类型", isRequired = false),
-			@Param(name = "headerList", type = ApiParamType.JSONARRAY, desc = "显示的字段", isRequired = false),
+			@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "分类uuid,据此从数据库获取对应分类的条件")
 	})
 	@Output({})
-	@Description(desc = "工单中心导出接口")
+	@Description(desc = "导出工单中心分类数据")
 	@Override
 	public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		if(jsonObj.containsKey("uuid")) {
-			String uuid = jsonObj.getString("uuid");
-			Integer isMeWillDo = jsonObj.getInteger("isMeWillDo");
-			List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
-			if(CollectionUtils.isNotEmpty(workcenterList)) {
-				jsonObj = JSONObject.parseObject(workcenterList.get(0).getConditionConfig());
-				jsonObj.put("uuid", uuid);
-//				jsonObj.put("currentPage", 1);
-				jsonObj.put("pageSize", 2000);
-				jsonObj.put("isMeWillDo", isMeWillDo);
+
+		String uuid = jsonObj.getString("uuid");
+		String title = "";
+		List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
+		if(CollectionUtils.isNotEmpty(workcenterList)){
+			title = workcenterList.get(0).getName();
+			jsonObj = JSONObject.parseObject(workcenterList.get(0).getConditionConfig());
+			jsonObj.put("uuid", uuid);
+		}
+		Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+		/** 获取表头开始 */
+		List<WorkcenterTheadVo> theadList = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(uuid, UserContext.get().getUserUuid()));
+		ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
+		while (it.hasNext()) {
+			WorkcenterTheadVo thead = it.next();
+			if (thead.getType().equals(ProcessFieldType.COMMON.getValue())) {
+				if (!columnComponentMap.containsKey(thead.getName())) {
+					it.remove();
+				} else {
+					thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
+					thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
+				}
 			}
 		}
-		SXSSFWorkbook workbook = new SXSSFWorkbook();
-		List<WorkcenterTheadVo> headList = null;
-		for(int page = 1;page < 5;page++){
-			jsonObj.put("currentPage", page);
-			JSONObject data = workcenterService.doSearch(new WorkcenterVo(jsonObj));
-			if(MapUtils.isNotEmpty(data)){
-				Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-				JSONArray theadList = data.getJSONArray("theadList");
-				JSONArray tbodyList = data.getJSONArray("tbodyList");
-				if(CollectionUtils.isEmpty(headList) && CollectionUtils.isNotEmpty(theadList)){
-					headList = theadList.toJavaList(WorkcenterTheadVo.class);
-					headList = headList.stream().filter(o -> o.getDisabled() == 0).collect(Collectors.toList());
-				}
-				if(CollectionUtils.isNotEmpty(tbodyList)){
-					List<Map<String,Object>> dataMapList = new ArrayList<>();
-					for(int i = 0;i < tbodyList.size();i++){
+		for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+			IProcessTaskColumn column = entry.getValue();
+			if (column.getIsShow() && CollectionUtils.isEmpty(theadList.stream()
+					.filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
+				theadList.add(new WorkcenterTheadVo(column));
+			}
+		}
+		theadList = theadList.stream().filter(o -> o.getDisabled() == 0).sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
+		/** 获取表头结束 */
+
+		List<Map<String,Object>> list = new ArrayList<>();
+		Set<String> headList = new LinkedHashSet<>();
+		Set<String> columnList = new LinkedHashSet<>();
+		QueryResultSet resultSet = workcenterService.searchTaskIterate(new WorkcenterVo(jsonObj));
+		if(CollectionUtils.isNotEmpty(theadList) && resultSet.hasMoreResults()){
+			while(resultSet.hasMoreResults()){
+				QueryResult result = resultSet.fetchResult();
+				if(!result.getData().isEmpty()){
+					for(MultiAttrsObject el : result.getData()){
 						Map<String,Object> map = new LinkedHashMap<>();
-						JSONObject object = tbodyList.getJSONObject(i);
-						for(WorkcenterTheadVo vo : headList){
-							Object value = columnComponentMap.get(vo.getName()).getSimpleValue(object);
-							map.put(vo.getDisplayName(),value);
+						for(WorkcenterTheadVo vo : theadList){
+							IProcessTaskColumn column = columnComponentMap.get(vo.getName());
+							Object value = column.getSimpleValue(column.getValue(el));
+							map.put(column.getDisplayName(),value);
+							headList.add(column.getDisplayName());
+							columnList.add(column.getDisplayName());
 						}
-						dataMapList.add(map);
+						list.add(map);
 					}
-					List<String> headerList = new ArrayList<>();
-					List<String> columnList = new ArrayList<>();
-					if(CollectionUtils.isNotEmpty(dataMapList)){
-						Map<String, Object> map = dataMapList.get(0);
-						for(String key : map.keySet()){
-							headerList.add(key);
-							columnList.add(key);
-						}
-						ExcelUtil.exportData(workbook,headerList,columnList,dataMapList,new Integer(30),page-1);
-					}
-				}else{
-					break;
 				}
 			}
 		}
-		String fileNameEncode = "工单数据.xlsx";
+
+		SXSSFWorkbook workbook = new SXSSFWorkbook();
+		ExcelUtil.exportData(workbook,headList.stream().collect(Collectors.toList()), columnList.stream().collect(Collectors.toList()), list,new Integer(35),0);
+
+		String fileNameEncode = title + ".xlsx";
 		Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
 		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器

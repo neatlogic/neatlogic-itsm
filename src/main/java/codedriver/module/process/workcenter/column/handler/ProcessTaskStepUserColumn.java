@@ -166,7 +166,7 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
+	public Object getSimpleValue(Object json) {
 		return null;
 	}
 }

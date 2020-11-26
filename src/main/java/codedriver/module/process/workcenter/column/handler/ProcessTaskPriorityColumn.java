@@ -69,8 +69,11 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
-		String priority = json.getJSONObject(this.getName()).getString("text");
+	public Object getSimpleValue(Object json) {
+		String priority = null;
+		if(json != null){
+			priority = JSONObject.parseObject(json.toString()).getString("text");
+		}
 		return priority;
 	}
 }

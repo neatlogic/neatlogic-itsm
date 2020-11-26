@@ -61,8 +61,10 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
-		String worktimeName = json.getString(this.getName());
-		return worktimeName;
+	public Object getSimpleValue(Object json) {
+		if(json != null){
+			return json.toString();
+		}
+		return null;
 	}
 }

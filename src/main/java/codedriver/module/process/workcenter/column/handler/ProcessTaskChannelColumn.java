@@ -72,8 +72,10 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase  implements 
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
-		String channelName = json.getString(this.getName());
-		return channelName;
+	public Object getSimpleValue(Object json) {
+		if(json != null){
+			return json.toString();
+		}
+		return null;
 	}
 }

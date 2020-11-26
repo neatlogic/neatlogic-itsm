@@ -63,7 +63,7 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 	}
 
 	@Override
-	public Object getSimpleValue(JSONObject json) {
+	public Object getSimpleValue(Object json) {
 		return null;
 	}
 }
