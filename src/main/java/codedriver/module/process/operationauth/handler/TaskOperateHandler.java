@@ -223,6 +223,23 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             }
             return false;
         });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFER, (processTaskVo, processTaskStepVo) -> {
+            // 撤销权限transfer
+            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
+                    processTaskVo.getStepList().addAll(processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId()));
+                }
+                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+                    if (processTaskStep.getIsActive().intValue() == 1) {
+                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.TRANSFERCURRENTSTEP)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        });
     }
 
     @Override

@@ -1256,4 +1256,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
         }   
     }
+
+    @Override
+    public Set<ProcessTaskStepVo> getTransferableStepListByProcessTask(ProcessTaskVo processTaskVo) {
+        Set<ProcessTaskStepVo> resultSet = new HashSet<>();
+        List<ProcessTaskStepVo> stepVoList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
+        for (ProcessTaskStepVo stepVo : stepVoList) {
+            /** 找到所有已激活步骤 **/
+            if (stepVo.getIsActive().equals(1)) {
+                if(checkOperationAuthIsConfigured(stepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.TRANSFERCURRENTSTEP)) {
+                    resultSet.add(stepVo);
+                }
+            }
+        }
+        return resultSet;
+    }
 }

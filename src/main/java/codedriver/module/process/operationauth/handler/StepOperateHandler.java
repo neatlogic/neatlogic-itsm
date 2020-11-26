@@ -51,10 +51,10 @@ public class StepOperateHandler implements IOperationAuthHandler {
             return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.VIEW);
         });
 	    
-	    operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFER, (processTaskVo, processTaskStepVo) -> {
+	    operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFERCURRENTSTEP, (processTaskVo, processTaskStepVo) -> {
             // 步骤状态为已激活的才能转交
             if (processTaskStepVo.getIsActive() == 1) {
-                return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.TRANSFER);
+                return processTaskService.checkOperationAuthIsConfigured(processTaskStepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.TRANSFERCURRENTSTEP);
             }
             return false;
 	    });

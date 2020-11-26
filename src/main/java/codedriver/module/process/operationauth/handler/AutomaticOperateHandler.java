@@ -24,7 +24,7 @@ public class AutomaticOperateHandler implements IOperationAuthHandler {
         operationBiPredicateMap.put(ProcessTaskOperationType.STARTPROCESS, (processTaskVo, processTaskStepVo) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.START, (processTaskVo, processTaskStepVo) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.ACTIVE, (processTaskVo, processTaskStepVo) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskVo, processTaskStepVo) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.RETREATCURRENTSTEP, (processTaskVo, processTaskStepVo) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.ACCEPT, (processTaskVo, processTaskStepVo) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo) -> false);

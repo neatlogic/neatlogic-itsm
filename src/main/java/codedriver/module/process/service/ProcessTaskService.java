@@ -247,4 +247,6 @@ public interface ProcessTaskService {
     * @return
      */
     public void updateTag(Long processTaskId,Long processTaskStepId,JSONObject jsonObj)throws PermissionDeniedException;
+
+    public Set<ProcessTaskStepVo> getTransferableStepListByProcessTask(ProcessTaskVo processTaskVo);
 }
