@@ -555,7 +555,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 		List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
 		processTaskStepVo.setMinorUserList(minorUserList);
 
-		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepId);
+		List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepId);
 		processTaskStepVo.setWorkerList(workerList);
 
 		return processTaskStepVo;
@@ -848,7 +848,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if(CollectionUtils.isNotEmpty(majorUserList)) {
             processTaskStepVo.setMajorUser(majorUserList.get(0));
         }else {
-            processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskStepId(processTaskStepVo.getId()));
+            processTaskStepVo.setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId()));
         }
         processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MINOR.getValue()));
     }
