@@ -1,7 +1,12 @@
 package codedriver.module.process.service;
 
 import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
 
+import codedriver.framework.process.column.core.IProcessTaskColumn;
+import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.QueryResultSet;
@@ -54,5 +59,7 @@ public interface WorkcenterService {
     JSONObject doSearch(Long processtaskId) throws ParseException;
 
     JSONObject getProcessTaskESObject(ProcessTaskVo processTaskVo);
+
+    List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList);
 
 }
