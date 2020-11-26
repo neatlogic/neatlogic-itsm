@@ -111,9 +111,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		JSONArray authorityArray = new JSONArray();
 		ProcessTaskOperationType[] stepActions = {
 				ProcessTaskOperationType.VIEW, 
-				ProcessTaskOperationType.TRANSFERCURRENTSTEP, 
-//				ProcessTaskOperationType.UPDATE, 
-//				ProcessTaskOperationType.URGE
+				ProcessTaskOperationType.TRANSFERCURRENTSTEP
 		};
 		for(ProcessTaskOperationType stepAction : stepActions) {
 			authorityArray.add(new JSONObject() {{

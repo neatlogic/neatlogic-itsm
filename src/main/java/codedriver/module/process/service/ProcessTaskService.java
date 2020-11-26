@@ -248,5 +248,12 @@ public interface ProcessTaskService {
      */
     public void updateTag(Long processTaskId,Long processTaskStepId,JSONObject jsonObj)throws PermissionDeniedException;
 
+    /**
+     * 
+    * @Time:2020年11月26日
+    * @Description: 获取当前用户有转交权限的步骤列表 
+    * @param processTaskVo
+    * @return Set<ProcessTaskStepVo>
+     */
     public Set<ProcessTaskStepVo> getTransferableStepListByProcessTask(ProcessTaskVo processTaskVo);
 }

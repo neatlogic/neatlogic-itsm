@@ -190,10 +190,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		JSONArray authorityArray = new JSONArray();
 		ProcessTaskOperationType[] stepActions = {
 				ProcessTaskOperationType.VIEW, 
-//				ProcessTaskOperationType.ABORTPROCESSTASK, 
 				ProcessTaskOperationType.TRANSFERCURRENTSTEP, 
-//				ProcessTaskOperationType.UPDATE, 
-//				ProcessTaskOperationType.URGE, 
                 ProcessTaskOperationType.RETREATCURRENTSTEP
 		};
 		for(ProcessTaskOperationType stepAction : stepActions) {

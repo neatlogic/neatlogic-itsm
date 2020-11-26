@@ -225,7 +225,6 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         });
         
         operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFER, (processTaskVo, processTaskStepVo) -> {
-            // 撤销权限transfer
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
                     processTaskVo.getStepList().addAll(processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId()));
