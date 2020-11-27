@@ -21,6 +21,8 @@ import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -72,8 +74,8 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
         }
         if (isCombine != null && isCombine == 0) {
             List<IProcessTaskCondition> conditionList = new ArrayList<IProcessTaskCondition>();
-            conditionList.add(new ProcessTaskTitleCondition());
-            conditionList.add(new ProcessTaskIdCondition());
+            conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.TITLE.getValue()));
+            conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.ID.getValue()));
             return getKeywordOptionMB(conditionList, keyword, jsonObj.getInteger("pageSize"));
         }
         return getKeywordOptionsPC(keyword, jsonObj.getInteger("pageSize"));
@@ -85,6 +87,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
      * @param keyword
      * @return
      */
+    @SuppressWarnings("unchecked")
     private JSONArray getKeywordOptionMB(List<IProcessTaskCondition> conditionList, String keyword, Integer pageSize) {
         JSONArray returnArray = new JSONArray();
         WorkcenterVo workcenter = getKeywordConditionMB(conditionList, keyword);
@@ -93,6 +96,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
             ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         List<MultiAttrsObject> dataList = esHandler.search(workcenter).getData();
         if (!dataList.isEmpty()) {
+            conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()));
             JSONObject titleObj = new JSONObject();
             JSONArray resultDateList = new JSONArray();
             for (MultiAttrsObject titleEl : dataList) {
@@ -178,6 +182,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
      * @param keyword
      * @return
      */
+    @SuppressWarnings("unchecked")
     private JSONArray getKeywordOptionPC(IProcessTaskCondition condition, String keyword, Integer pageSize) {
         JSONArray returnArray = new JSONArray();
         WorkcenterVo workcenter = getKeywordConditionPC(condition, keyword);
