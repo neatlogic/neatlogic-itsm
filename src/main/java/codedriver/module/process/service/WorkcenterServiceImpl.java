@@ -118,47 +118,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         // 获取用户历史自定义theadList
         // Date time2 = new Date();
-        List<WorkcenterTheadVo> theadList = workcenterMapper
-            .getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(), UserContext.get().getUserUuid()));
-        // 矫正theadList 或存在表单属性或固定字段增删
-        // 多删
-        ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
-        while (it.hasNext()) {
-            WorkcenterTheadVo thead = it.next();
-            if (thead.getType().equals(ProcessFieldType.COMMON.getValue())) {
-                if (!columnComponentMap.containsKey(thead.getName())) {
-                    it.remove();
-                } else {
-                    thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
-                    thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
-                }
-            } else {
-                List<String> channelUuidList = workcenterVo.getChannelUuidList();
-                if (CollectionUtils.isNotEmpty(channelUuidList)) {
-                    List<FormAttributeVo> formAttrList =
-                        formMapper.getFormAttributeListByChannelUuidList(channelUuidList);
-                    List<FormAttributeVo> theadFormList = formAttrList.stream()
-                        .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
-                    if (CollectionUtils.isEmpty(theadFormList)) {
-                        it.remove();
-                    } else {
-                        thead.setDisplayName(theadFormList.get(0).getLabel());
-                    }
-                }
-            }
-        }
-        // 少补
-        for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-            IProcessTaskColumn column = entry.getValue();
-            if (column.getIsShow() && CollectionUtils.isEmpty(theadList.stream()
-                .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
-                theadList.add(new WorkcenterTheadVo(column));
-            }
-            // 如果需要排序
-            if (column.getIsSort()) {
-                sortColumnList.add(column.getName());
-            }
-        }
+        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap,sortColumnList);
         theadList =
             theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         // Date time22 = new Date();
@@ -553,5 +513,52 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         esObject.put("common", WorkcenterFieldJson);
         return esObject;
     }
+
+    @Override
+    public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList) {
+        List<WorkcenterTheadVo> theadList = workcenterMapper
+                .getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(), UserContext.get().getUserUuid()));
+        // 矫正theadList 或存在表单属性或固定字段增删
+        // 多删
+        ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
+        while (it.hasNext()) {
+            WorkcenterTheadVo thead = it.next();
+            if (thead.getType().equals(ProcessFieldType.COMMON.getValue())) {
+                if (!columnComponentMap.containsKey(thead.getName())) {
+                    it.remove();
+                } else {
+                    thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
+                    thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
+                }
+            } else {
+                List<String> channelUuidList = workcenterVo.getChannelUuidList();
+                if (CollectionUtils.isNotEmpty(channelUuidList)) {
+                    List<FormAttributeVo> formAttrList =
+                            formMapper.getFormAttributeListByChannelUuidList(channelUuidList);
+                    List<FormAttributeVo> theadFormList = formAttrList.stream()
+                            .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
+                    if (CollectionUtils.isEmpty(theadFormList)) {
+                        it.remove();
+                    } else {
+                        thead.setDisplayName(theadFormList.get(0).getLabel());
+                    }
+                }
+            }
+        }
+        // 少补
+        for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+            IProcessTaskColumn column = entry.getValue();
+            if (column.getIsShow() && CollectionUtils.isEmpty(theadList.stream()
+                    .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
+                theadList.add(new WorkcenterTheadVo(column));
+            }
+            // 如果需要排序
+            if (sortColumnList != null && column.getIsSort()) {
+                sortColumnList.add(column.getName());
+            }
+        }
+        return theadList;
+    }
+
 
 }

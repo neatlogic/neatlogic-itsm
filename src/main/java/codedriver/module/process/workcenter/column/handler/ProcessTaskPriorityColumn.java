@@ -67,4 +67,13 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
 		// TODO Auto-generated method stub
 		return 3;
 	}
+
+	@Override
+	public Object getSimpleValue(Object json) {
+		String priority = null;
+		if(json != null){
+			priority = JSONObject.parseObject(json.toString()).getString("text");
+		}
+		return priority;
+	}
 }

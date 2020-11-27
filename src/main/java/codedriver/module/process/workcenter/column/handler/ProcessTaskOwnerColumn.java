@@ -76,4 +76,12 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 		return 3;
 	}
 
+	@Override
+	public Object getSimpleValue(Object json) {
+		String userName = null;
+		if(json != null){
+			userName = JSONObject.parseObject(json.toString()).getString("username");
+		}
+		return userName;
+	}
 }

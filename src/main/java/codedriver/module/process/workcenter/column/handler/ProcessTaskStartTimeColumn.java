@@ -52,4 +52,12 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
     public Boolean getIsSort() {
         return true;
     }
+
+    @Override
+    public Object getSimpleValue(Object json) {
+        if(json != null){
+            return json.toString();
+        }
+        return null;
+    }
 }
