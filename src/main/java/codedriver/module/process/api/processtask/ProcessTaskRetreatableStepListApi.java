@@ -56,25 +56,12 @@ public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase {
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
         String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
         if(StringUtils.isNotBlank(userUuid)) {
-//            List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
-//            String currentUserUuid = UserContext.get().getUserUuid(true);
-//            String currentUserId = UserContext.get().getUserId(true);
-//            String currentUserName = UserContext.get().getUserName();
-//            List<String> currentRoleUuidList = UserContext.get().getRoleUuidList();
-//            UserContext.get().setUserUuid(userUuid);
-//            UserContext.get().setUserId(null);
-//            UserContext.get().setUserName(null);
-//            UserContext.get().setRoleUuidList(roleUuidList);
             Set<ProcessTaskStepVo> retractableStepList = processTaskService.getRetractableStepListByProcessTask(processTaskVo, userUuid);
             for(ProcessTaskStepVo processTaskStepVo : retractableStepList) {
                 if(!resultList.contains(processTaskStepVo)) {
                     resultList.add(processTaskStepVo);
                 }
             }
-//            UserContext.get().setUserUuid(currentUserUuid);
-//            UserContext.get().setUserId(currentUserId);
-//            UserContext.get().setUserName(currentUserName);
-//            UserContext.get().setRoleUuidList(currentRoleUuidList);
         }
         return resultList;
 	}
