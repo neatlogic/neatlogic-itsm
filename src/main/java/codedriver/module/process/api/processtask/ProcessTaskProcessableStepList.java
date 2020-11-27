@@ -76,28 +76,15 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
             TimeUnit.MILLISECONDS.sleep(30);
 		}
 		    
-		List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId);
+		List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId, UserContext.get().getUserUuid(true));
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
         String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
         if(StringUtils.isNotBlank(userUuid)) {
-            List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
-            String currentUserUuid = UserContext.get().getUserUuid(true);
-            String currentUserId = UserContext.get().getUserId(true);
-            String currentUserName = UserContext.get().getUserName();
-            List<String> currentRoleUuidList = UserContext.get().getRoleUuidList();
-            UserContext.get().setUserUuid(userUuid);
-            UserContext.get().setUserId(null);
-            UserContext.get().setUserName(null);
-            UserContext.get().setRoleUuidList(roleUuidList);
-            for(ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId)) {
+            for(ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid)) {
                 if(!processableStepList.contains(processTaskStepVo)) {
                     processableStepList.add(processTaskStepVo);
                 }
             }
-            UserContext.get().setUserUuid(currentUserUuid);
-            UserContext.get().setUserId(currentUserId);
-            UserContext.get().setUserName(currentUserName);
-            UserContext.get().setRoleUuidList(currentRoleUuidList);
         }
 		String action = jsonObj.getString("action");
 		if(StringUtils.isNotBlank(action)) {
@@ -134,14 +121,15 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
      * @param processTaskId
      * @return List<ProcessTaskStepVo>
      */
-	private List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId) {
+	private List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId, String userUuid) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+        List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
         for (ProcessTaskStepVo stepVo : processTaskStepList) {
             /** 找到所有已激活未处理的步骤 **/
             if (stepVo.getIsActive().equals(1)) {
-                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), null, UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
+                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), null, userUuid, teamUuidList, roleUuidList) > 0) {
                     resultList.add(stepVo);
                 }
             }

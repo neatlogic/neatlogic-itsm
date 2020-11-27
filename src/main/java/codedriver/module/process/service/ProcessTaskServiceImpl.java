@@ -960,7 +960,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * @return boolean
      */
     @Override
-    public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter, ProcessTaskOperationType operationType) {
+    public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter, ProcessTaskOperationType operationType, String userUuid) {
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
         JSONArray authorityList = (JSONArray)JSONPath.read(stepConfig, "authorityList");
         if(CollectionUtils.isEmpty(authorityList)) {
@@ -970,12 +970,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
             ProcessStepHandlerVo processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
             JSONObject globalConfig = processStepUtilHandler.makeupConfig(processStepHandlerConfig != null ? processStepHandlerConfig.getConfig() : null);
-            authorityList = (JSONArray)JSONPath.read(globalConfig.toJSONString(), "authorityList");
+            authorityList = (JSONArray)JSONPath.read(JSON.toJSONString(globalConfig), "authorityList");
         }
         
         // 如果步骤自定义权限设置为空，则用组件的全局权限设置
         if (CollectionUtils.isNotEmpty(authorityList)) {
-            return checkOperationAuthIsConfigured(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), owner, reporter, operationType, authorityList);
+            return checkOperationAuthIsConfigured(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), owner, reporter, operationType, authorityList, userUuid);
         }
         return false;
     }
@@ -989,28 +989,29 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * @return boolean
      */
     @Override
-    public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType) {
+    public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType, String userUuid) {
         String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
         JSONArray authorityList = (JSONArray)JSONPath.read(config, "process.processConfig.authorityList");
         // 如果步骤自定义权限设置为空，则用组件的全局权限设置
         if (CollectionUtils.isNotEmpty(authorityList)) {
-            return checkOperationAuthIsConfigured(processTaskVo.getId(), null, processTaskVo.getOwner(), processTaskVo.getReporter(), operationType, authorityList);
+            return checkOperationAuthIsConfigured(processTaskVo.getId(), null, processTaskVo.getOwner(), processTaskVo.getReporter(), operationType, authorityList, userUuid);
         }
         return false;
     }
     
-    private boolean checkOperationAuthIsConfigured(Long processTaskId, Long processTaskStepId, String owner, String reporter, ProcessTaskOperationType operationType, JSONArray authorityList) {
+    private boolean checkOperationAuthIsConfigured(Long processTaskId, Long processTaskStepId, String owner, String reporter, ProcessTaskOperationType operationType, JSONArray authorityList, String userUuid) {
         for (int i = 0; i < authorityList.size(); i++) {
             JSONObject authorityObj = authorityList.getJSONObject(i);
             String action = authorityObj.getString("action");
             if(operationType.getValue().equals(action)) {
                 JSONArray acceptList = authorityObj.getJSONArray("acceptList");
                 if (CollectionUtils.isNotEmpty(acceptList)) {
-                    List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+                    List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+                    List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
                     ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
                     processTaskStepUserVo.setProcessTaskId(processTaskId);
                     processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);
-                    processTaskStepUserVo.setUserUuid(UserContext.get().getUserUuid(true));
+                    processTaskStepUserVo.setUserUuid(userUuid);
                     for (int j = 0; j < acceptList.size(); j++) {
                         String accept = acceptList.getString(j);
                         String[] split = accept.split("#");
@@ -1020,11 +1021,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                             }
                         } else if (ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {                              
                             if(ProcessUserType.OWNER.getValue().equals(split[1])) {
-                                if (UserContext.get().getUserUuid(true).equals(owner)) {
+                                if (userUuid.equals(owner)) {
                                     return true;
                                 }
                             }else if(ProcessUserType.REPORTER.getValue().equals(split[1])) {
-                                if (UserContext.get().getUserUuid(true).equals(reporter)) {
+                                if (userUuid.equals(reporter)) {
                                     return true;
                                 }
                             }else if(ProcessUserType.MAJOR.getValue().equals(split[1])) {
@@ -1039,15 +1040,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                 }
                             }
                         } else if (GroupSearch.USER.getValue().equals(split[0])) {
-                            if (UserContext.get().getUserUuid(true).equals(split[1])) {
+                            if (userUuid.equals(split[1])) {
                                 return true;
                             }
                         } else if (GroupSearch.TEAM.getValue().equals(split[0])) {
-                            if (currentUserTeamList.contains(split[1])) {
+                            if (teamUuidList.contains(split[1])) {
                                 return true;
                             }
                         } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
-                            if (UserContext.get().getRoleUuidList().contains(split[1])) {
+                            if (roleUuidList.contains(split[1])) {
                                 return true;
                             }
                         }
@@ -1065,13 +1066,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * @return Set<ProcessTaskStepVo>
      */
     @Override
-    public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo) {
+    public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo, String userUuid) {
         Set<ProcessTaskStepVo> resultSet = new HashSet<>();
         List<ProcessTaskStepVo> stepVoList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskStepVo stepVo : stepVoList) {
             /** 找到所有已激活步骤 **/
             if (stepVo.getIsActive().equals(1)) {
-                resultSet.addAll(getRetractableStepListByProcessTaskStepId(processTaskVo, stepVo.getId()));
+                resultSet.addAll(getRetractableStepListByProcessTaskStepId(processTaskVo, stepVo.getId(), userUuid));
             }
         }
         return resultSet;
@@ -1086,7 +1087,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * @return List<ProcessTaskStepVo>
      */
     @Override
-    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo, Long processTaskStepId) {
+    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo, Long processTaskStepId, String userUuid) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
         /** 所有前置步骤 **/
         List<ProcessTaskStepVo> fromStepList = processTaskMapper.getFromProcessTaskStepByToId(processTaskStepId);
@@ -1095,11 +1096,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromStep.getHandler());
             if (handler != null) {
                 if (ProcessStepMode.MT == handler.getMode()) {// 手动处理节点
-                    if(checkOperationAuthIsConfigured(fromStep, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.RETREATCURRENTSTEP)) {
+                    if(checkOperationAuthIsConfigured(fromStep, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.RETREATCURRENTSTEP, userUuid)) {
                         resultList.add(fromStep);
                     }
                 } else {// 自动处理节点，继续找前置节点
-                    resultList.addAll(getRetractableStepListByProcessTaskStepId(processTaskVo, fromStep.getId()));
+                    resultList.addAll(getRetractableStepListByProcessTaskStepId(processTaskVo, fromStep.getId(), userUuid));
                 }
             } else {
                 throw new ProcessStepHandlerNotFoundException(fromStep.getHandler());
@@ -1116,9 +1117,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * @return List<ProcessTaskStepVo>
      */
     @Override
-    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo) {
+    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo, String userUuid) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        if(checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.URGE)) {
+        if(checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.URGE, userUuid)) {
             List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
             for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                 if (processTaskStep.getIsActive().intValue() == 1) {
@@ -1255,5 +1256,20 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskStepVo.setParamObj(jsonObj);
             handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
         }   
+    }
+
+    @Override
+    public Set<ProcessTaskStepVo> getTransferableStepListByProcessTask(ProcessTaskVo processTaskVo, String userUuid) {
+        Set<ProcessTaskStepVo> resultSet = new HashSet<>();
+        List<ProcessTaskStepVo> stepVoList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
+        for (ProcessTaskStepVo stepVo : stepVoList) {
+            /** 找到所有已激活步骤 **/
+            if (stepVo.getIsActive().equals(1)) {
+                if(checkOperationAuthIsConfigured(stepVo, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.TRANSFERCURRENTSTEP, userUuid)) {
+                    resultSet.add(stepVo);
+                }
+            }
+        }
+        return resultSet;
     }
 }
