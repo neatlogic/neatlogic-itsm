@@ -58,10 +58,6 @@ public class ProcessTaskTransferableStepListApi extends PrivateApiComponentBase 
         String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
         if(StringUtils.isNotBlank(userUuid)) {
             List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
-            String currentUserUuid = UserContext.get().getUserUuid(true);
-            String currentUserId = UserContext.get().getUserId(true);
-            String currentUserName = UserContext.get().getUserName();
-            List<String> currentRoleUuidList = UserContext.get().getRoleUuidList();
             UserContext.get().setUserUuid(userUuid);
             UserContext.get().setUserId(null);
             UserContext.get().setUserName(null);
@@ -72,10 +68,6 @@ public class ProcessTaskTransferableStepListApi extends PrivateApiComponentBase 
                     resultList.add(processTaskStepVo);
                 }
             }
-            UserContext.get().setUserUuid(currentUserUuid);
-            UserContext.get().setUserId(currentUserId);
-            UserContext.get().setUserName(currentUserName);
-            UserContext.get().setRoleUuidList(currentRoleUuidList);
         }
         return resultList;
 	}
