@@ -104,7 +104,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         
         operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK, userUuid)) {
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.UPDATE, userUuid)) {
                     return true;
                 }
             }           
@@ -113,7 +113,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         
         operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK, userUuid)) {
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.URGE, userUuid)) {
                     return true;
                 }
             }            
