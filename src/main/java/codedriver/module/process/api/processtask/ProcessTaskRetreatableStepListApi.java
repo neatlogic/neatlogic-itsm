@@ -4,7 +4,6 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -53,29 +52,29 @@ public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		Set<ProcessTaskStepVo> resultList = processTaskService.getRetractableStepListByProcessTask(processTaskVo);
+		Set<ProcessTaskStepVo> resultList = processTaskService.getRetractableStepListByProcessTask(processTaskVo, UserContext.get().getUserUuid(true));
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
         String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
         if(StringUtils.isNotBlank(userUuid)) {
-            List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
-            String currentUserUuid = UserContext.get().getUserUuid(true);
-            String currentUserId = UserContext.get().getUserId(true);
-            String currentUserName = UserContext.get().getUserName();
-            List<String> currentRoleUuidList = UserContext.get().getRoleUuidList();
-            UserContext.get().setUserUuid(userUuid);
-            UserContext.get().setUserId(null);
-            UserContext.get().setUserName(null);
-            UserContext.get().setRoleUuidList(roleUuidList);
-            Set<ProcessTaskStepVo> retractableStepList = processTaskService.getRetractableStepListByProcessTask(processTaskVo);
+//            List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+//            String currentUserUuid = UserContext.get().getUserUuid(true);
+//            String currentUserId = UserContext.get().getUserId(true);
+//            String currentUserName = UserContext.get().getUserName();
+//            List<String> currentRoleUuidList = UserContext.get().getRoleUuidList();
+//            UserContext.get().setUserUuid(userUuid);
+//            UserContext.get().setUserId(null);
+//            UserContext.get().setUserName(null);
+//            UserContext.get().setRoleUuidList(roleUuidList);
+            Set<ProcessTaskStepVo> retractableStepList = processTaskService.getRetractableStepListByProcessTask(processTaskVo, userUuid);
             for(ProcessTaskStepVo processTaskStepVo : retractableStepList) {
                 if(!resultList.contains(processTaskStepVo)) {
                     resultList.add(processTaskStepVo);
                 }
             }
-            UserContext.get().setUserUuid(currentUserUuid);
-            UserContext.get().setUserId(currentUserId);
-            UserContext.get().setUserName(currentUserName);
-            UserContext.get().setRoleUuidList(currentRoleUuidList);
+//            UserContext.get().setUserUuid(currentUserUuid);
+//            UserContext.get().setUserId(currentUserId);
+//            UserContext.get().setUserName(currentUserName);
+//            UserContext.get().setRoleUuidList(currentRoleUuidList);
         }
         return resultList;
 	}

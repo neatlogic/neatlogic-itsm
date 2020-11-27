@@ -2,14 +2,12 @@ package codedriver.module.process.operationauth.handler;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiPredicate;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
@@ -20,20 +18,21 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
+import codedriver.framework.process.operationauth.core.TernaryPredicate;
 @Component
 public class OmnipotentOperateHandler implements IOperationAuthHandler {
 
-    private final Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> operationBiPredicateMap = new HashMap<>();
+    private final Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
     @Autowired
     private ProcessTaskMapper processTaskMapper;
     
     @PostConstruct
     public void init() {
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.CREATESUBTASK, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.CREATESUBTASK, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    if(processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), UserContext.get().getUserUuid(), ProcessUserType.MAJOR.getValue())) > 0) {
+                    if(processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), userUuid, ProcessUserType.MAJOR.getValue())) > 0) {
                         return true;
                     }
                 }
@@ -49,7 +48,7 @@ public class OmnipotentOperateHandler implements IOperationAuthHandler {
     }
 
     @Override
-    public Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> getOperationBiPredicateMap() {
+    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> getOperationBiPredicateMap() {
         return operationBiPredicateMap;
     }
 

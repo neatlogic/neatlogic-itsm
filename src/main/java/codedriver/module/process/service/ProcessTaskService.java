@@ -185,7 +185,7 @@ public interface ProcessTaskService {
      * @param operationType 
      * @return boolean
      */
-	public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter, ProcessTaskOperationType operationType);
+	public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter, ProcessTaskOperationType operationType, String userUuid);
 	
 	/**
      * 
@@ -196,7 +196,7 @@ public interface ProcessTaskService {
      * @param operationType 
      * @return boolean
      */
-    public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType);
+    public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType, String userUuid);
 	/**
      * 
      * @Time:2020年4月3日
@@ -204,7 +204,7 @@ public interface ProcessTaskService {
      * @param processTask
      * @return Set<ProcessTaskStepVo>
      */
-	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo);
+	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo, String userUuid);
 	/**
      * 
      * @Author: 14378
@@ -214,7 +214,7 @@ public interface ProcessTaskService {
      * @param processTaskStepId 已激活的步骤id
      * @return List<ProcessTaskStepVo>
      */
-    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo, Long processTaskStepId);
+    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo, Long processTaskStepId, String userUuid);
 
 	/**
      * 
@@ -223,7 +223,7 @@ public interface ProcessTaskService {
      * @param processTaskVo
      * @return List<ProcessTaskStepVo>
      */
-    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo);
+    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo, String userUuid);
     
     public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception;
 
@@ -255,5 +255,5 @@ public interface ProcessTaskService {
     * @param processTaskVo
     * @return Set<ProcessTaskStepVo>
      */
-    public Set<ProcessTaskStepVo> getTransferableStepListByProcessTask(ProcessTaskVo processTaskVo);
+    public Set<ProcessTaskStepVo> getTransferableStepListByProcessTask(ProcessTaskVo processTaskVo, String userUuid);
 }

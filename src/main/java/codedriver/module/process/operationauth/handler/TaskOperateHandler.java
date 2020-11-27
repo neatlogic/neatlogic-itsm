@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiPredicate;
 
 import javax.annotation.PostConstruct;
 
@@ -14,9 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -30,17 +28,20 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
+import codedriver.framework.process.operationauth.core.TernaryPredicate;
 import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Component
 public class TaskOperateHandler implements IOperationAuthHandler {
 
-    private Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> operationBiPredicateMap = new HashMap<>();
+    private Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
     @Autowired
     private ProcessTaskMapper processTaskMapper;
     @Autowired
     private TeamMapper teamMapper;
+    @Autowired
+    private UserMapper userMapper;
     @Autowired
     private ChannelMapper channelMapper;
     @Autowired
@@ -54,80 +55,82 @@ public class TaskOperateHandler implements IOperationAuthHandler {
     @PostConstruct
     public void init() {
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.POCESSTASKVIEW, (processTaskVo, processTaskStepVo) -> {
-            if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
+        operationBiPredicateMap.put(ProcessTaskOperationType.POCESSTASKVIEW, (processTaskVo, processTaskStepVo, userUuid) -> {
+            if (userUuid.equals(processTaskVo.getOwner())) {
                 return true;
-            } else if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
+            } else if (userUuid.equals(processTaskVo.getReporter())) {
                 return true;
             } else {
-                List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-                List<String> channelList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), currentUserTeamList, UserContext.get().getRoleUuidList(), processTaskVo.getChannelUuid());
+                List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+                List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+                List<String> channelList = channelMapper.getAuthorizedChannelUuidList(userUuid, teamUuidList, roleUuidList, processTaskVo.getChannelUuid());
                 if (channelList.contains(processTaskVo.getChannelUuid())) {
                     return true;
-                } else if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, UserContext.get().getUserUuid(), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
+                } else if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, userUuid, teamUuidList, roleUuidList) > 0) {
                     return true;
                 }
             }
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.STARTPROCESS, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STARTPROCESS, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
-                if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner()) || UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
+                if (userUuid.equals(processTaskVo.getOwner()) || userUuid.equals(processTaskVo.getReporter())) {
                     return true;
                 }
             }
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> {
             // 工单状态为进行中的才能终止
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK, userUuid)) {
                     return true;
                 }
             }          
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> {
             // 工单状态为已终止的才能恢复
             if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
-                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK, userUuid)) {
                     return true;
                 }
             }
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK, userUuid)) {
                     return true;
                 }
             }           
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                if(processTaskService.checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK, userUuid)) {
                     return true;
                 }
             }            
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo) -> {
-            List<String> currentUserTeamList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo, userUuid) -> {
+            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+            List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
             // 有可处理步骤work
-            if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, UserContext.get().getUserUuid(), currentUserTeamList, UserContext.get().getRoleUuidList()) > 0) {
+            if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, userUuid, teamUuidList, roleUuidList) > 0) {
                 return true;
             }
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskVo, processTaskStepVo, userUuid) -> {
             // 撤销权限retreat
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
@@ -136,7 +139,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
                 Set<ProcessTaskStepVo> retractableStepSet = new HashSet<>();
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        retractableStepSet.addAll(processTaskService.getRetractableStepListByProcessTaskStepId(processTaskVo, processTaskStep.getId()));
+                        retractableStepSet.addAll(processTaskService.getRetractableStepListByProcessTaskStepId(processTaskVo, processTaskStep.getId(), userUuid));
                     }
                 }
                 if (CollectionUtils.isNotEmpty(retractableStepSet)) {
@@ -146,10 +149,9 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.SCORE, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.SCORE, (processTaskVo, processTaskStepVo, userUuid) -> {
             // 评分权限score
             if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
-                String userUuid = UserContext.get().getUserUuid();
                 if (userUuid.equals(processTaskVo.getOwner())) {
                     return true;
                 }
@@ -157,9 +159,10 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.TRANFERREPORT, (processTaskVo, processTaskStepVo) -> {
-            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-            List<Long> channelTypeRelationIdList = channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList());
+        operationBiPredicateMap.put(ProcessTaskOperationType.TRANFERREPORT, (processTaskVo, processTaskStepVo, userUuid) -> {
+            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+            List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+            List<Long> channelTypeRelationIdList = channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(processTaskVo.getChannelUuid(), userUuid, teamUuidList, roleUuidList);
             if(CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
                 ChannelRelationVo channelRelationVo = new ChannelRelationVo();
                 channelRelationVo.setSource(processTaskVo.getChannelUuid());
@@ -198,7 +201,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.COPYPROCESSTASK, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.COPYPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> {
             if(catalogService.channelIsAuthority(processTaskVo.getChannelUuid())) {
                 return true;
             }else {
@@ -206,7 +209,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             }
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.REDO, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.REDO, (processTaskVo, processTaskStepVo, userUuid) -> {
             if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                 ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskVo.getId());
                 if(processTaskScoreTemplateVo != null) {
@@ -224,14 +227,14 @@ public class TaskOperateHandler implements IOperationAuthHandler {
             return false;
         });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFER, (processTaskVo, processTaskStepVo) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFER, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 if(CollectionUtils.isEmpty(processTaskVo.getStepList())) {
                     processTaskVo.getStepList().addAll(processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId()));
                 }
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
-                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.TRANSFERCURRENTSTEP)) {
+                        if(processTaskService.checkOperationAuthIsConfigured(processTaskStep, processTaskVo.getOwner(), processTaskVo.getReporter(), ProcessTaskOperationType.TRANSFERCURRENTSTEP, userUuid)) {
                             return true;
                         }
                     }
@@ -246,7 +249,7 @@ public class TaskOperateHandler implements IOperationAuthHandler {
         return OperationAuthHandlerType.TASK;
     }
     @Override
-    public Map<ProcessTaskOperationType, BiPredicate<ProcessTaskVo, ProcessTaskStepVo>> getOperationBiPredicateMap() {
+    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> getOperationBiPredicateMap() {
         return operationBiPredicateMap;
     }
 }

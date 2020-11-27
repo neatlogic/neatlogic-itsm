@@ -4,7 +4,6 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -53,16 +52,16 @@ public class ProcessTaskTransferableStepListApi extends PrivateApiComponentBase 
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		Set<ProcessTaskStepVo> resultList = processTaskService.getTransferableStepListByProcessTask(processTaskVo);
+		Set<ProcessTaskStepVo> resultList = processTaskService.getTransferableStepListByProcessTask(processTaskVo, UserContext.get().getUserUuid(true));
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
         String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
         if(StringUtils.isNotBlank(userUuid)) {
-            List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
-            UserContext.get().setUserUuid(userUuid);
-            UserContext.get().setUserId(null);
-            UserContext.get().setUserName(null);
-            UserContext.get().setRoleUuidList(roleUuidList);
-            Set<ProcessTaskStepVo> retractableStepList = processTaskService.getTransferableStepListByProcessTask(processTaskVo);
+//            List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+//            UserContext.get().setUserUuid(userUuid);
+//            UserContext.get().setUserId(null);
+//            UserContext.get().setUserName(null);
+//            UserContext.get().setRoleUuidList(roleUuidList);
+            Set<ProcessTaskStepVo> retractableStepList = processTaskService.getTransferableStepListByProcessTask(processTaskVo, userUuid);
             for(ProcessTaskStepVo processTaskStepVo : retractableStepList) {
                 if(!resultList.contains(processTaskStepVo)) {
                     resultList.add(processTaskStepVo);
