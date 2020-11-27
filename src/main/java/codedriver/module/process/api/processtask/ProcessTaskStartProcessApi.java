@@ -82,13 +82,15 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
 		if(handler == null) {
             throw new ProcessStepHandlerNotFoundException(startStepVo.getHandler());
 		}
+
+        List<String> hidecomponentList = new ArrayList<>();
+        List<String> readcomponentList = new ArrayList<>();
 		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(startStepVo.getProcessTaskId());
         processTaskStepDataVo.setProcessTaskStepId(startStepVo.getId());
         processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
         processTaskStepDataVo = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
-        List<String> hidecomponentList = new ArrayList<>();
         if(processTaskStepDataVo != null) {
             JSONObject dataObj = processTaskStepDataVo.getData();
             if (MapUtils.isNotEmpty(dataObj)) {
@@ -96,9 +98,14 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
                 if (CollectionUtils.isNotEmpty(hidecomponentArray)) {
                     hidecomponentList = JSON.parseArray(JSON.toJSONString(hidecomponentArray), String.class);
                 }
+                JSONArray readcomponentArray = dataObj.getJSONArray("readcomponentList");
+                if (CollectionUtils.isNotEmpty(readcomponentArray)) {
+                    readcomponentList = JSON.parseArray(JSON.toJSONString(readcomponentArray), String.class);
+                }
             }
         }
         jsonObj.put("hidecomponentList", hidecomponentList);
+        jsonObj.put("readcomponentList", readcomponentList);
         startStepVo.setParamObj(jsonObj);
         try {
             handler.startProcess(startStepVo);

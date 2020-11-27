@@ -66,6 +66,10 @@ public class ProcessCustomButtonStatusList extends PrivateApiComponentBase {
 			if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
 			    resultObj.put("notifyPolicyConfig", notifyPolicyConfig);
 			}
+            JSONObject actionConfig = handlerConfig.getJSONObject("actionConfig");
+            if(MapUtils.isNotEmpty(actionConfig)) {
+                resultObj.put("actionConfig", actionConfig);
+            }
 		}		
 		JSONArray customStatusList = new JSONArray();
 		for (ProcessTaskStatus status : ProcessTaskStatus.values()) {

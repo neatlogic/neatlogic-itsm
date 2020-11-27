@@ -7,6 +7,7 @@ import codedriver.framework.restful.annotation.OperationType;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -108,9 +109,17 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
                 if(CollectionUtils.isNotEmpty(hidecomponentList)) {
                     jsonObj.put("hidecomponentList", hidecomponentList);
                 }
+                JSONArray readcomponentList = dataObj.getJSONArray("readcomponentList");
+                if(CollectionUtils.isNotEmpty(readcomponentList)) {
+                    jsonObj.put("readcomponentList", readcomponentList);
+                }
                 JSONObject handlerStepInfo = dataObj.getJSONObject("handlerStepInfo");
                 if(MapUtils.isNotEmpty(handlerStepInfo)) {
                     jsonObj.put("handlerStepInfo", handlerStepInfo);
+                }
+                String priorityUuid = dataObj.getString("priorityUuid");
+                if(StringUtils.isNotBlank(priorityUuid)) {
+                    jsonObj.put("priorityUuid", priorityUuid);
                 }
             }
         }

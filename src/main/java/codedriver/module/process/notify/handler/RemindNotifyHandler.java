@@ -7,14 +7,13 @@ import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
 import codedriver.framework.reminder.core.IGlobalReminderHandler;
 import codedriver.framework.reminder.dto.ReminderMessageVo;
 import codedriver.module.process.reminder.handler.ProcessTaskRemindHandler;
-import org.springframework.stereotype.Component;
 
 /**
  * @program: codedriver
  * @description: 消息中心对接
  * @create: 2020-03-16 14:25
  **/
-@Component
+//@Component
 public class RemindNotifyHandler extends NotifyHandlerBase {
 
 //    private static Logger logger = LoggerFactory.getLogger(RemindNotifyHandler.class);

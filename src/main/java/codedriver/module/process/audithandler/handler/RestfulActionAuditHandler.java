@@ -12,7 +12,7 @@ import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetail
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dto.ActionVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.framework.process.notify.core.NotifyTriggerType;
+import codedriver.framework.process.notify.core.TaskStepNotifyTriggerType;
 
 @Service
 public class RestfulActionAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
@@ -33,7 +33,7 @@ public class RestfulActionAuditHandler extends ProcessTaskStepAuditDetailHandler
 			if(integrationVo != null) {
 				actionVo.setIntegrationName(integrationVo.getName());
 			}
-			String triggerText = NotifyTriggerType.getText(actionVo.getTrigger());
+			String triggerText = TaskStepNotifyTriggerType.getText(actionVo.getTrigger());
 			if(StringUtils.isNotBlank(triggerText)) {
 				actionVo.setTriggerText(triggerText);
 			}

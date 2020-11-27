@@ -27,7 +27,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.notify.core.NotifyTriggerType;
+import codedriver.framework.process.notify.core.SubtaskNotifyTriggerType;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 @Service
@@ -76,7 +76,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             currentProcessTaskStepVo.setParamObj(paramObj);
             handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.CREATESUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
-            handler.notify(currentProcessTaskStepVo, NotifyTriggerType.CREATESUBTASK);
+            handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.CREATESUBTASK);
         }else {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
         }
@@ -153,7 +153,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             currentProcessTaskStepVo.setParamObj(paramObj);
             handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.EDITSUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
-            handler.notify(currentProcessTaskStepVo, NotifyTriggerType.EDITSUBTASK);
+            handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.EDITSUBTASK);
         }else {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
         }
@@ -183,7 +183,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
             handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.REDOSUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
-            handler.notify(currentProcessTaskStepVo, NotifyTriggerType.REDOSUBTASK);
+            handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.REDOSUBTASK);
         }else {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
         }
@@ -214,7 +214,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
             handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETESUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
-            handler.notify(currentProcessTaskStepVo, NotifyTriggerType.COMPLETESUBTASK);
+            handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.COMPLETESUBTASK);
         }else {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
         }
@@ -240,7 +240,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
             handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.ABORTSUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
-            handler.notify(currentProcessTaskStepVo, NotifyTriggerType.ABORTSUBTASK);
+            handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.ABORTSUBTASK);
         }else {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
         }

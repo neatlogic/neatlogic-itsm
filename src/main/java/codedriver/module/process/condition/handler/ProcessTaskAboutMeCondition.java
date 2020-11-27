@@ -149,7 +149,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
     private String getMeWillDoCondition() {
         String sql = StringUtils.EMPTY;
         // status
-        List<String> statusList = Arrays.asList(ProcessTaskStatus.RUNNING.getValue()).stream()
+        List<String> statusList = Arrays.asList(ProcessTaskStatus.DRAFT.getValue(),ProcessTaskStatus.RUNNING.getValue()).stream()
             .map(object -> object.toString()).collect(Collectors.toList());
         String statusSql = String.format(Expression.INCLUDE.getExpressionEs(),
             ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()))
@@ -157,10 +157,10 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
             String.format(" '%s' ", String.join("','", statusList)));
         // common.step.filtstatus
         List<String> stepStatusList =
-            Arrays.asList(ProcessTaskStatus.PENDING.getValue(), ProcessTaskStatus.RUNNING.getValue()).stream()
+            Arrays.asList(ProcessTaskStatus.DRAFT.getValue(),ProcessTaskStatus.PENDING.getValue(), ProcessTaskStatus.RUNNING.getValue()).stream()
                 .map(object -> object.toString()).collect(Collectors.toList());
         String stepStatusSql = String.format(Expression.INCLUDE.getExpressionEs(),
-            ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+ ".filtstatus",
+            ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+ ".status",
             String.format(" '%s' ", String.join("','", stepStatusList)));
         // common.step.usertypelist.userlist
         List<String> userList = new ArrayList<String>();

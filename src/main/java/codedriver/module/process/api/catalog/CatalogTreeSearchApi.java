@@ -77,9 +77,14 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 		}
 		//已授权的服务uuid
 		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
+		    return new ArrayList<>();
+		}
 		//查出有已启用且有授权服务的目录uuid
 		List<String> hasActiveChannelCatalogUuidList = catalogMapper.getHasActiveChannelCatalogUuidList(currentUserAuthorizedChannelUuidList);
-		
+		if(CollectionUtils.isEmpty(hasActiveChannelCatalogUuidList)) {
+		    return new ArrayList<>();
+		}
 		Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 
 		//构建一个虚拟的root目录
@@ -111,8 +116,12 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 				if(CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
 					continue;
 				}
-				if(catalogVo.isAuthority() && (CollectionUtils.isNotEmpty(catalogVo.getChildren()) || hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid()))) {//
-					continue;
+				if(catalogVo.isAuthority()) {
+				    if(CollectionUtils.isNotEmpty(catalogVo.getChildren())) {
+				        continue;
+				    }else if(hasActiveChannelCatalogUuidList.contains(catalogVo.getUuid())) {
+				        continue;
+				    }
 				}
 				CatalogVo parentCatalog = catalogVo.getParent();
 				if(parentCatalog != null) {

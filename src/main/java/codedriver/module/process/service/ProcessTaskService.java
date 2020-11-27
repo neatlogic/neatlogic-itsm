@@ -35,8 +35,6 @@ public interface ProcessTaskService {
 	 */
 	public Boolean runRequest(AutomaticConfigVo automaticConfigVo, ProcessTaskStepVo currentProcessTaskStepVo);
 
-	public ProcessTaskStepVo getProcessTaskStepDetailInfoById(Long processTaskStepId);
-
 	public JSONObject initProcessTaskStepData(ProcessTaskStepVo currentProcessTaskStepVo, AutomaticConfigVo automaticConfig,
 			JSONObject data, String type);
 
@@ -187,7 +185,18 @@ public interface ProcessTaskService {
      * @param operationType 
      * @return boolean
      */
-	public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, ProcessTaskOperationType operationType);
+	public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter, ProcessTaskOperationType operationType, String userUuid);
+	
+	/**
+     * 
+     * @Time:2020年4月2日
+     * @Description: 检查当前用户是否配置该权限
+     * @param processTaskVo
+     * @param processTaskStepVo
+     * @param operationType 
+     * @return boolean
+     */
+    public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType, String userUuid);
 	/**
      * 
      * @Time:2020年4月3日
@@ -195,7 +204,7 @@ public interface ProcessTaskService {
      * @param processTask
      * @return Set<ProcessTaskStepVo>
      */
-	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo);
+	public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo, String userUuid);
 	/**
      * 
      * @Author: 14378
@@ -205,7 +214,7 @@ public interface ProcessTaskService {
      * @param processTaskStepId 已激活的步骤id
      * @return List<ProcessTaskStepVo>
      */
-    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(List<ProcessTaskStepVo> processTaskStepList, Long processTaskStepId);
+    public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo, Long processTaskStepId, String userUuid);
 
 	/**
      * 
@@ -214,9 +223,7 @@ public interface ProcessTaskService {
      * @param processTaskVo
      * @return List<ProcessTaskStepVo>
      */
-    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo);
-    
-    public List<ProcessTaskStepVo> getProcessTaskStepVoListByProcessTask(ProcessTaskVo processTaskVo);
+    public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo, String userUuid);
     
     public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception;
 
@@ -232,8 +239,6 @@ public interface ProcessTaskService {
      */
     public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
 
-    public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskId(Long processTaskId, List<String> typeList);
-
     /**
     * @Author 89770
     * @Time 2020年11月5日  
@@ -242,4 +247,13 @@ public interface ProcessTaskService {
     * @return
      */
     public void updateTag(Long processTaskId,Long processTaskStepId,JSONObject jsonObj)throws PermissionDeniedException;
+
+    /**
+     * 
+    * @Time:2020年11月26日
+    * @Description: 获取当前用户有转交权限的步骤列表 
+    * @param processTaskVo
+    * @return Set<ProcessTaskStepVo>
+     */
+    public Set<ProcessTaskStepVo> getTransferableStepListByProcessTask(ProcessTaskVo processTaskVo, String userUuid);
 }

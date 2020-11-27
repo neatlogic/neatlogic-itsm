@@ -2,12 +2,12 @@ package codedriver.module.process.api.processtask;
 
 import java.util.List;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.OperationType;
+//import codedriver.framework.reminder.core.OperationTypeEnum;
+//import codedriver.framework.restful.annotation.OperationType;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+//import org.springframework.stereotype.Service;
+//import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -31,9 +31,9 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 
-@Service
-@Transactional
-@OperationType(type = OperationTypeEnum.UPDATE)
+//@Service
+//@Transactional
+//@OperationType(type = OperationTypeEnum.UPDATE)
 public class ProcessTaskContentUpdateApi extends PrivateApiComponentBase {
 	
 	@Autowired
@@ -104,7 +104,8 @@ public class ProcessTaskContentUpdateApi extends PrivateApiComponentBase {
 	        processTaskStepVo.setProcessTaskId(processTaskId);
 	        processTaskStepVo.setId(processTaskStepId);
 			processTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);	
+			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
+			handler.calculateSla(new ProcessTaskVo(processTaskId), false);
 		}
 		return null;
 	}

@@ -59,4 +59,12 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 	public Integer getSort() {
 		return 12;
 	}
+
+	@Override
+	public Object getSimpleValue(Object json) {
+		if(json != null){
+			return json.toString();
+		}
+		return null;
+	}
 }

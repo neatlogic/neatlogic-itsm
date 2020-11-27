@@ -58,4 +58,11 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase  implements 
 		return 7;
 	}
 
+	@Override
+	public Object getSimpleValue(Object json) {
+		if(json != null){
+			return json.toString();
+		}
+		return null;
+	}
 }

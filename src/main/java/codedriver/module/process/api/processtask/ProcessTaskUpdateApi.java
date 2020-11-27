@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -139,44 +139,44 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 		}
 		
 		//跟新标签
-		JSONArray tagArray = jsonObj.getJSONArray("tagList");
-        List<ProcessTagVo>  oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
-        List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
-        processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
-        if(CollectionUtils.isNotEmpty(tagArray)) {
-            List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
-            List<String> notExistTagList = tagNameList.stream().filter(a->!existTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList());
-            List<ProcessTagVo> notExistTagVoList = new ArrayList<ProcessTagVo>();
-            for(String tagName : notExistTagList) {
-                notExistTagVoList.add(new ProcessTagVo(tagName));
+        List<String> tagNameList = JSONObject.parseArray(JSON.toJSONString(jsonObj.getJSONArray("tagList")), String.class);
+        if(tagNameList != null) {
+            List<ProcessTagVo> oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
+            processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
+            if(CollectionUtils.isNotEmpty(tagNameList)) {
+                List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
+                List<String> notExistTagList = tagNameList.stream().filter(a->!existTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList());
+                List<ProcessTagVo> notExistTagVoList = new ArrayList<ProcessTagVo>();
+                for(String tagName : notExistTagList) {
+                    notExistTagVoList.add(new ProcessTagVo(tagName));
+                }
+                if(CollectionUtils.isNotEmpty(notExistTagVoList)) {
+                    processMapper.insertProcessTag(notExistTagVoList);
+                    existTagList.addAll(notExistTagVoList);
+                }
+                List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
+                for(ProcessTagVo processTagVo : existTagList) {
+                    processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId,processTagVo.getId()));
+                }
+                processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
             }
-            if(CollectionUtils.isNotEmpty(notExistTagVoList)) {
-                processMapper.insertProcessTag(notExistTagVoList);
-                existTagList.addAll(notExistTagVoList);
+            int diffCount = tagNameList.stream().filter(a->!oldTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList()).size();
+            if(tagNameList.size() != oldTagList.size() || diffCount >0) {
+                List<String> oldTagNameList = new ArrayList<String>();
+                for(ProcessTagVo tag:oldTagList) {
+                    oldTagNameList.add(tag.getName());
+                }
+                ProcessTaskContentVo oldTagContentVo = new ProcessTaskContentVo(String.join(",", oldTagNameList));
+                processTaskMapper.replaceProcessTaskContent(oldTagContentVo);
+                if(StringUtils.isNotBlank(oldTagContentVo.getHash())) {
+                    jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), oldTagContentVo.getHash());
+                    jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
+                }
+                isUpdate = true;
+            }else {
+                jsonObj.remove(ProcessTaskAuditDetailType.TAGLIST.getParamName());
             }
-            List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
-            for(ProcessTagVo processTagVo : existTagList) {
-                processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId,processTagVo.getId()));
-            }
-            processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
-        }   
-        int diffCount = tagNameList.stream().filter(a->!oldTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList()).size();
-        if(tagNameList.size() != oldTagList.size() || diffCount >0) {
-            List<String> oldTagNameList = new ArrayList<String>();
-            for(ProcessTagVo tag:oldTagList) {
-                oldTagNameList.add(tag.getName());
-            }
-            ProcessTaskContentVo oldTagContentVo = new ProcessTaskContentVo(String.join(",", oldTagNameList));
-            processTaskMapper.replaceProcessTaskContent(oldTagContentVo);
-            if(StringUtils.isNotBlank(oldTagContentVo.getHash())) {
-                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), oldTagContentVo.getHash());
-                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
-            }
-            isUpdate = true;
-        }else {
-            jsonObj.remove(ProcessTaskAuditDetailType.TAGLIST.getParamName());
-        }
-        
+        }     
         
 		ProcessTaskStepReplyVo oldReplyVo = null;
         List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
@@ -196,15 +196,14 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             isUpdate = true;
         }
         
-        
-
 		//生成活动
 		if(isUpdate) {
 		    ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
 		    processTaskStepVo.setProcessTaskId(processTaskId);
 		    processTaskStepVo.setId(processTaskStepId);
 			processTaskStepVo.setParamObj(jsonObj);
-			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);	
+			handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
+			handler.calculateSla(new ProcessTaskVo(processTaskId), false);
 		}
 		
 		return null;

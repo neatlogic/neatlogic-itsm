@@ -2,7 +2,7 @@ package codedriver.module.process.service;
 
 import java.util.List;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.dto.CatalogVo;
 
@@ -36,7 +36,7 @@ public interface CatalogService {
 	 * @param catalog
 	 * @return JSONArray
 	 */
-	public JSONArray getCatalogChannelByCatalogUuid(CatalogVo catalog);
+	public JSONObject getCatalogChannelByCatalogUuid(CatalogVo catalog,Boolean isNeedChannel);
     /**
      * @Time:2020年7月7日
      * @Description:构造一个虚拟的root节点
@@ -45,4 +45,14 @@ public interface CatalogService {
     public CatalogVo buildRootCatalog();
     
     public List<String> getChannelRelationTargetChannelUuidList(String channelUuid, Long channelTypeRelationId);
+    
+    /**
+     * 
+    * @Author 89770
+    * @Time 2020年11月16日  
+    * @Description: 根据父服务目录uuid 获取 存在服务且有权限的 子服务目录
+    * @Param 
+    * @return
+     */
+    List<CatalogVo> getCatalogByCatalogParentUuid(String catalogUuid);
 }

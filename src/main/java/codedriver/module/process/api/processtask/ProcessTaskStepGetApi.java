@@ -25,10 +25,12 @@ import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
 import codedriver.framework.process.dto.ProcessTaskStepAgentVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -48,6 +50,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.common.config.ProcessConfig;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 @Service
@@ -77,6 +80,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private PriorityMapper priorityMapper;
     
 	@Override
 	public String getToken() {
@@ -112,14 +118,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
 		
 		ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
-		List<String> typeList = new ArrayList<>();
-        typeList.add(ProcessTaskOperationType.COMMENT.getValue());
-        typeList.add(ProcessTaskOperationType.COMPLETE.getValue());
-        typeList.add(ProcessTaskOperationType.BACK.getValue());
-        typeList.add(ProcessTaskOperationType.RETREAT.getValue());
-        typeList.add(ProcessTaskOperationType.TRANSFER.getValue());
-		List<ProcessTaskStepReplyVo> processTaskStepReplyList = processTaskService.getProcessTaskStepReplyListByProcessTaskId(processTaskId, typeList);
-		processTaskVo.setCommentList(processTaskStepReplyList);
+
         if(ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
             ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
             if(processTaskScoreTemplateVo != null) {
@@ -175,6 +174,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         //标签列表
         processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
 		
+        //移动端默认展开表单
+        processTaskVo.setMobileFormUIType(Integer.valueOf(ProcessConfig.MOBILE_FORM_UI_TYPE()));
 		JSONObject resultObj = new JSONObject();
         resultObj.put("processTask", processTaskVo);
 		return resultObj;
@@ -201,8 +202,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(processStepUtilHandler == null) {
                 throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
             }
-            //获取步骤信息
-            processStepUtilHandler.setProcessTaskStepConfig(processTaskStepVo);
             processTaskStepVo.setHandlerStepInfo(processStepUtilHandler.getHandlerStepInitInfo(processTaskStepVo));
             //步骤评论列表
             List<String> typeList = new ArrayList<>();
@@ -218,7 +217,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if(processTaskStepVo.getIsActive().intValue() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                 List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
                 if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-                    Map<String, String> customButtonMap = handler.getCustomButtonMapByProcessTaskStepId(processTaskStepVo.getId());
+                    Map<String, String> customButtonMap = handler.getCustomButtonMapByConfigHashAndHandler(processTaskStepVo.getConfigHash(), processTaskStepVo.getHandler());
                     for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
                         String currentUser = UserContext.get().getUserUuid(true);
                         if((currentUser.equals(processTaskStepSubtask.getMajorUser()) && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
@@ -276,8 +275,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
             processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepId, processTaskVo.getWorktimeUuid()));
             
-            //processtaskStepData
-            ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler()));
+            //补充 automatic processtaskStepData
+            ProcessTaskStepDataVo  stepDataVo = processTaskStepDataMapper.getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),processTaskStepVo.getId(),processTaskStepVo.getHandler(),"system"));
             if(stepDataVo != null) {
                 JSONObject stepDataJson = stepDataVo.getData();
                 processTaskStepVo.setProcessTaskStepData(stepDataJson);
@@ -365,6 +364,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 String priorityUuid = dataObj.getString("priorityUuid");
                 if(StringUtils.isNotBlank(priorityUuid)) {
                     processTaskVo.setPriorityUuid(priorityUuid);
+                    PriorityVo priorityVo = priorityMapper.getPriorityByUuid(priorityUuid);
+                    if(priorityVo == null) {
+                        priorityVo = new PriorityVo();
+                        priorityVo.setUuid(priorityUuid);
+                    }
+                    processTaskVo.setPriority(priorityVo);
                 }
             }
         }

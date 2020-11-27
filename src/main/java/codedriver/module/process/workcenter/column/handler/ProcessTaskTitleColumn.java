@@ -46,4 +46,11 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 		return 1;
 	}
 
+	@Override
+	public Object getSimpleValue(Object json) {
+		if(json != null){
+			return json.toString();
+		}
+		return null;
+	}
 }
