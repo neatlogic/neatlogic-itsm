@@ -28,6 +28,7 @@ import com.alibaba.fastjson.JSONPath;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.TeamLevel;
@@ -114,6 +115,7 @@ import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException
 import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.framework.util.TimeUtil;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 
 @Service
@@ -572,7 +574,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if(processTaskVo == null) {
             throw new ProcessTaskNotFoundException(processTaskId.toString());
         }
-        if(processTaskVo.getIsShow() != 1) {
+        if(processTaskVo.getIsShow() != 1 && !AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName())) {
             throw new PermissionDeniedException();
         }
         if(processTaskStepId != null) {
