@@ -143,6 +143,10 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
      * 获取设备（移动端|pc端）服务过滤条件
      */
     private String getChannelDeviceCondition(WorkcenterVo workcenterVo,String where) {
+        //如果是pc端，则可以查看所有工单，包括移动端的
+        if(DeviceType.PC.getValue().equals(workcenterVo.getDevice())) {
+            return where;
+        }
         String deviceCondition = StringUtils.EMPTY;
         ChannelVo channelVo = new ChannelVo();
         channelVo.setSupport(workcenterVo.getDevice());
