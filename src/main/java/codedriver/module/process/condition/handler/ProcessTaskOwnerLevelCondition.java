@@ -42,6 +42,8 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
 	public JSONObject getConfig() {
 		JSONObject config = new JSONObject();
 		config.put("type", FormHandlerType.SELECT.toString());
+		config.put("multiple", true);
+		config.put("isMultiple", true);//为兼容旧数据结构
 		JSONArray dataList = new JSONArray();
 		for(VipLevel o : VipLevel.values()){
 			dataList.add(new ValueTextVo(o.getValue(),o.getValue()));
