@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -145,14 +146,12 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
             if(CollectionUtils.isNotEmpty(tagNameList)) {
                 List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
-                List<String> notExistTagList = tagNameList.stream().filter(a->!existTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList());
-                List<ProcessTagVo> notExistTagVoList = new ArrayList<ProcessTagVo>();
+                List<String> existTagNameList = existTagList.stream().map(ProcessTagVo::getName).collect(Collectors.toList());
+                List<String> notExistTagList = ListUtils.removeAll(tagNameList, existTagNameList);
                 for(String tagName : notExistTagList) {
-                    notExistTagVoList.add(new ProcessTagVo(tagName));
-                }
-                if(CollectionUtils.isNotEmpty(notExistTagVoList)) {
-                    processMapper.insertProcessTag(notExistTagVoList);
-                    existTagList.addAll(notExistTagVoList);
+                    ProcessTagVo tagVo = new ProcessTagVo(tagName);
+                    processMapper.insertProcessTag(tagVo);
+                    existTagList.add(tagVo);
                 }
                 List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
                 for(ProcessTagVo processTagVo : existTagList) {

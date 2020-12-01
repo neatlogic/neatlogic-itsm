@@ -14,7 +14,6 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 
 @Service
@@ -48,9 +47,8 @@ public class ProcessTaskAbortApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler();
 		try {
-	        handler.abortProcessTask(processTaskVo);
+		    ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
 		}catch(ProcessTaskNoPermissionException e) {
 		    throw new PermissionDeniedException();
 		}

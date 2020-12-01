@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -52,7 +51,6 @@ import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
-import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -77,7 +75,6 @@ import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessTagVo;
 import codedriver.framework.process.dto.ProcessTaskConfigVo;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -93,13 +90,11 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.framework.process.dto.ProcessTaskTagVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.integration.handler.ProcessRequestFrom;
@@ -1209,55 +1204,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
         return startProcessTaskStepVo;
-    }
-    
-    @Transactional
-    @Override
-    public void updateTag(Long processTaskId,Long processTaskStepId,JSONObject jsonObj) throws PermissionDeniedException {
-        JSONArray tagArray = jsonObj.getJSONArray("tagList");
-        List<ProcessTagVo>  oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
-        processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
-        if(CollectionUtils.isNotEmpty(tagArray)) {
-            List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
-            List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
-            List<String> notExistTagList = tagNameList.stream().filter(a->!existTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a)).collect(Collectors.toList());
-            List<ProcessTagVo> notExistTagVoList = new ArrayList<ProcessTagVo>();
-            for(String tagName : notExistTagList) {
-                notExistTagVoList.add(new ProcessTagVo(tagName));
-            }
-            if(CollectionUtils.isNotEmpty(notExistTagVoList)) {
-                processMapper.insertProcessTag(notExistTagVoList);
-                existTagList.addAll(notExistTagVoList);
-            }
-            List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
-            for(ProcessTagVo processTagVo : existTagList) {
-                processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId,processTagVo.getId()));
-            }
-            processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
-            
-            //生成活动
-            IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-            try {
-                handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.UPDATE, true);
-            }catch(ProcessTaskNoPermissionException e) {
-                throw new PermissionDeniedException();
-            }
-            List<String> oldTagNameList = new ArrayList<String>();
-            for(ProcessTagVo tag:oldTagList) {
-                oldTagNameList.add(tag.getName());
-            }
-            ProcessTaskContentVo oldTagContentVo = new ProcessTaskContentVo(String.join(",", oldTagNameList));
-            processTaskMapper.replaceProcessTaskContent(oldTagContentVo);
-            if(StringUtils.isNotBlank(oldTagContentVo.getHash())) {
-                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), oldTagContentVo.getHash());
-                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
-            }
-            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-            processTaskStepVo.setProcessTaskId(processTaskId);
-            processTaskStepVo.setId(processTaskStepId);
-            processTaskStepVo.setParamObj(jsonObj);
-            handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
-        }   
     }
 
     @Override

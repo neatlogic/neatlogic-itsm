@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
@@ -238,15 +237,6 @@ public interface ProcessTaskService {
     * @return ProcessTaskStepVo
      */
     public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
-
-    /**
-    * @Author 89770
-    * @Time 2020年11月5日  
-    * @Description: 跟新标签
-    * @Param 
-    * @return
-     */
-    public void updateTag(Long processTaskId,Long processTaskStepId,JSONObject jsonObj)throws PermissionDeniedException;
 
     /**
      * 
