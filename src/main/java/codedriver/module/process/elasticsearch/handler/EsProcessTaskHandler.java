@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.QueryResultSet;
 import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
@@ -54,7 +55,7 @@ import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.service.WorkcenterService;
 
 @Service
-public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo, QueryResult> {
+public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo, Object> {
     Logger logger = LoggerFactory.getLogger(EsProcessTaskHandler.class);
 
     @Autowired
@@ -479,6 +480,12 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
 
     @Override
     protected QueryResult makeupQueryResult(WorkcenterVo workcenterVo, QueryResult result) {
+        return result;
+    }
+
+    @Override
+    protected QueryResultSet makeupQueryIterateResult(WorkcenterVo t, QueryResultSet result) {
+        // TODO Auto-generated method stub
         return result;
     }
 

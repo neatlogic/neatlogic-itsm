@@ -304,7 +304,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     @SuppressWarnings("unchecked")
     @Override
     public QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo) {
-        return ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).iterateSearch(workcenterVo);
+        return (QueryResultSet)ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).iterateSearch(workcenterVo);
     }
 
     public Object getStepAction(ProcessTaskVo processTaskVo) {
