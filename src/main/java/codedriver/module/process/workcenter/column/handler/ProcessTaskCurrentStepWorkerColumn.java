@@ -168,7 +168,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
 			JSONArray array = JSONArray.parseArray(json.toString());
 			if(CollectionUtils.isNotEmpty(array)){
 				for(int i = 0;i < array.size();i++){
-					sb.append(array.getJSONObject(i).getString("name") + ";");
+					sb.append(array.getJSONObject(i).getString("workername") + ";");
 				}
 			}
 		}
