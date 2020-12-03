@@ -191,4 +191,9 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 		}
 		return sb.toString();
 	}
+	
+	@Override
+	public Boolean getMyIsExport() {
+        return false;
+    }
 }
