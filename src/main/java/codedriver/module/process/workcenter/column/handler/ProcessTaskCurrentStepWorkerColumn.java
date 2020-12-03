@@ -91,8 +91,8 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                             List<String> userList = userArray.stream().map(object -> object.toString()).collect(Collectors.toList());
                             for(String user :userList) {
                                 if(StringUtils.isNotBlank(user.toString())) {
-                                    if(!workerList.contains(user)) {
-                                        workerList.add(user);
+                                    if(!workerList.contains(user+userTypeJson.getString("usertypename"))) {
+                                        workerList.add(user+userTypeJson.getString("usertypename"));
                                         if(user.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
                                             UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
                                             if(userVo != null) {
@@ -102,6 +102,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                                                 userJson.put("workername", userVo.getUserName());
                                                 userJson.put("workerAvatar", userVo.getAvatar());
                                                 userJson.put("workerVipLevel",userVo.getVipLevel());
+                                                userJson.put("workTypename",userTypeJson.getString("usertypename"));
                                                 userArrayTmp.add(userJson);
                                             }
                                         }else if(user.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
