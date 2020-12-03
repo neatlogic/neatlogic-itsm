@@ -61,7 +61,7 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 			    stepNameList.add(currentStepJson.getString("name"));
 			}
 		}
-		return String.join(",", stepNameList);
+		return stepNameList;
 	}
 
 	@Override
