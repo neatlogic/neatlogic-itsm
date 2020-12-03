@@ -93,17 +93,6 @@ public interface ProcessTaskService {
      * @throws Exception
      */
     public ProcessTaskVo checkProcessTaskParamsIsLegal(Long processTaskId) throws Exception;
-    /**
-     * 
-     * @Author: linbq
-     * @Time:2020年8月21日
-     * @Description: 获取工单信息
-     * @param processTaskId
-     *            工单id
-     * @return ProcessTaskVo
-     * @throws Exception
-     */
-    // public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) throws Exception;
 
     /**
      * 
@@ -190,16 +179,6 @@ public interface ProcessTaskService {
     /**
      * 
      * @Author: linbq
-     * @Time:2020年8月24日
-     * @Description: 获取开始步骤描述内容及附件列表
-     * @param processTaskStepId
-     *            步骤id
-     * @return ProcessTaskStepCommentVo
-     */
-    // public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepId(Long processTaskStepId);
-    /**
-     * 
-     * @Author: linbq
      * @Time:2020年8月26日
      * @Description: TODO
      * @param jsonObj
@@ -265,20 +244,7 @@ public interface ProcessTaskService {
      */
     public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo, String userUuid);
 
-    // public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception;
-
     public List<ProcessTaskStepRemindVo> getProcessTaskStepRemindListByProcessTaskStepId(Long processTaskStepId);
-
-    /**
-     * 
-     * @Author: linbq
-     * @Time:2020年8月21日
-     * @Description: 获取开始步骤信息
-     * @param processTaskId
-     *            工单id
-     * @return ProcessTaskStepVo
-     */
-    // public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
 
     /**
      * 

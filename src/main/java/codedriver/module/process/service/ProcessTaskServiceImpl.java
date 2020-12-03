@@ -616,111 +616,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         return checkProcessTaskParamsIsLegal(processTaskId, null, null);
     }
 
-    // @Override
-    // public ProcessTaskVo getProcessTaskDetailById(Long processTaskId) throws Exception {
-    // //获取工单基本信息(title、channel_uuid、config_hash、priority_uuid、status、start_time、end_time、expire_time、owner、ownerName、reporter、reporterName)
-    // ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
-    // //判断当前用户是否关注该工单
-    // if(processTaskVo != null &&
-    // processTaskMapper.checkProcessTaskFocusExists(processTaskId,UserContext.get().getUserUuid()) > 0){
-    // processTaskVo.setIsFocus(1);
-    // }
-    // //获取工单流程图信息
-    // ProcessTaskConfigVo processTaskConfig =
-    // selectContentByHashMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
-    // if(processTaskConfig == null) {
-    // throw new ProcessTaskRuntimeException("没有找到工单：'" + processTaskId + "'的流程图配置信息");
-    // }
-    // processTaskVo.setConfig(processTaskConfig.getConfig());
-    //
-    // //优先级
-    // PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
-    // if(priorityVo == null) {
-    // priorityVo = new PriorityVo();
-    // priorityVo.setUuid(processTaskVo.getPriorityUuid());
-    // }
-    // processTaskVo.setPriority(priorityVo);
-    // //上报服务路径
-    // ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-    // if(channelVo != null) {
-    // CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelVo.getParentUuid());
-    // if(catalogVo != null) {
-    // List<CatalogVo> catalogList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
-    // List<String> nameList = catalogList.stream().map(CatalogVo::getName).collect(Collectors.toList());
-    // nameList.add(channelVo.getName());
-    // processTaskVo.setChannelPath(String.join("/", nameList));
-    // }
-    // ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
-    // if(channelTypeVo == null) {
-    // channelTypeVo = new ChannelTypeVo();
-    // channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
-    // }
-    // processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
-    // }
-    // //耗时
-    // if(processTaskVo.getEndTime() != null) {
-    // long timeCost = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(),
-    // processTaskVo.getStartTime().getTime(), processTaskVo.getEndTime().getTime());
-    // processTaskVo.setTimeCost(timeCost);
-    // processTaskVo.setTimeCostStr(TimeUtil.millisecondsTranferMaxTimeUnit(timeCost));
-    // }
-    //
-    // //获取工单表单信息
-    // ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-    // if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-    // String formContent =
-    // selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-    // if(StringUtils.isNotBlank(formContent)) {
-    // processTaskVo.setFormConfig(formContent);
-    // List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList =
-    // processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
-    // for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-    // processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(),
-    // processTaskFormAttributeDataVo.getDataObj());
-    // }
-    // }
-    // }
-    // /** 上报人公司列表 **/
-    // List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
-    // if(CollectionUtils.isNotEmpty(teamUuidList)) {
-    // List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
-    // for(TeamVo teamVo : teamList) {
-    // List<TeamVo> companyList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(),
-    // TeamLevel.COMPANY.getValue());
-    // if(CollectionUtils.isNotEmpty(companyList)) {
-    // processTaskVo.getOwnerCompanyList().addAll(companyList);
-    // }
-    // }
-    // }
-    // /** 获取评分信息 */
-    // String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskId);
-    // processTaskVo.setScoreInfo(scoreInfo);
-    //
-    // /** 转报数据 **/
-    // Long fromProcessTaskId = processTaskMapper.getFromProcessTaskIdByToProcessTaskId(processTaskId);
-    // if(fromProcessTaskId != null) {
-    // processTaskVo.getTranferReportProcessTaskList().add(getFromProcessTasById(fromProcessTaskId));
-    // }
-    // List<Long> toProcessTaskIdList = processTaskMapper.getToProcessTaskIdListByFromProcessTaskId(processTaskId);
-    // for(Long toProcessTaskId : toProcessTaskIdList) {
-    // ProcessTaskVo toProcessTaskVo = processTaskMapper.getProcessTaskBaseInfoById(toProcessTaskId);
-    // if(toProcessTaskVo != null) {
-    // toProcessTaskVo.setTranferReportDirection("to");
-    // ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-    // if(channel != null) {
-    // ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
-    // if(channelTypeVo == null) {
-    // channelTypeVo = new ChannelTypeVo();
-    // channelTypeVo.setUuid(channel.getChannelTypeUuid());
-    // }
-    // processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
-    // }
-    // processTaskVo.getTranferReportProcessTaskList().add(toProcessTaskVo);
-    // }
-    // }
-    // return processTaskVo;
-    // }
-
     @Override
     public List<ProcessTaskStepReplyVo> getProcessTaskStepReplyListByProcessTaskStepId(Long processTaskStepId,
         List<String> typeList) {
@@ -879,27 +774,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(),
             ProcessUserType.MINOR.getValue()));
     }
-
-    // @Override
-    // public ProcessTaskStepReplyVo getProcessTaskStepContentAndFileByProcessTaskStepId(Long processTaskStepId) {
-    // ProcessTaskStepReplyVo comment = new ProcessTaskStepReplyVo();
-    // //获取上报描述内容
-    // List<Long> fileIdList = new ArrayList<>();
-    // List<ProcessTaskStepContentVo> processTaskStepContentList =
-    // processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(processTaskStepId);
-    // for(ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-    // if (ProcessTaskOperationType.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
-    // fileIdList = processTaskMapper.getFileIdListByContentId(processTaskStepContent.getId());
-    // comment.setContent(selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepContent.getContentHash()));
-    // break;
-    // }
-    // }
-    // //附件
-    // if(CollectionUtils.isNotEmpty(fileIdList)) {
-    // comment.setFileList(fileMapper.getFileListByIdList(fileIdList));
-    // }
-    // return comment;
-    // }
 
     @Override
     public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo oldReplyVo) {
@@ -1175,39 +1049,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         return resultList;
     }
 
-    // @Override
-    // public ProcessTaskVo getFromProcessTasById(Long processTaskId) throws Exception {
-    // ProcessTaskVo processTaskVo = checkProcessTaskParamsIsLegal(processTaskId);
-    // ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
-    // if(channelVo != null) {
-    // ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
-    // if(channelTypeVo == null) {
-    // channelTypeVo = new ChannelTypeVo();
-    // channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
-    // }
-    // processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
-    // }
-    // //获取工单表单信息
-    // ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-    // if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-    // String formContent =
-    // selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-    // if(StringUtils.isNotBlank(formContent)) {
-    // processTaskVo.setFormConfig(formContent);
-    // List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList =
-    // processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
-    // for(ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-    // processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(),
-    // processTaskFormAttributeDataVo.getDataObj());
-    // }
-    // }
-    // }
-    //
-    // processTaskVo.setStartProcessTaskStep(ProcessStepUtilHandlerFactory.getHandler().getStartProcessTaskStepByProcessTaskId(processTaskId));
-    // processTaskVo.setTranferReportDirection("from");
-    // return processTaskVo;
-    // }
-
     @Override
     public List<ProcessTaskStepRemindVo> getProcessTaskStepRemindListByProcessTaskStepId(Long processTaskStepId) {
         List<ProcessTaskStepRemindVo> processTaskStepRemindList =
@@ -1224,37 +1065,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         return processTaskStepRemindList;
     }
-
-    /**
-     * 
-     * @Author: linbq
-     * @Time:2020年8月21日
-     * @Description: 获取开始步骤信息
-     * @param processTaskId
-     *            工单id
-     * @return ProcessTaskStepVo
-     */
-    // @Override
-    // public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
-    // //获取开始步骤id
-    // List<ProcessTaskStepVo> processTaskStepList =
-    // processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
-    // if(processTaskStepList.size() != 1) {
-    // throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
-    // }
-    //
-    // ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-    //
-    // startProcessTaskStepVo.setComment(getProcessTaskStepContentAndFileByProcessTaskStepId(startProcessTaskStepVo.getId()));
-    // /** 当前步骤特有步骤信息 **/
-    // IProcessStepUtilHandler startProcessStepUtilHandler =
-    // ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
-    // if(startProcessStepUtilHandler == null) {
-    // throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
-    // }
-    // startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
-    // return startProcessTaskStepVo;
-    // }
 
     @Override
     public Set<ProcessTaskStepVo> getTransferableStepListByProcessTask(ProcessTaskVo processTaskVo, String userUuid) {

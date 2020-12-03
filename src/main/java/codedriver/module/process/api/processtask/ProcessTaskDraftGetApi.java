@@ -330,27 +330,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
     }
 
-    // private ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
-    // //获取开始步骤id
-    // List<ProcessTaskStepVo> processTaskStepList =
-    // processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
-    // if(processTaskStepList.size() != 1) {
-    // throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
-    // }
-    //
-    // ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
-    //
-    // startProcessTaskStepVo.setComment(processTaskService.getProcessTaskStepContentAndFileByProcessTaskStepId(startProcessTaskStepVo.getId()));
-    // /** 当前步骤特有步骤信息 **/
-    // IProcessStepUtilHandler startProcessStepUtilHandler =
-    // ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
-    // if(startProcessStepUtilHandler == null) {
-    // throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
-    // }
-    // startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(startProcessTaskStepVo));
-    // return startProcessTaskStepVo;
-    // }
-
     private void transferFormAttributeValue(ProcessTaskVo fromProcessTaskVo, ProcessTaskVo toProcessTaskVo) {
         Map<String, String> labelUuidMap = new HashMap<>();
         FormVersionVo fromFormVersion = new FormVersionVo();
