@@ -49,6 +49,9 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired=true, desc = "状态"),
 		@Param(name = "prefix", type = ApiParamType.STRING, isRequired = true, desc = "工单号前缀"),
+		@Param(name = "rule", type = ApiParamType.STRING, isRequired = true, desc = "工单号规则"),
+		@Param(name = "startValue", type = ApiParamType.STRING, isRequired = true, desc = "工单号起始值"),
+		@Param(name = "digits", type = ApiParamType.STRING, isRequired = true, desc = "工单号位数"),
 		@Param(name = "color", type = ApiParamType.STRING, isRequired = true, desc = "颜色"),
 		@Param(name = "description", type = ApiParamType.STRING, xss = true, desc = "描述")
 	})
