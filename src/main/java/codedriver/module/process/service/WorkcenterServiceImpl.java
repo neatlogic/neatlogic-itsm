@@ -33,6 +33,7 @@ import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -118,13 +119,13 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         // 获取用户历史自定义theadList
         // Date time2 = new Date();
-        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap,sortColumnList);
+        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
         theadList =
             theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         // Date time22 = new Date();
         // System.out.println("矫正headerCostTime:"+(time22.getTime()-time2.getTime()));
         if (!resultData.isEmpty()) {
-            // Date time3 = new Date();
+//            Date time3 = new Date();
             for (MultiAttrsObject el : resultData) {
                 JSONObject taskJson = new JSONObject();
                 taskJson.put("taskid", el.getId());
@@ -140,8 +141,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 taskJson.put("action", getStepAction(el, isHasProcessTaskAuth));
                 dataList.add(taskJson);
             }
-            // Date time33 = new Date();
-            // System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
+//            Date time33 = new Date();
+//            System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
         }
 
         // 字段排序
@@ -210,20 +211,24 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         List<ProcessTaskStepVo> stepList = new ArrayList<>();
         for (Object stepObj : stepArray) {
             JSONObject stepJson = (JSONObject)stepObj;
-            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-            processTaskStepVo.setId(stepJson.getLong("id"));
-            processTaskStepVo.setProcessTaskId(processTaskVo.getId());
-            processTaskStepVo.setName(stepJson.getString("name"));
-            processTaskStepVo.setStatus(stepJson.getString("status"));
-            processTaskStepVo.setType(stepJson.getString("type"));
-            processTaskStepVo.setHandler(stepJson.getString("handler"));
-            processTaskStepVo.setConfigHash(stepJson.getString("confighash"));
-            processTaskStepVo.setStartTime(
-                TimeUtil.convertStringToDate(stepJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
-            processTaskStepVo
-                .setEndTime(TimeUtil.convertStringToDate(stepJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
-            processTaskStepVo.setIsActive(stepJson.getInteger("isactive"));
-            stepList.add(processTaskStepVo);
+            if (ProcessTaskStatus.PENDING.getValue().equals(stepJson.getString("status"))
+                || ProcessTaskStatus.DRAFT.getValue().equals(stepJson.getString("status"))
+                || ProcessTaskStatus.RUNNING.getValue().equals(stepJson.getString("status"))) {
+                ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                processTaskStepVo.setId(stepJson.getLong("id"));
+                processTaskStepVo.setProcessTaskId(processTaskVo.getId());
+                processTaskStepVo.setName(stepJson.getString("name"));
+                processTaskStepVo.setStatus(stepJson.getString("status"));
+                processTaskStepVo.setType(stepJson.getString("type"));
+                processTaskStepVo.setHandler(stepJson.getString("handler"));
+                processTaskStepVo.setConfigHash(stepJson.getString("confighash"));
+                processTaskStepVo.setStartTime(
+                    TimeUtil.convertStringToDate(stepJson.getString("starttime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
+                processTaskStepVo.setEndTime(
+                    TimeUtil.convertStringToDate(stepJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
+                processTaskStepVo.setIsActive(stepJson.getInteger("isactive"));
+                stepList.add(processTaskStepVo);
+            }
         }
         JSONObject actionJson = getStepActionArray(processTaskVo, stepList);
         return actionJson;
@@ -304,7 +309,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     @SuppressWarnings("unchecked")
     @Override
     public QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo) {
-        return (QueryResultSet)ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).iterateSearch(workcenterVo);
+        return (QueryResultSet)ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue())
+            .iterateSearch(workcenterVo);
     }
 
     public Object getStepAction(ProcessTaskVo processTaskVo) {
@@ -322,54 +328,63 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         Boolean isHasRecover = false;
         Boolean isHasUrge = false;
         JSONArray handleArray = new JSONArray();
-        for (ProcessTaskStepVo step : stepList) {
-            Integer isActive = step.getIsActive();
-            step.setProcessTaskId(processTaskVo.getId());
-
-            if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
-                || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
-                || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus)
-                || (ProcessTaskStatus.PENDING.getValue().equals(processTaskStatus) && isActive == 1))) {
-                List<ProcessTaskOperationType> operationList = new ArrayList<>();
-                try {
-                    if (step.getHandler() != null) {
-                        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(step.getHandler());
-                        if (handler != null) {
-                            operationList =
-                                handler.getOperateList(processTaskVo, step, new ArrayList<ProcessTaskOperationType>() {
-                                    private static final long serialVersionUID = 1L;
-                                    {
-                                        add(ProcessTaskOperationType.WORK);
-                                        add(ProcessTaskOperationType.ABORTPROCESSTASK);
-                                        add(ProcessTaskOperationType.RECOVERPROCESSTASK);
-                                        add(ProcessTaskOperationType.URGE);
-                                    }
-                                });
-                        }
+        List<ProcessTaskOperationType> operationList = new ArrayList<>();
+        if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
+            || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
+            || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus))) {
+            // 工单权限
+            IProcessStepUtilHandler taskHandler =
+                ProcessStepUtilHandlerFactory.getHandler(ProcessStepHandlerType.OMNIPOTENT.getHandler());
+            operationList =
+                taskHandler.getOperateList(processTaskVo, stepList.get(0), new ArrayList<ProcessTaskOperationType>() {
+                    private static final long serialVersionUID = 1L;
+                    {
+                        add(ProcessTaskOperationType.ABORTPROCESSTASK);
+                        add(ProcessTaskOperationType.RECOVERPROCESSTASK);
+                        add(ProcessTaskOperationType.URGE);
                     }
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                }
-
-                if (operationList.contains(ProcessTaskOperationType.WORK)) {
-                    JSONObject configJson = new JSONObject();
-                    configJson.put("taskid", processTaskVo.getId());
-                    configJson.put("stepid", step.getId());
-                    configJson.put("stepName", step.getName());
-                    JSONObject actionJson = new JSONObject();
-                    actionJson.put("name", "handle");
-                    actionJson.put("text", step.getName());
-                    actionJson.put("config", configJson);
-                    handleArray.add(actionJson);
-                }
-                if (operationList.contains(ProcessTaskOperationType.ABORTPROCESSTASK)) {
-                    isHasAbort = true;
-                }
-                if (operationList.contains(ProcessTaskOperationType.RECOVERPROCESSTASK)) {
-                    isHasRecover = true;
-                }
-                if (operationList.contains(ProcessTaskOperationType.URGE)) {
-                    isHasUrge = true;
+                });
+            if (operationList.contains(ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                isHasAbort = true;
+            }
+            if (operationList.contains(ProcessTaskOperationType.RECOVERPROCESSTASK)) {
+                isHasRecover = true;
+            }
+            if (operationList.contains(ProcessTaskOperationType.URGE)) {
+                isHasUrge = true;
+            }
+            // 步骤权限
+            for (ProcessTaskStepVo step : stepList) {
+                if(step.getIsActive() == 1 ) {
+                    step.setProcessTaskId(processTaskVo.getId());
+                    try {
+                        if (step.getHandler() != null) {
+                            IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(step.getHandler());
+                            if (handler != null) {
+                                operationList.addAll(
+                                    handler.getOperateList(processTaskVo, step, new ArrayList<ProcessTaskOperationType>() {
+                                        private static final long serialVersionUID = 1L;
+                                        {
+                                            add(ProcessTaskOperationType.WORK);
+                                        }
+                                    }));
+                            }
+                        }
+                    } catch (Exception ex) {
+                        logger.error(ex.getMessage(), ex);
+                    }
+    
+                    if (operationList.contains(ProcessTaskOperationType.WORK)) {
+                        JSONObject configJson = new JSONObject();
+                        configJson.put("taskid", processTaskVo.getId());
+                        configJson.put("stepid", step.getId());
+                        configJson.put("stepName", step.getName());
+                        JSONObject actionJson = new JSONObject();
+                        actionJson.put("name", "handle");
+                        actionJson.put("text", step.getName());
+                        actionJson.put("config", configJson);
+                        handleArray.add(actionJson);
+                    }
                 }
             }
         }
@@ -515,9 +530,10 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     }
 
     @Override
-    public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList) {
+    public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo,
+        Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList) {
         List<WorkcenterTheadVo> theadList = workcenterMapper
-                .getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(), UserContext.get().getUserUuid()));
+            .getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(), UserContext.get().getUserUuid()));
         // 矫正theadList 或存在表单属性或固定字段增删
         // 多删
         ListIterator<WorkcenterTheadVo> it = theadList.listIterator();
@@ -535,9 +551,9 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();
                 if (CollectionUtils.isNotEmpty(channelUuidList)) {
                     List<FormAttributeVo> formAttrList =
-                            formMapper.getFormAttributeListByChannelUuidList(channelUuidList);
+                        formMapper.getFormAttributeListByChannelUuidList(channelUuidList);
                     List<FormAttributeVo> theadFormList = formAttrList.stream()
-                            .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
+                        .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
                     if (CollectionUtils.isEmpty(theadFormList)) {
                         it.remove();
                     } else {
@@ -550,7 +566,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
             IProcessTaskColumn column = entry.getValue();
             if (column.getIsShow() && CollectionUtils.isEmpty(theadList.stream()
-                    .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
+                .filter(data -> column.getName().endsWith(data.getName())).collect(Collectors.toList()))) {
                 theadList.add(new WorkcenterTheadVo(column));
             }
             // 如果需要排序
@@ -560,6 +576,5 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         }
         return theadList;
     }
-
 
 }
