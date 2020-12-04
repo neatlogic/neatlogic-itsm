@@ -87,15 +87,12 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 
 	@Override
 	public Object getSimpleValue(Object json) {
-		StringBuilder sb = new StringBuilder();
-		if(json != null){
-			JSONArray array = JSONArray.parseArray(json.toString());
-			if(CollectionUtils.isNotEmpty(array)){
-				for(int i = 0;i < array.size();i++){
-					sb.append(array.getJSONObject(i).getString("name") + ";");
-				}
+		if(json != null && json instanceof List){
+			List<String> list = (List<String>) json;
+			if(CollectionUtils.isNotEmpty(list)){
+				return String.join(";",list);
 			}
 		}
-		return sb.toString();
+		return null;
 	}
 }
