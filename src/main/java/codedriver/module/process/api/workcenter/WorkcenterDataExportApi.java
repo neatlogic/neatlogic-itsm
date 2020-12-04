@@ -86,7 +86,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 		/** 获取表头 */
 		List<WorkcenterTheadVo> theadList = workcenterService.getWorkcenterTheadList(workcenterVo, columnComponentMap,null);
 		if(CollectionUtils.isNotEmpty(theadList)){
-			theadList = theadList.stream().filter(o -> o.getDisabled() == 0).sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
+			theadList = theadList.stream().filter(o -> o.getDisabled() == 0).filter(o -> o.getIsExport() == 1).sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
 		}
 
 		List<Map<String,Object>> list = new ArrayList<>();
@@ -114,7 +114,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 
 		SXSSFWorkbook workbook = new SXSSFWorkbook();
 		ExcelUtil.exportData(workbook,headList.stream().collect(Collectors.toList()), columnList.stream().collect(Collectors.toList()), list,new Integer(35),0);
-		String fileNameEncode = StringUtils.isNotBlank(title) ? title : "工单数据" + ".xlsx";
+		String fileNameEncode = (StringUtils.isNotBlank(title) ? title : "工单数据") + ".xlsx";
 		Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
 		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
