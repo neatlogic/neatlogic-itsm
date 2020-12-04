@@ -86,7 +86,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 		/** 获取表头 */
 		List<WorkcenterTheadVo> theadList = workcenterService.getWorkcenterTheadList(workcenterVo, columnComponentMap,null);
 		if(CollectionUtils.isNotEmpty(theadList)){
-			theadList = theadList.stream().filter(o -> o.getDisabled() == 0).filter(o -> o.getIsExport() == 1).sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
+			theadList = theadList.stream().filter(o -> o.getDisabled() == 0 && o.getIsExport() == 1 && o.getIsShow() == 1).sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
 		}
 
 		List<Map<String,Object>> list = new ArrayList<>();
