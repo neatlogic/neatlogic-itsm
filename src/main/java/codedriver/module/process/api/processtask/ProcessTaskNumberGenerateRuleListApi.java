@@ -1,14 +1,11 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.process.constvalue.ProcessTaskNumberGenerateRule;
+import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
@@ -41,11 +38,7 @@ public class ProcessTaskNumberGenerateRuleListApi extends PrivateApiComponentBas
     @Description(desc = "查询工单号生成规则列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<ValueTextVo> resultList = new ArrayList<>();
-        for(ProcessTaskNumberGenerateRule rule : ProcessTaskNumberGenerateRule.values()) {
-            resultList.add(new ValueTextVo(rule.getValue(), rule.getText()));
-        }
-        return resultList;
+        return ProcessTaskSerialNumberPolicyFactory.getPolicyHandlerList();
     }
 
 }

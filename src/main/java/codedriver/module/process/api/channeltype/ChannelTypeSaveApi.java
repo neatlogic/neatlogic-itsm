@@ -16,8 +16,9 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNameRepeatException;
-import codedriver.framework.process.exception.priority.PriorityNotFoundException;
+import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 
 import java.util.Objects;
 
@@ -49,9 +50,8 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired=true, desc = "状态"),
 		@Param(name = "prefix", type = ApiParamType.STRING, isRequired = true, desc = "工单号前缀"),
-		@Param(name = "rule", type = ApiParamType.STRING, isRequired = true, desc = "工单号规则"),
-		@Param(name = "startValue", type = ApiParamType.STRING, isRequired = true, desc = "工单号起始值"),
-		@Param(name = "digits", type = ApiParamType.STRING, isRequired = true, desc = "工单号位数"),
+		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "工单号策略"),
+		@Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "工单号策略，格式：{\"startValue\": 0, \"digits\", 8}"),
 		@Param(name = "color", type = ApiParamType.STRING, isRequired = true, desc = "颜色"),
 		@Param(name = "description", type = ApiParamType.STRING, xss = true, desc = "描述")
 	})
@@ -75,15 +75,33 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 		String uuid = jsonObj.getString("uuid");
 		if(uuid != null) {
 			if(channelMapper.checkChannelTypeIsExists(uuid) == 0) {
-				throw new PriorityNotFoundException(uuid);
+				throw new ChannelTypeNotFoundException(uuid);
 			}
 			if(channelMapper.checkChannelTypeHasReference(uuid) > 0 && Objects.equals(channelTypeVo.getIsActive(),0)){
 				throw new ChannelTypeHasReferenceException(channelTypeVo.getName(),"禁用");
 			}
-			channelMapper.updateChannelTypeByUuid(channelTypeVo);
+			channelMapper.updateChannelTypeByUuid(channelTypeVo);						
 		}else {
 			channelMapper.insertChannelType(channelTypeVo);
 		}
+		ProcessTaskSerialNumberPolicyVo oldPolicy = channelMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(uuid);
+        if(oldPolicy != null) {
+            ProcessTaskSerialNumberPolicyVo policy = new ProcessTaskSerialNumberPolicyVo();
+            policy.setChannelTypeUuid(channelTypeVo.getUuid());
+            policy.setHandler(channelTypeVo.getHandler());
+            policy.setConfig(JSON.toJSONString(channelTypeVo.getConfig()));
+            channelMapper.updateProcessTaskSerialNumberPolicyByChannelTypeUuid(policy);
+            if(!oldPolicy.getHandler().equals(policy.getHandler())) {
+                // TODO 切换策略，需重新生成历史工单的工单号
+            }
+        }else {
+
+            ProcessTaskSerialNumberPolicyVo policy = new ProcessTaskSerialNumberPolicyVo();
+            policy.setChannelTypeUuid(channelTypeVo.getUuid());
+            policy.setHandler(channelTypeVo.getHandler());
+            policy.setConfig(JSON.toJSONString(channelTypeVo.getConfig()));
+            channelMapper.insertProcessTaskSerialNumberPolicy(policy);
+        }
 		return channelTypeVo.getUuid();
 	}
 
