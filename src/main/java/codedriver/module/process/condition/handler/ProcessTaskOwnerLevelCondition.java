@@ -2,7 +2,6 @@ package codedriver.module.process.condition.handler;
 
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
-import codedriver.framework.common.constvalue.VipLevel;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
@@ -16,7 +15,7 @@ import java.util.List;
 
 @Component
 public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
-	
+
 
 	@Override
 	public String getName() {
@@ -25,14 +24,14 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
 
 	@Override
 	public String getDisplayName() {
-		return "上报人等级";
+		return "上报人是否VIP";
 	}
 
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
 		return FormHandlerType.SELECT.toString();
 	}
-	
+
 	@Override
 	public String getType() {
 		return ProcessFieldType.COMMON.getValue();
@@ -42,12 +41,11 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
 	public JSONObject getConfig() {
 		JSONObject config = new JSONObject();
 		config.put("type", FormHandlerType.SELECT.toString());
-		config.put("multiple", true);
-		config.put("isMultiple", true);//为兼容旧数据结构
+//		config.put("multiple", true);
+//		config.put("isMultiple", true);//为兼容旧数据结构
 		JSONArray dataList = new JSONArray();
-		for(VipLevel o : VipLevel.values()){
-			dataList.add(new ValueTextVo(o.getValue(),o.getValue()));
-		}
+		dataList.add(new ValueTextVo("1","是"));
+		dataList.add(new ValueTextVo("0","否"));
 		config.put("dataList",dataList);
 		return config;
 	}

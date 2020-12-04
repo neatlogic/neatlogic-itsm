@@ -124,9 +124,11 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
         for(String team : stepTeamValueList) {
             teamUuidList.add(team.replaceAll(GroupSearch.TEAM.getValuePlugin(), StringUtils.EMPTY));
         }
-        List<String> userUuidList = userMapper.getUserUuidListByTeamUuidList(teamUuidList);
-        for(String userUuid : userUuidList) {
-            userList.add(GroupSearch.USER.getValuePlugin()+userUuid);
+        if(CollectionUtils.isNotEmpty(teamUuidList)) {
+            List<String> userUuidList = userMapper.getUserUuidListByTeamUuidList(teamUuidList);
+            for(String userUuid : userUuidList) {
+                userList.add(GroupSearch.USER.getValuePlugin()+userUuid);
+            }
         }
         String value = String.join("','",userList);
 	    return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),String.format("'%s'",  value))+" and not common.step.usertypelist.type = 'start' ";
