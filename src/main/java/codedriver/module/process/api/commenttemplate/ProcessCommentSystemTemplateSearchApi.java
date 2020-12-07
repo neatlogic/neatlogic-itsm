@@ -28,7 +28,7 @@ public class ProcessCommentSystemTemplateSearchApi extends PrivateApiComponentBa
 
     @Override
     public String getToken() {
-        return "process/system/comment/template/search";
+        return "process/comment/system/template/search";
     }
 
     @Override

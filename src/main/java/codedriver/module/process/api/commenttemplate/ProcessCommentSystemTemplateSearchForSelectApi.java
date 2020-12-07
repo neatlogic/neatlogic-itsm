@@ -29,7 +29,7 @@ public class ProcessCommentSystemTemplateSearchForSelectApi extends PrivateApiCo
 
     @Override
     public String getToken() {
-        return "process/system/comment/template/search/forselect";
+        return "process/comment/system/template/search/forselect";
     }
 
     @Override
