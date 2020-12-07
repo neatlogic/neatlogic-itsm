@@ -100,8 +100,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 					theadList.add(new WorkcenterTheadVo(stepNameColumn));
 				}
 				if(theadList.stream()
-						.noneMatch(o -> o.getName()
-								.equals(stepWorkerColumn.getName()) && o.getIsShow() == 1)){
+						.noneMatch(o -> o.getName().equals(stepWorkerColumn.getName()) && o.getIsShow() == 1)){
 					theadList.add(new WorkcenterTheadVo(stepWorkerColumn));
 				}
 			}
