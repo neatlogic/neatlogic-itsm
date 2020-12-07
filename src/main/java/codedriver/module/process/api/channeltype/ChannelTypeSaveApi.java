@@ -27,7 +27,7 @@ import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNameRepeatException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
-import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyNotFoundException;
+import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyHandlerNotFoundException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberUpdateThread;
@@ -99,7 +99,7 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 		
 		IProcessTaskSerialNumberPolicyHandler handler = ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(channelTypeVo.getHandler());
 		if(handler == null) {
-		    throw new ProcessTaskSerialNumberPolicyNotFoundException(channelTypeVo.getHandler());
+		    throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(channelTypeVo.getHandler());
 		}
 		JSONObject config = handler.makeupConfig(jsonObj);
         Long startValue = config.getLong("startValue");
