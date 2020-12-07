@@ -4,7 +4,13 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenc
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.scheduler.core.IJob;
+import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dto.JobObject;
+import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
+import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -24,6 +31,7 @@ import codedriver.framework.process.exception.processtaskserialnumberpolicy.Proc
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberUpdateThread;
+import codedriver.framework.process.processtaskserialnumberpolicy.schedule.plugin.ProcessTaskSerialNumberSeedResetJob;
 
 import java.util.Objects;
 
@@ -108,6 +116,17 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
             channelMapper.updateProcessTaskSerialNumberPolicyByChannelTypeUuid(policy);
             if(!oldPolicy.getHandler().equals(policy.getHandler())) {
                 CommonThreadPool.execute(new ProcessTaskSerialNumberUpdateThread(handler, uuid));
+            }
+            IJob job = SchedulerManager.getHandler(ProcessTaskSerialNumberSeedResetJob.class.getName());
+            if(job == null) {
+                throw new ScheduleHandlerNotFoundException(ProcessTaskSerialNumberSeedResetJob.class.getName());
+            }
+            String cron = handler.getSerialNumberSeedResetCron();
+            if(StringUtils.isNotBlank(cron) && CronExpression.isValidExpression(cron)) {
+                JobObject.Builder newJobObjectBuilder = new JobObject.Builder(uuid, job.getGroupName(), this.getClassName(), TenantContext.get().getTenantUuid())
+                    .addData("channelTypeUuid", uuid);
+                JobObject newJobObject = newJobObjectBuilder.build();
+                job.reloadJob(newJobObject);
             }
         }else {
             channelMapper.insertProcessTaskSerialNumberPolicy(policy);

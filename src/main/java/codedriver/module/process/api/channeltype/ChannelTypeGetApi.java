@@ -7,12 +7,16 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
+import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
+import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -50,7 +54,14 @@ public class ChannelTypeGetApi extends PrivateApiComponentBase {
 		if(channelType == null) {
 			throw new ChannelTypeNotFoundException(uuid);
 		}
-		return channelType;
+		JSONObject resultObj = (JSONObject)JSON.toJSON(channelType);
+		ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo = channelMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
+		if(processTaskSerialNumberPolicyVo != null) {
+		    IProcessTaskSerialNumberPolicyHandler handler = ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(processTaskSerialNumberPolicyVo.getHandler());
+		    JSONObject config = handler.makeupConfig(processTaskSerialNumberPolicyVo.getConfig());
+		    resultObj.putAll(config);
+		}
+		return resultObj;
 	}
 
 }
