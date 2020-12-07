@@ -39,8 +39,7 @@ public class ProcessCommentTemplateDeleteApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param( name = "id", type = ApiParamType.LONG, isRequired = true,desc = "回复模版ID"),
-    })
+    @Input({@Param( name = "id", type = ApiParamType.LONG, isRequired = true,desc = "回复模版ID")})
     @Output({})
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

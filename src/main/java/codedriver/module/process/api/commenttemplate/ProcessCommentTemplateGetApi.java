@@ -36,10 +36,8 @@ public class ProcessCommentTemplateGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param( name = "id", type = ApiParamType.LONG, desc = "回复模版ID")})
-    @Output({
-            @Param( name = "template", explode = ProcessCommentTemplateVo.class, desc = "回复模版")
-    })
+    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "回复模版ID")})
+    @Output({@Param(name = "template", explode = ProcessCommentTemplateVo.class, desc = "回复模版")})
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();

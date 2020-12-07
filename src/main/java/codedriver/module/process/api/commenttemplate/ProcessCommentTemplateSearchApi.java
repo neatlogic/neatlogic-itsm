@@ -1,6 +1,7 @@
 package codedriver.module.process.api.commenttemplate;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import codedriver.framework.process.dto.ProcessCommentTemplateVo;
@@ -46,7 +47,8 @@ public class ProcessCommentTemplateSearchApi extends PrivateApiComponentBase {
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
     })
     @Output({
-            @Param( name = "tbodyList", explode = ProcessCommentTemplateVo.class, desc = "回复模版集合")
+            @Param(explode= BasePageVo.class),
+            @Param(name = "tbodyList", explode = ProcessCommentTemplateVo.class, desc = "回复模版集合")
     })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

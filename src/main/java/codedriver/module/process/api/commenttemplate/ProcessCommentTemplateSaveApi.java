@@ -48,12 +48,12 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param( name = "id", type = ApiParamType.LONG, desc = "回复模版ID"),
-            @Param( name = "content", type = ApiParamType.STRING, desc = "内容", isRequired = true, xss = true),
-            @Param( name = "authList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]", isRequired = true)
+    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "回复模版ID"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "内容", isRequired = true, xss = true),
+            @Param(name = "authList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]", isRequired = true)
     })
     @Output({
-            @Param( name = "id",type = ApiParamType.LONG,desc = "回复模版id")
+            @Param(name = "id",type = ApiParamType.LONG,desc = "回复模版id")
     })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
