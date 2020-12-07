@@ -28,7 +28,7 @@ public class ProcessCommentTemplateGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取系统回复模版";
+        return "获取回复模版";
     }
 
     @Override
