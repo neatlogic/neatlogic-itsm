@@ -40,98 +40,97 @@ import java.util.Objects;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private ChannelMapper channelMapper;
+    @Autowired
+    private ChannelMapper channelMapper;
 
-	@Override
-	public String getToken() {
-		return "process/channeltype/save";
-	}
+    @Override
+    public String getToken() {
+        return "process/channeltype/save";
+    }
 
-	@Override
-	public String getName() {
-		return "服务类型信息保存接口";
-	}
+    @Override
+    public String getName() {
+        return "服务类型信息保存接口";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, desc = "服务类型uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired=true, desc = "状态"),
-		@Param(name = "prefix", type = ApiParamType.STRING, isRequired = true, desc = "工单号前缀"),
-		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "工单号策略"),
-		@Param(name = "color", type = ApiParamType.STRING, isRequired = true, desc = "颜色"),
-		@Param(name = "description", type = ApiParamType.STRING, xss = true, desc = "描述")
-	})
-	@Output({
-		@Param(name = "Return", type = ApiParamType.STRING, desc = "服务类型uuid")
-	})
-	@Description(desc = "服务类型信息保存接口")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		ChannelTypeVo channelTypeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelTypeVo>() {});
-		if(channelMapper.checkChannelTypeNameIsRepeat(channelTypeVo) > 0) {
-			throw new ChannelTypeNameRepeatException(channelTypeVo.getName());
-		}
-		
-		Integer sort = channelMapper.getChannelTypeMaxSort();
-		if(sort == null) {
-			sort = 0;
-		}
-		sort++;
-		channelTypeVo.setSort(sort);
-		String uuid = jsonObj.getString("uuid");
-		if(uuid != null) {
-			if(channelMapper.checkChannelTypeIsExists(uuid) == 0) {
-				throw new ChannelTypeNotFoundException(uuid);
-			}
-			if(channelMapper.checkChannelTypeHasReference(uuid) > 0 && Objects.equals(channelTypeVo.getIsActive(),0)){
-				throw new ChannelTypeHasReferenceException(channelTypeVo.getName(),"禁用");
-			}
-			channelMapper.updateChannelTypeByUuid(channelTypeVo);						
-		}else {
-			channelMapper.insertChannelType(channelTypeVo);
-		}
-		
-		IProcessTaskSerialNumberPolicyHandler handler = ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(channelTypeVo.getHandler());
-		if(handler == null) {
-		    throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(channelTypeVo.getHandler());
-		}
-		JSONObject config = handler.makeupConfig(jsonObj);
+    @Input({@Param(name = "uuid", type = ApiParamType.STRING, desc = "服务类型uuid"),
+        @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "名称"),
+        @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "状态"),
+        @Param(name = "prefix", type = ApiParamType.STRING, isRequired = true, desc = "工单号前缀"),
+        @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "工单号策略"),
+        @Param(name = "color", type = ApiParamType.STRING, isRequired = true, desc = "颜色"),
+        @Param(name = "description", type = ApiParamType.STRING, xss = true, desc = "描述")})
+    @Output({@Param(name = "Return", type = ApiParamType.STRING, desc = "服务类型uuid")})
+    @Description(desc = "服务类型信息保存接口")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        ChannelTypeVo channelTypeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelTypeVo>() {});
+        if (channelMapper.checkChannelTypeNameIsRepeat(channelTypeVo) > 0) {
+            throw new ChannelTypeNameRepeatException(channelTypeVo.getName());
+        }
+
+        Integer sort = channelMapper.getChannelTypeMaxSort();
+        if (sort == null) {
+            sort = 0;
+        }
+        sort++;
+        channelTypeVo.setSort(sort);
+        String uuid = jsonObj.getString("uuid");
+        if (uuid != null) {
+            if (channelMapper.checkChannelTypeIsExists(uuid) == 0) {
+                throw new ChannelTypeNotFoundException(uuid);
+            }
+            if (channelMapper.checkChannelTypeHasReference(uuid) > 0
+                && Objects.equals(channelTypeVo.getIsActive(), 0)) {
+                throw new ChannelTypeHasReferenceException(channelTypeVo.getName(), "禁用");
+            }
+            channelMapper.updateChannelTypeByUuid(channelTypeVo);
+        } else {
+            channelMapper.insertChannelType(channelTypeVo);
+        }
+
+        IProcessTaskSerialNumberPolicyHandler handler =
+            ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(channelTypeVo.getHandler());
+        if (handler == null) {
+            throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(channelTypeVo.getHandler());
+        }
+        JSONObject config = handler.makeupConfig(jsonObj);
         Long startValue = config.getLong("startValue");
         ProcessTaskSerialNumberPolicyVo policy = new ProcessTaskSerialNumberPolicyVo();
         policy.setChannelTypeUuid(channelTypeVo.getUuid());
         policy.setHandler(channelTypeVo.getHandler());
         policy.setConfig(config.toJSONString());
         policy.setSerialNumberSeed(startValue);
-		ProcessTaskSerialNumberPolicyVo oldPolicy = channelMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
-        if(oldPolicy != null) {
-            if(oldPolicy.getSerialNumberSeed() > startValue) {
+        ProcessTaskSerialNumberPolicyVo oldPolicy =
+            channelMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
+        if (oldPolicy != null) {
+            if (oldPolicy.getSerialNumberSeed() > startValue) {
                 policy.setSerialNumberSeed(oldPolicy.getSerialNumberSeed());
             }
             channelMapper.updateProcessTaskSerialNumberPolicyByChannelTypeUuid(policy);
-            if(!oldPolicy.getHandler().equals(policy.getHandler())) {
+            if (!oldPolicy.getHandler().equals(policy.getHandler())) {
                 CommonThreadPool.execute(new ProcessTaskSerialNumberUpdateThread(handler, uuid));
             }
             IJob job = SchedulerManager.getHandler(ProcessTaskSerialNumberSeedResetJob.class.getName());
-            if(job == null) {
+            if (job == null) {
                 throw new ScheduleHandlerNotFoundException(ProcessTaskSerialNumberSeedResetJob.class.getName());
             }
             String cron = handler.getSerialNumberSeedResetCron();
-            if(StringUtils.isNotBlank(cron) && CronExpression.isValidExpression(cron)) {
-                JobObject.Builder newJobObjectBuilder = new JobObject.Builder(uuid, job.getGroupName(), this.getClassName(), TenantContext.get().getTenantUuid())
-                    .addData("channelTypeUuid", uuid);
+            if (StringUtils.isNotBlank(cron) && CronExpression.isValidExpression(cron)) {
+                JobObject.Builder newJobObjectBuilder = new JobObject.Builder(uuid, job.getGroupName(),
+                    this.getClassName(), TenantContext.get().getTenantUuid()).addData("channelTypeUuid", uuid);
                 JobObject newJobObject = newJobObjectBuilder.build();
                 job.reloadJob(newJobObject);
             }
-        }else {
+        } else {
             channelMapper.insertProcessTaskSerialNumberPolicy(policy);
         }
-		return channelTypeVo.getUuid();
-	}
+        return channelTypeVo.getUuid();
+    }
 
 }

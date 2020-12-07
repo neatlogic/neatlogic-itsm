@@ -31,10 +31,8 @@ public class ProcessTaskSerialNumberPolicyListApi extends PrivateApiComponentBas
     public String getConfig() {
         return null;
     }
-    
-    @Output({
-        @Param(explode = ValueTextVo[].class, desc = "工单号生成规则列表")
-    })
+
+    @Output({@Param(explode = ValueTextVo[].class, desc = "工单号生成规则列表")})
     @Description(desc = "查询工单号生成规则列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
