@@ -1,8 +1,11 @@
 package codedriver.module.process.api.commenttemplate;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import codedriver.framework.process.dto.ProcessCommentTemplateVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -17,23 +20,30 @@ import com.alibaba.fastjson.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ProcessCommentTemplateSearchApi extends PrivateApiComponentBase {
+public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessCommentTemplateMapper commentTemplateMapper;
 
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private TeamMapper teamMapper;
+
     @Override
     public String getToken() {
-        return "process/comment/template/search";
+        return "process/comment/template/search/fortask";
     }
 
     @Override
     public String getName() {
-        return "查询系统回复模版";
+        return "查询处理页回复模版";
     }
 
     @Override
@@ -53,15 +63,23 @@ public class ProcessCommentTemplateSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessCommentTemplateVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessCommentTemplateVo>() {});
+        /** 根据当前用户所在组、角色筛选其能看到的模版 */
+        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid());
+        List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
+        List<String> uuidList = new ArrayList<>();
+        uuidList.addAll(teamUuidList);
+        uuidList.addAll(roleUuidList);
+        uuidList.add(UserContext.get().getUserUuid());
+        vo.setAuthList(uuidList);
         JSONObject returnObj = new JSONObject();
         if (vo.getNeedPage()) {
-            int rowNum = commentTemplateMapper.searchTemplateCount(vo);
+            int rowNum = commentTemplateMapper.searchTemplateCountForTask(vo);
             returnObj.put("pageSize", vo.getPageSize());
             returnObj.put("currentPage", vo.getCurrentPage());
             returnObj.put("rowNum", rowNum);
             returnObj.put("pageCount", PageUtil.getPageCount(rowNum, vo.getPageSize()));
         }
-        List<ProcessCommentTemplateVo> tbodyList = commentTemplateMapper.searchTemplate(vo);
+        List<ProcessCommentTemplateVo> tbodyList = commentTemplateMapper.searchTemplateForTask(vo);
         returnObj.put("tbodyList", tbodyList);
         return returnObj;
     }
