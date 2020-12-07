@@ -41,7 +41,7 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存系统回复模版";
+        return "保存回复模版";
     }
 
     @Override
