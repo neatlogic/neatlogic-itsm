@@ -20,8 +20,8 @@ import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNameRepeatException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyNotFoundException;
-import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicy;
-import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyFactory;
+import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
+import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
 
 import java.util.Objects;
 
@@ -87,7 +87,7 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 			channelMapper.insertChannelType(channelTypeVo);
 		}
 		
-		IProcessTaskSerialNumberPolicy handler = ProcessTaskSerialNumberPolicyFactory.getHandler(channelTypeVo.getHandler());
+		IProcessTaskSerialNumberPolicyHandler handler = ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(channelTypeVo.getHandler());
 		if(handler == null) {
 		    throw new ProcessTaskSerialNumberPolicyNotFoundException(channelTypeVo.getHandler());
 		}
@@ -98,11 +98,10 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
         policy.setHandler(channelTypeVo.getHandler());
         policy.setConfig(config.toJSONString());
         policy.setSerialNumberSeed(startValue);
-		ProcessTaskSerialNumberPolicyVo oldPolicy = channelMapper.getProcessTaskSerialNumberPolicyByChannelTypeUuid(uuid);
+		ProcessTaskSerialNumberPolicyVo oldPolicy = channelMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
         if(oldPolicy != null) {
-            Long serialNumberSeed = channelMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
-            if(serialNumberSeed > startValue) {
-                policy.setSerialNumberSeed(serialNumberSeed);
+            if(oldPolicy.getSerialNumberSeed() > startValue) {
+                policy.setSerialNumberSeed(oldPolicy.getSerialNumberSeed());
             }
             channelMapper.updateProcessTaskSerialNumberPolicyByChannelTypeUuid(policy);
             if(!oldPolicy.getHandler().equals(policy.getHandler())) {
