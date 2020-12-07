@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
@@ -22,6 +23,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundExc
 import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyNotFoundException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
+import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberUpdateThread;
 
 import java.util.Objects;
 
@@ -105,7 +107,7 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
             }
             channelMapper.updateProcessTaskSerialNumberPolicyByChannelTypeUuid(policy);
             if(!oldPolicy.getHandler().equals(policy.getHandler())) {
-                // TODO 切换策略，需重新生成历史工单的工单号
+                CommonThreadPool.execute(new ProcessTaskSerialNumberUpdateThread(handler, uuid));
             }
         }else {
             channelMapper.insertProcessTaskSerialNumberPolicy(policy);
