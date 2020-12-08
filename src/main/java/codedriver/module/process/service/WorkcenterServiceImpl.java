@@ -324,10 +324,6 @@ public class WorkcenterServiceImpl implements WorkcenterService {
 
     private JSONObject getStepActionArray(ProcessTaskVo processTaskVo, List<ProcessTaskStepVo> stepList) {
         JSONObject action = new JSONObject();
-        //兼容异常情况，如果异常工单没有步骤，则不获取对应操作按钮
-        if(CollectionUtils.isEmpty(stepList)) {
-            return action;
-        }
         String processTaskStatus = processTaskVo.getStatus();
         Boolean isHasAbort = false;
         Boolean isHasRecover = false;
@@ -341,7 +337,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             IProcessStepUtilHandler taskHandler =
                 ProcessStepUtilHandlerFactory.getHandler(ProcessStepHandlerType.OMNIPOTENT.getHandler());
             operationList =
-                taskHandler.getOperateList(processTaskVo, stepList.get(0), new ArrayList<ProcessTaskOperationType>() {
+                taskHandler.getOperateList(processTaskVo, null, new ArrayList<ProcessTaskOperationType>() {
                     private static final long serialVersionUID = 1L;
                     {
                         add(ProcessTaskOperationType.ABORTPROCESSTASK);
