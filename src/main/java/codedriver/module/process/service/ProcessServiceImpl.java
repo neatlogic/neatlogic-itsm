@@ -149,6 +149,10 @@ public class ProcessServiceImpl implements ProcessService {
                         notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
                     }
                 }
+                //保存回复模版配置
+                if(stepVo.getCommentTemplateId() != null){
+                    processMapper.insertProcessStepCommentTemplate(stepVo);
+                }
             }
         }
 
