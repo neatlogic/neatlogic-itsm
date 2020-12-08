@@ -1,7 +1,9 @@
 package codedriver.module.process.api.commenttemplate;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -14,9 +16,11 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.PROCESS_COMMENT_TEMPLATE_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,6 +74,7 @@ public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentB
         uuidList.addAll(teamUuidList);
         uuidList.addAll(roleUuidList);
         uuidList.add(UserContext.get().getUserUuid());
+        uuidList.add(UserType.ALL.getValue());
         vo.setAuthList(uuidList);
         JSONObject returnObj = new JSONObject();
         if (vo.getNeedPage()) {
@@ -80,6 +85,18 @@ public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentB
             returnObj.put("pageCount", PageUtil.getPageCount(rowNum, vo.getPageSize()));
         }
         List<ProcessCommentTemplateVo> tbodyList = commentTemplateMapper.searchTemplateForTask(vo);
+        if(CollectionUtils.isNotEmpty(tbodyList)){
+            /** 有系统模版管理权限才能编辑系统模版 */
+            tbodyList.stream().forEach(o -> {
+                if((ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(o.getType())
+                && AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName()))
+                || ProcessCommentTemplateVo.TempalteType.CUSTOM.getValue().equals(o.getType())){
+                    o.setIsEditable(1);
+                }else{
+                    o.setIsEditable(0);
+                }
+            });
+        }
         returnObj.put("tbodyList", tbodyList);
         return returnObj;
     }
