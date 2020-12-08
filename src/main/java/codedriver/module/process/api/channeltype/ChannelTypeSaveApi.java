@@ -13,7 +13,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
-import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
@@ -24,7 +23,6 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundExc
 import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyHandlerNotFoundException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
-import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberUpdateThread;
 
 import java.util.Objects;
 
@@ -108,20 +106,6 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
                 policy.setSerialNumberSeed(oldPolicy.getSerialNumberSeed());
             }
             processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyByChannelTypeUuid(policy);
-            if (!oldPolicy.getHandler().equals(policy.getHandler())) {
-                CommonThreadPool.execute(new ProcessTaskSerialNumberUpdateThread(handler, uuid));
-            }
-//            IJob job = SchedulerManager.getHandler(ProcessTaskSerialNumberSeedResetJob.class.getName());
-//            if (job == null) {
-//                throw new ScheduleHandlerNotFoundException(ProcessTaskSerialNumberSeedResetJob.class.getName());
-//            }
-//            String cron = handler.getSerialNumberSeedResetCron();
-//            if (StringUtils.isNotBlank(cron) && CronExpression.isValidExpression(cron)) {
-//                JobObject.Builder newJobObjectBuilder = new JobObject.Builder(uuid, job.getGroupName(),
-//                    this.getClassName(), TenantContext.get().getTenantUuid()).addData("channelTypeUuid", uuid);
-//                JobObject newJobObject = newJobObjectBuilder.build();
-//                job.reloadJob(newJobObject);
-//            }
         } else {
             processTaskSerialNumberMapper.insertProcessTaskSerialNumberPolicy(policy);
         }
