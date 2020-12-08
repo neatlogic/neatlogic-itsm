@@ -323,6 +323,11 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     }
 
     private JSONObject getStepActionArray(ProcessTaskVo processTaskVo, List<ProcessTaskStepVo> stepList) {
+        JSONObject action = new JSONObject();
+        //兼容异常情况，如果异常工单没有步骤，则不获取对应操作按钮
+        if(CollectionUtils.isEmpty(stepList)) {
+            return action;
+        }
         String processTaskStatus = processTaskVo.getStatus();
         Boolean isHasAbort = false;
         Boolean isHasRecover = false;
@@ -394,7 +399,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
          * 1、工单显示时，优先展示实质性的按钮，次要的操作按钮收起到“更多”中；如果没有任何实质性的操作按钮，则将次要按钮放出来（管理员可见）；
          * 2、工单隐藏时，仅“显示”、“删除”按钮放出来，其他实质性按钮需要等工单显示后才会展示；
          */
-        JSONObject action = new JSONObject();
+       
         WorkcenterActionBuilder workcenterFirstActionBuilder = new WorkcenterActionBuilder();
         JSONArray workcenterFirstActionArray = workcenterFirstActionBuilder.setHandleAction(handleArray)
             .setAbortRecoverAction(isHasAbort, isHasRecover, processTaskVo).setUrgeAction(isHasUrge, processTaskVo)
