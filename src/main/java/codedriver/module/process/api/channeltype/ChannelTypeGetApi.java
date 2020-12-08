@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
@@ -24,6 +25,8 @@ public class ChannelTypeGetApi extends PrivateApiComponentBase {
 
     @Autowired
     private ChannelMapper channelMapper;
+    @Autowired
+    private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
 
     @Override
     public String getToken() {
@@ -52,7 +55,7 @@ public class ChannelTypeGetApi extends PrivateApiComponentBase {
         }
         JSONObject resultObj = (JSONObject)JSON.toJSON(channelType);
         ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo =
-            channelMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
+            processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(uuid);
         if (processTaskSerialNumberPolicyVo != null) {
             IProcessTaskSerialNumberPolicyHandler handler =
                 ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(processTaskSerialNumberPolicyVo.getHandler());
