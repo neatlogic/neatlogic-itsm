@@ -82,11 +82,11 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
             commentTemplateMapper.updateTemplate(vo);
             commentTemplateMapper.deleteTemplateAuthority(id);
         }else {
+            vo.setType(type);
             /** 没有权限则不允许创建系统模版 */
             if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())){
                 throw new PermissionDeniedException();
             }
-            vo.setType(type);
             vo.setFcu(UserContext.get().getUserUuid(true));
             commentTemplateMapper.insertTemplate(vo);
         }
