@@ -2,6 +2,7 @@ package codedriver.module.process.api.commenttemplate;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -70,6 +71,7 @@ public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentB
         uuidList.addAll(teamUuidList);
         uuidList.addAll(roleUuidList);
         uuidList.add(UserContext.get().getUserUuid());
+        uuidList.add(UserType.ALL.getValue());
         vo.setAuthList(uuidList);
         JSONObject returnObj = new JSONObject();
         if (vo.getNeedPage()) {
