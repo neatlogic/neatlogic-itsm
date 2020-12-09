@@ -245,8 +245,8 @@ public class TaskOperateHandler implements IOperationAuthHandler {
     }
 
     @Override
-    public OperationAuthHandlerType getHandler() {
-        return OperationAuthHandlerType.TASK;
+    public String getHandler() {
+        return OperationAuthHandlerType.TASK.getValue();
     }
     @Override
     public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> getOperationBiPredicateMap() {

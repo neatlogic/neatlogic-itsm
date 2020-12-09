@@ -16,7 +16,6 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
-import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
 @Component
@@ -43,8 +42,8 @@ public class OmnipotentOperateHandler implements IOperationAuthHandler {
     }
 
     @Override
-    public IOperationAuthHandlerType getHandler() {
-        return OperationAuthHandlerType.OMNIPOTENT;
+    public String getHandler() {
+        return OperationAuthHandlerType.OMNIPOTENT.getValue();
     }
 
     @Override

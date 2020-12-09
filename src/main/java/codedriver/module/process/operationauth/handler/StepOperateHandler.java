@@ -198,8 +198,8 @@ public class StepOperateHandler implements IOperationAuthHandler {
 	}
 
 	@Override
-	public OperationAuthHandlerType getHandler() {
-		return OperationAuthHandlerType.STEP;
+	public String getHandler() {
+		return OperationAuthHandlerType.STEP.getValue();
 	}
     @Override
     public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> getOperationBiPredicateMap() {

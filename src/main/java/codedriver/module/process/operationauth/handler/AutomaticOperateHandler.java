@@ -21,22 +21,22 @@ public class AutomaticOperateHandler implements IOperationAuthHandler {
     
     @PostConstruct
     public void init() {
-        operationBiPredicateMap.put(ProcessTaskOperationType.STARTPROCESS, (processTaskVo, processTaskStepVo, userUuid) -> false);
+//        operationBiPredicateMap.put(ProcessTaskOperationType.STARTPROCESS, (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.START, (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.ACTIVE, (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.RETREATCURRENTSTEP, (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.ACCEPT, (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> false);
+//        operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> false);
+//        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> false);
+//        operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.COMMENT, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo, userUuid) -> false);
+//        operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo, userUuid) -> false);
     }
 
     @Override
-    public OperationAuthHandlerType getHandler() {
-        return OperationAuthHandlerType.AUTOMATIC;
+    public String getHandler() {
+        return OperationAuthHandlerType.AUTOMATIC.getValue();
     }
     @Override
     public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> getOperationBiPredicateMap() {
