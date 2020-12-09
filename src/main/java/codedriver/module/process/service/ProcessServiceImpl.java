@@ -150,6 +150,7 @@ public class ProcessServiceImpl implements ProcessService {
                     }
                 }
                 //保存回复模版配置
+                processMapper.deleteProcessStepCommentTemplate(stepVo.getUuid());
                 if(stepVo.getCommentTemplateId() != null){
                     processMapper.insertProcessStepCommentTemplate(stepVo);
                 }
