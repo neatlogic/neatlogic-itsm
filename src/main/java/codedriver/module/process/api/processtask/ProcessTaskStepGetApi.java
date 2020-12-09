@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.process.dao.mapper.*;
+import codedriver.framework.process.dto.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,21 +28,7 @@ import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
-import codedriver.framework.process.dao.mapper.PriorityMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
-import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
-import codedriver.framework.process.dto.PriorityVo;
-import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
-import codedriver.framework.process.dto.ProcessTaskStepAgentVo;
-import codedriver.framework.process.dto.ProcessTaskStepDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
-import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
-import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -84,6 +73,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
     @Autowired
     private PriorityMapper priorityMapper;
+
+    @Autowired
+    private ProcessCommentTemplateMapper commentTemplateMapper;
 
     @Override
     public String getToken() {
@@ -343,6 +335,20 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     processTaskStepVo.setOriginalUserName(userVo.getUserName());
                 }
             }
+            /** 如果当前用户有处理权限，则获取其有权看到的配置的回复模版 */
+            if (handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.COMPLETE,
+                    false)) {
+                List<String> authList = new ArrayList<>();
+                List<String> teamUuidList = userMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid());
+                List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
+                authList.addAll(teamUuidList);
+                authList.addAll(roleUuidList);
+                authList.add(UserType.ALL.getValue());
+                authList.add(UserContext.get().getUserUuid());
+                ProcessCommentTemplateVo commentTemplate = commentTemplateMapper.getTemplateByStepUuidAndAuth(processTaskStepVo.getProcessStepUuid(), authList);
+                processTaskStepVo.setCommentTemplate(commentTemplate);
+            }
+
             return processTaskStepVo;
         }
         return null;

@@ -3,6 +3,8 @@ package codedriver.module.process.api.processtask;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
+import codedriver.framework.process.dto.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,13 +25,6 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
-import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
-import codedriver.framework.process.dto.ProcessTaskStepDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepFileVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
@@ -53,6 +48,9 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private FileMapper fileMapper;
+
+	@Autowired
+    private ProcessCommentTemplateMapper commentTemplateMapper;
 	
 	@Override
 	public String getToken() {
@@ -73,7 +71,8 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 		@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
 		@Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
 		@Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表")
+		@Param(name = "fileIdList", type=ApiParamType.JSONARRAY, desc = "附件id列表"),
+		@Param(name = "commentTemplateId", type=ApiParamType.LONG, desc = "回复模版ID")
 	})
 	@Output({
 		@Param(name = "commentList", explode = ProcessTaskStepReplyVo[].class, desc = "当前步骤评论列表")
@@ -83,6 +82,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
+        Long commentTemplateId = jsonObj.getLong("commentTemplateId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 		processTaskMapper.getProcessTaskLockById(processTaskId);
 		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
@@ -141,6 +141,15 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
                 }
                 processTaskStepFileVo.setFileId(fileId);
                 processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
+            }
+        }
+        /** 记录回复模版使用次数 */
+        if(commentTemplateId != null){
+            ProcessCommentTemplateUseCountVo templateUseCount = commentTemplateMapper.getTemplateUseCount(commentTemplateId,UserContext.get().getUserUuid());
+            if(templateUseCount != null){
+                commentTemplateMapper.updateTemplateUseCount(commentTemplateId,UserContext.get().getUserUuid());
+            }else{
+                commentTemplateMapper.insertTemplateUseCount(commentTemplateId,UserContext.get().getUserUuid());
             }
         }
         
