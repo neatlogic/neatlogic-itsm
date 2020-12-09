@@ -26,14 +26,14 @@ import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ProcessTaskScoreTemplateVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
+import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
 import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Component
-public class TaskOperateHandler implements IOperationAuthHandler {
+public class TaskOperateHandler extends OperationAuthHandlerBase {
 
     private Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
     @Autowired

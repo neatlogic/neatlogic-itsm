@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
+import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
 
 @Component
-public class AutomaticOperateHandler implements IOperationAuthHandler {
+public class AutomaticOperateHandler extends OperationAuthHandlerBase {
 
     private final Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
     
