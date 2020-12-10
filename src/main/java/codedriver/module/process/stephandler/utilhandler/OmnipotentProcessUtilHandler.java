@@ -88,6 +88,9 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 				}
 				processStepVo.setWorkerPolicyList(workerPolicyList);
 			}
+			//保存回复模版ID
+			Long commentTemplateId = workerPolicyConfig.getLong("commentTemplateId");
+			processStepVo.setCommentTemplateId(commentTemplateId);
 		}
 	}
 
