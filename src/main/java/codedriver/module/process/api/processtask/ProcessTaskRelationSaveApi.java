@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
@@ -23,6 +24,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -45,6 +47,9 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
     
     @Autowired
     private ProcessTaskService processTaskService;
+    
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -73,7 +78,14 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         try {
-            handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.TRANFERREPORT, true);
+//            handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.TRANFERREPORT, true);
+            new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+            .addProcessTaskId(processTaskVo.getId())
+            .addOperationType(ProcessTaskOperationType.TRANFERREPORT)
+            .addCheckOperationType(processTaskVo.getId(), ProcessTaskOperationType.TRANFERREPORT)
+            .withIsThrowException(true)
+            .build()
+            .check();
         }catch(ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }

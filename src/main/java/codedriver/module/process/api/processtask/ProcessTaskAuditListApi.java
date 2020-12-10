@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
@@ -27,6 +28,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.util.FreemarkerUtil;
@@ -40,6 +42,9 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
+	
+	@Autowired
+	private UserMapper userMapper;
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
@@ -77,7 +82,14 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         try {
-            ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+//            ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+            new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+            .addProcessTaskId(processTaskVo.getId())
+            .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
+            .addCheckOperationType(processTaskVo.getId(), ProcessTaskOperationType.POCESSTASKVIEW)
+            .withIsThrowException(true)
+            .build()
+            .check();
         }catch(ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
@@ -100,7 +112,15 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                     if(processStepUtilHandler == null) {
                         throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                     }
-                    if(!processStepUtilHandler.verifyOperationAuthoriy(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), ProcessTaskOperationType.VIEW, false)) {
+//                    if(!processStepUtilHandler.verifyOperationAuthoriy(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId(), ProcessTaskOperationType.VIEW, false)) {
+//                        continue;
+//                    }
+                    if(!new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+                        .addProcessTaskStepId(processTaskStepAudit.getProcessTaskId(), processTaskStepAudit.getProcessTaskStepId())
+                        .addOperationType(ProcessTaskOperationType.VIEW)
+                        .addCheckOperationType(processTaskStepAudit.getProcessTaskStepId(), ProcessTaskOperationType.VIEW)
+                        .build()
+                        .check()) {
                         continue;
                     }
 				}

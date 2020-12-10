@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -27,8 +28,7 @@ import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -52,6 +52,9 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 	private ProcessTaskStepDataMapper processTaskStepDataMapper;
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -83,9 +86,15 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-		handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
-		
+//		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
+//		handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+		new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+        .addProcessTaskId(processTaskVo.getId())
+        .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
+        .addCheckOperationType(processTaskVo.getId(), ProcessTaskOperationType.POCESSTASKVIEW)
+        .withIsThrowException(true)
+        .build()
+        .check();
 		/** 检查工单是否存在表单 **/
 		ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
 		if(processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
@@ -104,8 +113,13 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 			
 			if(processTaskStepId != null) {
 				ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
-				handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-				if(handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.VIEW, false)){
+//				handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+				if(new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+                    .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
+                    .addOperationType(ProcessTaskOperationType.VIEW)
+                    .addCheckOperationType(processTaskStepVo.getId(), ProcessTaskOperationType.VIEW)
+                    .build()
+                    .check()){
 					/** 查出暂存数据中的表单数据**/				
 					ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
 					processTaskStepDataVo.setProcessTaskId(processTaskId);
@@ -130,7 +144,12 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 				}
 			}
 
-			if(handler.verifyOperationAuthoriy(processTaskVo, processTaskVo.getCurrentProcessTaskStep(), ProcessTaskOperationType.WORK, false)) {
+			if(new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+                .addProcessTaskStepId(processTaskVo.getCurrentProcessTaskStep().getProcessTaskId(), processTaskVo.getCurrentProcessTaskStep().getId())
+                .addOperationType(ProcessTaskOperationType.WORK)
+                .addCheckOperationType(processTaskVo.getCurrentProcessTaskStep().getId(), ProcessTaskOperationType.WORK)
+                .build()
+                .check()) {
 				/** 当前用户有处理权限，根据当前步骤表单属性显示设置控制表单属性展示 **/
 				Map<String, String> formAttributeActionMap = new HashMap<>();
 				List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);

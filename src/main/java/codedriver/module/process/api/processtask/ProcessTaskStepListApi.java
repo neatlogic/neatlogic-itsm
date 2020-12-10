@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -30,6 +31,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
@@ -54,6 +56,9 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     @Autowired
     private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @Override
     public String getToken() {
         return "processtask/step/list";
@@ -75,10 +80,16 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
-        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo,
-            ProcessTaskOperationType.POCESSTASKVIEW, true);
-
+        processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+//        ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo,
+//            ProcessTaskOperationType.POCESSTASKVIEW, true);
+        new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+        .addProcessTaskId(processTaskId)
+        .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
+        .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW)
+        .withIsThrowException(true)
+        .build()
+        .check();
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
 
         Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
@@ -144,8 +155,12 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                 if (handler == null) {
                     throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                 }
-                if (handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.VIEW,
-                    false)) {
+                if (new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+                    .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
+                    .addOperationType(ProcessTaskOperationType.VIEW)
+                    .addCheckOperationType(processTaskStepVo.getId(), ProcessTaskOperationType.VIEW)
+                    .build()
+                    .check()) {
                     processTaskStepVo.setIsView(1);
                     getProcessTaskStepDetail(processTaskStepVo);
                 } else {

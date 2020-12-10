@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -26,6 +27,7 @@ import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -51,6 +53,9 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 
 	@Autowired
     private ProcessCommentTemplateMapper commentTemplateMapper;
+	
+	@Autowired
+    private UserMapper userMapper;
 	
 	@Override
 	public String getToken() {
@@ -88,7 +93,14 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
 		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		try {
-	        handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.COMMENT, true);
+//	        handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.COMMENT, true);
+	        new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+            .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
+            .addOperationType(ProcessTaskOperationType.COMMENT)
+            .addCheckOperationType(processTaskStepVo.getId(), ProcessTaskOperationType.COMMENT)
+            .withIsThrowException(true)
+            .build()
+            .check();
         }catch(ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }

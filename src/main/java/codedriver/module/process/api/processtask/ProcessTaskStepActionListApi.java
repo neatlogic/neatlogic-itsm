@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,12 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
@@ -28,6 +32,12 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
 	
 	@Override
 	public String getToken() {
@@ -65,19 +75,26 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 			handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		}
 		List<ValueTextVo> resultList = new ArrayList<>();
-		List<ProcessTaskOperationType> operateList = handler.getOperateList(processTaskVo, processTaskStepVo);
-		for(ProcessTaskOperationType operationType : operateList) {
-		    String text = customButtonMap.get(operationType.getValue());
-		    if(StringUtils.isBlank(text)) {
-		        text = operationType.getText();
-		    }
-		    if(StringUtils.isNotBlank(text)) {
-		        ValueTextVo valueText = new ValueTextVo();
-		        valueText.setValue(operationType.getValue());
-		        valueText.setText(text);
-		        resultList.add(valueText);
-		    }
+//		List<ProcessTaskOperationType> operateList = handler.getOperateList(processTaskVo, processTaskStepVo);
+		Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+        .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
+        .build()
+        .getOperateMap();
+		for(Map.Entry<Long, Set<ProcessTaskOperationType>> entry : operationTypeSetMap.entrySet()) {
+		    for(ProcessTaskOperationType operationType : entry.getValue()) {
+	            String text = customButtonMap.get(operationType.getValue());
+	            if(StringUtils.isBlank(text)) {
+	                text = operationType.getText();
+	            }
+	            if(StringUtils.isNotBlank(text)) {
+	                ValueTextVo valueText = new ValueTextVo();
+	                valueText.setValue(operationType.getValue());
+	                valueText.setText(text);
+	                resultList.add(valueText);
+	            }
+	        }
 		}
+		
 		return resultList;
 	}
 

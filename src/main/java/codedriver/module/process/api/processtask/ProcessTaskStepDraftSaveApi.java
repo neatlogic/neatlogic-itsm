@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
@@ -22,6 +23,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
@@ -38,6 +40,9 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskStepDataMapper processTaskStepDataMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
 	
 	@Override
 	public String getToken() {
@@ -82,7 +87,14 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
 		    throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
 		try {
-	        handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.SAVE, true);
+//	        handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, ProcessTaskOperationType.SAVE, true);
+	        new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+            .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
+            .addOperationType(ProcessTaskOperationType.SAVE)
+            .addCheckOperationType(processTaskStepVo.getId(), ProcessTaskOperationType.SAVE)
+            .withIsThrowException(true)
+            .build()
+            .check();
         }catch(ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }

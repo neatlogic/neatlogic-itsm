@@ -25,6 +25,7 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
@@ -80,7 +81,14 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
 		    throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
 		try {
-	        handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.CREATESUBTASK, true);
+//	        handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.CREATESUBTASK, true);
+	        new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+            .addProcessTaskStepId(processTaskId, processTaskStepId)
+            .addOperationType(ProcessTaskOperationType.CREATESUBTASK)
+            .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.CREATESUBTASK)
+            .withIsThrowException(true)
+            .build()
+            .check();
         }catch(ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }

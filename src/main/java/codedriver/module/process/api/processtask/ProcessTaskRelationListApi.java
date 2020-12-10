@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -26,7 +27,7 @@ import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStatusVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -48,6 +49,9 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
     
     @Autowired
     private ProcessTaskService processTaskService;
+    
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -79,7 +83,14 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessTaskRelationVo processTaskRelationVo = JSON.toJavaObject(jsonObj, ProcessTaskRelationVo.class);
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskRelationVo.getProcessTaskId());
-        ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+//        ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+        new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+        .addProcessTaskId(processTaskVo.getId())
+        .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
+        .addCheckOperationType(processTaskVo.getId(), ProcessTaskOperationType.POCESSTASKVIEW)
+        .withIsThrowException(true)
+        .build()
+        .check();
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTaskRelationList", new ArrayList<>());
         int pageCount = 0;

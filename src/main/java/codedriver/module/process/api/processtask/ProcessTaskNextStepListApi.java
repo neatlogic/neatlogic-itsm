@@ -6,11 +6,12 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -21,6 +22,12 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase{
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
 	
 	@Override
 	public String getToken() {
@@ -57,12 +64,21 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase{
 		    operationType = ProcessTaskOperationType.BACK;
 		}
 		ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
-		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-		handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, operationType, true);
+//		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+//		handler.verifyOperationAuthoriy(processTaskVo, processTaskStepVo, operationType, true);
+		new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+        .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
+        .addOperationType(operationType)
+        .addCheckOperationType(processTaskStepVo.getId(), operationType)
+        .withIsThrowException(true)
+        .build()
+        .check();
 		if(operationType == ProcessTaskOperationType.COMPLETE) {
-		    return processTaskStepVo.getForwardNextStepList();
+		    //return processTaskStepVo.getForwardNextStepList();
+		    return processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepId);
 		}else {
-		    return processTaskStepVo.getBackwardNextStepList();
+		    //return processTaskStepVo.getBackwardNextStepList();
+		    return processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepId);
 		}
 	}
 
