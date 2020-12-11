@@ -21,7 +21,6 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.operationauth.core.ProcessOperateManager;
@@ -34,20 +33,21 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
+
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
 public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
-    
+
     @Autowired
     private ProcessTaskMapper processTaskMapper;
-    
+
     @Autowired
     private ChannelMapper channelMapper;
-    
+
     @Autowired
     private ProcessTaskService processTaskService;
-    
+
     @Autowired
     private UserMapper userMapper;
 
@@ -66,56 +66,54 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({
-        @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),
-        @Param(name = "relationProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "被关联的工单id列表")
-    })
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+        @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"), @Param(
+            name = "relationProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "被关联的工单id列表")})
     @Description(desc = "保存工单关联")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
-        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         try {
-//            handler.verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.TRANFERREPORT, true);
-            new ProcessOperateManager.Builder(processTaskMapper, userMapper)
-            .addProcessTaskId(processTaskVo.getId())
-            .addOperationType(ProcessTaskOperationType.TRANFERREPORT)
-            .addCheckOperationType(processTaskVo.getId(), ProcessTaskOperationType.TRANFERREPORT)
-            .withIsThrowException(true)
-            .build()
-            .check();
-        }catch(ProcessTaskNoPermissionException e) {
+            new ProcessOperateManager.Builder(processTaskMapper, userMapper).addProcessTaskId(processTaskId)
+                .addOperationType(ProcessTaskOperationType.TRANFERREPORT)
+                .addCheckOperationType(processTaskId, ProcessTaskOperationType.TRANFERREPORT).withIsThrowException(true)
+                .build().check();
+        } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
         Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-        if(channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
+        if (channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
-        List<Long> relationProcessTaskIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("relationProcessTaskIdList")), Long.class);
-        if(CollectionUtils.isNotEmpty(relationProcessTaskIdList)) {
+        List<Long> relationProcessTaskIdList =
+            JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("relationProcessTaskIdList")), Long.class);
+        if (CollectionUtils.isNotEmpty(relationProcessTaskIdList)) {
             List<Long> processTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(relationProcessTaskIdList);
-            if(CollectionUtils.isNotEmpty(processTaskIdList)) {               
-                for(Long target : processTaskIdList) {
+            if (CollectionUtils.isNotEmpty(processTaskIdList)) {
+                for (Long target : processTaskIdList) {
                     ProcessTaskRelationVo processTaskRelationVo = new ProcessTaskRelationVo();
                     processTaskRelationVo.setSource(processTaskId);
-                    processTaskRelationVo.setChannelTypeRelationId(channelTypeRelationId);  
+                    processTaskRelationVo.setChannelTypeRelationId(channelTypeRelationId);
                     processTaskRelationVo.setTarget(target);
-                    
+
                     processTaskMapper.replaceProcessTaskRelation(processTaskRelationVo);
                     ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
                     processTaskStepVo.setProcessTaskId(target);
-                    processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CHANNELTYPERELATION.getParamName(), channelTypeRelationId);
-                    processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(), JSON.toJSONString(Arrays.asList(processTaskId)));
+                    processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CHANNELTYPERELATION.getParamName(),
+                        channelTypeRelationId);
+                    processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
+                        JSON.toJSONString(Arrays.asList(processTaskId)));
                     handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.RELATION);
                 }
-                jsonObj.put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(), JSON.toJSONString(processTaskIdList));
+                jsonObj.put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
+                    JSON.toJSONString(processTaskIdList));
                 ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
                 processTaskStepVo.setProcessTaskId(processTaskId);
                 processTaskStepVo.setParamObj(jsonObj);
                 handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.RELATION);
-            }           
+            }
         }
         return null;
     }

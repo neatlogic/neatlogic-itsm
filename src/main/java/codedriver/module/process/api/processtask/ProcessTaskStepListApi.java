@@ -81,15 +81,10 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-//        ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo,
-//            ProcessTaskOperationType.POCESSTASKVIEW, true);
-        new ProcessOperateManager.Builder(processTaskMapper, userMapper)
-        .addProcessTaskId(processTaskId)
-        .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
-        .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW)
-        .withIsThrowException(true)
-        .build()
-        .check();
+        new ProcessOperateManager.Builder(processTaskMapper, userMapper).addProcessTaskId(processTaskId)
+            .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
+            .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW).withIsThrowException(true)
+            .build().check();
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
 
         Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
@@ -158,9 +153,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                 if (new ProcessOperateManager.Builder(processTaskMapper, userMapper)
                     .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
                     .addOperationType(ProcessTaskOperationType.VIEW)
-                    .addCheckOperationType(processTaskStepVo.getId(), ProcessTaskOperationType.VIEW)
-                    .build()
-                    .check()) {
+                    .addCheckOperationType(processTaskStepVo.getId(), ProcessTaskOperationType.VIEW).build().check()) {
                     processTaskStepVo.setIsView(1);
                     getProcessTaskStepDetail(processTaskStepVo);
                 } else {

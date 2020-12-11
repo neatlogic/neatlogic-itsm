@@ -82,12 +82,6 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                         return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo,
                             processTaskStepVo.getId(), ProcessFlowDirection.FORWARD);
-                        // List<ProcessTaskStepVo> forwardNextStepList =
-                        // processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId());
-                        // if(CollectionUtils.isNotEmpty(forwardNextStepList)) {
-                        // processTaskStepVo.setForwardNextStepList(forwardNextStepList);
-                        // return true;
-                        // }
                     }
                 }
 
@@ -102,12 +96,6 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                         return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo,
                             processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD);
-                        // List<ProcessTaskStepVo> backwardNextStepList =
-                        // processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId());
-                        // if(CollectionUtils.isNotEmpty(backwardNextStepList)) {
-                        // processTaskStepVo.setBackwardNextStepList(backwardNextStepList);
-                        // return true;
-                        // }
                     }
                 }
             }
@@ -172,13 +160,14 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.WORKCURRENTSTEP, (processTaskVo, processTaskStepVo, userUuid) -> {
-            // 有可处理步骤work
-            if (checkIsWorker(processTaskStepVo, userUuid)) {
-                return true;
-            }
-            return false;
-        });
+        operationBiPredicateMap.put(ProcessTaskOperationType.WORKCURRENTSTEP,
+            (processTaskVo, processTaskStepVo, userUuid) -> {
+                // 有可处理步骤work
+                if (checkIsWorker(processTaskStepVo, userUuid)) {
+                    return true;
+                }
+                return false;
+            });
     }
 
     @Override

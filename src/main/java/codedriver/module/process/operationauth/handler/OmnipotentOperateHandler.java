@@ -15,25 +15,29 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
+
 @Component
 public class OmnipotentOperateHandler extends OperationAuthHandlerBase {
 
-    private final Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
-    
+    private final Map<ProcessTaskOperationType,
+        TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
+
     @PostConstruct
     public void init() {
-        
-        operationBiPredicateMap.put(ProcessTaskOperationType.CREATESUBTASK, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (processTaskStepVo.getIsActive() == 1) {
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    if(checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        return true;
+
+        operationBiPredicateMap.put(ProcessTaskOperationType.CREATESUBTASK,
+            (processTaskVo, processTaskStepVo, userUuid) -> {
+                if (processTaskStepVo.getIsActive() == 1) {
+                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
+                        || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
+                        if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
+                            return true;
+                        }
                     }
                 }
-            }
-            return false;
-        });
-        
+                return false;
+            });
+
     }
 
     @Override
@@ -42,7 +46,8 @@ public class OmnipotentOperateHandler extends OperationAuthHandlerBase {
     }
 
     @Override
-    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> getOperationBiPredicateMap() {
+    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>>
+        getOperationBiPredicateMap() {
         return operationBiPredicateMap;
     }
 

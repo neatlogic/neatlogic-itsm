@@ -104,14 +104,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-//        handler.verifyOperationAuthoriy(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW, true);
-        new ProcessOperateManager.Builder(processTaskMapper, userMapper)
-        .addProcessTaskId(processTaskId)
-        .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
-        .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW)
-        .withIsThrowException(true)
-        .build()
-        .check();
+        new ProcessOperateManager.Builder(processTaskMapper, userMapper).addProcessTaskId(processTaskId)
+            .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
+            .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW).withIsThrowException(true)
+            .build().check();
         ProcessTaskVo processTaskVo = handler.getProcessTaskDetailById(processTaskId);
 
         if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
@@ -146,9 +142,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 if (new ProcessOperateManager.Builder(processTaskMapper, userMapper)
                     .addProcessTaskStepId(processTaskId, processTaskStepId)
                     .addOperationType(ProcessTaskOperationType.SAVE)
-                    .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.SAVE)
-                    .build()
-                    .check()) {
+                    .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.SAVE).build().check()) {
                     // 回复框内容和附件暂存回显
                     setTemporaryData(processTaskVo, currentProcessTaskStepVo);
                 }
@@ -171,14 +165,13 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             }
         }
         if (StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
-//            boolean isAuthority =
-//                handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.WORK, false);
-            boolean isAuthority = new ProcessOperateManager.Builder(processTaskMapper, userMapper)
-            .addProcessTaskStepId(processTaskId, processTaskStepId)
-            .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP)
-            .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.WORKCURRENTSTEP)
-            .build()
-            .check();
+            boolean isAuthority = false;
+            if (processTaskStepId != null) {
+                isAuthority = new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+                    .addProcessTaskStepId(processTaskId, processTaskStepId)
+                    .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP)
+                    .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.WORKCURRENTSTEP).build().check();
+            }
             processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap,
                 isAuthority ? 1 : 0);
         }
@@ -213,11 +206,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if (new ProcessOperateManager.Builder(processTaskMapper, userMapper)
-            .addProcessTaskStepId(processTaskId, processTaskStepId)
-            .addOperationType(ProcessTaskOperationType.VIEW)
-            .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.VIEW)
-            .build()
-            .check()) {
+            .addProcessTaskStepId(processTaskId, processTaskStepId).addOperationType(ProcessTaskOperationType.VIEW)
+            .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.VIEW).build().check()) {
             // 处理人列表
             processTaskService.setProcessTaskStepUser(processTaskStepVo);
 
@@ -313,11 +303,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
                     processTaskStepVo.getId(), processTaskStepVo.getHandler(), "system"));
             boolean hasComplete = new ProcessOperateManager.Builder(processTaskMapper, userMapper)
-            .addProcessTaskStepId(processTaskId, processTaskStepId)
-            .addOperationType(ProcessTaskOperationType.COMPLETE)
-            .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.COMPLETE)
-            .build()
-            .check();
+                .addProcessTaskStepId(processTaskId, processTaskStepId)
+                .addOperationType(ProcessTaskOperationType.COMPLETE)
+                .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.COMPLETE).build().check();
             if (stepDataVo != null) {
                 JSONObject stepDataJson = stepDataVo.getData();
                 processTaskStepVo.setProcessTaskStepData(stepDataJson);
@@ -371,7 +359,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 authList.addAll(roleUuidList);
                 authList.add(UserType.ALL.getValue());
                 authList.add(UserContext.get().getUserUuid());
-                ProcessCommentTemplateVo commentTemplate = commentTemplateMapper.getTemplateByStepUuidAndAuth(processTaskStepVo.getProcessStepUuid(), authList);
+                ProcessCommentTemplateVo commentTemplate = commentTemplateMapper
+                    .getTemplateByStepUuidAndAuth(processTaskStepVo.getProcessStepUuid(), authList);
                 processTaskStepVo.setCommentTemplate(commentTemplate);
             }
 
