@@ -125,7 +125,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         // Date time22 = new Date();
         // System.out.println("矫正headerCostTime:"+(time22.getTime()-time2.getTime()));
         if (!resultData.isEmpty()) {
-//            Date time3 = new Date();
+            // Date time3 = new Date();
             for (MultiAttrsObject el : resultData) {
                 JSONObject taskJson = new JSONObject();
                 taskJson.put("taskid", el.getId());
@@ -141,8 +141,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 taskJson.put("action", getStepAction(el, isHasProcessTaskAuth));
                 dataList.add(taskJson);
             }
-//            Date time33 = new Date();
-//            System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
+            // Date time33 = new Date();
+            // System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
         }
 
         // 字段排序
@@ -336,15 +336,14 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             // 工单权限
             IProcessStepUtilHandler taskHandler =
                 ProcessStepUtilHandlerFactory.getHandler(ProcessStepHandlerType.OMNIPOTENT.getHandler());
-            operationList =
-                taskHandler.getOperateList(processTaskVo, null, new ArrayList<ProcessTaskOperationType>() {
-                    private static final long serialVersionUID = 1L;
-                    {
-                        add(ProcessTaskOperationType.ABORTPROCESSTASK);
-                        add(ProcessTaskOperationType.RECOVERPROCESSTASK);
-                        add(ProcessTaskOperationType.URGE);
-                    }
-                });
+            operationList = taskHandler.getOperateList(processTaskVo, null, new ArrayList<ProcessTaskOperationType>() {
+                private static final long serialVersionUID = 1L;
+                {
+                    add(ProcessTaskOperationType.ABORTPROCESSTASK);
+                    add(ProcessTaskOperationType.RECOVERPROCESSTASK);
+                    add(ProcessTaskOperationType.URGE);
+                }
+            });
             if (operationList.contains(ProcessTaskOperationType.ABORTPROCESSTASK)) {
                 isHasAbort = true;
             }
@@ -356,14 +355,15 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             }
             // 步骤权限
             for (ProcessTaskStepVo step : stepList) {
-                if(step.getIsActive() == 1 ) {
+                if (step.getIsActive() == 1) {
                     step.setProcessTaskId(processTaskVo.getId());
                     try {
                         if (step.getHandler() != null) {
-                            IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(step.getHandler());
+                            IProcessStepUtilHandler handler =
+                                ProcessStepUtilHandlerFactory.getHandler(step.getHandler());
                             if (handler != null) {
-                                operationList.addAll(
-                                    handler.getOperateList(processTaskVo, step, new ArrayList<ProcessTaskOperationType>() {
+                                operationList.addAll(handler.getOperateList(processTaskVo, step,
+                                    new ArrayList<ProcessTaskOperationType>() {
                                         private static final long serialVersionUID = 1L;
                                         {
                                             add(ProcessTaskOperationType.WORK);
@@ -374,7 +374,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                     } catch (Exception ex) {
                         logger.error(ex.getMessage(), ex);
                     }
-    
+
                     if (operationList.contains(ProcessTaskOperationType.WORK)) {
                         JSONObject configJson = new JSONObject();
                         configJson.put("taskid", processTaskVo.getId());
@@ -395,7 +395,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
          * 1、工单显示时，优先展示实质性的按钮，次要的操作按钮收起到“更多”中；如果没有任何实质性的操作按钮，则将次要按钮放出来（管理员可见）；
          * 2、工单隐藏时，仅“显示”、“删除”按钮放出来，其他实质性按钮需要等工单显示后才会展示；
          */
-       
+
         WorkcenterActionBuilder workcenterFirstActionBuilder = new WorkcenterActionBuilder();
         JSONArray workcenterFirstActionArray = workcenterFirstActionBuilder.setHandleAction(handleArray)
             .setAbortRecoverAction(isHasAbort, isHasRecover, processTaskVo).setUrgeAction(isHasUrge, processTaskVo)
@@ -515,9 +515,9 @@ public class WorkcenterServiceImpl implements WorkcenterService {
 
         // common
         JSONObject WorkcenterFieldJson = builder.setId(processTaskVo.getId().toString())
-            .setTitle(processTaskVo.getTitle()).setStatus(processTaskVo.getStatus())
-            .setPriority(processTaskVo.getPriorityUuid()).setCatalog(catalog.getUuid())
-            .setChannelType(channel.getChannelTypeUuid()).setChannel(channel.getUuid())
+            .setSerialNumber(processTaskVo.getSerialNumber()).setTitle(processTaskVo.getTitle())
+            .setStatus(processTaskVo.getStatus()).setPriority(processTaskVo.getPriorityUuid())
+            .setCatalog(catalog.getUuid()).setChannelType(channel.getChannelTypeUuid()).setChannel(channel.getUuid())
             .setProcessUuid(processTaskVo.getProcessUuid()).setConfigHash(processTaskVo.getConfigHash())
             .setContent(startContentVo).setStartTime(processTaskVo.getStartTime())
             .setEndTime(processTaskVo.getEndTime()).setOwner(processTaskVo.getOwner())
@@ -544,6 +544,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 if (!columnComponentMap.containsKey(thead.getName())) {
                     it.remove();
                 } else {
+                    thead.setDisabled(columnComponentMap.get(thead.getName()).getDisabled()? 1 : 0);
                     thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
                     thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
                     thead.setIsExport(columnComponentMap.get(thead.getName()).getIsExport() ? 1 : 0);
