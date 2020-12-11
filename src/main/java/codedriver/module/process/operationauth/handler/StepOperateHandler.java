@@ -51,7 +51,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
                     if (checkIsWorker(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
+                        if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                             // 没有主处理人时是accept
                             return true;
                         }
@@ -165,6 +165,19 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 // 有可处理步骤work
                 if (checkIsWorker(processTaskStepVo, userUuid)) {
                     return true;
+                }
+                return false;
+            });
+        
+        operationBiPredicateMap.put(ProcessTaskOperationType.CREATESUBTASK,
+            (processTaskVo, processTaskStepVo, userUuid) -> {
+                if (processTaskStepVo.getIsActive() == 1) {
+                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
+                        || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
+                        if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
+                            return true;
+                        }
+                    }
                 }
                 return false;
             });

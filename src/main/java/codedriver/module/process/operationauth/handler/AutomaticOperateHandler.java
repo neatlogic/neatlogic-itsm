@@ -22,8 +22,6 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
 
     @PostConstruct
     public void init() {
-        // operationBiPredicateMap.put(ProcessTaskOperationType.STARTPROCESS, (processTaskVo, processTaskStepVo,
-        // userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.START,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.ACTIVE,
@@ -34,16 +32,10 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
             (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.WORKCURRENTSTEP,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
-        // operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo,
-        // userUuid) -> false);
-        // operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK, (processTaskVo, processTaskStepVo,
-        // userUuid) -> false);
-        // operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo, userUuid) ->
-        // false);
         operationBiPredicateMap.put(ProcessTaskOperationType.COMMENT,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
-        // operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo, userUuid) ->
-        // false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.CREATESUBTASK,
+            (processTaskVo, processTaskStepVo, userUuid) -> false);
     }
 
     @Override
