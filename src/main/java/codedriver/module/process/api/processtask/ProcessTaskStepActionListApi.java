@@ -77,7 +77,7 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
 		List<ValueTextVo> resultList = new ArrayList<>();
 //		List<ProcessTaskOperationType> operateList = handler.getOperateList(processTaskVo, processTaskStepVo);
 		Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = new ProcessOperateManager.Builder(processTaskMapper, userMapper)
-        .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
+        .addProcessTaskStepId(processTaskId, processTaskStepId)
         .build()
         .getOperateMap();
 		for(Map.Entry<Long, Set<ProcessTaskOperationType>> entry : operationTypeSetMap.entrySet()) {

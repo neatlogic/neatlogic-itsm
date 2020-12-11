@@ -394,7 +394,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
                 builder.addOperationType(ProcessTaskOperationType.ABORTPROCESSTASK)
                     .addOperationType(ProcessTaskOperationType.RECOVERPROCESSTASK)
-                    .addOperationType(ProcessTaskOperationType.URGE).addOperationType(ProcessTaskOperationType.WORK)
+                    .addOperationType(ProcessTaskOperationType.URGE)
+                    .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP)
                     .build().getOperateMap();
 
             Set<ProcessTaskOperationType> operationTypeSet = operateTypeSetMap.get(processTaskVo.getId());
@@ -411,7 +412,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             }
             for (ProcessTaskStepVo step : stepList) {
                 Set<ProcessTaskOperationType> set = operateTypeSetMap.get(step.getId());
-                if (set.contains(ProcessTaskOperationType.WORK)) {
+                if (set.contains(ProcessTaskOperationType.WORKCURRENTSTEP)) {
                     JSONObject configJson = new JSONObject();
                     configJson.put("taskid", processTaskVo.getId());
                     configJson.put("stepid", step.getId());

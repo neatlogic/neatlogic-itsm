@@ -172,7 +172,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.WORKCURRENTSTEP, (processTaskVo, processTaskStepVo, userUuid) -> {
             // 有可处理步骤work
             if (checkIsWorker(processTaskStepVo, userUuid)) {
                 return true;

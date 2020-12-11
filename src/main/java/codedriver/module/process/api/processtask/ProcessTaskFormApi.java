@@ -146,8 +146,8 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
 
 			if(new ProcessOperateManager.Builder(processTaskMapper, userMapper)
                 .addProcessTaskStepId(processTaskVo.getCurrentProcessTaskStep().getProcessTaskId(), processTaskVo.getCurrentProcessTaskStep().getId())
-                .addOperationType(ProcessTaskOperationType.WORK)
-                .addCheckOperationType(processTaskVo.getCurrentProcessTaskStep().getId(), ProcessTaskOperationType.WORK)
+                .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP)
+                .addCheckOperationType(processTaskVo.getCurrentProcessTaskStep().getId(), ProcessTaskOperationType.WORKCURRENTSTEP)
                 .build()
                 .check()) {
 				/** 当前用户有处理权限，根据当前步骤表单属性显示设置控制表单属性展示 **/

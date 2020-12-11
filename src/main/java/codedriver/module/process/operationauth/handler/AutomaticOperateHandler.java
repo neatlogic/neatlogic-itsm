@@ -26,7 +26,7 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.ACTIVE, (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.RETREATCURRENTSTEP, (processTaskVo, processTaskStepVo, userUuid) -> false);
         operationBiPredicateMap.put(ProcessTaskOperationType.ACCEPT, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo, userUuid) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.WORKCURRENTSTEP, (processTaskVo, processTaskStepVo, userUuid) -> false);
 //        operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> false);
 //        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> false);
 //        operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> false);

@@ -146,7 +146,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 if (new ProcessOperateManager.Builder(processTaskMapper, userMapper)
                     .addProcessTaskStepId(processTaskId, processTaskStepId)
                     .addOperationType(ProcessTaskOperationType.SAVE)
-                    .addCheckOperationType(processTaskId, ProcessTaskOperationType.SAVE)
+                    .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.SAVE)
                     .build()
                     .check()) {
                     // 回复框内容和附件暂存回显
@@ -175,8 +175,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 //                handler.verifyOperationAuthoriy(processTaskId, processTaskStepId, ProcessTaskOperationType.WORK, false);
             boolean isAuthority = new ProcessOperateManager.Builder(processTaskMapper, userMapper)
             .addProcessTaskStepId(processTaskId, processTaskStepId)
-            .addOperationType(ProcessTaskOperationType.WORK)
-            .addCheckOperationType(processTaskId, ProcessTaskOperationType.WORK)
+            .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP)
+            .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.WORKCURRENTSTEP)
             .build()
             .check();
             processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap,
@@ -215,7 +215,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         if (new ProcessOperateManager.Builder(processTaskMapper, userMapper)
             .addProcessTaskStepId(processTaskId, processTaskStepId)
             .addOperationType(ProcessTaskOperationType.VIEW)
-            .addCheckOperationType(processTaskId, ProcessTaskOperationType.WORK)
+            .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.VIEW)
             .build()
             .check()) {
             // 处理人列表
@@ -315,7 +315,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             boolean hasComplete = new ProcessOperateManager.Builder(processTaskMapper, userMapper)
             .addProcessTaskStepId(processTaskId, processTaskStepId)
             .addOperationType(ProcessTaskOperationType.COMPLETE)
-            .addCheckOperationType(processTaskId, ProcessTaskOperationType.COMPLETE)
+            .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.COMPLETE)
             .build()
             .check();
             if (stepDataVo != null) {

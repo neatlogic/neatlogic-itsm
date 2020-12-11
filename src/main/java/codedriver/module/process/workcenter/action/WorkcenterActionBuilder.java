@@ -24,7 +24,7 @@ public class WorkcenterActionBuilder {
         if (CollectionUtils.isNotEmpty(handleArray)) {
             isEnable = 1;
         }
-        JSONObject actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.WORK).setSort(1)
+        JSONObject actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.WORKCURRENTSTEP).setSort(1)
             .setIsEnable(isEnable).setHandleArray(handleArray).build();
         actionArray.add(actionJson);
         return this;
