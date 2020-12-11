@@ -98,7 +98,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
         //如果存在当前登录人所在组
         String loginTeam = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_TEAM.getValue();
         if(stepTeamValueList.contains(loginTeam)){
-            List<TeamVo> teamTmpList = teamMapper.searchTeamByUserUuidAndLevel(UserContext.get().getUserUuid(true),TeamLevel.GROUP.getValue());
+            List<TeamVo> teamTmpList = teamMapper.searchTeamByUserUuidAndLevel(UserContext.get().getUserUuid(true),TeamLevel.TEAM.getValue());
             if(CollectionUtils.isNotEmpty(teamTmpList)) {
                 for(TeamVo team :teamTmpList) {
                     stepTeamValueList.add(GroupSearch.TEAM.getValuePlugin()+team.getUuid());
@@ -118,6 +118,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
                     }
                 }
             }
+            stepTeamValueList.remove(loginDepartment);
         }
         userList.addAll(stepTeamValueList);
         //获取所有组的成员
@@ -131,6 +132,6 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
             }
         }
         String value = String.join("','",userList);
-	    return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),String.format("'%s'",  value))+" and not common.step.usertypelist.type = 'start' ";
+	    return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),String.format("'%s'",  value))+" and not common.step.type = 'start' ";
 	}
 }
