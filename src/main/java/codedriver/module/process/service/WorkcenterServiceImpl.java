@@ -328,65 +328,66 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         Boolean isHasRecover = false;
         Boolean isHasUrge = false;
         JSONArray handleArray = new JSONArray();
-//        List<ProcessTaskOperationType> operationList = new ArrayList<>();
+        // List<ProcessTaskOperationType> operationList = new ArrayList<>();
         if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
             || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
             || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus))) {
             // 工单权限
-//            IProcessStepUtilHandler taskHandler =
-//                ProcessStepUtilHandlerFactory.getHandler(ProcessStepHandlerType.OMNIPOTENT.getHandler());
-//            operationList = taskHandler.getOperateList(processTaskVo, null, new ArrayList<ProcessTaskOperationType>() {
-//                private static final long serialVersionUID = 1L;
-//                {
-//                    add(ProcessTaskOperationType.ABORTPROCESSTASK);
-//                    add(ProcessTaskOperationType.RECOVERPROCESSTASK);
-//                    add(ProcessTaskOperationType.URGE);
-//                }
-//            });
-//            if (operationList.contains(ProcessTaskOperationType.ABORTPROCESSTASK)) {
-//                isHasAbort = true;
-//            }
-//            if (operationList.contains(ProcessTaskOperationType.RECOVERPROCESSTASK)) {
-//                isHasRecover = true;
-//            }
-//            if (operationList.contains(ProcessTaskOperationType.URGE)) {
-//                isHasUrge = true;
-//            }
-//            // 步骤权限
-//            for (ProcessTaskStepVo step : stepList) {
-//                if (step.getIsActive() == 1) {
-//                    step.setProcessTaskId(processTaskVo.getId());
-//                    try {
-//                        if (step.getHandler() != null) {
-//                            IProcessStepUtilHandler handler =
-//                                ProcessStepUtilHandlerFactory.getHandler(step.getHandler());
-//                            if (handler != null) {
-//                                operationList.addAll(handler.getOperateList(processTaskVo, step,
-//                                    new ArrayList<ProcessTaskOperationType>() {
-//                                        private static final long serialVersionUID = 1L;
-//                                        {
-//                                            add(ProcessTaskOperationType.WORK);
-//                                        }
-//                                    }));
-//                            }
-//                        }
-//                    } catch (Exception ex) {
-//                        logger.error(ex.getMessage(), ex);
-//                    }
-//
-//                    if (operationList.contains(ProcessTaskOperationType.WORK)) {
-//                        JSONObject configJson = new JSONObject();
-//                        configJson.put("taskid", processTaskVo.getId());
-//                        configJson.put("stepid", step.getId());
-//                        configJson.put("stepName", step.getName());
-//                        JSONObject actionJson = new JSONObject();
-//                        actionJson.put("name", "handle");
-//                        actionJson.put("text", step.getName());
-//                        actionJson.put("config", configJson);
-//                        handleArray.add(actionJson);
-//                    }
-//                }
-//            }
+            // IProcessStepUtilHandler taskHandler =
+            // ProcessStepUtilHandlerFactory.getHandler(ProcessStepHandlerType.OMNIPOTENT.getHandler());
+            // operationList = taskHandler.getOperateList(processTaskVo, null, new ArrayList<ProcessTaskOperationType>()
+            // {
+            // private static final long serialVersionUID = 1L;
+            // {
+            // add(ProcessTaskOperationType.ABORTPROCESSTASK);
+            // add(ProcessTaskOperationType.RECOVERPROCESSTASK);
+            // add(ProcessTaskOperationType.URGE);
+            // }
+            // });
+            // if (operationList.contains(ProcessTaskOperationType.ABORTPROCESSTASK)) {
+            // isHasAbort = true;
+            // }
+            // if (operationList.contains(ProcessTaskOperationType.RECOVERPROCESSTASK)) {
+            // isHasRecover = true;
+            // }
+            // if (operationList.contains(ProcessTaskOperationType.URGE)) {
+            // isHasUrge = true;
+            // }
+            // // 步骤权限
+            // for (ProcessTaskStepVo step : stepList) {
+            // if (step.getIsActive() == 1) {
+            // step.setProcessTaskId(processTaskVo.getId());
+            // try {
+            // if (step.getHandler() != null) {
+            // IProcessStepUtilHandler handler =
+            // ProcessStepUtilHandlerFactory.getHandler(step.getHandler());
+            // if (handler != null) {
+            // operationList.addAll(handler.getOperateList(processTaskVo, step,
+            // new ArrayList<ProcessTaskOperationType>() {
+            // private static final long serialVersionUID = 1L;
+            // {
+            // add(ProcessTaskOperationType.WORK);
+            // }
+            // }));
+            // }
+            // }
+            // } catch (Exception ex) {
+            // logger.error(ex.getMessage(), ex);
+            // }
+            //
+            // if (operationList.contains(ProcessTaskOperationType.WORK)) {
+            // JSONObject configJson = new JSONObject();
+            // configJson.put("taskid", processTaskVo.getId());
+            // configJson.put("stepid", step.getId());
+            // configJson.put("stepName", step.getName());
+            // JSONObject actionJson = new JSONObject();
+            // actionJson.put("name", "handle");
+            // actionJson.put("text", step.getName());
+            // actionJson.put("config", configJson);
+            // handleArray.add(actionJson);
+            // }
+            // }
+            // }
             ProcessOperateManager.Builder builder = new ProcessOperateManager.Builder(processTaskMapper, userMapper);
             for (ProcessTaskStepVo step : stepList) {
                 builder.addProcessTaskStepId(step.getProcessTaskId(), step.getId());
@@ -395,8 +396,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 builder.addOperationType(ProcessTaskOperationType.ABORTPROCESSTASK)
                     .addOperationType(ProcessTaskOperationType.RECOVERPROCESSTASK)
                     .addOperationType(ProcessTaskOperationType.URGE)
-                    .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP)
-                    .build().getOperateMap();
+                    .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP).build().getOperateMap();
 
             Set<ProcessTaskOperationType> operationTypeSet = operateTypeSetMap.get(processTaskVo.getId());
             if (CollectionUtils.isNotEmpty(operationTypeSet)) {
@@ -580,7 +580,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 if (!columnComponentMap.containsKey(thead.getName())) {
                     it.remove();
                 } else {
-                    thead.setDisabled(columnComponentMap.get(thead.getName()).getDisabled()? 1 : 0);
+                    thead.setDisabled(columnComponentMap.get(thead.getName()).getDisabled() ? 1 : 0);
                     thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
                     thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
                     thead.setIsExport(columnComponentMap.get(thead.getName()).getIsExport() ? 1 : 0);
