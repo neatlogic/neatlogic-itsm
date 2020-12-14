@@ -17,7 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -50,9 +49,6 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
     @Autowired
     private ProcessTaskService processTaskService;
 
-    @Autowired
-    private UserMapper userMapper;
-
     @Override
     public String getToken() {
         return "processtask/relation/list";
@@ -80,8 +76,7 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
         ProcessTaskRelationVo processTaskRelationVo = JSON.toJavaObject(jsonObj, ProcessTaskRelationVo.class);
         processTaskService.checkProcessTaskParamsIsLegal(processTaskRelationVo.getProcessTaskId());
 
-        new ProcessOperateManager.Builder(processTaskMapper, userMapper)
-            .addProcessTaskId(processTaskRelationVo.getProcessTaskId())
+        new ProcessOperateManager.Builder(processTaskRelationVo.getProcessTaskId())
             .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
             .addCheckOperationType(processTaskRelationVo.getProcessTaskId(), ProcessTaskOperationType.POCESSTASKVIEW)
             .withIsThrowException(true).build().check();

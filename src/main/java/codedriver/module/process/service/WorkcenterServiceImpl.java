@@ -388,7 +388,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             // }
             // }
             // }
-            ProcessOperateManager.Builder builder = new ProcessOperateManager.Builder(processTaskMapper, userMapper);
+            ProcessOperateManager.Builder builder = new ProcessOperateManager.Builder(processTaskVo.getId());
             for (ProcessTaskStepVo step : stepList) {
                 builder.addProcessTaskStepId(step.getProcessTaskId(), step.getId());
             }

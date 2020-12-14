@@ -16,7 +16,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -52,9 +51,6 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
 
-    @Autowired
-    private UserMapper userMapper;
-
     @Override
     public String getToken() {
         return "processtask/step/form";
@@ -82,7 +78,7 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo =
             processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        new ProcessOperateManager.Builder(processTaskMapper, userMapper).addProcessTaskId(processTaskId)
+        new ProcessOperateManager.Builder(processTaskId)
             .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
             .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW).withIsThrowException(true)
             .build().check();
@@ -106,7 +102,7 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
             }
 
             if (processTaskStepId != null) {
-                if (new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+                if (new ProcessOperateManager.Builder(processTaskId)
                     .addProcessTaskStepId(processTaskId, processTaskStepId)
                     .addOperationType(ProcessTaskOperationType.VIEW)
                     .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.VIEW).build().check()) {
@@ -136,7 +132,7 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
                 }
             }
 
-            if (processTaskStepId != null && new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+            if (processTaskStepId != null && new ProcessOperateManager.Builder(processTaskId)
                 .addProcessTaskStepId(processTaskId, processTaskStepId)
                 .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP)
                 .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.WORKCURRENTSTEP).build().check()) {

@@ -12,7 +12,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
@@ -48,9 +47,6 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
     @Autowired
     private ProcessTaskService processTaskService;
 
-    @Autowired
-    private UserMapper userMapper;
-
     @Override
     public String getToken() {
         return "processtask/relation/save";
@@ -76,7 +72,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         try {
-            new ProcessOperateManager.Builder(processTaskMapper, userMapper).addProcessTaskId(processTaskId)
+            new ProcessOperateManager.Builder(processTaskId)
                 .addOperationType(ProcessTaskOperationType.TRANFERREPORT)
                 .addCheckOperationType(processTaskId, ProcessTaskOperationType.TRANFERREPORT).withIsThrowException(true)
                 .build().check();

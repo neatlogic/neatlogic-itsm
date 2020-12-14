@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
@@ -42,9 +41,6 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
-
-    @Autowired
-    private UserMapper userMapper;
 
     @Autowired
     private ProcessTaskService processTaskService;
@@ -78,7 +74,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         try {
-            new ProcessOperateManager.Builder(processTaskMapper, userMapper).addProcessTaskId(processTaskId)
+            new ProcessOperateManager.Builder(processTaskId)
                 .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
                 .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW)
                 .withIsThrowException(true).build().check();
@@ -108,7 +104,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                     if (processStepUtilHandler == null) {
                         throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                     }
-                    if (!new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+                    if (!new ProcessOperateManager.Builder(processTaskStepAudit.getProcessTaskId())
                         .addProcessTaskStepId(processTaskStepAudit.getProcessTaskId(),
                             processTaskStepAudit.getProcessTaskStepId())
                         .addOperationType(ProcessTaskOperationType.VIEW)

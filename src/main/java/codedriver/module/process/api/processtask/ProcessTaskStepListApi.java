@@ -17,7 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.SystemUser;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -56,9 +55,6 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     @Autowired
     private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
-    @Autowired
-    private UserMapper userMapper;
-
     @Override
     public String getToken() {
         return "processtask/step/list";
@@ -81,7 +77,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        new ProcessOperateManager.Builder(processTaskMapper, userMapper).addProcessTaskId(processTaskId)
+        new ProcessOperateManager.Builder(processTaskId)
             .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
             .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW).withIsThrowException(true)
             .build().check();
@@ -150,7 +146,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                 if (handler == null) {
                     throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                 }
-                if (new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+                if (new ProcessOperateManager.Builder(processTaskStepVo.getProcessTaskId())
                     .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
                     .addOperationType(ProcessTaskOperationType.VIEW)
                     .addCheckOperationType(processTaskStepVo.getId(), ProcessTaskOperationType.VIEW).build().check()) {

@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.operationauth.core.ProcessOperateManager;
 import codedriver.module.process.service.ProcessTaskService;
@@ -22,12 +20,6 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskService processTaskService;
-
-    @Autowired
-    private ProcessTaskMapper processTaskMapper;
-
-    @Autowired
-    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -60,7 +52,7 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
             operationType = ProcessTaskOperationType.BACK;
         }
 
-        new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+        new ProcessOperateManager.Builder(processTaskId)
             .addProcessTaskStepId(processTaskId, processTaskStepId).addOperationType(operationType)
             .addCheckOperationType(processTaskStepId, operationType).withIsThrowException(true).build().check();
 

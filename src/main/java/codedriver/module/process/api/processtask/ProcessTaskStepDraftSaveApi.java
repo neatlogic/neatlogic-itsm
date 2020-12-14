@@ -12,7 +12,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
@@ -41,9 +40,6 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskStepDataMapper processTaskStepDataMapper;
-
-    @Autowired
-    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -85,7 +81,7 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
             throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
         }
         try {
-            new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+            new ProcessOperateManager.Builder(processTaskId)
                 .addProcessTaskStepId(processTaskId, processTaskStepId).addOperationType(ProcessTaskOperationType.SAVE)
                 .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.SAVE).withIsThrowException(true)
                 .build().check();

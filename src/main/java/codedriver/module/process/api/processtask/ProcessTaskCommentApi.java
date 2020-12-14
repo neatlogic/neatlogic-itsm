@@ -17,7 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -54,9 +53,6 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
     @Autowired
     private ProcessCommentTemplateMapper commentTemplateMapper;
 
-    @Autowired
-    private UserMapper userMapper;
-
     @Override
     public String getToken() {
         return "processtask/comment";
@@ -89,7 +85,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         processTaskMapper.getProcessTaskLockById(processTaskId);
         ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         try {
-            new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+            new ProcessOperateManager.Builder(processTaskId)
                 .addProcessTaskStepId(processTaskId, processTaskStepId)
                 .addOperationType(ProcessTaskOperationType.COMMENT)
                 .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.COMMENT).withIsThrowException(true)

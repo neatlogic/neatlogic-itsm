@@ -15,7 +15,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
@@ -62,9 +61,6 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
     @Autowired
     private ProcessTaskService processTaskService;
 
-    @Autowired
-    private UserMapper userMapper;
-
     @Override
     public String getToken() {
         return "processtask/update";
@@ -104,7 +100,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         Long startProcessTaskStepId = processTaskStepList.get(0).getId();
 
         try {
-            new ProcessOperateManager.Builder(processTaskMapper, userMapper).addProcessTaskId(processTaskId)
+            new ProcessOperateManager.Builder(processTaskId)
                 .addOperationType(ProcessTaskOperationType.UPDATE)
                 .addCheckOperationType(processTaskId, ProcessTaskOperationType.UPDATE).withIsThrowException(true)
                 .build().check();

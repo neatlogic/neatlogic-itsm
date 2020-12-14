@@ -72,7 +72,7 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
         }
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         try {
-            new ProcessOperateManager.Builder(processTaskMapper, userMapper)
+            new ProcessOperateManager.Builder(processTaskId)
                 .addProcessTaskStepId(processTaskId, processTaskStepId)
                 .addOperationType(ProcessTaskOperationType.CREATESUBTASK)
                 .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.CREATESUBTASK)
