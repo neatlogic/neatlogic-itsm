@@ -100,10 +100,8 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         Long startProcessTaskStepId = processTaskStepList.get(0).getId();
 
         try {
-            new ProcessOperateManager.Builder(processTaskId)
-                .addOperationType(ProcessTaskOperationType.UPDATE)
-                .addCheckOperationType(processTaskId, ProcessTaskOperationType.UPDATE).withIsThrowException(true)
-                .build().check();
+            new ProcessOperateManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.UPDATE).build()
+                .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }

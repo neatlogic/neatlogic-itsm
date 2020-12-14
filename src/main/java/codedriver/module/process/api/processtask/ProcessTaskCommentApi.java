@@ -85,11 +85,8 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         processTaskMapper.getProcessTaskLockById(processTaskId);
         ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         try {
-            new ProcessOperateManager.Builder(processTaskId)
-                .addProcessTaskStepId(processTaskId, processTaskStepId)
-                .addOperationType(ProcessTaskOperationType.COMMENT)
-                .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.COMMENT).withIsThrowException(true)
-                .build().check();
+            new ProcessOperateManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.COMMENT).build()
+                .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }

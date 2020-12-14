@@ -72,10 +72,8 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         try {
-            new ProcessOperateManager.Builder(processTaskId)
-                .addOperationType(ProcessTaskOperationType.TRANFERREPORT)
-                .addCheckOperationType(processTaskId, ProcessTaskOperationType.TRANFERREPORT).withIsThrowException(true)
-                .build().check();
+            new ProcessOperateManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TRANFERREPORT)
+                .build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }

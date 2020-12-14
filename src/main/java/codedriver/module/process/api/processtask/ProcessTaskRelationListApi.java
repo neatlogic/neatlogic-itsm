@@ -76,10 +76,8 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
         ProcessTaskRelationVo processTaskRelationVo = JSON.toJavaObject(jsonObj, ProcessTaskRelationVo.class);
         processTaskService.checkProcessTaskParamsIsLegal(processTaskRelationVo.getProcessTaskId());
 
-        new ProcessOperateManager.Builder(processTaskRelationVo.getProcessTaskId())
-            .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
-            .addCheckOperationType(processTaskRelationVo.getProcessTaskId(), ProcessTaskOperationType.POCESSTASKVIEW)
-            .withIsThrowException(true).build().check();
+        new ProcessOperateManager.TaskOperationChecker(processTaskRelationVo.getProcessTaskId(),
+            ProcessTaskOperationType.POCESSTASKVIEW).build().checkAndNoPermissionThrowException();
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTaskRelationList", new ArrayList<>());
         int pageCount = 0;

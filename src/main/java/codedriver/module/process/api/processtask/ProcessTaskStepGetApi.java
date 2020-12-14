@@ -104,10 +104,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-        new ProcessOperateManager.Builder(processTaskId)
-            .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
-            .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW).withIsThrowException(true)
-            .build().check();
+        new ProcessOperateManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW).build()
+            .checkAndNoPermissionThrowException();
         ProcessTaskVo processTaskVo = handler.getProcessTaskDetailById(processTaskId);
 
         if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
@@ -139,10 +137,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
             if (currentProcessTaskStepVo != null) {
                 handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                if (new ProcessOperateManager.Builder(processTaskId)
-                    .addProcessTaskStepId(processTaskId, processTaskStepId)
-                    .addOperationType(ProcessTaskOperationType.SAVE)
-                    .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.SAVE).build().check()) {
+                if (new ProcessOperateManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.SAVE)
+                    .build().check()) {
                     // 回复框内容和附件暂存回显
                     setTemporaryData(processTaskVo, currentProcessTaskStepVo);
                 }
@@ -167,10 +163,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         if (StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
             boolean isAuthority = false;
             if (processTaskStepId != null) {
-                isAuthority = new ProcessOperateManager.Builder(processTaskId)
-                    .addProcessTaskStepId(processTaskId, processTaskStepId)
-                    .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP)
-                    .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.WORKCURRENTSTEP).build().check();
+                isAuthority = new ProcessOperateManager.StepOperationChecker(processTaskStepId,
+                    ProcessTaskOperationType.WORKCURRENTSTEP).build().check();
             }
             processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap,
                 isAuthority ? 1 : 0);
@@ -205,9 +199,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
-        if (new ProcessOperateManager.Builder(processTaskId)
-            .addProcessTaskStepId(processTaskId, processTaskStepId).addOperationType(ProcessTaskOperationType.VIEW)
-            .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.VIEW).build().check()) {
+        if (new ProcessOperateManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.VIEW).build()
+            .check()) {
             // 处理人列表
             processTaskService.setProcessTaskStepUser(processTaskStepVo);
 
@@ -302,10 +295,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
                 .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
                     processTaskStepVo.getId(), processTaskStepVo.getHandler(), "system"));
-            boolean hasComplete = new ProcessOperateManager.Builder(processTaskId)
-                .addProcessTaskStepId(processTaskId, processTaskStepId)
-                .addOperationType(ProcessTaskOperationType.COMPLETE)
-                .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.COMPLETE).build().check();
+            boolean hasComplete =
+                new ProcessOperateManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.COMPLETE)
+                    .build().check();
             if (stepDataVo != null) {
                 JSONObject stepDataJson = stepDataVo.getData();
                 processTaskStepVo.setProcessTaskStepData(stepDataJson);

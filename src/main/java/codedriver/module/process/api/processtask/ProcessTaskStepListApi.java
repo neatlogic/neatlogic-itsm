@@ -77,10 +77,8 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        new ProcessOperateManager.Builder(processTaskId)
-            .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
-            .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW).withIsThrowException(true)
-            .build().check();
+        new ProcessOperateManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW).build()
+            .checkAndNoPermissionThrowException();
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
 
         Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
@@ -146,10 +144,8 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                 if (handler == null) {
                     throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                 }
-                if (new ProcessOperateManager.Builder(processTaskStepVo.getProcessTaskId())
-                    .addProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId())
-                    .addOperationType(ProcessTaskOperationType.VIEW)
-                    .addCheckOperationType(processTaskStepVo.getId(), ProcessTaskOperationType.VIEW).build().check()) {
+                if (new ProcessOperateManager.StepOperationChecker(processTaskStepVo.getId(),
+                    ProcessTaskOperationType.VIEW).build().check()) {
                     processTaskStepVo.setIsView(1);
                     getProcessTaskStepDetail(processTaskStepVo);
                 } else {

@@ -81,10 +81,8 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
             throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
         }
         try {
-            new ProcessOperateManager.Builder(processTaskId)
-                .addProcessTaskStepId(processTaskId, processTaskStepId).addOperationType(ProcessTaskOperationType.SAVE)
-                .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.SAVE).withIsThrowException(true)
-                .build().check();
+            new ProcessOperateManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.SAVE).build()
+                .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }

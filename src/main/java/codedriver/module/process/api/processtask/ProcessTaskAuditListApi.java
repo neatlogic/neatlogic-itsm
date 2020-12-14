@@ -74,10 +74,8 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         try {
-            new ProcessOperateManager.Builder(processTaskId)
-                .addOperationType(ProcessTaskOperationType.POCESSTASKVIEW)
-                .addCheckOperationType(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW)
-                .withIsThrowException(true).build().check();
+            new ProcessOperateManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW)
+                .build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
@@ -104,13 +102,8 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                     if (processStepUtilHandler == null) {
                         throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                     }
-                    if (!new ProcessOperateManager.Builder(processTaskStepAudit.getProcessTaskId())
-                        .addProcessTaskStepId(processTaskStepAudit.getProcessTaskId(),
-                            processTaskStepAudit.getProcessTaskStepId())
-                        .addOperationType(ProcessTaskOperationType.VIEW)
-                        .addCheckOperationType(processTaskStepAudit.getProcessTaskStepId(),
-                            ProcessTaskOperationType.VIEW)
-                        .build().check()) {
+                    if (!new ProcessOperateManager.StepOperationChecker(processTaskStepAudit.getProcessTaskStepId(),
+                        ProcessTaskOperationType.VIEW).build().check()) {
                         continue;
                     }
                 }

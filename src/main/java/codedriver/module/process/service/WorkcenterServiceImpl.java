@@ -388,9 +388,9 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             // }
             // }
             // }
-            ProcessOperateManager.Builder builder = new ProcessOperateManager.Builder(processTaskVo.getId());
+            ProcessOperateManager.Builder builder = new ProcessOperateManager.Builder();
             for (ProcessTaskStepVo step : stepList) {
-                builder.addProcessTaskStepId(step.getProcessTaskId(), step.getId());
+                builder.addProcessTaskStepId(step.getId());
             }
             Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
                 builder.addOperationType(ProcessTaskOperationType.ABORTPROCESSTASK)

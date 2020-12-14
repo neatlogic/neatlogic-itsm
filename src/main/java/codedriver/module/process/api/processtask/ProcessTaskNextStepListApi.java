@@ -52,9 +52,8 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
             operationType = ProcessTaskOperationType.BACK;
         }
 
-        new ProcessOperateManager.Builder(processTaskId)
-            .addProcessTaskStepId(processTaskId, processTaskStepId).addOperationType(operationType)
-            .addCheckOperationType(processTaskStepId, operationType).withIsThrowException(true).build().check();
+        new ProcessOperateManager.StepOperationChecker(processTaskStepId, operationType).build()
+            .checkAndNoPermissionThrowException();
 
         if (operationType == ProcessTaskOperationType.COMPLETE) {
             return processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepId);

@@ -63,10 +63,8 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
             ProcessTaskVo processTaskVo =
                 processTaskMapper.getProcessTaskBaseInfoById(processTaskRelationVo.getSource());
             try {
-                new ProcessOperateManager.Builder(processTaskVo.getId())
-                    .addOperationType(ProcessTaskOperationType.TRANFERREPORT)
-                    .addCheckOperationType(processTaskVo.getId(), ProcessTaskOperationType.TRANFERREPORT)
-                    .withIsThrowException(true).build().check();
+                new ProcessOperateManager.TaskOperationChecker(processTaskVo.getId(),
+                    ProcessTaskOperationType.TRANFERREPORT).build().checkAndNoPermissionThrowException();
             } catch (ProcessTaskNoPermissionException e) {
                 throw new PermissionDeniedException();
             }

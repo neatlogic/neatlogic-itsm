@@ -72,11 +72,8 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
         }
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         try {
-            new ProcessOperateManager.Builder(processTaskId)
-                .addProcessTaskStepId(processTaskId, processTaskStepId)
-                .addOperationType(ProcessTaskOperationType.CREATESUBTASK)
-                .addCheckOperationType(processTaskStepId, ProcessTaskOperationType.CREATESUBTASK)
-                .withIsThrowException(true).build().check();
+            new ProcessOperateManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.CREATESUBTASK)
+                .build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
