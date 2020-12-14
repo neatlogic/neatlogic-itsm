@@ -17,15 +17,15 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 
 @Component
-public class ProcessTaskIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
+public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
 	@Override
 	public String getName() {
-		return "id";
+		return "serialnumber";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "工单id";
+		return "工单号";
 	}
 
 	@Override

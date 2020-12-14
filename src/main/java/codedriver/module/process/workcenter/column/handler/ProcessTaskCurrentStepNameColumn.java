@@ -88,7 +88,8 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 	@Override
 	public Object getSimpleValue(Object json) {
 		if(json != null && json instanceof List){
-			List<String> list = (List<String>) json;
+			@SuppressWarnings("unchecked")
+            List<String> list = (List<String>) json;
 			if(CollectionUtils.isNotEmpty(list)){
 				return String.join(";",list);
 			}

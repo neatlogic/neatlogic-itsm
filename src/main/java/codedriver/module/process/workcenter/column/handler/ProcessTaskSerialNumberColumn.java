@@ -9,22 +9,22 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 
 @Component
-public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
+public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 
 	@Override
 	public String getName() {
-		return "id";
+		return "serialnumber";
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "工单id";
+		return "工单号";
 	}
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
-		String id = json.getString(this.getName());
-		return id;
+		String serialNumber = json.getString(this.getName());
+		return serialNumber;
 	}
 
 	@Override
@@ -54,9 +54,4 @@ public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProce
 		}
 		return null;
 	}
-	
-	@Override
-    public Boolean getDisabled() {
-        return true;
-    }
 }
