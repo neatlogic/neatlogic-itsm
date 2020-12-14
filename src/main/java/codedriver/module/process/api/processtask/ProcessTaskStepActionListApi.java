@@ -68,8 +68,8 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
             handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
         }
         List<ValueTextVo> resultList = new ArrayList<>();
-        Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap =
-            new ProcessOperateManager.Builder().addProcessTaskId(processTaskId).addProcessTaskStepId(processTaskStepId).build().getOperateMap();
+        Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = new ProcessOperateManager.Builder()
+            .addProcessTaskId(processTaskId).addProcessTaskStepId(processTaskStepId).build().getOperateMap();
         for (Map.Entry<Long, Set<ProcessTaskOperationType>> entry : operationTypeSetMap.entrySet()) {
             for (ProcessTaskOperationType operationType : entry.getValue()) {
                 String text = customButtonMap.get(operationType.getValue());
