@@ -2,6 +2,7 @@ package codedriver.module.process.api.processtask;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -11,6 +12,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
 import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyHandlerNotFoundException;
 import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyNotFoundException;
+import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberUpdateInProcessException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberUpdateThread;
@@ -23,6 +25,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
+@Transactional
 public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
@@ -52,14 +55,20 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
         if(processTaskSerialNumberPolicyVo == null) {
             throw new ProcessTaskSerialNumberPolicyNotFoundException(channelTypeUuid);
         }
-        if(processTaskSerialNumberPolicyVo != null) {
-            IProcessTaskSerialNumberPolicyHandler handler =
-                ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(processTaskSerialNumberPolicyVo.getHandler());
-            if (handler == null) {
-                throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(processTaskSerialNumberPolicyVo.getHandler());
-            }
-            CommonThreadPool.execute(new ProcessTaskSerialNumberUpdateThread(handler, channelTypeUuid));
+        if(processTaskSerialNumberPolicyVo.getStartTime() != null && processTaskSerialNumberPolicyVo.getEndTime() == null) {
+            throw new ProcessTaskSerialNumberUpdateInProcessException();
         }
+        IProcessTaskSerialNumberPolicyHandler handler =
+            ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(processTaskSerialNumberPolicyVo.getHandler());
+        if (handler == null) {
+            throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(processTaskSerialNumberPolicyVo.getHandler());
+        }
+        processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyStartTimeByChannelTypeUuid(channelTypeUuid);
+        Long serialNumberSeed = handler.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo);
+        if(serialNumberSeed != null) {
+            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(channelTypeUuid, serialNumberSeed);
+        }
+        CommonThreadPool.execute(new ProcessTaskSerialNumberUpdateThread(handler, processTaskSerialNumberPolicyVo));
         return null;
     }
 
