@@ -26,7 +26,7 @@ import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -78,7 +78,7 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo =
             processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        new ProcessOperateManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW).build()
+        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW).build()
             .checkAndNoPermissionThrowException();
         /** 检查工单是否存在表单 **/
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
@@ -100,7 +100,7 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
             }
 
             if (processTaskStepId != null) {
-                if (new ProcessOperateManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.VIEW)
+                if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_VIEW)
                     .build().check()) {
                     /** 查出暂存数据中的表单数据 **/
                     ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
@@ -128,8 +128,8 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
                 }
             }
 
-            if (processTaskStepId != null && new ProcessOperateManager.StepOperationChecker(processTaskStepId,
-                ProcessTaskOperationType.WORKCURRENTSTEP).build().check()) {
+            if (processTaskStepId != null && new ProcessAuthManager.StepOperationChecker(processTaskStepId,
+                ProcessTaskOperationType.STEP_WORK).build().check()) {
                 /** 当前用户有处理权限，根据当前步骤表单属性显示设置控制表单属性展示 **/
                 Map<String, String> formAttributeActionMap = new HashMap<>();
                 List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList =

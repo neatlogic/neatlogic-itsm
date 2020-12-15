@@ -26,7 +26,7 @@ import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStatusVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -76,8 +76,8 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
         ProcessTaskRelationVo processTaskRelationVo = JSON.toJavaObject(jsonObj, ProcessTaskRelationVo.class);
         processTaskService.checkProcessTaskParamsIsLegal(processTaskRelationVo.getProcessTaskId());
 
-        new ProcessOperateManager.TaskOperationChecker(processTaskRelationVo.getProcessTaskId(),
-            ProcessTaskOperationType.POCESSTASKVIEW).build().checkAndNoPermissionThrowException();
+        new ProcessAuthManager.TaskOperationChecker(processTaskRelationVo.getProcessTaskId(),
+            ProcessTaskOperationType.TASK_VIEW).build().checkAndNoPermissionThrowException();
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTaskRelationList", new ArrayList<>());
         int pageCount = 0;

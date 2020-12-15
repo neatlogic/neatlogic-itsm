@@ -24,7 +24,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 
 @Service
@@ -72,7 +72,7 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
         }
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         try {
-            new ProcessOperateManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.CREATESUBTASK)
+            new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.SUBTASK_CREATE)
                 .build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();

@@ -60,9 +60,9 @@ public class EndProcessUtilHandler extends ProcessStepUtilHandlerBase {
         /** 授权 **/
         JSONArray authorityArray = new JSONArray();
         ProcessTaskOperationType[] stepActions = {
-              ProcessTaskOperationType.ABORTPROCESSTASK, 
-              ProcessTaskOperationType.UPDATE, 
-              ProcessTaskOperationType.URGE, 
+              ProcessTaskOperationType.TASK_ABORT, 
+              ProcessTaskOperationType.TASK_UPDATE, 
+              ProcessTaskOperationType.TASK_URGE
         };
         for(ProcessTaskOperationType stepAction : stepActions) {
             authorityArray.add(new JSONObject() {{

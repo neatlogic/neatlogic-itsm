@@ -340,7 +340,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                             ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
                             if (processHandler != null) {
                                 JSONObject jsonParam = new JSONObject();
-                                jsonParam.put("action", ProcessTaskOperationType.BACK.getValue());
+                                jsonParam.put("action", ProcessTaskOperationType.STEP_BACK.getValue());
                                 jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
                                 currentProcessTaskStepVo.setParamObj(jsonParam);
                                 processHandler.complete(currentProcessTaskStepVo);
@@ -811,7 +811,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 processTaskMapper.replaceProcessTaskContent(contentVo);
                 if (oldContentId == null) {
                     processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId,
-                        processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.STARTPROCESS.getValue()));
+                        processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue()));
                 } else {
                     processTaskMapper.updateProcessTaskStepContentById(
                         new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
@@ -1013,7 +1013,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             if (handler != null) {
                 if (ProcessStepMode.MT == handler.getMode()) {// 手动处理节点
                     if (checkOperationAuthIsConfigured(fromStep, processTaskVo.getOwner(), processTaskVo.getReporter(),
-                        ProcessTaskOperationType.RETREATCURRENTSTEP, userUuid)) {
+                        ProcessTaskOperationType.STEP_RETREAT, userUuid)) {
                         resultList.add(fromStep);
                     }
                 } else {// 自动处理节点，继续找前置节点
@@ -1037,7 +1037,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public List<ProcessTaskStepVo> getUrgeableStepList(ProcessTaskVo processTaskVo, String userUuid) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.URGE, userUuid)) {
+        if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_URGE, userUuid)) {
             List<ProcessTaskStepVo> processTaskStepList =
                 processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
             for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
@@ -1075,7 +1075,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             /** 找到所有已激活步骤 **/
             if (stepVo.getIsActive().equals(1)) {
                 if (checkOperationAuthIsConfigured(stepVo, processTaskVo.getOwner(), processTaskVo.getReporter(),
-                    ProcessTaskOperationType.TRANSFERCURRENTSTEP, userUuid)) {
+                    ProcessTaskOperationType.STEP_TRANSFER, userUuid)) {
                     resultSet.add(stepVo);
                 }
             }

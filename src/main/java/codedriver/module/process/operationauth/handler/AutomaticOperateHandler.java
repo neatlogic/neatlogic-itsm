@@ -22,19 +22,19 @@ public class AutomaticOperateHandler extends OperationAuthHandlerBase {
 
     @PostConstruct
     public void init() {
-        operationBiPredicateMap.put(ProcessTaskOperationType.START,
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_START,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.ACTIVE,
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACTIVE,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.RETREATCURRENTSTEP,
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RETREAT,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.ACCEPT,
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACCEPT,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.WORKCURRENTSTEP,
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_WORK,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.COMMENT,
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.CREATESUBTASK,
+        operationBiPredicateMap.put(ProcessTaskOperationType.SUBTASK_CREATE,
             (processTaskVo, processTaskStepVo, userUuid) -> false);
     }
 

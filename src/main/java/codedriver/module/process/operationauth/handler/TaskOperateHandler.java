@@ -46,7 +46,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
     @PostConstruct
     public void init() {
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.POCESSTASKVIEW,
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_VIEW,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 if (userUuid.equals(processTaskVo.getOwner())) {
                     return true;
@@ -66,7 +66,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.STARTPROCESS,
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_START,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
                     if (userUuid.equals(processTaskVo.getOwner()) || userUuid.equals(processTaskVo.getReporter())) {
@@ -76,11 +76,11 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK,
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_ABORT,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 // 工单状态为进行中的才能终止
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                    if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK,
+                    if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_ABORT,
                         userUuid)) {
                         return true;
                     }
@@ -88,11 +88,11 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK,
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_RECOVER,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 // 工单状态为已终止的才能恢复
                 if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
-                    if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.ABORTPROCESSTASK,
+                    if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_ABORT,
                         userUuid)) {
                         return true;
                     }
@@ -100,25 +100,25 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.UPDATE, userUuid)) {
+                if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_UPDATE, userUuid)) {
                     return true;
                 }
             }
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_URGE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.URGE, userUuid)) {
+                if (checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_URGE, userUuid)) {
                     return true;
                 }
             }
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_WORK, (processTaskVo, processTaskStepVo, userUuid) -> {
             // 有可处理步骤work
             if (checkIsWorker(processTaskVo, userUuid)) {
                 return true;
@@ -126,7 +126,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.RETREAT, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_RETREAT, (processTaskVo, processTaskStepVo, userUuid) -> {
             // 撤销权限retreat
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
@@ -141,7 +141,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.SCORE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_SCORE, (processTaskVo, processTaskStepVo, userUuid) -> {
             // 评分权限score
             if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                 if (userUuid.equals(processTaskVo.getOwner())) {
@@ -151,7 +151,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.TRANFERREPORT,
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_TRANFERREPORT,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
                 List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
@@ -203,7 +203,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.COPYPROCESSTASK,
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_COPYPROCESSTASK,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 if (catalogService.channelIsAuthority(processTaskVo.getChannelUuid())) {
                     return true;
@@ -212,7 +212,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 }
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.REDO, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_REDO, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                 ProcessTaskScoreTemplateVo processTaskScoreTemplateVo =
                     processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskVo.getId());
@@ -233,12 +233,12 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFER, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_TRANSFER, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                 for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
                     if (processTaskStep.getIsActive().intValue() == 1) {
                         if (checkOperationAuthIsConfigured(processTaskVo, processTaskStep,
-                            ProcessTaskOperationType.TRANSFERCURRENTSTEP, userUuid)) {
+                            ProcessTaskOperationType.STEP_TRANSFER, userUuid)) {
                             return true;
                         }
                     }

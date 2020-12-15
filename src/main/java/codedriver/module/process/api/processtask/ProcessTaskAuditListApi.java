@@ -26,7 +26,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.util.FreemarkerUtil;
@@ -74,7 +74,7 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         try {
-            new ProcessOperateManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.POCESSTASKVIEW)
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW)
                 .build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
@@ -102,8 +102,8 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                     if (processStepUtilHandler == null) {
                         throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                     }
-                    if (!new ProcessOperateManager.StepOperationChecker(processTaskStepAudit.getProcessTaskStepId(),
-                        ProcessTaskOperationType.VIEW).build().check()) {
+                    if (!new ProcessAuthManager.StepOperationChecker(processTaskStepAudit.getProcessTaskStepId(),
+                        ProcessTaskOperationType.STEP_VIEW).build().check()) {
                         continue;
                     }
                 }

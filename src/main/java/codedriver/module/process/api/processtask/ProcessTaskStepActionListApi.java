@@ -18,7 +18,7 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
@@ -68,7 +68,7 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
             handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
         }
         List<ValueTextVo> resultList = new ArrayList<>();
-        Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = new ProcessOperateManager.Builder()
+        Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = new ProcessAuthManager.Builder()
             .addProcessTaskId(processTaskId).addProcessTaskStepId(processTaskStepId).build().getOperateMap();
         for (Map.Entry<Long, Set<ProcessTaskOperationType>> entry : operationTypeSetMap.entrySet()) {
             for (ProcessTaskOperationType operationType : entry.getValue()) {

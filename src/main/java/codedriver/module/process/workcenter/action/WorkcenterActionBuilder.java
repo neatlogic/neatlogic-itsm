@@ -24,7 +24,7 @@ public class WorkcenterActionBuilder {
         if (CollectionUtils.isNotEmpty(handleArray)) {
             isEnable = 1;
         }
-        JSONObject actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.WORKCURRENTSTEP).setSort(1)
+        JSONObject actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.STEP_WORK).setSort(1)
             .setIsEnable(isEnable).setHandleArray(handleArray).build();
         actionArray.add(actionJson);
         return this;
@@ -36,15 +36,15 @@ public class WorkcenterActionBuilder {
         if (isHasRecover) {
             configJson.put("taskid", processTaskVo.getId());
             configJson.put("interfaceurl", "api/rest/processtask/recover?processTaskId=" + processTaskVo.getId());
-            actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.RECOVER).setSort(2).setConfig(configJson).setIsEnable(1).build();
+            actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.STEP_RECOVER).setSort(2).setConfig(configJson).setIsEnable(1).build();
             actionArray.add(actionJson);
         } else {
             if (isHasAbort) {
                 configJson.put("taskid", processTaskVo.getId());
                 configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId=" + processTaskVo.getId());
-                actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.ABORTPROCESSTASK).setSort(2).setConfig(configJson).setIsEnable(1).build();
+                actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.TASK_ABORT).setSort(2).setConfig(configJson).setIsEnable(1).build();
             } else {
-                actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.ABORTPROCESSTASK).setSort(2).setIsEnable(0).build();
+                actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.TASK_ABORT).setSort(2).setIsEnable(0).build();
             }
         }
         actionArray.add(actionJson);
@@ -57,10 +57,10 @@ public class WorkcenterActionBuilder {
             JSONObject configJson = new JSONObject();
             configJson.put("taskid", processTaskVo.getId());
             configJson.put("interfaceurl", "api/rest/processtask/urge?processTaskId=" + processTaskVo.getId());
-            actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.URGE).setSort(3)
+            actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.TASK_URGE).setSort(3)
                 .setConfig(configJson).setIsEnable(1).build();
         } else {
-            actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.URGE).setSort(3).setIsEnable(0).build();
+            actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.TASK_URGE).setSort(3).setIsEnable(0).build();
         }
         actionArray.add(actionJson);
         return this;
@@ -69,9 +69,9 @@ public class WorkcenterActionBuilder {
     public WorkcenterActionBuilder setShowHideAction(ProcessTaskVo processTaskVo) {
         if(processTaskVo.getParamObj().getBoolean("isHasProcessTaskAuth")) {
             int isShowParam = 1;
-            ProcessTaskOperationType type = ProcessTaskOperationType.SHOW;
+            ProcessTaskOperationType type = ProcessTaskOperationType.TASK_SHOW;
             if(processTaskVo.getIsShow() == 1) {
-                type = ProcessTaskOperationType.HIDE;
+                type = ProcessTaskOperationType.TASK_HIDE;
                 isShowParam = 0;
             }
             JSONObject configJson = new JSONObject();
@@ -88,7 +88,7 @@ public class WorkcenterActionBuilder {
             JSONObject configJson = new JSONObject();
             configJson.put("taskid", processTaskVo.getId());
             configJson.put("interfaceurl", String.format("api/rest/processtask/delete?processTaskId=%s" , processTaskVo.getId()));
-            JSONObject actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.DELETE).setSort(5).setIsEnable(1).setConfig(configJson).build();
+            JSONObject actionJson = new WorkcenterBuildActionBuilder().setAction(ProcessTaskOperationType.TASK_DELETE).setSort(5).setIsEnable(1).setConfig(configJson).build();
             actionArray.add(actionJson);
         }
         return this;

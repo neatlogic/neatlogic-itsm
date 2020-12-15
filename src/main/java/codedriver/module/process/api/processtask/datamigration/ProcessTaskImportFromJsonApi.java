@@ -306,7 +306,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                             }
                                             processTaskStepContentVo.setProcessTaskId(processTask.getId());
                                             processTaskStepContentVo.setProcessTaskStepId(processTaskStep.getId());
-                                            processTaskStepContentVo.setType(ProcessTaskOperationType.COMMENT.getValue());
+                                            processTaskStepContentVo.setType(ProcessTaskOperationType.STEP_COMMENT.getValue());
                                             processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                                             jsonReader.endObject();
                                         }

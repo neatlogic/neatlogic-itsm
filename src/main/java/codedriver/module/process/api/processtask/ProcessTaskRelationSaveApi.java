@@ -22,7 +22,7 @@ import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -72,7 +72,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         try {
-            new ProcessOperateManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TRANFERREPORT)
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_TRANFERREPORT)
                 .build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();

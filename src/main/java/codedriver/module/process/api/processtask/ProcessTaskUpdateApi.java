@@ -33,7 +33,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -100,7 +100,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         Long startProcessTaskStepId = processTaskStepList.get(0).getId();
 
         try {
-            new ProcessOperateManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.UPDATE).build()
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_UPDATE).build()
                 .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
@@ -185,7 +185,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         List<ProcessTaskStepContentVo> processTaskStepContentList =
             processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
         for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-            if (ProcessTaskOperationType.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
+            if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
                 oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContent);
                 break;
             }

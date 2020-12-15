@@ -92,17 +92,17 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 			while(iterator.hasNext()) {
 				ProcessTaskStepVo processTaskStepVo = iterator.next();
 				List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-				if(ProcessTaskOperationType.ACCEPT.getValue().equals(action)) {
+				if(ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(action)) {
 					if(CollectionUtils.isNotEmpty(majorUserList)) {
 						iterator.remove();
 					}
-				}else if(ProcessTaskOperationType.START.getValue().equals(action)) {
+				}else if(ProcessTaskOperationType.STEP_START.getValue().equals(action)) {
 					if(CollectionUtils.isEmpty(majorUserList)) {
 						iterator.remove();
 					}else if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())){
 						iterator.remove();
 					}
-				}else if(ProcessTaskOperationType.COMPLETE.getValue().equals(action)) {
+				}else if(ProcessTaskOperationType.STEP_COMPLETE.getValue().equals(action)) {
 					if(CollectionUtils.isEmpty(majorUserList)) {
 						iterator.remove();
 					}else if(ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())){

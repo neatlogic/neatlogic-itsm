@@ -25,7 +25,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
 
     @PostConstruct
     public void init() {
-        operationBiPredicateMap.put(ProcessTaskOperationType.VIEW, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_VIEW, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (userUuid.equals(processTaskVo.getOwner())) {
                 return true;
             } else if (userUuid.equals(processTaskVo.getReporter())) {
@@ -33,21 +33,21 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             } else if (checkIsProcessTaskStepUser(processTaskStepVo, userUuid)) {
                 return true;
             }
-            return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.VIEW,
+            return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.STEP_VIEW,
                 userUuid);
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.TRANSFERCURRENTSTEP,
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_TRANSFER,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 // 步骤状态为已激活的才能转交
                 if (processTaskStepVo.getIsActive() == 1) {
                     return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo,
-                        ProcessTaskOperationType.TRANSFERCURRENTSTEP, userUuid);
+                        ProcessTaskOperationType.STEP_TRANSFER, userUuid);
                 }
                 return false;
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.ACCEPT, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACCEPT, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
                     if (checkIsWorker(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
@@ -61,7 +61,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.START, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_START, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
                     if (checkIsWorker(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
@@ -75,7 +75,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.COMPLETE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMPLETE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
                     || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
@@ -89,7 +89,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.BACK, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_BACK, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
                     || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
@@ -102,7 +102,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.SAVE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_SAVE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
                     || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
@@ -114,7 +114,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.COMMENT, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
                     || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
@@ -126,32 +126,32 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.PAUSE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_PAUSE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                     return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo,
-                        ProcessTaskOperationType.PAUSE, userUuid);
+                        ProcessTaskOperationType.STEP_PAUSE, userUuid);
                 }
             }
             return false;
         });
-        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVER, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RECOVER, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.HANG.getValue().equals(processTaskStepVo.getStatus())) {
                     return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo,
-                        ProcessTaskOperationType.PAUSE, userUuid);
+                        ProcessTaskOperationType.STEP_PAUSE, userUuid);
                 }
             }
             return false;
         });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.RETREATCURRENTSTEP,
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RETREAT,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 // 撤销权限retreat
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                     if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus())) {
                         if (checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo,
-                            ProcessTaskOperationType.RETREATCURRENTSTEP, userUuid)) {
+                            ProcessTaskOperationType.STEP_RETREAT, userUuid)) {
                             return checkCurrentStepIsRetractableByProcessTaskStepId(processTaskVo,
                                 processTaskStepVo.getId(), userUuid);
                         }
@@ -160,7 +160,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
 
-        operationBiPredicateMap.put(ProcessTaskOperationType.WORKCURRENTSTEP,
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_WORK,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 // 有可处理步骤work
                 if (checkIsWorker(processTaskStepVo, userUuid)) {
@@ -169,7 +169,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 return false;
             });
         
-        operationBiPredicateMap.put(ProcessTaskOperationType.CREATESUBTASK,
+        operationBiPredicateMap.put(ProcessTaskOperationType.SUBTASK_CREATE,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 if (processTaskStepVo.getIsActive() == 1) {
                     if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())

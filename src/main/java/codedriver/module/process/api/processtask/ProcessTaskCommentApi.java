@@ -26,7 +26,7 @@ import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -85,7 +85,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         processTaskMapper.getProcessTaskLockById(processTaskId);
         ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         try {
-            new ProcessOperateManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.COMMENT).build()
+            new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_COMMENT).build()
                 .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
@@ -120,7 +120,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo();
         processTaskStepContentVo.setProcessTaskId(processTaskId);
         processTaskStepContentVo.setProcessTaskStepId(processTaskStepId);
-        processTaskStepContentVo.setType(ProcessTaskOperationType.COMMENT.getValue());
+        processTaskStepContentVo.setType(ProcessTaskOperationType.STEP_COMMENT.getValue());
         if (StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(contentVo);
@@ -159,11 +159,11 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 
         JSONObject resultObj = new JSONObject();
         List<String> typeList = new ArrayList<>();
-        typeList.add(ProcessTaskOperationType.COMMENT.getValue());
-        typeList.add(ProcessTaskOperationType.COMPLETE.getValue());
-        typeList.add(ProcessTaskOperationType.BACK.getValue());
-        typeList.add(ProcessTaskOperationType.RETREAT.getValue());
-        typeList.add(ProcessTaskOperationType.TRANSFER.getValue());
+        typeList.add(ProcessTaskOperationType.STEP_COMMENT.getValue());
+        typeList.add(ProcessTaskOperationType.STEP_COMPLETE.getValue());
+        typeList.add(ProcessTaskOperationType.STEP_BACK.getValue());
+        typeList.add(ProcessTaskOperationType.STEP_RETREAT.getValue());
+        typeList.add(ProcessTaskOperationType.STEP_TRANSFER.getValue());
         resultObj.put("commentList",
             processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
         return resultObj;

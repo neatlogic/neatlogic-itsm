@@ -19,7 +19,7 @@ import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -63,8 +63,8 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
             ProcessTaskVo processTaskVo =
                 processTaskMapper.getProcessTaskBaseInfoById(processTaskRelationVo.getSource());
             try {
-                new ProcessOperateManager.TaskOperationChecker(processTaskVo.getId(),
-                    ProcessTaskOperationType.TRANFERREPORT).build().checkAndNoPermissionThrowException();
+                new ProcessAuthManager.TaskOperationChecker(processTaskVo.getId(),
+                    ProcessTaskOperationType.TASK_TRANFERREPORT).build().checkAndNoPermissionThrowException();
             } catch (ProcessTaskNoPermissionException e) {
                 throw new PermissionDeniedException();
             }

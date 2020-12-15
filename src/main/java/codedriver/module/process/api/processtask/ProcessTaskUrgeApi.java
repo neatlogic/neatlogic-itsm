@@ -74,7 +74,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 			}
 		}else {
 			try {
-	            throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.URGE.getText());
+	            throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.TASK_URGE.getText());
 	        }catch(ProcessTaskNoPermissionException e) {
 	            throw new PermissionDeniedException();
 	        }

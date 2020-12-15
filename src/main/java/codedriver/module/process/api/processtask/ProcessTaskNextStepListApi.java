@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -46,16 +46,16 @@ public class ProcessTaskNextStepListApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        ProcessTaskOperationType operationType = ProcessTaskOperationType.COMPLETE;
+        ProcessTaskOperationType operationType = ProcessTaskOperationType.STEP_COMPLETE;
         String action = jsonObj.getString("action");
-        if (ProcessTaskOperationType.BACK.getValue().equals(action)) {
-            operationType = ProcessTaskOperationType.BACK;
+        if (ProcessTaskOperationType.STEP_BACK.getValue().equals(action)) {
+            operationType = ProcessTaskOperationType.STEP_BACK;
         }
 
-        new ProcessOperateManager.StepOperationChecker(processTaskStepId, operationType).build()
+        new ProcessAuthManager.StepOperationChecker(processTaskStepId, operationType).build()
             .checkAndNoPermissionThrowException();
 
-        if (operationType == ProcessTaskOperationType.COMPLETE) {
+        if (operationType == ProcessTaskOperationType.STEP_COMPLETE) {
             return processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepId);
         } else {
             return processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepId);

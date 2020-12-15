@@ -58,7 +58,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
-import codedriver.framework.process.operationauth.core.ProcessOperateManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -388,31 +388,31 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             // }
             // }
             // }
-            ProcessOperateManager.Builder builder = new ProcessOperateManager.Builder();
+            ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
             for (ProcessTaskStepVo step : stepList) {
                 builder.addProcessTaskStepId(step.getId());
             }
             Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
-                builder.addOperationType(ProcessTaskOperationType.ABORTPROCESSTASK)
-                    .addOperationType(ProcessTaskOperationType.RECOVERPROCESSTASK)
-                    .addOperationType(ProcessTaskOperationType.URGE)
-                    .addOperationType(ProcessTaskOperationType.WORKCURRENTSTEP).build().getOperateMap();
+                builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
+                    .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
+                    .addOperationType(ProcessTaskOperationType.TASK_URGE)
+                    .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
 
             Set<ProcessTaskOperationType> operationTypeSet = operateTypeSetMap.get(processTaskVo.getId());
             if (CollectionUtils.isNotEmpty(operationTypeSet)) {
-                if (operationTypeSet.contains(ProcessTaskOperationType.ABORTPROCESSTASK)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_ABORT)) {
                     isHasAbort = true;
                 }
-                if (operationTypeSet.contains(ProcessTaskOperationType.RECOVERPROCESSTASK)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_RECOVER)) {
                     isHasRecover = true;
                 }
-                if (operationTypeSet.contains(ProcessTaskOperationType.URGE)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_URGE)) {
                     isHasUrge = true;
                 }
             }
             for (ProcessTaskStepVo step : stepList) {
                 Set<ProcessTaskOperationType> set = operateTypeSetMap.get(step.getId());
-                if (set.contains(ProcessTaskOperationType.WORKCURRENTSTEP)) {
+                if (set.contains(ProcessTaskOperationType.STEP_WORK)) {
                     JSONObject configJson = new JSONObject();
                     configJson.put("taskid", processTaskVo.getId());
                     configJson.put("stepid", step.getId());
@@ -448,7 +448,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             workcenterSecondActionBuilder.setShowHideAction(processTaskVo).setDeleteAction(processTaskVo).build();
         for (Object workcenterSecondActionObj : workcenterSecondActionJsonArray) {
             JSONObject workcenterSecondActionJson = JSONObject.parseObject(workcenterSecondActionObj.toString());
-            if (ProcessTaskOperationType.SHOW.getValue().equals(workcenterSecondActionJson.getString("name"))) {
+            if (ProcessTaskOperationType.TASK_SHOW.getValue().equals(workcenterSecondActionJson.getString("name"))) {
                 isNeedFirstAction = false;
             }
         }
@@ -497,7 +497,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             List<ProcessTaskStepContentVo> processTaskStepContentList =
                 processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-                if (ProcessTaskOperationType.STARTPROCESS.getValue().equals(processTaskStepContent.getType())) {
+                if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
                     startContentVo =
                         selectContentByHashMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
                     break;
@@ -506,7 +506,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         }
         /** 获取转交记录 **/
         List<ProcessTaskStepAuditVo> transferAuditList = processTaskMapper.getProcessTaskAuditList(
-            new ProcessTaskStepAuditVo(processTaskVo.getId(), ProcessTaskOperationType.TRANSFER.getValue()));
+            new ProcessTaskStepAuditVo(processTaskVo.getId(), ProcessTaskOperationType.TASK_TRANSFER.getValue()));
 
         /** 获取工单当前步骤 **/
         @SuppressWarnings("serial")
