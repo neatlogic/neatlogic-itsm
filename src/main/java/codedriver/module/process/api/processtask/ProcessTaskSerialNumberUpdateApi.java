@@ -30,7 +30,7 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
-    
+
     @Override
     public String getToken() {
         return "processtask/serialnumber/update";
@@ -51,22 +51,27 @@ public class ProcessTaskSerialNumberUpdateApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String channelTypeUuid = jsonObj.getString("channelTypeUuid");
-        ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(channelTypeUuid);
-        if(processTaskSerialNumberPolicyVo == null) {
+        ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo =
+            processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(channelTypeUuid);
+        if (processTaskSerialNumberPolicyVo == null) {
             throw new ProcessTaskSerialNumberPolicyNotFoundException(channelTypeUuid);
         }
-        if(processTaskSerialNumberPolicyVo.getStartTime() != null && processTaskSerialNumberPolicyVo.getEndTime() == null) {
+        if (processTaskSerialNumberPolicyVo.getStartTime() != null
+            && processTaskSerialNumberPolicyVo.getEndTime() == null) {
             throw new ProcessTaskSerialNumberUpdateInProcessException();
         }
         IProcessTaskSerialNumberPolicyHandler handler =
             ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(processTaskSerialNumberPolicyVo.getHandler());
         if (handler == null) {
-            throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(processTaskSerialNumberPolicyVo.getHandler());
+            throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(
+                processTaskSerialNumberPolicyVo.getHandler());
         }
         processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyStartTimeByChannelTypeUuid(channelTypeUuid);
-        Long serialNumberSeed = handler.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo);
-        if(serialNumberSeed != null) {
-            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(channelTypeUuid, serialNumberSeed);
+        Long serialNumberSeed =
+            handler.calculateSerialNumberSeedAfterBatchUpdateHistoryProcessTask(processTaskSerialNumberPolicyVo);
+        if (serialNumberSeed != null) {
+            processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicySerialNumberSeedByChannelTypeUuid(
+                channelTypeUuid, serialNumberSeed);
         }
         CommonThreadPool.execute(new ProcessTaskSerialNumberUpdateThread(handler, processTaskSerialNumberPolicyVo));
         return null;
