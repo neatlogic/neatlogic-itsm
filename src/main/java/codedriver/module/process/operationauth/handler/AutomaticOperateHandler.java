@@ -10,36 +10,42 @@ import org.springframework.stereotype.Component;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.operationauth.core.IOperationAuthHandler;
+import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
 
 @Component
-public class AutomaticOperateHandler implements IOperationAuthHandler {
+public class AutomaticOperateHandler extends OperationAuthHandlerBase {
 
-    private final Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
-    
+    private final Map<ProcessTaskOperationType,
+        TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
+
     @PostConstruct
     public void init() {
-        operationBiPredicateMap.put(ProcessTaskOperationType.STARTPROCESS, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.START, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.ACTIVE, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.RETREATCURRENTSTEP, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.ACCEPT, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.WORK, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.ABORTPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.RECOVERPROCESSTASK, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.COMMENT, (processTaskVo, processTaskStepVo, userUuid) -> false);
-        operationBiPredicateMap.put(ProcessTaskOperationType.URGE, (processTaskVo, processTaskStepVo, userUuid) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_START,
+            (processTaskVo, processTaskStepVo, userUuid) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACTIVE,
+            (processTaskVo, processTaskStepVo, userUuid) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RETREAT,
+            (processTaskVo, processTaskStepVo, userUuid) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACCEPT,
+            (processTaskVo, processTaskStepVo, userUuid) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_WORK,
+            (processTaskVo, processTaskStepVo, userUuid) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT,
+            (processTaskVo, processTaskStepVo, userUuid) -> false);
+        operationBiPredicateMap.put(ProcessTaskOperationType.SUBTASK_CREATE,
+            (processTaskVo, processTaskStepVo, userUuid) -> false);
     }
 
     @Override
-    public OperationAuthHandlerType getHandler() {
-        return OperationAuthHandlerType.AUTOMATIC;
+    public String getHandler() {
+        return OperationAuthHandlerType.AUTOMATIC.getValue();
     }
+
     @Override
-    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> getOperationBiPredicateMap() {
+    public Map<ProcessTaskOperationType, TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>>
+        getOperationBiPredicateMap() {
         return operationBiPredicateMap;
     }
 

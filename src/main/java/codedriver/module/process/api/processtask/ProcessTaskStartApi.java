@@ -63,7 +63,7 @@ public class ProcessTaskStartApi extends PrivateApiComponentBase {
 		}
 		String action = jsonObj.getString("action");
         try {
-            if(ProcessTaskOperationType.ACCEPT.getValue().equals(action)) {
+            if(ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(action)) {
                 handler.accept(processTaskStepVo);
             }
             handler.start(processTaskStepVo);

@@ -26,7 +26,7 @@ import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskStatusVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -42,10 +42,10 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
-    
+
     @Autowired
     private ChannelMapper channelMapper;
-    
+
     @Autowired
     private ProcessTaskService processTaskService;
 
@@ -64,50 +64,52 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({
-        @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
         @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
         @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-        @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
-    })
-    @Output({
-        @Param(name = "processTaskRelationList", explode = ProcessTaskRelationVo[].class, desc = "关联工单列表"),
-        @Param(explode = BasePageVo.class)
-    })
+        @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")})
+    @Output({@Param(name = "processTaskRelationList", explode = ProcessTaskRelationVo[].class, desc = "关联工单列表"),
+        @Param(explode = BasePageVo.class)})
     @Description(desc = "查询关联工单列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessTaskRelationVo processTaskRelationVo = JSON.toJavaObject(jsonObj, ProcessTaskRelationVo.class);
-        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskRelationVo.getProcessTaskId());
-        ProcessStepUtilHandlerFactory.getHandler().verifyOperationAuthoriy(processTaskVo, ProcessTaskOperationType.POCESSTASKVIEW, true);
+        processTaskService.checkProcessTaskParamsIsLegal(processTaskRelationVo.getProcessTaskId());
+
+        new ProcessAuthManager.TaskOperationChecker(processTaskRelationVo.getProcessTaskId(),
+            ProcessTaskOperationType.TASK_VIEW).build().checkAndNoPermissionThrowException();
         JSONObject resultObj = new JSONObject();
         resultObj.put("processTaskRelationList", new ArrayList<>());
         int pageCount = 0;
-        if(processTaskRelationVo.getNeedPage()) {
-            int rowNum = processTaskMapper.getProcessTaskRelationCountByProcessTaskId(processTaskRelationVo.getProcessTaskId());
+        if (processTaskRelationVo.getNeedPage()) {
+            int rowNum =
+                processTaskMapper.getProcessTaskRelationCountByProcessTaskId(processTaskRelationVo.getProcessTaskId());
             pageCount = PageUtil.getPageCount(rowNum, processTaskRelationVo.getPageSize());
             resultObj.put("currentPage", processTaskRelationVo.getCurrentPage());
             resultObj.put("pageSize", processTaskRelationVo.getPageSize());
             resultObj.put("pageCount", pageCount);
-            resultObj.put("rowNum", rowNum);           
+            resultObj.put("rowNum", rowNum);
         }
-        if(!processTaskRelationVo.getNeedPage() || processTaskRelationVo.getCurrentPage() <= pageCount) {
+        if (!processTaskRelationVo.getNeedPage() || processTaskRelationVo.getCurrentPage() <= pageCount) {
             Set<Long> processTaskIdSet = new HashSet<>();
-            List<ProcessTaskRelationVo> processTaskRelationList = processTaskMapper.getProcessTaskRelationList(processTaskRelationVo);            
-            for(ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
+            List<ProcessTaskRelationVo> processTaskRelationList =
+                processTaskMapper.getProcessTaskRelationList(processTaskRelationVo);
+            for (ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
                 processTaskIdSet.add(processTaskRelation.getProcessTaskId());
-                ChannelTypeRelationVo channelTypeRelationVo = channelMapper.getChannelTypeRelationById(processTaskRelation.getChannelTypeRelationId());
-                if(channelTypeRelationVo != null) {
+                ChannelTypeRelationVo channelTypeRelationVo =
+                    channelMapper.getChannelTypeRelationById(processTaskRelation.getChannelTypeRelationId());
+                if (channelTypeRelationVo != null) {
                     processTaskRelation.setChannelTypeRelationName(channelTypeRelationVo.getName());
                 }
             }
             Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
-            List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndIdList(null, new ArrayList<>(processTaskIdSet), null, null);
-            for(ProcessTaskVo processTask : processTaskList) {
+            List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndIdList(null,
+                new ArrayList<>(processTaskIdSet), null, null);
+            for (ProcessTaskVo processTask : processTaskList) {
                 ChannelVo channelVo = channelMapper.getChannelByUuid(processTask.getChannelUuid());
-                if(channelVo != null && StringUtils.isNotBlank(channelVo.getChannelTypeUuid())) {
+                if (channelVo != null && StringUtils.isNotBlank(channelVo.getChannelTypeUuid())) {
                     ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
-                    if(channelTypeVo == null) {
+                    if (channelTypeVo == null) {
                         channelTypeVo = new ChannelTypeVo();
                         channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
                     }
@@ -115,9 +117,9 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                 }
                 processTaskMap.put(processTask.getId(), processTask);
             }
-            for(ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
+            for (ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
                 ProcessTaskVo processTask = processTaskMap.get(processTaskRelation.getProcessTaskId());
-                if(processTask != null) {
+                if (processTask != null) {
                     processTaskRelation.setTilte(processTask.getTitle());
                     processTaskRelation.setStatusVo(new ProcessTaskStatusVo(processTask.getStatus()));
                     processTaskRelation.setChannelTypeVo(new ChannelTypeVo(processTask.getChannelType()));
