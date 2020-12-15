@@ -412,7 +412,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             }
             for (ProcessTaskStepVo step : stepList) {
                 Set<ProcessTaskOperationType> set = operateTypeSetMap.get(step.getId());
-                if (set.contains(ProcessTaskOperationType.STEP_WORK)) {
+                if (set != null && set.contains(ProcessTaskOperationType.STEP_WORK)) {
                     JSONObject configJson = new JSONObject();
                     configJson.put("taskid", processTaskVo.getId());
                     configJson.put("stepid", step.getId());
