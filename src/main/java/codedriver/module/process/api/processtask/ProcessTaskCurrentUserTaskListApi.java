@@ -155,6 +155,7 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
 					ProcessTaskVo processTask = processTaskMap.get(processTaskStep.getProcessTaskId());
 					task.put("processTaskId", processTaskStep.getProcessTaskId());
 					task.put("title", processTask.getTitle());
+					task.put("serialNumber", processTask.getSerialNumber());
 					task.put("processTaskStepId", processTaskStep.getId());
 					task.put("stepName", processTaskStep.getName());
 //					String config = processTaskMapper.getProcessTaskStepConfigByHash(processTaskStep.getConfigHash());
