@@ -53,8 +53,7 @@ public class EsProcessTaskSyncApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({
-        @Param(name = "fromDate", type = ApiParamType.STRING, desc = "创建时间>=fromDate"),
+    @Input({@Param(name = "fromDate", type = ApiParamType.STRING, desc = "创建时间>=fromDate"),
         @Param(name = "toDate", type = ApiParamType.STRING, desc = "创建时间<toDate"),
         @Param(name = "documentIdList", type = ApiParamType.JSONARRAY, desc = "documentId数组"),
         @Param(name = "action", type = ApiParamType.STRING, desc = "delete,refresh")})
@@ -77,49 +76,51 @@ public class EsProcessTaskSyncApi extends PrivateApiComponentBase {
         if (action == null) {
             action = "refresh";
         }
-       //删除符合条件es数据
+        // 删除符合条件es数据
         String whereSql = StringUtils.EMPTY;
-        if(StringUtils.isNotBlank(fromDate)) {
-            whereSql = String.format(" where common.starttime >= '%s'",fromDate);
+        if (StringUtils.isNotBlank(fromDate)) {
+            whereSql = String.format(" where common.starttime >= '%s'", fromDate);
         }
-        if(StringUtils.isNotBlank(toDate)) {
-            if(StringUtils.isBlank(whereSql)) {
-                whereSql = String.format(" where common.starttime < '%s'",toDate);
-            }else {
-                whereSql = whereSql + String.format(" and common.starttime < '%s'",toDate);
+        if (StringUtils.isNotBlank(toDate)) {
+            if (StringUtils.isBlank(whereSql)) {
+                whereSql = String.format(" where common.starttime < '%s'", toDate);
+            } else {
+                whereSql = whereSql + String.format(" and common.starttime < '%s'", toDate);
             }
         }
-        
-        if(CollectionUtils.isNotEmpty(taskIdList)) {
-            if(StringUtils.isBlank(whereSql)) {
+
+        if (CollectionUtils.isNotEmpty(taskIdList)) {
+            if (StringUtils.isBlank(whereSql)) {
                 whereSql = String.format(" where common.id contains any ( '%s' )", String.join("','", taskIdStrList));
-            }else {
-                whereSql = whereSql + String.format(" and common.id contains any ( '%s' )", String.join("','", taskIdStrList));
+            } else {
+                whereSql =
+                    whereSql + String.format(" and common.id contains any ( '%s' )", String.join("','", taskIdStrList));
             }
         }
-        String esSql = String.format("select common.id from %s %s limit 0,20 ",TenantContext.get().getTenantUuid(),whereSql);
-        MultiAttrsObjectPool  objectPool = ElasticSearchPoolManager.getObjectPool(ESHandler.PROCESSTASK.getValue());
+        String esSql =
+            String.format("select common.id from %s %s limit 0,20 ", TenantContext.get().getTenantUuid(), whereSql);
+        MultiAttrsObjectPool objectPool = ElasticSearchPoolManager.getObjectPool(ESHandler.PROCESSTASK.getValue());
         objectPool.checkout(TenantContext.get().getTenantUuid());
         QueryParser parser = objectPool.createQueryParser();
         MultiAttrsQuery query = parser.parse(esSql);
         QueryResultSet resultSet = query.iterate();
-        while (resultSet.hasMoreResults()) { 
-            QueryResult result = resultSet.fetchResult(); 
-            if(!result.getData().isEmpty()) { 
-                for (MultiAttrsObject el : result.getData()) { 
+        while (resultSet.hasMoreResults()) {
+            QueryResult result = resultSet.fetchResult();
+            if (!result.getData().isEmpty()) {
+                for (MultiAttrsObject el : result.getData()) {
                     objectPool.delete(el.getId());
                 }
             }
-        } 
-        //如果需要更新
+        }
+        // 如果需要更新
         if (action.equals("refresh")) {
             List<ProcessTaskVo> processTaskVoList =
-                processTaskMapper.getProcessTaskListByKeywordAndIdList(null, taskIdList, fromDate, toDate);
+                processTaskMapper.getProcessTaskListByIdListAndStartTime(taskIdList, fromDate, toDate);
             for (ProcessTaskVo processTaskVo : processTaskVoList) {
                 ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).save(processTaskVo.getId());
             }
         }
-        
+
         return null;
     }
 }

@@ -103,8 +103,8 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                 }
             }
             Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
-            List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndIdList(null,
-                new ArrayList<>(processTaskIdSet), null, null);
+            List<ProcessTaskVo> processTaskList =
+                processTaskMapper.getProcessTaskListByIdListAndStartTime(new ArrayList<>(processTaskIdSet), null, null);
             for (ProcessTaskVo processTask : processTaskList) {
                 ChannelVo channelVo = channelMapper.getChannelByUuid(processTask.getChannelUuid());
                 if (channelVo != null && StringUtils.isNotBlank(channelVo.getChannelTypeUuid())) {
