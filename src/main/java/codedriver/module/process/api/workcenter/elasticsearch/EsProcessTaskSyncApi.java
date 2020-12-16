@@ -114,7 +114,7 @@ public class EsProcessTaskSyncApi extends PrivateApiComponentBase {
         //如果需要更新
         if (action.equals("refresh")) {
             List<ProcessTaskVo> processTaskVoList =
-                processTaskMapper.getProcessTaskListByKeywordAndIdList(null, taskIdList, fromDate, toDate);
+                processTaskMapper.getProcessTaskListByIdListAndStartTime(taskIdList, fromDate, toDate);
             for (ProcessTaskVo processTaskVo : processTaskVoList) {
                 ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).save(processTaskVo.getId());
             }
