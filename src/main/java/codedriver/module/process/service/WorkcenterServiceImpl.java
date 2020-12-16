@@ -548,6 +548,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                     thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
                     thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
                     thead.setIsExport(columnComponentMap.get(thead.getName()).getIsExport() ? 1 : 0);
+                    thead.setIsShow(columnComponentMap.get(thead.getName()).getIsShow() ? 1 : 0);
                 }
             } else {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();

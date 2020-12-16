@@ -78,4 +78,9 @@ public class ProcessTaskScoreColumn extends ProcessTaskColumnBase implements IPr
 	public Object getSimpleValue(Object json) {
 		return null;
 	}
+	
+	@Override
+	public Boolean getMyIsShow() {
+        return false;
+    }
 }
