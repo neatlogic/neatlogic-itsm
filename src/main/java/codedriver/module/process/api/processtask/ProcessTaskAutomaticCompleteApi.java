@@ -71,7 +71,7 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 		    throw new ProcessTaskStepMustBeAutomaticException();
 		}
 		jsonObj.put("processTaskId", processTaskStepVo.getProcessTaskId());
-		if(action.equals(ProcessTaskOperationType.BACK.getValue())) {
+		if(action.equals(ProcessTaskOperationType.STEP_BACK.getValue())) {
 			flowDirection = ProcessFlowDirection.BACKWARD.getValue();
 		}
 		/** 不允许多个后续步骤 **/
