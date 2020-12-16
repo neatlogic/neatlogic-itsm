@@ -33,137 +33,144 @@ import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundExc
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
-	
-	@Autowired
-	private TeamMapper teamMapper;
-	
-	@Autowired
-	private WorktimeMapper worktimeMapper;
-	
-	@Autowired
-	private ChannelMapper channelMapper;
-	
-	@Override
-	public String getToken() {
-		return "processtask/currentuser/task/list";
-	}
+    @Autowired
+    private ProcessTaskMapper processTaskMapper;
 
-	@Override
-	public String getName() {
-		return "当前用户任务列表接口";
-	}
+    @Autowired
+    private TeamMapper teamMapper;
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Autowired
+    private WorktimeMapper worktimeMapper;
 
-	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字搜索"),
-		@Param(name = "currentProcessTaskId", type = ApiParamType.LONG, isRequired = true, desc = "当前工单id"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
-	})
-	@Output({
-		@Param(name = "taskList", type = ApiParamType.JSONARRAY, desc = "任务列表"),
-		@Param(explode = BasePageVo.class)
-	})
-	@Description(desc = "当前用户任务列表接口")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long currentProcessTaskId = jsonObj.getLong("currentProcessTaskId");
-		ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskId);
-		if(processTaskVo == null) {
-			throw new ProcessTaskNotFoundException(currentProcessTaskId.toString());
-		}
-		JSONObject resultObj = new JSONObject();
-		ProcessTaskStepWorkerVo searchVo = JSON.toJavaObject(jsonObj, ProcessTaskStepWorkerVo.class);
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-		searchVo.setProcessTaskId(currentProcessTaskId);
-		searchVo.setUserUuid(UserContext.get().getUserUuid(true));
-		searchVo.setTeamUuidList(teamUuidList);
-		searchVo.setRoleUuidList(UserContext.get().getRoleUuidList());
-		int rowNum = processTaskMapper.getProcessTaskStepWorkerCountByProcessTaskIdUserUuidTeamUuidListRoleUuidList(searchVo);
-		if(rowNum > 0) {
-		    int pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
-		    if(!searchVo.getNeedPage() || searchVo.getCurrentPage() <= pageCount) {
-		        if(searchVo.getNeedPage()) {
-		            resultObj.put("currentPage", searchVo.getCurrentPage());
-		            resultObj.put("pageSize", searchVo.getPageSize());
-		            resultObj.put("rowNum", rowNum);
-		            resultObj.put("pageCount", pageCount);
-		        }
-		        List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper.getProcessTaskStepWorkerListByProcessTaskIdUserUuidTeamUuidListRoleUuidList(searchVo);
-	            Set<Long> processTaskIdSet = new HashSet<>();
-	            List<Long> processTaskStepIdList = new ArrayList<>();
-	            for(ProcessTaskStepWorkerVo processTaskStepWorker : processTaskStepWorkerList) {
-	                Long processTaskId = processTaskStepWorker.getProcessTaskId();
-	                processTaskIdSet.add(processTaskId);
-	                processTaskStepIdList.add(processTaskStepWorker.getProcessTaskStepId());
-	            }
+    @Autowired
+    private ChannelMapper channelMapper;
 
-	            List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdListAndStartTime(new ArrayList<>(processTaskIdSet),null,null);
-	            Map<Long, ProcessTaskVo> processTaskMap = processTaskList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
-                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
+    @Override
+    public String getToken() {
+        return "processtask/currentuser/task/list";
+    }
+
+    @Override
+    public String getName() {
+        return "当前用户任务列表接口";
+    }
+
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字搜索"),
+        @Param(name = "currentProcessTaskId", type = ApiParamType.LONG, isRequired = true, desc = "当前工单id"),
+        @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
+        @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
+        @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")})
+    @Output({@Param(name = "taskList", type = ApiParamType.JSONARRAY, desc = "任务列表"),
+        @Param(explode = BasePageVo.class)})
+    @Description(desc = "当前用户任务列表接口")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        Long currentProcessTaskId = jsonObj.getLong("currentProcessTaskId");
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskId);
+        if (processTaskVo == null) {
+            throw new ProcessTaskNotFoundException(currentProcessTaskId.toString());
+        }
+        JSONObject resultObj = new JSONObject();
+        ProcessTaskStepWorkerVo searchVo = JSON.toJavaObject(jsonObj, ProcessTaskStepWorkerVo.class);
+        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+        searchVo.setProcessTaskId(currentProcessTaskId);
+        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+        searchVo.setTeamUuidList(teamUuidList);
+        searchVo.setRoleUuidList(UserContext.get().getRoleUuidList());
+        int rowNum =
+            processTaskMapper.getProcessTaskStepWorkerCountByProcessTaskIdUserUuidTeamUuidListRoleUuidList(searchVo);
+        if (rowNum > 0) {
+            int pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
+            if (!searchVo.getNeedPage() || searchVo.getCurrentPage() <= pageCount) {
+                if (searchVo.getNeedPage()) {
+                    resultObj.put("currentPage", searchVo.getCurrentPage());
+                    resultObj.put("pageSize", searchVo.getPageSize());
+                    resultObj.put("rowNum", rowNum);
+                    resultObj.put("pageCount", pageCount);
+                }
+                List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = processTaskMapper
+                    .getProcessTaskStepWorkerListByProcessTaskIdUserUuidTeamUuidListRoleUuidList(searchVo);
+                Set<Long> processTaskIdSet = new HashSet<>();
+                List<Long> processTaskStepIdList = new ArrayList<>();
+                for (ProcessTaskStepWorkerVo processTaskStepWorker : processTaskStepWorkerList) {
+                    Long processTaskId = processTaskStepWorker.getProcessTaskId();
+                    processTaskIdSet.add(processTaskId);
+                    processTaskStepIdList.add(processTaskStepWorker.getProcessTaskStepId());
+                }
+
+                List<ProcessTaskVo> processTaskList = processTaskMapper
+                    .getProcessTaskListByIdListAndStartTime(new ArrayList<>(processTaskIdSet), null, null);
+                Map<Long, ProcessTaskVo> processTaskMap =
+                    processTaskList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
+                List<ProcessTaskStepVo> processTaskStepList =
+                    processTaskMapper.getProcessTaskStepListByIdList(processTaskStepIdList);
                 processTaskStepList.sort((e1, e2) -> -e1.getId().compareTo(e2.getId()));
                 Map<Long, ProcessTaskSlaTimeVo> stepSlaTimeMap = new HashMap<>();
-                List<ProcessTaskSlaTimeVo> processTaskSlaTimeList = processTaskMapper.getProcessTaskSlaTimeByProcessTaskStepIdList(processTaskStepIdList);
-                for(ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
-                    if(!stepSlaTimeMap.containsKey(processTaskSlaTimeVo.getProcessTaskStepId())) {
+                List<ProcessTaskSlaTimeVo> processTaskSlaTimeList =
+                    processTaskMapper.getProcessTaskSlaTimeByProcessTaskStepIdList(processTaskStepIdList);
+                for (ProcessTaskSlaTimeVo processTaskSlaTimeVo : processTaskSlaTimeList) {
+                    if (!stepSlaTimeMap.containsKey(processTaskSlaTimeVo.getProcessTaskStepId())) {
                         stepSlaTimeMap.put(processTaskSlaTimeVo.getProcessTaskStepId(), processTaskSlaTimeVo);
                     }
                 }
                 JSONArray taskList = new JSONArray();
-                for(ProcessTaskStepVo processTaskStep : processTaskStepList) {
+                for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
                     JSONObject task = new JSONObject();
                     ProcessTaskVo processTask = processTaskMap.get(processTaskStep.getProcessTaskId());
                     ChannelVo channelVo = channelMapper.getChannelByUuid(processTask.getChannelUuid());
-                    if(channelVo != null) {
-                        ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
-                        if(channelTypeVo != null) {
+                    if (channelVo != null) {
+                        ChannelTypeVo channelTypeVo =
+                            channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+                        if (channelTypeVo != null) {
                             task.put("prefix", channelTypeVo.getPrefix());
                         }
-                    }                    
+                    }
                     task.put("processTaskId", processTaskStep.getProcessTaskId());
                     task.put("title", processTask.getTitle());
                     task.put("serialNumber", processTask.getSerialNumber());
                     task.put("processTaskStepId", processTaskStep.getId());
                     task.put("stepName", processTaskStep.getName());
                     task.put("statusVo", processTaskStep.getStatusVo());
-                    
+
                     ProcessTaskSlaTimeVo processTaskSlaTimeVo = stepSlaTimeMap.get(processTaskStep.getId());
-                    if(processTaskSlaTimeVo != null) {
-                        if(processTaskSlaTimeVo.getExpireTime() != null) {
+                    if (processTaskSlaTimeVo != null) {
+                        if (processTaskSlaTimeVo.getExpireTime() != null) {
                             long timeLeft = 0L;
                             long nowTime = System.currentTimeMillis();
                             long expireTime = processTaskSlaTimeVo.getExpireTime().getTime();
-                            if(nowTime < expireTime) {
-                                timeLeft = worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), nowTime, expireTime);
-                            }else if(nowTime > expireTime) {
-                                timeLeft = -worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), expireTime, nowTime);
+                            if (nowTime < expireTime) {
+                                timeLeft = worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), nowTime,
+                                    expireTime);
+                            } else if (nowTime > expireTime) {
+                                timeLeft = -worktimeMapper.calculateCostTime(processTask.getWorktimeUuid(), expireTime,
+                                    nowTime);
                             }
                             processTaskSlaTimeVo.setTimeLeft(timeLeft);
                         }
-                        if(processTaskSlaTimeVo.getRealExpireTime() != null) {
-                            long realTimeLeft = processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
+                        if (processTaskSlaTimeVo.getRealExpireTime() != null) {
+                            long realTimeLeft =
+                                processTaskSlaTimeVo.getExpireTime().getTime() - System.currentTimeMillis();
                             processTaskSlaTimeVo.setRealTimeLeft(realTimeLeft);
                         }
                         task.put("slaTimeVo", processTaskSlaTimeVo);
                     }
                     taskList.add(task);
                 }
-	            
-	            resultObj.put("taskList", taskList);
-		    }
-		}				
-		return resultObj;
-	}
+
+                resultObj.put("taskList", taskList);
+            }
+        }
+        return resultObj;
+    }
 
 }
