@@ -3,6 +3,7 @@ package codedriver.module.process.service;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -107,24 +108,24 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         JSONArray sortColumnList = new JSONArray();
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         // 搜索es
-        // Date time1 = new Date();
+        Date time1 = new Date();
         @SuppressWarnings("unchecked")
         IElasticSearchHandler<WorkcenterVo, QueryResult> esHandler =
             ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
-        // Date time11 = new Date();
-        // System.out.println("searchCostTime:"+(time11.getTime()-time1.getTime()));
         QueryResult result = esHandler.search(workcenterVo);
+        Date time11 = new Date();
+        System.out.println("searchCostTime:"+(time11.getTime()-time1.getTime()));
         List<MultiAttrsObject> resultData = result.getData();
         // 返回的数据重新加工
         List<JSONObject> dataList = new ArrayList<JSONObject>();
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         // 获取用户历史自定义theadList
-        // Date time2 = new Date();
+         Date time2 = new Date();
         List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
         theadList =
             theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
-        // Date time22 = new Date();
-        // System.out.println("矫正headerCostTime:"+(time22.getTime()-time2.getTime()));
+         Date time22 = new Date();
+         System.out.println("矫正headerCostTime:"+(time22.getTime()-time2.getTime()));
         if (!resultData.isEmpty()) {
            
             // 先循环一次获取所有工单和步骤,并获取所有工单步骤权限
@@ -140,14 +141,14 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                     builder.addProcessTaskStepId(processStep.getId());
                 }
             }
-            // Date time3 = new Date();
+            Date time3 = new Date();
             Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
                 builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
                     .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
                     .addOperationType(ProcessTaskOperationType.TASK_URGE)
                     .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
-            // Date time33 = new Date();
-            // System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
+            Date time33 = new Date();
+            System.out.println("操作鉴权:" + (time33.getTime() - time3.getTime()));
             // 补充信息
             for (MultiAttrsObject el : resultData) {
                 // 重新渲染每个字段信息
