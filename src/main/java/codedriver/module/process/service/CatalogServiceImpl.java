@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -37,6 +38,9 @@ public class CatalogServiceImpl implements CatalogService {
 	
 	@Autowired
 	private TeamMapper teamMapper;
+	
+	@Autowired
+	private UserMapper userMapper;
 
 	@Override
 	public void rebuildLeftRightCode() {
@@ -114,22 +118,23 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	@Override
-	public boolean channelIsAuthority(String channelUuid) {
+	public boolean channelIsAuthority(String channelUuid, String userUuid) {
 		ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
 		if(channel == null ) {
 			throw new ChannelNotFoundException(channelUuid);
 		}
 		/** 服务状态必须是激活**/
 		if(Objects.equals(channel.getIsActive(), 1)) {
-			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+			List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
 			/** 查出当前用户所有已授权的服务uuid集合  **/
-			List<String> channelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), channelUuid);
+			List<String> channelUuidList = channelMapper.getAuthorizedChannelUuidList(userUuid, teamUuidList, roleUuidList, channelUuid);
 			/** 服务已授权 **/
 			if(channelUuidList.contains(channelUuid)) {
 				CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channel.getParentUuid());
 				if(catalogVo != null && !CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
 					/** 查出当前用户所有已授权的目录uuid集合  **/
-					List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+					List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(userUuid, teamUuidList, roleUuidList, null);
 					List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
 					for(CatalogVo catalog : ancestorsAndSelfList) {
 						if(!CatalogVo.ROOT_UUID.equals(catalog.getUuid())) {

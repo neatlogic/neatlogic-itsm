@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.exception.type.PermissionDeniedException;
@@ -110,7 +111,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
             ProcessTaskVo processTaskVo = handler.getProcessTaskDetailById(processTaskId);
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
-            if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid())) {
+            if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
                 // throw new ProcessTaskNoPermissionException("上报");
                 throw new PermissionDeniedException();
             }
@@ -146,7 +147,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         } else if (copyProcessTaskId != null) {
             ProcessTaskVo oldProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(copyProcessTaskId);
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
-            if (!catalogService.channelIsAuthority(oldProcessTaskVo.getChannelUuid())) {
+            if (!catalogService.channelIsAuthority(oldProcessTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
                 // throw new ProcessTaskNoPermissionException("上报");
                 throw new PermissionDeniedException();
             }
@@ -247,7 +248,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 throw new ChannelNotFoundException(channelUuid);
             }
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
-            if (!catalogService.channelIsAuthority(channelUuid)) {
+            if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
                 // throw new ProcessTaskNoPermissionException("上报");
                 throw new PermissionDeniedException();
             }
