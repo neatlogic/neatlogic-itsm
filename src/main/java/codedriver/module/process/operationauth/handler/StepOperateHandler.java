@@ -25,18 +25,39 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
 
     @PostConstruct
     public void init() {
+        /**
+         * 步骤查看权限
+         * 判断userUuid用户是否有步骤查看权限逻辑：
+         * 首先工单状态不是“未提交”，
+         * 符合一下几种情况之一就有步骤查看权限：
+         * 1.userUuid用户是上报人
+         * 2.userUuid用户是代报人
+         * 3.userUuid用户是步骤的处理人或协助处理人
+         * 4.userUuid用户在步骤权限设置中获得“查看节点信息”的授权
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_VIEW, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (userUuid.equals(processTaskVo.getOwner())) {
-                return true;
-            } else if (userUuid.equals(processTaskVo.getReporter())) {
-                return true;
-            } else if (checkIsProcessTaskStepUser(processTaskStepVo, userUuid)) {
-                return true;
+            if(!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+                if (userUuid.equals(processTaskVo.getOwner())) {
+                    return true;
+                } else if (userUuid.equals(processTaskVo.getReporter())) {
+                    return true;
+                } else if (checkIsProcessTaskStepUser(processTaskStepVo, userUuid)) {
+                    return true;
+                } else if (checkIsWorker(processTaskStepVo, userUuid)) {
+                    return true;
+                } else {
+                    return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.STEP_VIEW,
+                        userUuid);
+                }
+                
             }
-            return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo, ProcessTaskOperationType.STEP_VIEW,
-                userUuid);
+            return false;
         });
-
+        /**
+         * 步骤转交权限
+         * 判断userUuid用户是否有步骤转交权限逻辑：
+         * 首先步骤状态是“已激活”，然后userUuid用户在步骤权限设置中获得“转交”的授权
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_TRANSFER,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 // 步骤状态为已激活的才能转交
@@ -46,39 +67,46 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 }
                 return false;
             });
-
+        /**
+         * 步骤接受（抢单）权限
+         * 判断userUuid用户是否有步骤接受权限逻辑：
+         * 首先步骤状态是“已激活”且“待处理”，然后userUuid用户是步骤的待处理人
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_ACCEPT, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
                     if (checkIsWorker(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        if (!checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                            // 没有主处理人时是accept
-                            return true;
-                        }
+                        // 没有主处理人时是accept
+                        return !checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
                     }
                 }
             }
             return false;
         });
-
+        /**
+         * 步骤开始权限
+         * 判断userUuid用户是否有步骤开始权限逻辑：
+         * 首先步骤状态是“已激活”且“待处理”，然后userUuid用户是步骤的处理人
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_START, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {// 已激活未处理
                     if (checkIsWorker(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                            // 有主处理人时是start
-                            return true;
-                        }
+                        // 有主处理人时是start
+                        return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
                     }
                 }
             }
             return false;
         });
-
+        /**
+         * 步骤流转权限
+         * 判断userUuid用户是否有步骤流转权限逻辑：
+         * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人，且步骤有前进（实线）方向的连线
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMPLETE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
-                    || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                         return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo,
                             processTaskStepVo.getId(), ProcessFlowDirection.FORWARD);
@@ -88,53 +116,61 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             }
             return false;
         });
-
+        /**
+         * 步骤回退权限
+         * 判断userUuid用户是否有步骤回退权限逻辑：
+         * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人，且步骤有回退（虚线）方向的连线
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_BACK, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (processTaskStepVo.getIsActive() == 1) {
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
-                    || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo,
-                            processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD);
-                    }
+            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
+                    return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo,
+                        processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD);
                 }
             }
             return false;
         });
-
+        /**
+         * 步骤暂存权限
+         * 判断userUuid用户是否有步骤暂存权限逻辑：
+         * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_SAVE, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (processTaskStepVo.getIsActive() == 1) {
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
-                    || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        return true;
-                    }
-                }
+            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
             }
             return false;
         });
-
+        /**
+         * 步骤回复权限
+         * 判断userUuid用户是否有步骤回复权限逻辑：
+         * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMMENT, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
-                    || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                    if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        });
-
-        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_PAUSE, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-                    return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo,
-                        ProcessTaskOperationType.STEP_PAUSE, userUuid);
+                    return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
                 }
             }
             return false;
         });
+        /**
+         * 步骤暂停权限
+         * 判断userUuid用户是否有步骤暂停权限逻辑：
+         * 首先步骤状态是“处理中”，然后userUuid用户在步骤权限设置中获得“暂停”的授权
+         */
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_PAUSE, (processTaskVo, processTaskStepVo, userUuid) -> {
+            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo,
+                    ProcessTaskOperationType.STEP_PAUSE, userUuid);
+            }
+            return false;
+        });
+        /**
+         * 步骤恢复权限
+         * 判断userUuid用户是否有步骤恢复权限逻辑：
+         * 首先步骤状态是“已激活”且“已挂起”，然后userUuid用户在步骤权限设置中获得“暂停”的授权
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RECOVER, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
                 if (ProcessTaskStatus.HANG.getValue().equals(processTaskStepVo.getStatus())) {
@@ -144,7 +180,11 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
             }
             return false;
         });
-
+        /**
+         * 步骤撤回权限
+         * 判断userUuid用户是否有步骤撤回权限逻辑：
+         * 首先工单状态是“处理中”，步骤状态是“已完成”，然后userUuid用户在步骤权限设置中获得“撤回”的授权，当前步骤流转时激活步骤列表中有未完成的步骤
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_RETREAT,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 // 撤销权限retreat
@@ -159,25 +199,28 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 }
                 return false;
             });
-
+        /**
+         * 步骤处理权限
+         * 判断userUuid用户是否有步骤处理权限逻辑：
+         * 首先步骤状态是“已激活”，然后userUuid用户是步骤的处理人或待处理人
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_WORK,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 // 有可处理步骤work
-                if (checkIsWorker(processTaskStepVo, userUuid)) {
-                    return true;
+                if(processTaskStepVo.getIsActive() == 1) {
+                    return checkIsWorker(processTaskStepVo, userUuid);
                 }
                 return false;
             });
-        
+        /**
+         * 步骤创建子任务权限
+         * 判断userUuid用户是否有步骤创建子任务权限逻辑：
+         * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人
+         */
         operationBiPredicateMap.put(ProcessTaskOperationType.SUBTASK_CREATE,
             (processTaskVo, processTaskStepVo, userUuid) -> {
-                if (processTaskStepVo.getIsActive() == 1) {
-                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())
-                        || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
-                        if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                            return true;
-                        }
-                    }
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                    return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
                 }
                 return false;
             });

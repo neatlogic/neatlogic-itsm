@@ -126,7 +126,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 			startTaskStep = processTaskStepList.get(0);
 		}else {
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
-            if(!catalogService.channelIsAuthority(channelUuid)){
+            if(!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))){
                 //throw new ProcessTaskNoPermissionException("上报");
                 throw new PermissionDeniedException();
             }
