@@ -3,6 +3,7 @@ package codedriver.module.process.service;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -59,12 +60,13 @@ import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager.Builder;
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
-import codedriver.module.process.workcenter.action.WorkcenterActionBuilder;
+import codedriver.module.process.workcenter.operate.WorkcenterOperateBuilder;
 
 @Service
 public class WorkcenterServiceImpl implements WorkcenterService {
@@ -124,8 +126,31 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         // Date time22 = new Date();
         // System.out.println("矫正headerCostTime:"+(time22.getTime()-time2.getTime()));
         if (!resultData.isEmpty()) {
-            // Date time3 = new Date();
+           
+            // 先循环一次获取所有工单和步骤,并获取所有工单步骤权限
+            Map<Long,ProcessTaskVo> processTaskMap = new HashMap<>();
+            Builder builder = new ProcessAuthManager.Builder();
             for (MultiAttrsObject el : resultData) {
+                Long taskId = Long.valueOf(el.getId());
+                ProcessTaskVo processTaskVo = getProcessTaskByEsElement(el);
+                processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
+                processTaskMap.put(taskId, processTaskVo);
+                builder.addProcessTaskId(taskId);
+                for(ProcessTaskStepVo processStep : processTaskVo.getStepList()) {
+                    builder.addProcessTaskStepId(processStep.getId());
+                }
+            }
+            // Date time3 = new Date();
+            Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
+                builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
+                    .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
+                    .addOperationType(ProcessTaskOperationType.TASK_URGE)
+                    .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
+            // Date time33 = new Date();
+            // System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
+            // 补充信息
+            for (MultiAttrsObject el : resultData) {
+                // 重新渲染每个字段信息
                 JSONObject taskJson = new JSONObject();
                 taskJson.put("taskid", el.getId());
                 for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
@@ -136,12 +161,12 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 JSONObject routeJson = new JSONObject();
                 routeJson.put("taskid", el.getId());
                 taskJson.put("route", routeJson);
-                // action 操作
-                taskJson.put("action", getStepAction(el, isHasProcessTaskAuth));
+                // operate 获取对应工单的操作
+                taskJson.put("action", getTaskOperate(processTaskMap.get(Long.valueOf(el.getId())), operateTypeSetMap));
                 dataList.add(taskJson);
             }
-            // Date time33 = new Date();
-            // System.out.println("拼装CostTime:" + (time33.getTime() - time3.getTime()));
+
+            
         }
 
         // 字段排序
@@ -163,23 +188,61 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         returnObj.put("meWillDoRowNum", meWillDoCount > 99 ? "99+" : meWillDoCount.toString());
         return returnObj;
     }
+    
+    @Override
+    public JSONObject doSearch(Long processtaskId) throws ParseException {
+        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskAndStepById(processtaskId);
+        JSONObject taskJson = null;
+        if (processTaskVo != null) {
+            //获取工单&&步骤操作
+            Builder builder = new ProcessAuthManager.Builder();
+            builder.addProcessTaskId(processTaskVo.getId());
+            for(ProcessTaskStepVo processStep : processTaskVo.getStepList()) {
+                builder.addProcessTaskStepId(processStep.getId());
+            }
+            Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
+                builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
+                    .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
+                    .addOperationType(ProcessTaskOperationType.TASK_URGE)
+                    .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
+            processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
+            JSONObject task = assembleSingleProcessTask(processTaskVo);
+            taskJson = new JSONObject();
+            Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+            for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+                IProcessTaskColumn column = entry.getValue();
+                taskJson.put(column.getName(), column.getMyValue(task));
+            }
+
+            taskJson.put("taskid", processTaskVo.getId());
+            // route 供前端跳转路由信息
+            JSONObject routeJson = new JSONObject();
+            routeJson.put("taskid", processTaskVo.getId());
+            taskJson.put("route", routeJson);
+            // action 操作
+            taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
+            // 显示/隐藏
+            taskJson.put("isShow", task.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()));
+        }
+        return taskJson;
+    }
 
     /**
-     * 工单中心 获取操作按钮
-     * 
-     * @param MultiAttrsObject
-     *            el
+     * @Author 89770
+     * @Time 2020年12月17日
+     * @Description: 根据es返回的值，拼凑processtaskVo
+     * @Param
      * @return
-     * @throws ParseException
      */
-    @Override
-    public Object getStepAction(MultiAttrsObject el, Boolean isHasProcessTaskAuth) throws ParseException {
+    public ProcessTaskVo getProcessTaskByEsElement(MultiAttrsObject el)
+        throws ParseException {
         JSONObject commonJson = (JSONObject)el.getJSON(ProcessFieldType.COMMON.getValue());
+        ProcessTaskVo processTaskVo = new ProcessTaskVo();
         if (commonJson == null) {
-            return CollectionUtils.EMPTY_COLLECTION;
+            return processTaskVo;
         }
         // task
-        ProcessTaskVo processTaskVo = new ProcessTaskVo();
         processTaskVo.setId(Long.valueOf(el.getId()));
         processTaskVo.setTitle(commonJson.getString(ProcessWorkcenterField.TITLE.getValue()));
         processTaskVo.setProcessUuid(commonJson.getString(ProcessWorkcenterField.PROCESS.getValue()));
@@ -196,16 +259,15 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             .setEndTime(TimeUtil.convertStringToDate(commonJson.getString("endtime"), TimeUtil.YYYY_MM_DD_HH_MM_SS));
         processTaskVo.setIsShow(commonJson.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()) == null ? 1
             : commonJson.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()));
-        processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
         // step
         JSONArray stepArray = null;
         try {
             stepArray = (JSONArray)commonJson.getJSONArray(ProcessWorkcenterField.STEP.getValue());
         } catch (Exception ex) {
-            return "";
+            return processTaskVo;
         }
         if (CollectionUtils.isEmpty(stepArray)) {
-            return CollectionUtils.EMPTY_COLLECTION;
+            return processTaskVo;
         }
         List<ProcessTaskStepVo> stepList = new ArrayList<>();
         for (Object stepObj : stepArray) {
@@ -229,8 +291,98 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 stepList.add(processTaskStepVo);
             }
         }
-        JSONObject actionJson = getStepActionArray(processTaskVo, stepList);
-        return actionJson;
+        processTaskVo.setStepList(stepList);
+        return processTaskVo;
+    }
+
+    /**
+     * 
+     * @Author 89770
+     * @Time 2020年12月17日
+     * @Description: 获取工单操作按钮
+     * @Param
+     * @return
+     */
+    private JSONObject getTaskOperate(ProcessTaskVo processTaskVo,Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap) {
+        JSONObject action = new JSONObject();
+        String processTaskStatus = processTaskVo.getStatus();
+        Boolean isHasAbort = false;
+        Boolean isHasRecover = false;
+        Boolean isHasUrge = false;
+        JSONArray handleArray = new JSONArray();
+        if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
+            || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
+            || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus))) {
+            Set<ProcessTaskOperationType> operationTypeSet = operateTypeSetMap.get(processTaskVo.getId());
+           
+            if (CollectionUtils.isNotEmpty(operationTypeSet)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_ABORT)) {
+                    isHasAbort = true;
+                }
+                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_RECOVER)) {
+                    isHasRecover = true;
+                }
+                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_URGE)) {
+                    isHasUrge = true;
+                }
+            }
+            for (ProcessTaskStepVo step : processTaskVo.getStepList()) {
+                Set<ProcessTaskOperationType> set = operateTypeSetMap.get(step.getId());
+                if (set != null && set.contains(ProcessTaskOperationType.STEP_WORK)) {
+                    JSONObject configJson = new JSONObject();
+                    configJson.put("taskid", processTaskVo.getId());
+                    configJson.put("stepid", step.getId());
+                    configJson.put("stepName", step.getName());
+                    JSONObject actionJson = new JSONObject();
+                    actionJson.put("name", "handle");
+                    actionJson.put("text", step.getName());
+                    actionJson.put("config", configJson);
+                    handleArray.add(actionJson);
+                }
+            }
+        }
+        // 返回实际操作按钮
+        /**
+         * 实质性操作按钮：如“处理”、“取消”、“催办”，根据用户权限展示 ;次要的操作按钮：如“隐藏”、“删除”，只有管理员可见 移动端按钮展示规则：
+         * 1、工单显示时，优先展示实质性的按钮，次要的操作按钮收起到“更多”中；如果没有任何实质性的操作按钮，则将次要按钮放出来（管理员可见）；
+         * 2、工单隐藏时，仅“显示”、“删除”按钮放出来，其他实质性按钮需要等工单显示后才会展示；
+         */
+
+        WorkcenterOperateBuilder workcenterFirstOperateBuilder = new WorkcenterOperateBuilder();
+        JSONArray workcenterFirstOperateArray = workcenterFirstOperateBuilder.setHandleOperate(handleArray)
+            .setAbortRecoverOperate(isHasAbort, isHasRecover, processTaskVo).setUrgeOperate(isHasUrge, processTaskVo)
+            .build();
+        Boolean isNeedFirstOperate = false;
+        for (Object firstOperate : workcenterFirstOperateArray) {
+            JSONObject firstOperateJson = JSONObject.parseObject(firstOperate.toString());
+            if (firstOperateJson.getInteger("isEnable") == 1) {
+                isNeedFirstOperate = true;
+            }
+        }
+        WorkcenterOperateBuilder workcenterSecondOperateBuilder = new WorkcenterOperateBuilder();
+        JSONArray workcenterSecondOperateJsonArray =
+            workcenterSecondOperateBuilder.setShowHideOperate(processTaskVo).setDeleteOperate(processTaskVo).build();
+        for (Object workcenterSecondOperateObj : workcenterSecondOperateJsonArray) {
+            JSONObject workcenterSecondOperateJson = JSONObject.parseObject(workcenterSecondOperateObj.toString());
+            if (ProcessTaskOperationType.TASK_SHOW.getValue().equals(workcenterSecondOperateJson.getString("name"))) {
+                isNeedFirstOperate = false;
+            }
+        }
+        if (isNeedFirstOperate) {
+            action.put("firstActionList", workcenterFirstOperateArray);
+            action.put("secondActionList", workcenterSecondOperateJsonArray);
+        } else {
+            action.put("firstActionList", workcenterSecondOperateJsonArray);
+            action.put("secondActionList", new JSONArray());
+        }
+        return action;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo) {
+        return (QueryResultSet)ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue())
+            .iterateSearch(workcenterVo);
     }
 
     /**
@@ -275,191 +427,6 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         }
         returnObj.put("tbodyList", dataList);
         return returnObj;
-    }
-
-    @Override
-    public JSONObject doSearch(Long processtaskId) throws ParseException {
-        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
-        ProcessTaskVo processTask = processTaskMapper.getProcessTaskAndStepById(processtaskId);
-        JSONObject taskJson = null;
-        if (processTask != null) {
-            processTask.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
-            JSONObject task = assembleSingleProcessTask(processTask);
-            taskJson = new JSONObject();
-            Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-            for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-                IProcessTaskColumn column = entry.getValue();
-                taskJson.put(column.getName(), column.getMyValue(task));
-            }
-
-            taskJson.put("taskid", processTask.getId());
-            // route 供前端跳转路由信息
-            JSONObject routeJson = new JSONObject();
-            routeJson.put("taskid", processTask.getId());
-            taskJson.put("route", routeJson);
-            // action 操作
-            taskJson.put("action", getStepAction(processTask));
-            // 显示/隐藏
-            taskJson.put("isShow", task.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()));
-        }
-        return taskJson;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo) {
-        return (QueryResultSet)ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue())
-            .iterateSearch(workcenterVo);
-    }
-
-    public Object getStepAction(ProcessTaskVo processTaskVo) {
-        List<ProcessTaskStepVo> stepList = processTaskVo.getStepList();
-        if (CollectionUtils.isEmpty(stepList)) {
-            return CollectionUtils.EMPTY_COLLECTION;
-        }
-        JSONObject actionJson = getStepActionArray(processTaskVo, stepList);
-        return actionJson;
-    }
-
-    private JSONObject getStepActionArray(ProcessTaskVo processTaskVo, List<ProcessTaskStepVo> stepList) {
-        JSONObject action = new JSONObject();
-        String processTaskStatus = processTaskVo.getStatus();
-        Boolean isHasAbort = false;
-        Boolean isHasRecover = false;
-        Boolean isHasUrge = false;
-        JSONArray handleArray = new JSONArray();
-        // List<ProcessTaskOperationType> operationList = new ArrayList<>();
-        if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
-            || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
-            || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus))) {
-            // 工单权限
-            // IProcessStepUtilHandler taskHandler =
-            // ProcessStepUtilHandlerFactory.getHandler(ProcessStepHandlerType.OMNIPOTENT.getHandler());
-            // operationList = taskHandler.getOperateList(processTaskVo, null, new ArrayList<ProcessTaskOperationType>()
-            // {
-            // private static final long serialVersionUID = 1L;
-            // {
-            // add(ProcessTaskOperationType.ABORTPROCESSTASK);
-            // add(ProcessTaskOperationType.RECOVERPROCESSTASK);
-            // add(ProcessTaskOperationType.URGE);
-            // }
-            // });
-            // if (operationList.contains(ProcessTaskOperationType.ABORTPROCESSTASK)) {
-            // isHasAbort = true;
-            // }
-            // if (operationList.contains(ProcessTaskOperationType.RECOVERPROCESSTASK)) {
-            // isHasRecover = true;
-            // }
-            // if (operationList.contains(ProcessTaskOperationType.URGE)) {
-            // isHasUrge = true;
-            // }
-            // // 步骤权限
-            // for (ProcessTaskStepVo step : stepList) {
-            // if (step.getIsActive() == 1) {
-            // step.setProcessTaskId(processTaskVo.getId());
-            // try {
-            // if (step.getHandler() != null) {
-            // IProcessStepUtilHandler handler =
-            // ProcessStepUtilHandlerFactory.getHandler(step.getHandler());
-            // if (handler != null) {
-            // operationList.addAll(handler.getOperateList(processTaskVo, step,
-            // new ArrayList<ProcessTaskOperationType>() {
-            // private static final long serialVersionUID = 1L;
-            // {
-            // add(ProcessTaskOperationType.WORK);
-            // }
-            // }));
-            // }
-            // }
-            // } catch (Exception ex) {
-            // logger.error(ex.getMessage(), ex);
-            // }
-            //
-            // if (operationList.contains(ProcessTaskOperationType.WORK)) {
-            // JSONObject configJson = new JSONObject();
-            // configJson.put("taskid", processTaskVo.getId());
-            // configJson.put("stepid", step.getId());
-            // configJson.put("stepName", step.getName());
-            // JSONObject actionJson = new JSONObject();
-            // actionJson.put("name", "handle");
-            // actionJson.put("text", step.getName());
-            // actionJson.put("config", configJson);
-            // handleArray.add(actionJson);
-            // }
-            // }
-            // }
-            ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
-            for (ProcessTaskStepVo step : stepList) {
-                builder.addProcessTaskStepId(step.getId());
-            }
-            Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
-                builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
-                    .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
-                    .addOperationType(ProcessTaskOperationType.TASK_URGE)
-                    .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
-
-            Set<ProcessTaskOperationType> operationTypeSet = operateTypeSetMap.get(processTaskVo.getId());
-            if (CollectionUtils.isNotEmpty(operationTypeSet)) {
-                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_ABORT)) {
-                    isHasAbort = true;
-                }
-                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_RECOVER)) {
-                    isHasRecover = true;
-                }
-                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_URGE)) {
-                    isHasUrge = true;
-                }
-            }
-            for (ProcessTaskStepVo step : stepList) {
-                Set<ProcessTaskOperationType> set = operateTypeSetMap.get(step.getId());
-                if (set != null && set.contains(ProcessTaskOperationType.STEP_WORK)) {
-                    JSONObject configJson = new JSONObject();
-                    configJson.put("taskid", processTaskVo.getId());
-                    configJson.put("stepid", step.getId());
-                    configJson.put("stepName", step.getName());
-                    JSONObject actionJson = new JSONObject();
-                    actionJson.put("name", "handle");
-                    actionJson.put("text", step.getName());
-                    actionJson.put("config", configJson);
-                    handleArray.add(actionJson);
-                }
-            }
-        }
-        // 返回实际操作按钮
-        /**
-         * 实质性操作按钮：如“处理”、“取消”、“催办”，根据用户权限展示 ;次要的操作按钮：如“隐藏”、“删除”，只有管理员可见 移动端按钮展示规则：
-         * 1、工单显示时，优先展示实质性的按钮，次要的操作按钮收起到“更多”中；如果没有任何实质性的操作按钮，则将次要按钮放出来（管理员可见）；
-         * 2、工单隐藏时，仅“显示”、“删除”按钮放出来，其他实质性按钮需要等工单显示后才会展示；
-         */
-
-        WorkcenterActionBuilder workcenterFirstActionBuilder = new WorkcenterActionBuilder();
-        JSONArray workcenterFirstActionArray = workcenterFirstActionBuilder.setHandleAction(handleArray)
-            .setAbortRecoverAction(isHasAbort, isHasRecover, processTaskVo).setUrgeAction(isHasUrge, processTaskVo)
-            .build();
-        Boolean isNeedFirstAction = false;
-        for (Object firstAction : workcenterFirstActionArray) {
-            JSONObject firstActionJson = JSONObject.parseObject(firstAction.toString());
-            if (firstActionJson.getInteger("isEnable") == 1) {
-                isNeedFirstAction = true;
-            }
-        }
-        WorkcenterActionBuilder workcenterSecondActionBuilder = new WorkcenterActionBuilder();
-        JSONArray workcenterSecondActionJsonArray =
-            workcenterSecondActionBuilder.setShowHideAction(processTaskVo).setDeleteAction(processTaskVo).build();
-        for (Object workcenterSecondActionObj : workcenterSecondActionJsonArray) {
-            JSONObject workcenterSecondActionJson = JSONObject.parseObject(workcenterSecondActionObj.toString());
-            if (ProcessTaskOperationType.TASK_SHOW.getValue().equals(workcenterSecondActionJson.getString("name"))) {
-                isNeedFirstAction = false;
-            }
-        }
-        if (isNeedFirstAction) {
-            action.put("firstActionList", workcenterFirstActionArray);
-            action.put("secondActionList", workcenterSecondActionJsonArray);
-        } else {
-            action.put("firstActionList", workcenterSecondActionJsonArray);
-            action.put("secondActionList", new JSONArray());
-        }
-        return action;
     }
 
     private JSONObject assembleSingleProcessTask(ProcessTaskVo processTaskVo) {
