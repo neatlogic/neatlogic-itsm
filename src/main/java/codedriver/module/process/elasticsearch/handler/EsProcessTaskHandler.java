@@ -29,6 +29,7 @@ import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -271,7 +272,7 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
     
     /**
      * 拼接where条件
-     * 
+     * TODO 需重构
      * @param workcenterVo
      * @return
      */
@@ -317,8 +318,10 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
             int nestedBasisCount = 0;
             for (int i = 0; i < conditionList.size(); i++) {
                 ConditionVo condition = conditionList.get(i);
-                // 关于我的 必定会 nested
-                if (condition.getName().endsWith(ProcessWorkcenterField.ABOUTME.getValue())) {
+                // 关于我的 或 当前组/部 必定会 nested
+                if (condition.getName().endsWith(ProcessWorkcenterField.ABOUTME.getValue())
+                    ||condition.getValueList().toString().contains(GroupSearch.COMMON.getValuePlugin()+UserType.LOGIN_DEPARTMENT.getValue())
+                    ||condition.getValueList().toString().contains(GroupSearch.COMMON.getValuePlugin()+UserType.LOGIN_TEAM.getValue())) {
                     nestedBasisCount = nestedBasisCount + 2;
                 }
                 String[] valueList = null;

@@ -2,7 +2,9 @@ package codedriver.module.process.condition.handler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -98,7 +100,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
             List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
             stepTeamValueList.addAll(valueList);
         }
-        List<String> userTypeList = new ArrayList<String>();
+        Set<String> userTypeList = new HashSet<String>();
         List<String> userUuidList = new ArrayList<String>();
         List<String> teamUuidList = new ArrayList<String>();
         //如果存在当前登录人所在组
