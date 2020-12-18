@@ -169,7 +169,8 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             // 评分权限score
             if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                 if (userUuid.equals(processTaskVo.getOwner())) {
-                    Integer isActive = (Integer)JSONPath.read(processTaskVo.getConfig(), "process.scoreConfig.isActive");
+                    String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+                    Integer isActive = (Integer)JSONPath.read(taskConfig, "process.scoreConfig.isActive");
                     return Objects.equals(isActive, 1);
                 }
             }
@@ -248,7 +249,8 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_REDO, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                 if (userUuid.equals(processTaskVo.getOwner())) {
-                    JSONArray stepUuidList = (JSONArray)JSONPath.read(processTaskVo.getConfig(), "process.scoreConfig.config.stepUuidList");
+                    String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+                    JSONArray stepUuidList = (JSONArray)JSONPath.read(taskConfig, "process.scoreConfig.config.stepUuidList");
                     return CollectionUtils.isNotEmpty(stepUuidList);
                 }
             }
