@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONPath;
 
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -25,6 +26,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.service.CatalogService;
 
 @Component
@@ -54,20 +56,22 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_VIEW,
             (processTaskVo, processTaskStepVo, userUuid) -> {
-                if(!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
-                    if (userUuid.equals(processTaskVo.getOwner())) {
-                        return true;
-                    } else if (userUuid.equals(processTaskVo.getReporter())) {
-                        return true;
-                    }  else if (checkIsProcessTaskStepUser(processTaskVo, userUuid)) {
-                        return true;
-                    } else if (checkIsWorker(processTaskVo, userUuid)) {
-                        return true;
-                    } else {
-                        return catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid);
+                if(processTaskVo.getIsShow() == 1 || AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+                    if(!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+                        if (userUuid.equals(processTaskVo.getOwner())) {
+                            return true;
+                        } else if (userUuid.equals(processTaskVo.getReporter())) {
+                            return true;
+                        }  else if (checkIsProcessTaskStepUser(processTaskVo, userUuid)) {
+                            return true;
+                        } else if (checkIsWorker(processTaskVo, userUuid)) {
+                            return true;
+                        } else {
+                            return catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid);
+                        }
                     }
                 }                
-                return false;
+                return false;               
             });
         /**
          * 工单提交权限
@@ -76,9 +80,11 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_START,
             (processTaskVo, processTaskStepVo, userUuid) -> {
-                if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
-                    if (userUuid.equals(processTaskVo.getOwner()) || userUuid.equals(processTaskVo.getReporter())) {
-                        return true;
+                if(processTaskVo.getIsShow() == 1) {
+                    if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+                        if (userUuid.equals(processTaskVo.getOwner()) || userUuid.equals(processTaskVo.getReporter())) {
+                            return true;
+                        }
                     }
                 }
                 return false;
@@ -90,9 +96,11 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_ABORT,
             (processTaskVo, processTaskStepVo, userUuid) -> {
-                // 工单状态为进行中的才能终止
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                    return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_ABORT, userUuid);
+                if(processTaskVo.getIsShow() == 1) {                    
+                    // 工单状态为进行中的才能终止
+                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                        return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_ABORT, userUuid);
+                    }
                 }
                 return false;
             });
@@ -103,9 +111,11 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_RECOVER,
             (processTaskVo, processTaskStepVo, userUuid) -> {
-                // 工单状态为已终止的才能恢复
-                if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
-                    return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_ABORT, userUuid);
+                if(processTaskVo.getIsShow() == 1) {                
+                    // 工单状态为已终止的才能恢复
+                    if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
+                        return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_ABORT, userUuid);
+                    }
                 }
                 return false;
             });
@@ -115,8 +125,10 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“处理中”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“修改上报内容”的授权
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_UPDATE, userUuid);
+            if(processTaskVo.getIsShow() == 1) {               
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                    return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_UPDATE, userUuid);
+                }
             }
             return false;
         });
@@ -126,8 +138,10 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“处理中”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“催单”的授权
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_URGE, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_URGE, userUuid);
+            if(processTaskVo.getIsShow() == 1) {               
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                    return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_URGE, userUuid);
+                }
             }
             return false;
         });
@@ -137,10 +151,12 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“处理中”，然后userUuid用户是工单中某个步骤的处理人或协助处理人
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_WORK, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                // 有可处理步骤work
-                return checkIsWorker(processTaskVo, userUuid);
-            }            
+            if(processTaskVo.getIsShow() == 1) {
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                    // 有可处理步骤work
+                    return checkIsWorker(processTaskVo, userUuid);
+                }
+            }          
             return false;
         });
         /**
@@ -150,11 +166,13 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 步骤撤回权限逻辑在{@link codedriver.module.process.operationauth.handler.StepOperateHandler#init}中的ProcessTaskOperationType.STEP_RETREAT里
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_RETREAT, (processTaskVo, processTaskStepVo, userUuid) -> {
-            // 撤销权限retreat
-            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                    if (processTaskStep.getIsActive().intValue() == 1) {
-                        return checkIsRetractableStepByProcessTaskStepId(processTaskVo, processTaskStep.getId(), userUuid);
+            if(processTaskVo.getIsShow() == 1) {                
+                // 撤销权限retreat
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                    for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+                        if (processTaskStep.getIsActive().intValue() == 1) {
+                            return checkIsRetractableStepByProcessTaskStepId(processTaskVo, processTaskStep.getId(), userUuid);
+                        }
                     }
                 }
             }
@@ -166,12 +184,14 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“已完成”，然后userUuid用户是工单上报人，且在工单对应流程图的评分设置中启用评分
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_SCORE, (processTaskVo, processTaskStepVo, userUuid) -> {
-            // 评分权限score
-            if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
-                if (userUuid.equals(processTaskVo.getOwner())) {
-                    String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-                    Integer isActive = (Integer)JSONPath.read(taskConfig, "process.scoreConfig.isActive");
-                    return Objects.equals(isActive, 1);
+            if(processTaskVo.getIsShow() == 1) {
+             // 评分权限score
+                if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
+                    if (userUuid.equals(processTaskVo.getOwner())) {
+                        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+                        Integer isActive = (Integer)JSONPath.read(taskConfig, "process.scoreConfig.isActive");
+                        return Objects.equals(isActive, 1);
+                    }
                 }
             }
             return false;
@@ -183,43 +203,45 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_TRANFERREPORT,
             (processTaskVo, processTaskStepVo, userUuid) -> {
-                List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-                List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
-                List<Long> channelTypeRelationIdList =
-                    channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
-                        processTaskVo.getChannelUuid(), userUuid, teamUuidList, roleUuidList);
-                if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
-                    ChannelRelationVo channelRelationVo = new ChannelRelationVo();
-                    channelRelationVo.setSource(processTaskVo.getChannelUuid());
-                    for (Long channelTypeRelationId : channelTypeRelationIdList) {
-                        channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
-                        List<ChannelRelationVo> channelRelationTargetList =
-                            channelMapper.getChannelRelationTargetList(channelRelationVo);
-                        if (CollectionUtils.isNotEmpty(channelRelationTargetList)) {
-                            List<String> channelTypeUuidList = channelMapper
-                                .getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
-                            if (channelTypeUuidList.contains("all")) {
-                                channelTypeUuidList.clear();
-                            }
-                            for (ChannelRelationVo channelRelation : channelRelationTargetList) {
-                                if ("channel".equals(channelRelation.getType())) {
-                                    return true;
-                                } else if ("catalog".equals(channelRelation.getType())) {
-                                    if (channelMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(
-                                        channelRelation.getTarget(), channelTypeUuidList) > 0) {
+                if(processTaskVo.getIsShow() == 1) {                 
+                    List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+                    List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+                    List<Long> channelTypeRelationIdList =
+                        channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
+                            processTaskVo.getChannelUuid(), userUuid, teamUuidList, roleUuidList);
+                    if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
+                        ChannelRelationVo channelRelationVo = new ChannelRelationVo();
+                        channelRelationVo.setSource(processTaskVo.getChannelUuid());
+                        for (Long channelTypeRelationId : channelTypeRelationIdList) {
+                            channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
+                            List<ChannelRelationVo> channelRelationTargetList =
+                                channelMapper.getChannelRelationTargetList(channelRelationVo);
+                            if (CollectionUtils.isNotEmpty(channelRelationTargetList)) {
+                                List<String> channelTypeUuidList = channelMapper
+                                    .getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+                                if (channelTypeUuidList.contains("all")) {
+                                    channelTypeUuidList.clear();
+                                }
+                                for (ChannelRelationVo channelRelation : channelRelationTargetList) {
+                                    if ("channel".equals(channelRelation.getType())) {
                                         return true;
-                                    } else {
-                                        CatalogVo catalogVo =
-                                            catalogMapper.getCatalogByUuid(channelRelation.getTarget());
-                                        if (catalogVo != null) {
-                                            List<String> uuidList = catalogMapper
-                                                .getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
-                                            for (String uuid : uuidList) {
-                                                if (!channelRelation.getTarget().equals(uuid)) {
-                                                    if (channelMapper
-                                                        .getActiveChannelCountByParentUuidAndChannelTypeUuidList(
-                                                            channelRelation.getTarget(), channelTypeUuidList) > 0) {
-                                                        return true;
+                                    } else if ("catalog".equals(channelRelation.getType())) {
+                                        if (channelMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(
+                                            channelRelation.getTarget(), channelTypeUuidList) > 0) {
+                                            return true;
+                                        } else {
+                                            CatalogVo catalogVo =
+                                                catalogMapper.getCatalogByUuid(channelRelation.getTarget());
+                                            if (catalogVo != null) {
+                                                List<String> uuidList = catalogMapper
+                                                    .getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
+                                                for (String uuid : uuidList) {
+                                                    if (!channelRelation.getTarget().equals(uuid)) {
+                                                        if (channelMapper
+                                                            .getActiveChannelCountByParentUuidAndChannelTypeUuidList(
+                                                                channelRelation.getTarget(), channelTypeUuidList) > 0) {
+                                                            return true;
+                                                        }
                                                     }
                                                 }
                                             }
@@ -239,7 +261,10 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_COPYPROCESSTASK,
             (processTaskVo, processTaskStepVo, userUuid) -> {
-                return catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid);
+                if(processTaskVo.getIsShow() == 1) {
+                    return catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid);
+                }
+                return false;
             });
         /**
          * 工单重做权限
@@ -247,11 +272,13 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“已完成”，然后userUuid用户是工单上报人，且在工单对应流程图的评分设置-评分前允许回退中设置了回退步骤列表
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_REDO, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
-                if (userUuid.equals(processTaskVo.getOwner())) {
-                    String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-                    JSONArray stepUuidList = (JSONArray)JSONPath.read(taskConfig, "process.scoreConfig.config.stepUuidList");
-                    return CollectionUtils.isNotEmpty(stepUuidList);
+            if(processTaskVo.getIsShow() == 1) {               
+                if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
+                    if (userUuid.equals(processTaskVo.getOwner())) {
+                        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+                        JSONArray stepUuidList = (JSONArray)JSONPath.read(taskConfig, "process.scoreConfig.config.stepUuidList");
+                        return CollectionUtils.isNotEmpty(stepUuidList);
+                    }
                 }
             }
             return false;
@@ -263,14 +290,31 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 步骤转交权限逻辑在{@link codedriver.module.process.operationauth.handler.StepOperateHandler#init}中的ProcessTaskOperationType.STEP_TRANSFER里
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_TRANSFER, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
-                    if (processTaskStep.getIsActive().intValue() == 1) {
-                        return checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskOperationType.STEP_TRANSFER, userUuid);
+            if(processTaskVo.getIsShow() == 1) {               
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                    for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
+                        if (processTaskStep.getIsActive().intValue() == 1) {
+                            return checkOperationAuthIsConfigured(processTaskVo, processTaskStep, ProcessTaskOperationType.STEP_TRANSFER, userUuid);
+                        }
                     }
                 }
             }
             return false;
+        });
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_SHOW, (processTaskVo, processTaskStepVo, userUuid) -> {
+            if(processTaskVo.getIsShow() == 0) {
+                return AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName());
+            }
+            return false;
+        });
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_HIDE, (processTaskVo, processTaskStepVo, userUuid) -> {
+            if(processTaskVo.getIsShow() == 1) {
+                return AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName());
+            }
+            return false;
+        });
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_DELETE, (processTaskVo, processTaskStepVo, userUuid) -> {            
+            return AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName());
         });
     }
 
