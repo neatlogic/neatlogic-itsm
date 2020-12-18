@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,6 +138,11 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 
         // 其他处理步骤
         if (CollectionUtils.isNotEmpty(resultList)) {
+            Long[] processTaskStepIds = new Long[resultList.size()];
+            resultList.stream().map(ProcessTaskStepVo::getId).collect(Collectors.toList()).toArray(processTaskStepIds);
+            Map<Long, Set<ProcessTaskOperationType>> operateMap =
+                new ProcessAuthManager.Builder().addProcessTaskStepId(processTaskStepIds)
+                    .addOperationType(ProcessTaskOperationType.STEP_VIEW).build().getOperateMap();
             for (ProcessTaskStepVo processTaskStepVo : resultList) {
                 // 判断当前用户是否有权限查看该节点信息
                 IProcessStepUtilHandler handler =
@@ -144,8 +150,8 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                 if (handler == null) {
                     throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                 }
-                if (new ProcessAuthManager.StepOperationChecker(processTaskStepVo.getId(),
-                    ProcessTaskOperationType.STEP_VIEW).build().check()) {
+                if (operateMap.computeIfAbsent(processTaskStepVo.getId(), k -> new HashSet<>())
+                    .contains(ProcessTaskOperationType.STEP_VIEW)) {
                     processTaskStepVo.setIsView(1);
                     getProcessTaskStepDetail(processTaskStepVo);
                 } else {

@@ -1,8 +1,12 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -74,8 +78,8 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW)
-                .build().checkAndNoPermissionThrowException();
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW).build()
+                .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
@@ -87,6 +91,12 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         List<ProcessTaskStepAuditVo> processTaskStepAuditList =
             processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
         if (CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
+            Long[] processTaskStepIds = new Long[processTaskStepAuditList.size()];
+            processTaskStepAuditList.stream().map(ProcessTaskStepAuditVo::getProcessTaskStepId)
+                .collect(Collectors.toList()).toArray(processTaskStepIds);
+            Map<Long, Set<ProcessTaskOperationType>> operateMap =
+                new ProcessAuthManager.Builder().addProcessTaskStepId(processTaskStepIds)
+                    .addOperationType(ProcessTaskOperationType.STEP_VIEW).build().getOperateMap();
             for (ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
                 JSONObject paramObj = new JSONObject();
                 if (processTaskStepAudit.getProcessTaskStepId() != null) {
@@ -102,8 +112,8 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                     if (processStepUtilHandler == null) {
                         throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                     }
-                    if (!new ProcessAuthManager.StepOperationChecker(processTaskStepAudit.getProcessTaskStepId(),
-                        ProcessTaskOperationType.STEP_VIEW).build().check()) {
+                    if (!operateMap.computeIfAbsent(processTaskStepVo.getId(), k -> new HashSet<>())
+                        .contains(ProcessTaskOperationType.STEP_VIEW)) {
                         continue;
                     }
                 }
