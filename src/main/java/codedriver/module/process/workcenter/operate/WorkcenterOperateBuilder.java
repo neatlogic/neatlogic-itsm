@@ -38,7 +38,6 @@ public class WorkcenterOperateBuilder {
             configJson.put("taskid", processTaskVo.getId());
             configJson.put("interfaceurl", "api/rest/processtask/recover?processTaskId=" + processTaskVo.getId());
             operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.STEP_RECOVER).setSort(2).setConfig(configJson).setIsEnable(1).build();
-            operateArray.add(operateJson);
         } else {
             if (isHasAbort) {
                 configJson.put("taskid", processTaskVo.getId());
