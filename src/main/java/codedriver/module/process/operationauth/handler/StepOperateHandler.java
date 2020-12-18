@@ -106,7 +106,8 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_COMPLETE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskStepVo.getIsActive() == 1) {
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus()) 
+                    || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStepVo.getStatus())) {
                     if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
                         return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo,
                             processTaskStepVo.getId(), ProcessFlowDirection.FORWARD);
