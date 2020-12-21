@@ -1,7 +1,10 @@
 package codedriver.module.process.condition.handler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +21,7 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamVo;
@@ -33,6 +37,9 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
     
     @Autowired
     UserMapper userMapper;
+    
+    @Autowired
+    RoleMapper roleMapper;
     
 	@Override
 	public String getName() {
@@ -93,12 +100,13 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
             List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
             stepTeamValueList.addAll(valueList);
         }
-        List<String> userList = new ArrayList<String>();
+        Set<String> userTypeList = new HashSet<String>();
+        List<String> userUuidList = new ArrayList<String>();
         List<String> teamUuidList = new ArrayList<String>();
         //如果存在当前登录人所在组
         String loginTeam = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_TEAM.getValue();
         if(stepTeamValueList.contains(loginTeam)){
-            List<TeamVo> teamTmpList = teamMapper.searchTeamByUserUuidAndLevel(UserContext.get().getUserUuid(true),TeamLevel.TEAM.getValue());
+            List<TeamVo> teamTmpList = teamMapper.searchTeamByUserUuidAndLevelList(UserContext.get().getUserUuid(true),Arrays.asList(TeamLevel.TEAM.getValue()));
             if(CollectionUtils.isNotEmpty(teamTmpList)) {
                 for(TeamVo team :teamTmpList) {
                     stepTeamValueList.add(GroupSearch.TEAM.getValuePlugin()+team.getUuid());
@@ -106,12 +114,14 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
             }
             stepTeamValueList.remove(loginTeam);
         }
-        //如果存在当前登录人所在部(穿透获取所有子组)
+        //如果存在当前登录人所在部(寻找当前登录人所在部，并穿透获取所有子组)
         String loginDepartment = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_DEPARTMENT.getValue();
+        List<TeamVo> departmentTeamList = new ArrayList<>();
         if(stepTeamValueList.contains(loginDepartment)){
-            List<TeamVo> teamList = teamMapper.searchTeamByUserUuidAndLevel(UserContext.get().getUserUuid(true),TeamLevel.DEPARTMENT.getValue());
-            if(CollectionUtils.isNotEmpty(teamList)) {
-                List<TeamVo> groupTeamList = teamMapper.getAllSonTeamByParentTeamList(teamList);
+            List<TeamVo> teamTmpList = teamMapper.searchTeamByUserUuidAndLevelList(UserContext.get().getUserUuid(true),Arrays.asList(TeamLevel.TEAM.getValue(),TeamLevel.DEPARTMENT.getValue()));
+            departmentTeamList.addAll(teamMapper.getDepartmentTeamUuidByTeamList(teamTmpList));
+            if(CollectionUtils.isNotEmpty(departmentTeamList)) {
+                List<TeamVo> groupTeamList = teamMapper.getAllSonTeamByParentTeamList(departmentTeamList);
                 if(CollectionUtils.isNotEmpty(groupTeamList)) {
                     for(TeamVo groupTeam :groupTeamList) {
                         stepTeamValueList.add(GroupSearch.TEAM.getValuePlugin()+groupTeam.getUuid());
@@ -120,18 +130,26 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
             }
             stepTeamValueList.remove(loginDepartment);
         }
-        userList.addAll(stepTeamValueList);
+        userTypeList.addAll(stepTeamValueList);
         //获取所有组的成员
         for(String team : stepTeamValueList) {
             teamUuidList.add(team.replaceAll(GroupSearch.TEAM.getValuePlugin(), StringUtils.EMPTY));
         }
         if(CollectionUtils.isNotEmpty(teamUuidList)) {
-            List<String> userUuidList = userMapper.getUserUuidListByTeamUuidList(teamUuidList);
+            userUuidList = userMapper.getUserUuidListByTeamUuidList(teamUuidList);
             for(String userUuid : userUuidList) {
-                userList.add(GroupSearch.USER.getValuePlugin()+userUuid);
+                userTypeList.add(GroupSearch.USER.getValuePlugin()+userUuid);
             }
         }
-        String value = String.join("','",userList);
+        
+        //获取成员角色
+        if(CollectionUtils.isNotEmpty(userUuidList)) {
+            List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuidList(userUuidList);
+            for(String roleUuid : roleUuidList) {
+                userTypeList.add(GroupSearch.ROLE.getValuePlugin()+roleUuid);
+            }
+        }
+        String value = String.join("','",userTypeList);
 	    return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),String.format("'%s'",  value))+" and not common.step.type = 'start' ";
 	}
 }
