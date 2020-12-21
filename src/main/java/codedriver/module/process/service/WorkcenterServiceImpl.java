@@ -206,7 +206,11 @@ public class WorkcenterServiceImpl implements WorkcenterService {
                 builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
                     .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
                     .addOperationType(ProcessTaskOperationType.TASK_URGE)
-                    .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
+                    .addOperationType(ProcessTaskOperationType.TASK_HIDE)
+                    .addOperationType(ProcessTaskOperationType.TASK_SHOW)
+                    .addOperationType(ProcessTaskOperationType.TASK_DELETE)
+                    .addOperationType(ProcessTaskOperationType.STEP_WORK)
+                    .build().getOperateMap();
             processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
             JSONObject task = assembleSingleProcessTask(processTaskVo);
             taskJson = new JSONObject();
