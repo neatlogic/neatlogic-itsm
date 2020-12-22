@@ -3,6 +3,7 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
@@ -17,6 +19,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.DELETE)
+@AuthAction(action = WORKCENTER_MODIFY.class)
 public class WorkcenterDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired

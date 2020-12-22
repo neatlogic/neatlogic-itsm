@@ -3,6 +3,7 @@ package codedriver.module.process.api.form;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.FORM_MODIFY;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.FormVo;
@@ -19,6 +21,7 @@ import codedriver.framework.process.exception.form.FormNotFoundException;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
+@AuthAction(action = FORM_MODIFY.class)
 public class FormUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired

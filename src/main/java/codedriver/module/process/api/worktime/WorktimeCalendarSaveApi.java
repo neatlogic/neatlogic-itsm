@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.WorktimeRangeVo;
@@ -26,9 +27,11 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.WORKTIME_MODIFY;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = WORKTIME_MODIFY.class)
 public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 
 	@Autowired

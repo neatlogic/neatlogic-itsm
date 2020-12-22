@@ -1,6 +1,8 @@
 package codedriver.module.process.api.agent;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAgentVo;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = NO_AUTH.class)
 public class UserAgentSaveApi extends PrivateApiComponentBase {
 
 	@Autowired

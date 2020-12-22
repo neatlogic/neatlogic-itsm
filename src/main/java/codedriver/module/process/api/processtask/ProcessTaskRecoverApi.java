@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -18,6 +20,7 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
+@AuthAction(action = NO_AUTH.class)
 public class ProcessTaskRecoverApi extends PrivateApiComponentBase {
 
 	@Autowired

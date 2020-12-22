@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.process.ProcessImportException;
@@ -24,10 +25,12 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.module.process.auth.label.PROCESS_MODIFY;
 import codedriver.module.process.service.ProcessService;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = PROCESS_MODIFY.class)
 public class ProcessImportApi extends PrivateBinaryStreamApiComponentBase {
 
 	@Autowired

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
@@ -30,6 +32,7 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = NO_AUTH.class)
 public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
     
     @Autowired

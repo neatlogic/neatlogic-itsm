@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
@@ -31,6 +32,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = WORKCENTER_MODIFY.class)
 public class WorkcenterSaveApi extends PrivateApiComponentBase {
 
 	@Autowired

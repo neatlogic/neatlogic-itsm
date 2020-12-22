@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -26,6 +27,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
+@AuthAction(action = WORKCENTER_MODIFY.class)
 public class WorkcenterConditionSaveApi extends PrivateApiComponentBase {
 
 	@Autowired

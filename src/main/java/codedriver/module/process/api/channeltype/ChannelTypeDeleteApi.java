@@ -5,6 +5,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenc
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.CHANNELTYPE_MODIFY;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
@@ -20,6 +22,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundExc
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
+@AuthAction(action = CHANNELTYPE_MODIFY.class)
 public class ChannelTypeDeleteApi extends PrivateApiComponentBase {
 
     @Autowired

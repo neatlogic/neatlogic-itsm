@@ -4,6 +4,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenc
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.CHANNELTYPE_MODIFY;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
@@ -29,6 +31,7 @@ import java.util.Objects;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = CHANNELTYPE_MODIFY.class)
 public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 
     @Autowired

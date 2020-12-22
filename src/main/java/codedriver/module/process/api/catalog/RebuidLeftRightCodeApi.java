@@ -10,12 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.module.process.auth.label.CATALOG_MODIFY;
 import codedriver.module.process.service.CatalogService;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
+@AuthAction(action = CATALOG_MODIFY.class)
 public class RebuidLeftRightCodeApi extends PrivateApiComponentBase {
 
 	@Autowired

@@ -31,10 +31,11 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.FORM_MODIFY;
 
 @Service
 @Transactional
-@AuthAction(name = "FORM_MODIFY")
+@AuthAction(action = FORM_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class FormSaveApi extends PrivateApiComponentBase {
 
