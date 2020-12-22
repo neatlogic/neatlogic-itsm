@@ -1059,8 +1059,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             String contentHash = processTaskStepRemindVo.getContentHash();
             if (StringUtils.isNotBlank(contentHash)) {
                 String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
-                processTaskStepRemindVo.setDetail(content);
-                processTaskStepRemindVo.setContent(pattern_html.matcher(content).replaceAll(""));
+                if(StringUtils.isNotBlank(content)) {
+                    /** 有图片标签才显式点击详情 **/
+                    if(content.contains("<figure class=\"image\">") && content.contains("</figure>")) {
+                        processTaskStepRemindVo.setDetail(content);
+                    }                   
+                    processTaskStepRemindVo.setContent(pattern_html.matcher(content).replaceAll(""));
+                }
             }
         }
         return processTaskStepRemindList;
