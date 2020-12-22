@@ -1,6 +1,8 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
+@AuthAction(action = NO_AUTH.class)
 public class ProcessTaskFocusUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired

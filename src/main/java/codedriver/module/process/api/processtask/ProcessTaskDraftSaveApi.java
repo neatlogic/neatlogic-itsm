@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessStepType;
@@ -34,6 +36,7 @@ import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = NO_AUTH.class)
 public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 
 	@Autowired

@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
@@ -27,6 +29,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
+@AuthAction(action = NO_AUTH.class)
 public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
 
 	@Autowired

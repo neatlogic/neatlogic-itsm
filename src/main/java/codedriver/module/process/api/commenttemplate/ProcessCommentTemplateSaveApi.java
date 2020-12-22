@@ -1,6 +1,7 @@
 package codedriver.module.process.api.commenttemplate;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
@@ -29,6 +30,7 @@ import java.util.List;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = PROCESS_COMMENT_TEMPLATE_MODIFY.class)
 public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
 
     @Autowired

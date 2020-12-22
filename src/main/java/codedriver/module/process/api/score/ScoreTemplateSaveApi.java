@@ -14,6 +14,8 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.SCORE_TEMPLATE_MODIFY;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -23,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@AuthAction(name = "SCORE_TEMPLATE_MODIFY")
+@AuthAction(action = SCORE_TEMPLATE_MODIFY.class)
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)

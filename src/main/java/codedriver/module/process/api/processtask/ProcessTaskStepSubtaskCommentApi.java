@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -24,6 +26,7 @@ import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = NO_AUTH.class)
 public class ProcessTaskStepSubtaskCommentApi extends PrivateApiComponentBase {
 	
 	@Autowired

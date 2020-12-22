@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
@@ -19,6 +21,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
+@AuthAction(action = NO_AUTH.class)
 public class ChannelUserSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
