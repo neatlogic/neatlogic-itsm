@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -16,6 +17,7 @@ import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiCompon
 import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.framework.util.ExcelUtil;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.formattribute.handler.DivideHandler;
 import codedriver.module.process.formattribute.handler.LinkHandler;
 import com.alibaba.fastjson.JSONArray;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 @Service
+@AuthAction(action = PROCESSTASK_MODIFY.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiComponentBase {
     static Logger logger = LoggerFactory.getLogger(ProcessTaskImportFromExcelApi.class);
