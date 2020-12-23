@@ -198,7 +198,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     private ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId) {
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
         Long processTaskId = processTaskStepVo.getProcessTaskId();
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_VIEW).build()
             .check()) {
             // 处理人列表
@@ -228,7 +227,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList =
                     processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
                 if (CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-                    Map<String, String> customButtonMap = handler.getCustomButtonMapByConfigHashAndHandler(
+                    Map<String, String> customButtonMap = processStepUtilHandler.getCustomButtonMapByConfigHashAndHandler(
                         processTaskStepVo.getConfigHash(), processTaskStepVo.getHandler());
                     for (ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
                         String currentUser = UserContext.get().getUserUuid(true);
