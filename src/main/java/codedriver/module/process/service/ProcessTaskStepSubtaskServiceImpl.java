@@ -219,24 +219,31 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_COMPLETE.getValue(), processTaskContentVo.getHash()));
         }
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-        if(handler != null) {
-            handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
-            //记录活动
-            currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
-            handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETESUBTASK);
-            currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
-            List<ProcessTaskStepSubtaskContentVo> subtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
-            for(ProcessTaskStepSubtaskContentVo subtaskContent : subtaskContentList) {
-                if(subtaskContent.getAction().equals(ProcessTaskOperationType.SUBTASK_CREATE.getValue())) {
-                    processTaskStepSubtaskVo.setContent(subtaskContent.getContent());
-                }
-            }
-            currentProcessTaskStepVo.setCurrentSubtaskVo(processTaskStepSubtaskVo);
-            handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.COMPLETESUBTASK);
-        }else {
+        if(handler == null) {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
         }
+        handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
+        //记录活动
+        currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
+        handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETESUBTASK);
+        currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+        List<ProcessTaskStepSubtaskContentVo> subtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
+        for(ProcessTaskStepSubtaskContentVo subtaskContent : subtaskContentList) {
+            if(subtaskContent.getAction().equals(ProcessTaskOperationType.SUBTASK_CREATE.getValue())) {
+                processTaskStepSubtaskVo.setContent(subtaskContent.getContent());
+            }
+        }
+        currentProcessTaskStepVo.setCurrentSubtaskVo(processTaskStepSubtaskVo);
+        handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.COMPLETESUBTASK);
         
+        /** 判断当前步骤的所有子任务是否都完成了 **/
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
+        for(ProcessTaskStepSubtaskVo subtask : processTaskStepSubtaskList) {
+            if(!subtask.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue())) {
+                return;
+            }
+        }
+        handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.COMPLETEALLSUBTASK);
     }
 
     @Override
