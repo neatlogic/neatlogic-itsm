@@ -250,7 +250,7 @@ public class CatalogServiceImpl implements CatalogService {
         Integer maxRhtCode = catalogMapper.getMaxRhtCode();
         CatalogVo rootCatalog = new CatalogVo();
         rootCatalog.setUuid(CatalogVo.ROOT_UUID);
-        rootCatalog.setName("root");
+        rootCatalog.setName("所有");
         rootCatalog.setParentUuid(CatalogVo.ROOT_PARENTUUID);
         rootCatalog.setLft(1);
         rootCatalog.setRht(maxRhtCode == null ? 2 : maxRhtCode.intValue() + 1);
