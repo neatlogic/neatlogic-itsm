@@ -239,7 +239,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                                     if (!channelRelation.getTarget().equals(uuid)) {
                                                         if (channelMapper
                                                             .getActiveChannelCountByParentUuidAndChannelTypeUuidList(
-                                                                channelRelation.getTarget(), channelTypeUuidList) > 0) {
+                                                                uuid, channelTypeUuidList) > 0) {
                                                             return true;
                                                         }
                                                     }
