@@ -64,7 +64,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 	@Override
 	public JSONObject getConfig() {
 		JSONObject returnObj = new JSONObject();
-		returnObj.put("isMultiple", true);
+		returnObj.put("multiple", true);
 		return returnObj;
 	}
 
