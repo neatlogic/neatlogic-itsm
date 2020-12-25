@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.common.constvalue.*;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.condition.handler.ProcessTaskIsShowCondition;
 import org.springframework.stereotype.Service;
@@ -12,9 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.constvalue.Expression;
-import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
@@ -79,6 +77,32 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 				continue;
 			}
 			JSONObject commonObj = new JSONObject();
+			/**
+			 * initConfig用于控制组件的入参，例如控制user/role/team/search的返回值类型
+			 */
+			if(ProcessWorkcenterField.STEP_TEAM.getValue().equals(condition.getName())){
+				commonObj.put("initConfig",new JSONObject(){
+					{
+						this.put("excludeList",new JSONArray(){
+							{
+								this.add(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue());
+							}
+						});
+						this.put("groupList",new JSONArray(){
+							{
+								this.add(GroupSearch.COMMON.getValue());
+								this.add(GroupSearch.TEAM.getValue());
+							}
+						});
+						this.put("includeList",new JSONArray(){
+							{
+								this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_TEAM.getValue());
+								this.add(GroupSearch.TEAM.getValue() + UserType.LOGIN_DEPARTMENT.getValue());
+							}
+						});
+					}
+				});
+			}
 			commonObj.put("handler", condition.getName());
 			commonObj.put("handlerName", condition.getDisplayName());
 			commonObj.put("handlerType", condition.getHandler(conditionModel));

@@ -53,7 +53,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 
 	@Override
 	public String getHandler(String processWorkcenterConditionType) {
-		return FormHandlerType.TEAMSELECT.toString();
+		return FormHandlerType.USERSELECT.toString();
 	}
 	
 	@Override
@@ -64,7 +64,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 	@Override
 	public JSONObject getConfig() {
 		JSONObject returnObj = new JSONObject();
-		returnObj.put("isMultiple", true);
+		returnObj.put("multiple", true);
 		return returnObj;
 	}
 
