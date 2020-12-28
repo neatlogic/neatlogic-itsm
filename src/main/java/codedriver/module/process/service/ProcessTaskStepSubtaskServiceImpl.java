@@ -291,7 +291,9 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if(StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_COMMENT.getValue(), processTaskContentVo.getHash()));
+            ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_COMMENT.getValue(), processTaskContentVo.getHash());
+            processTaskStepSubtaskContentVo.setFcuVo(new UserVo(UserContext.get().getUserUuid()));
+            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(processTaskStepSubtaskContentVo);
         }
         List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
         Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();

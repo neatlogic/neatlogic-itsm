@@ -83,7 +83,7 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
         ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
         processTaskStepSubtaskVo.setProcessTaskId(processTaskId);
         processTaskStepSubtaskVo.setProcessTaskStepId(processTaskStepId);
-        processTaskStepSubtaskVo.setOwner(UserContext.get().getUserUuid(true));
+        processTaskStepSubtaskVo.setOwnerVo(new UserVo(UserContext.get().getUserUuid(true)));
         String workerList = jsonObj.getString("workerList");
         jsonObj.remove("workerList");
         String[] split = workerList.split("#");

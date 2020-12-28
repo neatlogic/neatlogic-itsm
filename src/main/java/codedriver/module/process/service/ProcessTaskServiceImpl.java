@@ -923,7 +923,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
                     processTaskStepUserVo.setProcessTaskId(processTaskId);
                     processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);
-                    processTaskStepUserVo.setUserUuid(userUuid);
+                    processTaskStepUserVo.setUserVo(new UserVo(userUuid));
                     for (int j = 0; j < acceptList.size(); j++) {
                         String accept = acceptList.getString(j);
                         String[] split = accept.split("#");
