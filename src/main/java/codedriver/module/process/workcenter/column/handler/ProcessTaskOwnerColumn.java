@@ -1,5 +1,6 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,18 +30,17 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
-		JSONObject userJson = new JSONObject();
+//		JSONObject userJson = new JSONObject();
 		String userUuid = json.getString(this.getName());
 		UserVo userVo =userMapper.getUserBaseInfoByUuid(userUuid.replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
-		if(userVo != null) {
-			userJson.put("username", userVo.getUserName());
-			//获取用户头像
-			userJson.put("avatar", userVo.getAvatar());
-			//获取用户VIP等级
-			userJson.put("vipLevel",userVo.getVipLevel());
-		}
-		userJson.put("useruuid", userUuid);
-		return userJson;
+//		if(userVo != null) {
+//			userJson.put("username", userVo.getUserName());
+//			//获取用户头像
+//			userJson.put("avatar", userVo.getAvatar());
+//			//获取用户VIP等级
+//			userJson.put("vipLevel",userVo.getVipLevel());
+//		}
+		return userVo != null ? JSON.parseObject(JSONObject.toJSONString(userVo)) : null;
 	}
 	
 	@Override
@@ -80,7 +80,7 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 	public Object getSimpleValue(Object json) {
 		String userName = null;
 		if(json != null){
-			userName = JSONObject.parseObject(json.toString()).getString("username");
+			userName = JSONObject.parseObject(json.toString()).getString("userName");
 		}
 		return userName;
 	}
