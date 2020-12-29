@@ -239,7 +239,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         /** 判断当前步骤的所有子任务是否都完成了 **/
         List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
         for(ProcessTaskStepSubtaskVo subtask : processTaskStepSubtaskList) {
-            if(!subtask.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue())) {
+            if(!subtask.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue()) && !subtask.getStatus().equals(ProcessTaskStatus.ABORTED.getValue())) {
                 return;
             }
         }
