@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -25,6 +27,7 @@ import codedriver.module.process.service.ProcessTaskService;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
+@AuthAction(action = NO_AUTH.class)
 public class ProcessTaskStartApi extends PrivateApiComponentBase {
     
     @Autowired
@@ -63,7 +66,7 @@ public class ProcessTaskStartApi extends PrivateApiComponentBase {
 		}
 		String action = jsonObj.getString("action");
         try {
-            if(ProcessTaskOperationType.ACCEPT.getValue().equals(action)) {
+            if(ProcessTaskOperationType.STEP_ACCEPT.getValue().equals(action)) {
                 handler.accept(processTaskStepVo);
             }
             handler.start(processTaskStepVo);

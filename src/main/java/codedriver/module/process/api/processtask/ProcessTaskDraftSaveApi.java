@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.constvalue.ProcessStepType;
@@ -34,6 +36,7 @@ import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = NO_AUTH.class)
 public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 
 	@Autowired
@@ -126,7 +129,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 			startTaskStep = processTaskStepList.get(0);
 		}else {
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
-            if(!catalogService.channelIsAuthority(channelUuid)){
+            if(!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))){
                 //throw new ProcessTaskNoPermissionException("上报");
                 throw new PermissionDeniedException();
             }

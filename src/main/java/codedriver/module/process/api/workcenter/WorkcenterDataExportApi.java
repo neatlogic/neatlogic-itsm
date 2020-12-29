@@ -11,6 +11,9 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.ExcelUtil;
 import codedriver.module.process.service.WorkcenterService;
+import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepColumn;
+import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
+import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.QueryResultSet;
@@ -86,7 +89,24 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 		/** 获取表头 */
 		List<WorkcenterTheadVo> theadList = workcenterService.getWorkcenterTheadList(workcenterVo, columnComponentMap,null);
 		if(CollectionUtils.isNotEmpty(theadList)){
-			theadList = theadList.stream().filter(o -> o.getDisabled() == 0).sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
+			/** 如果勾选了当前步骤，却没有勾选当前步骤名与当前步骤处理人，自动加上 */
+			if(theadList.stream()
+					.anyMatch(o -> o.getName()
+							.equals(new ProcessTaskCurrentStepColumn().getName()) && o.getIsShow() == 1)){
+				IProcessTaskColumn stepNameColumn = new ProcessTaskCurrentStepNameColumn();
+				IProcessTaskColumn stepWorkerColumn = new ProcessTaskCurrentStepWorkerColumn();
+				if(theadList.stream()
+						.noneMatch(o -> o.getName().equals(stepNameColumn.getName()) && o.getIsShow() == 1)){
+					theadList.add(new WorkcenterTheadVo(stepNameColumn));
+				}
+				if(theadList.stream()
+						.noneMatch(o -> o.getName().equals(stepWorkerColumn.getName()) && o.getIsShow() == 1)){
+					theadList.add(new WorkcenterTheadVo(stepWorkerColumn));
+				}
+			}
+			theadList = theadList.stream()
+					.filter(o -> o.getDisabled() == 0 && o.getIsExport() == 1 && o.getIsShow() == 1)
+					.sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
 		}
 
 		List<Map<String,Object>> list = new ArrayList<>();
@@ -114,7 +134,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 
 		SXSSFWorkbook workbook = new SXSSFWorkbook();
 		ExcelUtil.exportData(workbook,headList.stream().collect(Collectors.toList()), columnList.stream().collect(Collectors.toList()), list,new Integer(35),0);
-		String fileNameEncode = StringUtils.isNotBlank(title) ? title : "工单数据" + ".xlsx";
+		String fileNameEncode = (StringUtils.isNotBlank(title) ? title : "工单数据") + ".xlsx";
 		Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
 		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器

@@ -18,7 +18,7 @@ public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProce
 
 	@Override
 	public String getDisplayName() {
-		return "工单号";
+		return "工单id";
 	}
 
 	@Override
@@ -54,4 +54,14 @@ public class ProcessTaskIdColumn extends ProcessTaskColumnBase implements IProce
 		}
 		return null;
 	}
+	
+	@Override
+    public Boolean getDisabled() {
+        return true;
+    }
+	
+	@Override
+    public Boolean getMyIsShow() {
+        return false;
+    }
 }

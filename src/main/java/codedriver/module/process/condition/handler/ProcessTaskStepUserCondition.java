@@ -2,12 +2,9 @@ package codedriver.module.process.condition.handler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +23,6 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Component
 public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -83,16 +78,16 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 	@Override
 	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
 		ConditionVo condition = conditionList.get(index);
-		List<ConditionVo> stepStatusConditionList = conditionList.stream().filter(con->con.getName().equals(ProcessWorkcenterField.STEP_STATUS.getValue())).collect(Collectors.toList());
-		if(CollectionUtils.isNotEmpty(stepStatusConditionList)) {
-			ConditionVo stepStatusCondition = stepStatusConditionList.get(0);
-			List<String> stepStatusValueList = new ArrayList<>();
-			if(stepStatusCondition.getValueList() instanceof String) {
-				stepStatusValueList.add((String)stepStatusCondition.getValueList());
-			}else if(stepStatusCondition.getValueList() instanceof List){
-				List<String> valueList = JSON.parseArray(JSON.toJSONString(stepStatusCondition.getValueList()), String.class);
-				stepStatusValueList.addAll(valueList);
-			}
+		//List<ConditionVo> stepStatusConditionList = conditionList.stream().filter(con->con.getName().equals(ProcessWorkcenterField.STEP_STATUS.getValue())).collect(Collectors.toList());
+		//if(CollectionUtils.isNotEmpty(stepStatusConditionList)) {
+			//ConditionVo stepStatusCondition = stepStatusConditionList.get(0);
+//			List<String> stepStatusValueList = new ArrayList<>();
+//			if(stepStatusCondition.getValueList() instanceof String) {
+//				stepStatusValueList.add((String)stepStatusCondition.getValueList());
+//			}else if(stepStatusCondition.getValueList() instanceof List){
+//				List<String> valueList = JSON.parseArray(JSON.toJSONString(stepStatusCondition.getValueList()), String.class);
+//				stepStatusValueList.addAll(valueList);
+//			}
 			List<String> stepUserValueList = new ArrayList<>();
 			if(condition.getValueList() instanceof String) {
 				stepUserValueList.add((String)condition.getValueList());
@@ -105,13 +100,13 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 			    if(user.equals(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue())) {
 			        user = GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid();
                 }
-				for(String stepStatus : stepStatusValueList) {
+				//for(String stepStatus : stepStatusValueList) {
 					userList.add(user);
 					//如果是待处理状态，则需额外匹配角色和组
-					if(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())) {
+					//if(stepStatus.equals(ProcessTaskStatus.PENDING.getValue())) {
 						UserVo userVo = userMapper.getUserByUuid(user.replace(GroupSearch.USER.getValuePlugin(),""));
 						if(userVo != null) {
-							List<String> teamList = userVo.getTeamNameList();
+							List<String> teamList = userVo.getTeamUuidList();
 							if(CollectionUtils.isNotEmpty(teamList)) {
 								for(String team : teamList) {
 									userList.add(GroupSearch.TEAM.getValuePlugin()+team);
@@ -124,32 +119,33 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 								}
 							}
 						}
-					}
+					//}
 					
-				}
+				//}
 			}
 			String value = String.join("','",userList);
-			return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),String.format("'%s'",  value));
-		}else {
-		    List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-	        //替换“当前登录人标识”为当前登录用户 
-	        String loginUser = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue();
-	        if(valueList.contains(loginUser)) {
-	            Iterator<String>  valueIterator = valueList.iterator();
-	            if(valueIterator.hasNext()) {
-	                String value = valueIterator.next();
-	                if(value.equals(loginUser)) {
-	                    valueIterator.remove();
-	                    valueList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
-	                }
-	            }
-	        }
-	        String value = String.join("','", valueList);
-	        if(StringUtils.isNotBlank(value.toString())) {
-	            value = String.format("'%s'",  value);
-	        }
-	        return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),value);
-		}
+			//排除开始节点的处理人
+			return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),String.format("'%s'",  value))+" and not common.step.usertypelist.type = 'start' ";
+//		}else {
+//		    List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+//	        //替换“当前登录人标识”为当前登录用户 
+//	        String loginUser = GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue();
+//	        if(valueList.contains(loginUser)) {
+//	            Iterator<String>  valueIterator = valueList.iterator();
+//	            if(valueIterator.hasNext()) {
+//	                String value = valueIterator.next();
+//	                if(value.equals(loginUser)) {
+//	                    valueIterator.remove();
+//	                    valueList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
+//	                }
+//	            }
+//	        }
+//	        String value = String.join("','", valueList);
+//	        if(StringUtils.isNotBlank(value.toString())) {
+//	            value = String.format("'%s'",  value);
+//	        }
+//	        return String.format(Expression.INCLUDE.getExpressionEs(),this.getEsName(),value);
+//		}
 	}
 
 	@Override

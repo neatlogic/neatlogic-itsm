@@ -88,6 +88,9 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 				}
 				processStepVo.setWorkerPolicyList(workerPolicyList);
 			}
+			//保存回复模版ID
+			Long commentTemplateId = workerPolicyConfig.getLong("commentTemplateId");
+			processStepVo.setCommentTemplateId(commentTemplateId);
 		}
 	}
 
@@ -189,9 +192,9 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		/** 授权 **/
 		JSONArray authorityArray = new JSONArray();
 		ProcessTaskOperationType[] stepActions = {
-				ProcessTaskOperationType.VIEW, 
-				ProcessTaskOperationType.TRANSFERCURRENTSTEP, 
-                ProcessTaskOperationType.RETREATCURRENTSTEP
+				ProcessTaskOperationType.STEP_VIEW, 
+				ProcessTaskOperationType.STEP_TRANSFER, 
+                ProcessTaskOperationType.STEP_RETREAT
 		};
 		for(ProcessTaskOperationType stepAction : stepActions) {
 			authorityArray.add(new JSONObject() {{
@@ -221,13 +224,13 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		/** 按钮映射列表 **/
 		JSONArray customButtonArray = new JSONArray();
 		ProcessTaskOperationType[] stepButtons = {
-				ProcessTaskOperationType.COMPLETE, 
-				ProcessTaskOperationType.BACK, 
-				ProcessTaskOperationType.COMMENT, 
-				ProcessTaskOperationType.TRANSFER, 
-				ProcessTaskOperationType.START,
-				ProcessTaskOperationType.ABORTPROCESSTASK, 
-				ProcessTaskOperationType.RECOVERPROCESSTASK
+				ProcessTaskOperationType.STEP_COMPLETE, 
+				ProcessTaskOperationType.STEP_BACK, 
+				ProcessTaskOperationType.STEP_COMMENT, 
+				ProcessTaskOperationType.TASK_TRANSFER, 
+				ProcessTaskOperationType.STEP_START,
+				ProcessTaskOperationType.TASK_ABORT, 
+				ProcessTaskOperationType.TASK_RECOVER
 		};
 		for(ProcessTaskOperationType stepButton : stepButtons) {
 			customButtonArray.add(new JSONObject() {{
@@ -238,12 +241,12 @@ public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
 		}
 		/** 子任务按钮映射列表 **/
 		ProcessTaskOperationType[] subtaskButtons = {
-				ProcessTaskOperationType.ABORTSUBTASK, 
-				ProcessTaskOperationType.COMMENTSUBTASK, 
-				ProcessTaskOperationType.COMPLETESUBTASK, 
-				ProcessTaskOperationType.CREATESUBTASK, 
-				ProcessTaskOperationType.REDOSUBTASK, 
-				ProcessTaskOperationType.EDITSUBTASK
+				ProcessTaskOperationType.SUBTASK_ABORT, 
+				ProcessTaskOperationType.SUBTASK_COMMENT, 
+				ProcessTaskOperationType.SUBTASK_COMPLETE, 
+				ProcessTaskOperationType.SUBTASK_CREATE, 
+				ProcessTaskOperationType.SUBTASK_REDO, 
+				ProcessTaskOperationType.SUBTASK_EDIT
 		};
 		for(ProcessTaskOperationType subtaskButton : subtaskButtons) {
 			customButtonArray.add(new JSONObject() {{

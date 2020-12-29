@@ -33,7 +33,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.condition.handler.ProcessTaskIdCondition;
+import codedriver.module.process.condition.handler.ProcessTaskSerialNumberCondition;
 import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 import codedriver.module.process.service.WorkcenterService;
 
@@ -75,7 +75,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
         if (isCombine != null && isCombine == 0) {
             List<IProcessTaskCondition> conditionList = new ArrayList<IProcessTaskCondition>();
             conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.TITLE.getValue()));
-            conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.ID.getValue()));
+            conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.SERIAL_NUMBER.getValue()));
             return getKeywordOptionMB(conditionList, keyword, jsonObj.getInteger("pageSize"));
         }
         return getKeywordOptionsPC(keyword, jsonObj.getInteger("pageSize"));
@@ -172,7 +172,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
         // 搜索标题
         JSONArray returnArray = getKeywordOptionPC(new ProcessTaskTitleCondition(), keyword, pageSize);
         // 搜索ID
-        returnArray.addAll(getKeywordOptionPC(new ProcessTaskIdCondition(), keyword, pageSize));
+        returnArray.addAll(getKeywordOptionPC(new ProcessTaskSerialNumberCondition(), keyword, pageSize));
         return returnArray;
     }
 

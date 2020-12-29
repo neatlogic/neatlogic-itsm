@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessSlaVo;
@@ -21,11 +22,13 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.module.process.auth.label.PROCESS_MODIFY;
 import codedriver.module.process.service.ProcessService;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = PROCESS_MODIFY.class)
 public class ProcessCopyApi extends PrivateApiComponentBase {
 
 	@Autowired

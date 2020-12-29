@@ -49,10 +49,10 @@ public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implem
 		/** 新数据结构，参考前端表单数据结构**/
 		config.put("type", FormHandlerType.SELECT.toString());
 		config.put("search", true);
-		config.put("url", "api/rest/process/channel/search");
-		config.put("rootName", "channelList");
-		config.put("valueName", "uuid");
-		config.put("textName", "name");
+		config.put("dynamicUrl", "api/rest/process/channel/search/forselect");
+		config.put("rootName", "list");
+		config.put("valueName", "value");
+		config.put("textName", "text");
 		config.put("multiple", true);
 		config.put("value", "");
 		config.put("defaultValue", "");
@@ -64,8 +64,8 @@ public class ProcessTaskChannelCondition extends ProcessTaskConditionBase implem
 		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
 		config.put("isMultiple", true);
 		JSONObject mappingObj = new JSONObject();
-		mappingObj.put("value", "uuid");
-		mappingObj.put("text", "name");
+		mappingObj.put("value", "value");
+		mappingObj.put("text", "text");
 		config.put("mapping", mappingObj);
 		return config;
 	}

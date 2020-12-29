@@ -1,6 +1,8 @@
 package codedriver.module.process.api.agent;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.DELETE)
+@AuthAction(action = NO_AUTH.class)
 public class UserAgentDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired

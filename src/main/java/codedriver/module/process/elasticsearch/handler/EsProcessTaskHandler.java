@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.QueryResultSet;
 import com.techsure.multiattrsearch.query.QueryResult;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
@@ -28,6 +29,7 @@ import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -54,7 +56,7 @@ import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.service.WorkcenterService;
 
 @Service
-public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo, QueryResult> {
+public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo, Object> {
     Logger logger = LoggerFactory.getLogger(EsProcessTaskHandler.class);
 
     @Autowired
@@ -143,6 +145,10 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
      * 获取设备（移动端|pc端）服务过滤条件
      */
     private String getChannelDeviceCondition(WorkcenterVo workcenterVo,String where) {
+        //如果是pc端，则可以查看所有工单，包括移动端的
+        if(DeviceType.PC.getValue().equals(workcenterVo.getDevice())) {
+            return where;
+        }
         String deviceCondition = StringUtils.EMPTY;
         ChannelVo channelVo = new ChannelVo();
         channelVo.setSupport(workcenterVo.getDevice());
@@ -266,7 +272,7 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
     
     /**
      * 拼接where条件
-     * 
+     * TODO 需重构
      * @param workcenterVo
      * @return
      */
@@ -312,8 +318,10 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
             int nestedBasisCount = 0;
             for (int i = 0; i < conditionList.size(); i++) {
                 ConditionVo condition = conditionList.get(i);
-                // 关于我的 必定会 nested
-                if (condition.getName().endsWith(ProcessWorkcenterField.ABOUTME.getValue())) {
+                // 关于我的 或 当前组/部 必定会 nested
+                if (condition.getName().endsWith(ProcessWorkcenterField.ABOUTME.getValue())
+                    ||condition.getValueList().toString().contains(GroupSearch.COMMON.getValuePlugin()+UserType.LOGIN_DEPARTMENT.getValue())
+                    ||condition.getValueList().toString().contains(GroupSearch.COMMON.getValuePlugin()+UserType.LOGIN_TEAM.getValue())) {
                     nestedBasisCount = nestedBasisCount + 2;
                 }
                 String[] valueList = null;
@@ -475,6 +483,12 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
 
     @Override
     protected QueryResult makeupQueryResult(WorkcenterVo workcenterVo, QueryResult result) {
+        return result;
+    }
+
+    @Override
+    protected QueryResultSet makeupQueryIterateResult(WorkcenterVo t, QueryResultSet result) {
+        // TODO Auto-generated method stub
         return result;
     }
 

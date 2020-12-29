@@ -54,9 +54,10 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         processTaskStepSubtaskMapper.insertProcessTaskStepSubtask(processTaskStepSubtaskVo);
         paramObj.put("processTaskStepSubtaskId", processTaskStepSubtaskVo.getId());
         String content = paramObj.getString("content");
+        processTaskStepSubtaskVo.setContent(content);
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
         processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-        processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.CREATESUBTASK.getValue(), processTaskContentVo.getHash()));
+        processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_CREATE.getValue(), processTaskContentVo.getHash()));
 
         ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
         if(currentProcessTaskStepVo == null) {
@@ -76,6 +77,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             currentProcessTaskStepVo.setParamObj(paramObj);
             handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.CREATESUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+            currentProcessTaskStepVo.setCurrentSubtaskVo(processTaskStepSubtaskVo);
             handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.CREATESUBTASK);
         }else {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
@@ -93,7 +95,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         }
         List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(oldProcessTaskStepSubtask.getId());
         for(ProcessTaskStepSubtaskContentVo subtaskContentVo : processTaskStepSubtaskContentList) {
-            if(ProcessTaskOperationType.CREATESUBTASK.getValue().equals(subtaskContentVo.getAction())) {
+            if(ProcessTaskOperationType.SUBTASK_CREATE.getValue().equals(subtaskContentVo.getAction())) {
                 oldProcessTaskStepSubtask.setContentHash(subtaskContentVo.getContentHash());
             }
         }
@@ -102,7 +104,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         paramObj.remove("content");
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
         processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-        processTaskStepSubtaskMapper.updateProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(oldProcessTaskStepSubtask.getId(), ProcessTaskOperationType.CREATESUBTASK.getValue(), processTaskContentVo.getHash()));
+        processTaskStepSubtaskMapper.updateProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(oldProcessTaskStepSubtask.getId(), ProcessTaskOperationType.SUBTASK_CREATE.getValue(), processTaskContentVo.getHash()));
         ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
         processTaskStepSubtaskVo.setId(oldProcessTaskStepSubtask.getId());
         processTaskStepSubtaskVo.setContentHash(processTaskContentVo.getHash());
@@ -153,6 +155,8 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             currentProcessTaskStepVo.setParamObj(paramObj);
             handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.EDITSUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+            processTaskStepSubtaskVo.setContent(content);
+            currentProcessTaskStepVo.setCurrentSubtaskVo(processTaskStepSubtaskVo);
             handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.EDITSUBTASK);
         }else {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
@@ -174,7 +178,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if(StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.REDOSUBTASK.getValue(), processTaskContentVo.getHash()));
+            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_REDO.getValue(), processTaskContentVo.getHash()));
         }
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if(handler != null) {
@@ -183,6 +187,13 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
             handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.REDOSUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+            List<ProcessTaskStepSubtaskContentVo> subtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
+            for(ProcessTaskStepSubtaskContentVo subtaskContent : subtaskContentList) {
+                if(subtaskContent.getAction().equals(ProcessTaskOperationType.SUBTASK_CREATE.getValue())) {
+                    processTaskStepSubtaskVo.setContent(subtaskContent.getContent());
+                }
+            }
+            currentProcessTaskStepVo.setCurrentSubtaskVo(processTaskStepSubtaskVo);
             handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.REDOSUBTASK);
         }else {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
@@ -205,20 +216,34 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if(StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.COMPLETESUBTASK.getValue(), processTaskContentVo.getHash()));
+            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_COMPLETE.getValue(), processTaskContentVo.getHash()));
         }
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-        if(handler != null) {
-            handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
-            //记录活动
-            currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
-            handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETESUBTASK);
-            currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
-            handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.COMPLETESUBTASK);
-        }else {
+        if(handler == null) {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
         }
+        handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
+        //记录活动
+        currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
+        handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETESUBTASK);
+        currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+        List<ProcessTaskStepSubtaskContentVo> subtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
+        for(ProcessTaskStepSubtaskContentVo subtaskContent : subtaskContentList) {
+            if(subtaskContent.getAction().equals(ProcessTaskOperationType.SUBTASK_CREATE.getValue())) {
+                processTaskStepSubtaskVo.setContent(subtaskContent.getContent());
+            }
+        }
+        currentProcessTaskStepVo.setCurrentSubtaskVo(processTaskStepSubtaskVo);
+        handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.COMPLETESUBTASK);
         
+        /** 判断当前步骤的所有子任务是否都完成了 **/
+        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
+        for(ProcessTaskStepSubtaskVo subtask : processTaskStepSubtaskList) {
+            if(!subtask.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue())) {
+                return;
+            }
+        }
+        handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.COMPLETEALLSUBTASK);
     }
 
     @Override
@@ -240,6 +265,13 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
             handler.activityAudit(currentProcessTaskStepVo, ProcessTaskAuditType.ABORTSUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
+            List<ProcessTaskStepSubtaskContentVo> subtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
+            for(ProcessTaskStepSubtaskContentVo subtaskContent : subtaskContentList) {
+                if(subtaskContent.getAction().equals(ProcessTaskOperationType.SUBTASK_CREATE.getValue())) {
+                    processTaskStepSubtaskVo.setContent(subtaskContent.getContent());
+                }
+            }
+            currentProcessTaskStepVo.setCurrentSubtaskVo(processTaskStepSubtaskVo);
             handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.ABORTSUBTASK);
         }else {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
@@ -259,14 +291,14 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if(StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.COMMENTSUBTASK.getValue(), processTaskContentVo.getHash()));
+            processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_COMMENT.getValue(), processTaskContentVo.getHash()));
         }
         List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
         Iterator<ProcessTaskStepSubtaskContentVo> iterator = processTaskStepSubtaskContentList.iterator();
         while(iterator.hasNext()) {
             ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
             if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-                if(ProcessTaskOperationType.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+                if(ProcessTaskOperationType.SUBTASK_CREATE.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
                     processTaskStepSubtaskVo.setContent(processTaskStepSubtaskContentVo.getContent());
                     iterator.remove();
                 }
@@ -284,7 +316,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             while(iterator.hasNext()) {
                 ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = iterator.next();
                 if(processTaskStepSubtaskContentVo != null && processTaskStepSubtaskContentVo.getContentHash() != null) {
-                    if(ProcessTaskOperationType.CREATESUBTASK.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
+                    if(ProcessTaskOperationType.SUBTASK_CREATE.getValue().equals(processTaskStepSubtaskContentVo.getAction())) {
                         processTaskStepSubtask.setContent(processTaskStepSubtaskContentVo.getContent());
                         iterator.remove();
                     }

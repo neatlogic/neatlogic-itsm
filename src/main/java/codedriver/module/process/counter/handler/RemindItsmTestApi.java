@@ -1,10 +1,14 @@
 package codedriver.module.process.counter.handler;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
 import codedriver.framework.reminder.core.IGlobalReminderHandler;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.reminder.dto.ReminderMessageVo;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.reminder.handler.ProcessTaskRemindHandler;
@@ -21,6 +25,8 @@ import java.util.List;
  * @create: 2019-12-13 18:24
  **/
 @Service
+@OperationType(type = OperationTypeEnum.OPERATE)
+@AuthAction(action = NO_AUTH.class)
 public class RemindItsmTestApi extends PrivateApiComponentBase {
 
     @Override

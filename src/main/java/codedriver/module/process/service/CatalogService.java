@@ -30,7 +30,7 @@ public interface CatalogService {
 	* @param channelUuid
 	* @return boolean
 	 */
-	public boolean channelIsAuthority(String channelUuid);
+	public boolean channelIsAuthority(String channelUuid, String userUuid);
 	/**
 	 * 获取服务目录底下的服务目录&&服务
 	 * @param catalog

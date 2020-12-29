@@ -3,6 +3,7 @@ package codedriver.module.process.api.channeltype.relation;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.CATALOG_MODIFY;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
@@ -20,6 +22,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNot
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
 @Transactional
+@AuthAction(action = CATALOG_MODIFY.class)
 public class ChannelTypeRelationSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
