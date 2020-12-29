@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import codedriver.framework.dto.UserVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -230,7 +229,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
             stepDataJson.put("isStepUser",
                 processTaskMapper
                     .checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(),
-                        processTaskStepVo.getId(), new UserVo(UserContext.get().getUserUuid()))) > 0 ? 1 : 0);
+                        processTaskStepVo.getId(), UserContext.get().getUserUuid())) > 0 ? 1 : 0);
             processTaskStepVo.setProcessTaskStepData(stepDataJson);
         }
     }
