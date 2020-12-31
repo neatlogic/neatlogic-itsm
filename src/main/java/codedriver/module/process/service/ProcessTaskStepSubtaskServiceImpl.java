@@ -293,7 +293,6 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
             ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_COMMENT.getValue(), processTaskContentVo.getHash());
-            processTaskStepSubtaskContentVo.setFcuVo(new UserVo(UserContext.get().getUserUuid()));
             processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(processTaskStepSubtaskContentVo);
         }
         List<ProcessTaskStepSubtaskContentVo> processTaskStepSubtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
