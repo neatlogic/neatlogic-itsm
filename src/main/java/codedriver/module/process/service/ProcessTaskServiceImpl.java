@@ -1076,6 +1076,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     processTaskStepRemindVo.setContent(pattern_html.matcher(content).replaceAll(""));
                 }
             }
+            UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepRemindVo.getFcu());
+            if(userVo != null){
+                UserVo vo = new UserVo();
+                BeanUtils.copyProperties(userVo,vo);
+                processTaskStepRemindVo.setFcuVo(vo);
+            }
         }
         return processTaskStepRemindList;
     }
