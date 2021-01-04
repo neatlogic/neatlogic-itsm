@@ -16,6 +16,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -250,16 +251,24 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (StringUtils.isNotBlank(processTaskStepReplyVo.getLcu())) {
             UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepReplyVo.getLcu());
             if (user != null) {
-                processTaskStepReplyVo.setLcuName(user.getUserName());
-                processTaskStepReplyVo.setLcuInfo(user.getUserInfo());
-                processTaskStepReplyVo.setLcuVipLevel(user.getVipLevel());
+                //使用新对象，防止缓存
+                UserVo vo = new UserVo();
+                BeanUtils.copyProperties(user,vo);
+                processTaskStepReplyVo.setLcuVo(vo);
+//                processTaskStepReplyVo.setLcuName(user.getUserName());
+//                processTaskStepReplyVo.setLcuInfo(user.getUserInfo());
+//                processTaskStepReplyVo.setLcuVipLevel(user.getVipLevel());
             }
         }
         UserVo user = userMapper.getUserBaseInfoByUuid(processTaskStepReplyVo.getFcu());
         if (user != null) {
-            processTaskStepReplyVo.setFcuName(user.getUserName());
-            processTaskStepReplyVo.setFcuInfo(user.getUserInfo());
-            processTaskStepReplyVo.setFcuVipLevel(user.getVipLevel());
+            //使用新对象，防止缓存
+            UserVo vo = new UserVo();
+            BeanUtils.copyProperties(user,vo);
+            processTaskStepReplyVo.setFcuVo(vo);
+//            processTaskStepReplyVo.setFcuName(user.getUserName());
+//            processTaskStepReplyVo.setFcuInfo(user.getUserInfo());
+//            processTaskStepReplyVo.setFcuVipLevel(user.getVipLevel());
         }
     }
 
@@ -923,7 +932,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
                     processTaskStepUserVo.setProcessTaskId(processTaskId);
                     processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);
-                    processTaskStepUserVo.setUserUuid(userUuid);
+                    processTaskStepUserVo.setUserVo(new UserVo(userUuid));
                     for (int j = 0; j < acceptList.size(); j++) {
                         String accept = acceptList.getString(j);
                         String[] split = accept.split("#");
@@ -1066,6 +1075,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     }                   
                     processTaskStepRemindVo.setContent(pattern_html.matcher(content).replaceAll(""));
                 }
+            }
+            UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepRemindVo.getFcu());
+            if(userVo != null){
+                UserVo vo = new UserVo();
+                BeanUtils.copyProperties(userVo,vo);
+                processTaskStepRemindVo.setFcuVo(vo);
             }
         }
         return processTaskStepRemindList;
