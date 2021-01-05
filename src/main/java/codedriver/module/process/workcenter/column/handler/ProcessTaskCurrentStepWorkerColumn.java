@@ -114,7 +114,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                                                 JSONObject vo = new JSONObject();
                                                 vo.put("initType",GroupSearch.ROLE.getValue());
                                                 vo.put("uuid",roleVo.getUuid());
-                                                vo.put("userName",roleVo.getName());
+                                                vo.put("name",roleVo.getName());
                                                 roleJson.put("workerVo",vo);
 //                                                roleJson.put("type", GroupSearch.ROLE.getValue());
 //                                                roleJson.put("worker", roleVo.getUuid());
@@ -128,7 +128,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                                                 JSONObject vo = new JSONObject();
                                                 vo.put("initType",GroupSearch.TEAM.getValue());
                                                 vo.put("uuid",teamVo.getUuid());
-                                                vo.put("userName",teamVo.getName());
+                                                vo.put("name",teamVo.getName());
                                                 teamJson.put("workerVo",vo);
 //                                                teamJson.put("type", GroupSearch.TEAM.getValue());
 //                                                teamJson.put("worker", teamVo.getUuid());
@@ -180,7 +180,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
 			JSONArray array = JSONArray.parseArray(json.toString());
 			if(CollectionUtils.isNotEmpty(array)){
 				for(int i = 0;i < array.size();i++){
-					sb.append(array.getJSONObject(i).getJSONObject("workerVo").getString("userName") + ";");
+					sb.append(array.getJSONObject(i).getJSONObject("workerVo").getString("name") + ";");
 				}
 			}
 		}
