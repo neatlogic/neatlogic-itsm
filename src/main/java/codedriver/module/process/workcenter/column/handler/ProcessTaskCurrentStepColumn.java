@@ -104,7 +104,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 												JSONObject vo = new JSONObject();
 												vo.put("initType",GroupSearch.ROLE.getValue());
 												vo.put("uuid",roleVo.getUuid());
-												vo.put("userName",roleVo.getName());
+												vo.put("name",roleVo.getName());
 												userArrayTmp.add(vo);
 											}
 										}else if(user.toString().startsWith(GroupSearch.TEAM.getValuePlugin())) {
@@ -113,7 +113,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 												JSONObject vo = new JSONObject();
 												vo.put("initType",GroupSearch.TEAM.getValue());
 												vo.put("uuid",teamVo.getUuid());
-												vo.put("userName",teamVo.getName());
+												vo.put("name",teamVo.getName());
 												userArrayTmp.add(vo);
 											}
 										}
