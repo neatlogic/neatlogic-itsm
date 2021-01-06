@@ -6,6 +6,7 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.notify.core.INotifyHandler;
 import codedriver.framework.notify.core.NotifyContentHandlerBase;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
@@ -16,13 +17,11 @@ import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.notify.handler.EmailNotifyHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
-import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.service.WorkcenterService;
+import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -30,6 +29,7 @@ import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.QueryResultSet;
 import com.techsure.multiattrsearch.query.QueryResult;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,8 +43,13 @@ import java.util.stream.Collectors;
 @Component
 public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 
+	private Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+
 	@Autowired
 	private NotifyJobMapper notifyJobMapper;
+
+	@Autowired
+	private UserMapper userMapper;
 
 	@Autowired
 	WorkcenterService workcenterService;
@@ -196,51 +201,132 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 		if(notifyHandler == null){
 			throw new NotifyHandlerNotFoundException(job.getNotifyHandler());
 		}
-		// TODO 根据通知方式和配置获取工单数据并组装成消息内容，通知方式不一样消息内容也不一样，最后要按接收人分类
 		String config = job.getConfig();
 
-		JSONArray dataColumnList = (JSONArray)JSONPath.read(config, "dataColumnList");
+		/** 需要的工单字段 */
+		JSONArray dataColumns = (JSONArray)JSONPath.read(config, "dataColumnList");
+		List<String> columnList = new ArrayList<>();
+		if(CollectionUtils.isNotEmpty(dataColumns)){
+			dataColumns.stream().forEach(o -> columnList.add(columnComponentMap.get(o.toString()).getDisplayName()));
+		}
 
 		/** 组装工单查询参数 */
-		JSONArray conditionGroupList = getConditionList(config);
-		JSONObject conditionObj = new JSONObject();
-		conditionObj.put("conditionGroupList",conditionGroupList);
+		JSONObject conditionObj = getConditionList(config);
 		WorkcenterVo workcenterVo = new WorkcenterVo(conditionObj);
 		QueryResultSet resultSet = workcenterService.searchTaskIterate(workcenterVo);
 
-		Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+
 		List<WorkcenterTheadVo> theadList = workcenterService.getWorkcenterTheadList(workcenterVo, columnComponentMap,null);
 		theadList = theadList.stream()
 				.filter(o -> o.getDisabled() == 0 && o.getIsExport() == 1 && o.getIsShow() == 1)
 				.sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
-		List<Map<String,Object>> list = new ArrayList<>();
 
-		while(resultSet.hasMoreResults()){
+		/**
+		 * 构造原始工单数据(字段中文名->值)
+		 */
+		List<Map<String,Object>> originalTaskList = new ArrayList<>();
+		while (resultSet.hasMoreResults()) {
 			QueryResult result = resultSet.fetchResult();
-			if(!result.getData().isEmpty()){
-				for(MultiAttrsObject el : result.getData()){
-					Map<String,Object> map = new LinkedHashMap<>();
-					if(CollectionUtils.isNotEmpty(dataColumnList)){
-						for(Object columnName : dataColumnList){
-							IProcessTaskColumn column = columnComponentMap.get(columnName.toString());
-							Object value = column.getSimpleValue(column.getValue(el));
-							map.put(column.getDisplayName(),value);
-						}
-					}else{
-						for(WorkcenterTheadVo vo : theadList){
-							IProcessTaskColumn column = columnComponentMap.get(vo.getName());
-							Object value = column.getSimpleValue(column.getValue(el));
-							map.put(column.getDisplayName(),value);
+			if (!result.getData().isEmpty()) {
+				for (MultiAttrsObject el : result.getData()) {
+					Map<String, Object> map = new LinkedHashMap<>();
+					for (WorkcenterTheadVo vo : theadList) {
+						IProcessTaskColumn column = columnComponentMap.get(vo.getName());
+						Object value = column.getSimpleValue(column.getValue(el));
+						map.put(column.getDisplayName(), value);
+						/** 保留currentstepworker的getValue值，以便后面据此分类 */
+						if (column instanceof ProcessTaskCurrentStepWorkerColumn) {
+							map.put(column.getName(), column.getValue(el));
 						}
 					}
-					list.add(map);
+					originalTaskList.add(map);
 				}
+			}
+		}
+
+		/**
+		 * 按用户将工单分类
+		 * key->userUuid
+		 * value->task
+		 * 当前步骤处理人可能是用户、组和角色之间的组合
+		 * 如果是组和角色，要进一步查出用户
+		 */
+		Map<String, List<Map<String, Object>>> userTaskMap = new LinkedHashMap<>();
+		if (CollectionUtils.isNotEmpty(originalTaskList)) {
+			for (Map<String, Object> map : originalTaskList) {
+				Object o = map.get(new ProcessTaskCurrentStepWorkerColumn().getName());
+				if (o != null) {
+					JSONArray array = JSONArray.parseArray(o.toString());
+					for (int i = 0; i < array.size(); i++) {
+						JSONObject workerVo = array.getJSONObject(i).getJSONObject("workerVo");
+						if (GroupSearch.USER.getValue().equals(workerVo.getString("initType"))) {
+							List<Map<String, Object>> mapList = new ArrayList<>();
+							if (userTaskMap.get(workerVo.getString("uuid")) != null) {
+								mapList = userTaskMap.get(workerVo.getString("uuid"));
+							}
+							if (!mapList.stream().anyMatch(task -> task.get(ProcessField.ID.getName()).toString().equals(map.get(ProcessField.ID.getName()).toString()))) {
+								mapList.add(map);
+							}
+							userTaskMap.put(workerVo.getString("uuid"), mapList);
+						} else if (GroupSearch.TEAM.getValue().equals(workerVo.getString("initType"))) {
+							String uuid = workerVo.getString("uuid");
+							List<String> userUuidList = userMapper.getUserUuidListByTeamUuid(uuid);
+							if (CollectionUtils.isNotEmpty(userUuidList)) {
+								for (String userUuid : userUuidList) {
+									List<Map<String, Object>> mapList = new ArrayList<>();
+									if (userTaskMap.get(userUuid) != null) {
+										mapList = userTaskMap.get(userUuid);
+									}
+									/** 当前处理人为组时，可能某人刚好属于这些组的其中几个，那么就要防止重复记录 */
+									if (!mapList.stream().anyMatch(task -> task.get(ProcessField.ID.getName()).toString().equals(map.get(ProcessField.ID.getName()).toString()))) {
+										mapList.add(map);
+									}
+									userTaskMap.put(userUuid, mapList);
+								}
+							}
+						} else if (GroupSearch.ROLE.getValue().equals(workerVo.getString("initType"))) {
+							String uuid = workerVo.getString("uuid");
+							List<String> userUuidList = userMapper.getUserUuidListByRoleUuid(uuid);
+							if (CollectionUtils.isNotEmpty(userUuidList)) {
+								for (String userUuid : userUuidList) {
+									List<Map<String, Object>> mapList = new ArrayList<>();
+									if (userTaskMap.get(userUuid) != null) {
+										mapList = userTaskMap.get(userUuid);
+									}
+									if (!mapList.stream().anyMatch(task -> task.get(ProcessField.ID.getName()).toString().equals(map.get(ProcessField.ID.getName()).toString()))) {
+										mapList.add(map);
+									}
+									userTaskMap.put(userUuid, mapList);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/** 筛选需要的字段并排序 */
+		if (MapUtils.isNotEmpty(userTaskMap)) {
+			for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
+				List<Map<String, Object>> value = entry.getValue();
+				List<Map<String, Object>> userTaskList = new ArrayList<>();
+				for (Map<String, Object> map : value) {
+					Map<String, Object> _map = new LinkedHashMap<>();
+					for (String column : columnList) {
+						if (map.containsKey(column)) {
+							_map.put(column, map.get(column));
+						}
+					}
+					userTaskList.add(_map);
+				}
+				entry.setValue(userTaskList);
 			}
 		}
 		return null;
 	}
 
-	private JSONArray getConditionList(String config) {
+	private JSONObject getConditionList(String config) {
+		JSONObject conditionObj = new JSONObject();
 		JSONArray conditionGroupList = new JSONArray();
 		if(StringUtils.isNotBlank(config)){
 			JSONObject obj = new JSONObject();
@@ -284,6 +370,7 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 			}
 			conditionGroupList.add(obj);
 		}
-		return conditionGroupList;
+		conditionObj.put("conditionGroupList",conditionGroupList);
+		return conditionObj;
 	}
 }
