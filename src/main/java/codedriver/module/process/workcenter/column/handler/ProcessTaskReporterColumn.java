@@ -36,9 +36,13 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 		}
 		UserVo userVo =userMapper.getUserBaseInfoByUuid(userUuid);
 		if(userVo != null) {
-			userJson.put("username", userVo.getUserName());
+			userJson.put("initType", userVo.getInitType());
+			userJson.put("name", userVo.getUserName());
+			userJson.put("pinyin", userVo.getPinyin());
+			userJson.put("vipLevel", userVo.getVipLevel());
+			userJson.put("avatar", userVo.getAvatar());
 		}
-		userJson.put("useruuid", userUuid);
+		userJson.put("uuid", userUuid);
 		return userJson;
 	}
 
@@ -67,7 +71,7 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 	public Object getSimpleValue(Object json) {
 		String username = null;
 		if(json != null){
-			username = JSONObject.parseObject(json.toString()).getString("username");
+			username = JSONObject.parseObject(json.toString()).getString("name");
 		}
 		return username;
 	}
