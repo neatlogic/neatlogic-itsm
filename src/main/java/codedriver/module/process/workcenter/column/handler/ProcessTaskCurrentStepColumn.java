@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -93,31 +94,27 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 										if(user.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
 											UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 											if(userVo != null) {
-												JSONObject userJson = new JSONObject();
-												userJson.put("type", GroupSearch.USER.getValue());
-												userJson.put("worker", user);
-												userJson.put("workername", userVo.getUserName());
-												userJson.put("workerAvatar", userVo.getAvatar());
-												userJson.put("workerVipLevel",userVo.getVipLevel());
-												userArrayTmp.add(userJson);
+												UserVo vo = new UserVo();
+												BeanUtils.copyProperties(userVo,vo);
+												userArrayTmp.add(vo);
 											}
 										}else if(user.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
 											RoleVo roleVo = roleMapper.getRoleByUuid(user.toString().replaceFirst(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
 											if(roleVo != null) {
-												JSONObject roleJson = new JSONObject();
-												roleJson.put("type", GroupSearch.ROLE.getValue());
-												roleJson.put("worker", roleVo.getUuid());
-												roleJson.put("workername", roleVo.getName());
-												userArrayTmp.add(roleJson);
+												JSONObject vo = new JSONObject();
+												vo.put("initType",GroupSearch.ROLE.getValue());
+												vo.put("uuid",roleVo.getUuid());
+												vo.put("name",roleVo.getName());
+												userArrayTmp.add(vo);
 											}
 										}else if(user.toString().startsWith(GroupSearch.TEAM.getValuePlugin())) {
 											TeamVo teamVo = teamMapper.getTeamByUuid(user.toString().replaceFirst(GroupSearch.TEAM.getValuePlugin(), StringUtils.EMPTY));
 											if(teamVo != null) {
-												JSONObject teamJson = new JSONObject();
-												teamJson.put("type", GroupSearch.TEAM.getValue());
-												teamJson.put("worker", teamVo.getUuid());
-												teamJson.put("workername", teamVo.getName());
-												userArrayTmp.add(teamJson);
+												JSONObject vo = new JSONObject();
+												vo.put("initType",GroupSearch.TEAM.getValue());
+												vo.put("uuid",teamVo.getUuid());
+												vo.put("name",teamVo.getName());
+												userArrayTmp.add(vo);
 											}
 										}
 									}
@@ -135,12 +132,9 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 									if(StringUtils.isNotBlank(user.toString())) {
 										UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
 										if(userVo != null) {
-											JSONObject userJson = new JSONObject();
-											userJson.put("useruuid", user);
-											userJson.put("username", userVo.getUserName());
-											userJson.put("userAvatar", userVo.getAvatar());
-											userJson.put("userVipLevel", userVo.getVipLevel());
-											userArrayTmp.add(userJson);
+											UserVo vo = new UserVo();
+											BeanUtils.copyProperties(userVo,vo);
+											userArrayTmp.add(vo);
 										}
 									}
 									

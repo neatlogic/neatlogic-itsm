@@ -11,6 +11,7 @@ import codedriver.framework.process.dto.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -336,9 +337,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 processTaskMapper.getProcessTaskStepAgentByProcessTaskStepId(processTaskStepId);
             if (processTaskStepAgentVo != null) {
                 processTaskStepVo.setOriginalUser(processTaskStepAgentVo.getUserUuid());
-                UserVo userVo = userMapper.getUserByUuid(processTaskStepAgentVo.getUserUuid());
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepAgentVo.getUserUuid());
                 if (userVo != null) {
-                    processTaskStepVo.setOriginalUserName(userVo.getUserName());
+                    UserVo vo = new UserVo();
+                    BeanUtils.copyProperties(userVo,vo);
+                    processTaskStepVo.setOriginalUserVo(vo);
+//                    processTaskStepVo.setOriginalUserName(userVo.getUserName());
                 }
             }
             /** 如果当前用户有处理权限，则获取其有权看到的配置的回复模版 */

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,11 +98,12 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                                             UserVo userVo =userMapper.getUserBaseInfoByUuid(user.toString().replaceFirst(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
                                             if(userVo != null) {
                                                 JSONObject userJson = new JSONObject();
-                                                userJson.put("type", GroupSearch.USER.getValue());
-                                                userJson.put("worker", user);
-                                                userJson.put("workername", userVo.getUserName());
-                                                userJson.put("workerAvatar", userVo.getAvatar());
-                                                userJson.put("workerVipLevel",userVo.getVipLevel());
+                                                userJson.put("workerVo",userVo != null ? JSON.parseObject(JSONObject.toJSONString(userVo)) : null);
+//                                                userJson.put("type", GroupSearch.USER.getValue());
+//                                                userJson.put("worker", user);
+//                                                userJson.put("workername", userVo.getUserName());
+//                                                userJson.put("workerAvatar", userVo.getAvatar());
+//                                                userJson.put("workerVipLevel",userVo.getVipLevel());
                                                 userJson.put("workTypename",userTypeJson.getString("usertypename"));
                                                 userArrayTmp.add(userJson);
                                             }
@@ -109,18 +111,28 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                                             RoleVo roleVo = roleMapper.getRoleByUuid(user.toString().replaceFirst(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
                                             if(roleVo != null) {
                                                 JSONObject roleJson = new JSONObject();
-                                                roleJson.put("type", GroupSearch.ROLE.getValue());
-                                                roleJson.put("worker", roleVo.getUuid());
-                                                roleJson.put("workername", roleVo.getName());
+                                                JSONObject vo = new JSONObject();
+                                                vo.put("initType",GroupSearch.ROLE.getValue());
+                                                vo.put("uuid",roleVo.getUuid());
+                                                vo.put("name",roleVo.getName());
+                                                roleJson.put("workerVo",vo);
+//                                                roleJson.put("type", GroupSearch.ROLE.getValue());
+//                                                roleJson.put("worker", roleVo.getUuid());
+//                                                roleJson.put("workername", roleVo.getName());
                                                 userArrayTmp.add(roleJson);
                                             }
                                         }else if(user.toString().startsWith(GroupSearch.TEAM.getValuePlugin())) {
                                             TeamVo teamVo = teamMapper.getTeamByUuid(user.toString().replaceFirst(GroupSearch.TEAM.getValuePlugin(), StringUtils.EMPTY));
                                             if(teamVo != null) {
                                                 JSONObject teamJson = new JSONObject();
-                                                teamJson.put("type", GroupSearch.TEAM.getValue());
-                                                teamJson.put("worker", teamVo.getUuid());
-                                                teamJson.put("workername", teamVo.getName());
+                                                JSONObject vo = new JSONObject();
+                                                vo.put("initType",GroupSearch.TEAM.getValue());
+                                                vo.put("uuid",teamVo.getUuid());
+                                                vo.put("name",teamVo.getName());
+                                                teamJson.put("workerVo",vo);
+//                                                teamJson.put("type", GroupSearch.TEAM.getValue());
+//                                                teamJson.put("worker", teamVo.getUuid());
+//                                                teamJson.put("workername", teamVo.getName());
                                                 userArrayTmp.add(teamJson);
                                             }
                                         }
@@ -168,7 +180,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
 			JSONArray array = JSONArray.parseArray(json.toString());
 			if(CollectionUtils.isNotEmpty(array)){
 				for(int i = 0;i < array.size();i++){
-					sb.append(array.getJSONObject(i).getString("workername") + ";");
+					sb.append(array.getJSONObject(i).getJSONObject("workerVo").getString("name") + ";");
 				}
 			}
 		}
