@@ -309,7 +309,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     }
 
     @Override
-    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList)
+    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet)
         throws ProcessTaskException {
         return 0;
     }
