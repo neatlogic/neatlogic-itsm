@@ -26,11 +26,9 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.module.process.api.processtask.ProcessTaskCompleteApi;
 import codedriver.module.process.api.processtask.ProcessTaskDraftSaveApi;
-import codedriver.module.process.api.processtask.ProcessTaskProcessableStepList;
 import codedriver.module.process.api.processtask.ProcessTaskStartProcessApi;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +75,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
          * @Date: 2020/12/28 11:22
          */
         actionMap.put("create", (jsonParam) -> {
-            int unitCount = 100000;
+            int unitCount = 20000;
             JSONObject paramJson = new JSONObject();
             Integer count = jsonParam.getInteger("count");
             int latchCount = count / unitCount;
@@ -87,10 +85,11 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
             latch = new CountDownLatch(latchCount);
             int startIndex = 0;
             int endIndex = startIndex + unitCount;
-            for (int i = 1; i <= latchCount; i++) {
+            for (int i = 0; i < latchCount; i++) {
                 if (latchCount > 1) {
                     startIndex = i * unitCount + 1;
                 }
+                endIndex = startIndex + unitCount;
                 if (latchCount == 1 || startIndex + unitCount > count) {
                     endIndex = count;
                 }
@@ -185,6 +184,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
             List<UserVo> userList = userMapper.searchUserForSelect(new UserVo());
             List<ValueTextVo> priorityKeyValueList = priorityMapper.searchPriorityListForSelect(new PriorityVo());
             for (int i = startIndex; i < endIndex; i++) {
+
                 try {
                     int randomChannelIndex = (int) Math.round(Math.random() * (channelKeyValueList.size()-1));
                     int randomUserIndex = (int) Math.round(Math.random() * (userList.size()-1));
@@ -197,7 +197,14 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                     paramJson.put("title", String.format("%s 上报了 服务为 '%s' ,优先级为 '%s' 的工单", ownerVo.getUserName(), channelValueText.getText(), priorityValueText.getText()));
                     paramJson.put("owner", ownerVo.getUuid());
                     paramJson.put("priorityUuid", priorityValueText.getValue());
-                    paramJson.put("content", String.format("%s 上报了该内容", format.format(System.currentTimeMillis())));
+                    int startContentIndex = (int) Math.round(Math.random() * (Text.text.length()-1));
+                    int endContentIndex = (int) Math.round(Math.random() * (Text.text.length()-1));
+                    if(startContentIndex > endContentIndex){
+                        int tmpIndex = startContentIndex ;
+                        startContentIndex = endContentIndex;
+                        endContentIndex = tmpIndex;
+                    }
+                    paramJson.put("content", Text.text.substring(startContentIndex,endContentIndex));
                     //暂存
                     paramJson.put("isNeedValid", 1);
                     paramJson.put("hidecomponentList", new JSONArray());
@@ -207,14 +214,8 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                     JSONObject saveResultObj = JSONObject.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson).toString());
                     saveResultObj.put("action", "start");
                     //查询可执行下一步骤
-                    ProcessTaskProcessableStepList stepListApi = (ProcessTaskProcessableStepList) PrivateApiComponentFactory.getInstance(ProcessTaskProcessableStepList.class.getName());
-                    Object nextStepListObj = nextStepListObj = stepListApi.doService(PrivateApiComponentFactory.getApiByToken(stepListApi.getToken()), saveResultObj);
-
-                    List<ProcessTaskStepVo> nextStepList = (List<ProcessTaskStepVo>) nextStepListObj;
-                    if (CollectionUtils.isEmpty(nextStepList) && nextStepList.size() != 1) {
-                        throw new RuntimeException("抱歉！暂不支持开始节点连接多个后续节点。");
-                    }
-                    saveResultObj.put("nextStepId", nextStepList.get(0).getId());
+                    List<ProcessTaskStepVo> nextStepList =  processtaskMapper.getToProcessTaskStepByFromIdAndType(saveResultObj.getLong("processTaskStepId"), null);
+                    saveResultObj.put("nextStepId", nextStepList.get((int) Math.round(Math.random() * (nextStepList.size()-1))).getId());
                     //流转
                     ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
                     startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()), saveResultObj);
@@ -223,6 +224,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                 }
             }
             latch.countDown(); // 执行完毕，计数器减1
+
         }
     }
 }
