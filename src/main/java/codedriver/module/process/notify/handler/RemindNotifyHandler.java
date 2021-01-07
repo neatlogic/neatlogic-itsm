@@ -20,20 +20,20 @@ public class RemindNotifyHandler extends NotifyHandlerBase {
 
     @Override
     protected void myExecute(NotifyVo notifyVo) {
-        this.sendRemind(notifyVo);
+//        this.sendRemind(notifyVo);
     }
 
-    private void sendRemind(NotifyVo notifyVo){
-        if (notifyVo.getToUserList().size() > 0){
-            ReminderMessageVo message = new ReminderMessageVo();
-            message.setTitle(notifyVo.getTitle());
-            message.setContent(notifyVo.getContent());
-            message.setFromUser(notifyVo.getFromUser());
-            message.setReceiverList(notifyVo.getToUserUuidList());
-            IGlobalReminderHandler reminder = GlobalReminderHandlerFactory.getReminder(ProcessTaskRemindHandler.class.getName());
-            reminder.send(message);
-        }
-    }
+//    private void sendRemind(NotifyVo notifyVo){
+//        if (notifyVo.getToUserList().size() > 0){
+//            ReminderMessageVo message = new ReminderMessageVo();
+//            message.setTitle(notifyVo.getTitle());
+//            message.setContent(notifyVo.getContent());
+//            message.setFromUser(notifyVo.getFromUser());
+//            message.setReceiverList(notifyVo.getToUserUuidList());
+//            IGlobalReminderHandler reminder = GlobalReminderHandlerFactory.getReminder(ProcessTaskRemindHandler.class.getName());
+//            reminder.send(message);
+//        }
+//    }
 
     @Override
     public String getName() {

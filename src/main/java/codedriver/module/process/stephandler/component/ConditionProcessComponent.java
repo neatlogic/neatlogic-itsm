@@ -102,7 +102,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     @Override
     protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo,
         List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
-        UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);
+        UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
         Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
         if (CollectionUtils.isNotEmpty(nextStepList)) {
             Map<String, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
