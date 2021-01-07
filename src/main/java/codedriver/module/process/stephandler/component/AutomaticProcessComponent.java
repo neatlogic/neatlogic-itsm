@@ -179,8 +179,8 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
-	    return defaultAssign(currentProcessTaskStepVo, workerList);
+	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet) throws ProcessTaskException {
+	    return defaultAssign(currentProcessTaskStepVo, workerSet);
 	}
 	
 	@Override
