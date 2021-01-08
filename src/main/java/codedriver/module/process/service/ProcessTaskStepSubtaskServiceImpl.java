@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -239,12 +240,14 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
 
         /** 判断当前步骤的所有子任务是否都完成了 **/
         List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepSubtaskVo.getProcessTaskStepId());
-        for (ProcessTaskStepSubtaskVo subtask : processTaskStepSubtaskList) {
-            if (!subtask.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue()) && !subtask.getStatus().equals(ProcessTaskStatus.ABORTED.getValue())) {
-                return;
+        if(CollectionUtils.isNotEmpty(processTaskStepSubtaskList)){
+            for (ProcessTaskStepSubtaskVo subtask : processTaskStepSubtaskList) {
+                if (!subtask.getStatus().equals(ProcessTaskStatus.SUCCEED.getValue()) && !subtask.getStatus().equals(ProcessTaskStatus.ABORTED.getValue())) {
+                    return;
+                }
             }
+            handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.COMPLETEALLSUBTASK);
         }
-        handler.notify(currentProcessTaskStepVo, SubtaskNotifyTriggerType.COMPLETEALLSUBTASK);
     }
 
     @Override
