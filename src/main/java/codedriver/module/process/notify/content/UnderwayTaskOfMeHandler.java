@@ -334,7 +334,7 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 	private void getNotifyVoList(List<NotifyVo> notifyList, String title, String content, List<String> columnList, Map<String, List<Map<String, Object>>> userTaskMap) {
 		if (MapUtils.isNotEmpty(userTaskMap)) {
 			for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
-				NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null);
+				NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null,null);
 				notifyBuilder.withTitleTemplate(title);
 				notifyBuilder.addUserUuid(entry.getKey());
 
