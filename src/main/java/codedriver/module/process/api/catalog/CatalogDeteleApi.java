@@ -69,8 +69,6 @@ public class CatalogDeteleApi extends PrivateApiComponentBase {
 		CatalogVo existsCatalog = catalogMapper.getCatalogByUuid(uuid);
 		if(existsCatalog == null) {
 			throw new CatalogNotFoundException(uuid);
-		}else if(CatalogVo.UNCATEGORIZED_CATALOG_UUID.equals(uuid)) {
-			throw new CatalogIllegalParameterException("未分类目录不能删除");
 		}
 
 		CatalogVo catalogVo = new CatalogVo();
