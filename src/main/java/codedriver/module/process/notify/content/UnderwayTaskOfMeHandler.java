@@ -57,7 +57,7 @@ import java.util.*;
 @Component
 public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 
-	private Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+	private static Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
 
 	@Autowired
 	private NotifyJobMapper notifyJobMapper;
@@ -214,7 +214,6 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 	@Override
 	protected List<ValueTextVo> getMyDataColumnList() {
 		List<ValueTextVo> result = new ArrayList<>();
-		Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
 		Collection<IProcessTaskColumn> values = columnComponentMap.values();
 		values.stream().forEach(o -> {
 			if(!o.getDisabled() && o.getIsShow()){
@@ -222,6 +221,45 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 			}
 		});
 		return result;
+	}
+
+	@Override
+	protected String myPreview() {
+		StringBuilder taskTable = new StringBuilder();
+		taskTable.append("<table>");
+		taskTable.append("<tr>");
+		taskTable.append("<th>标题</th>");
+		taskTable.append("<th>工单号</th>");
+		taskTable.append("<th>上报人</th>");
+		taskTable.append("<th>优先级</th>");
+		taskTable.append("<th>代报人</th>");
+		taskTable.append("<th>当前步骤名</th>");
+		taskTable.append("<th>当前步骤处理人</th>");
+		taskTable.append("<th>工单状态</th>");
+		taskTable.append("<th>服务目录</th>");
+		taskTable.append("<th>服务类型</th>");
+		taskTable.append("<th>服务</th>");
+		taskTable.append("<th>上报时间</th>");
+		taskTable.append("</tr>");
+
+		for(int i = 0;i < 12;i++){
+			taskTable.append("<tr>");
+			taskTable.append("<td>机房进出申请-202101080000" + i + "</td>");
+			taskTable.append("<td>202101080000" + i + "</td>");
+			taskTable.append("<td>admin</td>");
+			taskTable.append("<td>P3</td>");
+			taskTable.append("<td>admin</td>");
+			taskTable.append("<td>机房监督</td>");
+			taskTable.append("<td>张三</td>");
+			taskTable.append("<td>处理中</td>");
+			taskTable.append("<td>机房</td>");
+			taskTable.append("<td>事件</td>");
+			taskTable.append("<td>机房进出申请</td>");
+			taskTable.append("<td>2021-01-08 10:10:57</td>");
+			taskTable.append("</tr>");
+		}
+		taskTable.append("</table>");
+		return taskTable.toString();
 	}
 
 	/**
