@@ -90,9 +90,6 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 		}
 
 		String uuid = catalogVo.getUuid();
-		if(CatalogVo.UNCATEGORIZED_CATALOG_UUID.equals(uuid)) {
-			return uuid;
-		}
 		CatalogVo existedCatalog = catalogMapper.getCatalogByUuid(uuid);
 		if(existedCatalog == null) {//新增
 			catalogVo.setUuid(null);

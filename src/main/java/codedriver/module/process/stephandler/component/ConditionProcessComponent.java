@@ -8,21 +8,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import com.alibaba.fastjson.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -101,46 +99,23 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo,
-        List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
-        UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);
+                                               List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
+        UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
         Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
         if (CollectionUtils.isNotEmpty(nextStepList)) {
-            Map<String, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
-            for (ProcessTaskStepVo stepVo : nextStepList) {
-                processTaskStepMap.put(stepVo.getProcessStepUuid(), stepVo);
-            }
-            ProcessTaskStepVo processTaskStepVo =
-                processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
-            String stepConfig =
-                selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+            Map<String, ProcessTaskStepVo> processTaskStepMap = nextStepList.stream().collect(Collectors.toMap(e -> e.getProcessStepUuid(), e -> e));
+            Map<String, String> processStepNameMap = nextStepList.stream().collect(Collectors.toMap(e -> e.getProcessStepUuid(), e -> e.getName()));
+            ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+            String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
             if (StringUtils.isNotBlank(stepConfig)) {
-                JSONObject stepConfigObj = null;
-                try {
-                    stepConfigObj = JSONObject.parseObject(stepConfig);
-                    currentProcessTaskStepVo.setParamObj(stepConfigObj);
-                } catch (Exception ex) {
-                    logger.error("hash为" + processTaskStepVo.getConfigHash() + "的processtask_step_config内容不是合法的JSON格式",
-                        ex);
-                }
-                if (MapUtils.isNotEmpty(stepConfigObj)) {
-                    JSONArray moveonConfigList = stepConfigObj.getJSONArray("moveonConfigList");
-                    if (CollectionUtils.isNotEmpty(moveonConfigList)) {
-                        JSONArray ruleList = new JSONArray();
-                        Map<String, String> processStepNameMap = new HashMap<>();
-                        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper
-                            .getProcessTaskStepListByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-                        for (ProcessTaskStepVo processTaskStep : processTaskStepList) {
-                            processStepNameMap.put(processTaskStep.getProcessStepUuid(), processTaskStep.getName());
-                        }
-                        for (int i = 0; i < moveonConfigList.size(); i++) {
+                JSONArray moveonConfigList = (JSONArray) JSONPath.read(stepConfig, "moveonConfigList");
+                if (CollectionUtils.isNotEmpty(moveonConfigList)) {
+                    JSONArray ruleList = new JSONArray();
+                    for (int i = 0; i < moveonConfigList.size(); i++) {
+                        JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
+                        JSONArray targetStepList = moveonConfig.getJSONArray("targetStepList");
+                        if (CollectionUtils.isNotEmpty(targetStepList)) {
                             JSONObject ruleObj = new JSONObject();
-                            JSONObject moveonConfig = moveonConfigList.getJSONObject(i);
-                            List<String> targetStepNameList = new ArrayList<>();
-                            List<String> targetStepList = JSON.parseArray(
-                                JSON.toJSONString(moveonConfig.getJSONArray("targetStepList")), String.class);
-                            for (String targetStepUuid : targetStepList) {
-                                targetStepNameList.add(processStepNameMap.get(targetStepUuid));
-                            }
                             String type = moveonConfig.getString("type");
                             Boolean canRun = false;
                             if ("always".equals(type)) {// 直接流转
@@ -150,16 +125,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
                                     IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-                                    ProcessTaskVo processTaskVo =
-                                        handler.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
-                                    processTaskVo.setStartProcessTaskStep(
-                                        handler.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
+                                    ProcessTaskVo processTaskVo = handler.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
+                                    processTaskVo.setStartProcessTaskStep(handler.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
                                     processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
-                                    JSONObject conditionParamData =
-                                        ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+                                    JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
                                     try {
-                                        ConditionParamContext.init(conditionParamData)
-                                            .setFormConfig(processTaskVo.getFormConfig()).setTranslate(true);
+                                        ConditionParamContext.init(conditionParamData).setFormConfig(processTaskVo.getFormConfig()).setTranslate(true);
                                         ConditionConfigVo conditionConfigVo = new ConditionConfigVo(moveonConfig);
                                         String script = conditionConfigVo.buildScript();
                                         // ((false || true) || (true && false) || (true || false))
@@ -175,25 +146,28 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                             } else {
                                 ruleObj.putAll(moveonConfig);
                             }
+                            List<String> targetStepNameList = new ArrayList<>();
+                            for (int j = 0; j < targetStepList.size(); j++) {
+                                String targetStepUuid = targetStepList.getString(j);
+                                String stepName = processStepNameMap.get(targetStepUuid);
+                                if (StringUtils.isNotBlank(stepName)) {
+                                    targetStepNameList.add(stepName);
+                                }
+                                // 符合条件
+                                if (canRun) {
+                                    ProcessTaskStepVo stepVo = processTaskStepMap.get(targetStepUuid);
+                                    if (stepVo != null) {
+                                        nextStepSet.add(stepVo);
+                                    }
+                                }
+                            }
                             ruleObj.put("type", type);
                             ruleObj.put("result", canRun);
                             ruleObj.put("targetStepList", targetStepNameList);
                             ruleList.add(ruleObj);
-                            // 符合条件
-                            if (canRun) {
-                                if (CollectionUtils.isNotEmpty(targetStepList)) {
-                                    for (String targetStep : targetStepList) {
-                                        ProcessTaskStepVo stepVo = processTaskStepMap.get(targetStep);
-                                        if (stepVo != null) {
-                                            nextStepSet.add(stepVo);
-                                        }
-                                    }
-                                }
-                            }
                         }
-                        currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.RULE.getParamName(),
-                            ruleList);
                     }
+                    currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.RULE.getParamName(), ruleList);
                 }
             }
         }
@@ -210,7 +184,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     protected int myCompleteAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
         if (StringUtils.isNotBlank(currentProcessTaskStepVo.getError())) {
             currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(),
-                currentProcessTaskStepVo.getError());
+                    currentProcessTaskStepVo.getError());
         }
         /** 处理历史记录 **/
         // String action = currentProcessTaskStepVo.getParamObj().getString("action");
@@ -251,8 +225,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 RelExpressionVo relExpressionVo = new RelExpressionVo();
                                 relExpressionVo.setExpression("${" + stepUid + "." + key + "}");
                                 List<String> valueList = new ArrayList<>(); // flowJobMapper.getFlowJobStepNodeParamValueByFlowJobIdUidKey(flowJobStepVo.getFlowJobId(),
-                                                                            // stepUid,
-                                                                            // key);
+                                // stepUid,
+                                // key);
                                 if (valueList.size() > 0) {
                                     if (valueList.size() > 1) {
                                         script.append("map[\"" + stepUid + "." + key + "\"] = [");
@@ -271,7 +245,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                         relExpressionVo.setValue(v);
                                     } else {
                                         script.append(
-                                            "map[\"" + stepUid + "." + key + "\"] = \"" + valueList.get(0) + "\";");
+                                                "map[\"" + stepUid + "." + key + "\"] = \"" + valueList.get(0) + "\";");
                                         relExpressionVo.setValue("\"" + valueList.get(0) + "\"");
                                     }
                                 }
@@ -286,7 +260,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                     ScriptEngine se = sem.getEngineByName("nashorn");
                     try {
                         se.eval(script.toString());
-                        Invocable invocableEngine = (Invocable)se;
+                        Invocable invocableEngine = (Invocable) se;
                         Object callbackvalue = invocableEngine.invokeFunction("run");
                         relVo.setScriptResult(callbackvalue.toString());
                     } catch (Exception ex) {
@@ -309,8 +283,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     }
 
     @Override
-    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList)
-        throws ProcessTaskException {
+    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet)
+            throws ProcessTaskException {
         return 0;
     }
 
@@ -351,7 +325,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList)
-        throws ProcessTaskException {
+            throws ProcessTaskException {
         return 0;
     }
 
