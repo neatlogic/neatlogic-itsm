@@ -44,8 +44,16 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
- * 待我处理的工单
- */
+ * @Title: 待我处理的工单
+ * @Package: codedriver.module.process.notify.content
+ * @Description:
+ * @Author: laiwt
+ * @Date: 2021/1/8 11:00
+ * <p>
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * <p>
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ **/
 @Component
 public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 
@@ -155,10 +163,14 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 		return Type.DYNAMIC.getValue();
 	}
 
+
 	/**
-	 * 获取工单筛选条件
-	 * @return
-	 */
+	 * @Description: 获取工单筛选条件
+	 * @Author: laiwt
+	 * @Date: 2021/1/8 14:16
+	 * @Params: []
+	 * @Returns: com.alibaba.fastjson.JSONArray
+	**/
 	@Override
 	protected JSONArray getMyConditionOptionList() {
 		JSONArray params = new JSONArray();
@@ -185,20 +197,20 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 		return params;
 	}
 
+
 	/**
-	 * 根据通知方式插件获取发件相关属性
-	 * @param handler
-	 * @return
-	 */
+	 * @Description: 根据通知方式获取消息相关属性
+	 * @Author: laiwt
+	 * @Date: 2021/1/8 14:17
+	 * @Params: [handler]
+	 * @Returns: com.alibaba.fastjson.JSONArray
+	**/
 	@Override
 	protected JSONArray getMyMessageAttrList(String handler) {
 		return messageAttrMap.get(handler);
 	}
 
-	/**
-	 * 获取工单列表数据列
-	 * @return
-	 */
+
 	@Override
 	protected List<ValueTextVo> getMyDataColumnList() {
 		List<ValueTextVo> result = new ArrayList<>();
@@ -213,9 +225,12 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 	}
 
 	/**
-	 * 获取待发送数据
-	 * @param id
-	 */
+	 * @Description: 获取待发送数据
+	 * @Author: laiwt
+	 * @Date: 2021/1/8 14:14
+	 * @Params: [id] 定时任务ID
+	 * @Returns: java.util.List<codedriver.framework.notify.dto.NotifyVo>
+	**/
 	@Override
 	protected List<NotifyVo> getMyNotifyData(Long id) {
 	    List<NotifyVo> notifyList = new ArrayList<>();
@@ -225,45 +240,59 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 		if(notifyHandler == null){
 			throw new NotifyHandlerNotFoundException(job.getNotifyHandler());
 		}
-		String config = job.getConfig();
-		String title = null;
-		String content = null;
-		JSONObject messageConfig = (JSONObject) JSONPath.read(config, "messageConfig");
-		if(MapUtils.isNotEmpty(messageConfig)){
-			title = messageConfig.getString("title");
-			content = messageConfig.getString("content");
-		}
+		JSONObject config = job.getConfig();
+		if(MapUtils.isNotEmpty(config)){
+			String title = null;
+			String content = null;
+			JSONObject messageConfig = config.getJSONObject("messageConfig");
+			if(MapUtils.isNotEmpty(messageConfig)){
+				title = messageConfig.getString("title");
+				content = messageConfig.getString("content");
+			}
 
-		/** 需要的工单字段 */
-		JSONArray dataColumns = (JSONArray)JSONPath.read(config, "dataColumnList");
-		List<String> columnList = new ArrayList<>();
-		if(CollectionUtils.isNotEmpty(dataColumns)){
-			dataColumns.stream().forEach(o -> columnList.add(columnComponentMap.get(o.toString()).getDisplayName()));
-		}
-
-		/** 获取工单查询条件 */
-		List<String> stepTeamUuidList = new ArrayList<>();
-		JSONArray conditionList = (JSONArray) JSONPath.read(config, "conditionList");
-		if (CollectionUtils.isNotEmpty(conditionList)) {
-			JSONObject stepTeam = conditionList.getJSONObject(0);
-			JSONArray valueList = stepTeam.getJSONArray("valueList");
-			if (CollectionUtils.isNotEmpty(valueList)) {
-				for (Object o : valueList) {
-					stepTeamUuidList.add(o.toString().split("#")[1]);
+			/** 需要的工单字段 */
+			JSONArray dataColumns = config.getJSONArray("dataColumnList");
+			List<String> columnList = new ArrayList<>();
+			if(CollectionUtils.isNotEmpty(dataColumns)){
+				dataColumns.stream().forEach(o -> columnList.add(columnComponentMap.get(o.toString()).getDisplayName()));
+			}else{
+				for(Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()){
+					columnList.add(entry.getValue().getDisplayName());
 				}
 			}
+
+			/** 获取工单查询条件 */
+			List<String> stepTeamUuidList = new ArrayList<>();
+			JSONObject conditionConfig = config.getJSONObject("conditionConfig");
+			if(MapUtils.isNotEmpty(conditionConfig)){
+				JSONArray stepTeam = conditionConfig.getJSONArray(ConditionOptions.STEPTEAM.getValue());
+				if (CollectionUtils.isNotEmpty(stepTeam)) {
+					for (Object o : stepTeam) {
+						stepTeamUuidList.add(o.toString().split("#")[1]);
+					}
+				}
+			}
+
+			/** 查询工单 */
+			List<Map<String, Object>> originalTaskList = getTaskList(stepTeamUuidList);
+
+			/** 按处理人给工单分类 */
+			Map<String, List<Map<String, Object>>> userTaskMap = getUserTaskMap(originalTaskList);
+
+			/** 组装NotifyVo对象列表 */
+			getNotifyVoList(notifyList, title, content, columnList, userTaskMap);
 		}
-
-		List<Map<String, Object>> originalTaskList = getTaskList(stepTeamUuidList);
-
-		/** 按处理人给工单分类 */
-		Map<String, List<Map<String, Object>>> userTaskMap = getUserTaskMap(originalTaskList);
-
-		getNotifyVoList(notifyList, title, content, columnList, userTaskMap);
 
 		return notifyList;
 	}
 
+	/**
+	 * @Description: 将工单绘制成HTML表格，作为消息内容，组装成NotifyVo列表
+	 * @Author: laiwt
+	 * @Date: 2021/1/8 14:20
+	 * @Params: [notifyList, title, content, columnList, userTaskMap]
+	 * @Returns: void
+	**/
 	private void getNotifyVoList(List<NotifyVo> notifyList, String title, String content, List<String> columnList, Map<String, List<Map<String, Object>>> userTaskMap) {
 		if (MapUtils.isNotEmpty(userTaskMap)) {
 			for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
@@ -300,15 +329,18 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 	}
 
 	/**
-	 * 按用户将工单分类
-	 * key->userUuid
-	 * value->task
-	 */
+	 * @Description: 按用户将工单分类
+	 * @Author: laiwt
+	 * @Date: 2021/1/8 14:21
+	 * @Params: [originalTaskList]
+	 * @Returns: java.util.Map<java.lang.String,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>>
+	**/
 	private Map<String, List<Map<String, Object>>> getUserTaskMap(List<Map<String, Object>> originalTaskList) {
 		Map<String, List<Map<String, Object>>> userTaskMap = new HashMap<>();
 		if (CollectionUtils.isNotEmpty(originalTaskList)) {
+			String currentStepNameWorker = new ProcessTaskCurrentStepWorkerColumn().getName();
 			for (Map<String, Object> map : originalTaskList) {
-				Object o = map.get(new ProcessTaskCurrentStepNameColumn().getName());
+				Object o = map.get(currentStepNameWorker);
 				if (o != null) {
 					Set<String> array = (HashSet<String>) o;
 					for (String uuid : array) {
@@ -328,13 +360,17 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 	}
 
 	/**
-	 * 构造原始工单数据
-	 * originalTaskList中的map：
-	 * 字段中文名->值
-	 */
+	 * @Description: 查询工单，构造"工单字段中文名->值"的map集合
+	 * @Author: laiwt
+	 * @Date: 2021/1/8 14:23
+	 * @Params: [stepTeamUuidList]
+	 * @Returns: java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
+	**/
 	private List<Map<String, Object>> getTaskList(List<String> stepTeamUuidList) {
 		List<Map<String, Object>> originalTaskList = new ArrayList<>();
 		List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByStepTeamUuidList(stepTeamUuidList);
+		ProcessTaskCurrentStepNameColumn currentStepNameColumn = new ProcessTaskCurrentStepNameColumn();
+		ProcessTaskCurrentStepWorkerColumn currentStepWorkerColumn = new ProcessTaskCurrentStepWorkerColumn();
 		if (CollectionUtils.isNotEmpty(processTaskList)) {
 			for (ProcessTaskVo processTaskVo : processTaskList) {
 				Map<String, Object> map = new HashMap<>();
@@ -465,11 +501,11 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 				map.put(ProcessWorkcenterField.PRIORITY.getName(), processTaskVo.getPriorityName());
 				map.put(ProcessWorkcenterField.STATUS.getName(), ProcessTaskStatus.getText(processTaskVo.getStatus()));
 				map.put(ProcessWorkcenterField.WOKRTIME.getName(), processTaskVo.getWorktimeName());
-				map.put(new ProcessTaskCurrentStepNameColumn().getDisplayName(), currentStepName);
-				map.put(new ProcessTaskCurrentStepWorkerColumn().getDisplayName(), currentStepWorkerName);
+				map.put(currentStepNameColumn.getDisplayName(), currentStepName);
+				map.put(currentStepWorkerColumn.getDisplayName(), currentStepWorkerName);
 				map.put(ProcessWorkcenterField.EXPIRED_TIME.getName(), sb.toString());
-				/** 保留当前步骤处理人人的userUuid，以便后面据此给工单分类 */
-				map.put(new ProcessTaskCurrentStepNameColumn().getName(), currentStepWorkerUuidList);
+				/** 保留当前步骤处理人的userUuid，以便后面据此给工单分类 */
+				map.put(currentStepWorkerColumn.getName(), currentStepWorkerUuidList);
 				originalTaskList.add(map);
 			}
 		}
