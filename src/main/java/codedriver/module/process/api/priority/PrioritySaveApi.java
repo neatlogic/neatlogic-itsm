@@ -1,5 +1,6 @@
 package codedriver.module.process.api.priority;
 
+import codedriver.framework.process.exception.priority.PriorityIsInvokedException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -66,6 +67,12 @@ public class PrioritySaveApi extends PrivateApiComponentBase {
 			PriorityVo priority = priorityMapper.getPriorityByUuid(uuid);
 			if(priority == null) {
 				throw new PriorityNotFoundException(uuid);
+			}
+			/** 如果禁用优先级，先判断有没有被服务引用，有引用则不能禁用 **/
+			if(priorityVo.getIsActive() == 0 && priority.getIsActive() == 1){
+				if(priorityMapper.checkPriorityIsInvoked(uuid) > 0){
+					throw new PriorityIsInvokedException(priority.getName());
+				}
 			}
 			priorityVo.setSort(priority.getSort());
 			priorityMapper.updatePriority(priorityVo);
