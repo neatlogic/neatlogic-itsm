@@ -118,7 +118,11 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 						this.put("label","标题");
 						this.put("name","title");
 						this.put("type", "text");
-						this.put("validateList", "['required']");
+						this.put("validateList", new JSONArray(){
+							{
+								this.add("required");
+							}
+						});
 					}
 				});
 				this.add(new JSONObject(){
