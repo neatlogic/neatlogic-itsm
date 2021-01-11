@@ -8,16 +8,13 @@ import java.util.Map;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
+import com.alibaba.fastjson.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -95,7 +92,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")})
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")})
     @Output({@Param(name = "processTask", explode = ProcessTaskVo.class, desc = "工单信息")})
     @Description(desc = "工单步骤基本信息获取接口，当前步骤名称、激活时间、状态、处理人、协助处理人、处理时效、表单属性显示控制等")
     @Override
@@ -106,30 +103,20 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW).build()
-            .checkAndNoPermissionThrowException();
+                .checkAndNoPermissionThrowException();
         ProcessTaskVo processTaskVo = handler.getProcessTaskDetailById(processTaskId);
 
-        if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
-            ProcessTaskScoreTemplateVo processTaskScoreTemplateVo =
-                processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
+        if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_SCORE).build().check()) {
+            ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
             if (processTaskScoreTemplateVo != null) {
                 if (StringUtils.isNotBlank(processTaskScoreTemplateVo.getConfigHash())) {
-                    String configStr = selectContentByHashMapper
-                        .getProcessTaskScoreTempleteConfigStringIsByHash(processTaskScoreTemplateVo.getConfigHash());
-                    if (StringUtils.isNotBlank(configStr)) {
-                        processTaskScoreTemplateVo.setConfig(configStr);
-                        List<String> stepUuidList = JSON.parseArray(
-                            JSON.toJSONString(processTaskScoreTemplateVo.getConfig().getJSONArray("stepUuidList")),
-                            String.class);
-                        if (CollectionUtils.isNotEmpty(stepUuidList)) {
-                            processTaskVo.setRedoStepList(
-                                processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuidList(
-                                    processTaskId, stepUuidList));
-                        }
+                    String configStr = selectContentByHashMapper.getProcessTaskScoreTempleteConfigStringIsByHash(processTaskScoreTemplateVo.getConfigHash());
+                    List<String> stepUuidList = JSON.parseArray(JSON.toJSONString(JSONPath.read(configStr, "stepUuidList")), String.class);
+                    if (CollectionUtils.isNotEmpty(stepUuidList)) {
+                        processTaskVo.setRedoStepList(processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuidList(processTaskId, stepUuidList));
                     }
                 }
-                processTaskVo.setScoreTemplateVo(
-                    scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
+                processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
             }
         }
         processTaskVo.setStartProcessTaskStep(handler.getStartProcessTaskStepByProcessTaskId(processTaskId));
@@ -139,7 +126,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if (currentProcessTaskStepVo != null) {
                 handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
                 if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_SAVE)
-                    .build().check()) {
+                        .build().check()) {
                     // 回复框内容和附件暂存回显
                     setTemporaryData(processTaskVo, currentProcessTaskStepVo);
                 }
@@ -150,12 +137,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 if (StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
                     // 表单属性显示控制
                     List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList =
-                        processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
+                            processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
                     for (ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
                         processTaskStepFormAttributeVo
-                            .setProcessStepUuid(currentProcessTaskStepVo.getProcessStepUuid());
+                                .setProcessStepUuid(currentProcessTaskStepVo.getProcessStepUuid());
                         formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(),
-                            processTaskStepFormAttributeVo.getAction());
+                                processTaskStepFormAttributeVo.getAction());
                     }
                     currentProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
                 }
@@ -165,10 +152,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             boolean isAuthority = false;
             if (processTaskStepId != null) {
                 isAuthority = new ProcessAuthManager.StepOperationChecker(processTaskStepId,
-                    ProcessTaskOperationType.STEP_WORK).build().check();
+                        ProcessTaskOperationType.STEP_WORK).build().check();
             }
             processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap,
-                isAuthority ? 1 : 0);
+                    isAuthority ? 1 : 0);
         }
 
         // TODO 兼容老工单表单（判断是否存在旧表单）
@@ -188,25 +175,23 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     }
 
     /**
-     * 
+     * @param processTaskStepId 步骤id
+     * @return ProcessTaskStepVo
      * @Author: linbq
      * @Time:2020年8月21日
      * @Description: 获取当前步骤信息
-     * @param processTaskStepId
-     *            步骤id
-     * @return ProcessTaskStepVo
      */
     private ProcessTaskStepVo getCurrentProcessTaskStepById(Long processTaskStepId) {
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepId);
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_VIEW).build()
-            .check()) {
+                .check()) {
             // 处理人列表
             processTaskService.setProcessTaskStepUser(processTaskStepVo);
 
             /** 当前步骤特有步骤信息 **/
             IProcessStepUtilHandler processStepUtilHandler =
-                ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                    ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
             if (processStepUtilHandler == null) {
                 throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
             }
@@ -219,22 +204,22 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             typeList.add(ProcessTaskOperationType.STEP_RETREAT.getValue());
             typeList.add(ProcessTaskOperationType.STEP_TRANSFER.getValue());
             processTaskStepVo.setCommentList(
-                processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
+                    processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepId, typeList));
 
             // 获取当前用户有权限的所有子任务
             // 子任务列表
             if (processTaskStepVo.getIsActive().intValue() == 1
-                && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                    && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                 List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList =
-                    processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+                        processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
                 if (CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
                     Map<String, String> customButtonMap = processStepUtilHandler.getCustomButtonMapByConfigHashAndHandler(
-                        processTaskStepVo.getConfigHash(), processTaskStepVo.getHandler());
+                            processTaskStepVo.getConfigHash(), processTaskStepVo.getHandler());
                     for (ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
                         String currentUser = UserContext.get().getUserUuid(true);
                         if ((currentUser.equals(processTaskStepSubtask.getMajorUser())
-                            && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
-                            || (currentUser.equals(processTaskStepSubtask.getUserUuid())
+                                && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
+                                || (currentUser.equals(processTaskStepSubtask.getUserUuid())
                                 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
                             if (processTaskStepSubtask.getIsAbortable() == 1) {
                                 String value = ProcessTaskOperationType.SUBTASK_ABORT.getValue();
@@ -284,20 +269,20 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
             // 获取可分配处理人的步骤列表
             processTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(
-                processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
+                    processTaskStepVo.getProcessTaskId(), processTaskStepVo.getProcessStepUuid()));
 
             // 时效列表
             ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
             processTaskStepVo.setSlaTimeList(processTaskService
-                .getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepId, processTaskVo.getWorktimeUuid()));
+                    .getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(processTaskStepId, processTaskVo.getWorktimeUuid()));
 
             // 补充 automatic processtaskStepData
             ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
-                .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
-                    processTaskStepVo.getId(), processTaskStepVo.getHandler(), "system"));
+                    .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
+                            processTaskStepVo.getId(), processTaskStepVo.getHandler(), "system"));
             boolean hasComplete =
-                new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_COMPLETE)
-                    .build().check();
+                    new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_COMPLETE)
+                            .build().check();
             if (stepDataVo != null) {
                 JSONObject stepDataJson = stepDataVo.getData();
                 processTaskStepVo.setProcessTaskStepData(stepDataJson);
@@ -306,7 +291,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     if (processTaskStepVo.getHandler().equals(ProcessStepHandlerType.AUTOMATIC.getHandler())) {
                         JSONObject requestAuditJson = stepDataJson.getJSONObject("requestAudit");
                         if (requestAuditJson.containsKey("status") && requestAuditJson.getJSONObject("status")
-                            .getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+                                .getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
                             requestAuditJson.put("isRetry", 1);
                         } else {
                             requestAuditJson.put("isRetry", 0);
@@ -314,7 +299,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                         JSONObject callbackAuditJson = stepDataJson.getJSONObject("callbackAudit");
                         if (callbackAuditJson != null) {
                             if (callbackAuditJson.containsKey("status") && callbackAuditJson.getJSONObject("status")
-                                .getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
+                                    .getString("value").equals(ProcessTaskStatus.FAILED.getValue())) {
                                 callbackAuditJson.put("isRetry", 1);
                             } else {
                                 callbackAuditJson.put("isRetry", 0);
@@ -325,22 +310,23 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             }
             /** 下一步骤列表 **/
             processTaskStepVo.setForwardNextStepList(
-                processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));
+                    processTaskService.getForwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));
             processTaskStepVo.setBackwardNextStepList(
-                processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));;
+                    processTaskService.getBackwardNextStepListByProcessTaskStepId(processTaskStepVo.getId()));
+            ;
             /** 提醒列表 **/
             List<ProcessTaskStepRemindVo> processTaskStepRemindList =
-                processTaskService.getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
+                    processTaskService.getProcessTaskStepRemindListByProcessTaskStepId(processTaskStepId);
             processTaskStepVo.setProcessTaskStepRemindList(processTaskStepRemindList);
 
             ProcessTaskStepAgentVo processTaskStepAgentVo =
-                processTaskMapper.getProcessTaskStepAgentByProcessTaskStepId(processTaskStepId);
+                    processTaskMapper.getProcessTaskStepAgentByProcessTaskStepId(processTaskStepId);
             if (processTaskStepAgentVo != null) {
                 processTaskStepVo.setOriginalUser(processTaskStepAgentVo.getUserUuid());
                 UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepAgentVo.getUserUuid());
                 if (userVo != null) {
                     UserVo vo = new UserVo();
-                    BeanUtils.copyProperties(userVo,vo);
+                    BeanUtils.copyProperties(userVo, vo);
                     processTaskStepVo.setOriginalUserVo(vo);
 //                    processTaskStepVo.setOriginalUserName(userVo.getUserName());
                 }
@@ -355,7 +341,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 authList.add(UserType.ALL.getValue());
                 authList.add(UserContext.get().getUserUuid());
                 ProcessCommentTemplateVo commentTemplate = commentTemplateMapper
-                    .getTemplateByStepUuidAndAuth(processTaskStepVo.getProcessStepUuid(), authList);
+                        .getTemplateByStepUuidAndAuth(processTaskStepVo.getProcessStepUuid(), authList);
                 processTaskStepVo.setCommentTemplate(commentTemplate);
             }
 
@@ -365,13 +351,11 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     }
 
     /**
-     * 
+     * @param ProcessTaskStepVo 步骤信息
+     * @return void
      * @Author: linbq
      * @Time:2020年8月21日
      * @Description: 设置步骤当前用户的暂存数据
-     * @param ProcessTaskStepVo
-     *            步骤信息
-     * @return void
      */
     private void setTemporaryData(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
@@ -380,7 +364,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
         processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
         ProcessTaskStepDataVo stepDraftSaveData =
-            processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+                processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
         if (stepDraftSaveData != null) {
             JSONObject dataObj = stepDraftSaveData.getData();
             if (MapUtils.isNotEmpty(dataObj)) {
@@ -390,7 +374,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     for (int i = 0; i < formAttributeDataList.size(); i++) {
                         JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
                         formAttributeDataMap.put(formAttributeDataObj.getString("attributeUuid"),
-                            formAttributeDataObj.get("dataList"));
+                                formAttributeDataObj.get("dataList"));
                     }
                     processTaskStepVo.setFormAttributeDataMap(formAttributeDataMap);
                 }
@@ -398,7 +382,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 String content = dataObj.getString("content");
                 commentVo.setContent(content);
                 List<Long> fileIdList =
-                    JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("fileIdList")), Long.class);
+                        JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("fileIdList")), Long.class);
                 if (CollectionUtils.isNotEmpty(fileIdList)) {
                     commentVo.setFileList(fileMapper.getFileListByIdList(fileIdList));
                 }
