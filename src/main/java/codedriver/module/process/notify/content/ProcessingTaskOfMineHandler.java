@@ -55,7 +55,7 @@ import java.util.*;
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Component
-public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
+public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 	private static Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
 
