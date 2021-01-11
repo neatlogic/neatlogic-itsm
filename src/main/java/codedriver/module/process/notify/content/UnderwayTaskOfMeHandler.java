@@ -226,8 +226,10 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 	@Override
 	protected String myPreview() {
 		StringBuilder taskTable = new StringBuilder();
-		taskTable.append("<table>");
-		taskTable.append("<tr>");
+		taskTable.append("<div class=\"ivu-card-body tstable-container\">");
+		taskTable.append("<table class=\"tstable-body\">");
+		taskTable.append("<thead>");
+		taskTable.append("<tr class=\"th-left\">");
 		taskTable.append("<th>标题</th>");
 		taskTable.append("<th>工单号</th>");
 		taskTable.append("<th>上报人</th>");
@@ -241,7 +243,8 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 		taskTable.append("<th>服务</th>");
 		taskTable.append("<th>上报时间</th>");
 		taskTable.append("</tr>");
-
+		taskTable.append("</thead>");
+		taskTable.append("<tbody>");
 		for(int i = 0;i < 12;i++){
 			taskTable.append("<tr>");
 			taskTable.append("<td>机房进出申请-202101080000" + i + "</td>");
@@ -258,7 +261,9 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 			taskTable.append("<td>2021-01-08 10:10:57</td>");
 			taskTable.append("</tr>");
 		}
+		taskTable.append("</tbody>");
 		taskTable.append("</table>");
+		taskTable.append("</div>");
 		return taskTable.toString();
 	}
 
