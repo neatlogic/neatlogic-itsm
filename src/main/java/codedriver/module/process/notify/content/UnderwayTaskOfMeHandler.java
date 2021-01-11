@@ -411,7 +411,7 @@ public class UnderwayTaskOfMeHandler extends NotifyContentHandlerBase {
 	**/
 	private List<Map<String, Object>> getTaskList(List<String> stepTeamUuidList) {
 		List<Map<String, Object>> originalTaskList = new ArrayList<>();
-		List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByStepTeamUuidList(stepTeamUuidList);
+		List<ProcessTaskVo> processTaskList = processTaskMapper.getPendingProcessTaskListByStepTeamUuidList(stepTeamUuidList);
 		ProcessTaskCurrentStepNameColumn currentStepNameColumn = new ProcessTaskCurrentStepNameColumn();
 		ProcessTaskCurrentStepWorkerColumn currentStepWorkerColumn = new ProcessTaskCurrentStepWorkerColumn();
 		if (CollectionUtils.isNotEmpty(processTaskList)) {
