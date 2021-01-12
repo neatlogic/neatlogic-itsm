@@ -39,12 +39,12 @@
 			<artifactId>codedriver-process-base</artifactId>
 			<version>[1.0.0,)</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>com.techsure</groupId>
 			<artifactId>codedriver-globalsearch</artifactId>
 			<version>[1.0.0,)</version>
 			<optional>true</optional>
-		</dependency> 
+		</dependency> -->
 		<dependency>
 			<groupId>com.techsure</groupId>
 			<artifactId>codedriver-dashboard</artifactId>
