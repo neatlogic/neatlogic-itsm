@@ -14,7 +14,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -85,10 +84,8 @@ public class ProcesstaskImportAuditSearchApi extends PrivateApiComponentBase {
 		List<ProcessTaskImportAuditVo> auditList = processTaskMapper.searchProcessTaskImportAudit(auditVo);
 		if(CollectionUtils.isNotEmpty(auditList)){
 			for(ProcessTaskImportAuditVo importAuditVo : auditList){
-				UserVo user = userMapper.getUserBaseInfoByUuid(importAuditVo.getOwner());
-				UserVo vo = new UserVo();
-				BeanUtils.copyProperties(user,vo);
-				importAuditVo.setOwnerVo(vo);
+				UserVo user = userMapper.getUserBaseInfoByUuidWithoutCache(importAuditVo.getOwner());
+				importAuditVo.setOwnerVo(user);
 			}
 		}
 		returnObj.put("auditList", auditList);
