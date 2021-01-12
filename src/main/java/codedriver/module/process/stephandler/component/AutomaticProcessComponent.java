@@ -145,7 +145,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		}
 		@Override
 		protected void execute() {
-			UserContext.init(SystemUser.SYSTEM.getConfig(), null, SystemUser.SYSTEM.getTimezone(), null, null);
+			UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
 			AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
 			JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
 			automaticConfigVo.setIsRequest(true);
@@ -179,8 +179,8 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
-	    return defaultAssign(currentProcessTaskStepVo, workerList);
+	protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet) throws ProcessTaskException {
+	    return defaultAssign(currentProcessTaskStepVo, workerSet);
 	}
 	
 	@Override
