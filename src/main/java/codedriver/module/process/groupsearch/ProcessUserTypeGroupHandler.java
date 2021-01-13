@@ -39,7 +39,9 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
 				userTypeList.add(s.getValue());
 			}
 			if(includeStrList.contains(getHeader() + s.getValue())){
-				userTypeList.add(s.getValue());
+				if(!userTypeList.contains(s.getValue())){
+					userTypeList.add(s.getValue());
+				}
 			}
 		}
 		return (List<T>) userTypeList;
