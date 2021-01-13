@@ -26,7 +26,7 @@ import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundExcep
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Transactional

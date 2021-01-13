@@ -3,7 +3,7 @@ package codedriver.module.process.api.processtask;
 import java.util.ArrayList;
 import java.util.List;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 
 import org.apache.commons.collections4.CollectionUtils;
