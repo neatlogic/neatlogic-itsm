@@ -215,8 +215,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	protected List<ValueTextVo> getMyDataColumnList() {
 		List<ValueTextVo> result = new ArrayList<>();
 		Collection<IProcessTaskColumn> values = columnComponentMap.values();
-		values.stream().forEach(o -> {
-			if(!o.getDisabled() && o.getIsShow()){
+		values.stream().sorted(Comparator.comparing(IProcessTaskColumn::getSort)).forEach(o -> {
+			if(!o.getDisabled() && o.getIsShow() && o.getIsExport()){
 				result.add(new ValueTextVo(o.getName(),o.getDisplayName()));
 			}
 		});
