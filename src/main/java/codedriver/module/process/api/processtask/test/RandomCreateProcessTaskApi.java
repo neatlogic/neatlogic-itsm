@@ -75,7 +75,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
          * @Date: 2020/12/28 11:22
          */
         actionMap.put("create", (jsonParam) -> {
-            int unitCount = 20000;
+            int unitCount = 100000;
             JSONObject paramJson = new JSONObject();
             Integer count = jsonParam.getInteger("count");
             int latchCount = count / unitCount;
