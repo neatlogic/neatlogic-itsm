@@ -1,7 +1,7 @@
 package codedriver.module.process.api.priority;
 
 import codedriver.framework.process.exception.priority.PriorityIsInvokedException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.PRIORITY_MODIFY;

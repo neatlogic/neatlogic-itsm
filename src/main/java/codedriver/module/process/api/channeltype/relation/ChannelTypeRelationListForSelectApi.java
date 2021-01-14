@@ -4,7 +4,7 @@ import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
@@ -62,7 +62,7 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
 
     @Input({
             @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关系名称，关键字搜索"),
-            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+            @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id"),
             @Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
             @Param(name = "sourceChannelTypeUuid", type = ApiParamType.STRING, xss = true, desc = "来源服务类型uuid"),
             @Param(name = "sourceChannelUuid", type = ApiParamType.STRING, xss = true, desc = "来源服务uuid"),
@@ -77,8 +77,6 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
     @Description(desc = "查询服务类型关系列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long processTaskId = jsonObj.getLong("processTaskId");
-        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         JSONObject resultObj = new JSONObject();
         resultObj.put("list", new ArrayList<>());
         ChannelTypeRelationVo channelTypeRelationVo = JSON.toJavaObject(jsonObj, ChannelTypeRelationVo.class);
@@ -94,25 +92,29 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
             String userUuid = UserContext.get().getUserUuid(true);
             List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
             List<String> processUserTypeList = new ArrayList<>();
-            if(userUuid.equals(processTaskVo.getOwner())){
-                processUserTypeList.add(ProcessUserType.OWNER.getValue());
-            }
-            if(userUuid.equals(processTaskVo.getReporter())){
-                processUserTypeList.add(ProcessUserType.REPORTER.getValue());
-            }
-            List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserList(new ProcessTaskStepUserVo(processTaskVo.getId(), null, userUuid));
-            for(ProcessTaskStepUserVo processTaskStepUserVo : processTaskStepUserList){
-                if(processTaskStepUserVo.getUserType().equals(ProcessUserType.MAJOR.getValue())){
-                    processUserTypeList.add(ProcessUserType.MAJOR.getValue());
-                }else {
-                    processUserTypeList.add(ProcessUserType.MINOR.getValue());
+            Long processTaskId = jsonObj.getLong("processTaskId");
+            if(processTaskId != null){
+                ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+                if(userUuid.equals(processTaskVo.getOwner())){
+                    processUserTypeList.add(ProcessUserType.OWNER.getValue());
                 }
-            }
-            if (processUserTypeList.contains(ProcessUserType.MAJOR.getValue())){
-                processUserTypeList.add(ProcessUserType.WORKER.getValue());
-            }else {
-                if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, ProcessUserType.MAJOR.getValue(), userUuid, teamUuidList, UserContext.get().getRoleUuidList()) > 0){
+                if(userUuid.equals(processTaskVo.getReporter())){
+                    processUserTypeList.add(ProcessUserType.REPORTER.getValue());
+                }
+                List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserList(new ProcessTaskStepUserVo(processTaskVo.getId(), null, userUuid));
+                for(ProcessTaskStepUserVo processTaskStepUserVo : processTaskStepUserList){
+                    if(processTaskStepUserVo.getUserType().equals(ProcessUserType.MAJOR.getValue())){
+                        processUserTypeList.add(ProcessUserType.MAJOR.getValue());
+                    }else {
+                        processUserTypeList.add(ProcessUserType.MINOR.getValue());
+                    }
+                }
+                if (processUserTypeList.contains(ProcessUserType.MAJOR.getValue())){
                     processUserTypeList.add(ProcessUserType.WORKER.getValue());
+                }else {
+                    if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, ProcessUserType.MAJOR.getValue(), userUuid, teamUuidList, UserContext.get().getRoleUuidList()) > 0){
+                        processUserTypeList.add(ProcessUserType.WORKER.getValue());
+                    }
                 }
             }
             List<Long> channelTypeRelationIdList = channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(sourceChannelUuid, userUuid, teamUuidList, UserContext.get().getRoleUuidList(), processUserTypeList);

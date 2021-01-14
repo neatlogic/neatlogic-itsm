@@ -1,7 +1,7 @@
 package codedriver.module.process.api.process;
 
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.PROCESS_MODIFY;

@@ -2,7 +2,7 @@ package codedriver.module.process.api.channeltype;
 
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.CHANNELTYPE_MODIFY;

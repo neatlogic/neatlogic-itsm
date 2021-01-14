@@ -31,24 +31,24 @@
 		<dependency>
 			<groupId>com.techsure</groupId>
 			<artifactId>codedriver-framework</artifactId>
-			<version>[1.0.0,)</version>
+			<version>0.1.0.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.techsure</groupId>
 			<artifactId>codedriver-process-base</artifactId>
-			<version>[1.0.0,)</version>
+			<version>0.1.0.0-SNAPSHOT</version>
 		</dependency>
 		<!--<dependency>
 			<groupId>com.techsure</groupId>
 			<artifactId>codedriver-globalsearch</artifactId>
-			<version>[1.0.0,)</version>
+			<version>0.1.0.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency> -->
 		<dependency>
 			<groupId>com.techsure</groupId>
 			<artifactId>codedriver-dashboard</artifactId>
-			<version>[1.0.0,)</version>
+			<version>0.1.0.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency> 
     </dependencies> 

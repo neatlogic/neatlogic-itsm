@@ -5,7 +5,7 @@ import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
 import codedriver.framework.reminder.core.IGlobalReminderHandler;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.reminder.dto.ReminderMessageVo;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;

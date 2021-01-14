@@ -7,14 +7,13 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskImportAuditVo;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -85,10 +84,8 @@ public class ProcesstaskImportAuditSearchApi extends PrivateApiComponentBase {
 		List<ProcessTaskImportAuditVo> auditList = processTaskMapper.searchProcessTaskImportAudit(auditVo);
 		if(CollectionUtils.isNotEmpty(auditList)){
 			for(ProcessTaskImportAuditVo importAuditVo : auditList){
-				UserVo user = userMapper.getUserBaseInfoByUuid(importAuditVo.getOwner());
-				UserVo vo = new UserVo();
-				BeanUtils.copyProperties(user,vo);
-				importAuditVo.setOwnerVo(vo);
+				UserVo user = userMapper.getUserBaseInfoByUuidWithoutCache(importAuditVo.getOwner());
+				importAuditVo.setOwnerVo(user);
 			}
 		}
 		returnObj.put("auditList", auditList);
