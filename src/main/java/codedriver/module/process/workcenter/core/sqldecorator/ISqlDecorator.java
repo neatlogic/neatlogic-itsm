@@ -1,4 +1,4 @@
-package codedriver.module.process.workcenter.core;
+package codedriver.module.process.workcenter.core.sqldecorator;
 
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 
@@ -21,4 +21,12 @@ public interface ISqlDecorator {
      * @Returns: java.lang.String
      **/
     void build(StringBuilder sqlSb, WorkcenterVo workcenterVo);
+
+
+    public ISqlDecorator getNextSqlDecorator();
+
+    public void setNextSqlDecorator(ISqlDecorator nextSqlDecorator);
+
+    public int getSort();
+
 }

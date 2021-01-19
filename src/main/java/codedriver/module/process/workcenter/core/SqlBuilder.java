@@ -1,7 +1,9 @@
 package codedriver.module.process.workcenter.core;
 
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import codedriver.module.process.workcenter.core.sqldecorator.SqlDecoratorChain;
+import codedriver.module.process.workcenter.core.sqldecorator.SqlLimitDecorator;
+import codedriver.module.process.workcenter.core.sqldecorator.SqlOrderDecorator;
 
 /**
  * @Title: SqlBuilder
@@ -14,38 +16,62 @@ import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
  **/
 public class SqlBuilder {
     private final StringBuilder sqlSb;
-    public SqlBuilder(){
+    public SqlBuilder(WorkcenterVo workcenterVo,FieldTypeEnum fieldTypeEnum ){
         sqlSb = new StringBuilder();
-        sqlSb.append("SELECT ");
+        SqlDecoratorChain.firstSqlDecorator.build(sqlSb,workcenterVo);
     }
 
     public String build(){
         return sqlSb.toString();
     }
 
-    public SqlBuilder withSelectDistinctIdColumn(){
-        ProcessTaskSqlTable processTaskSqlTable = new ProcessTaskSqlTable();
-        sqlSb.append(String.format(" DISTINCT %s.%s ",processTaskSqlTable.getShortName(),processTaskSqlTable.getJoinKey()));
-        return this;
+    /**
+     * @Description: 构建 order 排序
+     * @Author: 89770
+     * @Date: 2021/1/19 15:14
+     * @Params: [workcenterVo]
+     * @Returns: void
+     **/
+    public void buildOrder(WorkcenterVo workcenterVo){
+        new SqlOrderDecorator().build(sqlSb,workcenterVo);
     }
 
-    public SqlBuilder withSelectCountColumn(){
-        ProcessTaskSqlTable processTaskSqlTable = new ProcessTaskSqlTable();
-        sqlSb.append(" COUNT(1) ");
-
-        return this;
+    /**
+     * @Description: 构建 limit 分页
+     * @Author: 89770
+     * @Date: 2021/1/19 15:16
+     * @Params: [workcenterVo]
+     * @Returns: void
+     **/
+    public void buildLimit(WorkcenterVo workcenterVo){
+        new SqlLimitDecorator().build(sqlSb,workcenterVo);
     }
 
-    public SqlBuilder withSelectColumn(WorkcenterVo workcenterVo){
-        new SqlColumnDecorator().build(sqlSb,workcenterVo);
-        return this;
+    public enum FieldTypeEnum {
+        DISTINCT_ID("distinctId", "去重工单ID"), FIELD("field", "选择字段"), COUNT("count", "统计个数");
+        private final String name;
+        private final String text;
+
+        private FieldTypeEnum(String _value, String _text){
+            this.name = _value;
+            this.text = _text;
+        }
+
+        public String getValue(){
+            return name;
+        }
+
+        public String getText(){
+            return text;
+        }
+
+        public static String getText(String value){
+            for (FieldTypeEnum f : FieldTypeEnum.values()){
+                if (f.getValue().equals(value)){
+                    return f.getText();
+                }
+            }
+            return "";
+        }
     }
-
-    private SqlBuilder buildFromTable(){
-return this;
-    }
-
-    //public SqlBuilder with
-
-
 }

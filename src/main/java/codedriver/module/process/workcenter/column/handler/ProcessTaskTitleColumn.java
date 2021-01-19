@@ -1,5 +1,6 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -53,4 +54,7 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 		}
 		return null;
 	}
+
+	@Override
+	public String getSqlTableName(){return new ProcessTaskSqlTable().getName();}
 }
