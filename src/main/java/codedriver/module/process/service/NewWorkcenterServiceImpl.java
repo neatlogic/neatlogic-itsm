@@ -16,6 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
  * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
+@Service
 public class NewWorkcenterServiceImpl implements NewWorkcenterService{
 
     Logger logger = LoggerFactory.getLogger(WorkcenterServiceImpl.class);
@@ -52,6 +54,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService{
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
 
         SqlBuilder sb = new SqlBuilder(workcenterVo, SqlBuilder.FieldTypeEnum.FIELD);
+        System.out.println(sb.build());
         return null;
     }
 

@@ -4,13 +4,15 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.workcenter.core.SqlBuilder;
-import codedriver.module.process.workcenter.core.table.ISqlTable;
+import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTableFactory;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTableFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -77,13 +79,16 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
     private void buildField(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         Map<String, ISqlTable> tableComponentMap =  ProcessTaskSqlTableFactory.tableComponentMap;
+        List<String> columnList = new ArrayList<>();
         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
             IProcessTaskColumn column = entry.getValue();
-            ISqlTable sqlTable = tableComponentMap.get(column.getSqlTableName());
-            if(sqlTable != null){
-                sqlSb.append(String.format("%s.%s,",sqlTable.getShortName(),column.getName()));
-            }
+//
+//            ISqlTable sqlTable = tableComponentMap.get(column.getSqlTableName());
+//            if(sqlTable != null){
+//                columnList.add(String.format("%s.%s",sqlTable.getShortName(),column.getName()));
+//            }
         }
+        sqlSb.append(String.join(",",columnList));
     }
 
     @Override

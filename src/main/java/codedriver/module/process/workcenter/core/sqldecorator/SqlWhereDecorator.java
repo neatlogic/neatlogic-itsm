@@ -1,6 +1,21 @@
 package codedriver.module.process.workcenter.core.sqldecorator;
 
+import codedriver.framework.condition.core.ConditionHandlerFactory;
+import codedriver.framework.dto.condition.ConditionGroupRelVo;
+import codedriver.framework.dto.condition.ConditionGroupVo;
+import codedriver.framework.dto.condition.ConditionRelVo;
+import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.module.process.workcenter.core.SqlBuilder;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Title: SqlWhereDecorator
@@ -11,10 +26,62 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
  * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
+@Component
 public class SqlWhereDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
+        // 将group 以连接表达式 存 Map<fromUuid_toUuid,joinType>
+        Map<String, String> groupRelMap = new HashMap<String, String>();
+        List<ConditionGroupRelVo> groupRelList = workcenterVo.getConditionGroupRelList();
+        if (CollectionUtils.isNotEmpty(groupRelList)) {
+            for (ConditionGroupRelVo groupRel : groupRelList) {
+                groupRelMap.put(groupRel.getFrom() + "_" + groupRel.getTo(), groupRel.getJoinType());
+            }
+        }
 
+        //如果是distinct id 则 需要 根据条件获取需要的表。否则需要根据column获取需要的表
+        if(SqlBuilder.FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())){
+            List<ISqlTable> tableList = new ArrayList<>();
+            List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
+            String fromGroupUuid = null;
+            String toGroupUuid = groupList.get(0).getUuid();
+            for(ConditionGroupVo groupVo : groupList ) {
+                // 将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType>
+                Map<String, String> conditionRelMap = new HashMap<String, String>();
+                List<ConditionRelVo> conditionRelList = groupVo.getConditionRelList();
+                if (CollectionUtils.isNotEmpty(conditionRelList)) {
+                    for (ConditionRelVo conditionRel : conditionRelList) {
+                        conditionRelMap.put(conditionRel.getFrom() + "_" + conditionRel.getTo(),
+                                conditionRel.getJoinType());
+                    }
+                }
+                //append joinType
+                if (fromGroupUuid != null) {
+                    toGroupUuid = groupVo.getUuid();
+                    sqlSb.append(groupRelMap.get(fromGroupUuid + "_" + toGroupUuid));
+                }
+                sqlSb.append(" ( ");
+                List<ConditionVo> conditionVoList = groupVo.getConditionList();
+                String fromConditionUuid = null;
+                String toConditionUuid = conditionVoList.get(0).getUuid();
+                for ( int i = 0; i < conditionVoList.size();i++) {
+                    ConditionVo conditionVo = conditionVoList.get(i);
+                    //append joinType
+                    if (fromConditionUuid != null) {
+                        toConditionUuid = conditionVo.getUuid();
+                        IProcessTaskCondition sqlCondition = (IProcessTaskCondition)ConditionHandlerFactory.getHandler(conditionVo.getName());
+                        sqlCondition.getSqlConditionWhere(conditionVoList,i,sqlSb);
+                        sqlSb.append(groupRelMap.get(fromConditionUuid + "_" + toConditionUuid));
+                    }
+                    fromConditionUuid = toConditionUuid;
+                }
+                sqlSb.append(" ) ");
+                fromGroupUuid = toGroupUuid;
+
+            }
+        }else{
+
+        }
     }
 
     @Override

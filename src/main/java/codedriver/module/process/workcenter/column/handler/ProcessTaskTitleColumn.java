@@ -1,13 +1,14 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 @Component
 public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -56,5 +57,11 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 	}
 
 	@Override
-	public String getSqlTableName(){return new ProcessTaskSqlTable().getName();}
+	public Map<ISqlTable,List<String>> getMySqlTableColumnMap(){
+		return new HashMap<ISqlTable,List<String>>(){
+			{
+				put(new ProcessTaskSqlTable(), Collections.singletonList("title"));
+			}
+		};
+	}
 }

@@ -1,7 +1,9 @@
 package codedriver.module.process.workcenter.core.table;
 
+import codedriver.framework.process.workcenter.table.ISqlTable;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,6 +15,8 @@ import java.util.Map;
  * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
+
+@Component
 public class ProcessTaskStepSqlTable implements ISqlTable {
     @Override
     public String getName() {
@@ -30,17 +34,12 @@ public class ProcessTaskStepSqlTable implements ISqlTable {
     }
 
     @Override
-    public Map<String, String> getDependTableColumnMap(List<String> allTaleNameList) {
-        String processTaskTableName = new ProcessTaskSqlTable().getName();
-        Map<String,String> dependMap = null;
-        if(allTaleNameList.contains(processTaskTableName)){
-            dependMap = new HashMap<String,String>(){
-                {
-                    put(processTaskTableName,"id");
-                }
-            };
-        }
-        return dependMap;
+    public Map<ISqlTable,Map<String,String>> getDependTableColumnMap() {
+        return new HashMap<ISqlTable,Map<String,String>>(){
+            {
+                put(new ProcessTaskSqlTable(),new HashMap<String,String>(){{ put("id","processtask_id");}});
+            }
+        };
     }
 
 }

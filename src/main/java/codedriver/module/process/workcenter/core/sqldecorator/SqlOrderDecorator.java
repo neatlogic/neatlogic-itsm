@@ -1,6 +1,7 @@
 package codedriver.module.process.workcenter.core.sqldecorator;
 
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import org.springframework.stereotype.Component;
 
 /**
  * @Title: SqlOrderDecorator
@@ -11,6 +12,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
  * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
+@Component
 public class SqlOrderDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {

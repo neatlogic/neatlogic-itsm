@@ -1,13 +1,18 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -65,5 +70,14 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
 			status = JSONObject.parseObject(json.toString()).getString("text");
 		}
 		return status;
+	}
+
+	@Override
+	public Map<ISqlTable,List<String>> getMySqlTableColumnMap(){
+		return new HashMap<ISqlTable,List<String>>(){
+			{
+				put(new ProcessTaskSqlTable(), Collections.singletonList("status"));
+			}
+		};
 	}
 }

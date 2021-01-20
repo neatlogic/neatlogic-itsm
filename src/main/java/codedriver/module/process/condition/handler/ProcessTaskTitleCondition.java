@@ -1,12 +1,5 @@
 package codedriver.module.process.condition.handler;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
@@ -14,6 +7,14 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -87,5 +88,14 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
 	@Override
 	public Object valueConversionText(Object value, JSONObject config) {
 		return value;
+	}
+
+	@Override
+	public  List<ISqlTable> getMySqlTableList(){
+		return new ArrayList<ISqlTable>(){
+			{
+				add(new ProcessTaskSqlTable());
+			}
+		};
 	}
 }

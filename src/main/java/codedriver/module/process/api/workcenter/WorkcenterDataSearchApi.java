@@ -1,25 +1,21 @@
 package codedriver.module.process.api.workcenter;
 
-import java.util.List;
-
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.service.NewWorkcenterService;
+import codedriver.module.process.service.WorkcenterService;
+import codedriver.module.process.workcenter.core.SqlBuilder;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.WorkcenterService;
+import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
@@ -27,6 +23,9 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 	WorkcenterMapper workcenterMapper;
 	@Autowired
 	WorkcenterService workcenterService;
+
+	@Autowired
+	NewWorkcenterService newWorkcenterService;
 	
 	@Override
 	public String getToken() {
@@ -82,7 +81,11 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 				}
 			}
 		}
-		return workcenterService.doSearch(new WorkcenterVo(jsonObj));
+		WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
+		workcenterVo.setSqlFieldType(SqlBuilder.FieldTypeEnum.DISTINCT_ID.getValue());
+		newWorkcenterService.doSearch(workcenterVo);
+		return null;
+		//return workcenterService.doSearch(workcenterVo);
 	}
 
 }
