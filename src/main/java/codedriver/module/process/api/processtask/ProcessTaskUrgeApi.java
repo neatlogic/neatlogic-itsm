@@ -74,6 +74,7 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 			for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 				/** 触发通知 **/
 				handler.notify(processTaskStepVo, TaskNotifyTriggerType.URGE);
+				handler.action(processTaskStepVo, TaskNotifyTriggerType.URGE);
 			}
 		}else {
 			try {
