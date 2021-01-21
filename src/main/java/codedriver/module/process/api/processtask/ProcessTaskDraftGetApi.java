@@ -41,8 +41,6 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundExc
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -106,10 +104,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long copyProcessTaskId = jsonObj.getLong("copyProcessTaskId");
         String channelUuid = jsonObj.getString("channelUuid");
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         if (processTaskId != null) {
             processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-            ProcessTaskVo processTaskVo = handler.getProcessTaskDetailById(processTaskId);
+            ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
             if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
                 // throw new ProcessTaskNoPermissionException("上报");
@@ -122,7 +119,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 processTaskVo.setOwner(owner);
             }
 
-            ProcessTaskStepVo startProcessTaskStepVo = handler.getStartProcessTaskStepByProcessTaskId(processTaskId);
+            ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
             // 获取须指派的步骤列表
             startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(
                 startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getProcessStepUuid()));
@@ -192,7 +189,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
 
             ProcessTaskStepVo oldStartProcessTaskStepVo =
-                ProcessStepUtilHandlerFactory.getHandler().getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
+                    processTaskService.getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
 
             ProcessStepVo processStepVo = new ProcessStepVo();
             processStepVo.setProcessUuid(channel.getProcessUuid());
@@ -298,7 +295,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
             Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
             if (fromProcessTaskId != null) {
-                processTaskVo.getTranferReportProcessTaskList().add(handler.getFromProcessTasById(fromProcessTaskId));
+                processTaskVo.getTranferReportProcessTaskList().add(processTaskService.getFromProcessTasById(fromProcessTaskId));
             }
             if (StringUtils.isNotBlank(processVo.getFormUuid())) {
                 FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processVo.getFormUuid());

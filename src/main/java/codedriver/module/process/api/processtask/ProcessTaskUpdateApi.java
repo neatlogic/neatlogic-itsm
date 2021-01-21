@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,8 +37,6 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -63,6 +62,9 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskService processTaskService;
+
+    @Autowired
+    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -209,9 +211,8 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             processTaskStepVo.setProcessTaskId(processTaskId);
             processTaskStepVo.setId(processTaskStepId);
             processTaskStepVo.setParamObj(jsonObj);
-            IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-            handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
-            handler.calculateSla(new ProcessTaskVo(processTaskId), false);
+            IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATE);
+            IProcessStepHandlerUtil.calculateSla(new ProcessTaskVo(processTaskId), false);
         }
 
         return null;

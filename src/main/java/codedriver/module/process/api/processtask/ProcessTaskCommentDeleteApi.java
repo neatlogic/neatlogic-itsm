@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -27,7 +28,6 @@ import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepCommentNotFoundException;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
 @Service
 @Transactional
@@ -40,6 +40,9 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+
+	@Autowired
+	private IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
 	@Override
 	public String getToken() {
@@ -87,7 +90,7 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
         //生成活动
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(replyVo.getProcessTaskStepId());    
         processTaskStepVo.setParamObj(jsonObj);
-        ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
+		IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
         
         JSONObject resultObj = new JSONObject();
         List<String> typeList = new ArrayList<>();

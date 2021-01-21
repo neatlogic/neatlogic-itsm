@@ -101,10 +101,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW).build()
                 .checkAndNoPermissionThrowException();
-        ProcessTaskVo processTaskVo = handler.getProcessTaskDetailById(processTaskId);
+        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
 
         if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_SCORE).build().check()) {
             ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
@@ -119,12 +118,11 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
             }
         }
-        processTaskVo.setStartProcessTaskStep(handler.getStartProcessTaskStepByProcessTaskId(processTaskId));
+        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
         Map<String, String> formAttributeActionMap = new HashMap<>();
         if (processTaskStepId != null) {
             ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
             if (currentProcessTaskStepVo != null) {
-                handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
                 if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_SAVE)
                         .build().check()) {
                     // 回复框内容和附件暂存回显
@@ -351,12 +349,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     }
 
     /**
-     * @param ProcessTaskStepVo 步骤信息
-     * @return void
-     * @Author: linbq
-     * @Time:2020年8月21日
      * @Description: 设置步骤当前用户的暂存数据
-     */
+     * @Author: linbq
+     * @Date: 2020/8/21 10:13
+     * @Params:[processTaskVo, processTaskStepVo]
+     * @Returns:void
+     **/
     private void setTemporaryData(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());

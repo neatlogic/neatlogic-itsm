@@ -103,7 +103,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 		processTaskVo.setId(currentProcessTaskStepVo.getProcessTaskId());
 //		processTaskMapper.updateProcessTaskStatus(processTaskVo);
 		//自动评分
-		AutoScoreHandler.autoScore(processTaskVo);
+		IProcessStepHandlerUtil.autoScore(processTaskVo);
 		return 0;
 	}
 	

@@ -164,8 +164,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     }
 
     private ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
-        ProcessTaskStepVo startProcessTaskStepVo =
-            ProcessStepUtilHandlerFactory.getHandler().getStartProcessTaskStepByProcessTaskId(processTaskId);
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
         processTaskService.setProcessTaskStepUser(startProcessTaskStepVo);
 
         // 步骤评论列表

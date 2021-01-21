@@ -1,7 +1,6 @@
 package codedriver.module.process.stephandler.component;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +13,13 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.*;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
@@ -45,6 +45,8 @@ import codedriver.framework.util.RunScriptUtil;
 @Service
 public class ConditionProcessComponent extends ProcessStepHandlerBase {
     static Logger logger = LoggerFactory.getLogger(ConditionProcessComponent.class);
+    @Autowired
+    private ProcessTaskService processTaskService;
 
     @Override
     public String getName() {
@@ -124,9 +126,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                             } else if ("optional".equals(type)) {// 自定义
                                 JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
-                                    IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
-                                    ProcessTaskVo processTaskVo = handler.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
-                                    processTaskVo.setStartProcessTaskStep(handler.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
+                                    ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
+                                    processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
                                     processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
                                     JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
                                     try {
@@ -189,7 +190,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
         /** 处理历史记录 **/
         // String action = currentProcessTaskStepVo.getParamObj().getString("action");
         // AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
-        AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.CONDITION);
+        IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.CONDITION);
         return 1;
     }
 
