@@ -3,6 +3,7 @@ package codedriver.module.process.api.processtask;
 import java.util.Arrays;
 import java.util.List;
 
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,6 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -49,6 +48,9 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskService processTaskService;
+
+    @Autowired
+    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -73,7 +75,6 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         try {
             new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_TRANFERREPORT)
                 .build().checkAndNoPermissionThrowException();
@@ -102,14 +103,14 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
                         channelTypeRelationId);
                     processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                         JSON.toJSONString(Arrays.asList(processTaskId)));
-                    handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.RELATION);
+                    IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
                 }
                 jsonObj.put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                     JSON.toJSONString(processTaskIdList));
                 ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
                 processTaskStepVo.setProcessTaskId(processTaskId);
                 processTaskStepVo.setParamObj(jsonObj);
-                handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.RELATION);
+                IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
             }
         }
         return null;
