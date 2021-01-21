@@ -36,9 +36,9 @@ import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoun
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.integration.handler.ProcessRequestFrom;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.process.stepremind.core.ProcessTaskStepRemindTypeFactory;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
@@ -568,8 +568,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             if (processTaskStepVo == null) {
                 throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
             }
-            IProcessStepUtilHandler processStepUtilHandler =
-                ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            IProcessStepInternalHandler processStepUtilHandler =
+                    ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
             if (processStepUtilHandler == null) {
                 throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
             }
@@ -583,8 +583,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             if (nextProcessTaskStepVo == null) {
                 throw new ProcessTaskStepNotFoundException(nextStepId.toString());
             }
-            IProcessStepUtilHandler processStepUtilHandler =
-                ProcessStepUtilHandlerFactory.getHandler(nextProcessTaskStepVo.getHandler());
+            IProcessStepInternalHandler processStepUtilHandler =
+                    ProcessStepInternalHandlerFactory.getHandler(nextProcessTaskStepVo.getHandler());
             if (processStepUtilHandler == null) {
                 throw new ProcessStepUtilHandlerNotFoundException(nextProcessTaskStepVo.getHandler());
             }
@@ -858,16 +858,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
         JSONArray authorityList = (JSONArray)JSONPath.read(stepConfig, "authorityList");
         if (CollectionUtils.isEmpty(authorityList)) {
-            IProcessStepUtilHandler processStepUtilHandler =
-                ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            IProcessStepInternalHandler processStepUtilHandler =
+                    ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
             if (processStepUtilHandler == null) {
                 throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
             }
             ProcessStepHandlerVo processStepHandlerConfig =
-                processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+                    processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
             JSONObject globalConfig = processStepUtilHandler
-                .makeupConfig(processStepHandlerConfig != null ? processStepHandlerConfig.getConfig() : null);
-            authorityList = (JSONArray)JSONPath.read(JSON.toJSONString(globalConfig), "authorityList");
+                    .makeupConfig(processStepHandlerConfig != null ? processStepHandlerConfig.getConfig() : null);
+            authorityList = (JSONArray) JSONPath.read(JSON.toJSONString(globalConfig), "authorityList");
         }
 
         // 如果步骤自定义权限设置为空，则用组件的全局权限设置
@@ -1217,8 +1217,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         startProcessTaskStepVo.setComment(comment);
         /** 当前步骤特有步骤信息 **/
-        IProcessStepUtilHandler startProcessStepUtilHandler =
-                ProcessStepUtilHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
+        IProcessStepInternalHandler startProcessStepUtilHandler =
+                ProcessStepInternalHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
         if (startProcessStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
         }
@@ -1244,7 +1244,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         processTaskStepVo.setWorkerList(workerList);
         List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStep.getId(), null);
         processTaskStepVo.setUserList(userList);
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if (handler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }

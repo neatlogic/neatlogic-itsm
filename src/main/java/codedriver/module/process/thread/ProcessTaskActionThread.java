@@ -24,8 +24,8 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.module.process.integration.handler.ProcessRequestFrom;
 import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.util.ConditionUtil;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSON;
@@ -110,7 +110,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
                 actionList = (JSONArray)JSONPath.read(stepConfig, "actionConfig.actionList");
                 if (CollectionUtils.isEmpty(actionList)) {
-                    IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(stepVo.getHandler());
+                    IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(stepVo.getHandler());
                     if (processStepUtilHandler == null) {
                         throw new ProcessStepUtilHandlerNotFoundException(stepVo.getHandler());
                     }

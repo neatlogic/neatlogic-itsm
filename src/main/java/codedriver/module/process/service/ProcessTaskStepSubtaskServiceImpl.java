@@ -30,8 +30,8 @@ import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.notify.constvalue.SubtaskNotifyTriggerType;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 
 @Service
 public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtaskService {
@@ -69,7 +69,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if (currentProcessTaskStepVo == null) {
             throw new ProcessTaskStepNotFoundException(processTaskStepSubtaskVo.getProcessTaskStepId().toString());
         }
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if (handler != null) {
             handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
             //记录活动
@@ -135,7 +135,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             return;
         }
 
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if (handler != null) {
             if (!processTaskStepSubtaskVo.getUserUuid().equals(oldProcessTaskStepSubtask.getUserUuid())) {//更新了处理人
                 handler.updateProcessTaskStepUserAndWorker(oldProcessTaskStepSubtask.getProcessTaskId(), oldProcessTaskStepSubtask.getProcessTaskStepId());
@@ -188,7 +188,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
             processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_REDO.getValue(), processTaskContentVo.getHash()));
         }
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if (handler != null) {
             handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
             //记录活动
@@ -227,7 +227,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
             processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_COMPLETE.getValue(), processTaskContentVo.getHash()));
         }
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if (handler == null) {
             throw new ProcessStepUtilHandlerNotFoundException(currentProcessTaskStepVo.getHandler());
         }
@@ -271,7 +271,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         processTaskStepSubtaskVo.setCancelUser(UserContext.get().getUserUuid(true));
         processTaskStepSubtaskMapper.updateProcessTaskStepSubtaskStatus(processTaskStepSubtaskVo);
 
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
         if (handler != null) {
             handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
             //记录活动

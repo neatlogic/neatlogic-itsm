@@ -7,8 +7,8 @@ import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -67,17 +67,17 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	List<ProcessStepHandlerVo> processStepHandlerList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("processStepHandlerList")), ProcessStepHandlerVo.class);
     	for(ProcessStepHandlerVo stepHandlerVo :processStepHandlerList) {
-    		IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(stepHandlerVo.getHandler());
-    		if(handler != null) {
-    			JSONObject config = handler.makeupConfig(stepHandlerVo.getConfig());
-    			if(MapUtils.isNotEmpty(config)) {
-    				stepHandlerVo.setConfig(config.toJSONString());
-        			stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
+            IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(stepHandlerVo.getHandler());
+            if (handler != null) {
+                JSONObject config = handler.makeupConfig(stepHandlerVo.getConfig());
+                if (MapUtils.isNotEmpty(config)) {
+                    stepHandlerVo.setConfig(config.toJSONString());
+                    stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
                     stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
                     notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
                     JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
                     Long policyId = notifyPolicyConfig.getLong("policyId");
-                    if(policyId != null) {
+                    if (policyId != null) {
                     	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
                     	notifyPolicyInvokerVo.setPolicyId(policyId);
                     	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());

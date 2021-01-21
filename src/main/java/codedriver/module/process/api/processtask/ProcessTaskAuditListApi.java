@@ -31,8 +31,8 @@ import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotF
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -102,18 +102,18 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
                 if (processTaskStepAudit.getProcessTaskStepId() != null) {
                     // 判断当前用户是否有权限查看该节点信息
                     ProcessTaskStepVo processTaskStepVo =
-                        processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepAudit.getProcessTaskStepId());
+                            processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepAudit.getProcessTaskStepId());
                     if (processTaskStepVo == null) {
                         throw new ProcessTaskStepNotFoundException(
-                            processTaskStepAudit.getProcessTaskStepId().toString());
+                                processTaskStepAudit.getProcessTaskStepId().toString());
                     }
-                    IProcessStepUtilHandler processStepUtilHandler =
-                        ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                    IProcessStepInternalHandler processStepUtilHandler =
+                            ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
                     if (processStepUtilHandler == null) {
                         throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                     }
                     if (!operateMap.computeIfAbsent(processTaskStepVo.getId(), k -> new HashSet<>())
-                        .contains(ProcessTaskOperationType.STEP_VIEW)) {
+                            .contains(ProcessTaskOperationType.STEP_VIEW)) {
                         continue;
                     }
                 }

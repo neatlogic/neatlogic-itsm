@@ -8,9 +8,10 @@ import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+
 @Service
-public class ConditionProcessUtilHandler extends ProcessStepUtilHandlerBase {
+public class ConditionProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
 	@Override
 	public String getHandler() {

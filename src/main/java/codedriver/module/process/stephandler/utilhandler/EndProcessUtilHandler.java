@@ -16,19 +16,20 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.module.process.notify.handler.TaskNotifyPolicyHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+
 @Service
-public class EndProcessUtilHandler extends ProcessStepUtilHandlerBase {
+public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
-	@Override
-	public String getHandler() {
-		return ProcessStepHandlerType.END.getHandler();
-	}
+    @Override
+    public String getHandler() {
+        return ProcessStepHandlerType.END.getHandler();
+    }
 
-	@Override
-	public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
-		// TODO Auto-generated method stub
-		return null;
+    @Override
+    public Object getHandlerStepInfo(ProcessTaskStepVo currentProcessTaskStepVo) {
+        // TODO Auto-generated method stub
+        return null;
 	}
 
 	@Override
