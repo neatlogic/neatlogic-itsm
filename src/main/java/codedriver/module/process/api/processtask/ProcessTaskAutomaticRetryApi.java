@@ -71,10 +71,9 @@ public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 		if(dataObject != null && dataObject.containsKey("requestAudit")) {
 			JSONObject requestStatus = dataObject.getJSONObject("requestAudit").getJSONObject("status");
 			//load第一次请求job
-			if(!ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))
-					&&!ProcessTaskStatus.FAILED.getValue().equals(requestStatus.getString("value"))) {
+			if(!ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))) {
 				String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-				automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
+				automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config).getJSONObject("automaticConfig"));
 				automaticConfigVo.setIsRequest(true);
 				isRetry = true;
 			}

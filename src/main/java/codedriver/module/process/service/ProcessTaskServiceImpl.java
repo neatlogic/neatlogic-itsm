@@ -1,30 +1,5 @@
 package codedriver.module.process.service;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
-
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
@@ -44,40 +19,11 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.exception.MatrixExternalException;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
-import codedriver.framework.process.constvalue.FormAttributeAction;
-import codedriver.framework.process.constvalue.ProcessFlowDirection;
-import codedriver.framework.process.constvalue.ProcessStepMode;
-import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
-import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
-import codedriver.framework.process.constvalue.ProcessUserType;
-import codedriver.framework.process.constvalue.WorkerPolicy;
+import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.constvalue.automatic.CallbackType;
 import codedriver.framework.process.constvalue.automatic.FailPolicy;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
-import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
-import codedriver.framework.process.dao.mapper.WorktimeMapper;
-import codedriver.framework.process.dto.ProcessStepHandlerVo;
-import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
-import codedriver.framework.process.dto.ProcessTaskSlaVo;
-import codedriver.framework.process.dto.ProcessTaskStepContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepFileVo;
-import codedriver.framework.process.dto.ProcessTaskStepRemindVo;
-import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
-import codedriver.framework.process.dto.ProcessTaskStepUserVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.dao.mapper.*;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
@@ -98,6 +44,23 @@ import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class ProcessTaskServiceImpl implements ProcessTaskService {
@@ -323,6 +286,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
                     if (automaticConfigVo.getIsRequest() && !automaticConfigVo.getIsHasCallback()
                         || !automaticConfigVo.getIsRequest()) {// 第一次请求
+                        //补充下一步骤id
+                        List<ProcessTaskStepVo> nextStepList =  processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+                        currentProcessTaskStepVo.getParamObj().put("nextStepId",nextStepList.get(0).getId());
                         processHandler.complete(currentProcessTaskStepVo);
                     } else {// 回调请求
                         if (CallbackType.WAIT.getValue().equals(automaticConfigVo.getCallbackType())) {
@@ -358,6 +324,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                 // processHandler.hang(currentProcessTaskStepVo);
                         }
                     } else if (FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
+                        //补充下一步骤id
+                        List<ProcessTaskStepVo> nextStepList =  processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+                        currentProcessTaskStepVo.getParamObj().put("nextStepId",nextStepList.get(0).getId());
                         processHandler.complete(currentProcessTaskStepVo);
                     } else if (FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
                         processHandler.abortProcessTask(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));
