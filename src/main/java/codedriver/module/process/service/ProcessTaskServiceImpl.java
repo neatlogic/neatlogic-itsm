@@ -871,7 +871,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * 
      * @Time:2020年4月2日
      * @Description: 检查当前用户是否配置该权限
-     * @param processTaskStepVo
+     * @param processTaskVo
      * @param operationType
      * @return boolean
      */
@@ -953,7 +953,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * 
      * @Time:2020年4月3日
      * @Description: 获取工单中当前用户能撤回的步骤列表
-     * @param processTaskId
+     * @param processTaskVo
      * @return Set<ProcessTaskStepVo>
      */
     @Override
@@ -1009,7 +1009,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
      * 
      * @Time:2020年4月18日
      * @Description: 获取工单中当前用户能催办的步骤列表
-     * @param processTaskId
+     * @param processTaskVo
      * @return List<ProcessTaskStepVo>
      */
     @Override
