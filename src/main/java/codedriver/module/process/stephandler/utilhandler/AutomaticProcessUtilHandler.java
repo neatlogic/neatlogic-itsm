@@ -21,9 +21,10 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.notify.handler.TaskStepNotifyPolicyHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+
 @Service
-public class AutomaticProcessUtilHandler extends ProcessStepUtilHandlerBase {
+public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
 	@Override
 	public String getHandler() {

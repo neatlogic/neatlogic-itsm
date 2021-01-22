@@ -32,8 +32,8 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -145,13 +145,13 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                     .addOperationType(ProcessTaskOperationType.STEP_VIEW).build().getOperateMap();
             for (ProcessTaskStepVo processTaskStepVo : resultList) {
                 // 判断当前用户是否有权限查看该节点信息
-                IProcessStepUtilHandler handler =
-                    ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                IProcessStepInternalHandler handler =
+                        ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
                 if (handler == null) {
                     throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                 }
                 if (operateMap.computeIfAbsent(processTaskStepVo.getId(), k -> new HashSet<>())
-                    .contains(ProcessTaskOperationType.STEP_VIEW)) {
+                        .contains(ProcessTaskOperationType.STEP_VIEW)) {
                     processTaskStepVo.setIsView(1);
                     getProcessTaskStepDetail(processTaskStepVo);
                 } else {
@@ -164,8 +164,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     }
 
     private ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
-        ProcessTaskStepVo startProcessTaskStepVo =
-            ProcessStepUtilHandlerFactory.getHandler().getStartProcessTaskStepByProcessTaskId(processTaskId);
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
         processTaskService.setProcessTaskStepUser(startProcessTaskStepVo);
 
         // 步骤评论列表
@@ -190,8 +189,8 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         processTaskService.setProcessTaskStepUser(processTaskStepVo);
 
         /** 当前步骤特有步骤信息 **/
-        IProcessStepUtilHandler processStepUtilHandler =
-            ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        IProcessStepInternalHandler processStepUtilHandler =
+                ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if (processStepUtilHandler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }

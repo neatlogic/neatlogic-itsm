@@ -128,7 +128,7 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 		}
 		/** 处理历史记录 **/
 		String action = currentProcessTaskStepVo.getParamObj().getString("action");
-		AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
+		IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
 		return 1;
 	}
 

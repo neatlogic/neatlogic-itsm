@@ -29,8 +29,8 @@ import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -101,10 +101,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
 
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW).build()
                 .checkAndNoPermissionThrowException();
-        ProcessTaskVo processTaskVo = handler.getProcessTaskDetailById(processTaskId);
+        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
 
         if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_SCORE).build().check()) {
             ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
@@ -119,12 +118,11 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
             }
         }
-        processTaskVo.setStartProcessTaskStep(handler.getStartProcessTaskStepByProcessTaskId(processTaskId));
+        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
         Map<String, String> formAttributeActionMap = new HashMap<>();
         if (processTaskStepId != null) {
             ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
             if (currentProcessTaskStepVo != null) {
-                handler = ProcessStepUtilHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
                 if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_SAVE)
                         .build().check()) {
                     // 回复框内容和附件暂存回显
@@ -190,8 +188,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             processTaskService.setProcessTaskStepUser(processTaskStepVo);
 
             /** 当前步骤特有步骤信息 **/
-            IProcessStepUtilHandler processStepUtilHandler =
-                    ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            IProcessStepInternalHandler processStepUtilHandler =
+                    ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
             if (processStepUtilHandler == null) {
                 throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
             }
@@ -351,12 +349,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     }
 
     /**
-     * @param ProcessTaskStepVo 步骤信息
-     * @return void
-     * @Author: linbq
-     * @Time:2020年8月21日
      * @Description: 设置步骤当前用户的暂存数据
-     */
+     * @Author: linbq
+     * @Date: 2020/8/21 10:13
+     * @Params:[processTaskVo, processTaskStepVo]
+     * @Returns:void
+     **/
     private void setTemporaryData(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());

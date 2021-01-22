@@ -19,8 +19,7 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -59,13 +58,10 @@ public class ProcessTaskStepActionListApi extends PrivateApiComponentBase {
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo =
             processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
         ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         Map<String, String> customButtonMap = new HashMap<>();
         if (processTaskStepVo != null) {
-            customButtonMap = handler.getCustomButtonMapByConfigHashAndHandler(processTaskStepVo.getConfigHash(),
-                processTaskStepVo.getHandler());
-            handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+            customButtonMap = ProcessStepInternalHandlerFactory.getHandler().getCustomButtonMapByConfigHashAndHandler(processTaskStepVo.getConfigHash(), processTaskStepVo.getHandler());
         }
         List<ValueTextVo> resultList = new ArrayList<>();
         Map<Long, Set<ProcessTaskOperationType>> operationTypeSetMap = new ProcessAuthManager.Builder()

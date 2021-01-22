@@ -5,6 +5,7 @@ import java.util.List;
 
 import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +30,6 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -55,6 +55,9 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessCommentTemplateMapper commentTemplateMapper;
+
+    @Autowired
+    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -158,7 +161,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
 
         // 生成活动
         processTaskStepVo.setParamObj(jsonObj);
-        ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
+        IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
 
         JSONObject resultObj = new JSONObject();
         List<String> typeList = new ArrayList<>();

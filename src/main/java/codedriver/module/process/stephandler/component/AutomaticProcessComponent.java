@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,30 +111,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	 * @param automaticConfig
 	 */
 	private void requestFirst(ProcessTaskStepVo currentProcessTaskStepVo,JSONObject automaticConfig) {
-		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-			CachedThreadPool.execute(new RequestFirstThread(currentProcessTaskStepVo,automaticConfig));
-		} else {
-			List<RequestFirstThread> handlerList = AUTOMATIC_LIST.get();
-			if (handlerList == null) {
-				handlerList = new ArrayList<>();
-				AUTOMATIC_LIST.set(handlerList);
-				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-					@Override
-					public void afterCommit() {
-						List<RequestFirstThread> handlerList = AUTOMATIC_LIST.get();
-						for (RequestFirstThread automaticConfig : handlerList) {
-							CachedThreadPool.execute(automaticConfig);
-						}
-					}
-
-					@Override
-					public void afterCompletion(int status) {
-						AUTOMATIC_LIST.remove();
-					}
-				});
-			}
-			handlerList.add(new RequestFirstThread(currentProcessTaskStepVo,automaticConfig));
-		}
+		TransactionSynchronizationPool.execute(new RequestFirstThread(currentProcessTaskStepVo,automaticConfig));
 	}
 	
 	private class RequestFirstThread extends CodeDriverThread {
