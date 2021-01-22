@@ -1,28 +1,22 @@
 package codedriver.module.process.condition.handler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.constvalue.Expression;
-import codedriver.framework.common.constvalue.FormHandlerType;
-import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.common.constvalue.ParamType;
-import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.common.constvalue.*;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -152,5 +146,10 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 	public Object valueConversionText(Object value, JSONObject config) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+
 	}
 }

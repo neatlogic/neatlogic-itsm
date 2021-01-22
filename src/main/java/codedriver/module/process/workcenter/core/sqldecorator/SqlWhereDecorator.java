@@ -10,6 +10,8 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.module.process.workcenter.core.SqlBuilder;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -40,12 +42,13 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
         }
 
         //如果是distinct id 则 需要 根据条件获取需要的表。否则需要根据column获取需要的表
-        if(SqlBuilder.FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())){
+        if (SqlBuilder.FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
             List<ISqlTable> tableList = new ArrayList<>();
             List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
             String fromGroupUuid = null;
             String toGroupUuid = groupList.get(0).getUuid();
-            for(ConditionGroupVo groupVo : groupList ) {
+            Boolean isAddedWhere = false;
+            for (ConditionGroupVo groupVo : groupList) {
                 // 将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType>
                 Map<String, String> conditionRelMap = new HashMap<String, String>();
                 List<ConditionRelVo> conditionRelList = groupVo.getConditionRelList();
@@ -60,26 +63,30 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                     toGroupUuid = groupVo.getUuid();
                     sqlSb.append(groupRelMap.get(fromGroupUuid + "_" + toGroupUuid));
                 }
-                sqlSb.append(" ( ");
                 List<ConditionVo> conditionVoList = groupVo.getConditionList();
+                if(!isAddedWhere && CollectionUtils.isNotEmpty((conditionVoList))){
+                    sqlSb.append(" where ");
+                    isAddedWhere = true;
+                }
+                sqlSb.append(" ( ");
                 String fromConditionUuid = null;
-                String toConditionUuid = conditionVoList.get(0).getUuid();
-                for ( int i = 0; i < conditionVoList.size();i++) {
+                String toConditionUuid = null;
+                for (int i = 0; i < conditionVoList.size(); i++) {
                     ConditionVo conditionVo = conditionVoList.get(i);
                     //append joinType
-                    if (fromConditionUuid != null) {
-                        toConditionUuid = conditionVo.getUuid();
-                        IProcessTaskCondition sqlCondition = (IProcessTaskCondition)ConditionHandlerFactory.getHandler(conditionVo.getName());
-                        sqlCondition.getSqlConditionWhere(conditionVoList,i,sqlSb);
-                        sqlSb.append(groupRelMap.get(fromConditionUuid + "_" + toConditionUuid));
+                    toConditionUuid = conditionVo.getUuid();
+                    if(MapUtils.isNotEmpty(conditionRelMap)&& StringUtils.isNotBlank(fromConditionUuid)) {
+                        sqlSb.append(conditionRelMap.get(fromConditionUuid + "_" + toConditionUuid));
                     }
+                    IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(conditionVo.getName());
+                    sqlCondition.getSqlConditionWhere(conditionVoList, i, sqlSb);
                     fromConditionUuid = toConditionUuid;
                 }
                 sqlSb.append(" ) ");
                 fromGroupUuid = toGroupUuid;
 
             }
-        }else{
+        } else {
 
         }
     }

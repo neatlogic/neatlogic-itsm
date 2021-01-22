@@ -6,6 +6,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTableFactory;
@@ -16,7 +17,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * @Title: SqlColumnDecorator
@@ -39,30 +39,17 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
 
-        List<ISqlTable> tableList = null;
+        List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
         //如果是distinct id 则 只需要 根据条件获取需要的表。否则需要根据column获取需要的表
         if(SqlBuilder.FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())){
-            tableList = getJoinTableOfCondition(sqlSb,workcenterVo);
+            joinTableColumnList = getJoinTableOfCondition(sqlSb,workcenterVo);
         }else{
-            tableList = getJoinTableOfColumn(sqlSb);
+           // tableList = getJoinTableOfColumn(sqlSb);
         }
 
-        //去掉processtask表，因为它是主表
-        tableList = tableList.stream().filter(o ->!"processtask".contains(o.getName())).collect(Collectors.toList());
         sqlSb.append(" from  processtask pt ");
-
-        //根据表拼凑 left join sql
-        for (ISqlTable table : tableList){
-            Map<ISqlTable, Map<String, String>> tableMapMap = table.getDependTableColumnMap();
-            List<String> onList = new ArrayList<>();
-            for (Map.Entry<ISqlTable,Map<String,String>> entry : tableMapMap.entrySet()){
-                ISqlTable dependTable = entry.getKey();
-                Map<String,String> dependMap = entry.getValue();
-                for (Map.Entry<String,String> depend : dependMap.entrySet()) {
-                    onList.add(String.format(" %s.%s = %s.%s ", dependTable.getShortName(), depend.getKey(),table.getShortName(),depend.getValue()));
-                }
-            }
-            sqlSb.append(String.format(" LEFT JOIN %s %s ON %s",table.getName(),table.getShortName(),String.join(" and ",onList)));
+        for(JoinTableColumnVo joinTableColumn : joinTableColumnList){
+            sqlSb.append(joinTableColumn.toString());
         }
     }
 
@@ -73,23 +60,32 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
      * @Params: []
      * @Returns: void
      **/
-    private List<ISqlTable> getJoinTableOfCondition(StringBuilder sqlSb,WorkcenterVo workcenterVo){
+    private List<JoinTableColumnVo> getJoinTableOfCondition(StringBuilder sqlSb,WorkcenterVo workcenterVo){
         //根据接口入参的返回需要的conditionList,然后获取需要关联的tableList
-        List<ISqlTable> tableList = new ArrayList<>();
+        List<String> joinTableKeyList = new ArrayList<>();
         List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
+        List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
         for(ConditionGroupVo groupVo : groupList ){
             List<ConditionVo> conditionVoList =  groupVo.getConditionList();
             for(ConditionVo conditionVo :conditionVoList){
                 IProcessTaskCondition conditionHandler = (IProcessTaskCondition)ConditionHandlerFactory.getHandler(conditionVo.getName());
                 if(conditionHandler != null){
-                    tableList.addAll(conditionHandler.getSqlTableList());
+                    List<JoinTableColumnVo> handlerJoinTableColumnList =  conditionHandler.getJoinTableColumnList();
+                    for(JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList){
+                        String key = handlerJoinTableColumn.getHash();
+                        if(!joinTableKeyList.contains(key)){
+                            joinTableColumnList.add(handlerJoinTableColumn);
+                            joinTableKeyList.add(key);
+                        }
+                    }
                 }
             }
         }
-        //table去重
-        return  tableList.stream().filter(distinctByKey(ISqlTable::getName)).collect(Collectors.toList());
+        return  joinTableColumnList;
 
     }
+
+
 
     private List<ISqlTable> getJoinTableOfColumn(StringBuilder sqlSb){
         List<ISqlTable> tableList = new ArrayList<>();

@@ -17,22 +17,22 @@ import java.util.Map;
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Component
-public class ProcessTaskSqlTable implements ISqlTable {
+public class UserTable implements ISqlTable {
 
     @Override
     public String getName() {
-        return "processtask";
+        return "user";
     }
 
     @Override
     public String getShortName() {
-        return "pt";
+        return "u";
     }
 
 
     @Override
     public String getJoinKey() {
-        return FieldEnum.ID.getValue();
+        return FieldEnum.UUID.getValue();
     }
 
     @Override
@@ -41,15 +41,12 @@ public class ProcessTaskSqlTable implements ISqlTable {
     }
 
     public enum FieldEnum {
-        ID("id", "工单ID"),
-        SERIAL_NUMBER("serial_number", "工单号"),
-        START_TIME("start_time", "创建时间"),
-        OWNER("owner", "上报人"),
-        STATUS("status", "工单状态"),
-        PRIORITY_UUID("priority_uuid", "工单状态"),
-        CHANNEL_UUID("channel_uuid", "工单状态"),
-        IS_SHOW("is_show", "工单是否隐藏"),
-        TITLE("title", "标题");
+        UUID("uuid", "用户UUID"),
+        USER_ID("user_id", "用户ID"),
+        USER_NAME("user_name", "用户名"),
+        USER_INFO("user_info", "用户信息"),
+        VIP_LEVEL("vip_level", "vip等级"),
+        ;
         private final String name;
         private final String text;
 

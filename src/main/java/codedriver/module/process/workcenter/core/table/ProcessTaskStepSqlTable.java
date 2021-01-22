@@ -1,6 +1,7 @@
 package codedriver.module.process.workcenter.core.table;
 
 import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.module.process.workcenter.core.SqlBuilder;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -30,7 +31,7 @@ public class ProcessTaskStepSqlTable implements ISqlTable {
 
     @Override
     public String getJoinKey() {
-        return "processtask_id";
+        return FieldEnum.PROCESSTASK_ID.getValue();
     }
 
     @Override
@@ -42,4 +43,34 @@ public class ProcessTaskStepSqlTable implements ISqlTable {
         };
     }
 
+    public enum FieldEnum {
+        ID("id", "步骤ID"),
+        PROCESSTASK_ID("processtask_id","工单id"),
+        STATUS("status", "步骤状态"),
+        ;
+        private final String name;
+        private final String text;
+
+        private FieldEnum(String _value, String _text) {
+            this.name = _value;
+            this.text = _text;
+        }
+
+        public String getValue() {
+            return name;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public static String getText(String value) {
+            for (SqlBuilder.FieldTypeEnum f : SqlBuilder.FieldTypeEnum.values()) {
+                if (f.getValue().equals(value)) {
+                    return f.getText();
+                }
+            }
+            return "";
+        }
+    }
 }

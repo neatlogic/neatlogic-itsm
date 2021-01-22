@@ -9,7 +9,7 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
 import codedriver.module.process.workcenter.core.table.ProcessTaskStepSqlTable;
 import com.alibaba.fastjson.JSON;
@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -127,12 +128,18 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
 	}
 
 	@Override
-	public  List<ISqlTable> getMySqlTableList(){
-		return new ArrayList<ISqlTable>(){
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return new ArrayList<JoinTableColumnVo>() {
 			{
-				add(new ProcessTaskSqlTable());
-				add(new ProcessTaskStepSqlTable());
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new HashMap<String, String>() {{
+					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+				}}));
 			}
 		};
+	}
+
+	@Override
+	public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+		getSimpleSqlConditionWhere(conditionList.get(index),sqlSb,new ProcessTaskStepSqlTable().getShortName(),ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue());
 	}
 }
