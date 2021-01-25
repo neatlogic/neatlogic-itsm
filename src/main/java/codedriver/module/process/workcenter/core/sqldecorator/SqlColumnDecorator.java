@@ -3,10 +3,10 @@ package codedriver.module.process.workcenter.core.sqldecorator;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.module.process.workcenter.core.SqlBuilder;
 import codedriver.framework.process.workcenter.table.ISqlTable;
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTableFactory;
+import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -38,16 +38,16 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
      **/
     @PostConstruct
     public void fieldDispatcherInit() {
-        buildFieldMap.put(SqlBuilder.FieldTypeEnum.DISTINCT_ID.getValue(), (workcenterVo, sqlSb) -> {
+        buildFieldMap.put(FieldTypeEnum.DISTINCT_ID.getValue(), (workcenterVo, sqlSb) -> {
             ProcessTaskSqlTable processTaskSqlTable = new ProcessTaskSqlTable();
-            sqlSb.append(String.format(" DISTINCT %s.%s ", processTaskSqlTable.getShortName(), processTaskSqlTable.getJoinKey()));
+            sqlSb.append(String.format(" DISTINCT %s.%s ", processTaskSqlTable.getShortName(), "id"));
         });
 
-        buildFieldMap.put(SqlBuilder.FieldTypeEnum.COUNT.getValue(), (workcenterVo, sqlSb) -> {
+        buildFieldMap.put(FieldTypeEnum.COUNT.getValue(), (workcenterVo, sqlSb) -> {
             sqlSb.append(" COUNT(1) ");
         });
 
-        buildFieldMap.put(SqlBuilder.FieldTypeEnum.FIELD.getValue(), (workcenterVo, sqlSb) -> {
+        buildFieldMap.put(FieldTypeEnum.FIELD.getValue(), (workcenterVo, sqlSb) -> {
             buildField(sqlSb, workcenterVo);
         });
     }

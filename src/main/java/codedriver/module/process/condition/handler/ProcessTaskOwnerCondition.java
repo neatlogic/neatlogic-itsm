@@ -8,7 +8,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,10 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -51,7 +48,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 	public JSONObject getConfig() {
 		JSONObject config = new JSONObject();
 		config.put("type", FormHandlerType.USERSELECT.toString());
-		config.put("groupList", Arrays.asList("user"));
+		config.put("groupList", Collections.singletonList("user"));
 		config.put("multiple", true);
 		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
 		config.put("isMultiple", true);
@@ -144,13 +141,13 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 				String value = valueIterator.next();
 				if(value.equals(loginUser)) {
 					valueIterator.remove();
-					valueList.add(GroupSearch.USER.getValuePlugin()+UserContext.get().getUserUuid());
+					valueList.add(UserContext.get().getUserUuid());
 				}else if(value.equals(vipUser)) {
 					valueIterator.remove();
 					List<UserVo> userVoList = userMapper.getUserVip();
 					if(CollectionUtils.isNotEmpty(userVoList)) {
 						for(UserVo user : userVoList) {
-							valueList.add(GroupSearch.USER.getValuePlugin()+user.getUuid());
+							valueList.add(user.getUuid());
 						}
 					}
 				}

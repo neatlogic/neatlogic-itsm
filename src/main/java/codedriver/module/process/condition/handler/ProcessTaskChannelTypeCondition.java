@@ -10,6 +10,10 @@ import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.table.ChannelSqlTable;
+import codedriver.framework.process.workcenter.table.ChannelTypeSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -17,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -106,6 +111,20 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 
 	@Override
 	public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+		getSimpleSqlConditionWhere(conditionList.get(index), sqlSb,new ChannelTypeSqlTable().getShortName(),ChannelTypeSqlTable.FieldEnum.UUID.getValue());
+	}
 
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return new ArrayList<JoinTableColumnVo>() {
+			{
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ChannelSqlTable(), new HashMap<String, String>() {{
+					put(ProcessTaskSqlTable.FieldEnum.CHANNEL_UUID.getValue(), ChannelSqlTable.FieldEnum.UUID.getValue());
+				}}));
+				add(new JoinTableColumnVo(new ChannelSqlTable(), new ChannelTypeSqlTable(), new HashMap<String, String>() {{
+					put(ChannelSqlTable.FieldEnum.CHANNEL_TYPE_UUID.getValue(), ChannelTypeSqlTable.FieldEnum.UUID.getValue());
+				}}));
+			}
+		};
 	}
 }

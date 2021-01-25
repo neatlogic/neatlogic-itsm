@@ -8,7 +8,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
-import codedriver.module.process.workcenter.core.SqlBuilder;
+import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +42,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
         }
 
         //如果是distinct id 则 需要 根据条件获取需要的表。否则需要根据column获取需要的表
-        if (SqlBuilder.FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
+        if (FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
             List<ISqlTable> tableList = new ArrayList<>();
             List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
             String fromGroupUuid = null;

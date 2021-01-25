@@ -3,12 +3,12 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.NewWorkcenterService;
 import codedriver.module.process.service.WorkcenterService;
-import codedriver.module.process.workcenter.core.SqlBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -82,7 +82,7 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 			}
 		}
 		WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
-		workcenterVo.setSqlFieldType(SqlBuilder.FieldTypeEnum.DISTINCT_ID.getValue());
+		workcenterVo.setSqlFieldType(FieldTypeEnum.DISTINCT_ID.getValue());
 		newWorkcenterService.doSearch(workcenterVo);
 		return null;
 		//return workcenterService.doSearch(workcenterVo);

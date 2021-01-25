@@ -10,7 +10,7 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

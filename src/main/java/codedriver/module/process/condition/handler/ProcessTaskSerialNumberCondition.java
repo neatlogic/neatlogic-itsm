@@ -7,7 +7,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -90,6 +90,6 @@ public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase i
 
 	@Override
 	public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-		getSimpleSqlConditionWhere(conditionList.get(index), sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.PRIORITY_UUID.getValue());
+		getSimpleSqlConditionWhere(conditionList.get(index), sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
 	}
 }

@@ -6,7 +6,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;

@@ -5,7 +5,7 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.workcenter.table.ISqlTable;
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 

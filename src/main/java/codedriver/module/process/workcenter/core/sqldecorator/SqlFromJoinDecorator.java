@@ -10,7 +10,7 @@ import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTableFactory;
-import codedriver.module.process.workcenter.core.SqlBuilder;
+import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -41,7 +41,7 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
 
         List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
         //如果是distinct id 则 只需要 根据条件获取需要的表。否则需要根据column获取需要的表
-        if(SqlBuilder.FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())){
+        if(FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())){
             joinTableColumnList = getJoinTableOfCondition(sqlSb,workcenterVo);
         }else{
            // tableList = getJoinTableOfColumn(sqlSb);

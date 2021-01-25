@@ -9,6 +9,7 @@ import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.module.process.workcenter.core.SqlBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -53,7 +54,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService{
         List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
 
-        SqlBuilder sb = new SqlBuilder(workcenterVo, SqlBuilder.FieldTypeEnum.FIELD);
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
         System.out.println(sb.build());
         return null;
     }

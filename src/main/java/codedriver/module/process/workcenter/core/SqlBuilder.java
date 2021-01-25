@@ -1,6 +1,7 @@
 package codedriver.module.process.workcenter.core;
 
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.module.process.workcenter.core.sqldecorator.SqlDecoratorChain;
 import codedriver.module.process.workcenter.core.sqldecorator.SqlLimitDecorator;
 import codedriver.module.process.workcenter.core.sqldecorator.SqlOrderDecorator;
@@ -16,7 +17,7 @@ import codedriver.module.process.workcenter.core.sqldecorator.SqlOrderDecorator;
  **/
 public class SqlBuilder {
     private final StringBuilder sqlSb;
-    public SqlBuilder(WorkcenterVo workcenterVo,FieldTypeEnum fieldTypeEnum ){
+    public SqlBuilder(WorkcenterVo workcenterVo, FieldTypeEnum fieldTypeEnum ){
         sqlSb = new StringBuilder();
         SqlDecoratorChain.firstSqlDecorator.build(sqlSb,workcenterVo);
     }
@@ -47,31 +48,4 @@ public class SqlBuilder {
         new SqlLimitDecorator().build(sqlSb,workcenterVo);
     }
 
-    public enum FieldTypeEnum {
-        DISTINCT_ID("distinctId", "去重工单ID"), FIELD("field", "选择字段"), COUNT("count", "统计个数");
-        private final String name;
-        private final String text;
-
-        private FieldTypeEnum(String _value, String _text){
-            this.name = _value;
-            this.text = _text;
-        }
-
-        public String getValue(){
-            return name;
-        }
-
-        public String getText(){
-            return text;
-        }
-
-        public static String getText(String value){
-            for (FieldTypeEnum f : FieldTypeEnum.values()){
-                if (f.getValue().equals(value)){
-                    return f.getText();
-                }
-            }
-            return "";
-        }
-    }
 }

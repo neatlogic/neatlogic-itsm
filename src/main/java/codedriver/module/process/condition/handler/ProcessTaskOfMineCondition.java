@@ -12,10 +12,11 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
-import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.constvalue.*;
+import codedriver.framework.process.workcenter.table.ProcessTaskFocusSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -29,22 +30,70 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
-public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+public class ProcessTaskOfMineCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+
+    @Autowired
+    UserMapper userMapper;
 
     private String formHandlerType = FormHandlerType.SELECT.toString();
-    
+
     private Map<String, Function<String, String>> map = new HashMap<>();
+
+    private Map<String, MyProcessTask<String>> mapSql = new HashMap<>();
+
+    @FunctionalInterface
+    public interface MyProcessTask<T> {
+        void build(StringBuilder sqlSb);
+    }
 
     {
         map.put("willdo", sql -> getMeWillDoCondition());
         map.put("done", sql -> getMeDoneCondition());
         map.put("myfocus", sql -> getMyFocusCondition());
-    }
 
-    @Autowired
-    UserMapper userMapper;
+        mapSql.put("willdo", (sqlSb) -> {
+            sqlSb.append(" ( ");
+            // status
+            List<String> statusList = Stream.of(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.RUNNING.getValue())
+                    .map(String::toString).collect(Collectors.toList());
+            sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), String.join("','", statusList)));
+            sqlSb.append(" ) and ( ");
+            // step.status
+            List<String> stepStatusList =
+                    Stream.of(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.PENDING.getValue(), ProcessTaskStatus.RUNNING.getValue())
+                            .map(String::toString).collect(Collectors.toList());
+            sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(), String.join("','", statusList)));
+            sqlSb.append(" ) and ( ");
+            // step.user
+            List<String> userList = new ArrayList<String>();
+            List<String> teamList = new ArrayList<String>();
+            List<String> roleList = new ArrayList<String>();
+            userList.add(UserContext.get().getUserUuid());
+            // 如果是待处理状态，则需额外匹配角色和组
+            UserVo userVo = userMapper.getUserByUuid(UserContext.get().getUserUuid());
+            if (userVo != null) {
+                teamList = userVo.getTeamUuidList();
+                roleList = userVo.getRoleUuidList();
+            }
+            getProcessingTaskOfMineSql(sqlSb,userList,teamList,roleList);
+            sqlSb.append(" ) ");
+        });
+        mapSql.put("done",  (sqlSb) -> {
+            sqlSb.append(" ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStepUserStatus.DONE.getValue()));
+            sqlSb.append(" ) and ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
+            sqlSb.append(" ) ");
+        });
+        mapSql.put("myfocus",  (sqlSb) -> {
+            sqlSb.append(" ( ");
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskFocusSqlTable().getShortName(), ProcessTaskFocusSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
+            sqlSb.append(" ) ");
+        });
+    }
 
     @Override
     public String getName() {
@@ -72,12 +121,18 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
     @Override
     public String getMyEsName(String... values) {
         String esName = StringUtils.EMPTY;
-        if(ArrayUtils.isNotEmpty(values)) {
-            switch(values[0]) {
-                case "willdo" : esName = String.format("%s.%s", getType(),"step.usertypelist.list.status"); break;
-                case "done" : esName = String.format("%s.%s", getType(),"step.usertypelist.list.status"); break;
-                case "myfocus" : esName = String.format("%s.%s", getType(),ProcessWorkcenterField.FOCUS_USERS.getValue()); break;
-    
+        if (ArrayUtils.isNotEmpty(values)) {
+            switch (values[0]) {
+                case "willdo":
+                    esName = String.format("%s.%s", getType(), "step.usertypelist.list.status");
+                    break;
+                case "done":
+                    esName = String.format("%s.%s", getType(), "step.usertypelist.list.status");
+                    break;
+                case "myfocus":
+                    esName = String.format("%s.%s", getType(), ProcessWorkcenterField.FOCUS_USERS.getValue());
+                    break;
+
             }
         }
         return esName;
@@ -137,25 +192,25 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
 
     /**
      * 附加我的待办条件
-     * 
+     *
      * @return
      */
     private String getMeWillDoCondition() {
         String sql = StringUtils.EMPTY;
         // status
-        List<String> statusList = Arrays.asList(ProcessTaskStatus.DRAFT.getValue(),ProcessTaskStatus.RUNNING.getValue()).stream()
-            .map(object -> object.toString()).collect(Collectors.toList());
+        List<String> statusList = Arrays.asList(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.RUNNING.getValue()).stream()
+                .map(object -> object.toString()).collect(Collectors.toList());
         String statusSql = String.format(Expression.INCLUDE.getExpressionEs(),
-            ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()))
-                .getEsName(),
-            String.format(" '%s' ", String.join("','", statusList)));
+                ((IProcessTaskCondition) ConditionHandlerFactory.getHandler(ProcessWorkcenterField.STATUS.getValue()))
+                        .getEsName(),
+                String.format(" '%s' ", String.join("','", statusList)));
         // common.step.filtstatus
         List<String> stepStatusList =
-            Arrays.asList(ProcessTaskStatus.DRAFT.getValue(),ProcessTaskStatus.PENDING.getValue(), ProcessTaskStatus.RUNNING.getValue()).stream()
-                .map(object -> object.toString()).collect(Collectors.toList());
+                Arrays.asList(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.PENDING.getValue(), ProcessTaskStatus.RUNNING.getValue()).stream()
+                        .map(object -> object.toString()).collect(Collectors.toList());
         String stepStatusSql = String.format(Expression.INCLUDE.getExpressionEs(),
-            ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue())+ ".status",
-            String.format(" '%s' ", String.join("','", stepStatusList)));
+                ProcessWorkcenterField.getConditionValue(ProcessWorkcenterField.STEP.getValue()) + ".status",
+                String.format(" '%s' ", String.join("','", stepStatusList)));
         // common.step.usertypelist.userlist
         List<String> userList = new ArrayList<String>();
         userList.add(GroupSearch.USER.getValuePlugin() + UserContext.get().getUserUuid());
@@ -176,8 +231,8 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
             }
         }
         sql = String.format(
-            " %s and %s and common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing') and not common.step.isactive contains any (0,-1)",
-            statusSql, stepStatusSql, String.format(" '%s' ", String.join("','", userList)));
+                " %s and %s and common.step.usertypelist.list.value contains any ( %s ) and common.step.usertypelist.list.status contains any ('pending','doing') and not common.step.isactive contains any (0,-1)",
+                statusSql, stepStatusSql, String.format(" '%s' ", String.join("','", userList)));
         // sql = String.format(" common.step.usertypelist.list.value contains any ( %s ) and
         // common.step.usertypelist.list.status contains any ('pending','doing')", String.format(" '%s' ",
         // String.join("','",userList))) ;
@@ -187,16 +242,16 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
     private String getMeDoneCondition() {
         String sql = StringUtils.EMPTY;
         sql = String.format(
-            " common.step.usertypelist.list.value = '%s' and common.step.usertypelist.list.status = 'done'",
-            GroupSearch.USER.getValuePlugin() + UserContext.get().getUserUuid());
+                " common.step.usertypelist.list.value = '%s' and common.step.usertypelist.list.status = 'done'",
+                GroupSearch.USER.getValuePlugin() + UserContext.get().getUserUuid());
         return sql;
     }
 
     private String getMyFocusCondition() {
         String sql = StringUtils.EMPTY;
         sql = String.format(Expression.INCLUDE.getExpressionEs(),
-            String.format(" %s.%s", getType(),ProcessWorkcenterField.FOCUS_USERS.getValue()),
-            String.format(" '%s' ", GroupSearch.USER.getValuePlugin() + UserContext.get().getUserUuid()));
+                String.format(" %s.%s", getType(), ProcessWorkcenterField.FOCUS_USERS.getValue()),
+                String.format(" '%s' ", GroupSearch.USER.getValuePlugin() + UserContext.get().getUserUuid()));
         return sql;
     }
 

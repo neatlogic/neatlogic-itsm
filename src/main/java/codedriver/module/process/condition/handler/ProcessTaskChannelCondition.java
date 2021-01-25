@@ -8,7 +8,7 @@ import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.module.process.workcenter.core.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;

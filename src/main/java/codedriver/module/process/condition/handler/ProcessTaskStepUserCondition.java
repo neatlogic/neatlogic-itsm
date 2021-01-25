@@ -8,6 +8,12 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessStepHandlerType;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTable;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -150,6 +157,56 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
 
 	@Override
 	public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+		ConditionVo condition = conditionList.get(index);
+		List<String> stepUserValueList = new ArrayList<>();
+		if(condition.getValueList() instanceof String) {
+			stepUserValueList.add((String)condition.getValueList());
+		}else if(condition.getValueList() instanceof List){
+			List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+			stepUserValueList.addAll(valueList);
+		}
+		List<String> userList = new ArrayList<String>();
+		List<String> teamList = new ArrayList<String>();
+		List<String> roleList = new ArrayList<String>();
+		for(String user : stepUserValueList) {
+			user = user.replace(GroupSearch.USER.getValuePlugin(),"");
+			if(user.equals(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue())) {
+				user = UserContext.get().getUserUuid();
+			}
+			//如果是待处理状态，则需额外匹配角色和组
+			UserVo userVo = userMapper.getUserByUuid(user);
+			if(userVo != null) {
+				userList.add(user);
+				teamList = userVo.getTeamUuidList();
+				roleList = userVo.getRoleUuidList();
+			}
+		}
+		sqlSb.append(" (");
+		//非开始节点
+		sqlSb.append(Expression.getExpressionSql(Expression.UNEQUAL.getExpression(),new ProcessTaskStepSqlTable().getShortName(),ProcessTaskStepSqlTable.FieldEnum.TYPE.getValue(), ProcessStepHandlerType.START.getHandler()));
+		sqlSb.append(" and (");
+		//补充待处理人sql 条件
+		getProcessingTaskOfMineSql(sqlSb,userList,teamList,roleList);
+		sqlSb.append(" )) ");
 
+	}
+
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return new ArrayList<JoinTableColumnVo>() {
+			{
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new HashMap<String, String>() {{
+					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+				}}));
+				add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskStepUserSqlTable(), new HashMap<String, String>() {{
+					put(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), ProcessTaskStepUserSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+					put(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepUserSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue());
+				}}));
+				add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskStepWorkerSqlTable(), new HashMap<String, String>() {{
+					put(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), ProcessTaskStepWorkerSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+					put(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepWorkerSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue());
+				}}));
+			}
+		};
 	}
 }
