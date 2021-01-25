@@ -86,8 +86,8 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 		@Param(name = "priorityUuidList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "关联优先级列表"),
 		@Param(name = "priorityUuidList[0]", type = ApiParamType.STRING, isRequired = false, desc = "优先级uuid"),
 		@Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
-		@Param(name = "channelTypeUuid", type = ApiParamType.STRING, desc = "服务类型uuid"),
-		@Param(name = "allowTranferReport", type = ApiParamType.ENUM, rule = "0,1", desc = "是否允许转报"),//TODO linbq必填
+		@Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务类型uuid"),
+		@Param(name = "allowTranferReport", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否允许转报"),
 		@Param(name = "channelRelationList", type = ApiParamType.JSONARRAY, desc = "转报设置列表")
 	})
 	@Output({
