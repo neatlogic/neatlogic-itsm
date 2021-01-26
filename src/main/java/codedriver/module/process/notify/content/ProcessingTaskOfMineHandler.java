@@ -12,14 +12,13 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.notify.core.INotifyHandler;
-import codedriver.framework.notify.core.NotifyContentHandlerBase;
-import codedriver.framework.notify.core.NotifyHandlerFactory;
+import codedriver.framework.notify.core.*;
 import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
 import codedriver.framework.notify.dto.NotifyVo;
 import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.notify.handler.EmailNotifyHandler;
+import codedriver.framework.notify.handler.MessageNotifyHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
@@ -120,6 +119,38 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	 */
 	static {
 		messageAttrMap.put(EmailNotifyHandler.class.getName(),new JSONArray(){
+			{
+				this.add(new JSONObject(){
+					{
+						this.put("label","标题");
+						this.put("name","title");
+						this.put("type", "text");
+						this.put("validateList", new JSONArray(){
+							{
+								this.add("required");
+							}
+						});
+					}
+				});
+				this.add(new JSONObject(){
+					{
+						this.put("label","内容");
+						this.put("name","content");
+						this.put("type", FormHandlerType.TEXTAREA.toString());
+					}
+				});
+				this.add(new JSONObject(){
+					{
+						this.put("label","接收人");
+						this.put("name","toList");
+						this.put("type", FormHandlerType.SELECT.toString());
+						this.put("placeholder","工单内容对应的处理人");
+						this.put("disabled",true);
+					}
+				});
+			}
+		});
+		messageAttrMap.put(MessageNotifyHandler.class.getName(),new JSONArray(){
 			{
 				this.add(new JSONObject(){
 					{
@@ -332,8 +363,23 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			/** 按处理人给工单分类 */
 			Map<String, List<Map<String, Object>>> userTaskMap = getUserTaskMap(originalTaskList);
 
-			/** 组装NotifyVo对象列表 */
-			getNotifyVoList(notifyList, title, content, columnList, userTaskMap);
+			IBuildNotifyVoHandler buildNotifyVoHandler = BuildNotifyVoHandlerFactory.getHandler(new HashMap<String,String>(){
+				{
+					this.put(job.getNotifyHandler(),ProcessingTaskOfMineHandler.class.getName());
+				}
+			});
+
+			if(buildNotifyVoHandler != null){
+				Map<String,Object> map = new HashMap<>();
+				map.put("title",title);
+				map.put("content",content);
+				map.put("columnList",columnList);
+				map.put("userTaskMap",userTaskMap);
+				notifyList = buildNotifyVoHandler.getNotifyVoList(map);
+			}
+
+//			/** 组装NotifyVo对象列表 */
+//			getNotifyVoList(notifyList, title, content, columnList, userTaskMap);
 		}
 
 		return notifyList;
@@ -346,40 +392,40 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	 * @Params: [notifyList, title, content, columnList, userTaskMap]
 	 * @Returns: void
 	**/
-	private void getNotifyVoList(List<NotifyVo> notifyList, String title, String content, List<String> columnList, Map<String, List<Map<String, Object>>> userTaskMap) {
-		if (MapUtils.isNotEmpty(userTaskMap)) {
-			for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
-				NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null,null);
-				notifyBuilder.withTitleTemplate(title);
-				notifyBuilder.addUserUuid(entry.getKey());
-
-				/** 绘制工单列表 */
-				StringBuilder taskTable = new StringBuilder();
-				if (StringUtils.isNotBlank(content)) {
-					taskTable.append(content + "</br>");
-				}
-				taskTable.append("<table>");
-				taskTable.append("<tr>");
-				for (String column : columnList) {
-					taskTable.append("<th>" + column + "</th>");
-				}
-				taskTable.append("</tr>");
-				for (Map<String, Object> map : entry.getValue()) {
-					taskTable.append("<tr>");
-					for (String column : columnList) {
-						if (map.containsKey(column)) {
-							taskTable.append("<td>" + (map.get(column) == null ? "" : map.get(column)) + "</td>");
-						}
-					}
-					taskTable.append("</tr>");
-				}
-				taskTable.append("</table>");
-				notifyBuilder.withContentTemplate(taskTable.toString());
-				NotifyVo notifyVo = notifyBuilder.build();
-				notifyList.add(notifyVo);
-			}
-		}
-	}
+//	private void getNotifyVoList(List<NotifyVo> notifyList, String title, String content, List<String> columnList, Map<String, List<Map<String, Object>>> userTaskMap) {
+//		if (MapUtils.isNotEmpty(userTaskMap)) {
+//			for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
+//				NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null,null);
+//				notifyBuilder.withTitleTemplate(title);
+//				notifyBuilder.addUserUuid(entry.getKey());
+//
+//				/** 绘制工单列表 */
+//				StringBuilder taskTable = new StringBuilder();
+//				if (StringUtils.isNotBlank(content)) {
+//					taskTable.append(content + "</br>");
+//				}
+//				taskTable.append("<table>");
+//				taskTable.append("<tr>");
+//				for (String column : columnList) {
+//					taskTable.append("<th>" + column + "</th>");
+//				}
+//				taskTable.append("</tr>");
+//				for (Map<String, Object> map : entry.getValue()) {
+//					taskTable.append("<tr>");
+//					for (String column : columnList) {
+//						if (map.containsKey(column)) {
+//							taskTable.append("<td>" + (map.get(column) == null ? "" : map.get(column)) + "</td>");
+//						}
+//					}
+//					taskTable.append("</tr>");
+//				}
+//				taskTable.append("</table>");
+//				notifyBuilder.withContentTemplate(taskTable.toString());
+//				NotifyVo notifyVo = notifyBuilder.build();
+//				notifyList.add(notifyVo);
+//			}
+//		}
+//	}
 
 	/**
 	 * @Description: 按用户将工单分类
@@ -401,7 +447,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 						if (userTaskMap.get(uuid) != null) {
 							mapList = userTaskMap.get(uuid);
 						}
-						if (!mapList.stream().anyMatch(task -> task.get(ProcessWorkcenterField.ID.getName()).toString().equals(map.get(ProcessWorkcenterField.ID.getName()).toString()))) {
+						if (!mapList.stream().anyMatch(task -> task.get(ProcessWorkcenterField.ID.getValue()).toString().equals(map.get(ProcessWorkcenterField.ID.getValue()).toString()))) {
 							mapList.add(map);
 						}
 						userTaskMap.put(uuid, mapList);
@@ -541,7 +587,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 					}
 				}
 
-				map.put(ProcessWorkcenterField.ID.getName(), processTaskVo.getId());
+				map.put(ProcessWorkcenterField.ID.getValue(), processTaskVo.getId());
 				map.put(ProcessWorkcenterField.SERIAL_NUMBER.getName(), processTaskVo.getSerialNumber());
 				map.put(ProcessWorkcenterField.TITLE.getName(), processTaskVo.getTitle());
 				map.put(ProcessWorkcenterField.CHANNELTYPE.getName(), processTaskVo.getChannelTypeName());
