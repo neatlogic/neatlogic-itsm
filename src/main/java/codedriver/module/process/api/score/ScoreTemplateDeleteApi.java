@@ -3,6 +3,7 @@ package codedriver.module.process.api.score;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import codedriver.framework.process.exception.score.ScoreTemplateHasRefProcessException;
 import codedriver.framework.process.exception.score.ScoreTemplateNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Input;
@@ -48,6 +49,9 @@ public class ScoreTemplateDeleteApi extends PrivateApiComponentBase {
 
         if(scoreTemplateMapper.checkScoreTemplateExistsById(id) == null){
             throw new ScoreTemplateNotFoundException(id);
+        }
+        if(scoreTemplateMapper.getRefProcessCount(id) > 0){
+            throw new ScoreTemplateHasRefProcessException(scoreTemplateMapper.getScoreTemplateById(id).getName());
         }
         scoreTemplateMapper.deleteScoreTemplate(id);
         return null;
