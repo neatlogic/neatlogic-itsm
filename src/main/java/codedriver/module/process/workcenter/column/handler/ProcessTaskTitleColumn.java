@@ -3,12 +3,16 @@ package codedriver.module.process.workcenter.column.handler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -57,11 +61,24 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 	}
 
 	@Override
-	public Map<ISqlTable,List<String>> getMySqlTableColumnMap(){
-		return new HashMap<ISqlTable,List<String>>(){
+	public ISqlTable getSortSqlTable(){
+		return new ProcessTaskSqlTable();
+	}
+
+	@Override
+	public String getSortSqlColumn(){
+		return ProcessTaskSqlTable.FieldEnum.TITLE.getText();
+	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return new ArrayList<TableSelectColumnVo>(){
 			{
-				put(new ProcessTaskSqlTable(), Collections.singletonList("title"));
+				add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
+						new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.TITLE.getValue())
+				)));
 			}
 		};
 	}
+
 }

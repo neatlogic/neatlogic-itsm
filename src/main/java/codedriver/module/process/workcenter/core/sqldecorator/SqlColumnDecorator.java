@@ -7,6 +7,9 @@ import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTableFactory;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -40,7 +43,22 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
     public void fieldDispatcherInit() {
         buildFieldMap.put(FieldTypeEnum.DISTINCT_ID.getValue(), (workcenterVo, sqlSb) -> {
             ProcessTaskSqlTable processTaskSqlTable = new ProcessTaskSqlTable();
+
             sqlSb.append(String.format(" DISTINCT %s.%s ", processTaskSqlTable.getShortName(), "id"));
+            //拼接排序字段
+            JSONArray sortList = workcenterVo.getSortList();
+            if (CollectionUtils.isNotEmpty(sortList)) {
+                for (Object sortObj : sortList) {
+                    JSONObject sortJson = JSONObject.parseObject(sortObj.toString());
+                    for (Map.Entry<String, Object> entry : sortJson.entrySet()) {
+                        String key = entry.getKey();
+                        IProcessTaskColumn processTaskColumn = ProcessTaskColumnFactory.getHandler(key);
+                        if (processTaskColumn != null && processTaskColumn.getIsSort()) {
+                            sqlSb.append(String.format(",%s.%s", new ProcessTaskSqlTable().getShortName(), processTaskColumn.getSortSqlColumn()));
+                        }
+                    }
+                }
+            }
         });
 
         buildFieldMap.put(FieldTypeEnum.COUNT.getValue(), (workcenterVo, sqlSb) -> {
@@ -78,17 +96,18 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
      **/
     private void buildField(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-        Map<String, ISqlTable> tableComponentMap =  ProcessTaskSqlTableFactory.tableComponentMap;
+        Map<String, ISqlTable> tableComponentMap = ProcessTaskSqlTableFactory.tableComponentMap;
         List<String> columnList = new ArrayList<>();
         for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
             IProcessTaskColumn column = entry.getValue();
-//
+
+
 //            ISqlTable sqlTable = tableComponentMap.get(column.getSqlTableName());
 //            if(sqlTable != null){
 //                columnList.add(String.format("%s.%s",sqlTable.getShortName(),column.getName()));
 //            }
         }
-        sqlSb.append(String.join(",",columnList));
+        sqlSb.append(String.join(",", columnList));
     }
 
     @Override

@@ -7,6 +7,7 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
@@ -19,10 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -47,14 +45,29 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService{
 
     @Override
     public JSONObject doSearch(WorkcenterVo workcenterVo) {
-
+        List<JSONObject> dataList = new ArrayList<JSONObject>();
         JSONArray sortColumnList = new JSONArray();
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //thead
         List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
-
-        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
+        //找出符合条件分页后的工单ID List
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
+        List<Integer> processTaskIdList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
+        workcenterVo.setProcessTaskIdList(processTaskIdList);
+        //补充工单字段信息
+        workcenterVo.setTheadVoList(theadList);
+        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
+        List<ProcessTaskVo> processTaskVoList =  workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
+        //重新渲染工单字段
+        for(ProcessTaskVo processTaskVo : processTaskVoList) {
+            JSONObject taskJson = new JSONObject();
+            for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+                IProcessTaskColumn column = entry.getValue();
+                taskJson.put(column.getName(), column.getValue(processTaskVo));
+            }
+            dataList.add(taskJson);
+        }
         System.out.println(sb.build());
         return null;
     }

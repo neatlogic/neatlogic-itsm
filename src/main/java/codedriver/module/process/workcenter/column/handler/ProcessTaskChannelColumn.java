@@ -1,16 +1,17 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class ProcessTaskChannelColumn extends ProcessTaskColumnBase  implements IProcessTaskColumn{
@@ -76,6 +77,11 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase  implements 
 		if(json != null){
 			return json.toString();
 		}
+		return null;
+	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
 		return null;
 	}
 }

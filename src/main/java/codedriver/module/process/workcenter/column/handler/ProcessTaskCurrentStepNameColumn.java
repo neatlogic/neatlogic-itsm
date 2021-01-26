@@ -1,16 +1,5 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -19,6 +8,18 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 @Component
 public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -95,5 +96,29 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return new ArrayList<TableSelectColumnVo>(){
+			{
+				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"stepId"),
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(),"stepStatus"),
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(),"stepName")
+				)));
+			}
+		};
+	}
+
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return new ArrayList<JoinTableColumnVo>() {
+			{
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new HashMap<String, String>() {{
+					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+				}}));
+			}
+		};
 	}
 }

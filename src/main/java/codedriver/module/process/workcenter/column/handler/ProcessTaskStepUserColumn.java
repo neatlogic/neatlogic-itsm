@@ -1,20 +1,5 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -25,6 +10,20 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -34,6 +33,7 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 	RoleMapper roleMapper;
 	@Autowired
 	TeamMapper teamMapper;
+
 	@Override
 	public String getName() {
 		return "stepuser";
@@ -169,4 +169,10 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 	public Object getSimpleValue(Object json) {
 		return null;
 	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return null;
+	}
+
 }

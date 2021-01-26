@@ -4,15 +4,15 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -73,11 +73,14 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
 	}
 
 	@Override
-	public Map<ISqlTable,List<String>> getMySqlTableColumnMap(){
-		return new HashMap<ISqlTable,List<String>>(){
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return new ArrayList<TableSelectColumnVo>(){
 			{
-				put(new ProcessTaskSqlTable(), Collections.singletonList("status"));
+				add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
+						new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue())
+				)));
 			}
 		};
 	}
+
 }

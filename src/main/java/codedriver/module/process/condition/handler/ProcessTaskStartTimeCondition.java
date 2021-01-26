@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public String getName() {

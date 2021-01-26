@@ -1,16 +1,24 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dto.PriorityVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.PrioritySqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 @Component
 public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -75,5 +83,29 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
 			priority = JSONObject.parseObject(json.toString()).getString("text");
 		}
 		return priority;
+	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return new ArrayList<TableSelectColumnVo>(){
+			{
+				add(new TableSelectColumnVo(new PrioritySqlTable(), Arrays.asList(
+						new SelectColumnVo(PrioritySqlTable.FieldEnum.UUID.getValue(),"priorityUuid"),
+						new SelectColumnVo(PrioritySqlTable.FieldEnum.NAME.getValue(),"priorityName"),
+						new SelectColumnVo(PrioritySqlTable.FieldEnum.COLOR.getValue(),"priorityColor")
+				)));
+			}
+		};
+	}
+
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return new ArrayList<JoinTableColumnVo>() {
+			{
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new PrioritySqlTable(), new HashMap<String, String>() {{
+					put(ProcessTaskSqlTable.FieldEnum.PRIORITY_UUID.getValue(), PrioritySqlTable.FieldEnum.UUID.getValue());
+				}}));
+			}
+		};
 	}
 }

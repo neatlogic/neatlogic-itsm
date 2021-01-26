@@ -11,10 +11,9 @@ import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskSlaSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSlaTimeSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
+import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -22,7 +21,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -132,31 +132,19 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
         List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
         Object value = valueList.get(0);
         sqlSb.append(" ( ");
-        sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.STATUS.getValue(),String.join("','", Collections.singletonList(ProcessTaskStatus.RUNNING.getValue()))));
+        sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), String.join("','", Collections.singletonList(ProcessTaskStatus.RUNNING.getValue()))));
         sqlSb.append(" and ");
         if ("1".equals(value)) {
             // 超时单
-            sqlSb.append(Expression.getExpressionSql(Expression.LESSTHAN.getExpression(), new ProcessTaskSlaTimeSqlTable().getShortName(),ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue(), TimeUtil.timeNow()));
+            sqlSb.append(Expression.getExpressionSql(Expression.LESSTHAN.getExpression(), new ProcessTaskSlaTimeSqlTable().getShortName(), ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue(), TimeUtil.timeNow()));
         } else {
-            sqlSb.append(Expression.getExpressionSql(Expression.GREATERTHAN.getExpression(), new ProcessTaskSlaTimeSqlTable().getShortName(),ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue(), TimeUtil.timeNow()));
+            sqlSb.append(Expression.getExpressionSql(Expression.GREATERTHAN.getExpression(), new ProcessTaskSlaTimeSqlTable().getShortName(), ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue(), TimeUtil.timeNow()));
         }
         sqlSb.append(" ) ");
     }
 
     @Override
     public List<JoinTableColumnVo> getMyJoinTableColumnList() {
-        return new ArrayList<JoinTableColumnVo>() {
-            {
-                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new HashMap<String, String>() {{
-                    put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
-                }}));
-                add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskSlaSqlTable(), new HashMap<String, String>() {{
-                    put(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), ProcessTaskSlaSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
-                }}));
-                add(new JoinTableColumnVo(new ProcessTaskSlaSqlTable(), new ProcessTaskSlaTimeSqlTable(), new HashMap<String, String>() {{
-                    put(ProcessTaskSlaSqlTable.FieldEnum.ID.getValue(), ProcessTaskSlaTimeSqlTable.FieldEnum.SLA_ID.getValue());
-                }}));
-            }
-        };
+        return SqlTableUtil.getExpireTimeJoinTableSql();
     }
 }

@@ -1,12 +1,18 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
@@ -23,8 +29,7 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
 
     @Override
     public Object getMyValue(JSONObject json) throws RuntimeException {
-        String createTime = json.getString(this.getName());
-        return createTime;
+        return json.getString(this.getName());
     }
 
     @Override
@@ -59,5 +64,26 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
             return json.toString();
         }
         return null;
+    }
+
+    @Override
+    public String getMySortSqlColumn(){
+        return ProcessTaskSqlTable.FieldEnum.TITLE.getValue();
+    }
+
+    @Override
+    public ISqlTable getMySortSqlTable(){
+        return new ProcessTaskSqlTable();
+    }
+
+    @Override
+    public List<TableSelectColumnVo> getTableSelectColumn() {
+        return new ArrayList<TableSelectColumnVo>(){
+            {
+                add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
+                        new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.START_TIME.getValue())
+                )));
+            }
+        };
     }
 }
