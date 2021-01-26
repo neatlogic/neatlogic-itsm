@@ -5,6 +5,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.score.ScoreTemplateVo;
+import codedriver.framework.process.exception.score.ScoreTemplateHasRefProcessException;
 import codedriver.framework.process.exception.score.ScoreTemplateNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Input;
@@ -57,6 +58,9 @@ public class ScoreTemplateStatusUpdateApi extends PrivateApiComponentBase {
 
         if(scoreTemplateMapper.checkScoreTemplateExistsById(id) == null){
             throw new ScoreTemplateNotFoundException(id);
+        }
+        if(isActive == 0 && scoreTemplateMapper.getRefProcessCount(id) > 0){
+            throw new ScoreTemplateHasRefProcessException(scoreTemplateMapper.getScoreTemplateById(id).getName());
         }
         scoreTemplateMapper.updateScoreTemplateStatus(scoreTemplateVo);
         return null;
