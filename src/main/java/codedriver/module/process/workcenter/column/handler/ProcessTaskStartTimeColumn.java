@@ -68,7 +68,7 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
 
     @Override
     public String getMySortSqlColumn(){
-        return ProcessTaskSqlTable.FieldEnum.TITLE.getValue();
+        return ProcessTaskSqlTable.FieldEnum.START_TIME.getValue();
     }
 
     @Override

@@ -5,12 +5,19 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.ChannelSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -82,6 +89,26 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase  implements 
 
 	@Override
 	public List<TableSelectColumnVo> getTableSelectColumn() {
-		return null;
+		return new ArrayList<TableSelectColumnVo>(){
+			{
+				add(new TableSelectColumnVo(new ChannelSqlTable(), Collections.singletonList(
+						new SelectColumnVo(ChannelSqlTable.FieldEnum.UUID.getValue(),"channelUuid")
+				)));
+				add(new TableSelectColumnVo(new ChannelSqlTable(), Collections.singletonList(
+						new SelectColumnVo(ChannelSqlTable.FieldEnum.NAME.getValue(),"channelName")
+				)));
+			}
+		};
+	}
+
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return new ArrayList<JoinTableColumnVo>() {
+			{
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ChannelSqlTable(), new HashMap<String, String>() {{
+					put(ProcessTaskSqlTable.FieldEnum.CHANNEL_UUID.getValue(), ChannelSqlTable.FieldEnum.UUID.getValue());
+				}}));
+			}
+		};
 	}
 }

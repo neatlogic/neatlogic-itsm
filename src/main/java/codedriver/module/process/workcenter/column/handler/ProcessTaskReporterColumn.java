@@ -9,7 +9,6 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskScoreSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.UserTable;
 import com.alibaba.fastjson.JSONObject;
@@ -105,7 +104,7 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 		return new ArrayList<JoinTableColumnVo>() {
 			{
 				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new UserTable(),"reporter", new HashMap<String, String>() {{
-					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskScoreSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+					put(ProcessTaskSqlTable.FieldEnum.REPORTER.getValue(), UserTable.FieldEnum.UUID.getValue());
 				}}));
 			}
 		};

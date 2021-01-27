@@ -1,6 +1,7 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -45,6 +46,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService{
 
     @Override
     public JSONObject doSearch(WorkcenterVo workcenterVo) {
+        JSONObject returnObj = new JSONObject();
         List<JSONObject> dataList = new ArrayList<JSONObject>();
         JSONArray sortColumnList = new JSONArray();
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
@@ -53,12 +55,19 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService{
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         //找出符合条件分页后的工单ID List
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
-        List<Integer> processTaskIdList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
-        workcenterVo.setProcessTaskIdList(processTaskIdList);
+//        System.out.println("idSql:");
+//        System.out.println(sb.build());
+        List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
+        //统计符合条件工单数量
+        int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
+        workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
         //补充工单字段信息
         workcenterVo.setTheadVoList(theadList);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
+//        System.out.println("fieldSql:");
+//        System.out.println(sb.build());
         List<ProcessTaskVo> processTaskVoList =  workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
+
         //重新渲染工单字段
         for(ProcessTaskVo processTaskVo : processTaskVoList) {
             JSONObject taskJson = new JSONObject();
@@ -69,7 +78,19 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService{
             dataList.add(taskJson);
         }
         System.out.println(sb.build());
-        return null;
+        // 字段排序
+        JSONArray sortList = workcenterVo.getSortList();
+        if (CollectionUtils.isEmpty(sortList)) {
+            sortList = sortColumnList;
+        }
+        returnObj.put("sortList", sortList);
+        returnObj.put("theadList", theadList);
+        returnObj.put("tbodyList", dataList);
+        returnObj.put("rowNum", total);
+        returnObj.put("pageSize", workcenterVo.getPageSize());
+        returnObj.put("currentPage", workcenterVo.getCurrentPage());
+        returnObj.put("pageCount", PageUtil.getPageCount(total, workcenterVo.getPageSize()));
+        return returnObj;
     }
 
     @Override

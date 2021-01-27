@@ -9,7 +9,6 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskScoreSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.UserTable;
 import com.alibaba.fastjson.JSON;
@@ -114,7 +113,7 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 		return new ArrayList<JoinTableColumnVo>() {
 			{
 				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new UserTable(),"owner", new HashMap<String, String>() {{
-					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskScoreSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+					put(ProcessTaskSqlTable.FieldEnum.OWNER.getValue(), UserTable.FieldEnum.UUID.getValue());
 				}}));
 			}
 		};

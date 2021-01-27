@@ -10,7 +10,6 @@ import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.CatalogSqlTable;
 import codedriver.framework.process.workcenter.table.ChannelSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskScoreSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -90,7 +89,7 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase  implements 
 		return new ArrayList<JoinTableColumnVo>() {
 			{
 				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ChannelSqlTable(), new HashMap<String, String>() {{
-					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskScoreSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+					put(ProcessTaskSqlTable.FieldEnum.CHANNEL_UUID.getValue(), ChannelSqlTable.FieldEnum.UUID.getValue());
 				}}));
 				add(new JoinTableColumnVo(new ChannelSqlTable(), new CatalogSqlTable(), new HashMap<String, String>() {{
 					put(ChannelSqlTable.FieldEnum.PARENT_UUID.getValue(), CatalogSqlTable.FieldEnum.UUID.getValue());

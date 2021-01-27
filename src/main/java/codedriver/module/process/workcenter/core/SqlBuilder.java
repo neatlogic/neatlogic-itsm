@@ -19,6 +19,7 @@ public class SqlBuilder {
     private final StringBuilder sqlSb;
     public SqlBuilder(WorkcenterVo workcenterVo, FieldTypeEnum fieldTypeEnum ){
         sqlSb = new StringBuilder();
+        workcenterVo.setSqlFieldType(fieldTypeEnum.getValue());
         SqlDecoratorChain.firstSqlDecorator.build(sqlSb,workcenterVo);
     }
 

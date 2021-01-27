@@ -2,6 +2,10 @@ package codedriver.module.process.workcenter.core.sqldecorator;
 
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
@@ -54,10 +58,13 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
                         String key = entry.getKey();
                         IProcessTaskColumn processTaskColumn = ProcessTaskColumnFactory.getHandler(key);
                         if (processTaskColumn != null && processTaskColumn.getIsSort()) {
-                            sqlSb.append(String.format(",%s.%s", new ProcessTaskSqlTable().getShortName(), processTaskColumn.getSortSqlColumn()));
+                            sqlSb.append(String.format(",%s.%s", processTaskColumn.getSortSqlTable().getShortName(), processTaskColumn.getSortSqlColumn()));
                         }
                     }
                 }
+            } else {
+                IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(ProcessWorkcenterField.STARTTIME.getValue());
+                sqlSb.append(String.format(",%s.%s", new ProcessTaskSqlTable().getShortName(), column.getSortSqlColumn()));
             }
         });
 
@@ -98,14 +105,19 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         Map<String, ISqlTable> tableComponentMap = ProcessTaskSqlTableFactory.tableComponentMap;
         List<String> columnList = new ArrayList<>();
-        for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
-            IProcessTaskColumn column = entry.getValue();
+        for (WorkcenterTheadVo theadVo : workcenterVo.getTheadVoList()) {
+            if (columnComponentMap.containsKey(theadVo.getName())) {
+                IProcessTaskColumn column = columnComponentMap.get(theadVo.getName());
+                for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
+                    for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
+                        String columnStr = String.format(" %s.%s as %s ", tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
+                        if(!columnList.contains(columnStr)) {
+                            columnList.add(columnStr);
+                        }
+                    }
+                }
 
-
-//            ISqlTable sqlTable = tableComponentMap.get(column.getSqlTableName());
-//            if(sqlTable != null){
-//                columnList.add(String.format("%s.%s",sqlTable.getShortName(),column.getName()));
-//            }
+            }
         }
         sqlSb.append(String.join(",", columnList));
     }

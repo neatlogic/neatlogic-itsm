@@ -18,10 +18,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * @Title: SqlColumnDecorator
@@ -52,10 +48,10 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
             joinTableColumnList = getJoinTableOfColumn(workcenterVo, joinTableKeyList);
         }
         //补充排序需要的表
-        joinTableColumnList.addAll(getOrderJoinTableOfCondition(workcenterVo, joinTableKeyList));
+        joinTableColumnList.addAll(getJoinTableOfOrder(workcenterVo, joinTableKeyList));
         sqlSb.append(" from  processtask pt ");
         for (JoinTableColumnVo joinTableColumn : joinTableColumnList) {
-            sqlSb.append(joinTableColumn.toString());
+            sqlSb.append(joinTableColumn.toSqlString());
         }
     }
 
@@ -66,7 +62,7 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
      * @Params: [workcenterVo, joinTableKeyList]
      * @Returns: java.util.List<codedriver.framework.process.workcenter.dto.JoinTableColumnVo>
      **/
-    private List<JoinTableColumnVo> getOrderJoinTableOfCondition(WorkcenterVo workcenterVo, List<String> joinTableKeyList){
+    private List<JoinTableColumnVo> getJoinTableOfOrder(WorkcenterVo workcenterVo, List<String> joinTableKeyList){
         JSONArray sortJsonArray = workcenterVo.getSortList();
         List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(sortJsonArray)) {
@@ -147,15 +143,4 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
         return 3;
     }
 
-    /**
-     * @Description: 通过列表中对象的某个字段进行去重
-     * @Author: 89770
-     * @Date: 2021/1/20 17:14
-     * @Params: [keyExtractor]
-     * @Returns: java.util.function.Predicate<T>
-     **/
-    private <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Set<Object> seen = ConcurrentHashMap.newKeySet();
-        return t -> seen.add(keyExtractor.apply(t));
-    }
 }
