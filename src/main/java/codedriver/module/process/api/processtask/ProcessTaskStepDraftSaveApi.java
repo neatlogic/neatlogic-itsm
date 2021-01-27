@@ -1,15 +1,5 @@
 package codedriver.module.process.api.processtask;
 
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.NO_AUTH;
@@ -27,7 +17,14 @@ import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissio
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -89,7 +86,7 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
-        ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(true);
+        ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setProcessTaskId(processTaskId);
         processTaskStepDataVo.setProcessTaskStepId(processTaskStepId);
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));

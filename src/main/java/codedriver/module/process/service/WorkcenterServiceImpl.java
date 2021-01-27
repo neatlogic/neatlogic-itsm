@@ -462,10 +462,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         }
         /** 获取开始节点内容信息 **/
         ProcessTaskContentVo startContentVo = null;
-        List<ProcessTaskStepVo> stepList = processTaskMapper
-            .getProcessTaskStepByProcessTaskIdAndType(processTaskVo.getId(), ProcessStepType.START.getValue());
-        if (stepList.size() == 1) {
-            ProcessTaskStepVo startStepVo = stepList.get(0);
+        ProcessTaskStepVo startStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId());
+        if (startStepVo != null) {
             List<ProcessTaskStepContentVo> processTaskStepContentList =
                 processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
