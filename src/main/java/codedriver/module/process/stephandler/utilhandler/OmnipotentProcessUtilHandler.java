@@ -33,14 +33,15 @@ import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.notify.handler.TaskStepNotifyPolicyHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerBase;
-@Service
-public class OmnipotentProcessUtilHandler extends ProcessStepUtilHandlerBase {
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 
-    
-    @Autowired
-    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
-    
+@Service
+public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase {
+
+
+	@Autowired
+	private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
+
 	@Override
 	public String getHandler() {
 		return ProcessStepHandlerType.OMNIPOTENT.getHandler();

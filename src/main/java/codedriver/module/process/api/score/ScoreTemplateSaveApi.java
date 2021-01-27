@@ -50,8 +50,8 @@ public class ScoreTemplateSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({ @Param( name = "id", type = ApiParamType.LONG, desc = "评分模版ID"),
-             @Param( name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "评分模版名称", isRequired = true, xss = true),
-             @Param( name = "description", type = ApiParamType.STRING, desc = "评分模版说明"),
+             @Param( name = "name", type = ApiParamType.REGEX, maxLength = 50,rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "评分模版名称", isRequired = true, xss = true),
+             @Param( name = "description", type = ApiParamType.STRING, maxLength = 50, desc = "评分模版说明"),
              @Param( name = "isActive", type = ApiParamType.INTEGER,desc = "是否激活"),
              @Param( name = "dimensionArray", type = ApiParamType.JSONARRAY, isRequired = true,desc = "评分维度列表，格式:[{\"name\":\"t1\",\"description\":\"d1\"},{\"name\":\"t2\",\"description\":\"d2\"}]")
     })

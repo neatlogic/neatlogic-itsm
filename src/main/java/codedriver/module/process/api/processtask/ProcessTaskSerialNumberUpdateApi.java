@@ -16,7 +16,7 @@ import codedriver.framework.process.exception.processtaskserialnumberpolicy.Proc
 import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberUpdateInProcessException;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
 import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
-import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberUpdateThread;
+import codedriver.module.process.thread.ProcessTaskSerialNumberUpdateThread;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;

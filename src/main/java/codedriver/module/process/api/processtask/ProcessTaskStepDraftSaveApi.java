@@ -25,8 +25,8 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Service
@@ -79,7 +79,7 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
         // 锁定当前流程
         processTaskMapper.getProcessTaskLockById(processTaskId);
         ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
-        IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
         if (handler == null) {
             throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
         }

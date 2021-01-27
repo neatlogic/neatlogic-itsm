@@ -2,6 +2,7 @@ package codedriver.module.process.api.processtask;
 
 import java.util.Arrays;
 
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +23,6 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -39,6 +38,9 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
+
+    @Autowired
+    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -73,14 +75,13 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
             }
             processTaskMapper.deleteProcessTaskRelationById(processTaskRelationId);
 
-            IProcessStepUtilHandler handler = ProcessStepUtilHandlerFactory.getHandler();
             ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
             processTaskStepVo.setProcessTaskId(processTaskRelationVo.getSource());
             processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CHANNELTYPERELATION.getParamName(),
                 processTaskRelationVo.getChannelTypeRelationId());
             processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                 JSON.toJSONString(Arrays.asList(processTaskRelationVo.getTarget())));
-            handler.activityAudit(processTaskStepVo, ProcessTaskAuditType.DELETERELATION);
+            IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETERELATION);
 
             ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
             processTaskStep.setProcessTaskId(processTaskRelationVo.getTarget());
@@ -88,7 +89,7 @@ public class ProcessTaskRelationDeleteApi extends PrivateApiComponentBase {
                 processTaskRelationVo.getChannelTypeRelationId());
             processTaskStep.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                 JSON.toJSONString(Arrays.asList(processTaskRelationVo.getSource())));
-            handler.activityAudit(processTaskStep, ProcessTaskAuditType.DELETERELATION);
+            IProcessStepHandlerUtil.audit(processTaskStep, ProcessTaskAuditType.DELETERELATION);
         }
 
         return null;

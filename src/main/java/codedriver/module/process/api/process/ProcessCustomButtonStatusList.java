@@ -10,8 +10,8 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
-import codedriver.framework.process.stephandler.core.IProcessStepUtilHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -51,14 +51,14 @@ public class ProcessCustomButtonStatusList extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
 		String handler = jsonObj.getString("handler");
-		IProcessStepUtilHandler processStepUtilHandler = ProcessStepUtilHandlerFactory.getHandler(handler);
-		if(processStepUtilHandler == null) {
+		IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(handler);
+		if (processStepUtilHandler == null) {
 			throw new ProcessStepUtilHandlerNotFoundException(handler);
 		}
 		JSONObject handlerConfig = processStepUtilHandler.makeupConfig(null);
-		if(MapUtils.isNotEmpty(handlerConfig)) {
+		if (MapUtils.isNotEmpty(handlerConfig)) {
 			JSONArray authorityList = handlerConfig.getJSONArray("authorityList");
-			if(CollectionUtils.isNotEmpty(authorityList)) {
+			if (CollectionUtils.isNotEmpty(authorityList)) {
 				resultObj.put("authorityList", authorityList);
 			}
 			JSONArray customButtonList = handlerConfig.getJSONArray("customButtonList");

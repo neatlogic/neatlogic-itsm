@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,6 @@ import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepCommentNotFoundException;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -37,6 +37,9 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ProcessTaskService processTaskService;
+
+	@Autowired
+	private IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
 	@Override
 	public String getToken() {
@@ -84,7 +87,7 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
             processTaskStepVo.setProcessTaskId(oldReplyVo.getProcessTaskId());
             processTaskStepVo.setId(oldReplyVo.getProcessTaskStepId());
             processTaskStepVo.setParamObj(jsonObj);
-            ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
+			IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
         }
         
         JSONObject resultObj = new JSONObject();

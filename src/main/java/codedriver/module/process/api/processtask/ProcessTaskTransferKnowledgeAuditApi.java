@@ -1,5 +1,6 @@
 package codedriver.module.process.api.processtask;
 
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +13,6 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.stephandler.core.ProcessStepUtilHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -32,6 +32,9 @@ public class ProcessTaskTransferKnowledgeAuditApi extends PrivateApiComponentBas
     
     @Autowired
     private ProcessTaskService processTaskService;
+
+    @Autowired
+    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -62,7 +65,7 @@ public class ProcessTaskTransferKnowledgeAuditApi extends PrivateApiComponentBas
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskId);
         processTaskStepVo.setParamObj(jsonObj);
-        ProcessStepUtilHandlerFactory.getHandler().activityAudit(processTaskStepVo, ProcessTaskAuditType.TRANSFERKNOWLEDGE);
+        IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.TRANSFERKNOWLEDGE);
         return null;
     }
 

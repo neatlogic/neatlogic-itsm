@@ -12,7 +12,7 @@ import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetail
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dto.ActionVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.framework.process.notify.core.TaskStepNotifyTriggerType;
+import codedriver.framework.process.notify.constvalue.TaskStepNotifyTriggerType;
 
 @Service
 public class RestfulActionAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import codedriver.framework.notify.dto.NotifyReceiverVo;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -254,4 +255,57 @@ public interface ProcessTaskService {
      * @return Set<ProcessTaskStepVo>
      */
     public Set<ProcessTaskStepVo> getTransferableStepListByProcessTask(ProcessTaskVo processTaskVo, String userUuid);
+
+
+    /**
+     *
+     * @Time:2020年8月21日
+     * @Description: 获取工单信息
+     * @param processTaskId
+     *            工单id
+     * @return ProcessTaskVo
+     */
+    public ProcessTaskVo getProcessTaskDetailById(Long processTaskId);
+
+    /**
+     *
+     * @Time:2020年8月21日
+     * @Description: 获取开始步骤信息
+     * @param processTaskId
+     *            工单id
+     * @return ProcessTaskStepVo
+     */
+    public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId);
+    /**
+     *
+     * @Time:2020年12月23日
+     * @Description: 返回当前步骤详情
+     * @param currentProcessTaskStep 当前步骤基本信息
+     * @return ProcessTaskStepVo
+     */
+    public ProcessTaskStepVo getCurrentProcessTaskStepDetail(ProcessTaskStepVo currentProcessTaskStep);
+
+    /**
+     *
+     * @Time:2020年12月3日
+     * @Description: 获取来源工单信息
+     * @param processTaskId
+     * @return ProcessTaskVo
+     */
+    public ProcessTaskVo getFromProcessTasById(Long processTaskId);
+
+    /**
+     *
+     * @Time:2020年7月3日
+     * @Description: 获取所有工单干系人信息，用于通知接收人
+     * @param processTaskId
+     *            工单id
+     * @param processTaskStepId
+     *            步骤id
+     * @param receiverMap
+     *            工单干系人信息
+     * @return void
+     */
+    public void getReceiverMap(ProcessTaskStepVo currentProcessTaskStepVo,
+                               Map<String, List<NotifyReceiverVo>> receiverMap);
 }

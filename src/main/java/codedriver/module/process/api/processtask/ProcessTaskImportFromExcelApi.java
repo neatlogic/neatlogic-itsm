@@ -247,6 +247,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 result.put("successCount",successCount);
                 result.put("totalCount",contentList.size());
                 return result;
+            }else{
+                throw new EmptyExcelException();
             }
         }
         return null;

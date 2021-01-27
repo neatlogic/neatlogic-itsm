@@ -34,7 +34,6 @@ import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentSte
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Title: 待我处理的工单
@@ -224,41 +224,51 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	}
 
 	@Override
-	protected String myPreview() {
+	protected String myPreview(JSONObject config) {
+		JSONArray dataColumnList = config.getJSONArray("dataColumnList");
+		List<String> columnNameList = new ArrayList<>();
+		Map<String, String> collect = columnComponentMap.values()
+				.stream().collect(Collectors.toMap(e -> e.getName(), e -> e.getDisplayName()));
+		for(Object column : dataColumnList){
+			columnNameList.add(collect.get(column.toString()));
+		}
+		List<Map<String, String>> dataList = new ArrayList<>();
+		for(int i = 0;i < 12;i++){
+			Map<String, String> map = new HashMap<>();
+			map.put("标题","机房进出申请-202101080000" + i);
+			map.put("工单号","202101080000" + i);
+			map.put("上报人","admin");
+			map.put("优先级","P3");
+			map.put("代报人","admin");
+			map.put("当前步骤处理人","张三");
+			map.put("当前步骤名","机房监督");
+			map.put("工单状态","处理中");
+			map.put("服务目录","机房");
+			map.put("服务类型","事件");
+			map.put("服务","机房进出申请");
+			map.put("上报时间","2021-01-08 10:10:57");
+			map.put("时间窗口","工作日");
+			map.put("结束时间","2021-01-12 15:18:23");
+			map.put("剩余时间","距离超时：3天");
+			dataList.add(map);
+		}
+
 		StringBuilder taskTable = new StringBuilder();
 		taskTable.append("<div class=\"ivu-card-body tstable-container\">");
 		taskTable.append("<table class=\"tstable-body\">");
 		taskTable.append("<thead>");
 		taskTable.append("<tr class=\"th-left\">");
-		taskTable.append("<th>标题</th>");
-		taskTable.append("<th>工单号</th>");
-		taskTable.append("<th>上报人</th>");
-		taskTable.append("<th>优先级</th>");
-		taskTable.append("<th>代报人</th>");
-		taskTable.append("<th>当前步骤名</th>");
-		taskTable.append("<th>当前步骤处理人</th>");
-		taskTable.append("<th>工单状态</th>");
-		taskTable.append("<th>服务目录</th>");
-		taskTable.append("<th>服务类型</th>");
-		taskTable.append("<th>服务</th>");
-		taskTable.append("<th>上报时间</th>");
+		for(String column : columnNameList){
+			taskTable.append("<th>" + column + "</th>");
+		}
 		taskTable.append("</tr>");
 		taskTable.append("</thead>");
 		taskTable.append("<tbody>");
-		for(int i = 0;i < 12;i++){
+		for(Map<String, String> map : dataList){
 			taskTable.append("<tr>");
-			taskTable.append("<td>机房进出申请-202101080000" + i + "</td>");
-			taskTable.append("<td>202101080000" + i + "</td>");
-			taskTable.append("<td>admin</td>");
-			taskTable.append("<td>P3</td>");
-			taskTable.append("<td>admin</td>");
-			taskTable.append("<td>机房监督</td>");
-			taskTable.append("<td>张三</td>");
-			taskTable.append("<td>处理中</td>");
-			taskTable.append("<td>机房</td>");
-			taskTable.append("<td>事件</td>");
-			taskTable.append("<td>机房进出申请</td>");
-			taskTable.append("<td>2021-01-08 10:10:57</td>");
+			for(String column : columnNameList){
+				taskTable.append("<td>" + map.get(column) + "</td>");
+			}
 			taskTable.append("</tr>");
 		}
 		taskTable.append("</tbody>");
