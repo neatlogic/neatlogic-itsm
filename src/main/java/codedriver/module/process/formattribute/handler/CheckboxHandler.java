@@ -79,6 +79,11 @@ public class CheckboxHandler extends FormHandlerBase {
     }
 
     @Override
+    public Object textConversionValue(List<String> values, JSONObject config) {
+        return null;
+    }
+
+    @Override
     public String getHandlerName() {
         return "复选框";
     }

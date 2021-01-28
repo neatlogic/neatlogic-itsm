@@ -99,8 +99,13 @@ public class CascadeHandler extends FormHandlerBase {
         return dataObj;
     }
 
+    @Override
+    public Object textConversionValue(List<String> values, JSONObject config) {
+        return null;
+    }
+
     private String getText(String matrixUuid, ValueTextVo mapping, String value, List<MatrixColumnVo> sourceColumnList,
-        IApiComponent restComponent, ApiVo api) {
+                           IApiComponent restComponent, ApiVo api) {
         if (StringUtils.isBlank(value)) {
             return value;
         }

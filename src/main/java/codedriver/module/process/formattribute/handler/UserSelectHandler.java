@@ -71,6 +71,11 @@ public class UserSelectHandler extends FormHandlerBase {
         return dataObj;
     }
 
+    @Override
+    public Object textConversionValue(List<String> values, JSONObject config) {
+        return null;
+    }
+
     private String parse(String key) {
         if (key.contains("#")) {
             String[] split = key.split("#");

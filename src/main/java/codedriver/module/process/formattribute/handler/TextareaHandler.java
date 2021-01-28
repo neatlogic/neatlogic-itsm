@@ -10,6 +10,8 @@ import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.FormHandlerBase;
 
+import java.util.List;
+
 @Component
 public class TextareaHandler extends FormHandlerBase {
 
@@ -44,6 +46,11 @@ public class TextareaHandler extends FormHandlerBase {
     @Override
     public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
         return attributeDataVo.getData();
+    }
+
+    @Override
+    public Object textConversionValue(List<String> values, JSONObject config) {
+        return null;
     }
 
     @Override

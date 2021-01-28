@@ -10,6 +10,7 @@ import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -293,6 +294,21 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                             JSONObject formdata = new JSONObject();
                             formdata.put("attributeUuid",att.getUuid());
                             formdata.put("handler",att.getHandler());
+                            String content = entry.getValue();
+                            // todo 不支持静态和动态列表
+                            if(StringUtils.isNotBlank(content)){
+                                IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(att.getHandler());
+                                if(handler != null){
+                                    List<String> values = new ArrayList<>();
+                                    if (content.contains(",")) {
+                                        values = Arrays.asList(content.split(","));
+                                    } else {
+                                        values.add(content);
+                                    }
+                                    handler.textConversionValue(values,JSONObject.parseObject(att.getConfig()));
+                                }
+                            }
+
                             if(StringUtils.isNotBlank(entry.getValue()) && entry.getValue().startsWith("[") && entry.getValue().endsWith("]")){
                                 JSONArray dataList = JSONArray.parseArray(entry.getValue());
                                 formdata.put("dataList",dataList);

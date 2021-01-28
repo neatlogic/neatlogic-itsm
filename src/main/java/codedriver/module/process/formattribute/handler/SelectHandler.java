@@ -113,6 +113,11 @@ public class SelectHandler extends FormHandlerBase {
     }
 
     @Override
+    public Object textConversionValue(List<String> values, JSONObject config) {
+        return null;
+    }
+
+    @Override
     public ParamType getParamType() {
         return ParamType.ARRAY;
     }
