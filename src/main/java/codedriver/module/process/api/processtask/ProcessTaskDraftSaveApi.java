@@ -131,19 +131,17 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 			throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
 		}
 
+		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+		processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+		processTaskStepDataVo.setData(jsonObj.toJSONString());
+
 		startProcessTaskStepVo.setParamObj(jsonObj);
         handler.saveDraft(startProcessTaskStepVo);
-        if(processTaskMapper.checkProcessTaskhasForm(startProcessTaskStepVo.getProcessTaskId()) > 0) {
-            // 保存组件联动导致隐藏的属性uuid列表
-            ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
-            processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
-            processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
-            processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
-            processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-            processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
-            processTaskStepDataVo.setData(jsonObj.toJSONString());
-            processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
-        }
+		processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
+		processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
+		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+		processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("processTaskId", startProcessTaskStepVo.getProcessTaskId());
 		resultObj.put("processTaskStepId", startProcessTaskStepVo.getId());

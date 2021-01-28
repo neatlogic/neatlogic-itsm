@@ -688,7 +688,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                     if (readcomponentList.contains(formAttributeVo.getUuid())) {
                         continue;
                     }
-                    Object data = currentProcessTaskStepVo.getFormAttributeDataMap().get(formAttributeVo.getUuid());
+                    Object data = formAttributeDataMap.get(formAttributeVo.getUuid());
                     if (data != null) {
                         if (data instanceof String) {
                             if (StringUtils.isBlank(data.toString())) {

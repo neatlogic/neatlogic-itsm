@@ -1119,7 +1119,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 channelTypeVo = new ChannelTypeVo();
                 channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
             }
-            processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+            try {
+                processTaskVo.setChannelType(channelTypeVo.clone());
+            } catch (CloneNotSupportedException e) {
+            }
         }
         // 耗时
         if (processTaskVo.getEndTime() != null) {
@@ -1177,7 +1180,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                         channelTypeVo = new ChannelTypeVo();
                         channelTypeVo.setUuid(channel.getChannelTypeUuid());
                     }
-                    processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+                    try {
+                        processTaskVo.setChannelType(channelTypeVo.clone());
+                    } catch (CloneNotSupportedException e) {
+                    }
                 }
                 processTaskVo.getTranferReportProcessTaskList().add(toProcessTaskVo);
             }
@@ -1257,7 +1263,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     channelTypeVo = new ChannelTypeVo();
                     channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
                 }
-                processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+                try {
+                    processTaskVo.setChannelType(channelTypeVo.clone());
+                } catch (CloneNotSupportedException e) {
+                }
             }
             // 获取工单表单信息
             ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);

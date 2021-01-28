@@ -220,7 +220,10 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
         processTaskVo.setIsAutoGenerateId(false);
-        processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+        try {
+            processTaskVo.setChannelType(channelTypeVo.clone());
+        } catch (CloneNotSupportedException e) {
+        }
         processTaskVo.setChannelUuid(channelUuid);
         processTaskVo.setProcessUuid(channel.getProcessUuid());
         processTaskVo.setConfig(processVo.getConfig());

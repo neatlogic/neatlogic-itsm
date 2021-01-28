@@ -74,66 +74,75 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
         Long slaNotifyId = (Long)jobObject.getData("slaNotifyId");
         ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskSlaNotifyById(slaNotifyId);
         boolean isJobLoaded = false;
-        if (processTaskSlaNotifyVo != null) {
-            ProcessTaskSlaTimeVo slaTimeVo =
-                processTaskMapper.getProcessTaskSlaTimeBySlaId(processTaskSlaNotifyVo.getSlaId());
-            if (slaTimeVo != null) {
-                if (processTaskSlaNotifyVo != null && processTaskSlaNotifyVo.getConfigObj() != null) {
-                    JSONObject policyObj = processTaskSlaNotifyVo.getConfigObj();
-                    String expression = policyObj.getString("expression");
-                    int time = policyObj.getIntValue("time");
-                    String unit = policyObj.getString("unit");
-                    String executeType = policyObj.getString("executeType");
-                    int intervalTime = policyObj.getIntValue("intervalTime");
-                    String intervalUnit = policyObj.getString("intervalUnit");
-                    Integer repeatCount = null;
-                    if ("loop".equals(executeType) && intervalTime > 0) {// 周期执行
-                        if (intervalUnit.equalsIgnoreCase("day")) {
-                            intervalTime = intervalTime * 24 * 60 * 60;
-                        } else {
-                            intervalTime = intervalTime * 60 * 60;
+        try{
+            if (processTaskSlaNotifyVo != null) {
+                ProcessTaskSlaTimeVo slaTimeVo =
+                        processTaskMapper.getProcessTaskSlaTimeBySlaId(processTaskSlaNotifyVo.getSlaId());
+                if (slaTimeVo != null) {
+                    if (processTaskSlaNotifyVo != null && processTaskSlaNotifyVo.getConfigObj() != null) {
+                        JSONObject policyObj = processTaskSlaNotifyVo.getConfigObj();
+                        String expression = policyObj.getString("expression");
+                        int time = policyObj.getIntValue("time");
+                        String unit = policyObj.getString("unit");
+                        String executeType = policyObj.getString("executeType");
+                        int intervalTime = policyObj.getIntValue("intervalTime");
+                        String intervalUnit = policyObj.getString("intervalUnit");
+                        Integer repeatCount = null;
+                        if ("loop".equals(executeType) && intervalTime > 0) {// 周期执行
+                            if (intervalUnit.equalsIgnoreCase("day")) {
+                                intervalTime = intervalTime * 24 * 60 * 60;
+                            } else {
+                                intervalTime = intervalTime * 60 * 60;
+                            }
+                        } else {// 单次执行
+                            repeatCount = 0;
+                            intervalTime = 60 * 60;
                         }
-                    } else {// 单次执行
-                        repeatCount = 0;
-                        intervalTime = 60 * 60;
-                    }
-                    Calendar notifyDate = Calendar.getInstance();
-                    notifyDate.setTime(slaTimeVo.getExpireTime());
-                    if (expression.equalsIgnoreCase("before")) {
-                        time = -time;
-                    }
-                    if (StringUtils.isNotBlank(unit) && time != 0) {
-                        if (unit.equalsIgnoreCase("day")) {
-                            notifyDate.add(Calendar.DAY_OF_MONTH, time);
-                        } else if (unit.equalsIgnoreCase("hour")) {
-                            notifyDate.add(Calendar.HOUR, time);
-                        } else {
-                            notifyDate.add(Calendar.MINUTE, time);
+                        Calendar notifyDate = Calendar.getInstance();
+                        notifyDate.setTime(slaTimeVo.getExpireTime());
+                        if (expression.equalsIgnoreCase("before")) {
+                            time = -time;
                         }
-                    }
-                    /** 如果触发时间在当前时间之前，则将触发时间改为当前时间 **/
-                    if (notifyDate.before(Calendar.getInstance())) {
-                        notifyDate = Calendar.getInstance();
-                    }
-                    JobObject.Builder newJobObjectBuilder =
-                        new JobObject.Builder(processTaskSlaNotifyVo.getId().toString(), this.getGroupName(),
-                            this.getClassName(), TenantContext.get().getTenantUuid())
-                                .withBeginTime(notifyDate.getTime()).withIntervalInSeconds(intervalTime)
-                                .withRepeatCount(repeatCount).addData("slaNotifyId", processTaskSlaNotifyVo.getId());
-                    JobObject newJobObject = newJobObjectBuilder.build();
-                    Date triggerDate = schedulerManager.loadJob(newJobObject);
-                    if (triggerDate != null) {
-                        // 更新通知记录时间
-                        processTaskSlaNotifyVo.setTriggerTime(triggerDate);
-                        processTaskMapper.updateProcessTaskSlaNotify(processTaskSlaNotifyVo);
-                        isJobLoaded = true;
+                        if (StringUtils.isNotBlank(unit) && time != 0) {
+                            if (unit.equalsIgnoreCase("day")) {
+                                notifyDate.add(Calendar.DAY_OF_MONTH, time);
+                            } else if (unit.equalsIgnoreCase("hour")) {
+                                notifyDate.add(Calendar.HOUR, time);
+                            } else {
+                                notifyDate.add(Calendar.MINUTE, time);
+                            }
+                        }
+                        /** 如果触发时间在当前时间之前 **/
+                        if (notifyDate.before(Calendar.getInstance())) {
+                            if("loop".equals(executeType)){
+                                /** 如果是循环触发，则将触发时间改为当前时间 **/
+                                notifyDate = Calendar.getInstance();
+                            }else{
+                                /** 如果是单次触发，不启动作业 **/
+                                return;
+                            }
+                        }
+                        JobObject.Builder newJobObjectBuilder =
+                                new JobObject.Builder(processTaskSlaNotifyVo.getId().toString(), this.getGroupName(),
+                                        this.getClassName(), TenantContext.get().getTenantUuid())
+                                        .withBeginTime(notifyDate.getTime()).withIntervalInSeconds(intervalTime)
+                                        .withRepeatCount(repeatCount).addData("slaNotifyId", processTaskSlaNotifyVo.getId());
+                        JobObject newJobObject = newJobObjectBuilder.build();
+                        Date triggerDate = schedulerManager.loadJob(newJobObject);
+                        if (triggerDate != null) {
+                            // 更新通知记录时间
+                            processTaskSlaNotifyVo.setTriggerTime(triggerDate);
+                            processTaskMapper.updateProcessTaskSlaNotify(processTaskSlaNotifyVo);
+                            isJobLoaded = true;
+                        }
                     }
                 }
             }
-        }
-        if (!isJobLoaded) {
-            // 没有加载到作业，则删除通知记录
-            processTaskMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
+        }finally{
+            if (!isJobLoaded) {
+                // 没有加载到作业，则删除通知记录
+                processTaskMapper.deleteProcessTaskSlaNotifyById(slaNotifyId);
+            }
         }
     }
 
