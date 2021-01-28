@@ -3,6 +3,7 @@ package codedriver.module.process.workcenter.column.handler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
@@ -85,5 +86,10 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
                 )));
             }
         };
+    }
+
+    @Override
+    public Object getValue(ProcessTaskVo processTaskVo) {
+        return processTaskVo.getStartTime();
     }
 }

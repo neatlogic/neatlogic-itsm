@@ -4,6 +4,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -87,6 +88,25 @@ public class ProcessTaskScoreColumn extends ProcessTaskColumnBase implements IPr
 	@Override
 	public Object getSimpleValue(Object json) {
 		return null;
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		JSONObject obj = new JSONObject();
+		String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskVo.getId());
+		if(StringUtils.isNotBlank(scoreInfo)){
+			float total = 0;
+			JSONObject scoreObj = JSON.parseObject(scoreInfo);
+			JSONArray dimensionList = scoreObj.getJSONArray("dimensionList");
+			if(CollectionUtils.isNotEmpty(dimensionList)){
+				for(int i = 0;i < dimensionList.size();i++){
+					total += dimensionList.getJSONObject(i).getIntValue("score");
+				}
+				obj.put("value",Math.round(total / dimensionList.size()));
+			}
+			obj.put("content",scoreObj.getString("content"));
+		}
+		return obj;
 	}
 
 	@Override

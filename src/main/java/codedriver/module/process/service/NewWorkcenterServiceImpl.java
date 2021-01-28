@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Service
-public class NewWorkcenterServiceImpl implements NewWorkcenterService{
+public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     Logger logger = LoggerFactory.getLogger(WorkcenterServiceImpl.class);
 
@@ -55,21 +55,18 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService{
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         //找出符合条件分页后的工单ID List
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
-//        System.out.println("idSql:");
-//        System.out.println(sb.build());
+        System.out.println("idSql:-------------------------------------------------------------------------------");
+        System.out.println(sb.build());
         List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
-        //统计符合条件工单数量
-        int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
         workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
         //补充工单字段信息
         workcenterVo.setTheadVoList(theadList);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
 //        System.out.println("fieldSql:");
 //        System.out.println(sb.build());
-        List<ProcessTaskVo> processTaskVoList =  workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
-
+        List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
         //重新渲染工单字段
-        for(ProcessTaskVo processTaskVo : processTaskVoList) {
+        for (ProcessTaskVo processTaskVo : processTaskVoList) {
             JSONObject taskJson = new JSONObject();
             for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                 IProcessTaskColumn column = entry.getValue();
@@ -83,6 +80,10 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService{
         if (CollectionUtils.isEmpty(sortList)) {
             sortList = sortColumnList;
         }
+        //统计符合条件工单数量
+        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
+        int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
+
         returnObj.put("sortList", sortList);
         returnObj.put("theadList", theadList);
         returnObj.put("tbodyList", dataList);

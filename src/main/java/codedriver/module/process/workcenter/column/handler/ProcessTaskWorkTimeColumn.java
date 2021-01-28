@@ -4,6 +4,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.WorktimeMapper;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.dto.WorktimeVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
@@ -104,5 +105,10 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 				}}));
 			}
 		};
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		return processTaskVo.getWorktimeName();
 	}
 }

@@ -5,6 +5,7 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -81,6 +82,16 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 			channelType = JSONObject.parseObject(json.toString()).getString("text");
 		}
 		return channelType;
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		JSONObject channelTypeJson = new JSONObject();
+		ChannelTypeVo channelTypeVo = processTaskVo.getChannelVo().getChannelTypeVo();
+		channelTypeJson.put("value",channelTypeVo.getUuid());
+		channelTypeJson.put("text",channelTypeVo.getName());
+		channelTypeJson.put("color",channelTypeVo.getColor());
+		return channelTypeJson;
 	}
 
 	@Override

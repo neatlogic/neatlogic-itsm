@@ -10,6 +10,7 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -174,5 +175,8 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 	public List<TableSelectColumnVo> getTableSelectColumn() {
 		return null;
 	}
-
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		return null;
+	}
 }

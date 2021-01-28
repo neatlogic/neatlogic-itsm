@@ -1,9 +1,11 @@
 package codedriver.module.process.workcenter.column.handler;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -76,6 +79,15 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 	@Override
 	public Object getSimpleValue(Object json) {
 		return null;
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		JSONObject focusUserObj = new JSONObject();
+		List<String> focusUserUuidList = processTaskVo.getFocusUserList().stream().map(UserVo::getUuid).collect(Collectors.toList());
+		focusUserObj.put("focusUserList",focusUserUuidList);
+		focusUserObj.put("isCurrentUserFocus",focusUserUuidList.contains(UserContext.get().getUserUuid()) ? 1 : 0);
+		return focusUserObj;
 	}
 
 	@Override

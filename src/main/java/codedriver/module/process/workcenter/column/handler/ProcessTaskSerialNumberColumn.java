@@ -3,6 +3,7 @@ package codedriver.module.process.workcenter.column.handler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
@@ -58,6 +59,11 @@ public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase impleme
 			return json.toString();
 		}
 		return null;
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		return processTaskVo.getSerialNumber();
 	}
 
 	@Override

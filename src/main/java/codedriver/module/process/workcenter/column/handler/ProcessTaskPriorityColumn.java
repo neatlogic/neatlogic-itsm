@@ -5,6 +5,7 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dto.PriorityVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -83,6 +84,15 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
 			priority = JSONObject.parseObject(json.toString()).getString("text");
 		}
 		return priority;
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		JSONObject priorityJson = new JSONObject();
+		priorityJson.put("value", processTaskVo.getPriority().getUuid());
+		priorityJson.put("text", processTaskVo.getPriority().getName());
+		priorityJson.put("color", processTaskVo.getPriority().getColor());
+		return priorityJson;
 	}
 
 	@Override

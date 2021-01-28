@@ -8,6 +8,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Title: SqlWhereDecorator
@@ -47,7 +49,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
             List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
             String fromGroupUuid = null;
             String toGroupUuid = groupList.get(0).getUuid();
-            Boolean isAddedWhere = false;
+            boolean isAddedWhere = false;
             for (ConditionGroupVo groupVo : groupList) {
                 // 将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType>
                 Map<String, String> conditionRelMap = new HashMap<String, String>();
@@ -87,7 +89,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
 
             }
         } else {
-
+            sqlSb.append(String.format(" where %s.%s in ( '%s' ) ",new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.ID.getValue(), workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining("','"))));
         }
     }
 

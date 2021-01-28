@@ -8,6 +8,8 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -99,13 +101,30 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 	}
 
 	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		List<ProcessTaskStepVo> stepVoList = processTaskVo.getStepList();
+		List<String> stepNameList = new ArrayList<>();
+		if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+			for (ProcessTaskStepVo stepVo : stepVoList) {
+				if(ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
+						ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
+						ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus())
+				){
+					stepNameList.add(stepVo.getName());
+				}
+			}
+		}
+		return stepNameList;
+	}
+
+	@Override
 	public List<TableSelectColumnVo> getTableSelectColumn() {
 		return new ArrayList<TableSelectColumnVo>(){
 			{
 				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"stepId"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(),"stepStatus"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(),"stepName")
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"processTaskStepId"),
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(),"processTaskStepStatus"),
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(),"processTaskStepName")
 				)));
 			}
 		};

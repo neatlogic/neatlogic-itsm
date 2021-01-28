@@ -10,13 +10,19 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.*;
+import codedriver.framework.process.dto.ProcessTaskStepUserVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTable;
+import codedriver.framework.process.workcenter.table.UserTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -195,13 +201,88 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
     }
 
 	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		JSONArray currentStepArray = new JSONArray();
+		List<ProcessTaskStepVo> stepVoList =  processTaskVo.getStepList();
+		if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+			for (ProcessTaskStepVo stepVo : stepVoList) {
+				if(ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
+						ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
+						ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus())
+				) {
+					JSONObject currentStepJson  = new JSONObject();
+					currentStepJson.put("name",stepVo.getName());
+					JSONObject currentStepStatusJson = new JSONObject();
+					currentStepStatusJson.put("name",stepVo.getStatus());
+					currentStepStatusJson.put("text", ProcessTaskStatus.getText(stepVo.getStatus()));
+					currentStepStatusJson.put("color", ProcessTaskStatus.getColor(stepVo.getStatus()));
+					currentStepJson.put("status",currentStepStatusJson);
+
+					//补充处理人信息
+					JSONArray workerArray = new JSONArray();
+					for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
+						JSONObject workerJson = new JSONObject();
+						if (ProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(stepVo.getHandler())
+								&& ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
+							workerJson.put("workTypename", "变更步骤");
+						} else if (ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
+							workerJson.put("workTypename", "子任务");
+						}
+						if (GroupSearch.USER.getValue().equals(workerVo.getUserType())) {
+							UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
+							if (userVo != null) {
+								workerJson.put("workerVo", JSON.parseObject(JSONObject.toJSONString(userVo)));
+								workerArray.add(workerJson);
+							}
+						} else if (GroupSearch.TEAM.getValue().equals(workerVo.getUserType())) {
+							TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
+							if (teamVo != null) {
+								JSONObject teamTmp = new JSONObject();
+								teamTmp.put("initType", GroupSearch.TEAM.getValue());
+								teamTmp.put("uuid", teamVo.getUuid());
+								teamTmp.put("name", teamVo.getName());
+								workerJson.put("workerVo", teamTmp);
+								workerArray.add(workerJson);
+							}
+						} else {
+							RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
+							if (roleVo != null) {
+								JSONObject roleTmp = new JSONObject();
+								roleTmp.put("initType", GroupSearch.ROLE.getValue());
+								roleTmp.put("uuid", roleVo.getUuid());
+								roleTmp.put("name", roleVo.getName());
+								workerJson.put("workerVo", roleTmp);
+								workerArray.add(workerJson);
+							}
+						}
+					}
+
+					for (ProcessTaskStepUserVo userVo : stepVo.getUserList()) {
+						JSONObject userJson = new JSONObject();
+						if (ProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(stepVo.getHandler())
+								&& ProcessUserType.MINOR.getValue().equals(userVo.getUserType())) {
+							userJson.put("workTypename", "变更步骤");
+						} else if (ProcessUserType.MINOR.getValue().equals(userVo.getUserType())) {
+							userJson.put("workTypename", "子任务");
+						}
+						userJson.put("workerVo", userVo);
+						workerArray.add(userJson);
+					}
+					currentStepJson.put("workerList",workerArray);
+					currentStepArray.add(currentStepJson);
+				}
+			}
+		}
+		return currentStepArray;
+	}
+
+	@Override
 	public List<TableSelectColumnVo> getTableSelectColumn() {
 		return new ArrayList<TableSelectColumnVo>(){
 			{
 				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"stepId"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(),"stepStatus"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(),"stepName")
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"processTaskStepId"),
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.HANDLER.getValue(),"processTaskStepHandler")
 				)));
 				add(new TableSelectColumnVo(new ProcessTaskStepWorkerSqlTable(), Arrays.asList(
 						new SelectColumnVo(ProcessTaskStepWorkerSqlTable.FieldEnum.UUID.getValue(),"stepWorkerUuid"),
@@ -209,8 +290,15 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 						new SelectColumnVo(ProcessTaskStepWorkerSqlTable.FieldEnum.USER_TYPE.getValue(),"stepWorkerUserType")
 				)));
 				add(new TableSelectColumnVo(new ProcessTaskStepUserSqlTable(), Arrays.asList(
-						new SelectColumnVo(ProcessTaskStepUserSqlTable.FieldEnum.USER_UUID.getValue(),"stepUserUserUuid"),
+						new SelectColumnVo(ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(),"stepUserUserStatus"),
 						new SelectColumnVo(ProcessTaskStepUserSqlTable.FieldEnum.USER_TYPE.getValue(),"stepUserUserType")
+				)));
+				add(new TableSelectColumnVo(new UserTable(),"ptsuser", Arrays.asList(
+						new SelectColumnVo(UserTable.FieldEnum.USER_NAME.getValue(),"stepUserUserName"),
+						new SelectColumnVo(UserTable.FieldEnum.UUID.getValue(),"stepUserUserUuid"),
+						new SelectColumnVo(UserTable.FieldEnum.USER_INFO.getValue(),"stepUserUserInfo"),
+						new SelectColumnVo(UserTable.FieldEnum.VIP_LEVEL.getValue(),"stepUserUserVipLevel"),
+						new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(),"stepUserUserPinyin")
 				)));
 			}
 		};

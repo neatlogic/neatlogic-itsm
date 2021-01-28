@@ -6,6 +6,7 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -91,6 +92,11 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 			userName = JSONObject.parseObject(json.toString()).getString("userName");
 		}
 		return userName;
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		return processTaskVo.getOwnerVo();
 	}
 
 	@Override

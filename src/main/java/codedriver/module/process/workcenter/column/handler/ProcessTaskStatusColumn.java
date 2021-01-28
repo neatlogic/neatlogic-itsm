@@ -4,6 +4,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
@@ -82,5 +83,13 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
 			}
 		};
 	}
-
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		JSONObject statusJson = new JSONObject();
+		String status = processTaskVo.getStatus();
+		statusJson.put("value", status);
+		statusJson.put("text", ProcessTaskStatus.getText(status));
+		statusJson.put("color", ProcessTaskStatus.getColor(status));
+		return statusJson;
+	}
 }
