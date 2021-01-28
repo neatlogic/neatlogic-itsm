@@ -113,7 +113,7 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                         channelTypeVo = new ChannelTypeVo();
                         channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
                     }
-                    processTask.setChannelType(new ChannelTypeVo(channelTypeVo));
+                    processTask.setChannelType(channelTypeVo.clone());
                 }
                 processTaskMap.put(processTask.getId(), processTask);
             }
@@ -123,7 +123,7 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                     processTaskRelation.setSerialNumber(processTask.getSerialNumber());
                     processTaskRelation.setTilte(processTask.getTitle());
                     processTaskRelation.setStatusVo(new ProcessTaskStatusVo(processTask.getStatus()));
-                    processTaskRelation.setChannelTypeVo(new ChannelTypeVo(processTask.getChannelType()));
+                    processTaskRelation.setChannelTypeVo(processTask.getChannelType().clone());
                 }
             }
             resultObj.put("processTaskRelationList", processTaskRelationList);

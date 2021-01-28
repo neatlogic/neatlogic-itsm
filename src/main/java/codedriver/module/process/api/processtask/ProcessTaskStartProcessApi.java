@@ -87,6 +87,7 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setParamObj(jsonObj);
         try {
             handler.startProcess(startProcessTaskStepVo);
+			processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
         }catch(ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
