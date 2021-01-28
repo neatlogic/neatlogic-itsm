@@ -305,19 +305,10 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                                     } else {
                                         values.add(content);
                                     }
-                                    handler.textConversionValue(values,JSONObject.parseObject(att.getConfig()));
+                                    formdata.put("dataList",handler.textConversionValue(values,JSONObject.parseObject(att.getConfig())));
+                                    formAttributeDataList.add(formdata);
+                                    break;
                                 }
-                            }
-
-                            if(StringUtils.isNotBlank(entry.getValue()) && entry.getValue().startsWith("[") && entry.getValue().endsWith("]")){
-                                JSONArray dataList = JSONArray.parseArray(entry.getValue());
-                                formdata.put("dataList",dataList);
-                                formAttributeDataList.add(formdata);
-                                break;
-                            }else{
-                                formdata.put("dataList",entry.getValue());
-                                formAttributeDataList.add(formdata);
-                                break;
                             }
                         }
                     }
