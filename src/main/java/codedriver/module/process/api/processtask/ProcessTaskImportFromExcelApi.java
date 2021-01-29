@@ -114,7 +114,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 throw new EmptyExcelException();
             }
             List<String> channelData = (List<String>)data.get("channelData");
-            if(CollectionUtils.isEmpty(channelData) || channelData.size() != 4){
+            if(CollectionUtils.isEmpty(channelData)){
                 throw new ExcelLostChannelUuidException();
             }
             /** 从excel首行第四列取出服务UUID */
