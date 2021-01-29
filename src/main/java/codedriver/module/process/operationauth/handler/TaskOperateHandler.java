@@ -4,7 +4,7 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
-import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.constvalue.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,8 +13,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONPath;
 
 import codedriver.framework.auth.core.AuthActionChecker;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -281,9 +279,11 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 1) {
                 if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                     if (userUuid.equals(processTaskVo.getOwner())) {
-                        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-                        JSONArray stepUuidList = (JSONArray) JSONPath.read(taskConfig, "process.scoreConfig.config.stepUuidList");
-                        return CollectionUtils.isNotEmpty(stepUuidList);
+                        for(ProcessTaskStepVo stepVo : processTaskVo.getStepList()){
+                            if(stepVo.getType().equals(ProcessStepType.END.getValue())){
+                                return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, stepVo.getId(), ProcessFlowDirection.BACKWARD);
+                            }
+                        }
                     }
                 }
             }
