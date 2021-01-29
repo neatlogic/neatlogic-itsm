@@ -12,6 +12,8 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.ISqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSlaSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSlaTimeSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -189,13 +192,24 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 	public List<TableSelectColumnVo> getTableSelectColumn() {
 		return new ArrayList<TableSelectColumnVo>(){
 			{
+				add(new TableSelectColumnVo(new ProcessTaskSlaSqlTable(),
+						Arrays.asList(
+								new SelectColumnVo(ProcessTaskSlaSqlTable.FieldEnum.ID.getValue(),"processTaskSlaId"),
+								new SelectColumnVo(ProcessTaskSlaSqlTable.FieldEnum.NAME.getValue(),"processTaskSlaName"),
+								new SelectColumnVo(ProcessTaskSlaSqlTable.FieldEnum.CONFIG.getValue(),"processTaskSlaConfig")
+						)
+				));
 				add(new TableSelectColumnVo(new ProcessTaskSlaTimeSqlTable(),
 						Arrays.asList(
-								new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue())
-								,new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.REALEXPIRE_TIME.getValue())
-								,new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.TIME_LEFT.getValue())
-								,new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.REALTIME_LEFT.getValue())
-								,new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue())
+								new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue(),"expireTime")
+								,new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.REALEXPIRE_TIME.getValue(),"realExpireTime")
+								,new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.TIME_LEFT.getValue(),"timeLeft")
+								,new SelectColumnVo(ProcessTaskSlaTimeSqlTable.FieldEnum.REALTIME_LEFT.getValue(),"realTimeLeft")
+						)
+				));
+				add(new TableSelectColumnVo(new ProcessTaskSqlTable(),
+						Collections.singletonList(
+								new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue())
 						)
 				));
 			}
@@ -205,5 +219,15 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 	@Override
 	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
 		return SqlTableUtil.getExpireTimeJoinTableSql();
+	}
+
+	@Override
+	public String getMySortSqlColumn(){
+		return ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue();
+	}
+
+	@Override
+	public ISqlTable getMySortSqlTable(){
+		return new ProcessTaskSlaTimeSqlTable();
 	}
 }

@@ -43,8 +43,8 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
             }
         }
 
-        //如果是distinct id 则 需要 根据条件获取需要的表。否则需要根据column获取需要的表
-        if (FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
+        //如果是count , distinct id 则 需要 根据条件获取需要的表。否则需要根据column获取需要的表
+        if (!FieldTypeEnum.FIELD.getValue().equals(workcenterVo.getSqlFieldType())) {
             List<ISqlTable> tableList = new ArrayList<>();
             List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
             String fromGroupUuid = null;

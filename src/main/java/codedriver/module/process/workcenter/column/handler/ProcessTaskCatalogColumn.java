@@ -79,7 +79,14 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
 
     @Override
     public Object getValue(ProcessTaskVo processTaskVo) {
-        return processTaskVo.getChannelVo().getParent().getName();
+        if (processTaskVo.getChannelVo() != null) {
+            if (processTaskVo.getChannelVo().getParent() != null) {
+                return processTaskVo.getChannelVo().getParent().getName();
+            } else {
+                return "服务目录已被删除";
+            }
+        }
+        return "服务已被删除";
     }
 
     @Override

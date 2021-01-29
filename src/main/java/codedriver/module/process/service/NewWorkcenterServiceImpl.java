@@ -1,18 +1,25 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.workcenter.core.SqlBuilder;
+import codedriver.module.process.workcenter.operate.WorkcenterOperateBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -62,19 +69,35 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //补充工单字段信息
         workcenterVo.setTheadVoList(theadList);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
-//        System.out.println("fieldSql:");
-//        System.out.println(sb.build());
+        System.out.println("fieldSql:-------------------------------------------------------------------------------");
+        System.out.println(sb.build());
         List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
-        //重新渲染工单字段
+        ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
+        Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
+                builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
+                        .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
+                        .addOperationType(ProcessTaskOperationType.TASK_URGE)
+                        .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
+        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         for (ProcessTaskVo processTaskVo : processTaskVoList) {
+            processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
             JSONObject taskJson = new JSONObject();
+            //重新渲染工单字段
             for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                 IProcessTaskColumn column = entry.getValue();
                 taskJson.put(column.getName(), column.getValue(processTaskVo));
             }
+
+            // route 供前端跳转路由信息
+            JSONObject routeJson = new JSONObject();
+            routeJson.put("taskid", processTaskVo.getId());
+            taskJson.put("route", routeJson);
+            // operate 获取对应工单的操作
+
+            taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
             dataList.add(taskJson);
+
         }
-        System.out.println(sb.build());
         // 字段排序
         JSONArray sortList = workcenterVo.getSortList();
         if (CollectionUtils.isEmpty(sortList)) {
@@ -82,6 +105,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         }
         //统计符合条件工单数量
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
+        System.out.println("countSql:-------------------------------------------------------------------------------");
+        System.out.println(sb.build());
         int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
 
         returnObj.put("sortList", sortList);
@@ -121,7 +146,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                     thead.setDisplayName(columnComponentMap.get(thead.getName()).getDisplayName());
                     thead.setClassName(columnComponentMap.get(thead.getName()).getClassName());
                     thead.setIsExport(columnComponentMap.get(thead.getName()).getIsExport() ? 1 : 0);
-                    thead.setIsShow(columnComponentMap.get(thead.getName()).getIsShow() ? 1 : 0);
+                    //thead.setIsShow(columnComponentMap.get(thead.getName()).getIsShow() ? 1 : 0);
                 }
             } else {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();
@@ -151,5 +176,88 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             }
         }
         return theadList;
+    }
+
+
+    /**
+     * @Description:
+     * @Author: 89770
+     * @Date: 2021/1/29 11:44
+     * @Params: [processTaskVo, operateTypeSetMap]
+     * @Returns: com.alibaba.fastjson.JSONObject
+     **/
+    private JSONObject getTaskOperate(ProcessTaskVo processTaskVo,Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap) {
+        JSONObject action = new JSONObject();
+        String processTaskStatus = processTaskVo.getStatus();
+        Boolean isHasAbort = false;
+        Boolean isHasRecover = false;
+        Boolean isHasUrge = false;
+        JSONArray handleArray = new JSONArray();
+        if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
+                || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)
+                || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStatus))) {
+            Set<ProcessTaskOperationType> operationTypeSet = operateTypeSetMap.get(processTaskVo.getId());
+
+            if (CollectionUtils.isNotEmpty(operationTypeSet)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_ABORT)) {
+                    isHasAbort = true;
+                }
+                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_RECOVER)) {
+                    isHasRecover = true;
+                }
+                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_URGE)) {
+                    isHasUrge = true;
+                }
+            }
+            for (ProcessTaskStepVo step : processTaskVo.getStepList()) {
+                Set<ProcessTaskOperationType> set = operateTypeSetMap.get(step.getId());
+                if (set != null && set.contains(ProcessTaskOperationType.STEP_WORK)) {
+                    JSONObject configJson = new JSONObject();
+                    configJson.put("taskid", processTaskVo.getId());
+                    configJson.put("stepid", step.getId());
+                    configJson.put("stepName", step.getName());
+                    JSONObject actionJson = new JSONObject();
+                    actionJson.put("name", "handle");
+                    actionJson.put("text", step.getName());
+                    actionJson.put("config", configJson);
+                    handleArray.add(actionJson);
+                }
+            }
+        }
+        // 返回实际操作按钮
+        /**
+         * 实质性操作按钮：如“处理”、“取消”、“催办”，根据用户权限展示 ;次要的操作按钮：如“隐藏”、“删除”，只有管理员可见 移动端按钮展示规则：
+         * 1、工单显示时，优先展示实质性的按钮，次要的操作按钮收起到“更多”中；如果没有任何实质性的操作按钮，则将次要按钮放出来（管理员可见）；
+         * 2、工单隐藏时，仅“显示”、“删除”按钮放出来，其他实质性按钮需要等工单显示后才会展示；
+         */
+
+        WorkcenterOperateBuilder workcenterFirstOperateBuilder = new WorkcenterOperateBuilder();
+        JSONArray workcenterFirstOperateArray = workcenterFirstOperateBuilder.setHandleOperate(handleArray)
+                .setAbortRecoverOperate(isHasAbort, isHasRecover, processTaskVo).setUrgeOperate(isHasUrge, processTaskVo)
+                .build();
+        Boolean isNeedFirstOperate = false;
+        for (Object firstOperate : workcenterFirstOperateArray) {
+            JSONObject firstOperateJson = JSONObject.parseObject(firstOperate.toString());
+            if (firstOperateJson.getInteger("isEnable") == 1) {
+                isNeedFirstOperate = true;
+            }
+        }
+        WorkcenterOperateBuilder workcenterSecondOperateBuilder = new WorkcenterOperateBuilder();
+        JSONArray workcenterSecondOperateJsonArray =
+                workcenterSecondOperateBuilder.setShowHideOperate(processTaskVo).setDeleteOperate(processTaskVo).build();
+        for (Object workcenterSecondOperateObj : workcenterSecondOperateJsonArray) {
+            JSONObject workcenterSecondOperateJson = JSONObject.parseObject(workcenterSecondOperateObj.toString());
+            if (ProcessTaskOperationType.TASK_SHOW.getValue().equals(workcenterSecondOperateJson.getString("name"))) {
+                isNeedFirstOperate = false;
+            }
+        }
+        if (isNeedFirstOperate) {
+            action.put("firstActionList", workcenterFirstOperateArray);
+            action.put("secondActionList", workcenterSecondOperateJsonArray);
+        } else {
+            action.put("firstActionList", workcenterSecondOperateJsonArray);
+            action.put("secondActionList", new JSONArray());
+        }
+        return action;
     }
 }

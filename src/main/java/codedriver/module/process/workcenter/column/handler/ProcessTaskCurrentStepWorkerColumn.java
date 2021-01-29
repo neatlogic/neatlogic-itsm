@@ -211,6 +211,8 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                             workerJson.put("workTypename", "变更步骤");
                         } else if (ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
                             workerJson.put("workTypename", "子任务");
+                        } else{
+                            workerJson.put("workTypename", "处理人");
                         }
                         if (GroupSearch.USER.getValue().equals(workerVo.getUserType())) {
                             UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
@@ -241,15 +243,17 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                         }
                     }
 
-                    for (ProcessTaskStepUserVo userVo : stepVo.getUserList()) {
+                    for (ProcessTaskStepUserVo stepUserVo : stepVo.getUserList()) {
                         JSONObject userJson = new JSONObject();
                         if (ProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(stepVo.getHandler())
-                                && ProcessUserType.MINOR.getValue().equals(userVo.getUserType())) {
+                                && ProcessUserType.MINOR.getValue().equals(stepUserVo.getUserType())) {
                             userJson.put("workTypename", "变更步骤");
-                        } else if (ProcessUserType.MINOR.getValue().equals(userVo.getUserType())) {
+                        } else if (ProcessUserType.MINOR.getValue().equals(stepUserVo.getUserType())) {
                             userJson.put("workTypename", "子任务");
+                        }else {
+                            userJson.put("workTypename", "处理人");
                         }
-                        userJson.put("workerVo", userVo);
+                        userJson.put("workerVo", JSON.parseObject(JSONObject.toJSONString(stepUserVo.getUserVo())));
                         workerArray.add(userJson);
                     }
                 }
@@ -264,6 +268,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
             {
                 add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
                         new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"processTaskStepId"),
+                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(),"processTaskId"),
                         new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.HANDLER.getValue(),"processTaskStepHandler")
                 )));
                 add(new TableSelectColumnVo(new ProcessTaskStepWorkerSqlTable(), Arrays.asList(

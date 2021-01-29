@@ -106,10 +106,7 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 		List<String> stepNameList = new ArrayList<>();
 		if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
 			for (ProcessTaskStepVo stepVo : stepVoList) {
-				if(ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
-						ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
-						ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus())
-				){
+				if((ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus())||(ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus())&& stepVo.getIsActive() == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
 					stepNameList.add(stepVo.getName());
 				}
 			}
@@ -123,8 +120,10 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 			{
 				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
 						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"processTaskStepId"),
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(),"processTaskId"),
 						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(),"processTaskStepStatus"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(),"processTaskStepName")
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(),"processTaskStepName"),
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.IS_ACTIVE.getValue(),"processTaskStepIsActive")
 				)));
 			}
 		};

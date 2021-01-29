@@ -62,7 +62,7 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
      * @Params: [workcenterVo, joinTableKeyList]
      * @Returns: java.util.List<codedriver.framework.process.workcenter.dto.JoinTableColumnVo>
      **/
-    private List<JoinTableColumnVo> getJoinTableOfOrder(WorkcenterVo workcenterVo, List<String> joinTableKeyList){
+    private List<JoinTableColumnVo> getJoinTableOfOrder(WorkcenterVo workcenterVo, List<String> joinTableKeyList) {
         JSONArray sortJsonArray = workcenterVo.getSortList();
         List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(sortJsonArray)) {
@@ -123,6 +123,10 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //循环所有需要展示的字段
         for (WorkcenterTheadVo theadVo : workcenterVo.getTheadVoList()) {
+            //去掉沒有勾选的thead
+            if (theadVo.getIsShow() != 1) {
+                continue;
+            }
             if (columnComponentMap.containsKey(theadVo.getName())) {
                 IProcessTaskColumn column = columnComponentMap.get(theadVo.getName());
                 List<JoinTableColumnVo> handlerJoinTableColumnList = column.getJoinTableColumnList();

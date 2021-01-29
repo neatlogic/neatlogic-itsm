@@ -69,7 +69,7 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
         });
 
         buildFieldMap.put(FieldTypeEnum.COUNT.getValue(), (workcenterVo, sqlSb) -> {
-            sqlSb.append(" COUNT(1) ");
+            sqlSb.append(" COUNT( distinct pt.id ) ");
         });
 
         buildFieldMap.put(FieldTypeEnum.FIELD.getValue(), (workcenterVo, sqlSb) -> {
@@ -106,12 +106,16 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
         Map<String, ISqlTable> tableComponentMap = ProcessTaskSqlTableFactory.tableComponentMap;
         List<String> columnList = new ArrayList<>();
         for (WorkcenterTheadVo theadVo : workcenterVo.getTheadVoList()) {
+            //去掉沒有勾选的thead
+            if (theadVo.getIsShow() != 1) {
+                continue;
+            }
             if (columnComponentMap.containsKey(theadVo.getName())) {
                 IProcessTaskColumn column = columnComponentMap.get(theadVo.getName());
                 for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
                     for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
                         String columnStr = String.format(" %s.%s as %s ", tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
-                        if(!columnList.contains(columnStr)) {
+                        if (!columnList.contains(columnStr)) {
                             columnList.add(columnStr);
                         }
                     }
@@ -119,6 +123,9 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
 
             }
         }
+        //查询是否隐藏
+        columnList.add(String.format(" %s.%s as %s ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.IS_SHOW.getValue(), ProcessTaskSqlTable.FieldEnum.IS_SHOW.getValue()));
+        columnList.add(String.format(" %s.%s as %s ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskSqlTable.FieldEnum.ID.getValue()));
         sqlSb.append(String.join(",", columnList));
     }
 

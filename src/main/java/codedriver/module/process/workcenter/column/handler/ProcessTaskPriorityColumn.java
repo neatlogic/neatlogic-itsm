@@ -9,6 +9,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.PrioritySqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
@@ -117,5 +118,15 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
 				}}));
 			}
 		};
+	}
+
+	@Override
+	public String getMySortSqlColumn(){
+		return PrioritySqlTable.FieldEnum.SORT.getValue();
+	}
+
+	@Override
+	public ISqlTable getMySortSqlTable(){
+		return new PrioritySqlTable();
 	}
 }

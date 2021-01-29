@@ -282,6 +282,8 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 			{
 				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
 						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"processTaskStepId"),
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(),"processTaskStepName"),
+						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(),"processTaskId"),
 						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.HANDLER.getValue(),"processTaskStepHandler")
 				)));
 				add(new TableSelectColumnVo(new ProcessTaskStepWorkerSqlTable(), Arrays.asList(

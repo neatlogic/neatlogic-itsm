@@ -17,13 +17,14 @@ import codedriver.module.process.workcenter.core.sqldecorator.SqlOrderDecorator;
  **/
 public class SqlBuilder {
     private final StringBuilder sqlSb;
-    public SqlBuilder(WorkcenterVo workcenterVo, FieldTypeEnum fieldTypeEnum ){
+
+    public SqlBuilder(WorkcenterVo workcenterVo, FieldTypeEnum fieldTypeEnum) {
         sqlSb = new StringBuilder();
         workcenterVo.setSqlFieldType(fieldTypeEnum.getValue());
-        SqlDecoratorChain.firstSqlDecorator.build(sqlSb,workcenterVo);
+        SqlDecoratorChain.firstSqlDecorator.build(sqlSb, workcenterVo);
     }
 
-    public String build(){
+    public String build() {
         return sqlSb.toString();
     }
 
@@ -34,8 +35,8 @@ public class SqlBuilder {
      * @Params: [workcenterVo]
      * @Returns: void
      **/
-    public void buildOrder(WorkcenterVo workcenterVo){
-        new SqlOrderDecorator().build(sqlSb,workcenterVo);
+    public void buildOrder(WorkcenterVo workcenterVo) {
+        new SqlOrderDecorator().build(sqlSb, workcenterVo);
     }
 
     /**
@@ -45,8 +46,8 @@ public class SqlBuilder {
      * @Params: [workcenterVo]
      * @Returns: void
      **/
-    public void buildLimit(WorkcenterVo workcenterVo){
-        new SqlLimitDecorator().build(sqlSb,workcenterVo);
+    public void buildLimit(WorkcenterVo workcenterVo) {
+        new SqlLimitDecorator().build(sqlSb, workcenterVo);
     }
 
 }

@@ -87,10 +87,14 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {
 		JSONObject channelTypeJson = new JSONObject();
-		ChannelTypeVo channelTypeVo = processTaskVo.getChannelVo().getChannelTypeVo();
-		channelTypeJson.put("value",channelTypeVo.getUuid());
-		channelTypeJson.put("text",channelTypeVo.getName());
-		channelTypeJson.put("color",channelTypeVo.getColor());
+		if (processTaskVo.getChannelVo() != null) {
+			if(processTaskVo.getChannelVo().getChannelTypeVo() != null){
+				ChannelTypeVo channelTypeVo = processTaskVo.getChannelVo().getChannelTypeVo();
+				channelTypeJson.put("value",channelTypeVo.getUuid());
+				channelTypeJson.put("text",channelTypeVo.getName());
+				channelTypeJson.put("color",channelTypeVo.getColor());
+			}
+		}
 		return channelTypeJson;
 	}
 

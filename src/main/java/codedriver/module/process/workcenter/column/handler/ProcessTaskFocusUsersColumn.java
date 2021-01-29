@@ -84,9 +84,15 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {
 		JSONObject focusUserObj = new JSONObject();
-		List<String> focusUserUuidList = processTaskVo.getFocusUserList().stream().map(UserVo::getUuid).collect(Collectors.toList());
-		focusUserObj.put("focusUserList",focusUserUuidList);
-		focusUserObj.put("isCurrentUserFocus",focusUserUuidList.contains(UserContext.get().getUserUuid()) ? 1 : 0);
+		int isCurrentUserFocus = 0;
+		if(CollectionUtils.isNotEmpty(processTaskVo.getFocusUserList())) {
+			List<String> focusUserUuidList = processTaskVo.getFocusUserList().stream().map(UserVo::getUuid).collect(Collectors.toList());
+			focusUserObj.put("focusUserList", focusUserUuidList);
+			if(focusUserUuidList.contains(UserContext.get().getUserUuid())) {
+				isCurrentUserFocus = 1;
+			}
+		}
+		focusUserObj.put("isCurrentUserFocus",isCurrentUserFocus);
 		return focusUserObj;
 	}
 
