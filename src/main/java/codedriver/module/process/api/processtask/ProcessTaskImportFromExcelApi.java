@@ -295,7 +295,6 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                             formdata.put("attributeUuid",att.getUuid());
                             formdata.put("handler",att.getHandler());
                             String content = entry.getValue();
-                            // todo 不支持静态和动态列表
                             if(StringUtils.isNotBlank(content)){
                                 IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(att.getHandler());
                                 if(handler != null){

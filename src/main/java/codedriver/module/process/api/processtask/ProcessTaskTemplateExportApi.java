@@ -153,6 +153,7 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         channelData.add(channel.getName());
         channelData.add("服务UUID(禁止修改)：");
         channelData.add(channelUuid);
+        channelData.add("注意：不支持导入静态列表与动态列表");
         OutputStream os = null;
         Workbook workbook = new XSSFWorkbook();
         try{
