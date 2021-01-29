@@ -1,5 +1,6 @@
 package codedriver.module.process.formattribute.handler;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -36,6 +37,9 @@ public class TextHandler extends FormHandlerBase {
 
     @Override
     public Object textConversionValue(List<String> values, JSONObject config) {
+        if(CollectionUtils.isNotEmpty(values)){
+            return values.get(0);
+        }
         return null;
     }
 
