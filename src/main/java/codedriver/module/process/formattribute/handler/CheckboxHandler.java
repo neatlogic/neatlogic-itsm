@@ -8,7 +8,6 @@ import java.util.Map;
 import codedriver.framework.restful.core.IApiComponent;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.dto.ApiVo;
-import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -49,35 +48,7 @@ public class CheckboxHandler extends FormHandlerBase {
     public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
         List<String> valueList = JSON.parseArray(JSON.toJSONString(attributeDataVo.getDataObj()), String.class);
         if (CollectionUtils.isNotEmpty(valueList)) {
-            List<String> textList = new ArrayList<>();
-            String dataSource = configObj.getString("dataSource");
-            if ("static".equals(dataSource)) {
-                Map<Object, String> valueTextMap = new HashMap<>();
-                List<ValueTextVo> dataList =
-                        JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("dataList")), ValueTextVo.class);
-                if (CollectionUtils.isNotEmpty(dataList)) {
-                    for (ValueTextVo data : dataList) {
-                        valueTextMap.put(data.getValue(), data.getText());
-                    }
-                }
-                for (String value : valueList) {
-                    String text = valueTextMap.get(value);
-                    if (text != null) {
-                        textList.add(text);
-                    } else {
-                        textList.add(value);
-                    }
-                }
-            } else {// 其他，如动态数据源
-                for (String value : valueList) {
-                    if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
-                        textList.add(value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER)[1]);
-                    } else {
-                        textList.add(value);
-                    }
-                }
-            }
-            return textList;
+            return getTextOrValue(configObj,valueList,ConversionType.TOTEXT.getValue());
         } else {
             return valueList;
         }
@@ -87,37 +58,58 @@ public class CheckboxHandler extends FormHandlerBase {
     public Object textConversionValue(List<String> values, JSONObject config) {
         Object result = null;
         if (CollectionUtils.isNotEmpty(values)) {
-            String dataSource = config.getString("dataSource");
-            if ("static".equals(dataSource)) {
-                List<ValueTextVo> dataList =
-                        JSON.parseArray(JSON.toJSONString(config.getJSONArray("dataList")), ValueTextVo.class);
-                if (CollectionUtils.isNotEmpty(dataList)) {
-                    Map<String, Object> valueTextMap = new HashMap<>();
-                    for (ValueTextVo data : dataList) {
-                        valueTextMap.put(data.getText(), data.getValue());
-                    }
-                    JSONArray jsonArray = new JSONArray();
-                    for (String value : values) {
-                        jsonArray.add(valueTextMap.get(value));
-                    }
-                    result = jsonArray;
-                }
+            result = getTextOrValue(config,values,ConversionType.TOVALUE.getValue());
+        }
+        return result;
+    }
 
-            } else if ("matrix".equals(dataSource)) {
-                String matrixUuid = config.getString("matrixUuid");
-                ValueTextVo mapping = JSON.toJavaObject(config.getJSONObject("mapping"), ValueTextVo.class);
-                if (StringUtils.isNotBlank(matrixUuid) && CollectionUtils.isNotEmpty(values)
+    private Object getTextOrValue(JSONObject configObj,List<String> valueList,String conversionType){
+        List<String> result = new ArrayList<>();
+        String dataSource = configObj.getString("dataSource");
+        if ("static".equals(dataSource)) {
+            Map<Object, String> valueTextMap = new HashMap<>();
+            List<ValueTextVo> dataList =
+                    JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("dataList")), ValueTextVo.class);
+            if (CollectionUtils.isNotEmpty(dataList)) {
+                for (ValueTextVo data : dataList) {
+                    valueTextMap.put(data.getValue(), data.getText());
+                }
+            }
+            if(ConversionType.TOTEXT.getValue().equals(conversionType)){
+                for (String value : valueList) {
+                    String text = valueTextMap.get(value);
+                    if (text != null) {
+                        result.add(text);
+                    } else {
+                        result.add(value);
+                    }
+                }
+            }else if(ConversionType.TOVALUE.getValue().equals(conversionType)){
+                for (String value : valueList) {
+                    result.add(valueTextMap.get(value));
+                }
+            }
+        } else if("matrix".equals(dataSource)){// 其他，如动态数据源
+            if(ConversionType.TOTEXT.getValue().equals(conversionType)){
+                for (String value : valueList) {
+                    if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
+                        result.add(value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER)[1]);
+                    } else {
+                        result.add(value);
+                    }
+                }
+            }else if(ConversionType.TOVALUE.getValue().equals(conversionType)){
+                String matrixUuid = configObj.getString("matrixUuid");
+                ValueTextVo mapping = JSON.toJavaObject(configObj.getJSONObject("mapping"), ValueTextVo.class);
+                if (StringUtils.isNotBlank(matrixUuid) && CollectionUtils.isNotEmpty(valueList)
                         && mapping != null) {
                     ApiVo api = PrivateApiComponentFactory.getApiByToken("matrix/column/data/search/forselect/new");
                     if (api != null) {
                         IApiComponent restComponent = PrivateApiComponentFactory.getInstance(api.getHandler());
                         if (restComponent != null) {
-                            JSONArray jsonArray = new JSONArray();
-                            for (String value : values) {
-                                jsonArray.add(getValue(matrixUuid, mapping, value, restComponent, api));
+                            for (String value : valueList) {
+                                result.add(getValue(matrixUuid, mapping, value, restComponent, api));
                             }
-                            result = jsonArray;
-
                         }
                     }
                 }
