@@ -5,7 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.framework.restful.core.IApiComponent;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -49,7 +54,7 @@ public class CheckboxHandler extends FormHandlerBase {
             if ("static".equals(dataSource)) {
                 Map<Object, String> valueTextMap = new HashMap<>();
                 List<ValueTextVo> dataList =
-                    JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("dataList")), ValueTextVo.class);
+                        JSON.parseArray(JSON.toJSONString(configObj.getJSONArray("dataList")), ValueTextVo.class);
                 if (CollectionUtils.isNotEmpty(dataList)) {
                     for (ValueTextVo data : dataList) {
                         valueTextMap.put(data.getValue(), data.getText());
@@ -80,7 +85,45 @@ public class CheckboxHandler extends FormHandlerBase {
 
     @Override
     public Object textConversionValue(List<String> values, JSONObject config) {
-        return null;
+        Object result = null;
+        if (CollectionUtils.isNotEmpty(values)) {
+            String dataSource = config.getString("dataSource");
+            if ("static".equals(dataSource)) {
+                List<ValueTextVo> dataList =
+                        JSON.parseArray(JSON.toJSONString(config.getJSONArray("dataList")), ValueTextVo.class);
+                if (CollectionUtils.isNotEmpty(dataList)) {
+                    Map<String, Object> valueTextMap = new HashMap<>();
+                    for (ValueTextVo data : dataList) {
+                        valueTextMap.put(data.getText(), data.getValue());
+                    }
+                    JSONArray jsonArray = new JSONArray();
+                    for (String value : values) {
+                        jsonArray.add(valueTextMap.get(value));
+                    }
+                    result = jsonArray;
+                }
+
+            } else if ("matrix".equals(dataSource)) {
+                String matrixUuid = config.getString("matrixUuid");
+                ValueTextVo mapping = JSON.toJavaObject(config.getJSONObject("mapping"), ValueTextVo.class);
+                if (StringUtils.isNotBlank(matrixUuid) && CollectionUtils.isNotEmpty(values)
+                        && mapping != null) {
+                    ApiVo api = PrivateApiComponentFactory.getApiByToken("matrix/column/data/search/forselect/new");
+                    if (api != null) {
+                        IApiComponent restComponent = PrivateApiComponentFactory.getInstance(api.getHandler());
+                        if (restComponent != null) {
+                            JSONArray jsonArray = new JSONArray();
+                            for (String value : values) {
+                                jsonArray.add(getValue(matrixUuid, mapping, value, restComponent, api));
+                            }
+                            result = jsonArray;
+
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @Override
