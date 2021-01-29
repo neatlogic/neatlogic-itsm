@@ -1,11 +1,13 @@
 package codedriver.module.process.formattribute.handler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import codedriver.framework.restful.core.IApiComponent;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -110,6 +112,57 @@ public class SelectHandler extends FormHandlerBase {
             }
         }
         return dataObj;
+    }
+
+    @Override
+    public Object textConversionValue(List<String> values, JSONObject config) {
+        Object result = null;
+        if(CollectionUtils.isNotEmpty(values)){
+            boolean isMultiple = config.getBooleanValue("isMultiple");
+            String dataSource = config.getString("dataSource");
+            if ("static".equals(dataSource)) {
+                List<ValueTextVo> dataList =
+                        JSON.parseArray(JSON.toJSONString(config.getJSONArray("dataList")), ValueTextVo.class);
+                if (CollectionUtils.isNotEmpty(dataList)) {
+                    Map<String, Object> valueTextMap = new HashMap<>();
+                    for (ValueTextVo data : dataList) {
+                        valueTextMap.put(data.getText(), data.getValue());
+                    }
+                    if(isMultiple){
+                        JSONArray jsonArray = new JSONArray();
+                        for(String value : values){
+                            jsonArray.add(valueTextMap.get(value));
+                        }
+                        result = jsonArray;
+                    }else{
+                        result = valueTextMap.get(values.get(0));
+                    }
+                }
+
+            }else if("matrix".equals(dataSource)){
+                String matrixUuid = config.getString("matrixUuid");
+                ValueTextVo mapping = JSON.toJavaObject(config.getJSONObject("mapping"), ValueTextVo.class);
+                if (StringUtils.isNotBlank(matrixUuid) && CollectionUtils.isNotEmpty(values)
+                        && mapping != null) {
+                    ApiVo api = PrivateApiComponentFactory.getApiByToken("matrix/column/data/search/forselect/new");
+                    if(api != null){
+                        IApiComponent restComponent = PrivateApiComponentFactory.getInstance(api.getHandler());
+                        if (restComponent != null) {
+                            if(isMultiple){
+                                JSONArray jsonArray = new JSONArray();
+                                for(String value : values){
+                                    jsonArray.add(getValue(matrixUuid, mapping, value, restComponent, api));
+                                }
+                                result = jsonArray;
+                            }else{
+                                result = getValue(matrixUuid, mapping, values.get(0), restComponent, api);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @Override

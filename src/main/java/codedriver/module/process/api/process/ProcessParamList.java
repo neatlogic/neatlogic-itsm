@@ -2,6 +2,7 @@ package codedriver.module.process.api.process;
 
 import java.util.List;
 
+import codedriver.framework.common.constvalue.ParamType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,14 @@ public class ProcessParamList extends PrivateApiComponentBase {
             param.setIsEditable(0);
             resultArray.add(param);
         }
+        /** homeUrl参数 **/
+        ConditionParamVo param = new ConditionParamVo();
+        param.setName("homeUrl");
+        param.setLabel("域名");
+        param.setParamType(ParamType.STRING.getName());
+        param.setParamTypeName(ParamType.STRING.getText());
+        param.setIsEditable(0);
+        resultArray.add(param);
 
         // 表单条件
         String formUuid = jsonObj.getString("formUuid");
