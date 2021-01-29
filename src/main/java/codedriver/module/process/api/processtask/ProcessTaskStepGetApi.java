@@ -8,6 +8,7 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -104,14 +105,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         if (new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_SCORE).build().check()) {
             ProcessTaskScoreTemplateVo processTaskScoreTemplateVo = processTaskMapper.getProcessTaskScoreTemplateByProcessTaskId(processTaskId);
             if (processTaskScoreTemplateVo != null) {
-                if (StringUtils.isNotBlank(processTaskScoreTemplateVo.getConfigHash())) {
-                    String configStr = selectContentByHashMapper.getProcessTaskScoreTempleteConfigStringIsByHash(processTaskScoreTemplateVo.getConfigHash());
-                    List<String> stepUuidList = JSON.parseArray(JSON.toJSONString(JSONPath.read(configStr, "stepUuidList")), String.class);
-                    if (CollectionUtils.isNotEmpty(stepUuidList)) {
-                        processTaskVo.setRedoStepList(processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuidList(processTaskId, stepUuidList));
-                    }
-                }
                 processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
+                ProcessTaskStepVo endProcessTaskStepVo = processTaskMapper.getEndProcessTaskStepByProcessTaskId(processTaskId);
+                List<ProcessTaskStepVo> processTaskStepVoList = processTaskMapper.getToProcessTaskStepByFromIdAndType(endProcessTaskStepVo.getId(), ProcessFlowDirection.BACKWARD.getValue());
+                processTaskVo.setRedoStepList(processTaskStepVoList);
             }
         }
         processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
@@ -124,9 +121,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     processTaskService.setTemporaryData(processTaskVo, currentProcessTaskStepVo);
                 }
                 processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
-                if (MapUtils.isNotEmpty(currentProcessTaskStepVo.getFormAttributeDataMap())) {
-                    processTaskVo.setFormAttributeDataMap(currentProcessTaskStepVo.getFormAttributeDataMap());
-                }
                 if (StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
                     // 表单属性显示控制
                     List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
