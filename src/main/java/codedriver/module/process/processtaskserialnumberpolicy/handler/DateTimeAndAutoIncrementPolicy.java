@@ -146,12 +146,11 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
                 long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
                 long serialNumberSeed = startValue;
                 String timeFormat = null;
-                int pageSize = 1000;
-                int pageCount = PageUtil.getPageCount(rowNum, pageSize);
+                processTaskVo.setPageSize(100);
+                int pageCount = PageUtil.getPageCount(rowNum, processTaskVo.getPageSize());
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                     processTaskVo.setCurrentPage(currentPage);
-                    processTaskVo.setPageSize(pageSize);
                     List<ProcessTaskVo> processTaskList =
                             processTaskMapper.getProcessTaskListByChannelTypeUuidAndStartTime(processTaskVo);
                     for (ProcessTaskVo processTask : processTaskList) {
@@ -176,6 +175,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         } finally {
             processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyEndTimeByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
         }
+        System.out.println("------------");
         return 0;
     }
 
