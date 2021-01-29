@@ -93,25 +93,20 @@ public class CascadeHandler extends FormHandlerBase {
                     IApiComponent restComponent = PrivateApiComponentFactory.getInstance(api.getHandler());
                     if (restComponent != null) {
                         if (valueList.size() > 0 && mappingList.size() > 0) {
-                            List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
-                            if (ConversionType.TOTEXT.getValue().equals(conversionType)) {
-                                result.add(getText(matrixUuid, mappingList.get(0), valueList.get(0), sourceColumnList,
-                                        restComponent, api));
-                            } else if (ConversionType.TOVALUE.getValue().equals(conversionType)) {
-                                result.add(getValueForCascade(matrixUuid, mappingList.get(0), valueList.get(0), restComponent, api));
-                            }
-                            if (valueList.size() > 1 && mappingList.size() > 1) {
-                                if (ConversionType.TOTEXT.getValue().equals(conversionType)) {
-                                    result.add(getText(matrixUuid, mappingList.get(1), valueList.get(1),
-                                            sourceColumnList, restComponent, api));
-                                } else if (ConversionType.TOVALUE.getValue().equals(conversionType)) {
-                                    result.add(getValueForCascade(matrixUuid, mappingList.get(1), valueList.get(1), restComponent, api));
+                            if(ConversionType.TOTEXT.getValue().equals(conversionType)){
+                                List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
+                                result.add(getText(matrixUuid, mappingList.get(0), valueList.get(0), sourceColumnList, restComponent, api));
+                                if (valueList.size() > 1 && mappingList.size() > 1) {
+                                    result.add(getText(matrixUuid, mappingList.get(1), valueList.get(1), sourceColumnList, restComponent, api));
+                                    if (valueList.size() > 2 && mappingList.size() > 2) {
+                                        result.add(getText(matrixUuid, mappingList.get(2), valueList.get(2), sourceColumnList, restComponent, api));
+                                    }
                                 }
-                                if (valueList.size() > 2 && mappingList.size() > 2) {
-                                    if (ConversionType.TOTEXT.getValue().equals(conversionType)) {
-                                        result.add(getText(matrixUuid, mappingList.get(2), valueList.get(2),
-                                                sourceColumnList, restComponent, api));
-                                    } else if (ConversionType.TOVALUE.getValue().equals(conversionType)) {
+                            }else if(ConversionType.TOVALUE.getValue().equals(conversionType)){
+                                result.add(getValueForCascade(matrixUuid, mappingList.get(0), valueList.get(0), restComponent, api));
+                                if (valueList.size() > 1 && mappingList.size() > 1) {
+                                    result.add(getValueForCascade(matrixUuid, mappingList.get(1), valueList.get(1), restComponent, api));
+                                    if (valueList.size() > 2 && mappingList.size() > 2) {
                                         result.add(getValueForCascade(matrixUuid, mappingList.get(2), valueList.get(2), restComponent, api));
                                     }
                                 }
