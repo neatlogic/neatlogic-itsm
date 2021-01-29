@@ -101,7 +101,51 @@ public class CascadeHandler extends FormHandlerBase {
 
     @Override
     public Object textConversionValue(List<String> values, JSONObject config) {
-        return null;
+        Object result = null;
+        if (CollectionUtils.isNotEmpty(values)) {
+            JSONArray valueList = new JSONArray();
+            String dataSource = config.getString("dataSource");
+            if ("static".equals(dataSource)) {
+                JSONArray dataList = config.getJSONArray("dataList");
+                if (CollectionUtils.isNotEmpty(dataList)) {
+                    for(String value : values) {
+                        for(int i = 0; i < dataList.size(); i++) {
+                            JSONObject dataObject = dataList.getJSONObject(i);
+                            if(Objects.equals(dataObject.getString("text"), value)) {
+                                valueList.add(dataObject.getString("value"));
+                                dataList = dataObject.getJSONArray("children");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }else if("matrix".equals(dataSource)){
+                String matrixUuid = config.getString("matrixUuid");
+                List<ValueTextVo> mappingList =
+                        JSON.parseArray(JSON.toJSONString(config.getJSONArray("mapping")), ValueTextVo.class);
+                if (StringUtils.isNotBlank(matrixUuid) && CollectionUtils.isNotEmpty(values)
+                        && CollectionUtils.isNotEmpty(mappingList)) {
+                    ApiVo api = PrivateApiComponentFactory.getApiByToken("matrix/column/data/search/forselect/new");
+                    if (api != null) {
+                        IApiComponent restComponent = PrivateApiComponentFactory.getInstance(api.getHandler());
+                        if (restComponent != null) {
+                            if (values.size() > 0 && mappingList.size() > 0) {
+                                valueList.add(getValueForCascade(matrixUuid, mappingList.get(0), values.get(0),
+                                        restComponent, api));
+                                if (values.size() > 1 && mappingList.size() > 1) {
+                                    valueList.add(getValueForCascade(matrixUuid, mappingList.get(1), values.get(1), restComponent, api));
+                                    if (values.size() > 2 && mappingList.size() > 2) {
+                                        valueList.add(getValueForCascade(matrixUuid, mappingList.get(2), values.get(2), restComponent, api));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            result = valueList;
+        }
+        return result;
     }
 
     private String getText(String matrixUuid, ValueTextVo mapping, String value, List<MatrixColumnVo> sourceColumnList,
@@ -133,6 +177,33 @@ public class CascadeHandler extends FormHandlerBase {
             e.printStackTrace();
         }
         return split[1];
+    }
+
+    private String getValueForCascade(String matrixUuid, ValueTextVo mapping, String value, IApiComponent restComponent, ApiVo api) {
+        if (StringUtils.isBlank(value)) {
+            return value;
+        }
+        try {
+            JSONObject paramObj = new JSONObject();
+            paramObj.put("matrixUuid", matrixUuid);
+            JSONArray columnList = new JSONArray();
+            columnList.add((String)mapping.getValue());
+            columnList.add(mapping.getText());
+            paramObj.put("columnList", columnList);
+            JSONObject resultObj = (JSONObject)restComponent.doService(api, paramObj);
+            JSONArray columnDataList = resultObj.getJSONArray("columnDataList");
+            for (int i = 0; i < columnDataList.size(); i++) {
+                JSONObject firstObj = columnDataList.getJSONObject(i);
+                JSONObject valueObj = firstObj.getJSONObject((String)mapping.getValue());
+                if (valueObj.getString("compose").contains(value)) {
+                    JSONObject textObj = firstObj.getJSONObject(mapping.getText());
+                    return valueObj.getString("value") + IFormAttributeHandler.SELECT_COMPOSE_JOINER + textObj.getString("value");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
