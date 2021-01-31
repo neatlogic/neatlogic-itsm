@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 

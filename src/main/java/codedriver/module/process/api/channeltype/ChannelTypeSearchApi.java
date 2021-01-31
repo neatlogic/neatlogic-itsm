@@ -16,7 +16,6 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 
 @Service

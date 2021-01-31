@@ -3,7 +3,6 @@ package codedriver.module.process.api.channeltype;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;

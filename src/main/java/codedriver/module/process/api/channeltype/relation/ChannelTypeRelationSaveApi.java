@@ -1,7 +1,6 @@
 package codedriver.module.process.api.channeltype.relation;
 
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
-import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationHasReferenceException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -17,7 +16,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNameRepeatException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;

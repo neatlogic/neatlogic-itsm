@@ -12,11 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 
@@ -62,12 +60,6 @@ public class ChannelTypeRelationIsActiveUpdateApi extends PrivateApiComponentBas
 		if(channelTypeMapper.checkChannelTypeRelationHasReference(channelTypeRelationId) > 0){
 			throw new ChannelTypeRelationHasReferenceException(channelTypeRelationVo.getName());
 		}
-//	    Integer isActive = jsonObj.getInteger("isActive");
-//	    if(Objects.equal(isActive, channelTypeRelationVo.getIsActive())) {
-//	        return null;
-//	    }
-//	    channelTypeRelationVo.setIsActive(isActive);
-//	    channelTypeMapper.updateChannelTypeRelationById(channelTypeRelationVo);
 		channelTypeMapper.updateChannelTypeRelationIsActiveById(channelTypeRelationId);
 		return 1 - channelTypeRelationVo.getIsActive();
 	}
