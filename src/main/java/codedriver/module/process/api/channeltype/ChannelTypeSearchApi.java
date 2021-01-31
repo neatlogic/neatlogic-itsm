@@ -2,6 +2,7 @@ package codedriver.module.process.api.channeltype;
 
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -23,7 +24,7 @@ import codedriver.framework.process.dto.ChannelTypeVo;
 public class ChannelTypeSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
-	private ChannelMapper channelMapper;
+	private ChannelTypeMapper channelTypeMapper;
 
 	@Override
 	public String getToken() {
@@ -61,7 +62,7 @@ public class ChannelTypeSearchApi extends PrivateApiComponentBase {
 		
 		JSONObject resultObj = new JSONObject();
 		if(channelTypeVo.getNeedPage()) {
-			int rowNum = channelMapper.searchChannelTypeCount(channelTypeVo);
+			int rowNum = channelTypeMapper.searchChannelTypeCount(channelTypeVo);
 			int pageCount = PageUtil.getPageCount(rowNum, channelTypeVo.getPageSize());
 			channelTypeVo.setPageCount(pageCount);
 			channelTypeVo.setRowNum(rowNum);
@@ -70,7 +71,7 @@ public class ChannelTypeSearchApi extends PrivateApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
 		}
-		List<ChannelTypeVo> channelTypeList = channelMapper.searchChannelTypeList(channelTypeVo);
+		List<ChannelTypeVo> channelTypeList = channelTypeMapper.searchChannelTypeList(channelTypeVo);
 		resultObj.put("tbodyList", channelTypeList);
 		return resultObj;
 	}

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +50,9 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
 
     @Autowired
     private ChannelMapper channelMapper;
+
+    @Autowired
+    private ChannelTypeMapper channelTypeMapper;
 
     @Override
     public String getToken() {
@@ -130,7 +134,7 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
                     ChannelVo channelVo = channelMapper.getChannelByUuid(processTask.getChannelUuid());
                     if (channelVo != null) {
                         ChannelTypeVo channelTypeVo =
-                            channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+                            channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
                         if (channelTypeVo != null) {
                             task.put("prefix", channelTypeVo.getPrefix());
                         }

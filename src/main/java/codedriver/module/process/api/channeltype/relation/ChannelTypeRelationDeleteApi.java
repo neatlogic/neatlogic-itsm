@@ -1,5 +1,6 @@
 package codedriver.module.process.api.channeltype.relation;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -22,7 +23,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 public class ChannelTypeRelationDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
-	private ChannelMapper channelMapper;
+	private ChannelTypeMapper channelTypeMapper;
 
 	@Override
 	public String getToken() {
@@ -47,9 +48,9 @@ public class ChannelTypeRelationDeleteApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
 	    //TODO linbq 判断是否能删除
-	    channelMapper.deleteChannelTypeRelationById(channelTypeRelationId);
-        channelMapper.deleteChannelTypeRelationSourceByChannelTypeRelationId(channelTypeRelationId);
-        channelMapper.deleteChannelTypeRelationTargetByChannelTypeRelationId(channelTypeRelationId);
+	    channelTypeMapper.deleteChannelTypeRelationById(channelTypeRelationId);
+        channelTypeMapper.deleteChannelTypeRelationSourceByChannelTypeRelationId(channelTypeRelationId);
+        channelTypeMapper.deleteChannelTypeRelationTargetByChannelTypeRelationId(channelTypeRelationId);
 		return null;
 	}
 

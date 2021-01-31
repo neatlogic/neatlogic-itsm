@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,10 @@ public class CatalogServiceImpl implements CatalogService {
 	
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
+	@Autowired
+	private ChannelTypeMapper channelTypeMapper;
+
 	@Autowired
 	private TeamMapper teamMapper;
 	
@@ -273,7 +277,7 @@ public class CatalogServiceImpl implements CatalogService {
                     }
                 }
             }
-            return channelMapper.getChannelUuidListByParentUuidListAndChannelTypeUuidList(parentUuidList, channelTypeUuidList);
+            return channelTypeMapper.getChannelUuidListByParentUuidListAndChannelTypeUuidList(parentUuidList, channelTypeUuidList);
         }
         return new ArrayList<>();
     }
@@ -295,7 +299,7 @@ public class CatalogServiceImpl implements CatalogService {
                 }
             }
             if(CollectionUtils.isNotEmpty(targetCatalogUuidList)) {
-                List<String> channelTypeUuidList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+                List<String> channelTypeUuidList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
                 if(channelTypeUuidList.contains("all")) {
                     channelTypeUuidList.clear();
                 }

@@ -1,5 +1,6 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,7 @@ import codedriver.framework.process.dto.ChannelTypeVo;
 public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 
 	@Autowired
-	ChannelMapper channelMapper;
+	ChannelTypeMapper channelTypeMapper;
 	
 	@Override
 	public String getName() {
@@ -31,7 +32,7 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String channelTypeUuid = json.getString(this.getName());
 		JSONObject channelTypeJson = new JSONObject();
-		ChannelTypeVo channelType = channelMapper.getChannelTypeByUuid(channelTypeUuid);
+		ChannelTypeVo channelType = channelTypeMapper.getChannelTypeByUuid(channelTypeUuid);
 		channelTypeJson.put("value", channelTypeUuid);
 		if(channelType != null) {
 			channelTypeJson.put("text", channelType.getName());

@@ -2,6 +2,7 @@ package codedriver.module.process.api.catalog.relation;
 
 import java.util.*;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -33,7 +34,10 @@ public class CatalogChannelTreeApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
+	@Autowired
+	private ChannelTypeMapper channelTypeMapper;
+
 	@Override
 	public String getToken() {
 		return "process/catalog/channel/tree";
@@ -59,7 +63,7 @@ public class CatalogChannelTreeApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-		List<String> channelTypeUuidList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+		List<String> channelTypeUuidList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
         if(CollectionUtils.isNotEmpty(channelTypeUuidList)) {
             List<ChannelVo> channelList = new ArrayList<>();
             if(channelTypeUuidList.contains("all")) {

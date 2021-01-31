@@ -1,5 +1,6 @@
 package codedriver.module.process.api.channeltype;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -24,7 +25,7 @@ import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTa
 public class ChannelTypeGetApi extends PrivateApiComponentBase {
 
     @Autowired
-    private ChannelMapper channelMapper;
+    private ChannelTypeMapper channelTypeMapper;
     @Autowired
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
 
@@ -49,7 +50,7 @@ public class ChannelTypeGetApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
-        ChannelTypeVo channelType = channelMapper.getChannelTypeByUuid(uuid);
+        ChannelTypeVo channelType = channelTypeMapper.getChannelTypeByUuid(uuid);
         if (channelType == null) {
             throw new ChannelTypeNotFoundException(uuid);
         }

@@ -109,6 +109,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Autowired
     private ChannelMapper channelMapper;
     @Autowired
+    private ChannelTypeMapper channelTypeMapper;
+    @Autowired
     private CatalogMapper catalogMapper;
 
     @Override
@@ -1114,7 +1116,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 nameList.add(channelVo.getName());
                 processTaskVo.setChannelPath(String.join("/", nameList));
             }
-            ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+            ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
             if (channelTypeVo == null) {
                 channelTypeVo = new ChannelTypeVo();
                 channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
@@ -1175,7 +1177,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 toProcessTaskVo.setTranferReportDirection("to");
                 ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
                 if (channel != null) {
-                    ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+                    ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
                     if (channelTypeVo == null) {
                         channelTypeVo = new ChannelTypeVo();
                         channelTypeVo.setUuid(channel.getChannelTypeUuid());
@@ -1258,7 +1260,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (processTaskVo != null) {
             ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
             if (channelVo != null) {
-                ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+                ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
                 if (channelTypeVo == null) {
                     channelTypeVo = new ChannelTypeVo();
                     channelTypeVo.setUuid(channelVo.getChannelTypeUuid());

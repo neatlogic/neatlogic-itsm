@@ -3,6 +3,7 @@ package codedriver.module.process.condition.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,7 @@ import codedriver.framework.process.dto.ChannelTypeVo;
 public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
 
 	@Autowired
-	ChannelMapper channelMapper;
+	ChannelTypeMapper channelTypeMapper;
 	
 	private String formHandlerType = FormHandlerType.SELECT.toString();
 	
@@ -53,7 +54,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 
 	@Override
 	public JSONObject getConfig() {
-		List<ChannelTypeVo>  channellist = channelMapper.searchChannelTypeList(new ChannelTypeVo());
+		List<ChannelTypeVo>  channellist = channelTypeMapper.searchChannelTypeList(new ChannelTypeVo());
 		JSONArray dataList = new JSONArray();
 		for(ChannelTypeVo channelType:channellist) {
 			dataList.add(new ValueTextVo(channelType.getUuid(), channelType.getName()));
@@ -84,7 +85,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	public Object valueConversionText(Object value, JSONObject config) {
 		if(value != null) {
 			if(value instanceof String) {
-				ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(value.toString());
+				ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(value.toString());
 				if(channelTypeVo != null) {
 					return channelTypeVo.getName();
 				}
@@ -92,7 +93,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 				List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
 				List<String> textList = new ArrayList<>();
 				for(String valueStr : valueList) {
-					ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(valueStr);
+					ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(valueStr);
 					if(channelTypeVo != null) {
 						textList.add(channelTypeVo.getName());					
 					}else {

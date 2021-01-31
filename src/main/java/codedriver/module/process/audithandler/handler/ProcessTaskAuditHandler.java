@@ -1,5 +1,6 @@
 package codedriver.module.process.audithandler.handler;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,9 @@ public class ProcessTaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBa
     private ProcessTaskMapper processTaskMapper;
     @Autowired
     private ChannelMapper channelMapper;
-    
+    @Autowired
+    private ChannelTypeMapper channelTypeMapper;
+
 	@Override
 	public String getType() {
 		return ProcessTaskAuditDetailType.PROCESSTASK.getValue();
@@ -36,7 +39,7 @@ public class ProcessTaskAuditHandler extends ProcessTaskStepAuditDetailHandlerBa
 	        resultObj.put("title", processTaskVo.getTitle());
 	        ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
 	        if(channelVo != null) {
-	            ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+	            ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
 	            if(channelTypeVo != null) {
 	                resultObj.put("prefix", channelTypeVo.getPrefix());
 	            }

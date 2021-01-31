@@ -1,5 +1,6 @@
 package codedriver.module.process.api.channeltype.relation;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -21,7 +22,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNot
 public class ChannelTypeRelationGetApi extends PrivateApiComponentBase {
 
 	@Autowired
-	private ChannelMapper channelMapper;
+	private ChannelTypeMapper channelTypeMapper;
 
 	@Override
 	public String getToken() {
@@ -48,13 +49,13 @@ public class ChannelTypeRelationGetApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-		ChannelTypeRelationVo channelTypeRelationVo = channelMapper.getChannelTypeRelationById(channelTypeRelationId);
+		ChannelTypeRelationVo channelTypeRelationVo = channelTypeMapper.getChannelTypeRelationById(channelTypeRelationId);
 		if(channelTypeRelationVo == null) {
 		    throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
 		}
-		List<String> sourceList = channelMapper.getChannelTypeRelationSourceListByChannelTypeRelationId(channelTypeRelationId);
+		List<String> sourceList = channelTypeMapper.getChannelTypeRelationSourceListByChannelTypeRelationId(channelTypeRelationId);
 		channelTypeRelationVo.setSourceList(sourceList);
-		List<String> targetList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+		List<String> targetList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
 		channelTypeRelationVo.setTargetList(targetList);
 		return channelTypeRelationVo;
 	}

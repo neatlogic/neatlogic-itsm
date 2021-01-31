@@ -1,5 +1,7 @@
 package codedriver.module.process.api.channeltype.relation;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.exception.channeltype.ChannelTypeRelationHasReferenceException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -25,7 +27,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNot
 public class ChannelTypeRelationIsActiveUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired
-	private ChannelMapper channelMapper;
+	private ChannelTypeMapper channelTypeMapper;
 
 	@Override
 	public String getToken() {
@@ -43,24 +45,31 @@ public class ChannelTypeRelationIsActiveUpdateApi extends PrivateApiComponentBas
 	}
 
 	@Input({
-		@Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否激活")
+			@Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id")
+
+	})
+	@Output({
+			@Param(name = "Return", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否激活")
 	})
 	@Description(desc = "启用或禁用服务类型关系")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");    
-	    ChannelTypeRelationVo channelTypeRelationVo = channelMapper.getChannelTypeRelationById(channelTypeRelationId);
+	    ChannelTypeRelationVo channelTypeRelationVo = channelTypeMapper.getChannelTypeRelationLockById(channelTypeRelationId);
 	    if(channelTypeRelationVo == null) {
 	        throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
 	    }
-	    Integer isActive = jsonObj.getInteger("isActive");
-	    if(Objects.equal(isActive, channelTypeRelationVo.getIsActive())) {    
-	        return null;
-	    }
-	    channelTypeRelationVo.setIsActive(isActive);
-	    channelMapper.updateChannelTypeRelationById(channelTypeRelationVo);
-		return null;
+		if(channelTypeMapper.checkChannelTypeRelationHasReference(channelTypeRelationId) > 0){
+			throw new ChannelTypeRelationHasReferenceException(channelTypeRelationVo.getName());
+		}
+//	    Integer isActive = jsonObj.getInteger("isActive");
+//	    if(Objects.equal(isActive, channelTypeRelationVo.getIsActive())) {
+//	        return null;
+//	    }
+//	    channelTypeRelationVo.setIsActive(isActive);
+//	    channelTypeMapper.updateChannelTypeRelationById(channelTypeRelationVo);
+		channelTypeMapper.updateChannelTypeRelationIsActiveById(channelTypeRelationId);
+		return 1 - channelTypeRelationVo.getIsActive();
 	}
 
 }
