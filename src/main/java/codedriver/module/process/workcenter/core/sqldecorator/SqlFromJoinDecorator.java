@@ -10,6 +10,7 @@ import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,7 +43,7 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
         List<String> joinTableKeyList = new ArrayList<>();
         List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
         //如果是distinct id 则 只需要 根据条件获取需要的表。否则需要根据column获取需要的表
-        if (FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
+        if (!FieldTypeEnum.FIELD.getValue().equals(workcenterVo.getSqlFieldType())) {
             joinTableColumnList = getJoinTableOfCondition(workcenterVo, joinTableKeyList);
         } else {
             joinTableColumnList = getJoinTableOfColumn(workcenterVo, joinTableKeyList);
@@ -103,7 +104,7 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
             for (ConditionVo conditionVo : conditionVoList) {
                 IProcessTaskCondition conditionHandler = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(conditionVo.getName());
                 if (conditionHandler != null) {
-                    List<JoinTableColumnVo> handlerJoinTableColumnList = conditionHandler.getJoinTableColumnList();
+                    List<JoinTableColumnVo> handlerJoinTableColumnList = conditionHandler.getJoinTableColumnList(workcenterVo);
                     for (JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList) {
                         String key = handlerJoinTableColumn.getHash();
                         if (!joinTableKeyList.contains(key)) {
@@ -114,6 +115,10 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
                 }
             }
         }
+        //我的待办 条件
+        if(workcenterVo.getIsProcessingOfMine() == 1){
+            SqlTableUtil.getProcessingOfMineJoinTableSql(joinTableColumnList);
+        }
         return joinTableColumnList;
     }
 
@@ -122,19 +127,21 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
         //根据接口入参的返回需要的columnList,然后获取需要关联的tableList
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //循环所有需要展示的字段
-        for (WorkcenterTheadVo theadVo : workcenterVo.getTheadVoList()) {
-            //去掉沒有勾选的thead
-            if (theadVo.getIsShow() != 1) {
-                continue;
-            }
-            if (columnComponentMap.containsKey(theadVo.getName())) {
-                IProcessTaskColumn column = columnComponentMap.get(theadVo.getName());
-                List<JoinTableColumnVo> handlerJoinTableColumnList = column.getJoinTableColumnList();
-                for (JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList) {
-                    String key = handlerJoinTableColumn.getHash();
-                    if (!joinTableKeyList.contains(key)) {
-                        joinTableColumnList.add(handlerJoinTableColumn);
-                        joinTableKeyList.add(key);
+        if(CollectionUtils.isNotEmpty(workcenterVo.getTheadVoList())) {
+            for (WorkcenterTheadVo theadVo : workcenterVo.getTheadVoList()) {
+                //去掉沒有勾选的thead
+                if (theadVo.getIsShow() != 1) {
+                    continue;
+                }
+                if (columnComponentMap.containsKey(theadVo.getName())) {
+                    IProcessTaskColumn column = columnComponentMap.get(theadVo.getName());
+                    List<JoinTableColumnVo> handlerJoinTableColumnList = column.getJoinTableColumnList();
+                    for (JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList) {
+                        String key = handlerJoinTableColumn.getHash();
+                        if (!joinTableKeyList.contains(key)) {
+                            joinTableColumnList.add(handlerJoinTableColumn);
+                            joinTableKeyList.add(key);
+                        }
                     }
                 }
             }

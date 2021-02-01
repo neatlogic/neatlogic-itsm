@@ -87,6 +87,6 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        getDateSqlWhere(conditionList.get(index),sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.START_TIME.getValue());
+        getDateSqlWhereByValueList(conditionList.get(index),sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.START_TIME.getValue());
     }
 }

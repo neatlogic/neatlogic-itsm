@@ -11,6 +11,7 @@ import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSlaTimeSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
@@ -144,7 +145,7 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+    public List<JoinTableColumnVo> getMyJoinTableColumnList(WorkcenterVo workcenterVo) {
         return SqlTableUtil.getExpireTimeJoinTableSql();
     }
 }

@@ -10,6 +10,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import codedriver.module.process.condition.handler.ProcessTaskStartTimeCondition;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,14 +43,23 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                 groupRelMap.put(groupRel.getFrom() + "_" + groupRel.getTo(), groupRel.getJoinType());
             }
         }
-
+        sqlSb.append(" where ");
+        //上报时间
+        ProcessTaskStartTimeCondition startTimeSqlCondition = (ProcessTaskStartTimeCondition) ConditionHandlerFactory.getHandler("starttime");
+        startTimeSqlCondition.getDateSqlWhere(workcenterVo.getStartTimeCondition(),sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.START_TIME.getValue());
+        //我的待办
+        if (workcenterVo.getIsProcessingOfMine() == 1) {
+            sqlSb.append(" and ");
+            IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler("processingofmine");
+            sqlCondition.getSqlConditionWhere(null, 0, sqlSb);
+        }
         //如果是count , distinct id 则 需要 根据条件获取需要的表。否则需要根据column获取需要的表
         if (!FieldTypeEnum.FIELD.getValue().equals(workcenterVo.getSqlFieldType())) {
             List<ISqlTable> tableList = new ArrayList<>();
             List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
             String fromGroupUuid = null;
             String toGroupUuid = groupList.get(0).getUuid();
-            boolean isAddedWhere = false;
+            boolean isAddedAnd = false;
             for (ConditionGroupVo groupVo : groupList) {
                 // 将condition 以连接表达式 存 Map<fromUuid_toUuid,joinType>
                 Map<String, String> conditionRelMap = new HashMap<String, String>();
@@ -66,9 +76,9 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                     sqlSb.append(groupRelMap.get(fromGroupUuid + "_" + toGroupUuid));
                 }
                 List<ConditionVo> conditionVoList = groupVo.getConditionList();
-                if(!isAddedWhere && CollectionUtils.isNotEmpty((conditionVoList))){
-                    sqlSb.append(" where ");
-                    isAddedWhere = true;
+                if (!isAddedAnd && CollectionUtils.isNotEmpty((conditionVoList))) {
+                    sqlSb.append(" and ");
+                    isAddedAnd = true;
                 }
                 sqlSb.append(" ( ");
                 String fromConditionUuid = null;
@@ -77,7 +87,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                     ConditionVo conditionVo = conditionVoList.get(i);
                     //append joinType
                     toConditionUuid = conditionVo.getUuid();
-                    if(MapUtils.isNotEmpty(conditionRelMap)&& StringUtils.isNotBlank(fromConditionUuid)) {
+                    if (MapUtils.isNotEmpty(conditionRelMap) && StringUtils.isNotBlank(fromConditionUuid)) {
                         sqlSb.append(conditionRelMap.get(fromConditionUuid + "_" + toConditionUuid));
                     }
                     IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(conditionVo.getName());
@@ -88,8 +98,9 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                 fromGroupUuid = toGroupUuid;
 
             }
+
         } else {
-            sqlSb.append(String.format(" where %s.%s in ( '%s' ) ",new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.ID.getValue(), workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining("','"))));
+            sqlSb.append(String.format(" and %s.%s in ( '%s' ) ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.ID.getValue(), workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining("','"))));
         }
     }
 

@@ -11,6 +11,7 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ChannelTypeSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSON;
@@ -113,7 +114,7 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 	}
 
 	@Override
-	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+	public List<JoinTableColumnVo> getMyJoinTableColumnList(WorkcenterVo workcenterVo) {
 		return SqlTableUtil.getChannelTypeJoinTableSql();
 	}
 }

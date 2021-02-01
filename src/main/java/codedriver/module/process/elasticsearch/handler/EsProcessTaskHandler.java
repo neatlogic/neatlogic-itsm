@@ -1,28 +1,5 @@
 package codedriver.module.process.elasticsearch.handler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jsoup.internal.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.QueryResultSet;
-import com.techsure.multiattrsearch.query.QueryResult;
-
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
@@ -41,11 +18,7 @@ import codedriver.framework.elasticsearch.core.ElasticSearchHandlerBase;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.process.dao.mapper.CatalogMapper;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.WorktimeMapper;
+import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -54,6 +27,21 @@ import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundExc
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.service.WorkcenterService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.QueryResultSet;
+import com.techsure.multiattrsearch.query.QueryResult;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.internal.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Service
 public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo, Object> {
@@ -226,7 +214,7 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         // String.join("','",userList))) ;
         
         
-        if (workcenterVo.getIsMeWillDo() == 1) {
+        if (workcenterVo.getIsProcessingOfMine() == 1) {
             if (StringUtils.isBlank(where)) {
                 where = " where " + meWillDoSql;
             } else {

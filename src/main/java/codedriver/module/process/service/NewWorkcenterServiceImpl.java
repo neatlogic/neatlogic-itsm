@@ -121,7 +121,10 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     @Override
     public Integer doSearchCount(WorkcenterVo workcenterVo) {
-        return null;
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
+        System.out.println("countSql:-------------------------------------------------------------------------------");
+        System.out.println(sb.build());
+        return workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
     }
 
     /**

@@ -9,14 +9,14 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.condition.ConditionGroupVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.*;
-import codedriver.framework.process.workcenter.table.ProcessTaskFocusSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -30,68 +30,57 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
-public class ProcessTaskOfMineCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
     @Autowired
     UserMapper userMapper;
 
     private String formHandlerType = FormHandlerType.SELECT.toString();
 
-    private Map<String, Function<String, String>> map = new HashMap<>();
+    private final Map<String, Function<String, String>> map = new HashMap<>();
 
-    private Map<String, MyProcessTask<String>> mapSql = new HashMap<>();
+    private final Map<String, MyProcessTask<StringBuilder>> mapSql = new HashMap<>();
+
+    private final Map<String, MyProcessTask<List<JoinTableColumnVo>>> joinTableSqlMap = new HashMap<>();
 
     @FunctionalInterface
     public interface MyProcessTask<T> {
-        void build(StringBuilder sqlSb);
+        void build(T t);
     }
 
     {
-        map.put("willdo", sql -> getMeWillDoCondition());
-        map.put("done", sql -> getMeDoneCondition());
-        map.put("myfocus", sql -> getMyFocusCondition());
+        map.put("processingOfMine", sql -> getMeWillDoCondition());
+        map.put("doneOfMine", sql -> getMeDoneCondition());
+        map.put("focusOfMine", sql -> getMyFocusCondition());
 
-        mapSql.put("willdo", (sqlSb) -> {
-            sqlSb.append(" ( ");
-            // status
-            List<String> statusList = Stream.of(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.RUNNING.getValue())
-                    .map(String::toString).collect(Collectors.toList());
-            sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), String.join("','", statusList)));
-            sqlSb.append(" ) and ( ");
-            // step.status
-            List<String> stepStatusList =
-                    Stream.of(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.PENDING.getValue(), ProcessTaskStatus.RUNNING.getValue())
-                            .map(String::toString).collect(Collectors.toList());
-            sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(), String.join("','", statusList)));
-            sqlSb.append(" ) and ( ");
-            // step.user
-            List<String> userList = new ArrayList<String>();
-            List<String> teamList = new ArrayList<String>();
-            List<String> roleList = new ArrayList<String>();
-            userList.add(UserContext.get().getUserUuid());
-            // 如果是待处理状态，则需额外匹配角色和组
-            UserVo userVo = userMapper.getUserByUuid(UserContext.get().getUserUuid());
-            if (userVo != null) {
-                teamList = userVo.getTeamUuidList();
-                roleList = userVo.getRoleUuidList();
-            }
-            getProcessingTaskOfMineSql(sqlSb,userList,teamList,roleList);
-            sqlSb.append(" ) ");
-        });
-        mapSql.put("done",  (sqlSb) -> {
+        mapSql.put("doneOfMine", (sqlSb) -> {
             sqlSb.append(" ( ");
             sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskStepUserStatus.DONE.getValue()));
             sqlSb.append(" ) and ( ");
             sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepUserSqlTable().getShortName(), ProcessTaskStepUserSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
             sqlSb.append(" ) ");
         });
-        mapSql.put("myfocus",  (sqlSb) -> {
+        mapSql.put("focusOfMine", (sqlSb) -> {
             sqlSb.append(" ( ");
             sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskFocusSqlTable().getShortName(), ProcessTaskFocusSqlTable.FieldEnum.USER_UUID.getValue(), UserContext.get().getUserUuid(true)));
             sqlSb.append(" ) ");
+        });
+
+        joinTableSqlMap.put("doneOfMine", (list) -> {
+            list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new HashMap<String, String>() {{
+                put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+            }}));
+            list.add(new JoinTableColumnVo(new ProcessTaskStepSqlTable(), new ProcessTaskStepUserSqlTable(), new HashMap<String, String>() {{
+                put(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), ProcessTaskStepUserSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+                put(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepUserSqlTable.FieldEnum.PROCESSTASK_STEP_ID.getValue());
+            }}));
+        });
+        joinTableSqlMap.put("focusOfMine", (list) -> {
+            list.add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskFocusSqlTable(), new HashMap<String, String>() {{
+                put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskFocusSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+            }}));
         });
     }
 
@@ -141,9 +130,9 @@ public class ProcessTaskOfMineCondition extends ProcessTaskConditionBase impleme
     @Override
     public JSONObject getConfig() {
         JSONArray dataList = new JSONArray();
-        dataList.add(new ValueTextVo("willdo", "待办"));
-        dataList.add(new ValueTextVo("done", "已办"));
-        dataList.add(new ValueTextVo("myfocus", "已关注"));
+        dataList.add(new ValueTextVo("processingOfMine", "待办"));
+        dataList.add(new ValueTextVo("doneOfMine", "已办"));
+        dataList.add(new ValueTextVo("focusOfMine", "已关注"));
 
         JSONObject config = new JSONObject();
         config.put("type", formHandlerType);
@@ -263,6 +252,38 @@ public class ProcessTaskOfMineCondition extends ProcessTaskConditionBase impleme
 
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+        sqlSb.append(" ( ");
+        ConditionVo condition = conditionList.get(index);
+        List<String> valueList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+        int i = 0;
+        for (String value : valueList) {
+            MyProcessTask<StringBuilder> result = mapSql.get(value);
+            if (result != null) {
+                // 拼接条件
+                result.build(sqlSb);
+                if (i != 0) {
+                    sqlSb.append(" or ");
+                }
+            }
+            i++;
+        }
+        sqlSb.append(" ) ");
+    }
 
+    @Override
+    public List<JoinTableColumnVo> getMyJoinTableColumnList(WorkcenterVo workcenterVo) {
+        List<JoinTableColumnVo> joinTableColumnVoList = new ArrayList<>();
+        for (ConditionGroupVo conditionGroupVo : workcenterVo.getConditionGroupList()) {
+            for (ConditionVo conditionVo : conditionGroupVo.getConditionList()) {
+                List<String> valueList = JSON.parseArray(JSON.toJSONString(conditionVo.getValueList()), String.class);
+                for (String value : valueList) {
+                    MyProcessTask<List<JoinTableColumnVo>> result = joinTableSqlMap.get(value);
+                    if (result != null) {
+                        result.build(joinTableColumnVoList);
+                    }
+                }
+            }
+        }
+        return joinTableColumnVoList;
     }
 }
