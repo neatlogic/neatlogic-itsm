@@ -363,19 +363,19 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			/** 按处理人给工单分类 */
 			Map<String, List<Map<String, Object>>> userTaskMap = getUserTaskMap(originalTaskList);
 
-			IBuildNotifyVoHandler buildNotifyVoHandler = BuildNotifyVoHandlerFactory.getHandler(new HashMap<String,String>(){
+			IBuildNotifyContentHandler buildNotifyHandler = BuildNotifyContentHandlerFactory.getHandler(new HashMap<String,String>(){
 				{
 					this.put(job.getNotifyHandler(),ProcessingTaskOfMineHandler.class.getName());
 				}
 			});
 
-			if(buildNotifyVoHandler != null){
+			if(buildNotifyHandler != null){
 				Map<String,Object> map = new HashMap<>();
 				map.put("title",title);
 				map.put("content",content);
 				map.put("columnList",columnList);
 				map.put("userTaskMap",userTaskMap);
-				notifyList = buildNotifyVoHandler.getNotifyVoList(map);
+				notifyList = buildNotifyHandler.getNotifyVoList(map);
 			}
 
 //			/** 组装NotifyVo对象列表 */
