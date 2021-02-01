@@ -171,8 +171,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
         Long startProcessTaskStepId = startProcessTaskStepVo.getId();
         ProcessTaskStepReplyVo oldReplyVo = null;
-        List<ProcessTaskStepContentVo> processTaskStepContentList =
-            processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
         for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
             if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
                 oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContent);
