@@ -801,8 +801,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
                 processTaskMapper.replaceProcessTaskContent(contentVo);
                 if (oldContentId == null) {
-                    processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId,
-                        processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue()));
+                    ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue());
+                    processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
+                    oldContentId = processTaskStepContentVo.getId();
                 } else {
                     processTaskMapper.updateProcessTaskStepContentById(
                         new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));

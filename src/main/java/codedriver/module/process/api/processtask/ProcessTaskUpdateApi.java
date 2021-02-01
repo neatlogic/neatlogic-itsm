@@ -27,10 +27,10 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,19 +41,19 @@ import java.util.stream.Collectors;
 @AuthAction(action = NO_AUTH.class)
 public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private PriorityMapper priorityMapper;
 
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
 
-    @Autowired
+    @Resource
     private IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
     @Override
@@ -83,12 +83,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        ProcessTaskVo processTaskVo =
-            processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-
-        // 获取开始步骤id
-        ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
-        Long startProcessTaskStepId = startProcessTaskStepVo.getId();
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 
         try {
             new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_UPDATE).build()
@@ -172,9 +167,11 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             }
         }
 
+        // 获取开始步骤id
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
+        Long startProcessTaskStepId = startProcessTaskStepVo.getId();
         ProcessTaskStepReplyVo oldReplyVo = null;
-        List<ProcessTaskStepContentVo> processTaskStepContentList =
-            processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
         for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
             if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
                 oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContent);
