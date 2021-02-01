@@ -1,5 +1,6 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -8,14 +9,13 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 
 @Component
 public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 
 	@Autowired
-	ChannelMapper channelMapper;
+	ChannelTypeMapper channelTypeMapper;
 	
 	@Override
 	public String getName() {
@@ -31,7 +31,7 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String channelTypeUuid = json.getString(this.getName());
 		JSONObject channelTypeJson = new JSONObject();
-		ChannelTypeVo channelType = channelMapper.getChannelTypeByUuid(channelTypeUuid);
+		ChannelTypeVo channelType = channelTypeMapper.getChannelTypeByUuid(channelTypeUuid);
 		channelTypeJson.put("value", channelTypeUuid);
 		if(channelType != null) {
 			channelTypeJson.put("text", channelType.getName());

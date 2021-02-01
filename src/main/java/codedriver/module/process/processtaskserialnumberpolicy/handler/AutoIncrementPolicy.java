@@ -121,11 +121,10 @@ public class AutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandle
                 int numberOfDigits = processTaskSerialNumberPolicyVo.getConfig().getIntValue("numberOfDigits");
                 long max = (long) Math.pow(10, numberOfDigits) - 1;
                 long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
-                int pageSize = 1000;
-                int pageCount = PageUtil.getPageCount(rowNum, pageSize);
+                processTaskVo.setPageSize(100);
+                int pageCount = PageUtil.getPageCount(rowNum, processTaskVo.getPageSize());
                 for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                     processTaskVo.setCurrentPage(currentPage);
-                    processTaskVo.setPageSize(pageSize);
                     List<ProcessTaskVo> processTaskList =
                             processTaskMapper.getProcessTaskListByChannelTypeUuidAndStartTime(processTaskVo);
                     for (ProcessTaskVo processTask : processTaskList) {

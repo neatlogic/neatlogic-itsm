@@ -1,5 +1,7 @@
 package codedriver.module.process.api.channeltype.relation;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.exception.channeltype.ChannelTypeRelationHasReferenceException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -14,7 +16,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNameRepeatException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
@@ -26,7 +27,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNot
 public class ChannelTypeRelationSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
-	private ChannelMapper channelMapper;
+	private ChannelTypeMapper channelTypeMapper;
 
 	@Override
 	public String getToken() {
@@ -57,25 +58,29 @@ public class ChannelTypeRelationSaveApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    ChannelTypeRelationVo channelTypeRelationVo = JSON.toJavaObject(jsonObj, ChannelTypeRelationVo.class);
-	    if(channelMapper.checkChannelTypeRelationNameIsRepeat(channelTypeRelationVo) > 0) {
+	    if(channelTypeMapper.checkChannelTypeRelationNameIsRepeat(channelTypeRelationVo) > 0) {
 	        throw new ChannelTypeRelationNameRepeatException(channelTypeRelationVo.getName());
 	    }
 	    Long id = jsonObj.getLong("id");
 	    if(id == null) {
-	        channelMapper.insertChannelTypeRelation(channelTypeRelationVo);
+	        channelTypeMapper.insertChannelTypeRelation(channelTypeRelationVo);
 	    }else {
-	        if(channelMapper.checkChannelTypeRelationIsExists(id) == 0) {
+			ChannelTypeRelationVo oldChannelTypeRelationVo = channelTypeMapper.getChannelTypeRelationLockById(id);
+	        if(oldChannelTypeRelationVo == null) {
 	            throw new ChannelTypeRelationNotFoundException(id);
 	        }
-	        channelMapper.updateChannelTypeRelationById(channelTypeRelationVo);
-	        channelMapper.deleteChannelTypeRelationSourceByChannelTypeRelationId(id);
-	        channelMapper.deleteChannelTypeRelationTargetByChannelTypeRelationId(id);
+			if(channelTypeMapper.checkChannelTypeRelationHasReference(id) > 0){
+				throw new ChannelTypeRelationHasReferenceException(oldChannelTypeRelationVo.getName());
+			}
+	        channelTypeMapper.updateChannelTypeRelationById(channelTypeRelationVo);
+	        channelTypeMapper.deleteChannelTypeRelationSourceByChannelTypeRelationId(id);
+	        channelTypeMapper.deleteChannelTypeRelationTargetByChannelTypeRelationId(id);
 	    }
 	    for(String source : channelTypeRelationVo.getSourceList()) {
-	        channelMapper.insertChannelTypeRelationSource(channelTypeRelationVo.getId(), source);	        
+	        channelTypeMapper.insertChannelTypeRelationSource(channelTypeRelationVo.getId(), source);
 	    }
 	    for(String target : channelTypeRelationVo.getTargetList()) {
-            channelMapper.insertChannelTypeRelationTarget(channelTypeRelationVo.getId(), target);           
+            channelTypeMapper.insertChannelTypeRelationTarget(channelTypeRelationVo.getId(), target);
         }
 		return channelTypeRelationVo.getId();
 	}

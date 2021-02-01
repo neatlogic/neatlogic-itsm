@@ -8,12 +8,10 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.notify.core.INotifyTriggerType;
 import codedriver.framework.process.audithandler.core.IProcessTaskAuditType;
 import codedriver.framework.process.constvalue.*;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepTimeAuditMapper;
-import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
+import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
+import codedriver.framework.process.exception.form.FormAttributeRequiredException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.process.stepremind.core.IProcessTaskStepRemindType;
 import codedriver.module.process.thread.*;
@@ -21,15 +19,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Title: ProcessStepHandlerUtilServiceImpl
@@ -54,7 +50,11 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     private ChannelMapper channelMapper;
     @Autowired
     private FileMapper fileMapper;
-    
+    @Autowired
+    private ProcessMapper processMapper;
+    @Autowired
+    private FormMapper formMapper;
+
     /**
      * @param currentProcessTaskStepVo
      * @param trigger
@@ -137,7 +137,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     public void calculateSla(ProcessTaskVo currentProcessTaskVo, ProcessTaskStepVo currentProcessTaskStepVo, boolean isAsync) {
         if (!isAsync) {
             new ProcessTaskSlaThread(currentProcessTaskVo, currentProcessTaskStepVo).execute();
-        }else{
+        } else {
             TransactionSynchronizationPool.execute(new ProcessTaskSlaThread(currentProcessTaskVo, currentProcessTaskStepVo));
         }
     }
@@ -323,12 +323,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
      */
     @Override
     public boolean formAttributeDataValid(ProcessTaskStepVo currentProcessTaskStepVo) {
-        List<String> hidecomponentList = JSON.parseArray(
-                JSON.toJSONString(currentProcessTaskStepVo.getParamObj().getJSONArray("hidecomponentList")),
-                String.class);
-        List<String> readcomponentList = JSON.parseArray(
-                JSON.toJSONString(currentProcessTaskStepVo.getParamObj().getJSONArray("readcomponentList")),
-                String.class);
+        List<String> hidecomponentList = JSON.parseArray(JSON.toJSONString(currentProcessTaskStepVo.getParamObj().getJSONArray("hidecomponentList")), String.class);
+        List<String> readcomponentList = JSON.parseArray(JSON.toJSONString(currentProcessTaskStepVo.getParamObj().getJSONArray("readcomponentList")), String.class);
+
         for (FormAttributeVo formAttributeVo : currentProcessTaskStepVo.getFormAttributeVoList()) {
             if (!formAttributeVo.isRequired()) {
                 continue;
@@ -352,11 +349,11 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                         throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel() + "'不能为空");
                     }
                 } else if (data instanceof JSONArray) {
-                    if (CollectionUtils.isEmpty((JSONArray)data)) {
+                    if (CollectionUtils.isEmpty((JSONArray) data)) {
                         throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel() + "'不能为空");
                     }
                 } else if (data instanceof JSONObject) {
-                    if (MapUtils.isEmpty((JSONObject)data)) {
+                    if (MapUtils.isEmpty((JSONObject) data)) {
                         throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel() + "'不能为空");
                     }
                 }
@@ -573,5 +570,195 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             processTaskStepRemindVo.setContentHash(contentVo.getHash());
         }
         return processTaskMapper.insertProcessTaskStepRemind(processTaskStepRemindVo);
+    }
+
+    /**
+     * @param currentProcessTaskStepVo
+     * @param action
+     * @Description: 保存描述内容和附件
+     * @Author: linbq
+     * @Date: 2021/1/27 11:41
+     * @Params:[currentProcessTaskStepVo, action]
+     * @Returns:void
+     */
+    @Override
+    public void saveContentAndFile(ProcessTaskStepVo currentProcessTaskStepVo, ProcessTaskOperationType action) {
+        JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+        String content = paramObj.getString("content");
+        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(paramObj.getJSONArray("fileIdList")), Long.class);
+        if (StringUtils.isBlank(content) && CollectionUtils.isEmpty(fileIdList)) {
+            return;
+        }
+        ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo();
+        processTaskStepContentVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+        processTaskStepContentVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+        processTaskStepContentVo.setType(action.getValue());
+        if (StringUtils.isNotBlank(content)) {
+            ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+            processTaskMapper.replaceProcessTaskContent(contentVo);
+            processTaskStepContentVo.setContentHash(contentVo.getHash());
+        } else {
+            paramObj.remove("content");
+        }
+        processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
+
+        /** 保存附件uuid **/
+        if (CollectionUtils.isNotEmpty(fileIdList)) {
+            ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
+            processTaskStepFileVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+            processTaskStepFileVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+            processTaskStepFileVo.setContentId(processTaskStepContentVo.getId());
+            for (Long fileId : fileIdList) {
+                processTaskStepFileVo.setFileId(fileId);
+                processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
+            }
+        } else {
+            paramObj.remove("fileIdList");
+        }
+    }
+
+    /**
+     * @param currentProcessTaskStepVo
+     * @Description: 保存标签列表
+     * @Author: linbq
+     * @Date: 2021/1/27 11:42
+     * @Params:[currentProcessTaskStepVo]
+     * @Returns:void
+     */
+    @Override
+    public void saveTagList(ProcessTaskStepVo currentProcessTaskStepVo) {
+        processTaskMapper.deleteProcessTaskTagByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+        JSONArray tagArray = currentProcessTaskStepVo.getParamObj().getJSONArray("tagList");
+        if (CollectionUtils.isNotEmpty(tagArray)) {
+            List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
+            List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
+            List<String> existTagNameList = existTagList.stream().map(ProcessTagVo::getName).collect(Collectors.toList());
+            List<String> notExistTagList = ListUtils.removeAll(tagNameList, existTagNameList);
+            for (String tagName : notExistTagList) {
+                ProcessTagVo tagVo = new ProcessTagVo(tagName);
+                processMapper.insertProcessTag(tagVo);
+                existTagList.add(tagVo);
+            }
+            List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
+            for (ProcessTagVo processTagVo : existTagList) {
+                processTaskTagVoList.add(new ProcessTaskTagVo(currentProcessTaskStepVo.getProcessTaskId(), processTagVo.getId()));
+            }
+            processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
+        }
+    }
+
+    /**
+     * @param currentProcessTaskStepVo
+     * @Description: 保存表单属性值
+     * @Author: linbq
+     * @Date: 2021/1/27 11:42
+     * @Params:[currentProcessTaskStepVo]
+     * @Returns:void
+     */
+    @Override
+    public void saveForm(ProcessTaskStepVo currentProcessTaskStepVo) {
+        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+        if (processTaskFormVo != null) {
+            JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+            JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
+            if(formAttributeDataList == null){
+                /** 如果参数中没有formAttributeDataList字段，则不改变表单属性值，这样可以兼容自动节点自动完成场景 **/
+                return;
+            }
+            Map<String, Object> formAttributeDataMap = new HashMap<>();
+            for (int i = 0; i < formAttributeDataList.size(); i++) {
+                JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+                formAttributeDataMap.put(formAttributeDataObj.getString("attributeUuid"), formAttributeDataObj.get("dataList"));
+            }
+            /** 隐藏的属性uuid列表 **/
+            List<String> hidecomponentList = JSON.parseArray(paramObj.getString("hidecomponentList"), String.class);
+            if (hidecomponentList == null) {
+                hidecomponentList = new ArrayList<>();
+            }
+            /** 只读的属性uuid列表 **/
+            List<String> readcomponentList = JSON.parseArray(paramObj.getString("readcomponentList"), String.class);
+            if (readcomponentList == null) {
+                readcomponentList = new ArrayList<>();
+            }
+            /** 校验表单属性是否合法 **/
+            FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processTaskFormVo.getFormUuid());
+            for (FormAttributeVo formAttributeVo : formVersionVo.getFormAttributeList()) {
+                if (formAttributeVo.isRequired()) {
+                    if (hidecomponentList.contains(formAttributeVo.getUuid())) {
+                        continue;
+                    }
+                    if (readcomponentList.contains(formAttributeVo.getUuid())) {
+                        continue;
+                    }
+                    Object data = formAttributeDataMap.get(formAttributeVo.getUuid());
+                    if (data != null) {
+                        if (data instanceof String) {
+                            if (StringUtils.isBlank(data.toString())) {
+                                throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                            }
+                        } else if (data instanceof JSONArray) {
+                            if (CollectionUtils.isEmpty((JSONArray) data)) {
+                                throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                            }
+                        } else if (data instanceof JSONObject) {
+                            if (MapUtils.isEmpty((JSONObject) data)) {
+                                throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                            }
+                        }
+                    } else {
+                        throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                    }
+                }
+            }
+
+            /** 获取旧表单数据 **/
+            List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+            Iterator<ProcessTaskFormAttributeDataVo> iterator = oldProcessTaskFormAttributeDataList.iterator();
+            while (iterator.hasNext()) {
+                ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo = iterator.next();
+                String attributeUuid = processTaskFormAttributeDataVo.getAttributeUuid();
+                Object dataList = formAttributeDataMap.get(attributeUuid);
+                if (dataList != null && Objects.equals(dataList, processTaskFormAttributeDataVo.getDataObj())) {
+                    /** 如果新表单属性值与旧表单属性值相同，就不用replace更新数据了 **/
+                    formAttributeDataMap.remove(attributeUuid);
+                    iterator.remove();
+                } else if (hidecomponentList.contains(attributeUuid)) {
+                    iterator.remove();
+                }
+            }
+            if (CollectionUtils.isNotEmpty(oldProcessTaskFormAttributeDataList)) {
+                oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
+                ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldProcessTaskFormAttributeDataList));
+                processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+                paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), processTaskContentVo.getHash());
+            }
+
+            /** 写入当前步骤的表单属性值 **/
+            if (CollectionUtils.isNotEmpty(formAttributeDataList) && MapUtils.isNotEmpty(formAttributeDataMap)) {
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = new ArrayList<>(formAttributeDataList.size());
+                for (int i = 0; i < formAttributeDataList.size(); i++) {
+                    JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+                    String attributeUuid = formAttributeDataObj.getString("attributeUuid");
+                    if (formAttributeDataMap.containsKey(attributeUuid)) {
+                        // 对于隐藏的属性，当前用户不能修改，不更新数据库中的值，不进行修改前后对比
+                        if (hidecomponentList.contains(attributeUuid)) {
+                            continue;
+                        }
+                        ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
+                        attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                        attributeData.setData(formAttributeDataObj.getString("dataList"));
+                        attributeData.setAttributeUuid(formAttributeDataObj.getString("attributeUuid"));
+                        attributeData.setType(formAttributeDataObj.getString("handler"));
+                        attributeData.setSort(i);
+                        processTaskFormAttributeDataList.add(attributeData);
+                        processTaskMapper.replaceProcessTaskFormAttributeData(attributeData);
+                    }
+                }
+                if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+                    processTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
+                    paramObj.put(ProcessTaskAuditDetailType.FORM.getParamName(), JSON.toJSONString(processTaskFormAttributeDataList));
+                }
+            }
+        }
     }
 }

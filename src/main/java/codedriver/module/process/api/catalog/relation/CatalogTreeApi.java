@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -37,7 +38,10 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
+	@Autowired
+	private ChannelTypeMapper channelTypeMapper;
+
 	@Autowired
 	private TeamMapper teamMapper;
 	
@@ -77,7 +81,7 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 		    throw new ChannelNotFoundException(channelUuid);
 		}
 		Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-		if(channelTypeRelationId != null && channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
+		if(channelTypeRelationId != null && channelTypeMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
 		    throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
 		}
 		List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(channelUuid, channelTypeRelationId);

@@ -139,7 +139,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         if (StringUtils.isNotBlank(process.getConfig())) {
                             String hash = DigestUtils.md5DigestAsHex(process.getConfig().getBytes());
                             processTask.setConfigHash(hash);
-                            processTaskMapper.replaceProcessTaskConfig(new ProcessTaskConfigVo(hash, process.getConfig()));
+                            processTaskMapper.insertIgnoreProcessTaskConfig(new ProcessTaskConfigVo(hash, process.getConfig()));
                         }
                         break;
                     case "channelName":

@@ -3,6 +3,7 @@ package codedriver.module.process.api.processtask;
 import java.util.Arrays;
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,9 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
     private ChannelMapper channelMapper;
 
     @Autowired
+    private ChannelTypeMapper channelTypeMapper;
+
+    @Autowired
     private ProcessTaskService processTaskService;
 
     @Autowired
@@ -82,7 +86,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
             throw new PermissionDeniedException();
         }
         Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-        if (channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
+        if (channelTypeMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
         List<Long> relationProcessTaskIdList =

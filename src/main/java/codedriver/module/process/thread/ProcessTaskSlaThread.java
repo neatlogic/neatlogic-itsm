@@ -532,9 +532,19 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                             slaTimeVo.setTimeSum(timeSum);
                             slaTimeVo.setSlaId(slaId);
                             calculateExpireTime(slaTimeVo, worktimeUuid);
-                            if (Objects.equals(timeSum, oldTimeSum)
-                                    && Objects.equals(slaTimeVo.getExpireTime(), oldExpireTime)) {
-                                return;
+                            if (Objects.equals(timeSum, oldTimeSum)) {
+                                long expireTimeLong = 0L;
+                                long oldExpireTimeLong = 0L;
+                                if(slaTimeVo.getExpireTime() != null){
+                                    expireTimeLong = slaTimeVo.getExpireTime().getTime();
+                                }
+                                if(oldExpireTime != null){
+                                    oldExpireTimeLong = oldExpireTime.getTime();
+                                }
+                                /** 由于Date类型数据保存到MySql数据库时会丢失毫秒数值，只保留到秒的精度，所以两次计算超时时间点的差值小于1000时，说明时效没有被条件改变，不用更新 **/
+                                if(expireTimeLong - oldExpireTimeLong < 1000){
+                                    return;
+                                }
                             }
                             slaTimeVo.setProcessTaskId(processTaskId);
                             if (isSlaTimeExists) {

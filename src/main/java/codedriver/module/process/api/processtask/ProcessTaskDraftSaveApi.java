@@ -1,20 +1,10 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
-import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -24,16 +14,19 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
 @AuthAction(action = NO_AUTH.class)
@@ -116,55 +109,42 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 			owner = owner.split("#")[1];
 			jsonObj.put("owner", owner);
 		}
-		ProcessTaskStepVo startTaskStep = new ProcessTaskStepVo();
-		startTaskStep.setProcessUuid(processUuid);
+		ProcessTaskStepVo startProcessTaskStepVo = null;
 		
 		Long processTaskId = jsonObj.getLong("processTaskId");
 		if(processTaskId != null) {
 			processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-			List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
-			if(processTaskStepList.size() != 1) {
-				throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
-			}
-			startTaskStep = processTaskStepList.get(0);
+			startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
 		}else {
+			startProcessTaskStepVo = new ProcessTaskStepVo();
+			startProcessTaskStepVo.setProcessUuid(processUuid);
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
             if(!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))){
-                //throw new ProcessTaskNoPermissionException("上报");
                 throw new PermissionDeniedException();
             }
-			List<ProcessStepVo> processStepList = processMapper.getProcessStepDetailByProcessUuid(processUuid);
-			if(CollectionUtils.isNotEmpty(processStepList)) {
-				for(ProcessStepVo processStepVo : processStepList) {
-					if(processStepVo.getType().equals(ProcessStepType.START.getValue())) {
-						startTaskStep.setHandler(processStepVo.getHandler());
-					}
-				}
-			}
+            ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
+			startProcessTaskStepVo.setHandler(startProcessStepVo.getHandler());
 		}
 		
-		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startTaskStep.getHandler());
+		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(startProcessTaskStepVo.getHandler());
 		if(handler == null) {
-			throw new ProcessStepHandlerNotFoundException(startTaskStep.getHandler());
+			throw new ProcessStepHandlerNotFoundException(startProcessTaskStepVo.getHandler());
 		}
 
-        startTaskStep.setParamObj(jsonObj);
-        handler.saveDraft(startTaskStep);
-        if(processTaskMapper.checkProcessTaskhasForm(startTaskStep.getProcessTaskId()) > 0) {
-            // 保存组件联动导致隐藏的属性uuid列表
-            ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
-            processTaskStepDataVo.setProcessTaskId(startTaskStep.getProcessTaskId());
-            processTaskStepDataVo.setProcessTaskStepId(startTaskStep.getId());
-            processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
-            processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-            processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
-            processTaskStepDataVo.setData(jsonObj.toJSONString());
-            processTaskStepDataVo.setIsAutoGenerateId(true);
-            processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
-        }
+		ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+		processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+		processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+		processTaskStepDataVo.setData(jsonObj.toJSONString());
+
+		startProcessTaskStepVo.setParamObj(jsonObj);
+        handler.saveDraft(startProcessTaskStepVo);
+		processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
+		processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
+		processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+		processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("processTaskId", startTaskStep.getProcessTaskId());
-		resultObj.put("processTaskStepId", startTaskStep.getId());
+		resultObj.put("processTaskId", startProcessTaskStepVo.getProcessTaskId());
+		resultObj.put("processTaskStepId", startProcessTaskStepVo.getId());
 		return resultObj;
 	}
 

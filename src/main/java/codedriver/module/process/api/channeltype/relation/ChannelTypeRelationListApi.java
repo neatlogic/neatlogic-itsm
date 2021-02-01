@@ -1,14 +1,14 @@
 package codedriver.module.process.api.channeltype.relation;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +26,9 @@ import codedriver.framework.process.dto.ChannelTypeVo;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
+
+	@Autowired
+	private ChannelTypeMapper channelTypeMapper;
 
 	@Autowired
 	private ChannelMapper channelMapper;
@@ -64,7 +67,7 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
 	    ChannelTypeRelationVo channelTypeRelationVo = JSON.toJavaObject(jsonObj, ChannelTypeRelationVo.class);
  	    int pageCount = 0;
  	    if(channelTypeRelationVo.getNeedPage()) {
- 	        int rowNum = channelMapper.getChannelTypeRelationCount(channelTypeRelationVo);
+ 	        int rowNum = channelTypeMapper.getChannelTypeRelationCount(channelTypeRelationVo);
  	        pageCount = PageUtil.getPageCount(rowNum, channelTypeRelationVo.getPageSize());
  	        resultObj.put("currentPage", channelTypeRelationVo.getCurrentPage());
  	        resultObj.put("pageSize", channelTypeRelationVo.getPageSize());
@@ -72,12 +75,18 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
  	        resultObj.put("rowNum", rowNum);
  	    }
  	   if(!channelTypeRelationVo.getNeedPage() || channelTypeRelationVo.getCurrentPage() <= pageCount) {
- 	        List<ChannelTypeRelationVo> channelTypeRelationList = channelMapper.getChannelTypeRelationList(channelTypeRelationVo);
+ 	        List<ChannelTypeRelationVo> channelTypeRelationList = channelTypeMapper.getChannelTypeRelationList(channelTypeRelationVo);
  	        List<Long> channelTypeRelationIdList = new ArrayList<>();
  	        Map<Long, ChannelTypeRelationVo> channelTypeRelationMap = new HashMap<>();
  	        for(ChannelTypeRelationVo channelTypeRelation : channelTypeRelationList) {
  	           channelTypeRelationIdList.add(channelTypeRelation.getId());
  	           channelTypeRelationMap.put(channelTypeRelation.getId(), channelTypeRelation);
+ 	           Set<String> referenceUuidList = channelTypeMapper.getChannelTypeRelationReferenceUuidListByChannelTypeRelationId(channelTypeRelation.getId());
+ 	           channelTypeRelation.setReferenceCount(referenceUuidList.size());
+ 	           if(CollectionUtils.isNotEmpty(referenceUuidList)){
+				   List<ChannelVo> referenceList = channelMapper.getChannelVoByUuidList(new ArrayList<>(referenceUuidList));
+				   channelTypeRelation.setReferenceList(referenceList);
+			   }
  	        }
  	        Map<String, ChannelTypeVo> channelTypeMap = new HashMap<>();
  	        ChannelTypeVo all = new ChannelTypeVo();
@@ -85,27 +94,27 @@ public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
  	        all.setName("所有");
  	        channelTypeMap.put("all", all);
  	        ChannelTypeVo channelTypeVo = new ChannelTypeVo();
- 	        channelTypeVo.setNeedPage(false);
- 	        List<ChannelTypeVo> channelTypeList = channelMapper.searchChannelTypeList(channelTypeVo);
+ 	        channelTypeVo.setPageSize(1000);
+ 	        List<ChannelTypeVo> channelTypeList = channelTypeMapper.searchChannelTypeList(channelTypeVo);
  	        for(ChannelTypeVo channelType : channelTypeList) {
  	           channelTypeMap.put(channelType.getUuid(), channelType);
  	        }
- 	        List<ChannelTypeRelationChannelVo> channelTypeRelationSourceList = channelMapper.getChannelTypeRelationSourceListByChannelTypeRelationIdList(channelTypeRelationIdList);
+ 	        List<ChannelTypeRelationChannelVo> channelTypeRelationSourceList = channelTypeMapper.getChannelTypeRelationSourceListByChannelTypeRelationIdList(channelTypeRelationIdList);
  	        for(ChannelTypeRelationChannelVo channelTypeRelationChannelVo : channelTypeRelationSourceList) {
  	           ChannelTypeRelationVo channelTypeRelation = channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo());
  	           channelTypeRelation.getSourceList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
- 	           channelTypeRelation.getSourceVoList().add(new ChannelTypeVo(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid())));
+ 	           channelTypeRelation.getSourceVoList().add(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid()).clone());
  	        }
- 	        List<ChannelTypeRelationChannelVo> channelTypeRelationTargetList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationIdList(channelTypeRelationIdList);
+ 	        List<ChannelTypeRelationChannelVo> channelTypeRelationTargetList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationIdList(channelTypeRelationIdList);
  	        for(ChannelTypeRelationChannelVo channelTypeRelationChannelVo : channelTypeRelationTargetList) {
  	           ChannelTypeRelationVo channelTypeRelation = channelTypeRelationMap.computeIfAbsent(channelTypeRelationChannelVo.getChannelTypeRelationId(), v -> new ChannelTypeRelationVo());
  	           channelTypeRelation.getTargetList().add(channelTypeRelationChannelVo.getChannelTypeUuid());
- 	           channelTypeRelation.getTargetVoList().add(new ChannelTypeVo(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid())));
+ 	           channelTypeRelation.getTargetVoList().add(channelTypeMap.get(channelTypeRelationChannelVo.getChannelTypeUuid()).clone());
             }
- 	        List<ChannelTypeRelationVo> channelTypeRelationReferenceCountList = channelMapper.getChannelTypeRelationReferenceCountListByChannelTypeRelationIdList(channelTypeRelationIdList);
- 	        for(ChannelTypeRelationVo channelTypeRelation : channelTypeRelationReferenceCountList) {
- 	           channelTypeRelationMap.computeIfAbsent(channelTypeRelation.getId(), v -> new ChannelTypeRelationVo()).setReferenceCount(channelTypeRelation.getReferenceCount());
- 	        }
+// 	        List<ChannelTypeRelationVo> channelTypeRelationReferenceCountList = channelTypeMapper.getChannelTypeRelationReferenceCountListByChannelTypeRelationIdList(channelTypeRelationIdList);
+// 	        for(ChannelTypeRelationVo channelTypeRelation : channelTypeRelationReferenceCountList) {
+// 	           channelTypeRelationMap.computeIfAbsent(channelTypeRelation.getId(), v -> new ChannelTypeRelationVo()).setReferenceCount(channelTypeRelation.getReferenceCount());
+// 	        }
  	        resultObj.put("tbodyList", channelTypeRelationList);
 	    }
 		return resultObj;

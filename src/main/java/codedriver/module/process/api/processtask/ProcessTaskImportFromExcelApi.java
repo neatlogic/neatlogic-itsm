@@ -10,6 +10,7 @@ import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -113,7 +114,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 throw new EmptyExcelException();
             }
             List<String> channelData = (List<String>)data.get("channelData");
-            if(CollectionUtils.isEmpty(channelData) || channelData.size() != 4){
+            if(CollectionUtils.isEmpty(channelData)){
                 throw new ExcelLostChannelUuidException();
             }
             /** 从excel首行第四列取出服务UUID */
@@ -247,6 +248,8 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                 result.put("successCount",successCount);
                 result.put("totalCount",contentList.size());
                 return result;
+            }else{
+                throw new EmptyExcelException();
             }
         }
         return null;
@@ -291,15 +294,20 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                             JSONObject formdata = new JSONObject();
                             formdata.put("attributeUuid",att.getUuid());
                             formdata.put("handler",att.getHandler());
-                            if(StringUtils.isNotBlank(entry.getValue()) && entry.getValue().startsWith("[") && entry.getValue().endsWith("]")){
-                                JSONArray dataList = JSONArray.parseArray(entry.getValue());
-                                formdata.put("dataList",dataList);
-                                formAttributeDataList.add(formdata);
-                                break;
-                            }else{
-                                formdata.put("dataList",entry.getValue());
-                                formAttributeDataList.add(formdata);
-                                break;
+                            String content = entry.getValue();
+                            if(StringUtils.isNotBlank(content)){
+                                IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(att.getHandler());
+                                if(handler != null){
+                                    List<String> values = new ArrayList<>();
+                                    if (content.contains(",")) {
+                                        values = Arrays.asList(content.split(","));
+                                    } else {
+                                        values.add(content);
+                                    }
+                                    formdata.put("dataList",handler.textConversionValue(values,JSONObject.parseObject(att.getConfig())));
+                                    formAttributeDataList.add(formdata);
+                                    break;
+                                }
                             }
                         }
                     }

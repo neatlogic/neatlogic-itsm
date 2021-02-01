@@ -9,6 +9,8 @@ import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.ControlHandlerBase;
 
+import java.util.List;
+
 @Component
 public class PriorityHandler extends ControlHandlerBase {
 
@@ -25,6 +27,11 @@ public class PriorityHandler extends ControlHandlerBase {
     @Override
     public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
         return attributeDataVo.getData();
+    }
+
+    @Override
+    public Object textConversionValue(List<String> values, JSONObject config) {
+        return null;
     }
 
     @Override
