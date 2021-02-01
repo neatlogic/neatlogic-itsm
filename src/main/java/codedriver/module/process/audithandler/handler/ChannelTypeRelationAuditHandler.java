@@ -1,5 +1,6 @@
 package codedriver.module.process.audithandler.handler;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +13,7 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 public class ChannelTypeRelationAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	
     @Autowired
-    private ChannelMapper channelMapper;
+    private ChannelTypeMapper channelTypeMapper;
     
 	@Override
 	public String getType() {
@@ -22,7 +23,7 @@ public class ChannelTypeRelationAuditHandler extends ProcessTaskStepAuditDetailH
 	@Override
 	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 	    Long channelTypeRelationId = Long.valueOf(processTaskStepAuditDetailVo.getNewContent());
-	    ChannelTypeRelationVo channelTypeRelationVo = channelMapper.getChannelTypeRelationById(channelTypeRelationId);
+	    ChannelTypeRelationVo channelTypeRelationVo = channelTypeMapper.getChannelTypeRelationById(channelTypeRelationId);
 		if(channelTypeRelationVo != null) {
 		    processTaskStepAuditDetailVo.setNewContent(channelTypeRelationVo.getName());
 		}

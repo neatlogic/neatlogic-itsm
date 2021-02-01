@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -33,7 +34,10 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
+	@Autowired
+	private ChannelTypeMapper channelTypeMapper;
+
 	@Override
 	public String getToken() {
 		return "process/channel/get";
@@ -86,7 +90,7 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 		    ChannelTypeRelationVo channelTypeRelationVo = new ChannelTypeRelationVo();
 		    channelTypeRelationVo.setIsActive(1);
 		    channelTypeRelationVo.setNeedPage(false);
-		    List<ChannelTypeRelationVo> activeChannelTypeRelationList = channelMapper.getChannelTypeRelationList(channelTypeRelationVo);
+		    List<ChannelTypeRelationVo> activeChannelTypeRelationList = channelTypeMapper.getChannelTypeRelationList(channelTypeRelationVo);
 		    List<Long> activeChannelTypeRelationIdList = activeChannelTypeRelationList.stream().map(ChannelTypeRelationVo::getId).collect(Collectors.toList());
 		    Map<Long, List<String>> channelRelationTargetMap = new HashMap<>();
 		    for(ChannelRelationVo channelRelationVo : channelRelationList) {

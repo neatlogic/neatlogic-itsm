@@ -1,5 +1,6 @@
 package codedriver.module.process.api.channeltype;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -16,7 +17,6 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.dto.ProcessTaskSerialNumberPolicyVo;
@@ -35,7 +35,7 @@ import java.util.Objects;
 public class ChannelTypeSaveApi extends PrivateApiComponentBase {
 
     @Autowired
-    private ChannelMapper channelMapper;
+    private ChannelTypeMapper channelTypeMapper;
     @Autowired
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
 
@@ -66,11 +66,11 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ChannelTypeVo channelTypeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelTypeVo>() {});
-        if (channelMapper.checkChannelTypeNameIsRepeat(channelTypeVo) > 0) {
+        if (channelTypeMapper.checkChannelTypeNameIsRepeat(channelTypeVo) > 0) {
             throw new ChannelTypeNameRepeatException(channelTypeVo.getName());
         }
 
-        Integer sort = channelMapper.getChannelTypeMaxSort();
+        Integer sort = channelTypeMapper.getChannelTypeMaxSort();
         if (sort == null) {
             sort = 0;
         }
@@ -78,16 +78,16 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
         channelTypeVo.setSort(sort);
         String uuid = jsonObj.getString("uuid");
         if (uuid != null) {
-            if (channelMapper.checkChannelTypeIsExists(uuid) == 0) {
+            if (channelTypeMapper.checkChannelTypeIsExists(uuid) == 0) {
                 throw new ChannelTypeNotFoundException(uuid);
             }
-            if (channelMapper.checkChannelTypeHasReference(uuid) > 0
+            if (channelTypeMapper.checkChannelTypeHasReference(uuid) > 0
                 && Objects.equals(channelTypeVo.getIsActive(), 0)) {
                 throw new ChannelTypeHasReferenceException(channelTypeVo.getName(), "禁用");
             }
-            channelMapper.updateChannelTypeByUuid(channelTypeVo);
+            channelTypeMapper.updateChannelTypeByUuid(channelTypeVo);
         } else {
-            channelMapper.insertChannelType(channelTypeVo);
+            channelTypeMapper.insertChannelType(channelTypeVo);
         }
 
         IProcessTaskSerialNumberPolicyHandler handler =
