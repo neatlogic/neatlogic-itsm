@@ -259,11 +259,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 		if(handler == null){
 			throw new NotifyHandlerNotFoundException(notifyHandler);
 		}
-		IBuildNotifyContentHandler buildNotifyHandler = BuildNotifyContentHandlerFactory.getHandler(new HashMap<String,String>(){
-			{
-				this.put(notifyHandler,ProcessingTaskOfMineHandler.class.getName());
-			}
-		});
+		IBuildNotifyContentHandler buildNotifyHandler
+				= BuildNotifyContentHandlerFactory.getHandler(notifyHandler + "," +ProcessingTaskOfMineHandler.class.getName());
 		return buildNotifyHandler.getPreviewContent(config);
 	}
 
@@ -322,11 +319,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			/** 按处理人给工单分类 */
 			Map<String, List<Map<String, Object>>> userTaskMap = getUserTaskMap(originalTaskList);
 
-			IBuildNotifyContentHandler buildNotifyHandler = BuildNotifyContentHandlerFactory.getHandler(new HashMap<String,String>(){
-				{
-					this.put(job.getNotifyHandler(),ProcessingTaskOfMineHandler.class.getName());
-				}
-			});
+			IBuildNotifyContentHandler buildNotifyHandler
+					= BuildNotifyContentHandlerFactory.getHandler(job.getNotifyHandler() + "," +ProcessingTaskOfMineHandler.class.getName());
 
 			if(buildNotifyHandler != null){
 				Map<String,Object> map = new HashMap<>();
