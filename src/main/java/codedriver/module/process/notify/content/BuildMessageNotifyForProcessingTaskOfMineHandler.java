@@ -5,8 +5,8 @@ import codedriver.framework.common.config.Config;
 import codedriver.framework.notify.core.BuildNotifyContentHandlerBase;
 import codedriver.framework.notify.dto.NotifyVo;
 import codedriver.framework.notify.handler.MessageNotifyHandler;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -27,6 +27,11 @@ import java.util.Map;
 public class BuildMessageNotifyForProcessingTaskOfMineHandler extends BuildNotifyContentHandlerBase {
 
     @Override
+    protected String myGetPreviewContent(JSONObject config) {
+        return "您有 <span style=\"color:red\">5</span> 条待处理工单，请前往【IT服务->工单中心】查看";
+    }
+
+    @Override
     protected List<NotifyVo> myGetNotifyVoList(Map<String, Object> map) {
         List<NotifyVo> notifyList = new ArrayList<>();
         String homeUrl = Config.HOME_URL() + TenantContext.get().getTenantUuid() + File.separator;
@@ -45,12 +50,7 @@ public class BuildMessageNotifyForProcessingTaskOfMineHandler extends BuildNotif
                     contentSb.append(content.toString() + "</br>");
                 }
 
-                for (Map<String, Object> taskMap : entry.getValue()) {
-                    contentSb.append("查看详情：<a target=\"_blank\" href="
-                            + homeUrl + "process.html#/task-detail?processTaskId="
-                            + taskMap.get(ProcessWorkcenterField.ID.getValue())
-                            + "><b>【工单链接】</b></a></br>");
-                }
+                contentSb.append("您有 <span style=\"color:red\">" + entry.getValue().size() + "</span> 条待处理工单，请前往【IT服务->工单中心】查看");
 
                 notifyBuilder.withContentTemplate(contentSb.toString());
                 NotifyVo notifyVo = notifyBuilder.build();
