@@ -1419,6 +1419,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     }
                     processTaskVo.setPriority(priorityVo);
                 }
+                /** 标签列表 **/
+                List<String> tagList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("tagList")), String.class);
+                if(tagList != null){
+                    processTaskVo.setTagList(tagList);
+                }
             }
         }
     }
