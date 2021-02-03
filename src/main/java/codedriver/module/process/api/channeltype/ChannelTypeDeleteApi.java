@@ -1,5 +1,6 @@
 package codedriver.module.process.api.channeltype;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -15,7 +16,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
 
@@ -26,7 +26,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundExc
 public class ChannelTypeDeleteApi extends PrivateApiComponentBase {
 
     @Autowired
-    private ChannelMapper channelMapper;
+    private ChannelTypeMapper channelTypeMapper;
 
     @Autowired
     private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
@@ -52,14 +52,14 @@ public class ChannelTypeDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
-        if (channelMapper.checkChannelTypeIsExists(uuid) == 0) {
+        if (channelTypeMapper.checkChannelTypeIsExists(uuid) == 0) {
             throw new ChannelTypeNotFoundException(uuid);
         }
-        if (channelMapper.checkChannelTypeHasReference(uuid) > 0) {
-            ChannelTypeVo type = channelMapper.getChannelTypeByUuid(uuid);
+        if (channelTypeMapper.checkChannelTypeHasReference(uuid) > 0) {
+            ChannelTypeVo type = channelTypeMapper.getChannelTypeByUuid(uuid);
             throw new ChannelTypeHasReferenceException(type.getName(), "删除");
         }
-        channelMapper.deleteChannelTypeByUuid(uuid);
+        channelTypeMapper.deleteChannelTypeByUuid(uuid);
         processTaskSerialNumberMapper.deleteProcessTaskSerialNumberPolicyByChannelTypeUuid(uuid);
         return null;
     }

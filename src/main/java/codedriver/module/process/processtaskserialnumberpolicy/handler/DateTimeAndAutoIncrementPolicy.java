@@ -1,6 +1,8 @@
 package codedriver.module.process.processtaskserialnumberpolicy.handler;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -9,7 +11,6 @@ import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
-import org.joda.time.LocalDate;
 import org.quartz.CronExpression;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -187,7 +188,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
         processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-        processTaskVo.setStartTime(LocalDate.now().toDate());
+        processTaskVo.setStartTime(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
         rowNum += startValue;
         return rowNum % max;

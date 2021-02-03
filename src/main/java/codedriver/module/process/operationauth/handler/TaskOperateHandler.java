@@ -5,6 +5,7 @@ import java.util.*;
 import javax.annotation.PostConstruct;
 
 import codedriver.framework.process.constvalue.*;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,8 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
     @Autowired
     private ChannelMapper channelMapper;
+    @Autowired
+    private ChannelTypeMapper channelTypeMapper;
     @Autowired
     private CatalogMapper catalogMapper;
     @Autowired
@@ -218,7 +221,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         if (checkIsProcessTaskStepUser(processTaskVo, ProcessUserType.MINOR.getValue(), userUuid)) {
                             processUserTypeList.add(ProcessUserType.MINOR.getValue());
                         }
-                        List<Long> channelTypeRelationIdList = channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
+                        List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
                                 processTaskVo.getChannelUuid(), userUuid, teamUuidList, roleUuidList, processUserTypeList);
                         if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
                             ChannelRelationVo channelRelationVo = new ChannelRelationVo();
@@ -227,7 +230,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                 channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
                                 List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
                                 if (CollectionUtils.isNotEmpty(channelRelationTargetList)) {
-                                    List<String> channelTypeUuidList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+                                    List<String> channelTypeUuidList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
                                     if (channelTypeUuidList.contains("all")) {
                                         channelTypeUuidList.clear();
                                     }
@@ -235,7 +238,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                         if ("channel".equals(channelRelation.getType())) {
                                             return true;
                                         } else if ("catalog".equals(channelRelation.getType())) {
-                                            if (channelMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
+                                            if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
                                                 return true;
                                             } else {
                                                 CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelRelation.getTarget());
@@ -243,7 +246,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                                     List<String> uuidList = catalogMapper.getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
                                                     for (String uuid : uuidList) {
                                                         if (!channelRelation.getTarget().equals(uuid)) {
-                                                            if (channelMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(uuid, channelTypeUuidList) > 0) {
+                                                            if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(uuid, channelTypeUuidList) > 0) {
                                                                 return true;
                                                             }
                                                         }

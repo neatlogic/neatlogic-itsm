@@ -109,6 +109,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Autowired
     private ChannelMapper channelMapper;
     @Autowired
+    private ChannelTypeMapper channelTypeMapper;
+    @Autowired
     private CatalogMapper catalogMapper;
 
     @Override
@@ -796,11 +798,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 jsonObj.remove("content");
             } else {
                 isUpdate = true;
-                jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
-                processTaskMapper.replaceProcessTaskContent(contentVo);
+                String oldContent = selectContentByHashMapper.getProcessTaskContentStringByHash(oldContentHash);
+                jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
+                processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
                 if (oldContentId == null) {
-                    processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId,
-                        processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue()));
+                    ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue());
+                    processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
+                    oldContentId = processTaskStepContentVo.getId();
                 } else {
                     processTaskMapper.updateProcessTaskStepContentById(
                         new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
@@ -808,7 +812,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
         } else if (oldContentHash != null) {
             isUpdate = true;
-            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
+            String oldContent = selectContentByHashMapper.getProcessTaskContentStringByHash(oldContentHash);
+            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
             if (CollectionUtils.isEmpty(fileIdList)) {
                 processTaskMapper.deleteProcessTaskStepContentById(oldContentId);
             } else {
@@ -823,9 +828,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         } else {
             isUpdate = true;
             processTaskMapper.deleteProcessTaskStepFileByContentId(oldContentId);
-            ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldFileIdList));
-            processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), processTaskContentVo.getHash());
+            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), JSON.toJSONString(oldFileIdList));
             /** 保存附件uuid **/
             if (CollectionUtils.isNotEmpty(fileIdList)) {
                 ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
@@ -1114,7 +1117,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 nameList.add(channelVo.getName());
                 processTaskVo.setChannelPath(String.join("/", nameList));
             }
-            ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+            ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
             if (channelTypeVo == null) {
                 channelTypeVo = new ChannelTypeVo();
                 channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
@@ -1175,7 +1178,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 toProcessTaskVo.setTranferReportDirection("to");
                 ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
                 if (channel != null) {
-                    ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+                    ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
                     if (channelTypeVo == null) {
                         channelTypeVo = new ChannelTypeVo();
                         channelTypeVo.setUuid(channel.getChannelTypeUuid());
@@ -1258,7 +1261,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (processTaskVo != null) {
             ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
             if (channelVo != null) {
-                ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+                ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
                 if (channelTypeVo == null) {
                     channelTypeVo = new ChannelTypeVo();
                     channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
@@ -1415,6 +1418,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                         priorityVo.setUuid(priorityUuid);
                     }
                     processTaskVo.setPriority(priorityVo);
+                }
+                /** 标签列表 **/
+                List<String> tagList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("tagList")), String.class);
+                if(tagList != null){
+                    processTaskVo.setTagList(tagList);
                 }
             }
         }

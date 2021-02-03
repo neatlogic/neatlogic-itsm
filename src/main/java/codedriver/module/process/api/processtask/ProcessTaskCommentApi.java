@@ -129,7 +129,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         processTaskStepContentVo.setType(ProcessTaskOperationType.STEP_COMMENT.getValue());
         if (StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-            processTaskMapper.replaceProcessTaskContent(contentVo);
+            processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
             processTaskStepContentVo.setContentHash(contentVo.getHash());
         }
         processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);

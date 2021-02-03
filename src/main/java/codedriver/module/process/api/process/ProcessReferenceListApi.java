@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -31,6 +32,9 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ChannelMapper channelMapper;
+
+	@Autowired
+	private ChannelTypeMapper channelTypeMapper;
 
 	@Override
 	public String getToken() {
@@ -63,7 +67,7 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 		if(CollectionUtils.isNotEmpty(channelUuidList)){
 			List<ChannelVo> channelVoList = channelMapper.getChannelVoByUuidList(channelUuidList);
 			for(ChannelVo channelVo : channelVoList){
-				ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+				ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
 				channelVo.setChannelTypeVo(channelTypeVo.clone());
 				channelVo.setAllowDesc(null);
 				channelVo.setChannelRelationList(null);

@@ -269,103 +269,6 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
 
     /**
      * @param currentProcessTaskStepVo
-     * @Description: 获取需要验证表单数据，并校验
-     * @Author: linbq
-     * @Date: 2021/1/20 16:20
-     * @Params:[currentProcessTaskStepVo]
-     * @Returns:boolean
-     */
-    @Override
-    public boolean formAttributeDataValidFromDb(ProcessTaskStepVo currentProcessTaskStepVo) {
-        ProcessTaskFormVo processTaskFormVo =
-                processTaskMapper.getProcessTaskFormByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-        if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-            String formContent =
-                    selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-            FormVersionVo formVersionVo = new FormVersionVo();
-            formVersionVo.setFormConfig(formContent);
-            formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
-            List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-            if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                Map<String, Object> formAttributeDataMap = new HashMap<>();
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList =
-                        processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(
-                                currentProcessTaskStepVo.getProcessTaskId());
-                for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                    formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(),
-                            processTaskFormAttributeDataVo.getDataObj());
-                }
-                // Map<String, String> formAttributeActionMap = new HashMap<>();
-                // List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList =
-                // processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(currentProcessTaskStepVo.getId());
-                // for (ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo :
-                // processTaskStepFormAttributeList) {
-                // formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(),
-                // processTaskStepFormAttributeVo.getAction());
-                // }
-                currentProcessTaskStepVo.setFormAttributeDataMap(formAttributeDataMap);
-                currentProcessTaskStepVo.setFormAttributeVoList(formAttributeList);
-                // currentProcessTaskStepVo.setFormAttributeActionMap(formAttributeActionMap);
-                formAttributeDataValid(currentProcessTaskStepVo);
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @param currentProcessTaskStepVo
-     * @Description: 验证表单数据是否合法
-     * @Author: linbq
-     * @Date: 2021/1/20 16:20
-     * @Params:[currentProcessTaskStepVo]
-     * @Returns:boolean
-     */
-    @Override
-    public boolean formAttributeDataValid(ProcessTaskStepVo currentProcessTaskStepVo) {
-        List<String> hidecomponentList = JSON.parseArray(JSON.toJSONString(currentProcessTaskStepVo.getParamObj().getJSONArray("hidecomponentList")), String.class);
-        List<String> readcomponentList = JSON.parseArray(JSON.toJSONString(currentProcessTaskStepVo.getParamObj().getJSONArray("readcomponentList")), String.class);
-
-        for (FormAttributeVo formAttributeVo : currentProcessTaskStepVo.getFormAttributeVoList()) {
-            if (!formAttributeVo.isRequired()) {
-                continue;
-            }
-            // if(formAttributeActionMap.containsKey(formAttributeVo.getUuid()) ||
-            // formAttributeActionMap.containsKey("all")) {
-            // continue;
-            // }
-            if (CollectionUtils.isNotEmpty(hidecomponentList)
-                    && hidecomponentList.contains(formAttributeVo.getUuid())) {
-                continue;
-            }
-            if (CollectionUtils.isNotEmpty(readcomponentList)
-                    && readcomponentList.contains(formAttributeVo.getUuid())) {
-                continue;
-            }
-            Object data = currentProcessTaskStepVo.getFormAttributeDataMap().get(formAttributeVo.getUuid());
-            if (data != null) {
-                if (data instanceof String) {
-                    if (StringUtils.isBlank(data.toString())) {
-                        throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel() + "'不能为空");
-                    }
-                } else if (data instanceof JSONArray) {
-                    if (CollectionUtils.isEmpty((JSONArray) data)) {
-                        throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel() + "'不能为空");
-                    }
-                } else if (data instanceof JSONObject) {
-                    if (MapUtils.isEmpty((JSONObject) data)) {
-                        throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel() + "'不能为空");
-                    }
-                }
-            } else {
-                throw new ProcessTaskRuntimeException("表单属性：'" + formAttributeVo.getLabel() + "'不能为空");
-            }
-        }
-        return true;
-    }
-
-    /**
-     * @param currentProcessTaskStepVo
      * @Description: 获取验证基本信息数据是否合法，并验证
      * @Author: linbq
      * @Date: 2021/1/20 16:21
@@ -566,7 +469,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         processTaskStepRemindVo.setTitle(title);
         if (StringUtils.isNotBlank(reason)) {
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(reason);
-            processTaskMapper.replaceProcessTaskContent(contentVo);
+            processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
             processTaskStepRemindVo.setContentHash(contentVo.getHash());
         }
         return processTaskMapper.insertProcessTaskStepRemind(processTaskStepRemindVo);
@@ -595,7 +498,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         processTaskStepContentVo.setType(action.getValue());
         if (StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-            processTaskMapper.replaceProcessTaskContent(contentVo);
+            processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
             processTaskStepContentVo.setContentHash(contentVo.getHash());
         } else {
             paramObj.remove("content");
@@ -644,6 +547,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 processTaskTagVoList.add(new ProcessTaskTagVo(currentProcessTaskStepVo.getProcessTaskId(), processTagVo.getId()));
             }
             processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
+        }else {
+            currentProcessTaskStepVo.getParamObj().remove("tagList");
         }
     }
 
@@ -728,9 +633,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
             if (CollectionUtils.isNotEmpty(oldProcessTaskFormAttributeDataList)) {
                 oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
-                ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldProcessTaskFormAttributeDataList));
-                processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-                paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), processTaskContentVo.getHash());
+                paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
             }
 
             /** 写入当前步骤的表单属性值 **/

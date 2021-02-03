@@ -27,10 +27,10 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,19 +41,19 @@ import java.util.stream.Collectors;
 @AuthAction(action = NO_AUTH.class)
 public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private PriorityMapper priorityMapper;
 
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
 
-    @Autowired
+    @Resource
     private IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
     @Override
@@ -83,12 +83,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
-        ProcessTaskVo processTaskVo =
-            processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
-
-        // 获取开始步骤id
-        ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
-        Long startProcessTaskStepId = startProcessTaskStepVo.getId();
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 
         try {
             new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_UPDATE).build()
@@ -105,9 +100,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         if (StringUtils.isNotBlank(title) && !title.equals(oldTitle)) {
             isUpdate = true;
             processTaskVo.setTitle(title);
-            ProcessTaskContentVo oldTitleContentVo = new ProcessTaskContentVo(oldTitle);
-            processTaskMapper.replaceProcessTaskContent(oldTitleContentVo);
-            jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTitleContentVo.getHash());
+            jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTitle);
         } else {
             jsonObj.remove("title");
         }
@@ -120,9 +113,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             }
             isUpdate = true;
             processTaskVo.setPriorityUuid(priorityUuid);
-            ProcessTaskContentVo oldPriorityUuidContentVo = new ProcessTaskContentVo(oldPriorityUuid);
-            processTaskMapper.replaceProcessTaskContent(oldPriorityUuidContentVo);
-            jsonObj.put(ProcessTaskAuditDetailType.PRIORITY.getOldDataParamName(), oldPriorityUuidContentVo.getHash());
+            jsonObj.put(ProcessTaskAuditDetailType.PRIORITY.getOldDataParamName(), oldPriorityUuid);
         } else {
             jsonObj.remove("priorityUuid");
         }
@@ -134,6 +125,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         List<String> tagNameList =
             JSONObject.parseArray(JSON.toJSONString(jsonObj.getJSONArray("tagList")), String.class);
         if (tagNameList != null) {
+            jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
             List<ProcessTagVo> oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
             processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
             if (CollectionUtils.isNotEmpty(tagNameList)) {
@@ -146,7 +138,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                     processMapper.insertProcessTag(tagVo);
                     existTagList.add(tagVo);
                 }
-                List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
+                List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<>();
                 for (ProcessTagVo processTagVo : existTagList) {
                     processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId, processTagVo.getId()));
                 }
@@ -156,15 +148,12 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                 .filter(a -> !oldTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a))
                 .collect(Collectors.toList()).size();
             if (tagNameList.size() != oldTagList.size() || diffCount > 0) {
-                List<String> oldTagNameList = new ArrayList<String>();
+                List<String> oldTagNameList = new ArrayList<>();
                 for (ProcessTagVo tag : oldTagList) {
                     oldTagNameList.add(tag.getName());
                 }
-                ProcessTaskContentVo oldTagContentVo = new ProcessTaskContentVo(String.join(",", oldTagNameList));
-                processTaskMapper.replaceProcessTaskContent(oldTagContentVo);
-                if (StringUtils.isNotBlank(oldTagContentVo.getHash())) {
-                    jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), oldTagContentVo.getHash());
-                    jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
+                if (CollectionUtils.isNotEmpty(oldTagNameList)) {
+                    jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), String.join(",", oldTagNameList));
                 }
                 isUpdate = true;
             } else {
@@ -172,9 +161,11 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             }
         }
 
+        // 获取开始步骤id
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
+        Long startProcessTaskStepId = startProcessTaskStepVo.getId();
         ProcessTaskStepReplyVo oldReplyVo = null;
-        List<ProcessTaskStepContentVo> processTaskStepContentList =
-            processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
+        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
         for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
             if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
                 oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContent);

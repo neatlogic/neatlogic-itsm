@@ -3,6 +3,7 @@ package codedriver.module.process.api.processtask;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,10 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
     
     @Autowired
     private ChannelMapper channelMapper;
-    
+
+    @Autowired
+    private ChannelTypeMapper channelTypeMapper;
+
     @Autowired
     private ProcessTaskMapper processTaskMapper;
 
@@ -77,7 +81,7 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
             throw new ChannelNotFoundException(channelUuid);
         }
         Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-        if(channelTypeRelationId != null && channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
+        if(channelTypeRelationId != null && channelTypeMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
         List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(channelUuid, channelTypeRelationId);

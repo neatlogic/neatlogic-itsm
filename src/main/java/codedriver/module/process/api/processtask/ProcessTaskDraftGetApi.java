@@ -39,6 +39,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
     private ChannelMapper channelMapper;
 
     @Autowired
+    private ChannelTypeMapper channelTypeMapper;
+
+    @Autowired
     private ProcessMapper processMapper;
 
     @Autowired
@@ -209,7 +212,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
             throw new PermissionDeniedException();
         }
-        ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+        ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
         if (channelTypeVo == null) {
             throw new ChannelTypeNotFoundException(channel.getChannelTypeUuid());
         }

@@ -7,11 +7,14 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.audithandler.core.IProcessTaskAuditDetailType;
 import codedriver.framework.process.audithandler.core.IProcessTaskAuditType;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
+import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
+import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.util.FreemarkerUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +38,7 @@ import java.util.Objects;
 public class ProcessTaskAuditThread extends CodeDriverThread {
     private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
     private static ProcessTaskMapper processTaskMapper;
+
     @Autowired
     public void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
         processTaskMapper = _processTaskMapper;
@@ -43,7 +47,9 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
     private ProcessTaskStepVo currentProcessTaskStepVo;
     private IProcessTaskAuditType action;
 
-    public ProcessTaskAuditThread(){}
+    public ProcessTaskAuditThread() {
+    }
+
     public ProcessTaskAuditThread(ProcessTaskStepVo _currentProcessTaskStepVo, IProcessTaskAuditType _action) {
         currentProcessTaskStepVo = _currentProcessTaskStepVo;
         action = _action;
@@ -57,34 +63,56 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
     @Override
     public void execute() {
         String oldName = Thread.currentThread().getName();
-        Thread.currentThread()
-                .setName("PROCESSTASK-AUDIT-" + currentProcessTaskStepVo.getId() + "-" + action.getValue());
+        Thread.currentThread().setName("PROCESSTASK-AUDIT-" + currentProcessTaskStepVo.getId() + "-" + action.getValue());
         try {
+            /** 活动类型 **/
+            JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
             ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
             processTaskStepAuditVo.setAction(action.getValue());
             processTaskStepAuditVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-            processTaskStepAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-            processTaskStepAuditVo.setUserVo(new UserVo(UserContext.get().getUserUuid()));// 兼容automatic作业无用户
+            processTaskStepAuditVo.setUserUuid(UserContext.get().getUserUuid());// 兼容automatic作业无用户
             processTaskStepAuditVo.setStepStatus(currentProcessTaskStepVo.getStatus());
             processTaskStepAuditVo.setOriginalUser(currentProcessTaskStepVo.getOriginalUser());
+            if (currentProcessTaskStepVo.getId() != null) {
+                processTaskStepAuditVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+                String processTaskStepName = currentProcessTaskStepVo.getName();
+                if (StringUtils.isBlank(processTaskStepName)) {
+                    processTaskStepName = processTaskMapper.getProcessTaskStepNameById(currentProcessTaskStepVo.getId());
+                }
+                paramObj.put("processTaskStepName", processTaskStepName);
+            }
+            Long nextStepId = paramObj.getLong("nextStepId");
+            if (nextStepId != null) {
+                String nextStepName = processTaskMapper.getProcessTaskStepNameById(nextStepId);
+                paramObj.put("nextStepName", nextStepName);
+            }
+            String description = FreemarkerUtil.transform(paramObj, ProcessTaskAuditTypeFactory.getDescription(action.getValue()));
+            if (description != null) {
+                ProcessTaskContentVo descriptionVo = new ProcessTaskContentVo(description);
+                processTaskMapper.insertIgnoreProcessTaskContent(descriptionVo);
+                processTaskStepAuditVo.setDescriptionHash(descriptionVo.getHash());
+            }
             processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
-            JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-            if (MapUtils.isNotEmpty(paramObj)) {
-                for (IProcessTaskAuditDetailType auditDetailType : ProcessTaskAuditDetailTypeFactory
-                        .getAuditDetailTypeList()) {
-                    String newDataHash = null;
-                    String newData = paramObj.getString(auditDetailType.getParamName());
+            /** 活动内容 **/
+            for (IProcessTaskAuditDetailType auditDetailType : ProcessTaskAuditDetailTypeFactory.getAuditDetailTypeList()) {
+                String newData = paramObj.getString(auditDetailType.getParamName());
+                String oldData = paramObj.getString(auditDetailType.getOldDataParamName());
+                if (Objects.equals(oldData, newData)) {
+                    continue;
+                }
+                if (auditDetailType.getNeedCompression()) {
                     if (StringUtils.isNotBlank(newData)) {
                         ProcessTaskContentVo contentVo = new ProcessTaskContentVo(newData);
-                        processTaskMapper.replaceProcessTaskContent(contentVo);
-                        newDataHash = contentVo.getHash();
+                        processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
+                        newData = contentVo.getHash();
                     }
-                    String oldDataHash = paramObj.getString(auditDetailType.getOldDataParamName());
-                    if (!Objects.equals(oldDataHash, newDataHash)) {
-                        processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(
-                                processTaskStepAuditVo.getId(), auditDetailType.getValue(), oldDataHash, newDataHash));
+                    if (StringUtils.isNotBlank(oldData)) {
+                        ProcessTaskContentVo contentVo = new ProcessTaskContentVo(oldData);
+                        processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
+                        oldData = contentVo.getHash();
                     }
                 }
+                processTaskMapper.insertProcessTaskStepAuditDetail(new ProcessTaskStepAuditDetailVo(processTaskStepAuditVo.getId(), auditDetailType.getValue(), oldData, newData));
             }
 
         } catch (Exception ex) {
