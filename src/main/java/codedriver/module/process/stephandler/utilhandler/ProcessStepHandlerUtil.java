@@ -469,7 +469,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         processTaskStepRemindVo.setTitle(title);
         if (StringUtils.isNotBlank(reason)) {
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(reason);
-            processTaskMapper.replaceProcessTaskContent(contentVo);
+            processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
             processTaskStepRemindVo.setContentHash(contentVo.getHash());
         }
         return processTaskMapper.insertProcessTaskStepRemind(processTaskStepRemindVo);
@@ -498,7 +498,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         processTaskStepContentVo.setType(action.getValue());
         if (StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-            processTaskMapper.replaceProcessTaskContent(contentVo);
+            processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
             processTaskStepContentVo.setContentHash(contentVo.getHash());
         } else {
             paramObj.remove("content");
@@ -547,6 +547,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 processTaskTagVoList.add(new ProcessTaskTagVo(currentProcessTaskStepVo.getProcessTaskId(), processTagVo.getId()));
             }
             processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
+        }else {
+            currentProcessTaskStepVo.getParamObj().remove("tagList");
         }
     }
 
@@ -631,9 +633,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
             if (CollectionUtils.isNotEmpty(oldProcessTaskFormAttributeDataList)) {
                 oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
-                ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldProcessTaskFormAttributeDataList));
-                processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-                paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), processTaskContentVo.getHash());
+//                ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldProcessTaskFormAttributeDataList));
+//                processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+                paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
             }
 
             /** 写入当前步骤的表单属性值 **/
