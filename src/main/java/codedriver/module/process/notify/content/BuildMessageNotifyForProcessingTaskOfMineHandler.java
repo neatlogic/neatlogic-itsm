@@ -7,6 +7,7 @@ import codedriver.framework.notify.dto.NotifyVo;
 import codedriver.framework.notify.handler.MessageNotifyHandler;
 import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -26,15 +27,28 @@ import java.util.Map;
 @Component
 public class BuildMessageNotifyForProcessingTaskOfMineHandler extends BuildNotifyContentHandlerBase {
 
+    private static final String homeUrl = Config.HOME_URL();
+
     @Override
     protected String myGetPreviewContent(JSONObject config) {
-        return "您有 <span style=\"color:red\">5</span> 条待处理工单，请前往【IT服务->工单中心】查看";
+        if(StringUtils.isNotBlank(homeUrl)){
+            String taskOverviewUrl = homeUrl + TenantContext.get().getTenantUuid() + File.separator + "process.html#/task-overview";
+            return "您有 <span style=\"color:red\">"
+                   + "5</span> 条待处理工单，请前往<a href=\"" + taskOverviewUrl
+                   + "\" target=\"_blank\">【工单中心】</a>，点击【我的待办】按钮查看";
+        }else{
+            return "您有 <span style=\"color:red\">5</span> 条待处理工单，" +
+                   "请前往【IT服务->工单中心->所有】，点击【我的待办】按钮查看";
+        }
     }
 
     @Override
     protected List<NotifyVo> myGetNotifyVoList(Map<String, Object> map) {
+        String taskOverviewUrl = null;
+        if(StringUtils.isNotBlank(homeUrl)){
+            taskOverviewUrl = homeUrl + TenantContext.get().getTenantUuid() + File.separator + "process.html#/task-overview";
+        }
         List<NotifyVo> notifyList = new ArrayList<>();
-        String homeUrl = Config.HOME_URL() + TenantContext.get().getTenantUuid() + File.separator;
         Object title = map.get("title");
         Object content = map.get("content");
         Object userTaskMapObj = map.get("userTaskMap");
@@ -49,8 +63,15 @@ public class BuildMessageNotifyForProcessingTaskOfMineHandler extends BuildNotif
                 if (content != null) {
                     contentSb.append(content.toString() + "</br>");
                 }
-
-                contentSb.append("您有 <span style=\"color:red\">" + entry.getValue().size() + "</span> 条待处理工单，请前往【IT服务->工单中心】查看");
+                if(StringUtils.isNotBlank(taskOverviewUrl)){
+                    contentSb.append("您有 <span style=\"color:red\">"
+                            + entry.getValue().size() + "</span> 条待处理工单，请前往<a href=\""
+                            + taskOverviewUrl + "\" target=\"_blank\">【工单中心】</a>，点击【我的待办】按钮查看");
+                }else{
+                    contentSb.append("您有 <span style=\"color:red\">"
+                            + entry.getValue().size()
+                            + "</span> 条待处理工单，请前往【IT服务->工单中心->所有】，点击【我的待办】按钮查看");
+                }
 
                 notifyBuilder.withContentTemplate(contentSb.toString());
                 NotifyVo notifyVo = notifyBuilder.build();

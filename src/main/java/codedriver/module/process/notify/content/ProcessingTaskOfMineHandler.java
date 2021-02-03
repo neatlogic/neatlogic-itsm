@@ -330,55 +330,10 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				map.put("userTaskMap",userTaskMap);
 				notifyList = buildNotifyHandler.getNotifyVoList(map);
 			}
-
-//			/** 组装NotifyVo对象列表 */
-//			getNotifyVoList(notifyList, title, content, columnList, userTaskMap);
 		}
 
 		return notifyList;
 	}
-
-	/**
-	 * @Description: 将工单绘制成HTML表格，作为消息内容，组装成NotifyVo列表
-	 * @Author: laiwt
-	 * @Date: 2021/1/8 14:20
-	 * @Params: [notifyList, title, content, columnList, userTaskMap]
-	 * @Returns: void
-	**/
-//	private void getNotifyVoList(List<NotifyVo> notifyList, String title, String content, List<String> columnList, Map<String, List<Map<String, Object>>> userTaskMap) {
-//		if (MapUtils.isNotEmpty(userTaskMap)) {
-//			for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
-//				NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null,null);
-//				notifyBuilder.withTitleTemplate(title);
-//				notifyBuilder.addUserUuid(entry.getKey());
-//
-//				/** 绘制工单列表 */
-//				StringBuilder taskTable = new StringBuilder();
-//				if (StringUtils.isNotBlank(content)) {
-//					taskTable.append(content + "</br>");
-//				}
-//				taskTable.append("<table>");
-//				taskTable.append("<tr>");
-//				for (String column : columnList) {
-//					taskTable.append("<th>" + column + "</th>");
-//				}
-//				taskTable.append("</tr>");
-//				for (Map<String, Object> map : entry.getValue()) {
-//					taskTable.append("<tr>");
-//					for (String column : columnList) {
-//						if (map.containsKey(column)) {
-//							taskTable.append("<td>" + (map.get(column) == null ? "" : map.get(column)) + "</td>");
-//						}
-//					}
-//					taskTable.append("</tr>");
-//				}
-//				taskTable.append("</table>");
-//				notifyBuilder.withContentTemplate(taskTable.toString());
-//				NotifyVo notifyVo = notifyBuilder.build();
-//				notifyList.add(notifyVo);
-//			}
-//		}
-//	}
 
 	/**
 	 * @Description: 按用户将工单分类
