@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,11 +20,10 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 @Service
-public class WorkerAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
+public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler {
 	
 	@Autowired
 	private UserMapper userMapper;
@@ -77,11 +78,14 @@ public class WorkerAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 				}
 			}
 		}
-		return JSON.toJSONString(resultList);
+		if(CollectionUtils.isNotEmpty(resultList)){
+			return JSON.toJSONString(resultList);
+		}
+		return null;
 	}
 
 	@Override
-	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	public int handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
 			processTaskStepAuditDetailVo.setOldContent(parse(oldContent));

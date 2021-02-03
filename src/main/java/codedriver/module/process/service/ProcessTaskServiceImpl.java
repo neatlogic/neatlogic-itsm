@@ -798,8 +798,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 jsonObj.remove("content");
             } else {
                 isUpdate = true;
-                jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
-                processTaskMapper.replaceProcessTaskContent(contentVo);
+                String oldContent = selectContentByHashMapper.getProcessTaskContentStringByHash(oldContentHash);
+                jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
+                processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
                 if (oldContentId == null) {
                     ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue());
                     processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
@@ -811,7 +812,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
         } else if (oldContentHash != null) {
             isUpdate = true;
-            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
+            String oldContent = selectContentByHashMapper.getProcessTaskContentStringByHash(oldContentHash);
+            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
             if (CollectionUtils.isEmpty(fileIdList)) {
                 processTaskMapper.deleteProcessTaskStepContentById(oldContentId);
             } else {
@@ -826,9 +828,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         } else {
             isUpdate = true;
             processTaskMapper.deleteProcessTaskStepFileByContentId(oldContentId);
-            ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldFileIdList));
-            processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), processTaskContentVo.getHash());
+            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), JSON.toJSONString(oldFileIdList));
             /** 保存附件uuid **/
             if (CollectionUtils.isNotEmpty(fileIdList)) {
                 ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();

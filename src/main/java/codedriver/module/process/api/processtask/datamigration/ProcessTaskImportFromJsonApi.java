@@ -248,7 +248,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                                         String content = StringEscapeUtils.unescapeHtml4(taskStepContentValue);
                                                         String hash = DigestUtils.md5DigestAsHex(content.getBytes());
                                                         processTaskStepContentVo.setContentHash(hash);
-                                                        processTaskMapper.replaceProcessTaskContent(new ProcessTaskContentVo(hash,content));
+                                                        processTaskMapper.insertIgnoreProcessTaskContent(new ProcessTaskContentVo(hash,content));
                                                         break;
                                                     case "fcu":
                                                         processTaskStepContentVo.setFcu(taskStepContentValue);
@@ -324,7 +324,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                     case "content":
                         if (StringUtils.isNotBlank(taskValue)) {
                             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(taskValue);
-                            processTaskMapper.replaceProcessTaskContent(contentVo);
+                            processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
                             processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTask.getId(), processTask.getStartProcessTaskStep().getId(), contentVo.getHash(), null));
                         }
                         break;

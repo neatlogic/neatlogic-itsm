@@ -60,9 +60,10 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         processTaskStepSubtaskMapper.insertProcessTaskStepSubtask(processTaskStepSubtaskVo);
         paramObj.put("processTaskStepSubtaskId", processTaskStepSubtaskVo.getId());
         String content = paramObj.getString("content");
+        paramObj.remove("content");
         processTaskStepSubtaskVo.setContent(content);
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-        processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+        processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
         processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_CREATE.getValue(), processTaskContentVo.getHash()));
 
         ProcessTaskStepVo currentProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepSubtaskVo.getProcessTaskStepId());
@@ -110,7 +111,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         String content = paramObj.getString("content");
         paramObj.remove("content");
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-        processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+        processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
         processTaskStepSubtaskMapper.updateProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(oldProcessTaskStepSubtask.getId(), ProcessTaskOperationType.SUBTASK_CREATE.getValue(), processTaskContentVo.getHash()));
         ProcessTaskStepSubtaskVo processTaskStepSubtaskVo = new ProcessTaskStepSubtaskVo();
         processTaskStepSubtaskVo.setId(oldProcessTaskStepSubtask.getId());
@@ -156,9 +157,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             oldSubtaskVo.setUserName(oldProcessTaskStepSubtask.getUserName());
             oldSubtaskVo.setTargetTime(oldProcessTaskStepSubtask.getTargetTime());
             oldSubtaskVo.setContentHash(oldProcessTaskStepSubtask.getContentHash());
-            ProcessTaskContentVo oldSubtaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldSubtaskVo));
-            processTaskMapper.replaceProcessTaskContent(oldSubtaskContentVo);
-            paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), oldSubtaskContentVo.getHash());
+            paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), JSON.toJSONString(oldSubtaskVo));
             currentProcessTaskStepVo.setParamObj(paramObj);
             IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.EDITSUBTASK);
             currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
@@ -185,7 +184,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         String content = paramObj.getString("content");
         if (StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-            processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+            processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
             processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_REDO.getValue(), processTaskContentVo.getHash()));
         }
         IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
@@ -224,7 +223,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         String content = paramObj.getString("content");
         if (StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-            processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+            processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
             processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_COMPLETE.getValue(), processTaskContentVo.getHash()));
         }
         IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
@@ -304,7 +303,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         String content = paramObj.getString("content");
         if (StringUtils.isNotBlank(content)) {
             ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(content);
-            processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
+            processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
             ProcessTaskStepSubtaskContentVo processTaskStepSubtaskContentVo = new ProcessTaskStepSubtaskContentVo(processTaskStepSubtaskVo.getId(), ProcessTaskOperationType.SUBTASK_COMMENT.getValue(), processTaskContentVo.getHash());
             processTaskStepSubtaskMapper.insertProcessTaskStepSubtaskContent(processTaskStepSubtaskContentVo);
         }
