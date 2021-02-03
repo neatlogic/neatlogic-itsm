@@ -828,8 +828,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         } else {
             isUpdate = true;
             processTaskMapper.deleteProcessTaskStepFileByContentId(oldContentId);
-//            ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldFileIdList));
-//            processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
             jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), JSON.toJSONString(oldFileIdList));
             /** 保存附件uuid **/
             if (CollectionUtils.isNotEmpty(fileIdList)) {

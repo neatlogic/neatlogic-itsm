@@ -157,8 +157,6 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             oldSubtaskVo.setUserName(oldProcessTaskStepSubtask.getUserName());
             oldSubtaskVo.setTargetTime(oldProcessTaskStepSubtask.getTargetTime());
             oldSubtaskVo.setContentHash(oldProcessTaskStepSubtask.getContentHash());
-//            ProcessTaskContentVo oldSubtaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldSubtaskVo));
-//            processTaskMapper.replaceProcessTaskContent(oldSubtaskContentVo);
             paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), JSON.toJSONString(oldSubtaskVo));
             currentProcessTaskStepVo.setParamObj(paramObj);
             IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.EDITSUBTASK);

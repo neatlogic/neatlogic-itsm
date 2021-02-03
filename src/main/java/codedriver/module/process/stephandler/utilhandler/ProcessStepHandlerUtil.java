@@ -633,8 +633,6 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
             if (CollectionUtils.isNotEmpty(oldProcessTaskFormAttributeDataList)) {
                 oldProcessTaskFormAttributeDataList.sort(ProcessTaskFormAttributeDataVo::compareTo);
-//                ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldProcessTaskFormAttributeDataList));
-//                processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
                 paramObj.put(ProcessTaskAuditDetailType.FORM.getOldDataParamName(), JSON.toJSONString(oldProcessTaskFormAttributeDataList));
             }
 
