@@ -50,7 +50,21 @@ public class WorkcenterInit extends ApplicationListenerBase {
         WorkcenterVo workcenterVo = new WorkcenterVo();
         workcenterVo.setUuid("allProcessTask");
         workcenterVo.setName("所有工单");
-        workcenterVo.setConditionConfig("{\"handlerType\":\"simple\",\"conditionGroupList\":[{\"conditionList\":[{\"expression\":\"between\",\"valueList\":[{\"timeRange\":\"1\",\"timeUnit\":\"year\"}],\"name\":\"starttime\",\"type\":\"common\",\"uuid\":\"fce9f6d909b04fb5b10ee40a3e806396\"}],\"channelUuidList\":[],\"uuid\":\"6289d02329b442ad8912628e142be837\"}],\"conditionGroupRelList\":[]}");
+        workcenterVo.setConditionConfig("{\n" +
+                "    \"handlerType\":\"simple\",\n" +
+                "    \"conditionConfig\":{\n" +
+                "        \"conditionGroupList\":[\n" +
+                "\n" +
+                "        ],\n" +
+                "        \"conditionGroupRelList\":[\n" +
+                "\n" +
+                "        ],\n" +
+                "        \"startTimeCondition\":{\n" +
+                "            \"timeRange\":\"1\",\n" +
+                "            \"timeUnit\":\"year\"\n" +
+                "        }\n" +
+                "    }\n" +
+                "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
         workcenterVo.setSort(1);
         return  workcenterVo;

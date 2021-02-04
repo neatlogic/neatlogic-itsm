@@ -1,13 +1,19 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -65,5 +71,25 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
 			status = JSONObject.parseObject(json.toString()).getString("text");
 		}
 		return status;
+	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return new ArrayList<TableSelectColumnVo>(){
+			{
+				add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
+						new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue())
+				)));
+			}
+		};
+	}
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		JSONObject statusJson = new JSONObject();
+		String status = processTaskVo.getStatus();
+		statusJson.put("value", status);
+		statusJson.put("text", ProcessTaskStatus.getText(status));
+		statusJson.put("color", ProcessTaskStatus.getColor(status));
+		return statusJson;
 	}
 }

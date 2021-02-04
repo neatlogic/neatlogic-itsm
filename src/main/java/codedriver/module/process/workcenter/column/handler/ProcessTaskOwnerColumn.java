@@ -1,18 +1,27 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import com.alibaba.fastjson.JSON;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.UserTable;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 @Component
 public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -83,5 +92,36 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 			userName = JSONObject.parseObject(json.toString()).getString("userName");
 		}
 		return userName;
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		return processTaskVo.getOwnerVo();
+	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return new ArrayList<TableSelectColumnVo>(){
+			{
+				add(new TableSelectColumnVo(new UserTable(),"owner", Arrays.asList(
+						new SelectColumnVo(UserTable.FieldEnum.UUID.getValue(),"ownerUuid"),
+						new SelectColumnVo(UserTable.FieldEnum.USER_NAME.getValue(),"ownerName"),
+						new SelectColumnVo(UserTable.FieldEnum.USER_INFO.getValue(),"ownerInfo"),
+						new SelectColumnVo(UserTable.FieldEnum.VIP_LEVEL.getValue(),"ownerVipLevel"),
+						new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(),"ownerPinYin")
+				)));
+			}
+		};
+	}
+
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return new ArrayList<JoinTableColumnVo>() {
+			{
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new UserTable(),"owner", new HashMap<String, String>() {{
+					put(ProcessTaskSqlTable.FieldEnum.OWNER.getValue(), UserTable.FieldEnum.UUID.getValue());
+				}}));
+			}
+		};
 	}
 }

@@ -1,25 +1,21 @@
 package codedriver.module.process.api.workcenter;
 
-import java.util.List;
-
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.service.NewWorkcenterService;
+import codedriver.module.process.service.WorkcenterService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.WorkcenterService;
+import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
@@ -27,6 +23,9 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 	WorkcenterMapper workcenterMapper;
 	@Autowired
 	WorkcenterService workcenterService;
+
+	@Autowired
+	NewWorkcenterService newWorkcenterService;
 	
 	@Override
 	public String getToken() {
@@ -66,23 +65,34 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		if(jsonObj.containsKey("uuid")) {
 			String uuid = jsonObj.getString("uuid");
-			Integer currentPage = jsonObj.getInteger("currentPage");
-			Integer pageSize = jsonObj.getInteger("pageSize");
-			Integer isMeWillDo = jsonObj.getInteger("isMeWillDo");
-			JSONArray sortList = jsonObj.getJSONArray("sortList");
+			JSONObject conditionConfig = jsonObj.getJSONObject("conditionConfig");
+			Integer currentPage = conditionConfig.getInteger("currentPage");
+			Integer pageSize = conditionConfig.getInteger("pageSize");
+			//Integer isProcessingOfMine = conditionConfig.getInteger("isProcessingOfMine");
+			//JSONObject startTimeCondition = conditionConfig.getJSONObject("startTimeCondition");
+			JSONArray sortList = conditionConfig.getJSONArray("sortList");
 			List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
 			if(CollectionUtils.isNotEmpty(workcenterList)) {
 				jsonObj = JSONObject.parseObject(workcenterList.get(0).getConditionConfig());
 				jsonObj.put("uuid", uuid);
-				jsonObj.put("currentPage", currentPage);
-				jsonObj.put("pageSize", pageSize);
-				jsonObj.put("isMeWillDo", isMeWillDo);
+				JSONObject conditionConfigTmp = jsonObj.getJSONObject("conditionConfig");
+				conditionConfigTmp.put("currentPage", currentPage);
+				conditionConfigTmp.put("pageSize", pageSize);
+				/*if(isProcessingOfMine != null ) {
+					conditionConfigTmp.put("isProcessingOfMine", isProcessingOfMine);
+				}
+				if(startTimeCondition != null ) {
+					conditionConfigTmp.put("startTimeCondition", startTimeCondition);
+				}*/
 				if(CollectionUtils.isNotEmpty(sortList)) {
-				    jsonObj.put("sortList", sortList);
+					conditionConfigTmp.put("sortList", sortList);
 				}
 			}
 		}
-		return workcenterService.doSearch(new WorkcenterVo(jsonObj));
+		WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
+		workcenterVo.setSqlFieldType(FieldTypeEnum.DISTINCT_ID.getValue());
+		return newWorkcenterService.doSearch(workcenterVo);
+		//return workcenterService.doSearch(workcenterVo);
 	}
 
 }
