@@ -531,7 +531,8 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     @Override
     public void saveTagList(ProcessTaskStepVo currentProcessTaskStepVo) {
         processTaskMapper.deleteProcessTaskTagByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
-        JSONArray tagArray = currentProcessTaskStepVo.getParamObj().getJSONArray("tagList");
+        JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+        JSONArray tagArray = paramObj.getJSONArray("tagList");
         if (CollectionUtils.isNotEmpty(tagArray)) {
             List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
             List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
@@ -547,8 +548,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 processTaskTagVoList.add(new ProcessTaskTagVo(currentProcessTaskStepVo.getProcessTaskId(), processTagVo.getId()));
             }
             processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
+            paramObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
         }else {
-            currentProcessTaskStepVo.getParamObj().remove("tagList");
+            paramObj.remove("tagList");
         }
     }
 
