@@ -1,11 +1,9 @@
 package codedriver.module.process.audithandler.handler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,7 +15,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
@@ -27,12 +24,14 @@ import codedriver.framework.process.formattribute.core.FormAttributeHandlerFacto
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 
 @Service
-public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
+public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {
 
     private final static Logger logger = LoggerFactory.getLogger(FormAuditHandler.class);
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
+    @Autowired
+    private SelectContentByHashMapper selectContentByHashMapper;
 
     @Override
     public String getType() {
@@ -40,7 +39,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
     }
 
     @Override
-    protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+    public int handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
         List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList =
             JSON.parseArray(processTaskStepAuditDetailVo.getOldContent(), ProcessTaskFormAttributeDataVo.class);
         if (oldProcessTaskFormAttributeDataList == null) {
@@ -133,6 +132,7 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
                 if (oldContent != null) {
                     content.put("oldContent", oldContent);
                 }
+                String newContent = null;
                 IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
                 if (handler != null) {
                     String result = null;
@@ -147,10 +147,24 @@ public class FormAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
                         }
                     }
                     content.put("newContent", result);
+                    newContent = result;
                 } else {
                     content.put("newContent", attributeDataVo.getData());
+                    newContent = attributeDataVo.getData();
                 }
                 // }
+               if(oldContent != null && newContent != null){
+                   if(oldContent.equals(newContent)){
+                       content.remove("oldContent");
+                       content.put("changeType", "new");
+                   }else{
+                       content.put("changeType", "update");
+                   }
+                }else if(oldContent != null){
+                    content.put("changeType", "clear");
+                }else if(newContent != null){
+                    content.put("changeType", "new");
+                }
                 contentList.add(content);
             }
             processTaskStepAuditDetailVo.setNewContent(JSON.toJSONString(contentList));

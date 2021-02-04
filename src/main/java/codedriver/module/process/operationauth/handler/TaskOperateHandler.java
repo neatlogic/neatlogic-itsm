@@ -4,7 +4,8 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
-import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.constvalue.*;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,8 +14,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONPath;
 
 import codedriver.framework.auth.core.AuthActionChecker;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -34,6 +33,8 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             TernaryPredicate<ProcessTaskVo, ProcessTaskStepVo, String>> operationBiPredicateMap = new HashMap<>();
     @Autowired
     private ChannelMapper channelMapper;
+    @Autowired
+    private ChannelTypeMapper channelTypeMapper;
     @Autowired
     private CatalogMapper catalogMapper;
     @Autowired
@@ -220,7 +221,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                         if (checkIsProcessTaskStepUser(processTaskVo, ProcessUserType.MINOR.getValue(), userUuid)) {
                             processUserTypeList.add(ProcessUserType.MINOR.getValue());
                         }
-                        List<Long> channelTypeRelationIdList = channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
+                        List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
                                 processTaskVo.getChannelUuid(), userUuid, teamUuidList, roleUuidList, processUserTypeList);
                         if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
                             ChannelRelationVo channelRelationVo = new ChannelRelationVo();
@@ -229,7 +230,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                 channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
                                 List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
                                 if (CollectionUtils.isNotEmpty(channelRelationTargetList)) {
-                                    List<String> channelTypeUuidList = channelMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
+                                    List<String> channelTypeUuidList = channelTypeMapper.getChannelTypeRelationTargetListByChannelTypeRelationId(channelTypeRelationId);
                                     if (channelTypeUuidList.contains("all")) {
                                         channelTypeUuidList.clear();
                                     }
@@ -237,7 +238,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                         if ("channel".equals(channelRelation.getType())) {
                                             return true;
                                         } else if ("catalog".equals(channelRelation.getType())) {
-                                            if (channelMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
+                                            if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(channelRelation.getTarget(), channelTypeUuidList) > 0) {
                                                 return true;
                                             } else {
                                                 CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channelRelation.getTarget());
@@ -245,7 +246,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                                                     List<String> uuidList = catalogMapper.getCatalogUuidListByLftRht(catalogVo.getLft(), catalogVo.getRht());
                                                     for (String uuid : uuidList) {
                                                         if (!channelRelation.getTarget().equals(uuid)) {
-                                                            if (channelMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(uuid, channelTypeUuidList) > 0) {
+                                                            if (channelTypeMapper.getActiveChannelCountByParentUuidAndChannelTypeUuidList(uuid, channelTypeUuidList) > 0) {
                                                                 return true;
                                                             }
                                                         }
@@ -281,9 +282,11 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             if (processTaskVo.getIsShow() == 1) {
                 if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                     if (userUuid.equals(processTaskVo.getOwner())) {
-                        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-                        JSONArray stepUuidList = (JSONArray) JSONPath.read(taskConfig, "process.scoreConfig.config.stepUuidList");
-                        return CollectionUtils.isNotEmpty(stepUuidList);
+                        for(ProcessTaskStepVo stepVo : processTaskVo.getStepList()){
+                            if(stepVo.getType().equals(ProcessStepType.END.getValue())){
+                                return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo, stepVo.getId(), ProcessFlowDirection.BACKWARD);
+                            }
+                        }
                     }
                 }
             }

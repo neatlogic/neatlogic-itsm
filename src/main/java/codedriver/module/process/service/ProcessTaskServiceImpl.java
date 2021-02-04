@@ -109,6 +109,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Autowired
     private ChannelMapper channelMapper;
     @Autowired
+    private ChannelTypeMapper channelTypeMapper;
+    @Autowired
     private CatalogMapper catalogMapper;
 
     @Override
@@ -796,11 +798,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 jsonObj.remove("content");
             } else {
                 isUpdate = true;
-                jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
-                processTaskMapper.replaceProcessTaskContent(contentVo);
+                String oldContent = selectContentByHashMapper.getProcessTaskContentStringByHash(oldContentHash);
+                jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
+                processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
                 if (oldContentId == null) {
-                    processTaskMapper.insertProcessTaskStepContent(new ProcessTaskStepContentVo(processTaskId,
-                        processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue()));
+                    ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue());
+                    processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
+                    oldContentId = processTaskStepContentVo.getId();
                 } else {
                     processTaskMapper.updateProcessTaskStepContentById(
                         new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
@@ -808,7 +812,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             }
         } else if (oldContentHash != null) {
             isUpdate = true;
-            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContentHash);
+            String oldContent = selectContentByHashMapper.getProcessTaskContentStringByHash(oldContentHash);
+            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
             if (CollectionUtils.isEmpty(fileIdList)) {
                 processTaskMapper.deleteProcessTaskStepContentById(oldContentId);
             } else {
@@ -823,9 +828,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         } else {
             isUpdate = true;
             processTaskMapper.deleteProcessTaskStepFileByContentId(oldContentId);
-            ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(JSON.toJSONString(oldFileIdList));
-            processTaskMapper.replaceProcessTaskContent(processTaskContentVo);
-            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), processTaskContentVo.getHash());
+            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), JSON.toJSONString(oldFileIdList));
             /** 保存附件uuid **/
             if (CollectionUtils.isNotEmpty(fileIdList)) {
                 ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
@@ -845,13 +848,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     /**
-     * 
-     * @Time:2020年4月2日
      * @Description: 检查当前用户是否配置该权限
-     * @param processTaskStepVo
-     * @param operationType
-     * @return boolean
-     */
+     * @Author: linbq
+     * @Date: 2021/1/27 15:52
+     * @Params:[processTaskStepVo, owner, reporter, operationType, userUuid]
+     * @Returns:boolean
+     **/
     @Override
     public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter,
         ProcessTaskOperationType operationType, String userUuid) {
@@ -981,14 +983,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     /**
-     * 
-     * @Author: 14378
-     * @Time:2020年4月3日
      * @Description: 获取当前步骤的前置步骤列表中处理人是当前用户的步骤列表
-     * @param processTaskStepId
-     *            已激活的步骤id
-     * @return List<ProcessTaskStepVo>
-     */
+     * @Author: linbq
+     * @Date: 2020/4/3 8:26
+     * @Params:[processTaskVo, processTaskStepId, userUuid]
+     * @Returns:java.util.List<codedriver.framework.process.dto.ProcessTaskStepVo>
+     **/
     @Override
     public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo,
         Long processTaskStepId, String userUuid) {
@@ -1117,12 +1117,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 nameList.add(channelVo.getName());
                 processTaskVo.setChannelPath(String.join("/", nameList));
             }
-            ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+            ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
             if (channelTypeVo == null) {
                 channelTypeVo = new ChannelTypeVo();
                 channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
             }
-            processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+            try {
+                processTaskVo.setChannelType(channelTypeVo.clone());
+            } catch (CloneNotSupportedException e) {
+            }
         }
         // 耗时
         if (processTaskVo.getEndTime() != null) {
@@ -1175,29 +1178,28 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 toProcessTaskVo.setTranferReportDirection("to");
                 ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
                 if (channel != null) {
-                    ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+                    ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
                     if (channelTypeVo == null) {
                         channelTypeVo = new ChannelTypeVo();
                         channelTypeVo.setUuid(channel.getChannelTypeUuid());
                     }
-                    processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+                    try {
+                        processTaskVo.setChannelType(channelTypeVo.clone());
+                    } catch (CloneNotSupportedException e) {
+                    }
                 }
                 processTaskVo.getTranferReportProcessTaskList().add(toProcessTaskVo);
             }
         }
+        // 标签列表
+        processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
         return processTaskVo;
     }
 
     @Override
     public ProcessTaskStepVo getStartProcessTaskStepByProcessTaskId(Long processTaskId) {
         // 获取开始步骤id
-        List<ProcessTaskStepVo> processTaskStepList =
-                processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.START.getValue());
-        if (processTaskStepList.size() != 1) {
-            throw new ProcessTaskRuntimeException("工单：'" + processTaskId + "'有" + processTaskStepList.size() + "个开始步骤");
-        }
-
-        ProcessTaskStepVo startProcessTaskStepVo = processTaskStepList.get(0);
+        ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
         ProcessTaskStepReplyVo comment = new ProcessTaskStepReplyVo();
         // 获取上报描述内容
         List<Long> fileIdList = new ArrayList<>();
@@ -1259,12 +1261,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (processTaskVo != null) {
             ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
             if (channelVo != null) {
-                ChannelTypeVo channelTypeVo = channelMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+                ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
                 if (channelTypeVo == null) {
                     channelTypeVo = new ChannelTypeVo();
                     channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
                 }
-                processTaskVo.setChannelType(new ChannelTypeVo(channelTypeVo));
+                try {
+                    processTaskVo.setChannelType(channelTypeVo.clone());
+                } catch (CloneNotSupportedException e) {
+                }
             }
             // 获取工单表单信息
             ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
@@ -1287,7 +1292,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         return processTaskVo;
     }
-
+    /**
+     * @Description: 获取所有工单干系人信息，用于通知接收人
+     * @Author: linbq
+     * @Date: 2021/1/27 15:50
+     * @Params:[currentProcessTaskStepVo, receiverMap]
+     * @Returns:void
+     **/
     @Override
     public void getReceiverMap(ProcessTaskStepVo currentProcessTaskStepVo,
                                Map<String, List<NotifyReceiverVo>> receiverMap) {
@@ -1348,6 +1359,71 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 String[] split = defaultWorker.split("#");
                 receiverMap.computeIfAbsent(ProcessUserType.DEFAULT_WORKER.getValue(), k -> new ArrayList<>())
                         .add(new NotifyReceiverVo(split[0], split[1]));
+            }
+        }
+    }
+
+    /**
+     * @param processTaskVo
+     * @param processTaskStepVo
+     * @Description: 设置步骤当前用户的暂存数据
+     * @Author: linbq
+     * @Date: 2021/1/27 15:47
+     * @Params:[processTaskVo, processTaskStepVo]
+     * @Returns:void
+     */
+    @Override
+    public void setTemporaryData(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
+        processTaskStepDataVo.setProcessTaskId(processTaskStepVo.getProcessTaskId());
+        processTaskStepDataVo.setProcessTaskStepId(processTaskStepVo.getId());
+        processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
+        processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
+        ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
+        if (stepDraftSaveData != null) {
+            JSONObject dataObj = stepDraftSaveData.getData();
+            if (MapUtils.isNotEmpty(dataObj)) {
+                /** 表单属性 **/
+                JSONArray formAttributeDataList = dataObj.getJSONArray("formAttributeDataList");
+                if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
+                    Map<String, Object> formAttributeDataMap = new HashMap<>();
+                    for (int i = 0; i < formAttributeDataList.size(); i++) {
+                        JSONObject formAttributeDataObj = formAttributeDataList.getJSONObject(i);
+                        formAttributeDataMap.put(formAttributeDataObj.getString("attributeUuid"), formAttributeDataObj.get("dataList"));
+                    }
+//                    processTaskStepVo.setFormAttributeDataMap(formAttributeDataMap);
+                    processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
+                }
+                /** 描述及附件 **/
+                ProcessTaskStepReplyVo commentVo = new ProcessTaskStepReplyVo();
+                String content = dataObj.getString("content");
+                commentVo.setContent(content);
+                List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("fileIdList")), Long.class);
+                if (CollectionUtils.isNotEmpty(fileIdList)) {
+                    commentVo.setFileList(fileMapper.getFileListByIdList(fileIdList));
+                }
+                processTaskStepVo.setComment(commentVo);
+                /** 当前步骤特有步骤信息 **/
+                JSONObject handlerStepInfo = dataObj.getJSONObject("handlerStepInfo");
+                if (handlerStepInfo != null) {
+                    processTaskStepVo.setHandlerStepInfo(handlerStepInfo);
+                }
+                /** 优先级 **/
+                String priorityUuid = dataObj.getString("priorityUuid");
+                if (StringUtils.isNotBlank(priorityUuid)) {
+                    processTaskVo.setPriorityUuid(priorityUuid);
+                    PriorityVo priorityVo = priorityMapper.getPriorityByUuid(priorityUuid);
+                    if (priorityVo == null) {
+                        priorityVo = new PriorityVo();
+                        priorityVo.setUuid(priorityUuid);
+                    }
+                    processTaskVo.setPriority(priorityVo);
+                }
+                /** 标签列表 **/
+                List<String> tagList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("tagList")), String.class);
+                if(tagList != null){
+                    processTaskVo.setTagList(tagList);
+                }
             }
         }
     }

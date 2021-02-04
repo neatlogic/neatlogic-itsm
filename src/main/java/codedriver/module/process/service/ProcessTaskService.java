@@ -190,49 +190,41 @@ public interface ProcessTaskService {
     public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo processTaskStepReplyVo);
 
     /**
-     * 
-     * @Time:2020年4月2日
      * @Description: 检查当前用户是否配置该权限
-     * @param processTaskVo
-     * @param processTaskStepVo
-     * @param operationType
-     * @return boolean
-     */
+     * @Author: linbq
+     * @Date: 2021/1/27 15:52
+     * @Params:[processTaskStepVo, owner, reporter, operationType, userUuid]
+     * @Returns:boolean
+     **/
     public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter,
         ProcessTaskOperationType operationType, String userUuid);
 
     /**
-     * 
-     * @Time:2020年4月2日
      * @Description: 检查当前用户是否配置该权限
-     * @param processTaskVo
-     * @param processTaskStepVo
-     * @param operationType
-     * @return boolean
-     */
+     * @Author: linbq
+     * @Date: 2020/4/2 8:25
+     * @Params:[processTaskVo, operationType, userUuid]
+     * @Returns:boolean
+     **/
     public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType,
         String userUuid);
 
     /**
-     * 
-     * @Time:2020年4月3日
      * @Description: 获取工单中当前用户能撤回的步骤列表
-     * @param processTask
-     * @return Set<ProcessTaskStepVo>
-     */
+     * @Author: linbq
+     * @Date: 2020/4/3 8:26
+     * @Params:[processTaskVo, userUuid]
+     * @Returns:java.util.Set<codedriver.framework.process.dto.ProcessTaskStepVo>
+     **/
     public Set<ProcessTaskStepVo> getRetractableStepListByProcessTask(ProcessTaskVo processTaskVo, String userUuid);
 
     /**
-     * 
-     * @Author: 14378
-     * @Time:2020年4月3日
      * @Description: 获取当前步骤的前置步骤列表中处理人是当前用户的步骤列表
-     * @param processTaskStepList
-     *            步骤列表
-     * @param processTaskStepId
-     *            已激活的步骤id
-     * @return List<ProcessTaskStepVo>
-     */
+     * @Author: linbq
+     * @Date: 2020/4/3 8:26
+     * @Params:[processTaskVo, processTaskStepId, userUuid]
+     * @Returns:java.util.List<codedriver.framework.process.dto.ProcessTaskStepVo>
+     **/
     public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo,
         Long processTaskStepId, String userUuid);
 
@@ -295,17 +287,20 @@ public interface ProcessTaskService {
     public ProcessTaskVo getFromProcessTasById(Long processTaskId);
 
     /**
-     *
-     * @Time:2020年7月3日
      * @Description: 获取所有工单干系人信息，用于通知接收人
-     * @param processTaskId
-     *            工单id
-     * @param processTaskStepId
-     *            步骤id
-     * @param receiverMap
-     *            工单干系人信息
-     * @return void
-     */
+     * @Author: linbq
+     * @Date: 2021/1/27 15:50
+     * @Params:[currentProcessTaskStepVo, receiverMap]
+     * @Returns:void
+     **/
     public void getReceiverMap(ProcessTaskStepVo currentProcessTaskStepVo,
                                Map<String, List<NotifyReceiverVo>> receiverMap);
+    /**
+     * @Description: 设置步骤当前用户的暂存数据
+     * @Author: linbq
+     * @Date: 2021/1/27 15:47
+     * @Params:[processTaskVo, processTaskStepVo]
+     * @Returns:void
+     **/
+    public void setTemporaryData(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo);
 }

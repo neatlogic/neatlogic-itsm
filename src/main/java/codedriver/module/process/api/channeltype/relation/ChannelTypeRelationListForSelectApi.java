@@ -1,6 +1,7 @@
 package codedriver.module.process.api.channeltype.relation;
 
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -26,7 +27,6 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
 
 @Service
@@ -34,7 +34,7 @@ import codedriver.framework.process.dto.ChannelTypeRelationVo;
 public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase {
 
     @Autowired
-    private ChannelMapper channelMapper;
+    private ChannelTypeMapper channelTypeMapper;
 
     @Autowired
     private ProcessTaskService processTaskService;
@@ -83,7 +83,7 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
         String sourceChannelTypeUuid = jsonObj.getString("sourceChannelTypeUuid");
         if (StringUtils.isNotBlank(sourceChannelTypeUuid)) {
             channelTypeRelationVo.setUseIdList(true);
-            List<Long> channelTypeRelationIdList = channelMapper.getChannelTypeRelationIdListBySourceChannelTypeUuid(sourceChannelTypeUuid);
+            List<Long> channelTypeRelationIdList = channelTypeMapper.getChannelTypeRelationIdListBySourceChannelTypeUuid(sourceChannelTypeUuid);
             channelTypeRelationVo.setIdList(channelTypeRelationIdList);
         }
         String sourceChannelUuid = jsonObj.getString("sourceChannelUuid");
@@ -117,13 +117,13 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
                     }
                 }
             }
-            List<Long> channelTypeRelationIdList = channelMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(sourceChannelUuid, userUuid, teamUuidList, UserContext.get().getRoleUuidList(), processUserTypeList);
+            List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(sourceChannelUuid, userUuid, teamUuidList, UserContext.get().getRoleUuidList(), processUserTypeList);
             channelTypeRelationVo.setIdList(channelTypeRelationIdList);
         }
         if (!channelTypeRelationVo.isUseIdList() || CollectionUtils.isNotEmpty(channelTypeRelationVo.getIdList())) {
             int pageCount = 0;
             if (channelTypeRelationVo.getNeedPage()) {
-                int rowNum = channelMapper.getChannelTypeRelationCountForSelect(channelTypeRelationVo);
+                int rowNum = channelTypeMapper.getChannelTypeRelationCountForSelect(channelTypeRelationVo);
                 pageCount = PageUtil.getPageCount(rowNum, channelTypeRelationVo.getPageSize());
                 resultObj.put("currentPage", channelTypeRelationVo.getCurrentPage());
                 resultObj.put("pageSize", channelTypeRelationVo.getPageSize());
@@ -131,7 +131,7 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
                 resultObj.put("rowNum", rowNum);
             }
             if (!channelTypeRelationVo.getNeedPage() || channelTypeRelationVo.getCurrentPage() <= pageCount) {
-                List<ValueTextVo> list = channelMapper.getChannelTypeRelationListForSelect(channelTypeRelationVo);
+                List<ValueTextVo> list = channelTypeMapper.getChannelTypeRelationListForSelect(channelTypeRelationVo);
                 resultObj.put("list", list);
             }
         }

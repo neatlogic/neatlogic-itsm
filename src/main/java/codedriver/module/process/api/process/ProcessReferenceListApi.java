@@ -1,11 +1,16 @@
 package codedriver.module.process.api.process;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +29,13 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessMapper processMapper;
-	
+
+	@Autowired
+	private ChannelMapper channelMapper;
+
+	@Autowired
+	private ChannelTypeMapper channelTypeMapper;
+
 	@Override
 	public String getToken() {
 		return "process/reference/list";
@@ -41,35 +52,33 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid"),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+			@Param(name = "processUuid", type = ApiParamType.STRING, isRequired = true, desc = "流程uuid")
 	})
 	@Output({
-		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
-		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
-		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
-		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name = "channelList", explode = ChannelVo[].class, desc = "流程引用列表")
+			@Param(name = "channelList", explode = ChannelVo[].class, desc = "流程引用列表")
 	})
 	@Description(desc = "流程引用列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
-		ChannelProcessVo channelProcessVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelProcessVo>() {});
-		if(channelProcessVo.getNeedPage()) {
-			int rowNum = processMapper.getProcessReferenceCount(channelProcessVo.getProcessUuid());
-			int pageCount = PageUtil.getPageCount(rowNum, channelProcessVo.getPageSize());
-			int currentPage = channelProcessVo.getCurrentPage();
-			resultObj.put("rowNum", rowNum);
-			resultObj.put("pageCount", pageCount);
-			resultObj.put("currentPage", currentPage);
-			resultObj.put("pageSize", channelProcessVo.getPageSize());		
+		resultObj.put("channelList", new ArrayList<>());
+		String processUuid = jsonObj.getString("processUuid");
+		List<String> channelUuidList = processMapper.getProcessReferenceUuidList(processUuid);
+		if(CollectionUtils.isNotEmpty(channelUuidList)){
+			List<ChannelVo> channelVoList = channelMapper.getChannelVoByUuidList(channelUuidList);
+			for(ChannelVo channelVo : channelVoList){
+				ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+				channelVo.setChannelTypeVo(channelTypeVo.clone());
+				channelVo.setAllowDesc(null);
+				channelVo.setChannelRelationList(null);
+				channelVo.setParentUuid(null);
+				channelVo.setChannelTypeUuid(null);
+				channelVo.setColor(null);
+				channelVo.setIcon(null);
+				channelVo.setIsActive(null);
+			}
+			resultObj.put("channelList", channelVoList);
 		}
-		
-		List<ChannelVo> channelList = processMapper.getProcessReferenceList(channelProcessVo);
-		resultObj.put("channelList", channelList);
 		return resultObj;
 	}
 

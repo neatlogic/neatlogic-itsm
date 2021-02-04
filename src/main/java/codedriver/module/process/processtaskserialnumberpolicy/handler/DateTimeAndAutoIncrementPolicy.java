@@ -1,6 +1,8 @@
 package codedriver.module.process.processtaskserialnumberpolicy.handler;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -9,7 +11,6 @@ import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
-import org.joda.time.LocalDate;
 import org.quartz.CronExpression;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -146,12 +147,11 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
                 long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
                 long serialNumberSeed = startValue;
                 String timeFormat = null;
-                int pageSize = 1000;
-                int pageCount = PageUtil.getPageCount(rowNum, pageSize);
+                processTaskVo.setPageSize(100);
+                int pageCount = PageUtil.getPageCount(rowNum, processTaskVo.getPageSize());
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                     processTaskVo.setCurrentPage(currentPage);
-                    processTaskVo.setPageSize(pageSize);
                     List<ProcessTaskVo> processTaskList =
                             processTaskMapper.getProcessTaskListByChannelTypeUuidAndStartTime(processTaskVo);
                     for (ProcessTaskVo processTask : processTaskList) {
@@ -176,6 +176,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         } finally {
             processTaskSerialNumberMapper.updateProcessTaskSerialNumberPolicyEndTimeByChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
         }
+        System.out.println("------------");
         return 0;
     }
 
@@ -187,7 +188,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         long startValue = processTaskSerialNumberPolicyVo.getConfig().getLongValue("startValue");
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
         processTaskVo.setChannelTypeUuid(processTaskSerialNumberPolicyVo.getChannelTypeUuid());
-        processTaskVo.setStartTime(LocalDate.now().toDate());
+        processTaskVo.setStartTime(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         int rowNum = processTaskMapper.getProcessTaskCountByChannelTypeUuidAndStartTime(processTaskVo);
         rowNum += startValue;
         return rowNum % max;

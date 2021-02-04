@@ -1,5 +1,6 @@
 package codedriver.module.process.formattribute.handler;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -8,6 +9,8 @@ import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.FormHandlerBase;
+
+import java.util.List;
 
 @Component
 public class TextHandler extends FormHandlerBase {
@@ -30,6 +33,14 @@ public class TextHandler extends FormHandlerBase {
     @Override
     public Object valueConversionText(AttributeDataVo attributeDataVo, JSONObject configObj) {
         return attributeDataVo.getData();
+    }
+
+    @Override
+    public Object textConversionValue(List<String> values, JSONObject config) {
+        if(CollectionUtils.isNotEmpty(values)){
+            return values.get(0);
+        }
+        return null;
     }
 
     @Override

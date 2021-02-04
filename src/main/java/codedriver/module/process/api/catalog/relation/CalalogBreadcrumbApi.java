@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,10 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
+	@Autowired
+	private ChannelTypeMapper channelTypeMapper;
+
 	@Autowired
 	private TeamMapper teamMapper;
 	
@@ -96,7 +100,7 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
             throw new ChannelNotFoundException(channelUuid);
         }
         Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-        if(channelTypeRelationId != null && channelMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
+        if(channelTypeRelationId != null && channelTypeMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
         List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(channelUuid, channelTypeRelationId);

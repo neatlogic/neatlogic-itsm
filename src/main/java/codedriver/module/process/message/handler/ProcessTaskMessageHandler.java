@@ -20,7 +20,7 @@ public class ProcessTaskMessageHandler extends MessageHandlerBase {
 
     @Override
     public String getName() {
-        return "工单处理";
+        return "IT服务";
     }
 
     @Override

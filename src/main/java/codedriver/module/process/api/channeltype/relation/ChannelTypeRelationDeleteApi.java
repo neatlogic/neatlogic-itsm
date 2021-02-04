@@ -1,5 +1,9 @@
 package codedriver.module.process.api.channeltype.relation;
 
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.dto.ChannelTypeRelationVo;
+import codedriver.framework.process.exception.channeltype.ChannelTypeRelationHasReferenceException;
+import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -13,7 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 
 @Service
 @OperationType(type = OperationTypeEnum.DELETE)
@@ -22,7 +25,7 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 public class ChannelTypeRelationDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
-	private ChannelMapper channelMapper;
+	private ChannelTypeMapper channelTypeMapper;
 
 	@Override
 	public String getToken() {
@@ -46,10 +49,22 @@ public class ChannelTypeRelationDeleteApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-	    //TODO linbq 判断是否能删除
-	    channelMapper.deleteChannelTypeRelationById(channelTypeRelationId);
-        channelMapper.deleteChannelTypeRelationSourceByChannelTypeRelationId(channelTypeRelationId);
-        channelMapper.deleteChannelTypeRelationTargetByChannelTypeRelationId(channelTypeRelationId);
+		ChannelTypeRelationVo channelTypeRelationVo = channelTypeMapper.getChannelTypeRelationLockById(channelTypeRelationId);
+		if(channelTypeRelationVo == null) {
+			throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
+		}
+	    /** 判断是否能删除，被服务引用则不能删除 **/
+		if(channelTypeMapper.checkChannelTypeRelationHasReference(channelTypeRelationId) > 0){
+			throw new ChannelTypeRelationHasReferenceException(channelTypeRelationVo.getName());
+		}
+		/** 判断是逻辑删除还是物理删除，如果被工单使用，则逻辑删除，否则物理删除。 **/
+		if(channelTypeMapper.checkChannelTypeRelationIsUsedByChannelTypeRelationId(channelTypeRelationId) != null){
+			channelTypeMapper.updateChannelTypeRelationToDeleteById(channelTypeRelationId);
+		}else{
+			channelTypeMapper.deleteChannelTypeRelationById(channelTypeRelationId);
+			channelTypeMapper.deleteChannelTypeRelationSourceByChannelTypeRelationId(channelTypeRelationId);
+			channelTypeMapper.deleteChannelTypeRelationTargetByChannelTypeRelationId(channelTypeRelationId);
+		}
 		return null;
 	}
 

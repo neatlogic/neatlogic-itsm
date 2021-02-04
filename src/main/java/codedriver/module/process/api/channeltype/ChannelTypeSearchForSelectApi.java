@@ -3,7 +3,7 @@ package codedriver.module.process.api.channeltype;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -24,7 +24,7 @@ import java.util.List;
 public class ChannelTypeSearchForSelectApi extends PrivateApiComponentBase {
 
 	@Autowired
-	private ChannelMapper channelMapper;
+	private ChannelTypeMapper channelTypeMapper;
 
 	@Override
 	public String getToken() {
@@ -63,7 +63,7 @@ public class ChannelTypeSearchForSelectApi extends PrivateApiComponentBase {
 		
 		JSONObject resultObj = new JSONObject();
 		if(channelTypeVo.getNeedPage()) {
-			int rowNum = channelMapper.searchChannelTypeCount(channelTypeVo);
+			int rowNum = channelTypeMapper.searchChannelTypeCount(channelTypeVo);
 			int pageCount = PageUtil.getPageCount(rowNum, channelTypeVo.getPageSize());
 			channelTypeVo.setPageCount(pageCount);
 			channelTypeVo.setRowNum(rowNum);
@@ -72,7 +72,7 @@ public class ChannelTypeSearchForSelectApi extends PrivateApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
 		}
-		List<ValueTextVo> channelTypeList = channelMapper.searchChannelTypeListForSelect(channelTypeVo);
+		List<ValueTextVo> channelTypeList = channelTypeMapper.searchChannelTypeListForSelect(channelTypeVo);
 		Integer needAllOption = jsonObj.getInteger("needAllOption");
 		if(Objects.equal(needAllOption, 1)) {
 		    channelTypeList.add(0, new ValueTextVo("all", "所有"));
