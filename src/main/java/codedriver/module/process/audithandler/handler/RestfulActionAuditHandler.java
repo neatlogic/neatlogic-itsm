@@ -1,5 +1,6 @@
 package codedriver.module.process.audithandler.handler;
 
+import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,14 +9,13 @@ import com.alibaba.fastjson.JSON;
 
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dto.ActionVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.notify.constvalue.TaskStepNotifyTriggerType;
 
 @Service
-public class RestfulActionAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
+public class RestfulActionAuditHandler implements IProcessTaskStepAuditDetailHandler {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;
@@ -26,7 +26,7 @@ public class RestfulActionAuditHandler extends ProcessTaskStepAuditDetailHandler
 	}
 
 	@Override
-	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	public int handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getNewContent())) {
 			ActionVo actionVo = JSON.parseObject(processTaskStepAuditDetailVo.getNewContent(), ActionVo.class);
 			IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(actionVo.getIntegrationUuid());

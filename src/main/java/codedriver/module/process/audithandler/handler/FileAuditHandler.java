@@ -3,6 +3,7 @@ package codedriver.module.process.audithandler.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +13,10 @@ import com.alibaba.fastjson.JSON;
 
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerBase;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 @Service
-public class FileAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
+public class FileAuditHandler implements IProcessTaskStepAuditDetailHandler {
 	
 	@Autowired
 	private FileMapper fileMapper;
@@ -27,7 +27,7 @@ public class FileAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 	}
 
 	@Override
-	protected int myHandle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
+	public int handle(ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo) {
 		String oldContent = processTaskStepAuditDetailVo.getOldContent();
 		if(StringUtils.isNotBlank(oldContent)) {
 			processTaskStepAuditDetailVo.setOldContent(parse(oldContent));
@@ -35,6 +35,9 @@ public class FileAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 		String newContent = processTaskStepAuditDetailVo.getNewContent();
 		if(StringUtils.isNotBlank(newContent)) {
 			processTaskStepAuditDetailVo.setNewContent(parse(newContent));
+		}
+		if(processTaskStepAuditDetailVo.getOldContent() == null && processTaskStepAuditDetailVo.getNewContent() == null){
+			return 0;
 		}
 		return 1;
 	}
@@ -51,6 +54,6 @@ public class FileAuditHandler extends ProcessTaskStepAuditDetailHandlerBase {
 			}
 			return JSON.toJSONString(fileList);
 		}
-		return content;
+		return null;
 	}
 }

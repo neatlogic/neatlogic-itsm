@@ -1,13 +1,13 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.WorkAssignmentUnitVo;
+import codedriver.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,22 +18,14 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
-import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
 import codedriver.framework.process.audithandler.core.ProcessTaskStepAuditDetailHandlerFactory;
-import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
-import codedriver.framework.util.FreemarkerUtil;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -52,6 +44,9 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
     @Autowired
     private SelectContentByHashMapper selectContentByHashMapper;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @Override
     public String getToken() {
         return "processtask/audit/list";
@@ -67,10 +62,14 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")})
-    @Output({@Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "工单活动列表"),
-        @Param(name = "Return[n].auditDetailList", explode = ProcessTaskStepAuditDetailVo[].class, desc = "工单活动详情列表")})
+    @Input({
+            @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "工单步骤id")
+    })
+    @Output({
+            @Param(name = "Return", explode = ProcessTaskStepAuditVo[].class, desc = "工单活动列表"),
+            @Param(name = "Return[n].auditDetailList", explode = ProcessTaskStepAuditDetailVo[].class, desc = "工单活动详情列表")
+    })
     @Description(desc = "工单活动列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -79,80 +78,83 @@ public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         try {
             new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW).build()
-                .checkAndNoPermissionThrowException();
+                    .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
 
-        List<ProcessTaskStepAuditVo> resutlList = new ArrayList<>();
+        List<ProcessTaskStepAuditVo> resultList = new ArrayList<>();
         ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
         processTaskStepAuditVo.setProcessTaskId(processTaskId);
         processTaskStepAuditVo.setProcessTaskStepId(processTaskStepId);
-        List<ProcessTaskStepAuditVo> processTaskStepAuditList =
-            processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
-        if (CollectionUtils.isNotEmpty(processTaskStepAuditList)) {
-            Long[] processTaskStepIds = new Long[processTaskStepAuditList.size()];
-            processTaskStepAuditList.stream().map(ProcessTaskStepAuditVo::getProcessTaskStepId)
-                .collect(Collectors.toList()).toArray(processTaskStepIds);
-            Map<Long, Set<ProcessTaskOperationType>> operateMap =
-                new ProcessAuthManager.Builder().addProcessTaskStepId(processTaskStepIds)
-                    .addOperationType(ProcessTaskOperationType.STEP_VIEW).build().getOperateMap();
-            for (ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
-                JSONObject paramObj = new JSONObject();
-                if (processTaskStepAudit.getProcessTaskStepId() != null) {
-                    // 判断当前用户是否有权限查看该节点信息
-                    ProcessTaskStepVo processTaskStepVo =
-                            processTaskMapper.getProcessTaskStepBaseInfoById(processTaskStepAudit.getProcessTaskStepId());
-                    if (processTaskStepVo == null) {
-                        throw new ProcessTaskStepNotFoundException(
-                                processTaskStepAudit.getProcessTaskStepId().toString());
-                    }
-                    IProcessStepInternalHandler processStepUtilHandler =
-                            ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
-                    if (processStepUtilHandler == null) {
-                        throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
-                    }
-                    if (!operateMap.computeIfAbsent(processTaskStepVo.getId(), k -> new HashSet<>())
-                            .contains(ProcessTaskOperationType.STEP_VIEW)) {
-                        continue;
-                    }
-                }
-                paramObj.put("processTaskStepName", processTaskStepAudit.getProcessTaskStepName());
-                if (processTaskStepAudit.getStepStatusVo() != null) {
-                    paramObj.put("stepStatusVo", processTaskStepAudit.getStepStatusVo());
-                }
-                List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList =
-                    processTaskStepAudit.getAuditDetailList();
-                processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
-                Iterator<ProcessTaskStepAuditDetailVo> iterator = processTaskStepAuditDetailList.iterator();
-                while (iterator.hasNext()) {
-                    ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo = iterator.next();
-                    if (ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-                        String content = selectContentByHashMapper
-                            .getProcessTaskContentStringByHash(processTaskStepAuditDetailVo.getNewContent());
-                        if (StringUtils.isNotBlank(content)) {
-                            processTaskStepAudit.setNextStepId(Long.parseLong(content));
-                        }
-                    }
-                    IProcessTaskStepAuditDetailHandler auditDetailHandler =
-                        ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
-                    if (auditDetailHandler != null) {
-                        int isShow = auditDetailHandler.handle(processTaskStepAuditDetailVo);
-                        paramObj.putAll(processTaskStepAuditDetailVo.getParamObj());
-                        if (isShow == 0) {
-                            iterator.remove();
-                        }
-                    }
-                    if (ProcessTaskAuditDetailType.TASKSTEP.getValue().equals(processTaskStepAuditDetailVo.getType())) {
-                        processTaskStepAudit.setNextStepName(processTaskStepAuditDetailVo.getNewContent());
-                    }
-                }
-                processTaskStepAudit.setDescription(FreemarkerUtil.transform(paramObj,
-                    ProcessTaskAuditTypeFactory.getDescription(processTaskStepAudit.getAction())));
-                resutlList.add(processTaskStepAudit);
-            }
+        List<ProcessTaskStepAuditVo> processTaskStepAuditList = processTaskMapper.getProcessTaskStepAuditList(processTaskStepAuditVo);
+        Map<Long, Set<ProcessTaskOperationType>> operateMap = new HashMap<>();
+        List<Long> processtaskStepIdList = processTaskStepAuditList.stream().filter(e -> e.getProcessTaskStepId() != null).map(ProcessTaskStepAuditVo::getProcessTaskStepId).collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(processtaskStepIdList)){
+            Long[] processTaskStepIds = new Long[processtaskStepIdList.size()];
+            processtaskStepIdList.toArray(processTaskStepIds);
+            operateMap = new ProcessAuthManager.Builder().addProcessTaskStepId(processTaskStepIds).addOperationType(ProcessTaskOperationType.STEP_VIEW).build().getOperateMap();
         }
-        return resutlList;
+        for (ProcessTaskStepAuditVo processTaskStepAudit : processTaskStepAuditList) {
+            if (processTaskStepAudit.getProcessTaskStepId() != null) {
+                // 判断当前用户是否有权限查看该节点信息
+                if (!operateMap.computeIfAbsent(processTaskStepAudit.getProcessTaskStepId(), k -> new HashSet<>()).contains(ProcessTaskOperationType.STEP_VIEW)) {
+                    continue;
+                }
+            }
+
+            if(StringUtils.isNotBlank(processTaskStepAudit.getDescriptionHash())){
+                String description = selectContentByHashMapper.getProcessTaskContentStringByHash(processTaskStepAudit.getDescriptionHash());
+                processTaskStepAudit.setDescription(description);
+            }
+            if(SystemUser.SYSTEM.getUserUuid().equals(processTaskStepAudit.getUserUuid())){
+                processTaskStepAudit.setUserVo(new WorkAssignmentUnitVo(SystemUser.SYSTEM.getUserVo()));
+            }else {
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepAudit.getUserUuid());
+                if(userVo == null){
+                    userVo = new UserVo(processTaskStepAudit.getUserUuid());
+                }
+                processTaskStepAudit.setUserVo(new WorkAssignmentUnitVo(userVo));
+            }
+
+            if(SystemUser.SYSTEM.getUserUuid().equals(processTaskStepAudit.getOriginalUser())){
+                processTaskStepAudit.setOriginalUserVo(new WorkAssignmentUnitVo(SystemUser.SYSTEM.getUserVo()));
+            }else if(StringUtils.isNotBlank(processTaskStepAudit.getOriginalUser())) {
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(processTaskStepAudit.getOriginalUser());
+                if(userVo == null){
+                    userVo = new UserVo(processTaskStepAudit.getOriginalUser());
+                }
+                processTaskStepAudit.setOriginalUserVo(new WorkAssignmentUnitVo(userVo));
+            }
+            List<ProcessTaskStepAuditDetailVo> processTaskStepAuditDetailList = processTaskStepAudit.getAuditDetailList();
+            processTaskStepAuditDetailList.sort(ProcessTaskStepAuditDetailVo::compareTo);
+            Iterator<ProcessTaskStepAuditDetailVo> iterator = processTaskStepAuditDetailList.iterator();
+            while (iterator.hasNext()) {
+                ProcessTaskStepAuditDetailVo processTaskStepAuditDetailVo = iterator.next();
+                if(ProcessTaskAuditDetailTypeFactory.getNeedCompression(processTaskStepAuditDetailVo.getType())){
+                    String oldContent = processTaskStepAuditDetailVo.getOldContent();
+                    if(StringUtils.isNotBlank(oldContent)) {
+                        processTaskStepAuditDetailVo.setOldContent(selectContentByHashMapper.getProcessTaskContentStringByHash(oldContent));
+                    }
+                    String newContent = processTaskStepAuditDetailVo.getNewContent();
+                    if(StringUtils.isNotBlank(newContent)) {
+                        processTaskStepAuditDetailVo.setNewContent(selectContentByHashMapper.getProcessTaskContentStringByHash(newContent));
+                    }
+                }
+                IProcessTaskStepAuditDetailHandler auditDetailHandler = ProcessTaskStepAuditDetailHandlerFactory.getHandler(processTaskStepAuditDetailVo.getType());
+                if (auditDetailHandler != null) {
+                    int isShow = auditDetailHandler.handle(processTaskStepAuditDetailVo);
+                    if (isShow == 0) {
+                        iterator.remove();
+                    }
+                }
+            }
+            resultList.add(processTaskStepAudit);
+        }
+        if(CollectionUtils.isNotEmpty(resultList)){
+            resultList.sort((e1, e2) -> e2.getId().compareTo(e1.getId()));
+        }
+        return resultList;
     }
 
 }

@@ -121,6 +121,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                             if ("always".equals(type)) {// 直接流转
                                 canRun = true;
                                 ruleObj.putAll(moveonConfig);
+                                ruleObj.put("result", true);
                             } else if ("optional".equals(type)) {// 自定义
                                 JSONArray conditionGroupList = moveonConfig.getJSONArray("conditionGroupList");
                                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
@@ -136,6 +137,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                         // System.out.println(JSON.toJSONString(conditionConfigVo));
                                         canRun = RunScriptUtil.runScript(script);
                                         ruleObj.putAll(JSON.parseObject(JSON.toJSONString(conditionConfigVo)));
+                                        ruleObj.put("result", canRun);
                                     } catch (Exception e) {
                                         logger.error(e.getMessage(), e);
                                     } finally {
@@ -144,6 +146,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 }
                             } else {
                                 ruleObj.putAll(moveonConfig);
+                                ruleObj.put("result", true);
                             }
                             List<String> targetStepNameList = new ArrayList<>();
                             for (int j = 0; j < targetStepList.size(); j++) {
@@ -161,7 +164,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 }
                             }
                             ruleObj.put("type", type);
-                            ruleObj.put("result", canRun);
                             ruleObj.put("targetStepList", targetStepNameList);
                             ruleList.add(ruleObj);
                         }

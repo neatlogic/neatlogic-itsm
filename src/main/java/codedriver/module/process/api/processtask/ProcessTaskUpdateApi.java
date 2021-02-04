@@ -100,9 +100,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         if (StringUtils.isNotBlank(title) && !title.equals(oldTitle)) {
             isUpdate = true;
             processTaskVo.setTitle(title);
-            ProcessTaskContentVo oldTitleContentVo = new ProcessTaskContentVo(oldTitle);
-            processTaskMapper.replaceProcessTaskContent(oldTitleContentVo);
-            jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTitleContentVo.getHash());
+            jsonObj.put(ProcessTaskAuditDetailType.TITLE.getOldDataParamName(), oldTitle);
         } else {
             jsonObj.remove("title");
         }
@@ -115,9 +113,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             }
             isUpdate = true;
             processTaskVo.setPriorityUuid(priorityUuid);
-            ProcessTaskContentVo oldPriorityUuidContentVo = new ProcessTaskContentVo(oldPriorityUuid);
-            processTaskMapper.replaceProcessTaskContent(oldPriorityUuidContentVo);
-            jsonObj.put(ProcessTaskAuditDetailType.PRIORITY.getOldDataParamName(), oldPriorityUuidContentVo.getHash());
+            jsonObj.put(ProcessTaskAuditDetailType.PRIORITY.getOldDataParamName(), oldPriorityUuid);
         } else {
             jsonObj.remove("priorityUuid");
         }
@@ -129,6 +125,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         List<String> tagNameList =
             JSONObject.parseArray(JSON.toJSONString(jsonObj.getJSONArray("tagList")), String.class);
         if (tagNameList != null) {
+            jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
             List<ProcessTagVo> oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
             processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
             if (CollectionUtils.isNotEmpty(tagNameList)) {
@@ -141,7 +138,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                     processMapper.insertProcessTag(tagVo);
                     existTagList.add(tagVo);
                 }
-                List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();
+                List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<>();
                 for (ProcessTagVo processTagVo : existTagList) {
                     processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId, processTagVo.getId()));
                 }
@@ -151,15 +148,12 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                 .filter(a -> !oldTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a))
                 .collect(Collectors.toList()).size();
             if (tagNameList.size() != oldTagList.size() || diffCount > 0) {
-                List<String> oldTagNameList = new ArrayList<String>();
+                List<String> oldTagNameList = new ArrayList<>();
                 for (ProcessTagVo tag : oldTagList) {
                     oldTagNameList.add(tag.getName());
                 }
-                ProcessTaskContentVo oldTagContentVo = new ProcessTaskContentVo(String.join(",", oldTagNameList));
-                processTaskMapper.replaceProcessTaskContent(oldTagContentVo);
-                if (StringUtils.isNotBlank(oldTagContentVo.getHash())) {
-                    jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), oldTagContentVo.getHash());
-                    jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
+                if (CollectionUtils.isNotEmpty(oldTagNameList)) {
+                    jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getOldDataParamName(), String.join(",", oldTagNameList));
                 }
                 isUpdate = true;
             } else {
