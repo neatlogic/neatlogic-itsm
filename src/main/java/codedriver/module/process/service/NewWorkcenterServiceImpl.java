@@ -62,17 +62,23 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         //找出符合条件分页后的工单ID List
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
-        System.out.println("idSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+        //System.out.println("idSql:-------------------------------------------------------------------------------");
+        //System.out.println(sb.build());
         List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
         workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
         //补充工单字段信息
         workcenterVo.setTheadVoList(theadList);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
-        System.out.println("fieldSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+        //System.out.println("fieldSql:-------------------------------------------------------------------------------");
+        //System.out.println(sb.build());
         List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
+        for (ProcessTaskVo processTaskVo : processTaskVoList) {
+            builder.addProcessTaskId(processTaskVo.getId());
+            for(ProcessTaskStepVo processStep : processTaskVo.getStepList()) {
+                builder.addProcessTaskStepId(processStep.getId());
+            }
+        }
         Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
                 builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
                         .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
@@ -87,7 +93,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 IProcessTaskColumn column = entry.getValue();
                 taskJson.put(column.getName(), column.getValue(processTaskVo));
             }
-
             // route 供前端跳转路由信息
             JSONObject routeJson = new JSONObject();
             routeJson.put("taskid", processTaskVo.getId());
@@ -104,8 +109,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         }
         //统计符合条件工单数量
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
-        System.out.println("countSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+        //System.out.println("countSql:-------------------------------------------------------------------------------");
+        //System.out.println(sb.build());
         int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
 
         returnObj.put("sortList", sortList);
@@ -118,8 +123,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //补充待办数
         workcenterVo.setIsProcessingOfMine(1);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
-        System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+        //System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
+        //System.out.println(sb.build());
         returnObj.put("processingOfMineCount", workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build()));
         return returnObj;
     }
@@ -127,8 +132,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     @Override
     public Integer doSearchCount(WorkcenterVo workcenterVo) {
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
-        System.out.println("countSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+        //System.out.println("countSql:-------------------------------------------------------------------------------");
+        //System.out.println(sb.build());
         return workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
     }
 
@@ -197,9 +202,9 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     private JSONObject getTaskOperate(ProcessTaskVo processTaskVo,Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap) {
         JSONObject action = new JSONObject();
         String processTaskStatus = processTaskVo.getStatus();
-        Boolean isHasAbort = false;
-        Boolean isHasRecover = false;
-        Boolean isHasUrge = false;
+        boolean isHasAbort = false;
+        boolean isHasRecover = false;
+        boolean isHasUrge = false;
         JSONArray handleArray = new JSONArray();
         if ((ProcessTaskStatus.RUNNING.getValue().equals(processTaskStatus)
                 || ProcessTaskStatus.DRAFT.getValue().equals(processTaskStatus)

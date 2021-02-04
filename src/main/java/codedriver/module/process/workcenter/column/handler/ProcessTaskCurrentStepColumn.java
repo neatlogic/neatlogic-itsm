@@ -226,8 +226,6 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 							workerJson.put("workTypename", "变更步骤");
 						} else if (ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
 							workerJson.put("workTypename", "子任务");
-						} else{
-							workerJson.put("workTypename", "处理人");
 						}
 						if (GroupSearch.USER.getValue().equals(workerVo.getType())) {
 							UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
@@ -258,17 +256,6 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 						}
 					}
 
-					/*for (ProcessTaskStepUserVo userVo : stepVo.getUserList()) {
-						JSONObject userJson = new JSONObject();
-						if (ProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(stepVo.getHandler())
-								&& ProcessUserType.MINOR.getValue().equals(userVo.getUserType())) {
-							userJson.put("workTypename", "变更步骤");
-						} else if (ProcessUserType.MINOR.getValue().equals(userVo.getUserType())) {
-							userJson.put("workTypename", "子任务");
-						}
-						userJson.put("workerVo", userVo);
-						workerArray.add(userJson);
-					}*/
 					currentStepJson.put("workerList",workerArray);
 					currentStepArray.add(currentStepJson);
 				}

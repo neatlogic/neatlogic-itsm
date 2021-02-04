@@ -210,8 +210,6 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                             workerJson.put("workTypename", "变更步骤");
                         } else if (ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
                             workerJson.put("workTypename", "子任务");
-                        } else {
-                            workerJson.put("workTypename", "处理人");
                         }
                         if (GroupSearch.USER.getValue().equals(workerVo.getType())) {
                             UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
@@ -242,23 +240,6 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                         }
                     }
                 }
-                /*if(ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
-                        ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus())
-                ) {
-                    for (ProcessTaskStepUserVo stepUserVo : stepVo.getUserList()) {
-                        JSONObject userJson = new JSONObject();
-                        if (ProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(stepVo.getHandler())
-                                && ProcessUserType.MINOR.getValue().equals(stepUserVo.getUserType())) {
-                            userJson.put("workTypename", "变更步骤");
-                        } else if (ProcessUserType.MINOR.getValue().equals(stepUserVo.getUserType())) {
-                            userJson.put("workTypename", "子任务");
-                        }else {
-                            userJson.put("workTypename", "处理人");
-                        }
-                        userJson.put("workerVo", JSON.parseObject(JSONObject.toJSONString(stepUserVo.getUserVo())));
-                        workerArray.add(userJson);
-                    }
-                }*/
             }
         }
         return workerArray;
