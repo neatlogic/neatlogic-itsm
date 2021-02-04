@@ -87,7 +87,10 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 
 	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {
-		return processTaskVo.getReporterVo();
+		if(!processTaskVo.getOwnerVo().getUuid().equals(processTaskVo.getReporterVo().getUuid())){
+			return processTaskVo.getReporterVo();
+		}
+		return null;
 	}
 
 	@Override

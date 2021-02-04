@@ -65,19 +65,27 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		if(jsonObj.containsKey("uuid")) {
 			String uuid = jsonObj.getString("uuid");
-			Integer currentPage = jsonObj.getInteger("currentPage");
-			Integer pageSize = jsonObj.getInteger("pageSize");
-			Integer isMeWillDo = jsonObj.getInteger("isMeWillDo");
-			JSONArray sortList = jsonObj.getJSONArray("sortList");
+			JSONObject conditionConfig = jsonObj.getJSONObject("conditionConfig");
+			Integer currentPage = conditionConfig.getInteger("currentPage");
+			Integer pageSize = conditionConfig.getInteger("pageSize");
+			//Integer isProcessingOfMine = conditionConfig.getInteger("isProcessingOfMine");
+			//JSONObject startTimeCondition = conditionConfig.getJSONObject("startTimeCondition");
+			JSONArray sortList = conditionConfig.getJSONArray("sortList");
 			List<WorkcenterVo> workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
 			if(CollectionUtils.isNotEmpty(workcenterList)) {
 				jsonObj = JSONObject.parseObject(workcenterList.get(0).getConditionConfig());
 				jsonObj.put("uuid", uuid);
-				jsonObj.put("currentPage", currentPage);
-				jsonObj.put("pageSize", pageSize);
-				jsonObj.put("isMeWillDo", isMeWillDo);
+				JSONObject conditionConfigTmp = jsonObj.getJSONObject("conditionConfig");
+				conditionConfigTmp.put("currentPage", currentPage);
+				conditionConfigTmp.put("pageSize", pageSize);
+				/*if(isProcessingOfMine != null ) {
+					conditionConfigTmp.put("isProcessingOfMine", isProcessingOfMine);
+				}
+				if(startTimeCondition != null ) {
+					conditionConfigTmp.put("startTimeCondition", startTimeCondition);
+				}*/
 				if(CollectionUtils.isNotEmpty(sortList)) {
-				    jsonObj.put("sortList", sortList);
+					conditionConfigTmp.put("sortList", sortList);
 				}
 			}
 		}

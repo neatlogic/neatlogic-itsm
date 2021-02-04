@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -52,7 +52,7 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
     public JSONObject getConfig() {
         JSONObject config = new JSONObject();
         config.put("type", FormHandlerType.USERSELECT.toString());
-        config.put("groupList", Arrays.asList("user"));
+        config.put("groupList", Collections.singletonList("user"));
         config.put("multiple", true);
         /** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
         config.put("isMultiple", true);

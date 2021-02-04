@@ -208,7 +208,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 			for (ProcessTaskStepVo stepVo : stepVoList) {
 				if(ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
 						ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
-						ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus())
+						(ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus())&& stepVo.getIsActive() == 1)
 				) {
 					JSONObject currentStepJson  = new JSONObject();
 					currentStepJson.put("name",stepVo.getName());
@@ -228,13 +228,13 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 						} else if (ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
 							workerJson.put("workTypename", "子任务");
 						}
-						if (GroupSearch.USER.getValue().equals(workerVo.getUserType())) {
+						if (GroupSearch.USER.getValue().equals(workerVo.getType())) {
 							UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
 							if (userVo != null) {
 								workerJson.put("workerVo", JSON.parseObject(JSONObject.toJSONString(userVo)));
 								workerArray.add(workerJson);
 							}
-						} else if (GroupSearch.TEAM.getValue().equals(workerVo.getUserType())) {
+						} else if (GroupSearch.TEAM.getValue().equals(workerVo.getType())) {
 							TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
 							if (teamVo != null) {
 								JSONObject teamTmp = new JSONObject();

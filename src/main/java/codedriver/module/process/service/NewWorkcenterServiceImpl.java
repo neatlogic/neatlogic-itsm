@@ -93,7 +93,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             routeJson.put("taskid", processTaskVo.getId());
             taskJson.put("route", routeJson);
             // operate 获取对应工单的操作
-
             taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
             dataList.add(taskJson);
 
@@ -116,6 +115,12 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         returnObj.put("pageSize", workcenterVo.getPageSize());
         returnObj.put("currentPage", workcenterVo.getCurrentPage());
         returnObj.put("pageCount", PageUtil.getPageCount(total, workcenterVo.getPageSize()));
+        //补充待办数
+        workcenterVo.setIsProcessingOfMine(1);
+        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
+        System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
+        System.out.println(sb.build());
+        returnObj.put("processingOfMineCount", workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build()));
         return returnObj;
     }
 

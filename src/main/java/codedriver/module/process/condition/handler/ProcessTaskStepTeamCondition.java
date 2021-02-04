@@ -60,7 +60,11 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
     @Override
     public JSONObject getConfig() {
         JSONObject returnObj = new JSONObject();
+        returnObj.put("type", FormHandlerType.USERSELECT.toString());
+        returnObj.put("groupList", Collections.singletonList("team"));
+        returnObj.put("includeList", Arrays.asList(GroupSearch.TEAM.getValuePlugin()+UserType.LOGIN_TEAM.getValue(),GroupSearch.TEAM.getValuePlugin()+UserType.LOGIN_DEPARTMENT.getValue()));
         returnObj.put("multiple", true);
+        returnObj.put("isMultiple", true);
         return returnObj;
     }
 

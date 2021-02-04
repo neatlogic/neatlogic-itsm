@@ -1,24 +1,5 @@
 package codedriver.module.process.dashboard.handler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.QueryResultSet;
-
 import codedriver.framework.common.constvalue.dashboard.ChartType;
 import codedriver.framework.common.constvalue.dashboard.DashboardShowConfig;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
@@ -31,6 +12,15 @@ import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.module.process.service.WorkcenterService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.QueryResultSet;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 @Component
 public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
@@ -48,7 +38,8 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 		DashboardChartBase chart = DashboardChartFactory.getChart(widgetVo.getChartType());
 		JSONObject jsonObj = new JSONObject();
 		if (chart != null) {
-			jsonObj = JSONObject.parseObject(widgetVo.getConditionConfig());
+			JSONObject conditionConfig = JSONObject.parseObject(widgetVo.getConditionConfig());
+			jsonObj.put("conditionConfig",conditionConfig);
 			JSONObject preDatas = new JSONObject();
 			JSONObject configChart = widgetVo.getChartConfigObj();
 			String groupField = configChart.getString(DashboardShowConfig.GROUPFIELD.getValue());
@@ -58,7 +49,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 			if(StringUtils.isNotBlank(subGroupField)) {
 				resultColumnList.add(subGroupField);
 			}
-			jsonObj.put("resultColumnList", resultColumnList);
+			conditionConfig.put("resultColumnList", resultColumnList);
 			//补充分组条件所有属性
 			Map<String, String> valueTextMap =  new HashMap<>();
 			if(configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {

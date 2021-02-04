@@ -49,6 +49,8 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
 		JSONObject config = new JSONObject();
 		config.put("type", FormHandlerType.USERSELECT.toString());
 		config.put("groupList", Collections.singletonList("user"));
+		config.put("excludeList", Collections.singletonList("common#alluser"));
+		config.put("includeList", Arrays.asList(GroupSearch.USER.getValuePlugin()+UserType.LOGIN_USER.getValue(),GroupSearch.USER.getValuePlugin()+UserType.VIP_USER.getValue()));
 		config.put("multiple", true);
 		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
 		config.put("isMultiple", true);

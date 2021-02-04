@@ -85,42 +85,47 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
 	    		}
 	    	}
 	    }
-		Iterator<WorkcenterVo> it =workcenterList.iterator();
-	    while (it.hasNext()) {
-	        WorkcenterVo workcenter = it.next();
-			if(workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
+		for (WorkcenterVo workcenter : workcenterList) {
+			if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
 				workcenter.setIsCanEdit(0);
-			}if(workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue())&& CollectionUtils.isNotEmpty(userAuthList)) {
+			}
+			if (workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue()) && CollectionUtils.isNotEmpty(userAuthList)) {
 				workcenter.setIsCanEdit(1);
 				workcenter.setIsCanRole(1);
-			}else if(workcenter.getType().equals(ProcessWorkcenterType.CUSTOM.getValue())){
-				if(UserContext.get().getUserUuid(true).equalsIgnoreCase(workcenter.getOwner())) {
+			} else if (workcenter.getType().equals(ProcessWorkcenterType.CUSTOM.getValue())) {
+				if (UserContext.get().getUserUuid(true).equalsIgnoreCase(workcenter.getOwner())) {
 					workcenter.setIsCanEdit(1);
-					if(CollectionUtils.isNotEmpty(userAuthList)) {
+					if (CollectionUtils.isNotEmpty(userAuthList)) {
 						workcenter.setIsCanRole(1);
-					}else {
+					} else {
 						workcenter.setIsCanRole(0);
 					}
-				}else {
+				} else {
 					workcenter.setIsCanEdit(0);
 					workcenter.setIsCanRole(0);
 				}
 			}
-			
+
 			//查询数量
-			if(isAll == 1) {
+			if (isAll == 1) {
 				JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
-				conditionJson.put("isProcessingOfMine",1);
+				JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
+				conditionConfig.put("isProcessingOfMine", 1);
+				conditionConfig.put("pageSize",100);
 				WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
-				wcProcessingOfMine.setPageSize(100);
-				Integer ProcessingOfMineCount  = newWorkcenterService.doSearchCount(wcProcessingOfMine);
-				workcenter.setProcessingOfMineCount(ProcessingOfMineCount>99?"99+":ProcessingOfMineCount.toString());
+				Integer ProcessingOfMineCount = newWorkcenterService.doSearchCount(wcProcessingOfMine);
+				workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
 			}
 			workcenter.setConditionConfig(null);
 			//排序 用户设置的排序优先
-		    if(workcenterUserSortMap.containsKey(workcenter.getUuid())) {
-		    	workcenter.setSort(workcenterUserSortMap.get(workcenter.getUuid()));
-		    }
+			if (workcenterUserSortMap.containsKey(workcenter.getUuid())) {
+				workcenter.setSort(workcenterUserSortMap.get(workcenter.getUuid()));
+			}
+			//去除返回前端的多余字段
+			workcenter.setConditionGroupList(null);
+			workcenter.setConditionGroupRelList(null);
+			workcenter.setIsProcessingOfMine(null);
+			workcenter.setValueList(null);
 		}
 	    workcenterJson.put("viewType", viewType);
 	    workcenterJson.put("workcenterList", workcenterList.stream().sorted(Comparator.comparing(WorkcenterVo::getSort)).collect(Collectors.toList()));
