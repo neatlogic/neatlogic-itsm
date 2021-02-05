@@ -117,7 +117,14 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
         }
         //我的待办 条件
         if(workcenterVo.getIsProcessingOfMine() == 1){
-            SqlTableUtil.getProcessingOfMineJoinTableSql(joinTableColumnList);
+            List<JoinTableColumnVo> handlerJoinTableColumnList = SqlTableUtil.getProcessingOfMineJoinTableSql();
+            for (JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList) {
+                String key = handlerJoinTableColumn.getHash();
+                if (!joinTableKeyList.contains(key)) {
+                    joinTableColumnList.add(handlerJoinTableColumn);
+                    joinTableKeyList.add(key);
+                }
+            }
         }
         return joinTableColumnList;
     }

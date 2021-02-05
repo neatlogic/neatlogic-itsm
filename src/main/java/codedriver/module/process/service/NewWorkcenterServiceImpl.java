@@ -97,6 +97,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             JSONObject routeJson = new JSONObject();
             routeJson.put("taskid", processTaskVo.getId());
             taskJson.put("route", routeJson);
+            taskJson.put("taskid", processTaskVo.getId());
             // operate 获取对应工单的操作
             taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
             dataList.add(taskJson);
@@ -122,11 +123,35 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         returnObj.put("pageCount", PageUtil.getPageCount(total, workcenterVo.getPageSize()));
         //补充待办数
         workcenterVo.setIsProcessingOfMine(1);
+        workcenterVo.setPageSize(100);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
         //System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
         //System.out.println(sb.build());
-        returnObj.put("processingOfMineCount", workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build()));
+        Integer count  = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
+        returnObj.put("processingOfMineCount", count>99?"99+":count.toString());
         return returnObj;
+    }
+
+    @Override
+    public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo,String columnName) {
+        List<JSONObject> dataList = new ArrayList<JSONObject>();
+        JSONArray sortColumnList = new JSONArray();
+        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+        //thead
+        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
+        theadList = theadList.stream().filter(t->t.getName().equals(columnName)).collect(Collectors.toList());
+        //找出符合条件分页后的工单ID List
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
+        //System.out.println("idSql:-------------------------------------------------------------------------------");
+        System.out.println(sb.build());
+        List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
+        workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
+        //补充工单字段信息
+        workcenterVo.setTheadVoList(theadList);
+        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
+        //System.out.println("fieldSql:-------------------------------------------------------------------------------");
+        //System.out.println(sb.build());
+        return workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
     }
 
     @Override
