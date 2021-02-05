@@ -10,6 +10,19 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.ChannelTypeSqlTable;
+import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -74,5 +87,37 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 			channelType = JSONObject.parseObject(json.toString()).getString("text");
 		}
 		return channelType;
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		JSONObject channelTypeJson = new JSONObject();
+		if (processTaskVo.getChannelVo() != null) {
+			if(processTaskVo.getChannelVo().getChannelTypeVo() != null){
+				ChannelTypeVo channelTypeVo = processTaskVo.getChannelVo().getChannelTypeVo();
+				channelTypeJson.put("value",channelTypeVo.getUuid());
+				channelTypeJson.put("text",channelTypeVo.getName());
+				channelTypeJson.put("color",channelTypeVo.getColor());
+			}
+		}
+		return channelTypeJson;
+	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return new ArrayList<TableSelectColumnVo>(){
+			{
+				add(new TableSelectColumnVo(new ChannelTypeSqlTable(), Arrays.asList(
+						new SelectColumnVo(ChannelTypeSqlTable.FieldEnum.UUID.getValue(),"ChannelTypeUuid"),
+						new SelectColumnVo(ChannelTypeSqlTable.FieldEnum.NAME.getValue(),"ChannelTypeName"),
+						new SelectColumnVo(ChannelTypeSqlTable.FieldEnum.COLOR.getValue(),"ChannelTypeColor")
+				)));
+			}
+		};
+	}
+
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return SqlTableUtil.getChannelTypeJoinTableSql();
 	}
 }

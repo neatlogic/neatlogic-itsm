@@ -1,5 +1,6 @@
 package codedriver.module.process.condition.handler;
 
+import codedriver.framework.common.constvalue.FormHandlerType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +14,25 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.common.constvalue.FormHandlerType;
+import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.ChannelTypeSqlTable;
+import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -104,5 +117,15 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 			}			
 		}
 		return value;
+	}
+
+	@Override
+	public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+		getSimpleSqlConditionWhere(conditionList.get(index), sqlSb,new ChannelTypeSqlTable().getShortName(),ChannelTypeSqlTable.FieldEnum.UUID.getValue());
+	}
+
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList(WorkcenterVo workcenterVo) {
+		return SqlTableUtil.getChannelTypeJoinTableSql();
 	}
 }

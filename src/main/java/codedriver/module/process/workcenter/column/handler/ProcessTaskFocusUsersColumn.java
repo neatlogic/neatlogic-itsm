@@ -1,13 +1,27 @@
 package codedriver.module.process.workcenter.column.handler;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskFocusSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.UserTable;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -65,5 +79,49 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 	@Override
 	public Object getSimpleValue(Object json) {
 		return null;
+	}
+
+	@Override
+	public Object getValue(ProcessTaskVo processTaskVo) {
+		JSONObject focusUserObj = new JSONObject();
+		int isCurrentUserFocus = 0;
+		if(CollectionUtils.isNotEmpty(processTaskVo.getFocusUserList())) {
+			List<String> focusUserUuidList = processTaskVo.getFocusUserList().stream().map(UserVo::getUuid).collect(Collectors.toList());
+			focusUserObj.put("focusUserList", focusUserUuidList);
+			if(focusUserUuidList.contains(UserContext.get().getUserUuid())) {
+				isCurrentUserFocus = 1;
+			}
+		}
+		focusUserObj.put("isCurrentUserFocus",isCurrentUserFocus);
+		return focusUserObj;
+	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return new ArrayList<TableSelectColumnVo>(){
+			{
+				add(new TableSelectColumnVo(new UserTable(),"focus", Arrays.asList(
+						new SelectColumnVo(UserTable.FieldEnum.UUID.getValue(),"focusUuid"),
+						new SelectColumnVo(UserTable.FieldEnum.USER_NAME.getValue(),"focusName"),
+						new SelectColumnVo(UserTable.FieldEnum.USER_INFO.getValue(),"focusInfo"),
+						new SelectColumnVo(UserTable.FieldEnum.VIP_LEVEL.getValue(),"focusVipLevel"),
+						new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(),"focusPinYin")
+				)));
+			}
+		};
+	}
+
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return new ArrayList<JoinTableColumnVo>() {
+			{
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskFocusSqlTable(), new HashMap<String, String>() {{
+					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskFocusSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+				}}));
+				add(new JoinTableColumnVo(new ProcessTaskFocusSqlTable(), new UserTable(),"focus", new HashMap<String, String>() {{
+					put(ProcessTaskFocusSqlTable.FieldEnum.USER_UUID.getValue(), UserTable.FieldEnum.UUID.getValue());
+				}}));
+			}
+		};
 	}
 }
