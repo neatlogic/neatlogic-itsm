@@ -1,7 +1,10 @@
 package codedriver.module.process.service;
 
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import com.alibaba.fastjson.JSONObject;
+
+import java.util.List;
 
 /**
  * @Title: NewWorkcenterService
@@ -31,4 +34,14 @@ public interface NewWorkcenterService {
      * @Returns: java.lang.Integer
      **/
     Integer doSearchCount(WorkcenterVo workcenterVo);
+
+
+    /**
+     * @Description: 搜索工单号、标题、内容
+     * @Author: 89770
+     * @Date: 2021/1/19 20:09
+     * @Params: [workcenterVo]
+     * @Returns: com.alibaba.fastjson.JSONObject
+     **/
+    public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo,String columnName);
 }

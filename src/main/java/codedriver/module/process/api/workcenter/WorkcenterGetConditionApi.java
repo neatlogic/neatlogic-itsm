@@ -61,9 +61,10 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
 			//不支持endTime过滤，如果是简单模式 title、id、content 不返回
 			//没有工单管理权限则不显示“是否隐藏工单”选项
-			if(conditionModel.equals(ProcessConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
+			if((condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
 					||condition.getName().equals(ProcessWorkcenterField.ID.getValue())||condition.getName().equals(ProcessWorkcenterField.CONTENT.getValue()))
 					||condition.getName().equals(ProcessWorkcenterField.ENDTIME.getValue())
+					||condition.getName().equals(ProcessWorkcenterField.SERIAL_NUMBER.getValue())
 					||condition.getName().equals(ProcessWorkcenterField.STARTTIME.getValue())
 					||ProcessWorkcenterField.getValue(condition.getName())== null
 					||!(condition instanceof IProcessTaskCondition)
