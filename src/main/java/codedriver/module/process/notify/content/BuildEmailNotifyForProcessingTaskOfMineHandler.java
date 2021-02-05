@@ -2,13 +2,19 @@ package codedriver.module.process.notify.content;
 
 import codedriver.framework.notify.core.BuildNotifyContentHandlerBase;
 import codedriver.framework.notify.dto.NotifyVo;
+import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.handler.EmailNotifyHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +34,9 @@ import java.util.stream.Collectors;
 public class BuildEmailNotifyForProcessingTaskOfMineHandler extends BuildNotifyContentHandlerBase {
 
     private static Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+
+    @Resource
+    private ProcessTaskService processTaskService;
 
     @Override
     protected String myGetPreviewContent(JSONObject config) {
@@ -84,46 +93,82 @@ public class BuildEmailNotifyForProcessingTaskOfMineHandler extends BuildNotifyC
     }
 
     @Override
-    protected List<NotifyVo> myGetNotifyVoList(Map<String, Object> map) {
+    protected List<NotifyVo> myGetNotifyVoList(NotifyJobVo job) {
         List<NotifyVo> notifyList = new ArrayList<>();
-        Object title = map.get("title");
-        Object content = map.get("content");
-        Object columnListObj = map.get("columnList");
-        Object userTaskMapObj = map.get("userTaskMap");
-        if (userTaskMapObj != null) {
-            Map<String, List<Map<String, Object>>> userTaskMap = (Map<String, List<Map<String, Object>>>) userTaskMapObj;
-            List<String> columnList = (List<String>) columnListObj;
-            for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
-                NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null,null);
-                notifyBuilder.withTitleTemplate(title != null ? title.toString() : null);
-                notifyBuilder.addUserUuid(entry.getKey());
 
-                /** 绘制工单列表 */
-                StringBuilder taskTable = new StringBuilder();
-                if (content != null) {
-                    taskTable.append(content.toString() + "</br>");
+        JSONObject config = job.getConfig();
+        if(MapUtils.isNotEmpty(config)){
+            String title = null;
+            String content = null;
+            JSONObject messageConfig = config.getJSONObject("messageConfig");
+            if(MapUtils.isNotEmpty(messageConfig)){
+                title = messageConfig.getString("title");
+                content = messageConfig.getString("content");
+            }
+
+            /** 需要的工单字段 */
+            JSONArray dataColumns = config.getJSONArray("dataColumnList");
+            List<String> columnList = new ArrayList<>();
+            if(CollectionUtils.isNotEmpty(dataColumns)){
+                dataColumns.stream().forEach(o -> columnList.add(columnComponentMap.get(o.toString()).getDisplayName()));
+            }else{
+                for(Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()){
+                    columnList.add(entry.getValue().getDisplayName());
                 }
-                taskTable.append("<table>");
-                taskTable.append("<tr>");
-                for (String column : columnList) {
-                    taskTable.append("<th>" + column + "</th>");
+            }
+
+            /** 获取工单查询条件 */
+            List<String> stepTeamUuidList = new ArrayList<>();
+            JSONObject conditionConfig = config.getJSONObject("conditionConfig");
+            if(MapUtils.isNotEmpty(conditionConfig)){
+                JSONArray stepTeam = conditionConfig.getJSONArray(ProcessingTaskOfMineHandler.ConditionOptions.STEPTEAM.getValue());
+                if (CollectionUtils.isNotEmpty(stepTeam)) {
+                    for (Object o : stepTeam) {
+                        stepTeamUuidList.add(o.toString().split("#")[1]);
+                    }
                 }
-                taskTable.append("</tr>");
-                for (Map<String, Object> taskMap : entry.getValue()) {
+            }
+
+            /** 查询工单 */
+            List<Map<String, Object>> originalTaskList = processTaskService.getTaskListByStepTeamUuidList(stepTeamUuidList);
+
+            /** 按处理人给工单分类 */
+            Map<String, List<Map<String, Object>>> userTaskMap = ProcessingTaskOfMineHandler.getUserTaskMap(originalTaskList);
+
+            if(MapUtils.isNotEmpty(userTaskMap)){
+                for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
+                    NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null,null);
+                    notifyBuilder.withTitleTemplate(title != null ? title.toString() : null);
+                    notifyBuilder.addUserUuid(entry.getKey());
+
+                    /** 绘制工单列表 */
+                    StringBuilder taskTable = new StringBuilder();
+                    if (StringUtils.isNotBlank(content)) {
+                        taskTable.append(content + "</br>");
+                    }
+                    taskTable.append("<table>");
                     taskTable.append("<tr>");
                     for (String column : columnList) {
-                        if (taskMap.containsKey(column)) {
-                            taskTable.append("<td>" + (taskMap.get(column) == null ? "" : taskMap.get(column)) + "</td>");
-                        }
+                        taskTable.append("<th>" + column + "</th>");
                     }
                     taskTable.append("</tr>");
+                    for (Map<String, Object> taskMap : entry.getValue()) {
+                        taskTable.append("<tr>");
+                        for (String column : columnList) {
+                            if (taskMap.containsKey(column)) {
+                                taskTable.append("<td>" + (taskMap.get(column) == null ? "" : taskMap.get(column)) + "</td>");
+                            }
+                        }
+                        taskTable.append("</tr>");
+                    }
+                    taskTable.append("</table>");
+                    notifyBuilder.withContentTemplate(taskTable.toString());
+                    NotifyVo notifyVo = notifyBuilder.build();
+                    notifyList.add(notifyVo);
                 }
-                taskTable.append("</table>");
-                notifyBuilder.withContentTemplate(taskTable.toString());
-                NotifyVo notifyVo = notifyBuilder.build();
-                notifyList.add(notifyVo);
             }
         }
+
         return notifyList;
     }
 

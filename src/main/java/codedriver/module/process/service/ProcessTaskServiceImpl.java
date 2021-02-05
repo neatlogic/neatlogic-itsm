@@ -7,8 +7,10 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
@@ -48,6 +50,8 @@ import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
+import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
+import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -58,9 +62,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
@@ -74,44 +78,47 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     private Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private TeamMapper teamMapper;
 
-    @Autowired
+    @Resource
     private FileMapper fileMapper;
 
-    @Autowired
+    @Resource
     private IntegrationMapper integrationMapper;
 
-    @Autowired
+    @Resource
     private WorktimeMapper worktimeMapper;
 
-    @Autowired
+    @Resource
     ProcessTaskStepDataMapper processTaskStepDataMapper;
 
-    @Autowired
+    @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
 
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
 
-    @Autowired
+    @Resource
     private ProcessStepHandlerMapper processStepHandlerMapper;
 
-    @Autowired
+    @Resource
     private PriorityMapper priorityMapper;
-    @Autowired
+    @Resource
     private ChannelMapper channelMapper;
-    @Autowired
+    @Resource
     private ChannelTypeMapper channelTypeMapper;
-    @Autowired
+    @Resource
     private CatalogMapper catalogMapper;
+
+    @Resource
+    private RoleMapper roleMapper;
 
     @Override
     public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
@@ -1428,4 +1435,151 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
     }
 
+
+    @Override
+    public List<Map<String, Object>> getTaskListByStepTeamUuidList(List<String> stepTeamUuidList) {
+        List<Map<String, Object>> taskList = new ArrayList<>();
+        List<ProcessTaskVo> processTaskList = processTaskMapper.getPendingProcessTaskListByStepTeamUuidList(stepTeamUuidList);
+        ProcessTaskCurrentStepNameColumn currentStepNameColumn = new ProcessTaskCurrentStepNameColumn();
+        ProcessTaskCurrentStepWorkerColumn currentStepWorkerColumn = new ProcessTaskCurrentStepWorkerColumn();
+        if (CollectionUtils.isNotEmpty(processTaskList)) {
+            for (ProcessTaskVo processTaskVo : processTaskList) {
+                Map<String, Object> map = new HashMap<>();
+
+                /** 获取服务信息 **/
+                ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+                if (channel == null) {
+                    channel = new ChannelVo();
+                }
+                /** 获取服务目录信息 **/
+                CatalogVo catalog = null;
+                if (StringUtils.isNotBlank(channel.getParentUuid())) {
+                    catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+                }
+                if (catalog == null) {
+                    catalog = new CatalogVo();
+                }
+
+                /** 获取工单当前步骤 **/
+                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper
+                        .getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(processTaskVo.getId(), new ArrayList<String>() {
+                            {
+                                add(ProcessStepType.PROCESS.getValue());
+                                add(ProcessStepType.START.getValue());
+                            }
+                        }, 1);
+                /** 记录当前步骤名与处理人 */
+                String currentStepName = null;
+                String currentStepWorkerName = null;
+                Set<String> currentStepWorkerUuidList = new HashSet<>();
+                if (CollectionUtils.isNotEmpty(processTaskStepList)) {
+                    List<String> currentStepNameList = new ArrayList<>();
+                    Set<String> currentStepWorkerNameList = new HashSet<>();
+                    for (ProcessTaskStepVo step : processTaskStepList) {
+                        currentStepNameList.add(step.getName());
+                        if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())
+                                && (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())
+                                || (ProcessTaskStatus.PENDING.getValue().equals(processTaskVo.getStatus())
+                                && step.getIsActive() == 1) || ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus()))) {
+                            if (step.getStatus().equals(ProcessTaskStatus.PENDING.getValue()) && step.getIsActive() == 1) {
+                                for (ProcessTaskStepWorkerVo worker : step.getWorkerList()) {
+                                    if (GroupSearch.USER.getValue().equals(worker.getType())) {
+                                        UserVo user = userMapper.getUserBaseInfoByUuid(worker.getUuid());
+                                        if (user != null) {
+                                            currentStepWorkerNameList.add(user.getUserName());
+                                            currentStepWorkerUuidList.add(user.getUuid());
+                                        }
+                                    } else if (GroupSearch.TEAM.getValue().equals(worker.getType())) {
+                                        TeamVo team = teamMapper.getTeamByUuid(worker.getUuid());
+                                        if (team != null) {
+                                            currentStepWorkerNameList.add(team.getName());
+                                            List<String> userUuidList = userMapper.getUserUuidListByTeamUuid(team.getUuid());
+                                            if (CollectionUtils.isNotEmpty(userUuidList)) {
+                                                currentStepWorkerUuidList.addAll(userUuidList);
+                                            }
+                                        }
+                                    } else if (GroupSearch.ROLE.getValue().equals(worker.getType())) {
+                                        RoleVo role = roleMapper.getRoleByUuid(worker.getUuid());
+                                        if (role != null) {
+                                            currentStepWorkerNameList.add(role.getName());
+                                            List<String> userUuidList = userMapper.getUserUuidListByRoleUuid(role.getUuid());
+                                            if (CollectionUtils.isNotEmpty(userUuidList)) {
+                                                currentStepWorkerUuidList.addAll(userUuidList);
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (ProcessTaskStepUserVo userVo : step.getUserList()) {
+                                    UserVo user = userMapper.getUserBaseInfoByUuid(userVo.getUserVo().getUuid());
+                                    if (user != null) {
+                                        currentStepWorkerNameList.add(user.getUserName());
+                                        currentStepWorkerUuidList.add(user.getUuid());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    currentStepName = String.join(",", currentStepNameList);
+                    currentStepWorkerName = String.join(",", currentStepWorkerNameList);
+                }
+
+                /** 记录超时时间 **/
+                List<ProcessTaskSlaVo> processTaskSlaList = processTaskMapper.getProcessTaskSlaByProcessTaskId(processTaskVo.getId());
+                StringBuilder sb = new StringBuilder();
+                if (CollectionUtils.isNotEmpty(processTaskSlaList) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                    for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
+                        ProcessTaskSlaTimeVo slaTimeVo = slaVo.getSlaTimeVo();
+                        Long expireTimeLong = slaTimeVo.getExpireTimeLong();
+                        if (!(slaTimeVo.getExpireTime() == null && expireTimeLong == null)) {
+                            Long expireTime = slaTimeVo.getExpireTime() == null ? expireTimeLong : slaTimeVo.getExpireTime().getTime();
+                            Long willOverTime = null;
+                            JSONObject configObj = slaVo.getConfigObj();
+                            if (configObj != null && configObj.containsKey("willOverTimeRule")) {
+                                Integer willOverTimeRule = configObj.getInteger("willOverTimeRule");
+                                if (willOverTimeRule != null && expireTime != null) {
+                                    willOverTime = expireTime - willOverTimeRule * 60 * 100;
+                                }
+                            }
+                            long time;
+                            if (willOverTime != null && System.currentTimeMillis() > willOverTime) {
+                                time = System.currentTimeMillis() - willOverTime;
+                                sb.append(slaVo.getName())
+                                        .append("距离超时：")
+                                        .append(Math.floor(time / (1000 * 60 * 60 * 24)))
+                                        .append("天;");
+                            } else if (expireTime != null && System.currentTimeMillis() > expireTime) {
+                                time = System.currentTimeMillis() - expireTime;
+                                sb.append(slaVo.getName())
+                                        .append("已超时：")
+                                        .append(Math.floor(time / (1000 * 60 * 60 * 24)))
+                                        .append("天;");
+                            }
+                        }
+                    }
+                }
+
+                map.put(ProcessWorkcenterField.ID.getValue(), processTaskVo.getId());
+                map.put(ProcessWorkcenterField.SERIAL_NUMBER.getName(), processTaskVo.getSerialNumber());
+                map.put(ProcessWorkcenterField.TITLE.getName(), processTaskVo.getTitle());
+                map.put(ProcessWorkcenterField.CHANNELTYPE.getName(), processTaskVo.getChannelTypeName());
+                map.put(ProcessWorkcenterField.CHANNEL.getName(), processTaskVo.getChannelName());
+                map.put(ProcessWorkcenterField.CATALOG.getName(), catalog.getName());
+                map.put(ProcessWorkcenterField.ENDTIME.getName(), processTaskVo.getEndTime());
+                map.put(ProcessWorkcenterField.STARTTIME.getName(), processTaskVo.getStartTime());
+                map.put(ProcessWorkcenterField.OWNER.getName(), processTaskVo.getOwnerName());
+                map.put(ProcessWorkcenterField.REPORTER.getName(), processTaskVo.getReporterName());
+                map.put(ProcessWorkcenterField.PRIORITY.getName(), processTaskVo.getPriorityName());
+                map.put(ProcessWorkcenterField.STATUS.getName(), ProcessTaskStatus.getText(processTaskVo.getStatus()));
+                map.put(ProcessWorkcenterField.WOKRTIME.getName(), processTaskVo.getWorktimeName());
+                map.put(currentStepNameColumn.getDisplayName(), currentStepName);
+                map.put(currentStepWorkerColumn.getDisplayName(), currentStepWorkerName);
+                map.put(ProcessWorkcenterField.EXPIRED_TIME.getName(), sb.toString());
+                /** 保留当前步骤处理人的userUuid，以便后面据此给工单分类 */
+                map.put(currentStepWorkerColumn.getName(), currentStepWorkerUuidList);
+                taskList.add(map);
+            }
+        }
+        return taskList;
+    }
 }
