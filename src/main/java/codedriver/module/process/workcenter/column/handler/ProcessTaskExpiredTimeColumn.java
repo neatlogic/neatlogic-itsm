@@ -151,6 +151,9 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 			for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
 				JSONObject tmpJson = new JSONObject();
 				ProcessTaskSlaTimeVo slaTimeVo = slaVo.getSlaTimeVo();
+				if(slaTimeVo == null ){
+					continue;
+				}
 				Long expireTimeLong = slaTimeVo.getExpireTime() != null ?slaTimeVo.getExpireTime().getTime():null;
 				Long realExpireTimeLong = slaTimeVo.getRealExpireTime() != null ?slaTimeVo.getRealExpireTime().getTime():null;
 				if(expireTimeLong != null) {
