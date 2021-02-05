@@ -70,7 +70,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         workcenterVo.setTheadVoList(theadList);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
         //System.out.println("fieldSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+        //System.out.println(sb.build());
         List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
         for (ProcessTaskVo processTaskVo : processTaskVoList) {
@@ -126,7 +126,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         workcenterVo.setPageSize(100);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
         //System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+        //System.out.println(sb.build());
         Integer count  = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
         returnObj.put("processingOfMineCount", count>99?"99+":count.toString());
         return returnObj;
