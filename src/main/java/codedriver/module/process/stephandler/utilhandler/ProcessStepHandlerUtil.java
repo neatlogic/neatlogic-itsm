@@ -589,35 +589,36 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
             /** 校验表单属性是否合法 **/
             FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processTaskFormVo.getFormUuid());
-            for (FormAttributeVo formAttributeVo : formVersionVo.getFormAttributeList()) {
-                if (formAttributeVo.isRequired()) {
-                    if (hidecomponentList.contains(formAttributeVo.getUuid())) {
-                        continue;
-                    }
-                    if (readcomponentList.contains(formAttributeVo.getUuid())) {
-                        continue;
-                    }
-                    Object data = formAttributeDataMap.get(formAttributeVo.getUuid());
-                    if (data != null) {
-                        if (data instanceof String) {
-                            if (StringUtils.isBlank(data.toString())) {
-                                throw new FormAttributeRequiredException(formAttributeVo.getLabel());
-                            }
-                        } else if (data instanceof JSONArray) {
-                            if (CollectionUtils.isEmpty((JSONArray) data)) {
-                                throw new FormAttributeRequiredException(formAttributeVo.getLabel());
-                            }
-                        } else if (data instanceof JSONObject) {
-                            if (MapUtils.isEmpty((JSONObject) data)) {
-                                throw new FormAttributeRequiredException(formAttributeVo.getLabel());
-                            }
+            if(CollectionUtils.isNotEmpty(formVersionVo.getFormAttributeList())) {
+                for (FormAttributeVo formAttributeVo : formVersionVo.getFormAttributeList()) {
+                    if (formAttributeVo.isRequired()) {
+                        if (hidecomponentList.contains(formAttributeVo.getUuid())) {
+                            continue;
                         }
-                    } else {
-                        throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                        if (readcomponentList.contains(formAttributeVo.getUuid())) {
+                            continue;
+                        }
+                        Object data = formAttributeDataMap.get(formAttributeVo.getUuid());
+                        if (data != null) {
+                            if (data instanceof String) {
+                                if (StringUtils.isBlank(data.toString())) {
+                                    throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                                }
+                            } else if (data instanceof JSONArray) {
+                                if (CollectionUtils.isEmpty((JSONArray) data)) {
+                                    throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                                }
+                            } else if (data instanceof JSONObject) {
+                                if (MapUtils.isEmpty((JSONObject) data)) {
+                                    throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                                }
+                            }
+                        } else {
+                            throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                        }
                     }
                 }
             }
-
             /** 获取旧表单数据 **/
             List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
             Iterator<ProcessTaskFormAttributeDataVo> iterator = oldProcessTaskFormAttributeDataList.iterator();
