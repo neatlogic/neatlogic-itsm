@@ -186,12 +186,14 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
         List<TeamVo> departmentTeamList = new ArrayList<>();
         if (stepTeamValueList.contains(loginDepartment)) {
             List<TeamVo> teamTmpList = teamMapper.searchTeamByUserUuidAndLevelList(UserContext.get().getUserUuid(true), Arrays.asList(TeamLevel.TEAM.getValue(), TeamLevel.DEPARTMENT.getValue()));
-            departmentTeamList.addAll(teamMapper.getDepartmentTeamUuidByTeamList(teamTmpList));
-            if (CollectionUtils.isNotEmpty(departmentTeamList)) {
-                List<TeamVo> groupTeamList = teamMapper.getAllSonTeamByParentTeamList(departmentTeamList);
-                if (CollectionUtils.isNotEmpty(groupTeamList)) {
-                    for (TeamVo groupTeam : groupTeamList) {
-                        stepTeamValueList.add(groupTeam.getUuid());
+            if(CollectionUtils.isNotEmpty(teamTmpList)){
+                departmentTeamList.addAll(teamMapper.getDepartmentTeamUuidByTeamList(teamTmpList));
+                if (CollectionUtils.isNotEmpty(departmentTeamList)) {
+                    List<TeamVo> groupTeamList = teamMapper.getAllSonTeamByParentTeamList(departmentTeamList);
+                    if (CollectionUtils.isNotEmpty(groupTeamList)) {
+                        for (TeamVo groupTeam : groupTeamList) {
+                            stepTeamValueList.add(groupTeam.getUuid());
+                        }
                     }
                 }
             }
