@@ -91,8 +91,8 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
 	public Object getValue(ProcessTaskVo processTaskVo) {
 		JSONObject priorityJson = new JSONObject();
 		if(processTaskVo.getPriority() == null){
-			priorityJson.put("value", "服务已删除");
-			priorityJson.put("text", "服务已删除");
+			priorityJson.put("value", "优先级已删除");
+			priorityJson.put("text", "优先级已删除");
 			priorityJson.put("color", "rgb(255, 102, 102)");
 		}else {
 			priorityJson.put("value", processTaskVo.getPriority().getUuid());
