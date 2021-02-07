@@ -68,8 +68,12 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
             }
         });
 
-        buildFieldMap.put(FieldTypeEnum.COUNT.getValue(), (workcenterVo, sqlSb) -> {
+        buildFieldMap.put(FieldTypeEnum.TOTAL_COUNT.getValue(), (workcenterVo, sqlSb) -> {
             sqlSb.append(" COUNT( distinct pt.id ) ");
+        });
+
+        buildFieldMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(), (workcenterVo, sqlSb) -> {
+            sqlSb.append(" distinct pt.id ");
         });
 
         buildFieldMap.put(FieldTypeEnum.FIELD.getValue(), (workcenterVo, sqlSb) -> {

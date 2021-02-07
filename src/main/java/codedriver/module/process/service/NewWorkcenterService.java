@@ -33,7 +33,7 @@ public interface NewWorkcenterService {
      * @Params: [workcenterVo]
      * @Returns: java.lang.Integer
      **/
-    Integer doSearchCount(WorkcenterVo workcenterVo);
+    Integer doSearchLimitCount(WorkcenterVo workcenterVo);
 
 
     /**

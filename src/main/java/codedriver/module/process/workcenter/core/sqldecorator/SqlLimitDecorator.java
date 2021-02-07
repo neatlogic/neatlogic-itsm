@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class SqlLimitDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        if(FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
+        if(FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())||FieldTypeEnum.LIMIT_COUNT.getValue().equals(workcenterVo.getSqlFieldType())) {
             sqlSb.append(String.format(" limit %d,%d ", workcenterVo.getStartNum(), workcenterVo.getPageSize()));
         }
     }

@@ -63,7 +63,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         Date time11 = new Date();
         System.out.println("---------------------------workcenter cost time ---------------------------------------- ");
-        System.out.println("theadTime-------------------------------------------------------------------:"+(time11.getTime()-time1.getTime()));
+        System.out.println("theadTime:"+(time11.getTime()-time1.getTime()));
         //找出符合条件分页后的工单ID List
         Date time2 = new Date();
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
@@ -123,7 +123,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             sortList = sortColumnList;
         }
         //统计符合条件工单数量
-        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
+        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.TOTAL_COUNT);
         //System.out.println("countSql:-------------------------------------------------------------------------------");
         //System.out.println(sb.build());
         int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
@@ -139,7 +139,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //补充待办数
         workcenterVo.setIsProcessingOfMine(1);
         workcenterVo.setPageSize(100);
-        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
+        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
         //System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
         //System.out.println(sb.build());
         Integer count  = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
@@ -160,7 +160,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //找出符合条件分页后的工单ID List
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
         //System.out.println("idSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+        //System.out.println(sb.build());
         List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
         workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
         //补充工单字段信息
@@ -172,8 +172,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     }
 
     @Override
-    public Integer doSearchCount(WorkcenterVo workcenterVo) {
-        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
+    public Integer doSearchLimitCount(WorkcenterVo workcenterVo) {
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
         //System.out.println("countSql:-------------------------------------------------------------------------------");
         //System.out.println(sb.build());
         return workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
