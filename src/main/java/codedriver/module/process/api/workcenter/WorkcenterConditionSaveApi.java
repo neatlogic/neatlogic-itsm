@@ -1,7 +1,6 @@
 package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -25,7 +24,6 @@ import java.util.List;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-@AuthAction(action = WORKCENTER_MODIFY.class)
 public class WorkcenterConditionSaveApi extends PrivateApiComponentBase {
 
 	@Autowired

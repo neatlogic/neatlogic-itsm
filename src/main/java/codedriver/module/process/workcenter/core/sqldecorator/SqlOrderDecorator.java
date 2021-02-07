@@ -25,7 +25,7 @@ import java.util.Map;
 public class SqlOrderDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        if(!FieldTypeEnum.LIMIT_COUNT.getValue().equals(workcenterVo.getSqlFieldType())||!FieldTypeEnum.TOTAL_COUNT.getValue().equals(workcenterVo.getSqlFieldType())) {
+        if(!FieldTypeEnum.LIMIT_COUNT.getValue().equals(workcenterVo.getSqlFieldType())&&!FieldTypeEnum.TOTAL_COUNT.getValue().equals(workcenterVo.getSqlFieldType())) {
             sqlSb.append(" order by ");
             JSONArray sortJsonArray = workcenterVo.getSortList();
             if (CollectionUtils.isNotEmpty(sortJsonArray)) {
