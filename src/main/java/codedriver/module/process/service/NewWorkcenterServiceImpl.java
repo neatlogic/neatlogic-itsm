@@ -58,20 +58,30 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         JSONArray sortColumnList = new JSONArray();
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //thead
+        Date time1 = new Date();
         List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
         theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
+        Date time11 = new Date();
+        System.out.println("---------------------------workcenter cost time ---------------------------------------- ");
+        System.out.println("theadTime-------------------------------------------------------------------:"+(time11.getTime()-time1.getTime()));
         //找出符合条件分页后的工单ID List
+        Date time2 = new Date();
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
         //System.out.println("idSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+        //System.out.println(sb.build());
         List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
         workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
+        Date time22 = new Date();
+        System.out.println("searchIdTime:"+(time22.getTime()-time2.getTime()));
         //补充工单字段信息
         workcenterVo.setTheadVoList(theadList);
+        Date time3 = new Date();
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
         //System.out.println("fieldSql:-------------------------------------------------------------------------------");
         //System.out.println(sb.build());
         List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
+        Date time33 = new Date();
+        System.out.println("searchInfoByIdTime:"+(time33.getTime()-time3.getTime()));
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
         for (ProcessTaskVo processTaskVo : processTaskVoList) {
             builder.addProcessTaskId(processTaskVo.getId());
@@ -84,6 +94,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                         .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
                         .addOperationType(ProcessTaskOperationType.TASK_URGE)
                         .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
+        Date time44 = new Date();
+        System.out.println("actionAuthTime:"+(time44.getTime()-time33.getTime()));
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         for (ProcessTaskVo processTaskVo : processTaskVoList) {
             processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
@@ -103,6 +115,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             dataList.add(taskJson);
 
         }
+        Date time55 = new Date();
+        System.out.println("combineProcessTaskTime:"+(time55.getTime()-time44.getTime()));
         // 字段排序
         JSONArray sortList = workcenterVo.getSortList();
         if (CollectionUtils.isEmpty(sortList)) {
@@ -113,7 +127,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //System.out.println("countSql:-------------------------------------------------------------------------------");
         //System.out.println(sb.build());
         int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
-
+        Date time66 = new Date();
+        System.out.println("totalTime:"+(time66.getTime()-time55.getTime()));
         returnObj.put("sortList", sortList);
         returnObj.put("theadList", theadList);
         returnObj.put("tbodyList", dataList);
@@ -129,6 +144,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //System.out.println(sb.build());
         Integer count  = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
         returnObj.put("processingOfMineCount", count>99?"99+":count.toString());
+        Date time77 = new Date();
+        System.out.println("processingOfMineTotalTime:"+(time77.getTime()-time66.getTime()));
         return returnObj;
     }
 
