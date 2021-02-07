@@ -49,7 +49,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
 
     @Override
     public String getHandler(String processWorkcenterConditionType) {
-        return FormHandlerType.USERSELECT.toString();
+        return FormHandlerType.TEAMSELECT.toString();
     }
 
     @Override

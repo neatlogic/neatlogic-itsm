@@ -1,38 +1,34 @@
 package codedriver.module.process.api.workcenter;
 
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthorityVo;
-import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.exception.workcenter.WorkcenterParamException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-@AuthAction(action = WORKCENTER_MODIFY.class)
 public class WorkcenterSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
@@ -93,7 +89,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 		
 		if((CollectionUtils.isNotEmpty(workcenterList)&&ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterList.get(0).getType()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
 			//判断是否有管理员权限
-			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid,WORKCENTER_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByUuidList(UserContext.get().getRoleUuidList()))) {
+			if(AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
 				throw new WorkcenterNoAuthException("管理");
 			}
 			workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());
@@ -128,7 +124,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 		}
 		
 		if(StringUtils.isBlank(uuid)) {
-			workcenterVo.setConditionConfig(jsonObj.getString("conditionConfig"));
+			workcenterVo.setConditionConfig(jsonObj.toJSONString());
 			workcenterMapper.insertWorkcenter(workcenterVo);
 		}else { 
 			workcenterVo.setName(name);

@@ -63,7 +63,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         //找出符合条件分页后的工单ID List
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
         //System.out.println("idSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
+        System.out.println(sb.build());
         List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
         workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
         //补充工单字段信息
