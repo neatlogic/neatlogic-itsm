@@ -89,7 +89,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 		
 		if((CollectionUtils.isNotEmpty(workcenterList)&&ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterList.get(0).getType()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
 			//判断是否有管理员权限
-			if(AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
+			if(!AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
 				throw new WorkcenterNoAuthException("管理");
 			}
 			workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());

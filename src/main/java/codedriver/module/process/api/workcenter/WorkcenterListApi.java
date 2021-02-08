@@ -125,7 +125,6 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
 			workcenter.setConditionGroupList(null);
 			workcenter.setConditionGroupRelList(null);
 			workcenter.setIsProcessingOfMine(null);
-			workcenter.setValueList(null);
 		}
 	    workcenterJson.put("viewType", viewType);
 	    workcenterJson.put("workcenterList", workcenterList.stream().sorted(Comparator.comparing(WorkcenterVo::getSort)).collect(Collectors.toList()));
