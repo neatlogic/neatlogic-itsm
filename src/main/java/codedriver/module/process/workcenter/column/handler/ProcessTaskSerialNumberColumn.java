@@ -29,8 +29,7 @@ public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase impleme
 
 	@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
-		String serialNumber = json.getString(this.getName());
-		return serialNumber;
+		return json.getString(this.getName());
 	}
 
 	@Override
@@ -71,7 +70,7 @@ public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase impleme
 		return new ArrayList<TableSelectColumnVo>(){
 			{
 				add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
-						new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue())
+						new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue(),ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProValue())
 				)));
 			}
 		};

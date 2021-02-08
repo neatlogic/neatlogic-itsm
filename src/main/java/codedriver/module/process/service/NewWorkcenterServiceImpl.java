@@ -78,7 +78,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         Date time3 = new Date();
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
         //System.out.println("fieldSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
+        System.out.println(sb.build());
         List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
         Date time33 = new Date();
         System.out.println("searchInfoByIdTime:"+(time33.getTime()-time3.getTime()));
@@ -150,25 +150,18 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     }
 
     @Override
-    public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo,String columnName) {
+    public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo) {
         List<JSONObject> dataList = new ArrayList<JSONObject>();
         JSONArray sortColumnList = new JSONArray();
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //thead
-        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
-        theadList = theadList.stream().filter(t->t.getName().equals(columnName)).collect(Collectors.toList());
+        /*List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
+        theadList = theadList.stream().filter(t->t.getName().equals(workcenterVo.getKeywordHandler())).collect(Collectors.toList());*/
         //找出符合条件分页后的工单ID List
-        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
-        //System.out.println("idSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
-        List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
-        workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
-        //补充工单字段信息
-        workcenterVo.setTheadVoList(theadList);
-        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
-        //System.out.println("fieldSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
-        return workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
+        //System.out.println("fullTextSql:-------------------------------------------------------------------------------");
+        System.out.println(sb.build());
+        return workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
     }
 
     @Override

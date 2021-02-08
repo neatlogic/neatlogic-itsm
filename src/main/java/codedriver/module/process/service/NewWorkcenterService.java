@@ -43,5 +43,5 @@ public interface NewWorkcenterService {
      * @Params: [workcenterVo]
      * @Returns: com.alibaba.fastjson.JSONObject
      **/
-    public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo,String columnName);
+    public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo);
 }

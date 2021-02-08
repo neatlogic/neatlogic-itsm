@@ -13,6 +13,8 @@ import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -20,7 +22,6 @@ import codedriver.module.process.condition.handler.ProcessTaskSerialNumberCondit
 import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 import codedriver.module.process.service.NewWorkcenterService;
 import codedriver.module.process.service.WorkcenterService;
-import codedriver.module.process.workcenter.column.handler.ProcessTaskTitleColumn;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
@@ -78,7 +79,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
             conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.SERIAL_NUMBER.getValue()));
             return getKeywordOptionMB(conditionList, keyword, jsonObj.getInteger("pageSize"));
         }
-        return getKeywordOptionsPCNew(keyword, jsonObj.getInteger("pageSize"));
+        return getKeywordOptionsPCNew(new WorkcenterVo(jsonObj));
     }
 
     /**
@@ -186,15 +187,22 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
      * @Params: [keyword, pageSize]
      * @Returns: com.alibaba.fastjson.JSONArray
      **/
-    private JSONArray getKeywordOptionsPCNew(String keyword, Integer pageSize) {
+    private JSONArray getKeywordOptionsPCNew(WorkcenterVo workcenterVo) {
         JSONArray returnArray = new JSONArray();
+        workcenterVo.setSqlFieldType(FieldTypeEnum.FULL_TEXT.getValue());
         // 搜索标题
-        IProcessTaskCondition titleCondition =  new ProcessTaskTitleCondition();
-        returnArray.addAll(getKeywordOptionPCNew(titleCondition,keyword,pageSize,new ProcessTaskTitleColumn().getName()));
+        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.TITLE.getHandlerName());
+        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.TITLE.getText());
+        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.TITLE.getProValue());
+        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
+        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
 
         // 搜索ID
-        IProcessTaskCondition serialNumberCondition =  new ProcessTaskSerialNumberCondition();
-        returnArray.addAll(getKeywordOptionPCNew(serialNumberCondition,keyword,pageSize,"serialNumber"));
+        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getHandlerName());
+        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getText());
+        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProValue());
+        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
+        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
         return returnArray;
     }
 
@@ -205,20 +213,18 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
      * @Params: [condition, keyword, pageSize, columnName]
      * @Returns: com.alibaba.fastjson.JSONArray
      **/
-    private JSONArray getKeywordOptionPCNew(IProcessTaskCondition condition, String keyword, Integer pageSize, String columnName) {
+    private JSONArray getKeywordOptionPCNew(WorkcenterVo workcenterVo) {
         JSONArray returnArray = new JSONArray();
-        WorkcenterVo workcenter = getKeywordConditionPCNew(condition, keyword);
-        workcenter.setPageSize(pageSize);
-        List<ProcessTaskVo> processTaskVoList = newWorkcenterService.doSearchKeyword(workcenter,columnName.toLowerCase());
+        List<ProcessTaskVo> processTaskVoList = newWorkcenterService.doSearchKeyword(workcenterVo);
         if (!processTaskVoList.isEmpty()) {
             JSONObject titleObj = new JSONObject();
             JSONArray dataList = new JSONArray();
             for (ProcessTaskVo processTaskVo: processTaskVoList) {
-                dataList.add(JSONObject.parseObject(JSONObject.toJSONString(processTaskVo)).getString(columnName));
+                dataList.add(JSONObject.parseObject(JSONObject.toJSONString(processTaskVo)).getString(workcenterVo.getKeywordPro()));
             }
             titleObj.put("dataList", dataList);
-            titleObj.put("value", condition.getName());
-            titleObj.put("text", condition.getDisplayName());
+            titleObj.put("value", workcenterVo.getKeywordColumn());
+            titleObj.put("text", workcenterVo.getKeywordText());
             returnArray.add(titleObj);
         }
         return returnArray;
@@ -286,33 +292,4 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
 
     }
 
-    /**
-     * @Description: 拼接关键字过滤选项 pc端
-     * @Author: 89770
-     * @Date: 2021/2/4 18:07
-     * @Params: [condition, keyword]
-     * @Returns: codedriver.framework.process.workcenter.dto.WorkcenterVo
-     **/
-    private WorkcenterVo getKeywordConditionPCNew(IProcessTaskCondition condition, String keyword) {
-        JSONObject searchObj = new JSONObject();
-        JSONObject conditionConfig = new JSONObject();
-        JSONArray conditionGroupList = new JSONArray();
-        JSONObject conditionGroup = new JSONObject();
-        JSONArray conditionList = new JSONArray();
-        JSONObject conditionObj = new JSONObject();
-        conditionObj.put("name", condition.getName());
-        conditionObj.put("type", condition.getType());
-        JSONArray valueList = new JSONArray();
-        valueList.add(keyword);
-        conditionObj.put("valueList", valueList);
-        conditionObj.put("expression", Expression.LIKE.getExpression());
-        conditionList.add(conditionObj);
-        conditionGroup.put("conditionList", conditionList);
-        conditionGroupList.add(conditionGroup);
-        conditionConfig.put("conditionGroupList",conditionGroupList);
-        searchObj.put("conditionConfig", conditionConfig);
-
-        return new WorkcenterVo(searchObj);
-
-    }
 }
