@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
@@ -44,4 +45,13 @@ public interface NewWorkcenterService {
      * @Returns: com.alibaba.fastjson.JSONObject
      **/
     public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo);
+
+    /**
+     * @Description: 根据标题 id获取所有过滤选项 pc端
+     * @Author: 89770
+     * @Date: 2021/2/4 18:59
+     * @Params: [keyword, pageSize]
+     * @Returns: com.alibaba.fastjson.JSONArray
+     **/
+    public JSONArray getKeywordOptionsPCNew(WorkcenterVo workcenterVo);
 }

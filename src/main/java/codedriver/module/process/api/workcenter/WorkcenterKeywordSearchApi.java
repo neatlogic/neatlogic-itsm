@@ -10,11 +10,8 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -79,7 +76,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
             conditionList.add(ProcessTaskConditionFactory.getHandler(ProcessWorkcenterField.SERIAL_NUMBER.getValue()));
             return getKeywordOptionMB(conditionList, keyword, jsonObj.getInteger("pageSize"));
         }
-        return getKeywordOptionsPCNew(new WorkcenterVo(jsonObj));
+        return newWorkcenterService.getKeywordOptionsPCNew(new WorkcenterVo(jsonObj));
     }
 
     /**
@@ -165,70 +162,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
 
     }
 
-    /**
-     * 根据关键字获取所有过滤选项 pc端
-     *
-     * @param keyword
-     * @return
-     */
-    @Deprecated
-    private JSONArray getKeywordOptionsPC(String keyword, Integer pageSize) {
-        // 搜索标题
-        JSONArray returnArray = getKeywordOptionPC(new ProcessTaskTitleCondition(), keyword, pageSize);
-        // 搜索ID
-        returnArray.addAll(getKeywordOptionPC(new ProcessTaskSerialNumberCondition(), keyword, pageSize));
-        return returnArray;
-    }
 
-    /**
-     * @Description: 根据标题 id获取所有过滤选项 pc端
-     * @Author: 89770
-     * @Date: 2021/2/4 18:59
-     * @Params: [keyword, pageSize]
-     * @Returns: com.alibaba.fastjson.JSONArray
-     **/
-    private JSONArray getKeywordOptionsPCNew(WorkcenterVo workcenterVo) {
-        JSONArray returnArray = new JSONArray();
-        workcenterVo.setSqlFieldType(FieldTypeEnum.FULL_TEXT.getValue());
-        // 搜索标题
-        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.TITLE.getHandlerName());
-        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.TITLE.getText());
-        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.TITLE.getProValue());
-        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
-        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
-
-        // 搜索ID
-        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getHandlerName());
-        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getText());
-        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProValue());
-        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
-        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
-        return returnArray;
-    }
-
-    /**
-     * @Description: 根据关键字获取所有过滤选项 pc端
-     * @Author: 89770
-     * @Date: 2021/2/5 9:59
-     * @Params: [condition, keyword, pageSize, columnName]
-     * @Returns: com.alibaba.fastjson.JSONArray
-     **/
-    private JSONArray getKeywordOptionPCNew(WorkcenterVo workcenterVo) {
-        JSONArray returnArray = new JSONArray();
-        List<ProcessTaskVo> processTaskVoList = newWorkcenterService.doSearchKeyword(workcenterVo);
-        if (!processTaskVoList.isEmpty()) {
-            JSONObject titleObj = new JSONObject();
-            JSONArray dataList = new JSONArray();
-            for (ProcessTaskVo processTaskVo: processTaskVoList) {
-                dataList.add(JSONObject.parseObject(JSONObject.toJSONString(processTaskVo)).getString(workcenterVo.getKeywordPro()));
-            }
-            titleObj.put("dataList", dataList);
-            titleObj.put("value", workcenterVo.getKeywordColumn());
-            titleObj.put("text", workcenterVo.getKeywordText());
-            returnArray.add(titleObj);
-        }
-        return returnArray;
-    }
 
     /**
      * 根据单个关键字获取过滤选项 pc端
@@ -291,5 +225,18 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
         return new WorkcenterVo(searchObj);
 
     }
-
+    /**
+     * 根据关键字获取所有过滤选项 pc端
+     *
+     * @param keyword
+     * @return
+     */
+    @Deprecated
+    private JSONArray getKeywordOptionsPC(String keyword, Integer pageSize) {
+        // 搜索标题
+        JSONArray returnArray = getKeywordOptionPC(new ProcessTaskTitleCondition(), keyword, pageSize);
+        // 搜索ID
+        returnArray.addAll(getKeywordOptionPC(new ProcessTaskSerialNumberCondition(), keyword, pageSize));
+        return returnArray;
+    }
 }

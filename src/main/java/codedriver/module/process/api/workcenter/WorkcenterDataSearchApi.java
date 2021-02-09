@@ -81,6 +81,8 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 		}
 		WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
 		workcenterVo.setSqlFieldType(FieldTypeEnum.DISTINCT_ID.getValue());
+
+
 		return newWorkcenterService.doSearch(workcenterVo);
 		//return workcenterService.doSearch(workcenterVo);
 	}
