@@ -15,6 +15,8 @@ import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.module.process.condition.handler.ProcessTaskStartTimeCondition;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -60,31 +62,46 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
         });
 
         buildWhereMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(), (workcenterVo, sqlSb) -> {
-            getCountWhereSql( sqlSb,  workcenterVo);
+            getCountWhereSql(sqlSb, workcenterVo);
         });
 
         buildWhereMap.put(FieldTypeEnum.DISTINCT_ID.getValue(), (workcenterVo, sqlSb) -> {
-            getCountWhereSql( sqlSb,  workcenterVo);
+            getCountWhereSql(sqlSb, workcenterVo);
         });
 
         buildWhereMap.put(FieldTypeEnum.TOTAL_COUNT.getValue(), (workcenterVo, sqlSb) -> {
-            getCountWhereSql( sqlSb,  workcenterVo);
+            getCountWhereSql(sqlSb, workcenterVo);
         });
 
         buildWhereMap.put(FieldTypeEnum.FULL_TEXT.getValue(), (workcenterVo, sqlSb) -> {
-            IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getKeywordHandler());
-            if(columnHandler != null){
-                List<String> columnList = new ArrayList<>();
-                List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
-                for(TableSelectColumnVo columnVo : columnVoList){
-                    for(SelectColumnVo column : columnVo.getColumnList()){
-                        columnList.add(String.format("%s.%s",columnVo.getTableShortName(),column.getColumnName()));
-                    }
+            JSONArray keywordConditionList = workcenterVo.getKeywordConditionList();
+            //获取过滤最终工单idList
+            if (CollectionUtils.isNotEmpty(keywordConditionList)) {
+                for(Object keywordCondition : keywordConditionList){
+                    JSONObject keywordConditionJson = JSONObject.parseObject(JSONObject.toJSONString(keywordCondition));
+                    String handler = keywordConditionJson.getString("name");
+                    JSONArray valueArray = keywordConditionJson.getJSONArray("valueList");
+                    List<String> valueList =  JSONObject.parseArray(valueArray.toJSONString(), String.class);
+                    getFullTextSql(sqlSb,String.join("\" \"", valueList),handler);
                 }
-                sqlSb.append(String.format(" AND MATCH (%s)  AGAINST ('\"%s\"' IN BOOLEAN MODE) ",String.join(",",columnList),workcenterVo.getKeyword()));
+            } else {//获取关键字搜索下拉选项
+                getFullTextSql(sqlSb,workcenterVo.getKeyword(),workcenterVo.getKeywordHandler());
             }
-
         });
+    }
+
+    private void getFullTextSql(StringBuilder sqlSb,String value,String handler){
+        IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(handler);
+        if (columnHandler != null) {
+            List<String> columnList = new ArrayList<>();
+            List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
+            for (TableSelectColumnVo columnVo : columnVoList) {
+                for (SelectColumnVo column : columnVo.getColumnList()) {
+                    columnList.add(String.format("%s.%s", columnVo.getTableShortName(), column.getColumnName()));
+                }
+            }
+            sqlSb.append(String.format(" AND MATCH (%s)  AGAINST ('\"%s\"' IN BOOLEAN MODE) ", String.join(",", columnList), value));
+        }
     }
 
     /**
@@ -94,7 +111,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
      * @Params: [sqlSb, workcenterVo]
      * @Returns: void
      **/
-    private void getCountWhereSql(StringBuilder sqlSb, WorkcenterVo workcenterVo){
+    private void getCountWhereSql(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         // 将group 以连接表达式 存 Map<fromUuid_toUuid,joinType>
         Map<String, String> groupRelMap = new HashMap<String, String>();
         List<ConditionGroupRelVo> groupRelList = workcenterVo.getConditionGroupRelList();
@@ -163,7 +180,9 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
             sqlCondition.getSqlConditionWhere(null, 0, sqlSb);
         }
         //keyword搜索框搜索 idList 过滤
-
+        if(CollectionUtils.isNotEmpty(workcenterVo.getProcessTaskIdList())){
+            sqlSb.append(String.format(" and pt.id in ( %s )", workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining(","))));
+        }
         //其它条件过滤
         buildWhereMap.get(workcenterVo.getSqlFieldType()).build(workcenterVo, sqlSb);
 

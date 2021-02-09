@@ -60,8 +60,10 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //thead
 //        Date time1 = new Date();
-        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
-        theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
+        //设置关键字搜索返回的工单IdList
+        if(CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
+            workcenterVo.setProcessTaskIdList(getProcessTaskIdListByKeywordConditionList(workcenterVo));
+        }
 //        Date time11 = new Date();
 //        System.out.println("---------------------------workcenter cost time ---------------------------------------- ");
 //        System.out.println("theadTime:"+(time11.getTime()-time1.getTime()));
@@ -75,6 +77,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 //        Date time22 = new Date();
 //        System.out.println("searchIdTime:"+(time22.getTime()-time2.getTime()));
         //补充工单字段信息
+        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
+        theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         workcenterVo.setTheadVoList(theadList);
 //        Date time3 = new Date();
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
@@ -152,12 +156,6 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     @Override
     public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo) {
-        List<JSONObject> dataList = new ArrayList<JSONObject>();
-        JSONArray sortColumnList = new JSONArray();
-        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-        //thead
-        /*List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
-        theadList = theadList.stream().filter(t->t.getName().equals(workcenterVo.getKeywordHandler())).collect(Collectors.toList());*/
         //找出符合条件分页后的工单ID List
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
         //System.out.println("fullTextSql:-------------------------------------------------------------------------------");
@@ -308,6 +306,21 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             action.put("secondActionList", new JSONArray());
         }
         return action;
+    }
+
+    /**
+     * @Description: 获取工单idList by  关键字搜索条件 keywordConditionList
+     * @Author: 89770
+     * @Date: 2021/2/9 17:08
+     * @Params: [workcenterVo]
+     * @Returns: java.util.List<java.lang.Long>
+     **/
+    private List<Long> getProcessTaskIdListByKeywordConditionList(WorkcenterVo workcenterVo){
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
+        System.out.println("fullTextGetIdListSql:-------------------------------------------------------------------------------");
+        System.out.println(sb.build());
+        List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
+        return processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList());
     }
 
     @Override

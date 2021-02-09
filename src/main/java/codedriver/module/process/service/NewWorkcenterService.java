@@ -54,4 +54,5 @@ public interface NewWorkcenterService {
      * @Returns: com.alibaba.fastjson.JSONArray
      **/
     public JSONArray getKeywordOptionsPCNew(WorkcenterVo workcenterVo);
+
 }

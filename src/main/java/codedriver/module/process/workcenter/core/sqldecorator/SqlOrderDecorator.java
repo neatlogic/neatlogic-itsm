@@ -58,7 +58,10 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
         });
 
         buildOrderMap.put(FieldTypeEnum.FULL_TEXT.getValue(), (workcenterVo, sqlSb) -> {
-            sqlSb.append(" ORDER BY  score DESC ");
+            //关键字搜索条件获取processtaskIdList 不需要排序
+            if(!CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
+                sqlSb.append(" ORDER BY  score DESC ");
+            }
         });
     }
 
