@@ -69,8 +69,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
         //统计符合条件工单数量
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.TOTAL_COUNT);
-        System.out.println("countSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
+//        System.out.println("countSql:-------------------------------------------------------------------------------");
+//        System.out.println(sb.build());
         int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
 //        Date time11 = new Date();
 //        System.out.println("---------------------------workcenter cost time ---------------------------------------- ");

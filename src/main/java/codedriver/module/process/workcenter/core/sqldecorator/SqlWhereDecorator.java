@@ -1,5 +1,6 @@
 package codedriver.module.process.workcenter.core.sqldecorator;
 
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dto.condition.ConditionGroupRelVo;
 import codedriver.framework.dto.condition.ConditionGroupVo;
@@ -14,6 +15,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.condition.handler.ProcessTaskStartTimeCondition;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -182,6 +184,11 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
         //keyword搜索框搜索 idList 过滤
         if(CollectionUtils.isNotEmpty(workcenterVo.getProcessTaskIdList())){
             sqlSb.append(String.format(" and pt.id in ( %s )", workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining(","))));
+        }
+        //隐藏工单 过滤
+        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
+        if(!isHasProcessTaskAuth){
+            sqlSb.append(" and pt.is_show = 1 ");
         }
         //其它条件过滤
         buildWhereMap.get(workcenterVo.getSqlFieldType()).build(workcenterVo, sqlSb);
