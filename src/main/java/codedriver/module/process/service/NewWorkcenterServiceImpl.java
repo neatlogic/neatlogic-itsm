@@ -147,11 +147,12 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         returnObj.put("pageCount", PageUtil.getPageCount(total, workcenterVo.getPageSize()));
         //补充待办数
         workcenterVo.setIsProcessingOfMine(1);
+        workcenterVo.setCurrentPage(1);
         workcenterVo.setPageSize(100);
         workcenterVo.setProcessTaskIdList(keywordResultList);
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
-        //System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
+//        System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
+//        System.out.println(sb.build());
         Integer count  = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
         returnObj.put("processingOfMineCount", count>99?"99+":count.toString());
 //        Date time77 = new Date();
