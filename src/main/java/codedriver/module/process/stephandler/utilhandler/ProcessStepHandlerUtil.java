@@ -554,6 +554,28 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         }
     }
 
+    /***
+     * @Description: 保存工单关注人
+     * @Author: laiwt
+     * @Date: 2021/2/19 11:20
+     * @Params: [currentProcessTaskStepVo]
+     * @Returns: void
+    **/
+    @Override
+    public void saveFocusUserList(ProcessTaskStepVo currentProcessTaskStepVo) {
+        processTaskMapper.deleteProcessTaskFocusByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+        JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+        JSONArray focusUserUuidList = paramObj.getJSONArray("focusUserUuidList");
+        if(CollectionUtils.isNotEmpty(focusUserUuidList)){
+            for(int i = 0;i < focusUserUuidList.size();i++){
+                String useUuid = focusUserUuidList.getString(i);
+                processTaskMapper.insertProcessTaskFocus(currentProcessTaskStepVo.getProcessTaskId(),useUuid);
+            }
+        }else{
+            paramObj.remove("focusUserUuidList");
+        }
+    }
+
     /**
      * @param currentProcessTaskStepVo
      * @Description: 保存表单属性值

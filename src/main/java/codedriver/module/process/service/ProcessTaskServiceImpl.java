@@ -1199,6 +1199,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         // 标签列表
         processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
+        /** 工单关注人列表 **/
+        List<String> focusUserUuidList = processTaskMapper.getFocusUserListByTaskId(processTaskId);
+        if(CollectionUtils.isNotEmpty(focusUserUuidList)){
+            processTaskVo.setFocusUserUuidList(focusUserUuidList);
+            List<UserVo> focusUserList = new ArrayList<>();
+            for(String uuid : focusUserUuidList){
+                focusUserList.add(userMapper.getUserBaseInfoByUuid(uuid));
+            }
+            processTaskVo.setFocusUserList(focusUserList);
+        }
         return processTaskVo;
     }
 
@@ -1429,6 +1439,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 List<String> tagList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("tagList")), String.class);
                 if(tagList != null){
                     processTaskVo.setTagList(tagList);
+                }
+                /** 工单关注人列表 **/
+                List<String> focusUserUuidList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("focusUserUuidList")), String.class);
+                if(CollectionUtils.isNotEmpty(focusUserUuidList)){
+                    processTaskVo.setFocusUserUuidList(focusUserUuidList);
+                    List<UserVo> focusUserList = new ArrayList<>();
+                    for(String uuid : focusUserUuidList){
+                        focusUserList.add(userMapper.getUserBaseInfoByUuid(uuid));
+                    }
+                    processTaskVo.setFocusUserList(focusUserList);
                 }
             }
         }
