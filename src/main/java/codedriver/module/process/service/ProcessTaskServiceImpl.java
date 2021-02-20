@@ -8,10 +8,13 @@ import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.WorkAssignmentUnitVo;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -83,6 +86,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Autowired
     private TeamMapper teamMapper;
+
+    @Autowired
+    private RoleMapper roleMapper;
 
     @Autowired
     private FileMapper fileMapper;
@@ -759,9 +765,29 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (CollectionUtils.isNotEmpty(majorUserList)) {
             processTaskStepVo.setMajorUser(majorUserList.get(0));
         } else {
-            processTaskStepVo
-                .setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(
-                    processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId()));
+            List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId());
+            for(ProcessTaskStepWorkerVo workerVo : workerList){
+                if(workerVo.getType().equals(GroupSearch.USER.getValue())){
+                    UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
+                    if(userVo != null){
+                        workerVo.setWorker(new WorkAssignmentUnitVo(userVo));
+                        workerVo.setName(userVo.getUserName());
+                    }
+                }else if(workerVo.getType().equals(GroupSearch.TEAM.getValue())){
+                    TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
+                    if(teamVo != null){
+                        workerVo.setWorker(new WorkAssignmentUnitVo(teamVo));
+                        workerVo.setName(teamVo.getName());
+                    }
+                }else if(workerVo.getType().equals(GroupSearch.ROLE.getValue())){
+                    RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
+                    if(roleVo != null){
+                        workerVo.setWorker(new WorkAssignmentUnitVo(roleVo));
+                        workerVo.setName(roleVo.getName());
+                    }
+                }
+            }
+            processTaskStepVo.setWorkerList(workerList);
         }
         processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(),
             ProcessUserType.MINOR.getValue()));
