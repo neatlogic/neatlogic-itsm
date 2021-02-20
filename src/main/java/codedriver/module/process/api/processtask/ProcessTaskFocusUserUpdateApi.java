@@ -23,12 +23,10 @@ import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -79,22 +77,14 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
         }
         List<String> oldFocusUser = processTaskMapper.getFocusUserListByTaskId(processTaskId);
         JSONObject paramObj = new JSONObject();
+        paramObj.put("focusUserUuidList",focusUserUuidList);
         paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getOldDataParamName(), JSON.toJSONString(oldFocusUser));
 
-        processTaskMapper.deleteProcessTaskFocusByProcessTaskId(processTaskId);
-        if(CollectionUtils.isNotEmpty(focusUserUuidList)){
-            List<String> focusUser = new ArrayList<>();
-            for(int i = 0;i < focusUserUuidList.size();i++){
-                String useUuid = focusUserUuidList.getString(i);
-                processTaskMapper.insertProcessTaskFocus(processTaskId,useUuid);
-                focusUser.add(useUuid);
-            }
-            paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getParamName(),JSON.toJSONString(focusUser));
-        }
-        /** 生成活动 **/
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskVo.getId());
         processTaskStepVo.setParamObj(paramObj);
+        IProcessStepHandlerUtil.saveFocusUserList(processTaskStepVo);
+        /** 生成活动 **/
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATEFOCUSUSER);
         return null;
     }
