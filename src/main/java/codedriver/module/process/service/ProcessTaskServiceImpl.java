@@ -1441,7 +1441,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     processTaskVo.setTagList(tagList);
                 }
                 /** 工单关注人列表 **/
-                List<String> focusUserUuidList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("focusUserUuidList")), String.class);
+                List<String> focusUserUuidList = JSON.parseArray(dataObj.getString("focusUserUuidList"),String.class);
                 if(CollectionUtils.isNotEmpty(focusUserUuidList)){
                     processTaskVo.setFocusUserUuidList(focusUserUuidList);
                     List<UserVo> focusUserList = new ArrayList<>();

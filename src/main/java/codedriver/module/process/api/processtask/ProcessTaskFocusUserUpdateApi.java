@@ -80,6 +80,7 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
         List<String> oldFocusUser = processTaskMapper.getFocusUserListByTaskId(processTaskId);
         JSONObject paramObj = new JSONObject();
         paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getOldDataParamName(), JSON.toJSONString(oldFocusUser));
+
         processTaskMapper.deleteProcessTaskFocusByProcessTaskId(processTaskId);
         if(CollectionUtils.isNotEmpty(focusUserUuidList)){
             List<String> focusUser = new ArrayList<>();
@@ -89,9 +90,8 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
                 focusUser.add(useUuid);
             }
             paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getParamName(),JSON.toJSONString(focusUser));
-        }else{
-            paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getParamName(),null);
         }
+        /** 生成活动 **/
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskVo.getId());
         processTaskStepVo.setParamObj(paramObj);
