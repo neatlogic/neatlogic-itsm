@@ -1225,6 +1225,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         // 标签列表
         processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
+        /** 工单关注人列表 **/
+        List<String> focusUserUuidList = processTaskMapper.getFocusUserListByTaskId(processTaskId);
+        if(CollectionUtils.isNotEmpty(focusUserUuidList)){
+            processTaskVo.setFocusUserUuidList(focusUserUuidList);
+            processTaskVo.setFocusUserList(userMapper.getUserByUserUuidList(focusUserUuidList));
+        }
         return processTaskVo;
     }
 
@@ -1455,6 +1461,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 List<String> tagList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("tagList")), String.class);
                 if(tagList != null){
                     processTaskVo.setTagList(tagList);
+                }
+                /** 工单关注人列表 **/
+                List<String> focusUserUuidList = JSON.parseArray(dataObj.getString("focusUserUuidList"),String.class);
+                if(CollectionUtils.isNotEmpty(focusUserUuidList)){
+                    processTaskVo.setFocusUserUuidList(focusUserUuidList);
+                    processTaskVo.setFocusUserList(userMapper.getUserByUserUuidList(focusUserUuidList));
                 }
             }
         }

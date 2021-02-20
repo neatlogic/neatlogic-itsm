@@ -325,6 +325,34 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_DELETE, (processTaskVo, processTaskStepVo, userUuid) -> {
             return AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName());
         });
+        /**
+         * 修改工单关注人权限
+         * 首先工单状态不是“未提交”，
+         * 符合一下几种情况之一就有修改工单关注人权限：
+         * 1.userUuid用户是上报人
+         * 2.userUuid用户是代报人
+         * 3.userUuid用户是工单中某个“已完成”步骤的处理人或协助处理人
+         * 4.userUuid用户是工单中某个“处理中”步骤的处理人或协助处理人
+        **/
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_FOCUSUSER_UPDATE,
+                (processTaskVo, processTaskStepVo, userUuid) -> {
+                    if (processTaskVo.getIsShow() == 1 || AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
+                        if (!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
+                            if (userUuid.equals(processTaskVo.getOwner())) {
+                                return true;
+                            } else if (userUuid.equals(processTaskVo.getReporter())) {
+                                return true;
+                            } else if (checkIsProcessTaskStepUser(processTaskVo, userUuid)) {
+                                return true;
+                            } else if (checkIsWorker(processTaskVo, userUuid)) {
+                                return true;
+                            } else {
+                               return false;
+                            }
+                        }
+                    }
+                    return false;
+                });
     }
 
     @Override
