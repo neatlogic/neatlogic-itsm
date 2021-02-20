@@ -3,6 +3,7 @@ package codedriver.module.process.api.catalog;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.AuthorityVo;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.exception.catalog.CatalogNameRepeatException;
@@ -119,8 +120,9 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 			catalogVo.setName(value.getString("name"));
 			catalogVo.setParentUuid(value.getString("parentUuid"));
 			if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
-				throw new CatalogNameRepeatException(catalogVo.getName());
+				return new FieldValidResultVo(new CatalogNameRepeatException(catalogVo.getName()));
 			}
+			return new FieldValidResultVo();
 		};
 	}
 
