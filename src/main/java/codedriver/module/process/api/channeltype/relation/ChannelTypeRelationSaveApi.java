@@ -1,9 +1,11 @@
 package codedriver.module.process.api.channeltype.relation;
 
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationHasReferenceException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.CATALOG_MODIFY;
 
@@ -83,6 +85,16 @@ public class ChannelTypeRelationSaveApi extends PrivateApiComponentBase {
             channelTypeMapper.insertChannelTypeRelationTarget(channelTypeRelationVo.getId(), target);
         }
 		return channelTypeRelationVo.getId();
+	}
+
+	public IValid name(){
+		return value -> {
+			ChannelTypeRelationVo channelTypeRelationVo = JSON.toJavaObject(value, ChannelTypeRelationVo.class);
+			if(channelTypeMapper.checkChannelTypeRelationNameIsRepeat(channelTypeRelationVo) > 0) {
+				return new FieldValidResultVo(new ChannelTypeRelationNameRepeatException(channelTypeRelationVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }
