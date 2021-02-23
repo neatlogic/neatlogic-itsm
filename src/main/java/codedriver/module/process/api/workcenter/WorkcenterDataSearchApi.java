@@ -3,7 +3,6 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -80,7 +79,7 @@ public class WorkcenterDataSearchApi extends PrivateApiComponentBase {
 			}
 		}
 		WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
-		workcenterVo.setSqlFieldType(FieldTypeEnum.DISTINCT_ID.getValue());
+		//workcenterVo.setSqlFieldType(FieldTypeEnum.DISTINCT_ID.getValue());
 		return newWorkcenterService.doSearch(workcenterVo);
 		//return workcenterService.doSearch(workcenterVo);
 	}

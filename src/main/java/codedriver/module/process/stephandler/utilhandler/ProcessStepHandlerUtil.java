@@ -554,6 +554,29 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         }
     }
 
+    /***
+     * @Description: 保存工单关注人
+     * @Author: laiwt
+     * @Date: 2021/2/19 11:20
+     * @Params: [currentProcessTaskStepVo]
+     * @Returns: void
+    **/
+    @Override
+    public void saveFocusUserList(ProcessTaskStepVo currentProcessTaskStepVo) {
+        processTaskMapper.deleteProcessTaskFocusByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+        JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+        JSONArray focusUserUuidList = paramObj.getJSONArray("focusUserUuidList");
+        if(CollectionUtils.isNotEmpty(focusUserUuidList)){
+            for(int i = 0;i < focusUserUuidList.size();i++){
+                String useUuid = focusUserUuidList.getString(i);
+                processTaskMapper.insertProcessTaskFocus(currentProcessTaskStepVo.getProcessTaskId(),useUuid);
+            }
+            paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getParamName(), focusUserUuidList.toJSONString());
+        }else{
+            paramObj.remove("focusUserUuidList");
+        }
+    }
+
     /**
      * @param currentProcessTaskStepVo
      * @Description: 保存表单属性值
@@ -589,35 +612,36 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
             /** 校验表单属性是否合法 **/
             FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processTaskFormVo.getFormUuid());
-            for (FormAttributeVo formAttributeVo : formVersionVo.getFormAttributeList()) {
-                if (formAttributeVo.isRequired()) {
-                    if (hidecomponentList.contains(formAttributeVo.getUuid())) {
-                        continue;
-                    }
-                    if (readcomponentList.contains(formAttributeVo.getUuid())) {
-                        continue;
-                    }
-                    Object data = formAttributeDataMap.get(formAttributeVo.getUuid());
-                    if (data != null) {
-                        if (data instanceof String) {
-                            if (StringUtils.isBlank(data.toString())) {
-                                throw new FormAttributeRequiredException(formAttributeVo.getLabel());
-                            }
-                        } else if (data instanceof JSONArray) {
-                            if (CollectionUtils.isEmpty((JSONArray) data)) {
-                                throw new FormAttributeRequiredException(formAttributeVo.getLabel());
-                            }
-                        } else if (data instanceof JSONObject) {
-                            if (MapUtils.isEmpty((JSONObject) data)) {
-                                throw new FormAttributeRequiredException(formAttributeVo.getLabel());
-                            }
+            if(CollectionUtils.isNotEmpty(formVersionVo.getFormAttributeList())) {
+                for (FormAttributeVo formAttributeVo : formVersionVo.getFormAttributeList()) {
+                    if (formAttributeVo.isRequired()) {
+                        if (hidecomponentList.contains(formAttributeVo.getUuid())) {
+                            continue;
                         }
-                    } else {
-                        throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                        if (readcomponentList.contains(formAttributeVo.getUuid())) {
+                            continue;
+                        }
+                        Object data = formAttributeDataMap.get(formAttributeVo.getUuid());
+                        if (data != null) {
+                            if (data instanceof String) {
+                                if (StringUtils.isBlank(data.toString())) {
+                                    throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                                }
+                            } else if (data instanceof JSONArray) {
+                                if (CollectionUtils.isEmpty((JSONArray) data)) {
+                                    throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                                }
+                            } else if (data instanceof JSONObject) {
+                                if (MapUtils.isEmpty((JSONObject) data)) {
+                                    throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                                }
+                            }
+                        } else {
+                            throw new FormAttributeRequiredException(formAttributeVo.getLabel());
+                        }
                     }
                 }
             }
-
             /** 获取旧表单数据 **/
             List<ProcessTaskFormAttributeDataVo> oldProcessTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
             Iterator<ProcessTaskFormAttributeDataVo> iterator = oldProcessTaskFormAttributeDataList.iterator();

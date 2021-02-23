@@ -2,6 +2,7 @@ package codedriver.module.process.workcenter.core.sqldecorator;
 
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,7 +18,10 @@ import org.springframework.stereotype.Component;
 public class SqlLimitDecorator extends SqlDecoratorBase {
     @Override
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
-        if(FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
+        if(FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())
+                ||FieldTypeEnum.LIMIT_COUNT.getValue().equals(workcenterVo.getSqlFieldType())
+                ||(FieldTypeEnum.FULL_TEXT.getValue().equals(workcenterVo.getSqlFieldType())&&!CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList()))
+        ) {
             sqlSb.append(String.format(" limit %d,%d ", workcenterVo.getStartNum(), workcenterVo.getPageSize()));
         }
     }

@@ -16,6 +16,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.workcenter.core.SqlBuilder;
@@ -57,21 +58,43 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         List<JSONObject> dataList = new ArrayList<JSONObject>();
         JSONArray sortColumnList = new JSONArray();
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-        //thead
-        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
-        theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
+//        Date time1 = new Date();
+        //获取关键字搜索返回的工单IdList
+        List<Long> keywordResultList = getProcessTaskIdListByKeywordConditionList(workcenterVo);
+
+        //设置关键字搜索返回的工单IdList
+        if(CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
+            workcenterVo.setProcessTaskIdList(keywordResultList);
+        }
+
+        //统计符合条件工单数量
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.TOTAL_COUNT);
+//        System.out.println("countSql:-------------------------------------------------------------------------------");
+//        System.out.println(sb.build());
+        int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
+//        Date time11 = new Date();
+//        System.out.println("---------------------------workcenter cost time ---------------------------------------- ");
+//        System.out.println("theadTime:"+(time11.getTime()-time1.getTime()));
         //找出符合条件分页后的工单ID List
-        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
-        //System.out.println("idSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
+//        Date time2 = new Date();
+        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
+//        System.out.println("idSql:-------------------------------------------------------------------------------");
+//        System.out.println(sb.build());
         List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
         workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
+//        Date time22 = new Date();
+//        System.out.println("searchIdTime:"+(time22.getTime()-time2.getTime()));
         //补充工单字段信息
+        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
+        theadList = theadList.stream().sorted(Comparator.comparing(WorkcenterTheadVo::getSort)).collect(Collectors.toList());
         workcenterVo.setTheadVoList(theadList);
+//        Date time3 = new Date();
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
-        //System.out.println("fieldSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
+//        System.out.println("fieldSql:-------------------------------------------------------------------------------");
+//        System.out.println(sb.build());
         List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
+//        Date time33 = new Date();
+//        System.out.println("searchInfoByIdTime:"+(time33.getTime()-time3.getTime()));
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
         for (ProcessTaskVo processTaskVo : processTaskVoList) {
             builder.addProcessTaskId(processTaskVo.getId());
@@ -84,6 +107,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                         .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
                         .addOperationType(ProcessTaskOperationType.TASK_URGE)
                         .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
+//        Date time44 = new Date();
+//        System.out.println("actionAuthTime:"+(time44.getTime()-time33.getTime()));
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         for (ProcessTaskVo processTaskVo : processTaskVoList) {
             processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
@@ -103,17 +128,16 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             dataList.add(taskJson);
 
         }
+//        Date time55 = new Date();
+//        System.out.println("combineProcessTaskTime:"+(time55.getTime()-time44.getTime()));
         // 字段排序
         JSONArray sortList = workcenterVo.getSortList();
         if (CollectionUtils.isEmpty(sortList)) {
             sortList = sortColumnList;
         }
-        //统计符合条件工单数量
-        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
-        //System.out.println("countSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
-        int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
 
+//        Date time66 = new Date();
+//        System.out.println("totalTime:"+(time66.getTime()-time55.getTime()));
         returnObj.put("sortList", sortList);
         returnObj.put("theadList", theadList);
         returnObj.put("tbodyList", dataList);
@@ -123,40 +147,31 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         returnObj.put("pageCount", PageUtil.getPageCount(total, workcenterVo.getPageSize()));
         //补充待办数
         workcenterVo.setIsProcessingOfMine(1);
+        workcenterVo.setCurrentPage(1);
         workcenterVo.setPageSize(100);
-        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
-        //System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
+        workcenterVo.setProcessTaskIdList(keywordResultList);
+        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
+//        System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
+//        System.out.println(sb.build());
         Integer count  = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
         returnObj.put("processingOfMineCount", count>99?"99+":count.toString());
+//        Date time77 = new Date();
+//        System.out.println("processingOfMineTotalTime:"+(time77.getTime()-time66.getTime()));
         return returnObj;
     }
 
     @Override
-    public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo,String columnName) {
-        List<JSONObject> dataList = new ArrayList<JSONObject>();
-        JSONArray sortColumnList = new JSONArray();
-        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-        //thead
-        List<WorkcenterTheadVo> theadList = getWorkcenterTheadList(workcenterVo, columnComponentMap, sortColumnList);
-        theadList = theadList.stream().filter(t->t.getName().equals(columnName)).collect(Collectors.toList());
+    public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo) {
         //找出符合条件分页后的工单ID List
-        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
-        //System.out.println("idSql:-------------------------------------------------------------------------------");
-        System.out.println(sb.build());
-        List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
-        workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
-        //补充工单字段信息
-        workcenterVo.setTheadVoList(theadList);
-        sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
-        //System.out.println("fieldSql:-------------------------------------------------------------------------------");
-        //System.out.println(sb.build());
-        return workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
+        //System.out.println("fullTextSql:-------------------------------------------------------------------------------");
+//        System.out.println(sb.build());
+        return workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
     }
 
     @Override
-    public Integer doSearchCount(WorkcenterVo workcenterVo) {
-        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.COUNT);
+    public Integer doSearchLimitCount(WorkcenterVo workcenterVo) {
+        SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
         //System.out.println("countSql:-------------------------------------------------------------------------------");
         //System.out.println(sb.build());
         return workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
@@ -297,5 +312,67 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             action.put("secondActionList", new JSONArray());
         }
         return action;
+    }
+
+    /**
+     * @Description: 获取工单idList by  关键字搜索条件 keywordConditionList
+     * @Author: 89770
+     * @Date: 2021/2/9 17:08
+     * @Params: [workcenterVo]
+     * @Returns: java.util.List<java.lang.Long>
+     **/
+    private List<Long> getProcessTaskIdListByKeywordConditionList(WorkcenterVo workcenterVo){
+        if(CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
+            SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
+//        System.out.println("fullTextGetIdListSql:-------------------------------------------------------------------------------");
+//        System.out.println(sb.build());
+            List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
+            return processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public JSONArray getKeywordOptionsPCNew(WorkcenterVo workcenterVo) {
+        JSONArray returnArray = new JSONArray();
+        workcenterVo.setSqlFieldType(FieldTypeEnum.FULL_TEXT.getValue());
+        // 搜索标题
+        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.TITLE.getHandlerName());
+        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.TITLE.getText());
+        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.TITLE.getProValue());
+        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
+        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
+
+        // 搜索ID
+        workcenterVo.setKeywordHandler(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getHandlerName());
+        workcenterVo.setKeywordText(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getText());
+        workcenterVo.setKeywordPro(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getProValue());
+        workcenterVo.setKeywordColumn(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
+        returnArray.addAll(getKeywordOptionPCNew(workcenterVo));
+        return returnArray;
+    }
+
+    /**
+     * @Description: 根据关键字获取所有过滤选项 pc端
+     * @Author: 89770
+     * @Date: 2021/2/5 9:59
+     * @Params: [condition, keyword, pageSize, columnName]
+     * @Returns: com.alibaba.fastjson.JSONArray
+     **/
+    private JSONArray getKeywordOptionPCNew(WorkcenterVo workcenterVo) {
+        JSONArray returnArray = new JSONArray();
+        List<ProcessTaskVo> processTaskVoList = doSearchKeyword(workcenterVo);
+        if (!processTaskVoList.isEmpty()) {
+            JSONObject titleObj = new JSONObject();
+            JSONArray dataList = new JSONArray();
+            for (ProcessTaskVo processTaskVo: processTaskVoList) {
+                dataList.add(JSONObject.parseObject(JSONObject.toJSONString(processTaskVo)).getString(workcenterVo.getKeywordPro()));
+            }
+            titleObj.put("dataList", dataList);
+            titleObj.put("value", workcenterVo.getKeywordHandler());
+            titleObj.put("text", workcenterVo.getKeywordText());
+            returnArray.add(titleObj);
+        }
+        return returnArray;
     }
 }

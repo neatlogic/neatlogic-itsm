@@ -111,9 +111,9 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
 				JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
 				JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
 				conditionConfig.put("isProcessingOfMine", 1);
-				conditionConfig.put("pageSize",100);
+				conditionJson.put("pageSize",100);
 				WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
-				Integer ProcessingOfMineCount = newWorkcenterService.doSearchCount(wcProcessingOfMine);
+				Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(wcProcessingOfMine);
 				workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
 			}
 			workcenter.setConditionConfig(null);
@@ -125,7 +125,6 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
 			workcenter.setConditionGroupList(null);
 			workcenter.setConditionGroupRelList(null);
 			workcenter.setIsProcessingOfMine(null);
-			workcenter.setValueList(null);
 		}
 	    workcenterJson.put("viewType", viewType);
 	    workcenterJson.put("workcenterList", workcenterList.stream().sorted(Comparator.comparing(WorkcenterVo::getSort)).collect(Collectors.toList()));

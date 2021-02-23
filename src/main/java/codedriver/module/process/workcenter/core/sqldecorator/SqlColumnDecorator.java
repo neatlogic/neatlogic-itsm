@@ -68,12 +68,38 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
             }
         });
 
-        buildFieldMap.put(FieldTypeEnum.COUNT.getValue(), (workcenterVo, sqlSb) -> {
+        buildFieldMap.put(FieldTypeEnum.TOTAL_COUNT.getValue(), (workcenterVo, sqlSb) -> {
             sqlSb.append(" COUNT( distinct pt.id ) ");
+        });
+
+        buildFieldMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(), (workcenterVo, sqlSb) -> {
+            sqlSb.append(" distinct pt.id ");
         });
 
         buildFieldMap.put(FieldTypeEnum.FIELD.getValue(), (workcenterVo, sqlSb) -> {
             buildField(sqlSb, workcenterVo);
+        });
+
+        buildFieldMap.put(FieldTypeEnum.FULL_TEXT.getValue(), (workcenterVo, sqlSb) -> {
+            JSONArray keywordConditionList = workcenterVo.getKeywordConditionList();
+            if(CollectionUtils.isNotEmpty(keywordConditionList)){
+                sqlSb.append(" pt.id  ");
+            }else {
+                //获取关键字
+                IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getKeywordHandler());
+                if (columnHandler != null) {
+                    List<String> matchColumnList = new ArrayList<>();
+                    List<String> columnList = new ArrayList<>();
+                    List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
+                    for (TableSelectColumnVo columnVo : columnVoList) {
+                        for (SelectColumnVo column : columnVo.getColumnList()) {
+                            matchColumnList.add(String.format("%s.%s", columnVo.getTableShortName(), column.getColumnName()));
+                            columnList.add(String.format("%s.%s as %s", columnVo.getTableShortName(), column.getColumnName(), column.getPropertyName()));
+                        }
+                    }
+                    sqlSb.append(String.format(" pt.id , %s ,MATCH (%s)  AGAINST ('\"%s\"' IN BOOLEAN MODE) AS score  ", String.join(",", columnList), String.join(",", matchColumnList), workcenterVo.getKeyword()));
+                }
+            }
         });
     }
 

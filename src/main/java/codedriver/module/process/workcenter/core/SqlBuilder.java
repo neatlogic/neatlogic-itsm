@@ -20,8 +20,18 @@ public class SqlBuilder {
 
     public SqlBuilder(WorkcenterVo workcenterVo, FieldTypeEnum fieldTypeEnum) {
         sqlSb = new StringBuilder();
+        //提升性能，例如 大于100 则 返回99+ 的场景
+        if(FieldTypeEnum.LIMIT_COUNT.getValue().equals(fieldTypeEnum.getValue())){
+            sqlSb.append(" SELECT COUNT(1) FROM ( ");
+        }
+
         workcenterVo.setSqlFieldType(fieldTypeEnum.getValue());
         SqlDecoratorChain.firstSqlDecorator.build(sqlSb, workcenterVo);
+
+        //提升性能，例如 大于100 则 返回99+ 的场景
+        if(FieldTypeEnum.LIMIT_COUNT.getValue().equals(fieldTypeEnum.getValue())){
+            sqlSb.append(" )a ");
+        }
     }
 
     public String build() {

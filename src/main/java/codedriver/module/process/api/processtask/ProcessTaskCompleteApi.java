@@ -124,6 +124,16 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
                 if(StringUtils.isNotBlank(priorityUuid)) {
                     jsonObj.put("priorityUuid", priorityUuid);
                 }
+                JSONArray fileIdList = dataObj.getJSONArray("fileIdList");
+                if(CollectionUtils.isNotEmpty(fileIdList)){
+                    jsonObj.put("fileIdList", fileIdList);
+                }
+                if(!jsonObj.containsKey("content")){
+                    String content = dataObj.getString("content");
+                    if(StringUtils.isNotBlank(content)){
+                        jsonObj.put("content", content);
+                    }
+                }
             }
         }
         processTaskStepVo.setParamObj(jsonObj);
