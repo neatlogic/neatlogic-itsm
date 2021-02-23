@@ -18,7 +18,7 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.notify.handler.TaskStepNotifyPolicyHandler;
+import codedriver.module.process.notify.handler.TaskStepNotifyPolicyHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
