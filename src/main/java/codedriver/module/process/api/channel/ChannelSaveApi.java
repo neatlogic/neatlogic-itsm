@@ -2,6 +2,8 @@ package codedriver.module.process.api.channel;
 
 import java.util.List;
 
+import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.restful.core.IValid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,13 +41,13 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
 	@Autowired
 	private CatalogMapper catalogMapper;
-	
+
 	@Autowired
 	private ProcessMapper processMapper;
-	
+
 	@Autowired
 	private PriorityMapper priorityMapper;
 	
@@ -182,6 +184,17 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 		    }
 		}
 		return uuid;
+	}
+
+	public IValid name() {
+		return value -> {
+			/** 需要传parentUuid，同一个目录下，不能出现重名服务 **/
+			ChannelVo channelVo = JSON.toJavaObject(value, ChannelVo.class);
+			if (channelMapper.checkChannelNameIsRepeat(channelVo) > 0) {
+				return new FieldValidResultVo(new ChannelNameRepeatException(channelVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }

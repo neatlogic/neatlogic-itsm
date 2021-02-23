@@ -1,8 +1,10 @@
 package codedriver.module.process.api.priority;
 
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.process.exception.priority.PriorityIsInvokedException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.PRIORITY_MODIFY;
 
@@ -86,6 +88,16 @@ public class PrioritySaveApi extends PrivateApiComponentBase {
 			priorityMapper.insertPriority(priorityVo);
 		}
 		return priorityVo.getUuid();
+	}
+
+	public IValid name(){
+		return value -> {
+			PriorityVo priorityVo = JSON.toJavaObject(value, PriorityVo.class);
+			if(priorityMapper.checkPriorityNameIsRepeat(priorityVo) > 0) {
+				return new FieldValidResultVo(new PriorityNameRepeatException(priorityVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }

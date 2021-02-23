@@ -1,7 +1,11 @@
 package codedriver.module.process.api.process;
 
+import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,9 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ProcessService processService;
+
+	@Autowired
+	private ProcessMapper processMapper;
 
 	@Override
 	public String getToken() {
@@ -56,6 +63,16 @@ public class ProcessSaveApi extends PrivateApiComponentBase {
 		processVo.makeupConfigObj();
 		processService.saveProcess(processVo);
 		return processVo.getUuid();
+	}
+
+	public IValid name(){
+		return value -> {
+			ProcessVo processVo = JSON.toJavaObject(value,ProcessVo.class);
+			if (processMapper.checkProcessNameIsRepeat(processVo) > 0) {
+				return new FieldValidResultVo(new ProcessNameRepeatException(processVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }

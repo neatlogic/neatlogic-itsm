@@ -51,7 +51,7 @@ public class ProcessServiceImpl implements ProcessService {
     private ScoreTemplateMapper scoreTemplateMapper;
 
     @Override
-    public int saveProcess(ProcessVo processVo) {
+    public int saveProcess(ProcessVo processVo) throws ProcessNameRepeatException {
         if (processMapper.checkProcessNameIsRepeat(processVo) > 0) {
             throw new ProcessNameRepeatException(processVo.getName());
         }
