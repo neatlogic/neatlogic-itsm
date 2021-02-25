@@ -305,8 +305,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             } else if (StringUtils.isNotBlank(resultJson)) {
                 if (predicate(successConfig, resultVo, true)) {// 如果执行成功
                     audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
-                    if (automaticConfigVo.getIsRequest() && !automaticConfigVo.getIsHasCallback()
-                        || !automaticConfigVo.getIsRequest()) {// 第一次请求
+                    if (!automaticConfigVo.getIsRequest() || !automaticConfigVo.getIsHasCallback()) {// 第一次请求
                         //补充下一步骤id
                         List<ProcessTaskStepVo> nextStepList =  processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
                         currentProcessTaskStepVo.getParamObj().put("nextStepId",nextStepList.get(0).getId());
@@ -328,7 +327,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 } else if (automaticConfigVo.getIsRequest()
                     || (!automaticConfigVo.getIsRequest() && predicate(failConfig, resultVo, false))) {// 失败
                     audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
-                    audit.put("failedReason", "");
+                    //拼凑失败原因
+                    String failedReason  = StringUtils.EMPTY;
+                    if(MapUtils.isNotEmpty(successConfig)){
+                        failedReason = String.format("不满足成功条件：%s%s%s",StringUtils.isNotBlank(successConfig.getString("name"))?successConfig.getString("name"):"-",successConfig.getString("expressionName"),successConfig.getString("value"));
+                    }else if(!automaticConfigVo.getIsRequest()&&MapUtils.isNotEmpty(failConfig)){
+                        failedReason = String.format("满足失败条件：%s%s%s",StringUtils.isNotBlank(failConfig.getString("name"))?failConfig.getString("name"):"-",failConfig.getString("expressionName"),failConfig.getString("value"));
+                    }
+                    audit.put("failedReason", failedReason);
                     if (FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
                         List<ProcessTaskStepVo> backStepList =
                             getBackwardNextStepListByProcessTaskStepId(currentProcessTaskStepVo.getId());
@@ -338,10 +344,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                 JSONObject jsonParam = new JSONObject();
                                 jsonParam.put("action", ProcessTaskOperationType.STEP_BACK.getValue());
                                 jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
+                                jsonParam.put("content",failedReason);
                                 currentProcessTaskStepVo.setParamObj(jsonParam);
                                 processHandler.complete(currentProcessTaskStepVo);
                             }
-                        } else {// 如果存在多个回退线，则挂起
+                        } else {// 如果存在多个回退线，保持running
                                 // processHandler.hang(currentProcessTaskStepVo);
                         }
                     } else if (FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
