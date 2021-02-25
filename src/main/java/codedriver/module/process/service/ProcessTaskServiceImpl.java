@@ -330,9 +330,17 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     //拼凑失败原因
                     String failedReason  = StringUtils.EMPTY;
                     if(MapUtils.isNotEmpty(successConfig)){
-                        failedReason = String.format("不满足成功条件：%s%s%s",StringUtils.isNotBlank(successConfig.getString("name"))?successConfig.getString("name"):"-",successConfig.getString("expressionName"),successConfig.getString("value"));
+                        if(StringUtils.isBlank(successConfig.getString("name"))){
+                            failedReason = "-";
+                        }else {
+                            failedReason = String.format("不满足成功条件：%s%s%s", successConfig.getString("name"), successConfig.getString("expressionName"), successConfig.getString("value"));
+                        }
                     }else if(!automaticConfigVo.getIsRequest()&&MapUtils.isNotEmpty(failConfig)){
-                        failedReason = String.format("满足失败条件：%s%s%s",StringUtils.isNotBlank(failConfig.getString("name"))?failConfig.getString("name"):"-",failConfig.getString("expressionName"),failConfig.getString("value"));
+                        if(StringUtils.isBlank(failConfig.getString("name"))){
+                            failedReason = "-";
+                        }else {
+                            failedReason = String.format("满足失败条件：%s%s%s", failConfig.getString("name"), failConfig.getString("expressionName"), failConfig.getString("value"));
+                        }
                     }
                     audit.put("failedReason", failedReason);
                     if (FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
