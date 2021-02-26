@@ -1,32 +1,25 @@
 package codedriver.module.process.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.CatalogVo;
+import codedriver.framework.process.dto.ChannelRelationVo;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.process.dao.mapper.CatalogMapper;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dto.CatalogVo;
-import codedriver.framework.process.dto.ChannelRelationVo;
-import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import java.util.*;
 
 @Service
 public class CatalogServiceImpl implements CatalogService {
@@ -45,6 +38,9 @@ public class CatalogServiceImpl implements CatalogService {
 	
 	@Autowired
 	private UserMapper userMapper;
+
+	@Autowired
+	private ProcessTaskMapper processTaskMapper;
 
 	@Override
 	public void rebuildLeftRightCode() {
@@ -124,8 +120,13 @@ public class CatalogServiceImpl implements CatalogService {
 	@Override
 	public boolean channelIsAuthority(String channelUuid, String userUuid) {
 		ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
-		if(channel == null ) {
-			throw new ChannelNotFoundException(channelUuid);
+		if(channel == null) {
+			//如果存在工单依赖，则说明服务之前存在，现在被删除了，则返回合法权限
+			if(processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(new BasePageVo() , Collections.singletonList(channelUuid)) > 0){
+				return true;
+			}else {
+				throw new ChannelNotFoundException(channelUuid);
+			}
 		}
 		/** 服务状态必须是激活**/
 		if(Objects.equals(channel.getIsActive(), 1)) {

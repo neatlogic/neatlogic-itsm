@@ -7,10 +7,14 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.WorkAssignmentUnitVo;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -33,8 +37,6 @@ import codedriver.framework.process.exception.process.ProcessStepHandlerNotFound
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.util.TimeUtil;
-import codedriver.module.process.integration.handler.ProcessRequestFrom;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
@@ -46,7 +48,9 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
+import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.module.process.integration.handler.ProcessRequestFrom;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -82,6 +86,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Autowired
     private TeamMapper teamMapper;
+
+    @Autowired
+    private RoleMapper roleMapper;
 
     @Autowired
     private FileMapper fileMapper;
@@ -298,8 +305,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             } else if (StringUtils.isNotBlank(resultJson)) {
                 if (predicate(successConfig, resultVo, true)) {// 如果执行成功
                     audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
-                    if (automaticConfigVo.getIsRequest() && !automaticConfigVo.getIsHasCallback()
-                        || !automaticConfigVo.getIsRequest()) {// 第一次请求
+                    if (!automaticConfigVo.getIsRequest() || !automaticConfigVo.getIsHasCallback()) {// 第一次请求
                         //补充下一步骤id
                         List<ProcessTaskStepVo> nextStepList =  processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
                         currentProcessTaskStepVo.getParamObj().put("nextStepId",nextStepList.get(0).getId());
@@ -321,7 +327,22 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 } else if (automaticConfigVo.getIsRequest()
                     || (!automaticConfigVo.getIsRequest() && predicate(failConfig, resultVo, false))) {// 失败
                     audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
-                    audit.put("failedReason", "");
+                    //拼凑失败原因
+                    String failedReason  = StringUtils.EMPTY;
+                    if(MapUtils.isNotEmpty(successConfig)){
+                        if(StringUtils.isBlank(successConfig.getString("name"))){
+                            failedReason = "-";
+                        }else {
+                            failedReason = String.format("不满足成功条件：%s%s%s", successConfig.getString("name"), successConfig.getString("expressionName"), successConfig.getString("value"));
+                        }
+                    }else if(!automaticConfigVo.getIsRequest()&&MapUtils.isNotEmpty(failConfig)){
+                        if(StringUtils.isBlank(failConfig.getString("name"))){
+                            failedReason = "-";
+                        }else {
+                            failedReason = String.format("满足失败条件：%s%s%s", failConfig.getString("name"), failConfig.getString("expressionName"), failConfig.getString("value"));
+                        }
+                    }
+                    audit.put("failedReason", failedReason);
                     if (FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
                         List<ProcessTaskStepVo> backStepList =
                             getBackwardNextStepListByProcessTaskStepId(currentProcessTaskStepVo.getId());
@@ -331,10 +352,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                 JSONObject jsonParam = new JSONObject();
                                 jsonParam.put("action", ProcessTaskOperationType.STEP_BACK.getValue());
                                 jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
+                                jsonParam.put("content",failedReason);
                                 currentProcessTaskStepVo.setParamObj(jsonParam);
                                 processHandler.complete(currentProcessTaskStepVo);
                             }
-                        } else {// 如果存在多个回退线，则挂起
+                        } else {// 如果存在多个回退线，保持running
                                 // processHandler.hang(currentProcessTaskStepVo);
                         }
                     } else if (FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
@@ -758,9 +780,29 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (CollectionUtils.isNotEmpty(majorUserList)) {
             processTaskStepVo.setMajorUser(majorUserList.get(0));
         } else {
-            processTaskStepVo
-                .setWorkerList(processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(
-                    processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId()));
+            List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId());
+            for(ProcessTaskStepWorkerVo workerVo : workerList){
+                if(workerVo.getType().equals(GroupSearch.USER.getValue())){
+                    UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
+                    if(userVo != null){
+                        workerVo.setWorker(new WorkAssignmentUnitVo(userVo));
+                        workerVo.setName(userVo.getUserName());
+                    }
+                }else if(workerVo.getType().equals(GroupSearch.TEAM.getValue())){
+                    TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
+                    if(teamVo != null){
+                        workerVo.setWorker(new WorkAssignmentUnitVo(teamVo));
+                        workerVo.setName(teamVo.getName());
+                    }
+                }else if(workerVo.getType().equals(GroupSearch.ROLE.getValue())){
+                    RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
+                    if(roleVo != null){
+                        workerVo.setWorker(new WorkAssignmentUnitVo(roleVo));
+                        workerVo.setName(roleVo.getName());
+                    }
+                }
+            }
+            processTaskStepVo.setWorkerList(workerList);
         }
         processTaskStepVo.setMinorUserList(processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepVo.getId(),
             ProcessUserType.MINOR.getValue()));
@@ -1126,6 +1168,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 processTaskVo.setChannelType(channelTypeVo.clone());
             } catch (CloneNotSupportedException e) {
             }
+        }else{
+            if(processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(new BasePageVo() , Collections.singletonList(processTaskVo.getChannelUuid())) > 0) {
+                processTaskVo.setChannelName("服务已被删除");
+                processTaskVo.setChannelPath("服务已被删除");
+            }
         }
         // 耗时
         if (processTaskVo.getEndTime() != null) {
@@ -1193,6 +1240,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         // 标签列表
         processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId));
+        /** 工单关注人列表 **/
+        List<String> focusUserUuidList = processTaskMapper.getFocusUserListByTaskId(processTaskId);
+        if(CollectionUtils.isNotEmpty(focusUserUuidList)){
+            processTaskVo.setFocusUserUuidList(focusUserUuidList);
+            processTaskVo.setFocusUserList(userMapper.getUserByUserUuidList(focusUserUuidList));
+        }
         return processTaskVo;
     }
 
@@ -1423,6 +1476,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 List<String> tagList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("tagList")), String.class);
                 if(tagList != null){
                     processTaskVo.setTagList(tagList);
+                }
+                /** 工单关注人列表 **/
+                List<String> focusUserUuidList = JSON.parseArray(dataObj.getString("focusUserUuidList"),String.class);
+                if(CollectionUtils.isNotEmpty(focusUserUuidList)){
+                    processTaskVo.setFocusUserUuidList(focusUserUuidList);
+                    processTaskVo.setFocusUserList(userMapper.getUserByUserUuidList(focusUserUuidList));
                 }
             }
         }

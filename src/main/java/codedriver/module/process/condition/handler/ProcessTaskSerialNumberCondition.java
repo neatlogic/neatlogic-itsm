@@ -1,13 +1,5 @@
 package codedriver.module.process.condition.handler;
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
@@ -15,6 +7,13 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
@@ -87,5 +86,10 @@ public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase i
 	@Override
 	public Object valueConversionText(Object value, JSONObject config) {
 		return value;
+	}
+
+	@Override
+	public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+		getSimpleSqlConditionWhere(conditionList.get(index), sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
 	}
 }

@@ -1,27 +1,27 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.AuthorityVo;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.exception.catalog.CatalogNameRepeatException;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.CATALOG_MODIFY;
 import codedriver.module.process.service.CatalogService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @Transactional
@@ -29,10 +29,10 @@ import codedriver.module.process.service.CatalogService;
 @AuthAction(action = CATALOG_MODIFY.class)
 public class CatalogSaveApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	private CatalogMapper catalogMapper;
 
-	@Autowired
+	@Resource
 	private CatalogService catalogService;
 
 	@Override
@@ -112,6 +112,18 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 			}
 		}
 		return catalogVo.getUuid();
+	}
+
+	public IValid name(){
+		return value -> {
+			CatalogVo catalogVo = new CatalogVo();
+			catalogVo.setName(value.getString("name"));
+			catalogVo.setParentUuid(value.getString("parentUuid"));
+			if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
+				return new FieldValidResultVo(new CatalogNameRepeatException(catalogVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }

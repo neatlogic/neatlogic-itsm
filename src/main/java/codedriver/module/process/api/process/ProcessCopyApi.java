@@ -3,10 +3,13 @@ package codedriver.module.process.api.process;
 import java.util.List;
 import java.util.UUID;
 
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,6 +103,17 @@ public class ProcessCopyApi extends PrivateApiComponentBase {
 		processService.saveProcess(processVo);
 		processVo.setConfig(null);
 		return processVo;
+	}
+
+	public IValid name(){
+		return value -> {
+			ProcessVo processVo = JSON.toJavaObject(value,ProcessVo.class);
+			processVo.setUuid(null);
+			if (processMapper.checkProcessNameIsRepeat(processVo) > 0) {
+				return new FieldValidResultVo(new ProcessNameRepeatException(processVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }

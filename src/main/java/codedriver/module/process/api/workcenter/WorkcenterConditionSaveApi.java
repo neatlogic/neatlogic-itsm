@@ -1,16 +1,6 @@
 package codedriver.module.process.api.workcenter;
 
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -20,14 +10,20 @@ import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.exception.workcenter.WorkcenterNoAuthException;
 import codedriver.framework.process.exception.workcenter.WorkcenterNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-@AuthAction(action = WORKCENTER_MODIFY.class)
 public class WorkcenterConditionSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
@@ -76,7 +72,7 @@ public class WorkcenterConditionSaveApi extends PrivateApiComponentBase {
 		}else if(ProcessWorkcenterType.CUSTOM.getValue().equals(workcenterVo.getType())&&!workcenterVo.getOwner().equalsIgnoreCase(userUuid)) {
 			throw new WorkcenterNoAuthException("修改个人分类");
 		}
-		workcenterVo.setConditionConfig(jsonObj.getString("conditionConfig"));
+		workcenterVo.setConditionConfig(jsonObj.toJSONString());
 		workcenterMapper.updateWorkcenterCondition(workcenterVo);
 		return null;
 	}

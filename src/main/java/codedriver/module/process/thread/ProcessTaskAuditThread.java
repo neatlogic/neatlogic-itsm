@@ -3,12 +3,10 @@ package codedriver.module.process.thread;
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.audithandler.core.IProcessTaskAuditDetailType;
 import codedriver.framework.process.audithandler.core.IProcessTaskAuditType;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
-import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
@@ -16,7 +14,6 @@ import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.util.FreemarkerUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +97,7 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
                 if (Objects.equals(oldData, newData)) {
                     continue;
                 }
+
                 if (auditDetailType.getNeedCompression()) {
                     if (StringUtils.isNotBlank(newData)) {
                         ProcessTaskContentVo contentVo = new ProcessTaskContentVo(newData);

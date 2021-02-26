@@ -2,6 +2,8 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.restful.core.IValid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,6 +141,16 @@ public class FormSaveApi extends PrivateApiComponentBase {
 		resultObj.put("currentVersionUuid", formVersionVo.getUuid());
 		resultObj.put("currentVersion", formVersionVo.getVersion());
 		return resultObj;
+	}
+
+	public IValid name() {
+		return value -> {
+			FormVo formVo = JSON.toJavaObject(value, FormVo.class);
+			if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
+				return new FieldValidResultVo(new FormNameRepeatException(formVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }

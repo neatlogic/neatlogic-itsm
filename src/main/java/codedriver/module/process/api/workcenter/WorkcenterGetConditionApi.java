@@ -1,30 +1,24 @@
 package codedriver.module.process.api.workcenter;
 
-import java.util.Collections;
-import java.util.Comparator;
-
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.*;
-import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
-import codedriver.module.process.condition.handler.ProcessTaskIsShowCondition;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.module.process.condition.handler.ProcessTaskIsShowCondition;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.Comparator;
 
 @Service
 @Transactional
@@ -67,9 +61,11 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
 			//不支持endTime过滤，如果是简单模式 title、id、content 不返回
 			//没有工单管理权限则不显示“是否隐藏工单”选项
-			if(conditionModel.equals(ProcessConditionModel.SIMPLE.getValue())&&(condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
+			if((condition.getName().equals(ProcessWorkcenterField.TITLE.getValue())
 					||condition.getName().equals(ProcessWorkcenterField.ID.getValue())||condition.getName().equals(ProcessWorkcenterField.CONTENT.getValue()))
 					||condition.getName().equals(ProcessWorkcenterField.ENDTIME.getValue())
+					||condition.getName().equals(ProcessWorkcenterField.SERIAL_NUMBER.getValue())
+					||condition.getName().equals(ProcessWorkcenterField.STARTTIME.getValue())
 					||ProcessWorkcenterField.getValue(condition.getName())== null
 					||!(condition instanceof IProcessTaskCondition)
 					|| (!AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName()) && (condition instanceof ProcessTaskIsShowCondition))

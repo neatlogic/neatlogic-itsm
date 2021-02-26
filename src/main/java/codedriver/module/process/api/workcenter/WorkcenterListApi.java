@@ -1,19 +1,5 @@
 package codedriver.module.process.api.workcenter;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -23,15 +9,19 @@ import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterUserProfileVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
-import codedriver.module.process.service.WorkcenterService;
+import codedriver.module.process.service.NewWorkcenterService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterListApi extends PrivateApiComponentBase {
@@ -46,7 +36,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
 	TeamMapper teamMapper;
 	
 	@Autowired
-	WorkcenterService workcenterService;
+	NewWorkcenterService newWorkcenterService;
 	
 	@Override
 	public String getToken() {
@@ -95,47 +85,46 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
 	    		}
 	    	}
 	    }
-		Iterator<WorkcenterVo> it =workcenterList.iterator();
-	    while (it.hasNext()) {
-	        WorkcenterVo workcenter = it.next();
-			if(workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
+		for (WorkcenterVo workcenter : workcenterList) {
+			if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
 				workcenter.setIsCanEdit(0);
-			}if(workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue())&& CollectionUtils.isNotEmpty(userAuthList)) {
+			}
+			if (workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue()) && CollectionUtils.isNotEmpty(userAuthList)) {
 				workcenter.setIsCanEdit(1);
 				workcenter.setIsCanRole(1);
-			}else if(workcenter.getType().equals(ProcessWorkcenterType.CUSTOM.getValue())){
-				if(UserContext.get().getUserUuid(true).equalsIgnoreCase(workcenter.getOwner())) {
+			} else if (workcenter.getType().equals(ProcessWorkcenterType.CUSTOM.getValue())) {
+				if (UserContext.get().getUserUuid(true).equalsIgnoreCase(workcenter.getOwner())) {
 					workcenter.setIsCanEdit(1);
-					if(CollectionUtils.isNotEmpty(userAuthList)) {
+					if (CollectionUtils.isNotEmpty(userAuthList)) {
 						workcenter.setIsCanRole(1);
-					}else {
+					} else {
 						workcenter.setIsCanRole(0);
 					}
-				}else {
+				} else {
 					workcenter.setIsCanEdit(0);
 					workcenter.setIsCanRole(0);
 				}
 			}
-			
+
 			//查询数量
-			if(isAll == 1) {
-				WorkcenterVo wc = new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()));
-				wc.setPageSize(100);
-				Integer workcenterCount  = workcenterService.doSearchCount(wc);
-				workcenter.setCount(workcenterCount>99?"99+":workcenterCount.toString());
-				
-				
-				WorkcenterVo wcMe = new WorkcenterVo(JSONObject.parseObject(workcenter.getConditionConfig()));
-				wcMe.setPageSize(100);
-				wcMe.setIsMeWillDo(1);
-				Integer meWillDoCount  = workcenterService.doSearchCount(wcMe);
-				workcenter.setMeWillDoCount(meWillDoCount>99?"99+":meWillDoCount.toString());
+			if (isAll == 1) {
+				JSONObject conditionJson = JSONObject.parseObject(workcenter.getConditionConfig());
+				JSONObject conditionConfig = conditionJson.getJSONObject("conditionConfig");
+				conditionConfig.put("isProcessingOfMine", 1);
+				conditionJson.put("pageSize",100);
+				WorkcenterVo wcProcessingOfMine = new WorkcenterVo(conditionJson);
+				Integer ProcessingOfMineCount = newWorkcenterService.doSearchLimitCount(wcProcessingOfMine);
+				workcenter.setProcessingOfMineCount(ProcessingOfMineCount > 99 ? "99+" : ProcessingOfMineCount.toString());
 			}
 			workcenter.setConditionConfig(null);
 			//排序 用户设置的排序优先
-		    if(workcenterUserSortMap.containsKey(workcenter.getUuid())) {
-		    	workcenter.setSort(workcenterUserSortMap.get(workcenter.getUuid()));
-		    }
+			if (workcenterUserSortMap.containsKey(workcenter.getUuid())) {
+				workcenter.setSort(workcenterUserSortMap.get(workcenter.getUuid()));
+			}
+			//去除返回前端的多余字段
+			workcenter.setConditionGroupList(null);
+			workcenter.setConditionGroupRelList(null);
+			workcenter.setIsProcessingOfMine(null);
 		}
 	    workcenterJson.put("viewType", viewType);
 	    workcenterJson.put("workcenterList", workcenterList.stream().sorted(Comparator.comparing(WorkcenterVo::getSort)).collect(Collectors.toList()));

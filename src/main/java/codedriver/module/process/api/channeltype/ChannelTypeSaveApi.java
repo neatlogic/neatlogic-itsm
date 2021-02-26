@@ -1,9 +1,11 @@
 package codedriver.module.process.api.channeltype;
 
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.exception.channeltype.ChannelTypeHasReferenceException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.CHANNELTYPE_MODIFY;
 
@@ -113,6 +115,16 @@ public class ChannelTypeSaveApi extends PrivateApiComponentBase {
             processTaskSerialNumberMapper.insertProcessTaskSerialNumberPolicy(policy);
         }
         return channelTypeVo.getUuid();
+    }
+
+    public IValid name() {
+        return value -> {
+            ChannelTypeVo channelTypeVo = JSON.toJavaObject(value, ChannelTypeVo.class);
+            if (channelTypeMapper.checkChannelTypeNameIsRepeat(channelTypeVo) > 0) {
+                return new FieldValidResultVo(new ChannelTypeNameRepeatException(channelTypeVo.getName()));
+            }
+            return new FieldValidResultVo();
+        };
     }
 
 }

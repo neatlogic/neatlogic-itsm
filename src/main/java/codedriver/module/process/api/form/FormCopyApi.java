@@ -3,11 +3,14 @@ package codedriver.module.process.api.form;
 import java.util.List;
 import java.util.UUID;
 
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.FORM_MODIFY;
 
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,6 +107,16 @@ public class FormCopyApi extends PrivateApiComponentBase {
 			}
 		}
 		return formVo;
+	}
+
+	public IValid name() {
+		return value -> {
+			FormVo formVo = JSON.toJavaObject(value, FormVo.class);
+			if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
+				return new FieldValidResultVo(new FormNameRepeatException(formVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 	private void saveFormVersion(FormVersionVo formVersionVo, String newFormUuid, String oldName, String newName) {
