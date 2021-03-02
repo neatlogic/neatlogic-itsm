@@ -67,6 +67,7 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
         @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "处理器特有的步骤信息")})
     @Output({@Param(name = "auditId", type = ApiParamType.LONG, desc = "活动id")})
     @Description(desc = "工单步骤暂存接口")
+    @ResubmitInterval(value = 5)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
