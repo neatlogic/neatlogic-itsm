@@ -54,6 +54,7 @@ import codedriver.module.process.integration.handler.ProcessRequestFrom;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
+import codedriver.module.process.workcenter.column.handler.ProcessTaskStartTimeColumn;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -69,6 +70,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -79,6 +81,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     private final static Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
 
     private Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
+
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
@@ -1494,8 +1498,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     public List<Map<String, Object>> getTaskListByStepTeamUuidList(List<String> stepTeamUuidList) {
         List<Map<String, Object>> taskList = new ArrayList<>();
         List<ProcessTaskVo> processTaskList = processTaskMapper.getPendingProcessTaskListByStepTeamUuidList(stepTeamUuidList);
+        ProcessTaskStartTimeColumn startTimeColumn = new ProcessTaskStartTimeColumn();
         ProcessTaskCurrentStepNameColumn currentStepNameColumn = new ProcessTaskCurrentStepNameColumn();
         ProcessTaskCurrentStepWorkerColumn currentStepWorkerColumn = new ProcessTaskCurrentStepWorkerColumn();
+        long currentTimeMillis = System.currentTimeMillis();
         if (CollectionUtils.isNotEmpty(processTaskList)) {
             for (ProcessTaskVo processTaskVo : processTaskList) {
                 Map<String, Object> map = new HashMap<>();
@@ -1504,14 +1510,22 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
                 if (channel == null) {
                     channel = new ChannelVo();
+                    channel.setName("服务已被删除");
+                }
+                String channelTypeName = null;
+                if(StringUtils.isNotBlank(channel.getChannelTypeUuid())){
+                    ChannelTypeVo channelType = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+                    if(channelType != null){
+                        channelTypeName = channelType.getName();
+                    }
                 }
                 /** 获取服务目录信息 **/
-                CatalogVo catalog = null;
+                String catalogName = null;
                 if (StringUtils.isNotBlank(channel.getParentUuid())) {
-                    catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
-                }
-                if (catalog == null) {
-                    catalog = new CatalogVo();
+                    CatalogVo catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+                    if(catalog != null){
+                        catalogName = catalog.getName();
+                    }
                 }
 
                 /** 获取工单当前步骤 **/
@@ -1596,13 +1610,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                 }
                             }
                             long time;
-                            if (willOverTime != null && System.currentTimeMillis() > willOverTime) {
+                            if (willOverTime != null && currentTimeMillis > willOverTime) {
                                 time = System.currentTimeMillis() - willOverTime;
                                 sb.append(slaVo.getName())
                                         .append("距离超时：")
                                         .append(Math.floor(time / (1000 * 60 * 60 * 24)))
                                         .append("天;");
-                            } else if (expireTime != null && System.currentTimeMillis() > expireTime) {
+                            } else if (expireTime != null && currentTimeMillis > expireTime) {
                                 time = System.currentTimeMillis() - expireTime;
                                 sb.append(slaVo.getName())
                                         .append("已超时：")
@@ -1616,11 +1630,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 map.put(ProcessWorkcenterField.ID.getValue(), processTaskVo.getId());
                 map.put(ProcessWorkcenterField.SERIAL_NUMBER.getName(), processTaskVo.getSerialNumber());
                 map.put(ProcessWorkcenterField.TITLE.getName(), processTaskVo.getTitle());
-                map.put(ProcessWorkcenterField.CHANNELTYPE.getName(), processTaskVo.getChannelTypeName());
-                map.put(ProcessWorkcenterField.CHANNEL.getName(), processTaskVo.getChannelName());
-                map.put(ProcessWorkcenterField.CATALOG.getName(), catalog.getName());
-                map.put(ProcessWorkcenterField.ENDTIME.getName(), processTaskVo.getEndTime());
-                map.put(ProcessWorkcenterField.STARTTIME.getName(), processTaskVo.getStartTime());
+                map.put(ProcessWorkcenterField.CHANNELTYPE.getName(), channelTypeName);
+                map.put(ProcessWorkcenterField.CHANNEL.getName(), channel.getName());
+                map.put(ProcessWorkcenterField.CATALOG.getName(), catalogName);
+                map.put(ProcessWorkcenterField.ENDTIME.getName(), processTaskVo.getEndTime() != null ? sdf.format(processTaskVo.getEndTime()) : null);
+                map.put(startTimeColumn.getDisplayName(), sdf.format(processTaskVo.getStartTime()));
                 map.put(ProcessWorkcenterField.OWNER.getName(), processTaskVo.getOwnerName());
                 map.put(ProcessWorkcenterField.REPORTER.getName(), processTaskVo.getReporterName());
                 map.put(ProcessWorkcenterField.PRIORITY.getName(), processTaskVo.getPriorityName());
