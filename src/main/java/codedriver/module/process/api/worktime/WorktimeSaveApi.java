@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.WORKTIME_MODIFY;
 
@@ -117,6 +119,16 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
 		}
 
 		return uuid;
+	}
+
+	public IValid name(){
+		return value -> {
+			WorktimeVo worktimeVo = JSON.toJavaObject(value, WorktimeVo.class);
+			if(worktimeMapper.checkWorktimeNameIsRepeat(worktimeVo) > 0) {
+				return new FieldValidResultVo(new WorktimeNameRepeatException(worktimeVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }
