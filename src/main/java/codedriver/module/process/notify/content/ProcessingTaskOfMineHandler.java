@@ -253,24 +253,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 							columnList.add(entry.getValue().getDisplayName());
 						}
 					}
-
-					/** 获取工单查询条件 */
-					List<String> stepTeamUuidList = new ArrayList<>();
-					JSONObject conditionConfig = config.getJSONObject("conditionConfig");
-					if(MapUtils.isNotEmpty(conditionConfig)){
-						JSONArray stepTeam = conditionConfig.getJSONArray(ProcessingTaskOfMineHandler.ConditionOptions.STEPTEAM.getValue());
-						if (CollectionUtils.isNotEmpty(stepTeam)) {
-							for (Object o : stepTeam) {
-								stepTeamUuidList.add(o.toString().split("#")[1]);
-							}
-						}
-					}
-
-					/** 查询工单 */
-					List<Map<String, Object>> originalTaskList = processTaskService.getTaskListByStepTeamUuidList(stepTeamUuidList);
-
-					/** 按处理人给工单分类 */
-					Map<String, List<Map<String, Object>>> userTaskMap = ProcessingTaskOfMineHandler.getUserTaskMap(originalTaskList);
+					/** 获取按用户分好类的工单列表 **/
+					Map<String, List<Map<String, Object>>> userTaskMap = getUserTaskMap(config);
 
 					drawTaskTable(notifyList, title, content, columnList, userTaskMap);
 				}
@@ -409,23 +393,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 						content = messageConfig.getString("content");
 					}
 
-					/** 获取工单查询条件 */
-					List<String> stepTeamUuidList = new ArrayList<>();
-					JSONObject conditionConfig = config.getJSONObject("conditionConfig");
-					if(MapUtils.isNotEmpty(conditionConfig)){
-						JSONArray stepTeam = conditionConfig.getJSONArray(ProcessingTaskOfMineHandler.ConditionOptions.STEPTEAM.getValue());
-						if (CollectionUtils.isNotEmpty(stepTeam)) {
-							for (Object o : stepTeam) {
-								stepTeamUuidList.add(o.toString().split("#")[1]);
-							}
-						}
-					}
-
-					/** 查询工单 */
-					List<Map<String, Object>> originalTaskList = processTaskService.getTaskListByStepTeamUuidList(stepTeamUuidList);
-
-					/** 按处理人给工单分类 */
-					Map<String, List<Map<String, Object>>> userTaskMap = ProcessingTaskOfMineHandler.getUserTaskMap(originalTaskList);
+					/** 获取按用户分好类的工单列表 */
+					Map<String, List<Map<String, Object>>> userTaskMap = getUserTaskMap(config);
 
 					if(MapUtils.isNotEmpty(userTaskMap)){
 						for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
@@ -567,13 +536,40 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	}
 
 	/**
+	 * @Description: 查询工单，并按用户分类
+	 * @Author: laiwt
+	 * @Date: 2021/3/4 15:15
+	 * @Params: [config]
+	 * @Returns: java.util.Map<java.lang.String,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>>
+	**/
+	private Map<String, List<Map<String, Object>>> getUserTaskMap(JSONObject config) {
+		/** 获取工单查询条件 */
+		List<String> stepTeamUuidList = new ArrayList<>();
+		JSONObject conditionConfig = config.getJSONObject("conditionConfig");
+		if (MapUtils.isNotEmpty(conditionConfig)) {
+			JSONArray stepTeam = conditionConfig.getJSONArray(ConditionOptions.STEPTEAM.getValue());
+			if (CollectionUtils.isNotEmpty(stepTeam)) {
+				for (Object o : stepTeam) {
+					stepTeamUuidList.add(o.toString().split("#")[1]);
+				}
+			}
+		}
+
+		/** 查询工单 */
+		List<Map<String, Object>> originalTaskList = processTaskService.getTaskListByStepTeamUuidList(stepTeamUuidList);
+
+		/** 按处理人给工单分类 */
+		return classifyTaskByUser(originalTaskList);
+	}
+
+	/**
 	 * @Description: 按用户将工单分类
 	 * @Author: laiwt
 	 * @Date: 2021/1/8 14:21
 	 * @Params: [originalTaskList]
 	 * @Returns: java.util.Map<java.lang.String,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>>
 	**/
-	public static Map<String, List<Map<String, Object>>> getUserTaskMap(List<Map<String, Object>> originalTaskList) {
+	private Map<String, List<Map<String, Object>>> classifyTaskByUser(List<Map<String, Object>> originalTaskList) {
 		Map<String, List<Map<String, Object>>> userTaskMap = new HashMap<>();
 		if (CollectionUtils.isNotEmpty(originalTaskList)) {
 			String currentStepNameWorker = new ProcessTaskCurrentStepWorkerColumn().getName();
