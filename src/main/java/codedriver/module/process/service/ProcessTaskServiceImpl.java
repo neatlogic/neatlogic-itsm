@@ -1611,13 +1611,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                             }
                             long time;
                             if (willOverTime != null && currentTimeMillis > willOverTime) {
-                                time = System.currentTimeMillis() - willOverTime;
+                                time = currentTimeMillis - willOverTime;
                                 sb.append(slaVo.getName())
                                         .append("距离超时：")
                                         .append(Math.floor(time / (1000 * 60 * 60 * 24)))
                                         .append("天;");
                             } else if (expireTime != null && currentTimeMillis > expireTime) {
-                                time = System.currentTimeMillis() - expireTime;
+                                time = currentTimeMillis - expireTime;
                                 sb.append(slaVo.getName())
                                         .append("已超时：")
                                         .append(Math.floor(time / (1000 * 60 * 60 * 24)))

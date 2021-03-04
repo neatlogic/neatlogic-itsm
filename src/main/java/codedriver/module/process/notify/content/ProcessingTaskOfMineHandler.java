@@ -50,8 +50,6 @@ import java.util.stream.Collectors;
 @Component
 public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
-	private static Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-
 	@Resource
 	private NotifyJobMapper notifyJobMapper;
 
@@ -91,13 +89,12 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 	private static Map<String, JSONArray> messageAttrMap = new HashMap<>();
 
-	private static Map<String,BuildNotifyHandler> handlerMap = new HashMap<>();
-
-	/**
-	 * 不同的通知内容与通知方式插件对应不同的属性
-	 * 例如此插件下的邮件通知有邮件标题、邮件正文、接收人
-	 * 将来扩展通知方式插件时，可在messageAttrMap中put对应的插件类与属性
+	/** 需要可选择工单显示字段的通知方式
+	 * 目前只有邮件通知需要，因为邮件内容为工单列表
 	 */
+	private static List<String> notifyHandlersWhichCanChooseTaskColumn = new ArrayList<>();
+
+	private static Map<String,BuildNotifyHandler> handlerMap = new HashMap<>();
 
 	@PostConstruct
 	public void init() {
@@ -172,6 +169,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			}
 		});
 
+		notifyHandlersWhichCanChooseTaskColumn.add(EmailNotifyHandler.class.getName());
+
 		/**
 		 * 不同的通知方式返回内容形式不同的NotifyVo
 		 * 例如邮件通知的形式为工单列表
@@ -181,7 +180,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			public String getPreviewContent(JSONObject config) {
 				JSONArray dataColumnList = config.getJSONArray("dataColumnList");
 				List<String> columnNameList = new ArrayList<>();
-				Map<String, String> collect = columnComponentMap.values()
+				Map<String, String> collect = ProcessTaskColumnFactory.columnComponentMap.values()
 						.stream().collect(Collectors.toMap(e -> e.getName(), e -> e.getDisplayName()));
 				for(Object column : dataColumnList){
 					columnNameList.add(collect.get(column.toString()));
@@ -248,9 +247,9 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 					JSONArray dataColumns = config.getJSONArray("dataColumnList");
 					List<String> columnList = new ArrayList<>();
 					if(CollectionUtils.isNotEmpty(dataColumns)){
-						dataColumns.stream().forEach(o -> columnList.add(columnComponentMap.get(o.toString()).getDisplayName()));
+						dataColumns.stream().forEach(o -> columnList.add(ProcessTaskColumnFactory.columnComponentMap.get(o.toString()).getDisplayName()));
 					}else{
-						for(Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()){
+						for(Map.Entry<String, IProcessTaskColumn> entry : ProcessTaskColumnFactory.columnComponentMap.entrySet()){
 							columnList.add(entry.getValue().getDisplayName());
 						}
 					}
@@ -518,14 +517,20 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 
 	@Override
-	protected List<ValueTextVo> getMyDataColumnList() {
+	protected List<ValueTextVo> getMyDataColumnList(String notifyHandler) {
 		List<ValueTextVo> result = new ArrayList<>();
-		Collection<IProcessTaskColumn> values = columnComponentMap.values();
-		values.stream().sorted(Comparator.comparing(IProcessTaskColumn::getSort)).forEach(o -> {
-			if(!o.getDisabled() && o.getIsShow() && o.getIsExport()){
-				result.add(new ValueTextVo(o.getName(),o.getDisplayName()));
-			}
-		});
+		INotifyHandler handler = NotifyHandlerFactory.getHandler(notifyHandler);
+		if(handler == null){
+			throw new NotifyHandlerNotFoundException(notifyHandler);
+		}
+		if(notifyHandlersWhichCanChooseTaskColumn.contains(notifyHandler)){
+			Collection<IProcessTaskColumn> values = ProcessTaskColumnFactory.columnComponentMap.values();
+			values.stream().sorted(Comparator.comparing(IProcessTaskColumn::getSort)).forEach(o -> {
+				if(!o.getDisabled() && o.getIsShow() && o.getIsExport()){
+					result.add(new ValueTextVo(o.getName(),o.getDisplayName()));
+				}
+			});
+		}
 		return result;
 	}
 
