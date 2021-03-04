@@ -1,24 +1,18 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = NO_AUTH.class)
@@ -60,12 +54,12 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 	    //暂存
 	    jsonObj.put("isNeedValid", 1);
 	    ProcessTaskDraftSaveApi drafSaveApi = (ProcessTaskDraftSaveApi)PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-	    JSONObject saveResultObj =  JSONObject.parseObject(drafSaveApi.doService(PrivateApiComponentFactory.getApiByToken(drafSaveApi.getToken()), jsonObj).toString());
+	    JSONObject saveResultObj =  JSONObject.parseObject(drafSaveApi.doService(PrivateApiComponentFactory.getApiByToken(drafSaveApi.getToken()), jsonObj,null).toString());
 	    saveResultObj.put("action", "start");
 	    
 	    //查询可执行下一步骤
 	    ProcessTaskProcessableStepList stepListApi  = (ProcessTaskProcessableStepList)PrivateApiComponentFactory.getInstance(ProcessTaskProcessableStepList.class.getName());
-	    Object nextStepListObj = stepListApi.doService(PrivateApiComponentFactory.getApiByToken(stepListApi.getToken()),saveResultObj);
+	    Object nextStepListObj = stepListApi.doService(PrivateApiComponentFactory.getApiByToken(stepListApi.getToken()),saveResultObj,null);
 	    List<ProcessTaskStepVo> nextStepList  =  (List<ProcessTaskStepVo>)nextStepListObj;
 	    if(CollectionUtils.isEmpty(nextStepList) && nextStepList.size() != 1) {
 	        throw new RuntimeException("抱歉！暂不支持开始节点连接多个后续节点。");
@@ -74,7 +68,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 	    
 	    //流转
 	    ProcessTaskStartProcessApi startProcessApi  = (ProcessTaskStartProcessApi)PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
-	    startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()),saveResultObj);
+	    startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()),saveResultObj,null);
         
         result.put("processTaskId", saveResultObj.getString("processTaskId"));
 		return result;

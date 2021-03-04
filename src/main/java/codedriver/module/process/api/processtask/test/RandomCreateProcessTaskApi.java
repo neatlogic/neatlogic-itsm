@@ -126,7 +126,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                 completeJson.put("processTaskStepId", stepUserVo.getProcessTaskStepId());
                 completeJson.put("action", "complete");
                 completeJson.put("nextStepId", processTaskNextStepMap.get(String.format("%s_%s", stepUserVo.getProcessTaskId(), stepUserVo.getProcessTaskStepId())));
-                completeProcessApi.doService(PrivateApiComponentFactory.getApiByToken(completeProcessApi.getToken()), completeJson);
+                completeProcessApi.doService(PrivateApiComponentFactory.getApiByToken(completeProcessApi.getToken()), completeJson,null);
             }
         });
     }
@@ -211,14 +211,14 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                     paramJson.put("readcomponentList", new JSONArray());
 
                     ProcessTaskDraftSaveApi draftSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-                    JSONObject saveResultObj = JSONObject.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson).toString());
+                    JSONObject saveResultObj = JSONObject.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson,null).toString());
                     saveResultObj.put("action", "start");
                     //查询可执行下一步骤
                     List<ProcessTaskStepVo> nextStepList =  processtaskMapper.getToProcessTaskStepByFromIdAndType(saveResultObj.getLong("processTaskStepId"), null);
                     saveResultObj.put("nextStepId", nextStepList.get((int) Math.round(Math.random() * (nextStepList.size()-1))).getId());
                     //流转
                     ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
-                    startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()), saveResultObj);
+                    startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()), saveResultObj,null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

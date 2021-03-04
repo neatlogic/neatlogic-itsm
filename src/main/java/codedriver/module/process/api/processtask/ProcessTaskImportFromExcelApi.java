@@ -216,7 +216,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
                     try{
                         ApiVo apiVo = new ApiVo();
                         apiVo.setIsActive(1);
-                        JSONObject resultObj = JSONObject.parseObject(taskCreatePublicApi.doService(apiVo,task).toString());
+                        JSONObject resultObj = JSONObject.parseObject(taskCreatePublicApi.doService(apiVo,task,null).toString());
                         auditVo.setProcessTaskId(resultObj.getLong("processTaskId"));
                         auditVo.setStatus(1);
                         successCount++;
