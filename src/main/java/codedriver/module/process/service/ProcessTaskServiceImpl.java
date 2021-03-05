@@ -25,6 +25,8 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.exception.MatrixExternalException;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
+import codedriver.framework.process.column.core.IProcessTaskColumn;
+import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.constvalue.automatic.CallbackType;
@@ -67,6 +69,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -77,6 +80,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     private final static Logger logger = LoggerFactory.getLogger(ProcessTaskServiceImpl.class);
 
     private Pattern pattern_html = Pattern.compile("<[^>]+>", Pattern.CASE_INSENSITIVE);
+
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
@@ -1487,4 +1492,115 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
     }
 
+
+    @Override
+    public List<Map<String, Object>> getTaskListByStepTeamUuidList(List<String> stepTeamUuidList) {
+        List<Map<String, Object>> taskList = new ArrayList<>();
+        List<ProcessTaskVo> processTaskList = processTaskMapper.getPendingProcessTaskListByStepTeamUuidList(stepTeamUuidList);
+        IProcessTaskColumn startTimeColumn = ProcessTaskColumnFactory.getHandler("starttime");
+        IProcessTaskColumn currentStepNameColumn = ProcessTaskColumnFactory.getHandler("currentstepname");
+        IProcessTaskColumn currentStepWorkerColumn = ProcessTaskColumnFactory.getHandler("currentstepworker");
+        IProcessTaskColumn expiredTimeColumn = ProcessTaskColumnFactory.getHandler("expiretime");
+        if (CollectionUtils.isNotEmpty(processTaskList)) {
+            for (ProcessTaskVo processTaskVo : processTaskList) {
+                Map<String, Object> map = new HashMap<>();
+
+                /** 获取服务信息 **/
+                ChannelVo channel = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+                if (channel == null) {
+                    channel = new ChannelVo();
+                    channel.setName("服务已被删除");
+                }
+                String channelTypeName = null;
+                if(StringUtils.isNotBlank(channel.getChannelTypeUuid())){
+                    ChannelTypeVo channelType = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
+                    if(channelType != null){
+                        channelTypeName = channelType.getName();
+                    }
+                }
+                /** 获取服务目录信息 **/
+                String catalogName = null;
+                if (StringUtils.isNotBlank(channel.getParentUuid())) {
+                    CatalogVo catalog = catalogMapper.getCatalogByUuid(channel.getParentUuid());
+                    if(catalog != null){
+                        catalogName = catalog.getName();
+                    }
+                }
+
+                /** 获取工单当前步骤 **/
+                List<ProcessTaskStepVo> processTaskStepList = processTaskMapper
+                        .getProcessTaskActiveStepByProcessTaskIdAndProcessStepType(processTaskVo.getId(), new ArrayList<String>() {
+                            {
+                                add(ProcessStepType.PROCESS.getValue());
+                                add(ProcessStepType.START.getValue());
+                            }
+                        }, 1);
+                /** 记录当前步骤名与处理人 */
+                String currentStepName = null;
+                String currentStepWorkerName = null;
+                Set<String> currentStepWorkerUuidList = new HashSet<>();
+                processTaskVo.setStepList(processTaskStepList);
+                Object currentStepNameArray = currentStepNameColumn.getValue(processTaskVo);
+                if(currentStepNameArray != null){
+                    currentStepName = String.join(",",(List<String>)currentStepNameArray);
+                }
+                Object currentWorker = currentStepWorkerColumn.getValue(processTaskVo);
+                if(currentWorker != null){
+                    Set<String> currentStepWorkerNameList = new HashSet<>();
+                    JSONArray workerArray = (JSONArray) currentWorker;
+                    for(int i = 0;i < workerArray.size();i++){
+                        JSONObject worker = workerArray.getJSONObject(i).getJSONObject("workerVo");
+                        currentStepWorkerNameList.add(worker.getString("name"));
+                        if(GroupSearch.USER.getValue().equals(worker.getString("initType"))){
+                            currentStepWorkerUuidList.add(worker.getString("uuid"));
+                        }else if(GroupSearch.TEAM.getValue().equals(worker.getString("initType"))){
+                            List<String> userUuidList = userMapper.getUserUuidListByTeamUuid(worker.getString("uuid"));
+                            if (CollectionUtils.isNotEmpty(userUuidList)) {
+                                currentStepWorkerUuidList.addAll(userUuidList);
+                            }
+                        }else if(GroupSearch.ROLE.getValue().equals(worker.getString("initType"))){
+                            List<String> userUuidList = userMapper.getUserUuidListByRoleUuid(worker.getString("uuid"));
+                            if (CollectionUtils.isNotEmpty(userUuidList)) {
+                                currentStepWorkerUuidList.addAll(userUuidList);
+                            }
+                        }
+                    }
+                    currentStepWorkerName = String.join(",", currentStepWorkerNameList);
+                }
+
+                /** 记录超时时间 **/
+                String expiredTime = null;
+                List<ProcessTaskSlaVo> processTaskSlaList = processTaskMapper.getProcessTaskSlaByProcessTaskId(processTaskVo.getId());
+                processTaskVo.setProcessTaskSlaVoList(processTaskSlaList);
+                Object expiredTimeObj = expiredTimeColumn.getValue(processTaskVo);
+                if(expiredTimeObj != null){
+                    Object expiredTimeSb = expiredTimeColumn.getSimpleValue(expiredTimeObj);
+                    if(expiredTimeObj != null){
+                        expiredTime = (String)expiredTimeSb;
+                    }
+                }
+
+                map.put(ProcessWorkcenterField.ID.getValue(), processTaskVo.getId());
+                map.put(ProcessWorkcenterField.SERIAL_NUMBER.getName(), processTaskVo.getSerialNumber());
+                map.put(ProcessWorkcenterField.TITLE.getName(), processTaskVo.getTitle());
+                map.put(ProcessWorkcenterField.CHANNELTYPE.getName(), channelTypeName);
+                map.put(ProcessWorkcenterField.CHANNEL.getName(), channel.getName());
+                map.put(ProcessWorkcenterField.CATALOG.getName(), catalogName);
+                map.put(ProcessWorkcenterField.ENDTIME.getName(), processTaskVo.getEndTime() != null ? sdf.format(processTaskVo.getEndTime()) : null);
+                map.put(startTimeColumn.getDisplayName(), sdf.format(processTaskVo.getStartTime()));
+                map.put(ProcessWorkcenterField.OWNER.getName(), processTaskVo.getOwnerName());
+                map.put(ProcessWorkcenterField.REPORTER.getName(), processTaskVo.getReporterName());
+                map.put(ProcessWorkcenterField.PRIORITY.getName(), processTaskVo.getPriorityName());
+                map.put(ProcessWorkcenterField.STATUS.getName(), ProcessTaskStatus.getText(processTaskVo.getStatus()));
+                map.put(ProcessWorkcenterField.WOKRTIME.getName(), processTaskVo.getWorktimeName());
+                map.put(currentStepNameColumn.getDisplayName(), currentStepName);
+                map.put(currentStepWorkerColumn.getDisplayName(), currentStepWorkerName);
+                map.put(ProcessWorkcenterField.EXPIRED_TIME.getName(), expiredTime);
+                /** 保留当前步骤处理人的userUuid，以便后面据此给工单分类 */
+                map.put(currentStepWorkerColumn.getName(), currentStepWorkerUuidList);
+                taskList.add(map);
+            }
+        }
+        return taskList;
+    }
 }
