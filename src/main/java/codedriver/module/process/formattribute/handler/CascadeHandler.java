@@ -1,15 +1,5 @@
 package codedriver.module.process.formattribute.handler;
 
-import java.util.*;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.matrix.dto.MatrixColumnVo;
@@ -20,6 +10,16 @@ import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.core.IApiComponent;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 public class CascadeHandler extends FormHandlerBase {
@@ -135,7 +135,7 @@ public class CascadeHandler extends FormHandlerBase {
             sourceColumnList.add(new MatrixColumnVo((String) mapping.getValue(), split[0]));
             sourceColumnList.add(new MatrixColumnVo(mapping.getText(), split[1]));
             paramObj.put("sourceColumnList", sourceColumnList);
-            JSONObject resultObj = (JSONObject) restComponent.doService(api, paramObj);
+            JSONObject resultObj = (JSONObject) restComponent.doService(api, paramObj,null);
             JSONArray columnDataList = resultObj.getJSONArray("columnDataList");
             for (int i = 0; i < columnDataList.size(); i++) {
                 JSONObject firstObj = columnDataList.getJSONObject(i);
@@ -161,7 +161,7 @@ public class CascadeHandler extends FormHandlerBase {
             columnList.add((String) mapping.getValue());
             columnList.add(mapping.getText());
             paramObj.put("columnList", columnList);
-            JSONObject resultObj = (JSONObject) restComponent.doService(api, paramObj);
+            JSONObject resultObj = (JSONObject) restComponent.doService(api, paramObj,null);
             JSONArray columnDataList = resultObj.getJSONArray("columnDataList");
             for (int i = 0; i < columnDataList.size(); i++) {
                 JSONObject firstObj = columnDataList.getJSONObject(i);
