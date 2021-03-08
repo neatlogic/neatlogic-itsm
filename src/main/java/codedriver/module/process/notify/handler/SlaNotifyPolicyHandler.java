@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.notify.core.INotifyPolicyHandlerGroup;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.core.NotifyHandlerType;
 import codedriver.framework.notify.dto.NotifyTriggerTemplateVo;
@@ -132,5 +133,10 @@ public class SlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     @Override
     public String getAuthName() {
         return AuthFactory.getAuthInstance("PROCESS_MODIFY").getAuthName();
+    }
+
+    @Override
+    public INotifyPolicyHandlerGroup getGroup() {
+        return null;
     }
 }

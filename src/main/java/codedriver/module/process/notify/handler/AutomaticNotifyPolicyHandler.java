@@ -8,6 +8,7 @@ import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.ExpressionVo;
+import codedriver.framework.notify.core.INotifyPolicyHandlerGroup;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.core.NotifyHandlerType;
 import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
@@ -29,25 +30,43 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * @Title: AutomaticNotifyPolicyHandler
+ * @Package codedriver.module.process.notify.handler
+ * @Description: 自动处理节点通知策略处理器
+ * @Author: linbq
+ * @Date: 2021/3/8 11:01
+ * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ **/
 @Component
-public class TaskStepNotifyPolicyHandler extends NotifyPolicyHandlerBase {
+public class AutomaticNotifyPolicyHandler extends NotifyPolicyHandlerBase {
+    @Override
+    public String getName() {
+        return ProcessStepHandlerType.AUTOMATIC.getName();
+    }
 
-	@Override
-	public String getName() {
-		return "流程步骤";
-	}
-	
-	@Override
-	public List<NotifyTriggerVo> myNotifyTriggerList() {
-		List<NotifyTriggerVo> returnList = new ArrayList<>();
-		for (TaskStepNotifyTriggerType notifyTriggerType : TaskStepNotifyTriggerType.values()) {
-			returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
-		}
-		for (SubtaskNotifyTriggerType notifyTriggerType : SubtaskNotifyTriggerType.values()) {
+    /**
+     * 绑定权限，每种handler对应不同的权限
+     */
+    @Override
+    public String getAuthName() {
+        return AuthFactory.getAuthInstance("PROCESS_MODIFY").getAuthName();
+    }
+
+    @Override
+    public INotifyPolicyHandlerGroup getGroup() {
+        return ProcessNotifyPolicyHandlerGroup.TASKSTEP;
+    }
+
+    @Override
+    protected List<NotifyTriggerVo> myNotifyTriggerList() {
+        List<NotifyTriggerVo> returnList = new ArrayList<>();
+        for (TaskStepNotifyTriggerType notifyTriggerType : TaskStepNotifyTriggerType.values()) {
             returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
         }
-		return returnList;
-	}
+        return returnList;
+    }
 
     @Override
     protected List<NotifyTriggerTemplateVo> myNotifyTriggerTemplateList(NotifyHandlerType type) {
@@ -80,20 +99,20 @@ public class TaskStepNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     }
 
     @Override
-	protected List<ConditionParamVo> mySystemParamList() {
-		List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
-		for(ProcessTaskParams processTaskParams : ProcessTaskParams.values()) {
-		    ConditionParamVo param = new ConditionParamVo();
-		    param.setName(processTaskParams.getValue());
+    protected List<ConditionParamVo> mySystemParamList() {
+        List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
+        for(ProcessTaskParams processTaskParams : ProcessTaskParams.values()) {
+            ConditionParamVo param = new ConditionParamVo();
+            param.setName(processTaskParams.getValue());
             param.setLabel(processTaskParams.getText());
             param.setParamType(processTaskParams.getParamType().getName());
             param.setParamTypeName(processTaskParams.getParamType().getText());
             param.setFreemarkerTemplate(processTaskParams.getFreemarkerTemplate());
             param.setIsEditable(0);
             notifyPolicyParamList.add(param);
-		}
-		return notifyPolicyParamList;
-	}
+        }
+        return notifyPolicyParamList;
+    }
 
     @Override
     protected List<ConditionParamVo> mySystemConditionOptionList() {
@@ -119,7 +138,7 @@ public class TaskStepNotifyPolicyHandler extends NotifyPolicyHandlerBase {
                         param.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName(),expression.getIsShowConditionValue()));
                     }
                 }
-                
+
                 param.setIsEditable(0);
                 notifyPolicyParamList.add(param);
             }
@@ -127,18 +146,13 @@ public class TaskStepNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         return notifyPolicyParamList;
     }
 
-	@Override
-	protected void myAuthorityConfig(JSONObject config) {
-		List<String> groupList = JSON.parseArray(config.getJSONArray("groupList").toJSONString(), String.class);
-		groupList.add(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue());
-		config.put("groupList", groupList);
+    @Override
+    protected void myAuthorityConfig(JSONObject config) {
+        List<String> groupList = JSON.parseArray(config.getJSONArray("groupList").toJSONString(), String.class);
+        groupList.add(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue());
+        config.put("groupList", groupList);
         List<String> includeList = JSON.parseArray(config.getJSONArray("includeList").toJSONString(), String.class);
         includeList.add(ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue() + "#" + ProcessUserType.DEFAULT_WORKER.getValue());
         config.put("includeList", includeList);
-	}
-
-    @Override
-    public String getAuthName() {
-        return AuthFactory.getAuthInstance("PROCESS_MODIFY").getAuthName();
     }
 }
