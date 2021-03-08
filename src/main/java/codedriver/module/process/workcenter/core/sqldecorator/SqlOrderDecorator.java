@@ -3,15 +3,21 @@ package codedriver.module.process.workcenter.core.sqldecorator;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.workcenter.dto.SelectColumnVo;
+import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,8 +65,37 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
 
         buildOrderMap.put(FieldTypeEnum.FULL_TEXT.getValue(), (workcenterVo, sqlSb) -> {
             //关键字搜索条件获取processtaskIdList 不需要排序
-            if(!CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
+            if (!CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
                 sqlSb.append(" ORDER BY  score DESC ");
+            }
+        });
+
+        buildOrderMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
+            if (StringUtils.isNotBlank(workcenterVo.getSubGroup())&&MapUtils.isNotEmpty(workcenterVo.getGroupDataCountMap())) {
+                List<String> groupDataList = new ArrayList<>();
+                if(MapUtils.isNotEmpty(workcenterVo.getGroupDataCountMap())) {
+                    for (Map.Entry<String, String> entry : workcenterVo.getGroupDataCountMap().entrySet()) {
+                        groupDataList.add(entry.getKey());
+                    }
+                }
+                IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getGroup());
+                if (columnHandler != null && MapUtils.isNotEmpty(workcenterVo.getGroupDataCountMap())) {
+                    List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
+                    OUT: for (TableSelectColumnVo columnVo : columnVoList) {
+                        for (SelectColumnVo column : columnVo.getColumnList()) {
+                            if(column.getIsPrimary()){
+                                sqlSb.append(" ORDER BY ( CASE ");
+                                for (int i = 1; i <= groupDataList.size(); i++) {
+                                    sqlSb.append(String.format(" WHEN %s.%s = '%s'  THEN %d ",columnVo.getTableShortName(),column.getColumnName(),groupDataList.get(i-1),i));
+                                }
+                                break OUT;
+                            }
+                        }
+                    }
+                    sqlSb.append(" END ),COUNT(1) DESC ");
+                }
+            }else {
+                sqlSb.append(" order by COUNT(1) DESC");
             }
         });
     }
@@ -87,7 +122,7 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
                     }
                 }
             }
-        }else{
+        } else {
             IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(ProcessWorkcenterField.STARTTIME.getValue());
             sqlSb.append(String.format(" %s.%s %s ", column.getSortSqlTable().getShortName(), column.getSortSqlColumn(), " DESC "));
         }
@@ -100,6 +135,6 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
 
     @Override
     public int getSort() {
-        return 5;
+        return 6;
     }
 }

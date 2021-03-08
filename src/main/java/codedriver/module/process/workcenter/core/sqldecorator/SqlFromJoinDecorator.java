@@ -14,9 +14,12 @@ import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +34,37 @@ import java.util.Map;
  **/
 @Component
 public class SqlFromJoinDecorator extends SqlDecoratorBase {
+
+    private final Map<String, SqlFromJoinDecorator.BuildFromJoin<WorkcenterVo, List<String>, List<JoinTableColumnVo>>> buildFromJoinMap = new HashMap<>();
+
+    @FunctionalInterface
+    public interface BuildFromJoin<T, List, joinTableColumnList> {
+        void build(T t, List joinTableKeyList, joinTableColumnList joinTableColumnList);
+    }
+
+    /**
+     * @Description: 初始化构建sql where
+     * @Author: 89770
+     * @Date: 2021/1/19 14:35
+     * @Params: []
+     * @Returns: void
+     **/
+    @PostConstruct
+    public void fieldDispatcherInit() {
+        //根据column获取需要的表
+        buildFromJoinMap.put(FieldTypeEnum.FIELD.getValue(), this::getJoinTableOfColumn);
+
+        buildFromJoinMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(),this::getJoinTableOfCondition);
+        //如果是distinct id 则 只需要 根据条件获取需要的表
+        buildFromJoinMap.put(FieldTypeEnum.DISTINCT_ID.getValue(),this::getJoinTableOfCondition);
+
+        buildFromJoinMap.put(FieldTypeEnum.TOTAL_COUNT.getValue(),this::getJoinTableOfCondition);
+
+        buildFromJoinMap.put(FieldTypeEnum.FULL_TEXT.getValue(),this::getJoinTableOfCondition);
+
+        buildFromJoinMap.put(FieldTypeEnum.GROUP_COUNT.getValue(),this::getJoinTableOfGroupColumn);
+    }
+
     /**
      * @Description: 构建回显字段sql语句
      * @Author: 89770
@@ -42,14 +76,11 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
     public void myBuild(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         List<String> joinTableKeyList = new ArrayList<>();
         List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
-        //如果是distinct id 则 只需要 根据条件获取需要的表。否则需要根据column获取需要的表
-        if (!FieldTypeEnum.FIELD.getValue().equals(workcenterVo.getSqlFieldType())) {
-            joinTableColumnList = getJoinTableOfCondition(workcenterVo, joinTableKeyList);
-        } else {
-            joinTableColumnList = getJoinTableOfColumn(workcenterVo, joinTableKeyList);
+        if(buildFromJoinMap.containsKey(workcenterVo.getSqlFieldType())){
+            buildFromJoinMap.get(workcenterVo.getSqlFieldType()).build(workcenterVo,joinTableKeyList,joinTableColumnList);
         }
         //补充排序需要的表
-        joinTableColumnList.addAll(getJoinTableOfOrder(workcenterVo, joinTableKeyList));
+        getJoinTableOfOrder(workcenterVo, joinTableKeyList, joinTableColumnList);
         sqlSb.append(" from  processtask pt ");
         for (JoinTableColumnVo joinTableColumn : joinTableColumnList) {
             sqlSb.append(joinTableColumn.toSqlString());
@@ -63,9 +94,8 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
      * @Params: [workcenterVo, joinTableKeyList]
      * @Returns: java.util.List<codedriver.framework.process.workcenter.dto.JoinTableColumnVo>
      **/
-    private List<JoinTableColumnVo> getJoinTableOfOrder(WorkcenterVo workcenterVo, List<String> joinTableKeyList) {
+    private List<JoinTableColumnVo> getJoinTableOfOrder(WorkcenterVo workcenterVo, List<String> joinTableKeyList, List<JoinTableColumnVo> joinTableColumnList) {
         JSONArray sortJsonArray = workcenterVo.getSortList();
-        List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(sortJsonArray)) {
             for (Object sortObj : sortJsonArray) {
                 JSONObject sortJson = JSONObject.parseObject(sortObj.toString());
@@ -95,10 +125,9 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
      * @Params: []
      * @Returns: void
      **/
-    private List<JoinTableColumnVo> getJoinTableOfCondition(WorkcenterVo workcenterVo, List<String> joinTableKeyList) {
+    private void getJoinTableOfCondition(WorkcenterVo workcenterVo, List<String> joinTableKeyList, List<JoinTableColumnVo> joinTableColumnList) {
         //根据接口入参的返回需要的conditionList,然后获取需要关联的tableList
         List<ConditionGroupVo> groupList = workcenterVo.getConditionGroupList();
-        List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
         for (ConditionGroupVo groupVo : groupList) {
             List<ConditionVo> conditionVoList = groupVo.getConditionList();
             for (ConditionVo conditionVo : conditionVoList) {
@@ -116,7 +145,7 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
             }
         }
         //我的待办 条件
-        if(workcenterVo.getIsProcessingOfMine() == 1){
+        if (workcenterVo.getIsProcessingOfMine() == 1) {
             List<JoinTableColumnVo> handlerJoinTableColumnList = SqlTableUtil.getProcessingOfMineJoinTableSql();
             for (JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList) {
                 String key = handlerJoinTableColumn.getHash();
@@ -126,34 +155,53 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
                 }
             }
         }
-        return joinTableColumnList;
     }
 
-    private List<JoinTableColumnVo> getJoinTableOfColumn(WorkcenterVo workcenterVo, List<String> joinTableKeyList) {
-        List<JoinTableColumnVo> joinTableColumnList = new ArrayList<>();
+    private void getJoinTableOfColumn(WorkcenterVo workcenterVo, List<String> joinTableKeyList, List<JoinTableColumnVo> joinTableColumnList) {
         //根据接口入参的返回需要的columnList,然后获取需要关联的tableList
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
         //循环所有需要展示的字段
-        if(CollectionUtils.isNotEmpty(workcenterVo.getTheadVoList())) {
+        if (CollectionUtils.isNotEmpty(workcenterVo.getTheadVoList())) {
             for (WorkcenterTheadVo theadVo : workcenterVo.getTheadVoList()) {
                 //去掉沒有勾选的thead
                 if (theadVo.getIsShow() != 1) {
                     continue;
                 }
                 if (columnComponentMap.containsKey(theadVo.getName())) {
-                    IProcessTaskColumn column = columnComponentMap.get(theadVo.getName());
-                    List<JoinTableColumnVo> handlerJoinTableColumnList = column.getJoinTableColumnList();
-                    for (JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList) {
-                        String key = handlerJoinTableColumn.getHash();
-                        if (!joinTableKeyList.contains(key)) {
-                            joinTableColumnList.add(handlerJoinTableColumn);
-                            joinTableKeyList.add(key);
-                        }
-                    }
+                    getJoinTableColumnList(columnComponentMap, theadVo.getName(), joinTableKeyList, joinTableColumnList);
                 }
             }
         }
-        return joinTableColumnList;
+    }
+
+    private void getJoinTableOfGroupColumn(WorkcenterVo workcenterVo, List<String> joinTableKeyList, List<JoinTableColumnVo> joinTableColumnList) {
+        //根据接口入参的返回需要的columnList,然后获取需要关联的tableList
+        Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+        //循环所有需要展示的字段
+        List<String> groupList = new ArrayList<>();
+        if (StringUtils.isNotBlank(workcenterVo.getGroup())) {
+            groupList.add(workcenterVo.getGroup());
+        }
+        if (StringUtils.isNotBlank(workcenterVo.getSubGroup())) {
+            groupList.add(workcenterVo.getSubGroup());
+        }
+        if (CollectionUtils.isNotEmpty(groupList)) {//group by 需要join的表
+            for (String group : groupList) {
+                getJoinTableColumnList(columnComponentMap, group, joinTableKeyList, joinTableColumnList);
+            }
+        }
+    }
+
+    private void getJoinTableColumnList(Map<String, IProcessTaskColumn> columnComponentMap, String columnName, List<String> joinTableKeyList, List<JoinTableColumnVo> joinTableColumnList) {
+        IProcessTaskColumn column = columnComponentMap.get(columnName);
+        List<JoinTableColumnVo> handlerJoinTableColumnList = column.getJoinTableColumnList();
+        for (JoinTableColumnVo handlerJoinTableColumn : handlerJoinTableColumnList) {
+            String key = handlerJoinTableColumn.getHash();
+            if (!joinTableKeyList.contains(key)) {
+                joinTableColumnList.add(handlerJoinTableColumn);
+                joinTableKeyList.add(key);
+            }
+        }
     }
 
     @Override

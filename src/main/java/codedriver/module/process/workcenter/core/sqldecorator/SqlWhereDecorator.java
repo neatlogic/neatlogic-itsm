@@ -9,6 +9,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -25,10 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -88,6 +86,29 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                 }
             } else {//获取关键字搜索下拉选项
                 getFullTextSql(sqlSb,workcenterVo.getKeyword(),workcenterVo.getKeywordHandler());
+            }
+        });
+
+        buildWhereMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
+            getCountWhereSql(sqlSb, workcenterVo);
+            LinkedHashMap<String,String> groupDataMap = workcenterVo.getGroupDataCountMap();
+            List<String> groupDataList = new ArrayList<>();
+            if(MapUtils.isNotEmpty(groupDataMap)) {
+                for (Map.Entry<String, String> entry : groupDataMap.entrySet()) {
+                    groupDataList.add(entry.getKey());
+                }
+            }
+            IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getGroup());
+            if (columnHandler != null && MapUtils.isNotEmpty(groupDataMap)) {
+                List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
+               OUT: for (TableSelectColumnVo columnVo : columnVoList) {
+                    for (SelectColumnVo column : columnVo.getColumnList()) {
+                        if(column.getIsPrimary()){
+                            sqlSb.append(String.format(" AND %s.`%s` IN ('%s') ", columnVo.getTableShortName(),column.getColumnName(),String.join("','", groupDataList)));
+                            break OUT;
+                        }
+                    }
+                }
             }
         });
     }
@@ -158,7 +179,13 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                     if (MapUtils.isNotEmpty(conditionRelMap) && StringUtils.isNotBlank(fromConditionUuid)) {
                         sqlSb.append(conditionRelMap.get(fromConditionUuid + "_" + toConditionUuid));
                     }
-                    IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(conditionVo.getName());
+                    //append condition
+                    String handler = conditionVo.getName();
+                    //如果是form
+                    if(conditionVo.getType().equals(ProcessFieldType.FORM.getValue())){
+                        handler = ProcessFieldType.FORM.getValue();
+                    }
+                    IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(handler);
                     sqlCondition.getSqlConditionWhere(conditionVoList, i, sqlSb);
                     fromConditionUuid = toConditionUuid;
                 }
