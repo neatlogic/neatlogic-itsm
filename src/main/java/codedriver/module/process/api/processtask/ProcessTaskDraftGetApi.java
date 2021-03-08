@@ -165,7 +165,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
         if (StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
-            List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(startProcessTaskStepVo.getId());
+            List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(startProcessTaskStepVo.getProcessTaskId(), startProcessTaskStepVo.getId());
             if (CollectionUtils.isNotEmpty(processTaskStepFormAttributeList)) {
                 Map<String, String> formAttributeActionMap = new HashMap<>();
                 for (ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
@@ -264,7 +264,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 //                    && StringUtils.isNotBlank(processTaskVo.getTranferReportProcessTaskList().get(0).getFormConfig())) {
 //                transferFormAttributeValue(processTaskVo.getTranferReportProcessTaskList().get(0), processTaskVo);
 //            }
-            List<ProcessStepFormAttributeVo> processStepFormAttributeList = processMapper.getProcessStepFormAttributeByStepUuid(startProcessTaskStepVo.getProcessStepUuid());
+            List<ProcessStepFormAttributeVo> processStepFormAttributeList = processMapper.getProcessStepFormAttributeByStepUuid(startProcessTaskStepVo.getProcessUuid(), startProcessTaskStepVo.getProcessStepUuid());
             if (CollectionUtils.isNotEmpty(processStepFormAttributeList)) {
                 Map<String, String> formAttributeActionMap = new HashMap<>();
                 List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = new ArrayList<>();
