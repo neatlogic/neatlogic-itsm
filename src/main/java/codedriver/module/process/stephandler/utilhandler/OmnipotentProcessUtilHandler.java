@@ -30,7 +30,7 @@ import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.module.process.notify.handler.TaskStepNotifyPolicyHandler;
+import codedriver.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
 import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
@@ -281,7 +281,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 		if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
 			notifyPolicyObj.putAll(notifyPolicyConfig);
 		}
-		notifyPolicyObj.put("handler", TaskStepNotifyPolicyHandler.class.getName());
+		notifyPolicyObj.put("handler", OmnipotentNotifyPolicyHandler.class.getName());
 		resultObj.put("notifyPolicyConfig", notifyPolicyObj);
 		
 		/** 动作 **/
@@ -289,7 +289,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         if(actionConfig == null) {
             actionConfig = new JSONObject();
         }
-        actionConfig.put("handler", TaskStepNotifyPolicyHandler.class.getName());
+        actionConfig.put("handler", OmnipotentNotifyPolicyHandler.class.getName());
         actionConfig.put("integrationHandler", "");
 		resultObj.put("actionConfig", actionConfig);
 		return resultObj;
