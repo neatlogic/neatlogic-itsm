@@ -15,6 +15,7 @@ import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
 import codedriver.framework.notify.dto.NotifyTriggerTemplateVo;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.process.constvalue.*;
+import codedriver.framework.process.notify.constvalue.ProcessNotifyPolicyHandlerGroup;
 import codedriver.framework.process.notify.constvalue.SubtaskNotifyTriggerType;
 import codedriver.framework.process.notify.constvalue.TaskStepNotifyTriggerType;
 import codedriver.framework.process.notify.core.IDefaultTemplate;
