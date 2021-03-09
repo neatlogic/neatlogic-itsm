@@ -85,7 +85,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                     while(userTypeIterator.hasNext()) {
                         JSONObject userTypeJson = (JSONObject) userTypeIterator.next();
                         //判断子任务|变更步骤
-                        if(ProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(currentStepJson.getString("handler"))
+                        if("changehandle".equals(currentStepJson.getString("handler"))
                             && ProcessUserType.MINOR.getValue().equals(userTypeJson.getString("usertype"))) {
                             userTypeJson.put("usertypename", "变更步骤");
                         }else if(ProcessUserType.MINOR.getValue().equals(userTypeJson.getString("usertype"))){
@@ -205,7 +205,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                 ) {
                     for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
                         JSONObject workerJson = new JSONObject();
-                        if (ProcessStepHandlerType.CHANGEHANDLE.getHandler().equals(stepVo.getHandler())
+                        if ("changehandle".equals(stepVo.getHandler())
                                 && ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
                             workerJson.put("workTypename", "变更步骤");
                         } else if (ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
