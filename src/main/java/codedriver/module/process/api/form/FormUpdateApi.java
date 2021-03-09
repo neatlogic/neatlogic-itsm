@@ -1,7 +1,9 @@
 package codedriver.module.process.api.form;
 
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.FORM_MODIFY;
 
@@ -64,6 +66,16 @@ public class FormUpdateApi extends PrivateApiComponentBase {
 		}
 		formMapper.updateForm(formVo);
 		return formVo.getUuid();
+	}
+
+	public IValid name() {
+		return value -> {
+			FormVo formVo = JSON.toJavaObject(value, FormVo.class);
+			if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
+				return new FieldValidResultVo(new FormNameRepeatException(formVo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }
