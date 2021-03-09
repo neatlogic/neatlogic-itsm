@@ -55,8 +55,8 @@ public class ProcessTaskMobileisFitApi extends PrivateApiComponentBase {
 		result.put("isfit", true);
 		//屏蔽节点
 		List<String> blackList = new ArrayList<>();
-		blackList.add(ProcessStepHandlerType.CHANGECREATE.getHandler());
-		blackList.add(ProcessStepHandlerType.CHANGEHANDLE.getHandler());
+		blackList.add("changecreate");
+		blackList.add("changehandle");
 		//blackList.add(ProcessStepHandler.EVENT.getHandler());
 		blackList.add(ProcessStepHandlerType.AUTOMATIC.getHandler());
 		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepListByProcessTaskId(jsonObj.getLong("processTaskId"));
