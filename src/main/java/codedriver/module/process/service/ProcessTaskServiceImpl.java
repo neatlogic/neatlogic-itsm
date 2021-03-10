@@ -1589,7 +1589,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 map.put(ProcessWorkcenterField.ENDTIME.getName(), processTaskVo.getEndTime() != null ? sdf.format(processTaskVo.getEndTime()) : null);
                 map.put(startTimeColumn.getDisplayName(), sdf.format(processTaskVo.getStartTime()));
                 map.put(ProcessWorkcenterField.OWNER.getName(), processTaskVo.getOwnerName());
+                map.put(ProcessWorkcenterField.OWNER.getValue(), processTaskVo.getOwner());
                 map.put(ProcessWorkcenterField.REPORTER.getName(), processTaskVo.getReporterName());
+                map.put(ProcessWorkcenterField.REPORTER.getValue(), processTaskVo.getReporter());
                 map.put(ProcessWorkcenterField.PRIORITY.getName(), processTaskVo.getPriorityName());
                 map.put(ProcessWorkcenterField.STATUS.getName(), ProcessTaskStatus.getText(processTaskVo.getStatus()));
                 map.put(ProcessWorkcenterField.WOKRTIME.getName(), processTaskVo.getWorktimeName());

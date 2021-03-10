@@ -572,12 +572,28 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	private Map<String, List<Map<String, Object>>> classifyTaskByUser(List<Map<String, Object>> originalTaskList) {
 		Map<String, List<Map<String, Object>>> userTaskMap = new HashMap<>();
 		if (CollectionUtils.isNotEmpty(originalTaskList)) {
-			String currentStepNameWorker = new ProcessTaskCurrentStepWorkerColumn().getName();
+			String currentStepNameWorker = ProcessTaskColumnFactory.getHandler("currentstepworker").getName();
 			for (Map<String, Object> map : originalTaskList) {
-				Object o = map.get(currentStepNameWorker);
-				if (o != null) {
-					Set<String> array = (HashSet<String>) o;
-					for (String uuid : array) {
+				Set<String> worker = (HashSet<String>) map.get(currentStepNameWorker);
+				if(CollectionUtils.isEmpty(worker)){
+					Object owner = map.get(ProcessWorkcenterField.OWNER.getValue());
+					Object reporter = map.get(ProcessWorkcenterField.REPORTER.getValue());
+					String uuid = null;
+					if(owner != null){
+						uuid = owner.toString();
+					}else if(reporter != null){
+						uuid = reporter.toString();
+					}
+					if(StringUtils.isNotBlank(uuid)){
+						List<Map<String, Object>> list = userTaskMap.get(uuid);
+						if(CollectionUtils.isEmpty(list)){
+							list = new ArrayList<>();
+						}
+						list.add(map);
+						userTaskMap.put(uuid,list);
+					}
+				}else{
+					for (String uuid : worker) {
 						List<Map<String, Object>> mapList = new ArrayList<>();
 						if (userTaskMap.get(uuid) != null) {
 							mapList = userTaskMap.get(uuid);
