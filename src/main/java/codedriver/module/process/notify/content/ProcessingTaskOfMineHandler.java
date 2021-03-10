@@ -108,6 +108,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 	private static Map<String,BuildNotifyHandler> handlerMap = new HashMap<>();
 
+	private static Map<String,ICondition> conditionMap = new HashMap<>();
+
 	@PostConstruct
 	public void init() {
 
@@ -437,6 +439,55 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				return notifyList;
 			}
 		});
+
+		/**
+		 * 将来扩展ConditionOptions时，在conditionMap中put对应的实现类，实现自己的sql拼接方法
+		**/
+		conditionMap.put(ConditionOptions.STEPTEAM.getValue(), new ICondition() {
+			@Override
+			public String getConditionSql(JSONObject conditionConfig) {
+				StringBuilder sql = new StringBuilder();
+				List<String> stepTeamUuidList = new ArrayList<>();
+				List<String> userUuidList = new ArrayList<>();
+				if (MapUtils.isNotEmpty(conditionConfig)) {
+					JSONArray stepTeam = conditionConfig.getJSONArray(ConditionOptions.STEPTEAM.getValue());
+					if (CollectionUtils.isNotEmpty(stepTeam)) {
+						stepTeamUuidList = teamMapper.checkTeamUuidListIsExists(stepTeam.toJavaList(String.class)
+								.stream().map(o -> o.split("#")[1]).collect(Collectors.toList()));
+					}
+				}
+				if(CollectionUtils.isNotEmpty(stepTeamUuidList)){
+					userUuidList = userMapper.getUserUuidListByTeamUuidList(stepTeamUuidList);
+					if(CollectionUtils.isNotEmpty(userUuidList)){
+						stepTeamUuidList.addAll(userUuidList);
+						stepTeamUuidList.addAll(roleMapper.getRoleUuidListByUserUuidList(userUuidList));
+					}
+				}
+				if(CollectionUtils.isNotEmpty(stepTeamUuidList)){
+					sql.append(" and ( b.type != 'start' and ( c.`user_uuid` in (");
+					if(CollectionUtils.isNotEmpty(userUuidList)){
+						for(int i = 0;i < userUuidList.size();i++){
+							sql.append("'" + userUuidList.get(i) + "'");
+							if(i != userUuidList.size() - 1){
+								sql.append(",");
+							}
+						}
+						sql.append(")");
+					}else {
+						sql.append("'')");
+					}
+					sql.append(" or d.`uuid` in (");
+					for(int i = 0;i < stepTeamUuidList.size();i++){
+						sql.append("'" + stepTeamUuidList.get(i) + "'");
+						if(i != stepTeamUuidList.size() - 1){
+							sql.append(",");
+						}
+					}
+					sql.append("))) ");
+				}
+				return sql.toString();
+			}
+		});
 	}
 
 	@Override
@@ -555,48 +606,14 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	 * @Returns: java.util.Map<java.lang.String,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>>
 	**/
 	private Map<String, List<Map<String, Object>>> getUserTaskMap(JSONObject config) {
-		/** 获取工单查询条件 */
-		List<String> stepTeamUuidList = new ArrayList<>();
-		List<String> userUuidList = new ArrayList<>();
 		JSONObject conditionConfig = config.getJSONObject("conditionConfig");
-		if (MapUtils.isNotEmpty(conditionConfig)) {
-			JSONArray stepTeam = conditionConfig.getJSONArray(ConditionOptions.STEPTEAM.getValue());
-			if (CollectionUtils.isNotEmpty(stepTeam)) {
-				stepTeamUuidList = teamMapper.checkTeamUuidListIsExists(stepTeam.toJavaList(String.class)
-						.stream().map(o -> o.split("#")[1]).collect(Collectors.toList()));
-			}
-		}
-		if(CollectionUtils.isNotEmpty(stepTeamUuidList)){
-			userUuidList = userMapper.getUserUuidListByTeamUuidList(stepTeamUuidList);
-			if(CollectionUtils.isNotEmpty(userUuidList)){
-				stepTeamUuidList.addAll(userUuidList);
-				stepTeamUuidList.addAll(roleMapper.getRoleUuidListByUserUuidList(userUuidList));
-			}
-		}
 		StringBuilder sql = new StringBuilder();
-		if(CollectionUtils.isNotEmpty(stepTeamUuidList)){
-			sql.append(" and ( b.type != 'start' and ( c.`user_uuid` in (");
-			if(CollectionUtils.isNotEmpty(userUuidList)){
-				for(int i = 0;i < userUuidList.size();i++){
-					sql.append("'" + userUuidList.get(i) + "'");
-					if(i != userUuidList.size() - 1){
-						sql.append(",");
-					}
-				}
-				sql.append(")");
-			}else {
-				sql.append("'')");
+		if(MapUtils.isNotEmpty(conditionConfig)){
+			for(ConditionOptions option : ConditionOptions.values()){
+				ICondition condition = conditionMap.get(option.getValue());
+				sql.append(condition.getConditionSql(conditionConfig));
 			}
-			sql.append(" or d.`uuid` in (");
-			for(int i = 0;i < stepTeamUuidList.size();i++){
-				sql.append("'" + stepTeamUuidList.get(i) + "'");
-				if(i != stepTeamUuidList.size() - 1){
-					sql.append(",");
-				}
-			}
-			sql.append(")))");
 		}
-
 		/** 查询工单 */
 		List<Map<String, Object>> originalTaskList = processTaskService.getProcessingTaskListByCondition(sql.toString());
 
