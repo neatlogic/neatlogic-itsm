@@ -617,6 +617,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			String currentStepNameWorker = ProcessTaskColumnFactory.getHandler("currentstepworker").getName();
 			for (Map<String, Object> map : originalTaskList) {
 				Set<String> worker = (HashSet<String>) map.get(currentStepNameWorker);
+				/** 如果没有当前步骤处理人，那么按上报人或者代报人分类 **/
 				if(CollectionUtils.isEmpty(worker)){
 					Object owner = map.get(ProcessWorkcenterField.OWNER.getValue());
 					Object reporter = map.get(ProcessWorkcenterField.REPORTER.getValue());

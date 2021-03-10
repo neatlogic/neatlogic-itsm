@@ -305,10 +305,10 @@ public interface ProcessTaskService {
     public void setTemporaryData(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo);
 
     /**
-     * @Description: 查询指定处理组待处理的工单，构造"工单字段中文名->值"的map集合
+     * @Description: 查询待处理的工单，构造"工单字段中文名->值"的map集合
      * @Author: laiwt
      * @Date: 2021/1/8 14:23
-     * @Params: [stepTeamUuidList]
+     * @Params: [conditionSql] 筛选条件SQL
      * @Returns: java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
      **/
     public List<Map<String, Object>> getProcessingTaskListByCondition(String conditionSql);
