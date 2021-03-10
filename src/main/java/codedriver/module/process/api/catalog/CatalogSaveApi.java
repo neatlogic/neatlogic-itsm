@@ -116,9 +116,7 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 
 	public IValid name(){
 		return value -> {
-			CatalogVo catalogVo = new CatalogVo();
-			catalogVo.setName(value.getString("name"));
-			catalogVo.setParentUuid(value.getString("parentUuid"));
+			CatalogVo catalogVo = JSON.toJavaObject(value,CatalogVo.class);
 			if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
 				return new FieldValidResultVo(new CatalogNameRepeatException(catalogVo.getName()));
 			}
