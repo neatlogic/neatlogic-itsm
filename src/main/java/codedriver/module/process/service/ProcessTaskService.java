@@ -311,5 +311,5 @@ public interface ProcessTaskService {
      * @Params: [stepTeamUuidList]
      * @Returns: java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
      **/
-    public List<Map<String, Object>> getTaskListByStepTeamUuidList(List<String> stepTeamUuidList);
+    public List<Map<String, Object>> getProcessingTaskListByCondition(String conditionSql);
 }

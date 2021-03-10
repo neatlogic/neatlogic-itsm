@@ -8,6 +8,9 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.notify.core.*;
 import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
 import codedriver.framework.notify.dto.NotifyVo;
@@ -52,6 +55,15 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 	@Resource
 	private NotifyJobMapper notifyJobMapper;
+
+	@Resource
+	private UserMapper userMapper;
+
+	@Resource
+	private RoleMapper roleMapper;
+
+	@Resource
+	private TeamMapper teamMapper;
 
     @Resource
     protected ProcessTaskService processTaskService;
@@ -545,18 +557,48 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	private Map<String, List<Map<String, Object>>> getUserTaskMap(JSONObject config) {
 		/** 获取工单查询条件 */
 		List<String> stepTeamUuidList = new ArrayList<>();
+		List<String> userUuidList = new ArrayList<>();
 		JSONObject conditionConfig = config.getJSONObject("conditionConfig");
 		if (MapUtils.isNotEmpty(conditionConfig)) {
 			JSONArray stepTeam = conditionConfig.getJSONArray(ConditionOptions.STEPTEAM.getValue());
 			if (CollectionUtils.isNotEmpty(stepTeam)) {
-				for (Object o : stepTeam) {
-					stepTeamUuidList.add(o.toString().split("#")[1]);
+				stepTeamUuidList = teamMapper.checkTeamUuidListIsExists(stepTeam.toJavaList(String.class)
+						.stream().map(o -> o.split("#")[1]).collect(Collectors.toList()));
+			}
+		}
+		if(CollectionUtils.isNotEmpty(stepTeamUuidList)){
+			userUuidList = userMapper.getUserUuidListByTeamUuidList(stepTeamUuidList);
+			if(CollectionUtils.isNotEmpty(userUuidList)){
+				stepTeamUuidList.addAll(userUuidList);
+				stepTeamUuidList.addAll(roleMapper.getRoleUuidListByUserUuidList(userUuidList));
+			}
+		}
+		StringBuilder sql = new StringBuilder();
+		if(CollectionUtils.isNotEmpty(stepTeamUuidList)){
+			sql.append(" and ( b.type != 'start' and ( c.`user_uuid` in (");
+			if(CollectionUtils.isNotEmpty(userUuidList)){
+				for(int i = 0;i < userUuidList.size();i++){
+					sql.append("'" + userUuidList.get(i) + "'");
+					if(i != userUuidList.size() - 1){
+						sql.append(",");
+					}
+				}
+				sql.append(")");
+			}else {
+				sql.append("'')");
+			}
+			sql.append(" or d.`uuid` in (");
+			for(int i = 0;i < stepTeamUuidList.size();i++){
+				sql.append("'" + stepTeamUuidList.get(i) + "'");
+				if(i != stepTeamUuidList.size() - 1){
+					sql.append(",");
 				}
 			}
+			sql.append(")))");
 		}
 
 		/** 查询工单 */
-		List<Map<String, Object>> originalTaskList = processTaskService.getTaskListByStepTeamUuidList(stepTeamUuidList);
+		List<Map<String, Object>> originalTaskList = processTaskService.getProcessingTaskListByCondition(sql.toString());
 
 		/** 按处理人给工单分类 */
 		return classifyTaskByUser(originalTaskList);

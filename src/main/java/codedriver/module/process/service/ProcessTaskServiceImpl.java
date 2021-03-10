@@ -1494,9 +1494,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 
     @Override
-    public List<Map<String, Object>> getTaskListByStepTeamUuidList(List<String> stepTeamUuidList) {
+    public List<Map<String, Object>> getProcessingTaskListByCondition(String conditionSql) {
         List<Map<String, Object>> taskList = new ArrayList<>();
-        List<ProcessTaskVo> processTaskList = processTaskMapper.getPendingProcessTaskListByStepTeamUuidList(stepTeamUuidList);
+        List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessingTaskListByCondition(conditionSql);
         IProcessTaskColumn startTimeColumn = ProcessTaskColumnFactory.getHandler("starttime");
         IProcessTaskColumn currentStepNameColumn = ProcessTaskColumnFactory.getHandler("currentstepname");
         IProcessTaskColumn currentStepWorkerColumn = ProcessTaskColumnFactory.getHandler("currentstepworker");
