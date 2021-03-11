@@ -24,6 +24,7 @@ import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
 import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
+import codedriver.module.process.notify.handler.TaskNotifyPolicyHandler;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
 import com.alibaba.fastjson.JSONArray;
@@ -412,7 +413,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 					if(MapUtils.isNotEmpty(userTaskMap)){
 						for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
-							NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(TaskNotifyTriggerType.URGE, ProcessTaskMessageHandler.class);
+							NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(TaskNotifyTriggerType.URGE, ProcessTaskMessageHandler.class, TaskNotifyPolicyHandler.class.getName());
 							notifyBuilder.withTitleTemplate(title != null ? title : null);
 							notifyBuilder.addUserUuid(entry.getKey());
 
