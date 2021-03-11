@@ -1,5 +1,8 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -10,7 +13,6 @@ import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -95,36 +97,32 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     }
 
     @Override
-    public List<Map<String, String>> getMyExchangeToDashboardResultData(List<Map<String, String>> mapList, WorkcenterVo workcenterVo) {
-        for (int i = 0; i< mapList.size() ; i++) {
-            Map<String, String> dataMap = mapList.get(i);
-            Iterator<Map.Entry<String, String>> iterator = dataMap.entrySet().iterator();
-            Map<String,String> tmpMap = new HashMap<>();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String> entry = iterator.next();
+    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo,List<Map<String, String>> mapList) {
+        //补充text
+        for( int i =0 ; i < mapList.size();i++){
+            Map<String, String> tmpMap = new HashMap<>();
+            Map<String,String> map = mapList.get(i);
+            for(Map.Entry<String,String> entry : map.entrySet()){
                 String key = entry.getKey();
                 String value = String.valueOf(entry.getValue());
-                //如果是分组
-                if (ProcessTaskSqlTable.FieldEnum.STATUS.getProValue().equals(key)) {
-                    if ("group".equals(workcenterVo.getGroupType())) {
-                        if(StringUtils.isNotBlank(workcenterVo.getSubGroup())) {
-                            tmpMap.put("total", workcenterVo.getGroupDataCountMap().get(value));
-                        }else{
-                            tmpMap.put("total", dataMap.get("count"));
-                        }
-                        tmpMap.put("column", ProcessTaskStatus.getText(value));
-                    } else if ("subGroup".equals(workcenterVo.getGroupType())) {
-                        tmpMap.put("type", ProcessTaskStatus.getText(value));
-                    }
-                }else if("count".equals(key)){
-                    tmpMap.put("value", dataMap.get("count"));
-                }else{
-                    tmpMap.put(key,value);
+                if(key.equals(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue())){
+                    tmpMap.put("statusText",ProcessTaskStatus.getText(value));
                 }
+                tmpMap.put(key,value);
             }
             mapList.set(i,tmpMap);
         }
-        return mapList;
+        //
+        if (getName().equals(workcenterVo.getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getGroup(), "statusText", workcenterVo.getGroupDataCountMap());
+            dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+        }
+        //如果存在子分组
+        if (getName().equals(workcenterVo.getSubGroup())) {
+            DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getSubGroup(), "statusText");
+            dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+        }
     }
 
     @Override

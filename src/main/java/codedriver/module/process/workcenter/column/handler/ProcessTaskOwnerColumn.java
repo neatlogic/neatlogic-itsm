@@ -2,6 +2,9 @@ package codedriver.module.process.workcenter.column.handler;
 
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
@@ -10,6 +13,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.UserTable;
 import com.alibaba.fastjson.JSON;
@@ -18,10 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -104,7 +105,7 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 		return new ArrayList<TableSelectColumnVo>(){
 			{
 				add(new TableSelectColumnVo(new UserTable(),"owner", Arrays.asList(
-						new SelectColumnVo(UserTable.FieldEnum.UUID.getValue(),"ownerUuid"),
+						new SelectColumnVo(UserTable.FieldEnum.UUID.getValue(),"ownerUuid",true),
 						new SelectColumnVo(UserTable.FieldEnum.USER_NAME.getValue(),"ownerName"),
 						new SelectColumnVo(UserTable.FieldEnum.USER_INFO.getValue(),"ownerInfo"),
 						new SelectColumnVo(UserTable.FieldEnum.VIP_LEVEL.getValue(),"ownerVipLevel"),
@@ -123,5 +124,28 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 				}}));
 			}
 		};
+	}
+
+	@Override
+	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
+		if (getName().equals(workcenterVo.getGroup())) {
+			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("ownerUuid", workcenterVo.getGroup(), "ownerName", workcenterVo.getGroupDataCountMap());
+			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+		}
+		//如果存在子分组
+		if (getName().equals(workcenterVo.getSubGroup())) {
+			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
+			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("ownerUuid", workcenterVo.getSubGroup(), "ownerName");
+			dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+		}
+	}
+
+	@Override
+	public LinkedHashMap<String, String> getMyExchangeToDashboardGroupDataMap(List<Map<String, String>> mapList) {
+		LinkedHashMap<String, String> groupDataMap = new LinkedHashMap<>();
+		for (Map<String, String> dataMap : mapList) {
+			groupDataMap.put(dataMap.get("ownerUuid"), dataMap.get("count"));
+		}
+		return groupDataMap;
 	}
 }

@@ -4,6 +4,9 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
@@ -11,7 +14,10 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,10 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -172,11 +175,40 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 	}
 
 	@Override
-	public List<TableSelectColumnVo> getTableSelectColumn() {
-		return null;
-	}
-	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {
 		return null;
+	}
+
+	@Override
+	public List<TableSelectColumnVo> getTableSelectColumn() {
+		return SqlTableUtil.getTableSelectColumn();
+	}
+
+	@Override
+	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+		return SqlTableUtil.getStepUserJoinTableSql();
+	}
+
+	@Override
+	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
+		if (getName().equals(workcenterVo.getGroup())) {
+			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("stepUserUserUuid", workcenterVo.getGroup(), "stepUserUserName", workcenterVo.getGroupDataCountMap());
+			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+		}
+		//如果存在子分组
+		if (getName().equals(workcenterVo.getSubGroup())) {
+			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
+			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("stepUserUserUuid", workcenterVo.getSubGroup(), "stepUserUserName");
+			dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+		}
+	}
+
+	@Override
+	public LinkedHashMap<String, String> getMyExchangeToDashboardGroupDataMap(List<Map<String, String>> mapList) {
+		LinkedHashMap<String, String> groupDataMap = new LinkedHashMap<>();
+		for (Map<String, String> dataMap : mapList) {
+			groupDataMap.put(dataMap.get("stepUserUserUuid"), dataMap.get("count"));
+		}
+		return groupDataMap;
 	}
 }

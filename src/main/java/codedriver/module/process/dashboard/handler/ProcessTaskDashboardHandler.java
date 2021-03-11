@@ -6,6 +6,7 @@ import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dashboard.core.DashboardChartBase;
 import codedriver.framework.dashboard.core.DashboardChartFactory;
 import codedriver.framework.dashboard.core.DashboardHandlerBase;
+import codedriver.framework.dashboard.dto.DashboardDataVo;
 import codedriver.framework.dashboard.dto.DashboardShowConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
@@ -48,6 +49,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             JSONObject configChart = widgetVo.getChartConfigObj();
             String groupField = configChart.getString(DashboardShowConfig.GROUPFIELD.getValue());
             String subGroupField = configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue());
+            DashboardDataVo dashboardDataVo = new DashboardDataVo();
             /* start: 从mysql 获取源数据 */
             WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
             //1、查出group权重，用于排序截取最大组数量
@@ -60,34 +62,29 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.GROUP_COUNT);
             List<Map<String, String>> groupMapList = workcenterMapper.getWorkcenterProcessTaskMapBySql(sb.build());
             IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(groupField);
+
             IProcessTaskColumn subGroupColumn = null;
             //2、如果存在subGroup,则根据步骤1查出的权重，排序截取最大组数量，查出二维数据
-            List<Map<String, String>> subGroupMapList = null;
             if (StringUtils.isNotBlank(subGroupField)) {
                 subGroupColumn = ProcessTaskColumnFactory.columnComponentMap.get(subGroupField);
-                if(subGroupColumn != null) {
+                if (subGroupColumn != null) {
                     workcenterVo.setSubGroup(subGroupField);
+                    //先排序分页获取前分组数的group
+                    groupColumn.getExchangeToDashboardGroupDataMap(groupMapList, workcenterVo);
+                    //根据分组groupDataList、子分组 再次搜索
+                    sb = new SqlBuilder(workcenterVo, FieldTypeEnum.GROUP_COUNT);
+                    groupMapList = workcenterMapper.getWorkcenterProcessTaskMapBySql(sb.build());
+                    subGroupColumn.getDashboardDataVo(dashboardDataVo, workcenterVo, groupMapList);
                 }
-                //先排序分页获取前分组数的group
-                groupColumn.getExchangeToDashboardGroupDataMap(groupMapList, workcenterVo);
-                //根据分组groupDataList、子分组 再次搜索
-                sb = new SqlBuilder(workcenterVo, FieldTypeEnum.GROUP_COUNT);
-                groupMapList = workcenterMapper.getWorkcenterProcessTaskMapBySql(sb.build());
             }
-            //3、替换mapList的key（group -》 column，subGroup -》 type）
-            workcenterVo.setGroupType("group");
-            groupColumn.getExchangeToDashboardResultData(groupMapList, workcenterVo);
-            if (subGroupColumn != null) {
-                workcenterVo.setGroupType("subGroup");
-                subGroupColumn.getExchangeToDashboardResultData(groupMapList, workcenterVo);
-            }
+            groupColumn.getDashboardDataVo(dashboardDataVo, workcenterVo, groupMapList);
+            dashboardDataVo.getDataGroupVo().setDataCountMap(workcenterVo.getGroupDataCountMap());
+            dashboardDataVo.getDataGroupVo().setDataList(groupMapList);
             /* end: 从mysql 获取源数据 */
             /* start: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
-
-
+            data.put("dataList", chart.getData(dashboardDataVo).get("dataList"));
             /* end: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
             data.put("configObj", configChart);
-            data.put("dataList",groupMapList);
             if (configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {
                 configChart.put("groupfieldtext", ProcessWorkcenterField.getName(groupField));
             }

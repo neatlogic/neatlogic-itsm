@@ -1,5 +1,8 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -106,7 +109,7 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new PrioritySqlTable(), Arrays.asList(
-                        new SelectColumnVo(PrioritySqlTable.FieldEnum.UUID.getValue(), PrioritySqlTable.FieldEnum.UUID.getProValue(),true),
+                        new SelectColumnVo(PrioritySqlTable.FieldEnum.UUID.getValue(), PrioritySqlTable.FieldEnum.UUID.getProValue(), true),
                         new SelectColumnVo(PrioritySqlTable.FieldEnum.NAME.getValue(), PrioritySqlTable.FieldEnum.NAME.getProValue()),
                         new SelectColumnVo(PrioritySqlTable.FieldEnum.COLOR.getValue(), PrioritySqlTable.FieldEnum.COLOR.getProValue())
                 )));
@@ -136,39 +139,17 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     }
 
     @Override
-    public List<Map<String, String>> getMyExchangeToDashboardResultData(List<Map<String, String>> mapList, WorkcenterVo workcenterVo) {
-        for (Map<String, String> dataMap : mapList) {
-            Iterator<Map.Entry<String, String>> iterator = dataMap.entrySet().iterator();
-            Map<String,String> tmpMap = new HashMap<>();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String> entry = iterator.next();
-                String key = entry.getKey();
-                String value = String.valueOf(entry.getValue());
-                //如果是分组
-                if (PrioritySqlTable.FieldEnum.UUID.getProValue().equals(key) && "group".equals(workcenterVo.getGroupType())) {
-                    if(StringUtils.isNotBlank(workcenterVo.getSubGroup())) {
-                        tmpMap.put("total", workcenterVo.getGroupDataCountMap().get(value));
-                    }else{
-                        tmpMap.put("total", dataMap.get("count"));
-                    }
-                }
-                if (PrioritySqlTable.FieldEnum.NAME.getProValue().equals(key)) {
-                    if ("group".equals(workcenterVo.getGroupType())) {
-                        tmpMap.put("column", value);
-                    } else if ("subGroup".equals(workcenterVo.getGroupType())) {
-                        tmpMap.put("type", value);
-                    }
-                }
-                if("count".equals(key)){
-                    tmpMap.put("value", dataMap.get("count"));
-                }
-                if (PrioritySqlTable.FieldEnum.UUID.getProValue().equals(key) || PrioritySqlTable.FieldEnum.NAME.getProValue().equals(key) || PrioritySqlTable.FieldEnum.COLOR.getProValue().equals(key)||"count".equals(key)) {
-                    iterator.remove();
-                }
-            }
-            dataMap.putAll(tmpMap);
+    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
+        if (getName().equals(workcenterVo.getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getGroupDataCountMap());
+            dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
         }
-        return mapList;
+        //如果存在子分组
+        if (getName().equals(workcenterVo.getSubGroup())) {
+            DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getSubGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue());
+            dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+        }
     }
 
     @Override

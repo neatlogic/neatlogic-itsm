@@ -1,5 +1,8 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -9,6 +12,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.CatalogSqlTable;
 import codedriver.framework.process.workcenter.table.ChannelSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
@@ -17,10 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
@@ -93,8 +94,8 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
     public List<TableSelectColumnVo> getTableSelectColumn() {
         return new ArrayList<TableSelectColumnVo>() {
             {
-                add(new TableSelectColumnVo(new CatalogSqlTable(), Arrays.asList(new SelectColumnVo(CatalogSqlTable.FieldEnum.UUID.getValue(), "catalogUuid")
-                        , new SelectColumnVo(CatalogSqlTable.FieldEnum.NAME.getValue(), "catalogName"))));
+                add(new TableSelectColumnVo(new CatalogSqlTable(), Arrays.asList(new SelectColumnVo(CatalogSqlTable.FieldEnum.UUID.getValue(), CatalogSqlTable.FieldEnum.UUID.getProValue(),true)
+                        , new SelectColumnVo(CatalogSqlTable.FieldEnum.NAME.getValue(), CatalogSqlTable.FieldEnum.NAME.getProValue()))));
                 ;
             }
         };
@@ -112,5 +113,28 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
                 }}));
             }
         };
+    }
+
+    @Override
+    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
+        if (getName().equals(workcenterVo.getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getGroupDataCountMap());
+            dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+        }
+        //如果存在子分组
+        if (getName().equals(workcenterVo.getSubGroup())) {
+            DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getSubGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue());
+            dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+        }
+    }
+
+    @Override
+    public LinkedHashMap<String, String> getMyExchangeToDashboardGroupDataMap(List<Map<String, String>> mapList) {
+        LinkedHashMap<String, String> groupDataMap = new LinkedHashMap<>();
+        for (Map<String, String> dataMap : mapList) {
+            groupDataMap.put(dataMap.get(CatalogSqlTable.FieldEnum.UUID.getProValue()), dataMap.get("count"));
+        }
+        return groupDataMap;
     }
 }

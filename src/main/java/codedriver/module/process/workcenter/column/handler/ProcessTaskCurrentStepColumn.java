@@ -9,17 +9,15 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
-import codedriver.framework.process.constvalue.*;
+import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
-import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTable;
-import codedriver.framework.process.workcenter.table.UserTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -30,8 +28,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
@@ -266,32 +262,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 
 	@Override
 	public List<TableSelectColumnVo> getTableSelectColumn() {
-		return new ArrayList<TableSelectColumnVo>(){
-			{
-				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"processTaskStepId"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(),"processTaskStepName"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(),"processTaskId"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.HANDLER.getValue(),"processTaskStepHandler")
-				)));
-				add(new TableSelectColumnVo(new ProcessTaskStepWorkerSqlTable(), Arrays.asList(
-						new SelectColumnVo(ProcessTaskStepWorkerSqlTable.FieldEnum.UUID.getValue(),"stepWorkerUuid"),
-						new SelectColumnVo(ProcessTaskStepWorkerSqlTable.FieldEnum.TYPE.getValue(),"stepWorkerType"),
-						new SelectColumnVo(ProcessTaskStepWorkerSqlTable.FieldEnum.USER_TYPE.getValue(),"stepWorkerUserType")
-				)));
-				add(new TableSelectColumnVo(new ProcessTaskStepUserSqlTable(), Arrays.asList(
-						new SelectColumnVo(ProcessTaskStepUserSqlTable.FieldEnum.STATUS.getValue(),"stepUserUserStatus"),
-						new SelectColumnVo(ProcessTaskStepUserSqlTable.FieldEnum.USER_TYPE.getValue(),"stepUserUserType")
-				)));
-				add(new TableSelectColumnVo(new UserTable(),"ptsuser", Arrays.asList(
-						new SelectColumnVo(UserTable.FieldEnum.USER_NAME.getValue(),"stepUserUserName"),
-						new SelectColumnVo(UserTable.FieldEnum.UUID.getValue(),"stepUserUserUuid"),
-						new SelectColumnVo(UserTable.FieldEnum.USER_INFO.getValue(),"stepUserUserInfo"),
-						new SelectColumnVo(UserTable.FieldEnum.VIP_LEVEL.getValue(),"stepUserUserVipLevel"),
-						new SelectColumnVo(UserTable.FieldEnum.PINYIN.getValue(),"stepUserUserPinyin")
-				)));
-			}
-		};
+		return SqlTableUtil.getTableSelectColumn();
 	}
 
 
