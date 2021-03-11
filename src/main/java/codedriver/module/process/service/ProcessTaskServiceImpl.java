@@ -572,6 +572,27 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         List<ProcessTaskStepWorkerVo> workerList =
             processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(
                 processTaskStepVo.getProcessTaskId(), processTaskStepId);
+        for(ProcessTaskStepWorkerVo workerVo : workerList){
+            if(workerVo.getType().equals(GroupSearch.USER.getValue())){
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
+                if(userVo != null){
+                    workerVo.setWorker(new WorkAssignmentUnitVo(userVo));
+                    workerVo.setName(userVo.getUserName());
+                }
+            }else if(workerVo.getType().equals(GroupSearch.TEAM.getValue())){
+                TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
+                if(teamVo != null){
+                    workerVo.setWorker(new WorkAssignmentUnitVo(teamVo));
+                    workerVo.setName(teamVo.getName());
+                }
+            }else if(workerVo.getType().equals(GroupSearch.ROLE.getValue())){
+                RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
+                if(roleVo != null){
+                    workerVo.setWorker(new WorkAssignmentUnitVo(roleVo));
+                    workerVo.setName(roleVo.getName());
+                }
+            }
+        }
         processTaskStepVo.setWorkerList(workerList);
 
         return processTaskStepVo;
@@ -1301,6 +1322,27 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         List<ProcessTaskStepWorkerVo> workerList =
                 processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(
                         processTaskStepVo.getProcessTaskId(), currentProcessTaskStep.getId());
+        for(ProcessTaskStepWorkerVo workerVo : workerList){
+            if(workerVo.getType().equals(GroupSearch.USER.getValue())){
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
+                if(userVo != null){
+                    workerVo.setWorker(new WorkAssignmentUnitVo(userVo));
+                    workerVo.setName(userVo.getUserName());
+                }
+            }else if(workerVo.getType().equals(GroupSearch.TEAM.getValue())){
+                TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
+                if(teamVo != null){
+                    workerVo.setWorker(new WorkAssignmentUnitVo(teamVo));
+                    workerVo.setName(teamVo.getName());
+                }
+            }else if(workerVo.getType().equals(GroupSearch.ROLE.getValue())){
+                RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
+                if(roleVo != null){
+                    workerVo.setWorker(new WorkAssignmentUnitVo(roleVo));
+                    workerVo.setName(roleVo.getName());
+                }
+            }
+        }
         processTaskStepVo.setWorkerList(workerList);
         List<ProcessTaskStepUserVo> userList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStep.getId(), null);
         processTaskStepVo.setUserList(userList);

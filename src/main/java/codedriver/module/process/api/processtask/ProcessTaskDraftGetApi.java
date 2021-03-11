@@ -4,6 +4,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.exception.type.PermissionDeniedException;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
@@ -11,6 +12,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundExc
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -144,6 +146,9 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     private ProcessTaskVo getProcessTaskVoByProcessTaskId(Long processTaskId) throws Exception {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        if(!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_START).build().check()){
+            throw new PermissionDeniedException();
+        }
         ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
         /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
         if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {

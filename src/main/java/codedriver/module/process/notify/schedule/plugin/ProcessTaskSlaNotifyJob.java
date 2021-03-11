@@ -200,7 +200,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                             processTaskStepVo.setConfig(stepConfig);
                             processTaskService.getReceiverMap(processTaskStepVo, receiverMap);
                         }
-                        NotifyPolicyUtil.execute(SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo.getConfig(), paramMappingList,
+                        NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo.getConfig(), paramMappingList,
                             templateParamData, conditionParamData, receiverMap);
                     }
                 }

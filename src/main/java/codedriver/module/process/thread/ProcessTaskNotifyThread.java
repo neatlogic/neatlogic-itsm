@@ -123,6 +123,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
             if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
                 Long policyId = notifyPolicyConfig.getLong("policyId");
                 if (policyId != null) {
+                    String notifyPolicyHandler = null;
                     NotifyPolicyConfigVo policyConfig = null;
                     ProcessTaskStepNotifyPolicyVo processTaskStepNotifyPolicyVo =
                             new ProcessTaskStepNotifyPolicyVo();
@@ -133,10 +134,12 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                     if (processTaskStepNotifyPolicyVo != null) {
                         policyConfig = JSON.parseObject(processTaskStepNotifyPolicyVo.getPolicyConfig(),
                                 NotifyPolicyConfigVo.class);
+                        notifyPolicyHandler = processTaskStepNotifyPolicyVo.getPolicyHandler();
                     } else {
                         NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
                         if (notifyPolicyVo != null) {
                             policyConfig = notifyPolicyVo.getConfig();
+                            notifyPolicyHandler = notifyPolicyVo.getHandler();
                         }
                     }
                     ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
@@ -150,7 +153,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                     List<ParamMappingVo> paramMappingList =
                             JSON.parseArray(JSON.toJSONString(notifyPolicyConfig.getJSONArray("paramMappingList")),
                                     ParamMappingVo.class);
-                    NotifyPolicyUtil.execute(notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData,
+                    NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData,
                             conditionParamData, receiverMap);
                 }
             }
