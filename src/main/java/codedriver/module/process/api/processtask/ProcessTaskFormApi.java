@@ -35,7 +35,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
-
+@Deprecated//这个接口前端没有使用
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskFormApi extends PrivateApiComponentBase {
