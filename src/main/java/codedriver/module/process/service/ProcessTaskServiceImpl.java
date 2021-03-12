@@ -1552,8 +1552,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     conditionMap.put("teamUuidList",teamUuidList);
                 }
                 /** 查询工单 **/
-                List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessingTaskListByCondition(conditionMap);
-                if(CollectionUtils.isNotEmpty(processTaskList)){
+                List<Long> taskIdList = processTaskMapper.getProcessingTaskIdListByCondition(conditionMap);
+                if(CollectionUtils.isNotEmpty(taskIdList)){
+                    List<ProcessTaskVo> processTaskList = processTaskMapper.getTaskListByIdList(taskIdList);
                     for (ProcessTaskVo processTaskVo : processTaskList) {
                         Map<String,Object> map = new HashMap<>();
                         for(IProcessTaskColumn column : ProcessTaskColumnFactory.columnComponentMap.values()){
