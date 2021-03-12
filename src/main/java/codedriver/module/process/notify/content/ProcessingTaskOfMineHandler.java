@@ -451,7 +451,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				List<String> teamUuidList = new ArrayList<>();
 				List<String> userUuidList = new ArrayList<>();
 				List<String> uuidList = new ArrayList<>();
-				List<UserVo> userTeamList = new ArrayList<>();
+				List<UserVo> userList = new ArrayList<>();
 				JSONArray stepTeam = conditionConfig.getJSONArray(ConditionOptions.STEPTEAM.getValue());
 				if (CollectionUtils.isNotEmpty(stepTeam)) {
 					teamUuidList = teamMapper.checkTeamUuidListIsExists(stepTeam.toJavaList(String.class)
@@ -460,7 +460,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				if(CollectionUtils.isNotEmpty(teamUuidList)){
 					uuidList.addAll((teamUuidList));
 					userUuidList.addAll(userMapper.getUserUuidListByTeamUuidList(teamUuidList));
-					userTeamList.addAll(userMapper.getUserTeamListByTeamUuidList(teamUuidList));
+					userList.addAll(userMapper.getUserTeamRoleListByTeamUuidList(teamUuidList));
 					if(CollectionUtils.isNotEmpty(userUuidList)){
 						uuidList.addAll(userUuidList);
 						uuidList.addAll(roleMapper.getRoleUuidListByUserUuidList(userUuidList));
@@ -473,7 +473,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 					uuidListMap.put("uuidList",uuidList);
 					map.put(ConditionOptions.STEPTEAM.getValue(),uuidListMap);
 				}
-				map.put("userTeamList",userTeamList);
+				map.put("userList",userList);
 			}
 		});
 	}

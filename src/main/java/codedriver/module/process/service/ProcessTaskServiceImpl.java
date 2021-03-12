@@ -1540,16 +1540,22 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     public Map<String,List<Map<String,Object>>> getProcessingUserTaskMapByCondition(Map<String,Object> conditionMap) {
 
         Map<String,List<Map<String,Object>>> userTaskMap = new HashMap<>();
-        List<UserVo> userTeamList = (List<UserVo>)conditionMap.get("userTeamList");
+        List<UserVo> userList = (List<UserVo>)conditionMap.get("userList");
         /** 以处理组中的用户为单位，查询每个用户的待办工单 **/
-        if(CollectionUtils.isNotEmpty(userTeamList)){
-            for(UserVo user : userTeamList){
+        if(CollectionUtils.isNotEmpty(userList)){
+            for(UserVo user : userList){
+                conditionMap.remove("teamUuidList");
+                conditionMap.remove("roleUuidList");
                 List<Map<String, Object>> taskList = new ArrayList<>();
-                /** 补充user的uuid与teamUuid **/
+                /** 补充user的uuid与teamUuid、roleUuid **/
                 List<String> teamUuidList = user.getTeamUuidList();
+                List<String> roleUuidList = user.getRoleUuidList();
                 conditionMap.put("userUuid",user.getUuid());
                 if(CollectionUtils.isNotEmpty(teamUuidList)){
                     conditionMap.put("teamUuidList",teamUuidList);
+                }
+                if(CollectionUtils.isNotEmpty(roleUuidList)){
+                    conditionMap.put("roleUuidList",roleUuidList);
                 }
                 /** 查询工单 **/
                 List<Long> taskIdList = processTaskMapper.getProcessingTaskIdListByCondition(conditionMap);
