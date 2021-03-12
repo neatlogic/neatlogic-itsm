@@ -50,15 +50,18 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             String groupField = configChart.getString(DashboardShowConfig.GROUPFIELD.getValue());
             String subGroupField = configChart.getString(DashboardShowConfig.SUBGROUPFIELD.getValue());
             DashboardDataVo dashboardDataVo = new DashboardDataVo();
+            dashboardDataVo.setChartConfig(configChart);
             /* start: 从mysql 获取源数据 */
             WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
             //1、查出group权重，用于排序截取最大组数量
-            workcenterVo.setGroup(groupField);
+            workcenterVo.getDashboardConfigVo().setGroup(groupField);
             if (!ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType()) && !ChartType.TABLECHART.getValue().equals(widgetVo.getChartType()) && configChart.containsKey(DashboardShowConfig.MAXGROUP.getValue())) {
                 //仅展示分组数
                 workcenterVo.setCurrentPage(1);
                 workcenterVo.setPageSize(configChart.getInteger(DashboardShowConfig.MAXGROUP.getValue()));
             }
+            //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
+            workcenterVo.getDashboardConfigVo().setChartConfig(configChart);
             SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.GROUP_COUNT);
             List<Map<String, String>> groupMapList = workcenterMapper.getWorkcenterProcessTaskMapBySql(sb.build());
             IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(groupField);
@@ -68,7 +71,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             if (StringUtils.isNotBlank(subGroupField)) {
                 subGroupColumn = ProcessTaskColumnFactory.columnComponentMap.get(subGroupField);
                 if (subGroupColumn != null) {
-                    workcenterVo.setSubGroup(subGroupField);
+                    workcenterVo.getDashboardConfigVo().setSubGroup(subGroupField);
                     //先排序分页获取前分组数的group
                     groupColumn.getExchangeToDashboardGroupDataMap(groupMapList, workcenterVo);
                     //根据分组groupDataList、子分组 再次搜索
@@ -78,7 +81,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
                 }
             }
             groupColumn.getDashboardDataVo(dashboardDataVo, workcenterVo, groupMapList);
-            dashboardDataVo.getDataGroupVo().setDataCountMap(workcenterVo.getGroupDataCountMap());
+            dashboardDataVo.getDataGroupVo().setDataCountMap(workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
             dashboardDataVo.getDataGroupVo().setDataList(groupMapList);
             /* end: 从mysql 获取源数据 */
             /* start: 将mysql源数据 按不同dashboard插件处理返回结果数据*/

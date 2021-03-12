@@ -24,7 +24,7 @@ public class SqlLimitDecorator extends SqlDecoratorBase {
                 ||FieldTypeEnum.GROUP_COUNT.getValue().equals(workcenterVo.getSqlFieldType())
                 ||(FieldTypeEnum.FULL_TEXT.getValue().equals(workcenterVo.getSqlFieldType())&&!CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList()))
         ) {
-            if(StringUtils.isBlank(workcenterVo.getSubGroup())) {
+            if(StringUtils.isBlank(workcenterVo.getDashboardConfigVo().getSubGroup())) {
                 sqlSb.append(String.format(" limit %d,%d ", workcenterVo.getStartNum(), workcenterVo.getPageSize()));
             }
         }

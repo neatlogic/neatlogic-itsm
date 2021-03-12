@@ -104,9 +104,9 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
         buildFieldMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
             Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
             List<String> columnList = new ArrayList<>();
-            getColumnSqlList(columnComponentMap, columnList, workcenterVo.getGroup());
-            if(StringUtils.isNotBlank(workcenterVo.getSubGroup())){
-                getColumnSqlList(columnComponentMap, columnList, workcenterVo.getSubGroup());
+            getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardConfigVo().getGroup());
+            if(StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup())){
+                getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardConfigVo().getSubGroup());
             }
             columnList.add("count(1) `count`");
             sqlSb.append(String.join(",", columnList));

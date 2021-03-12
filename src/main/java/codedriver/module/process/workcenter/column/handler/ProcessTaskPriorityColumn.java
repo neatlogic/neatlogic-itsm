@@ -140,14 +140,14 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
 
     @Override
     public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
-        if (getName().equals(workcenterVo.getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getGroupDataCountMap());
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
             dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getSubGroup())) {
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
             DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getSubGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue());
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getSubGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue());
             dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
         }
     }

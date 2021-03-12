@@ -30,11 +30,11 @@ public class SqlGroupByDecorator extends SqlDecoratorBase {
             Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
             List<String> columnList = new ArrayList<>();
             List<String> groupList = new ArrayList<>();
-            if(StringUtils.isNotBlank(workcenterVo.getGroup())){
-                groupList.add(workcenterVo.getGroup());
+            if(StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getGroup())){
+                groupList.add(workcenterVo.getDashboardConfigVo().getGroup());
             }
-            if(StringUtils.isNotBlank(workcenterVo.getSubGroup())){
-                groupList.add(workcenterVo.getSubGroup());
+            if(StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup())){
+                groupList.add(workcenterVo.getDashboardConfigVo().getSubGroup());
             }
 
             for (String group : groupList) {

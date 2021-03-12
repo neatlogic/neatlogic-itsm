@@ -117,14 +117,14 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
 
     @Override
     public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
-        if (getName().equals(workcenterVo.getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getGroupDataCountMap());
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
             dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getSubGroup())) {
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
             DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getSubGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue());
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(CatalogSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getSubGroup(), CatalogSqlTable.FieldEnum.NAME.getProValue());
             dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
         }
     }

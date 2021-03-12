@@ -1,5 +1,8 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -9,6 +12,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ChannelSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
@@ -16,10 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
@@ -103,10 +104,10 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ChannelSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ChannelSqlTable.FieldEnum.UUID.getValue(), "channelUuid")
+                        new SelectColumnVo(ChannelSqlTable.FieldEnum.UUID.getValue(), ChannelSqlTable.FieldEnum.UUID.getProValue(),true)
                 )));
                 add(new TableSelectColumnVo(new ChannelSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ChannelSqlTable.FieldEnum.NAME.getValue(), "channelName")
+                        new SelectColumnVo(ChannelSqlTable.FieldEnum.NAME.getValue(), ChannelSqlTable.FieldEnum.NAME.getProValue())
                 )));
             }
         };
@@ -121,5 +122,28 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
                 }}));
             }
         };
+    }
+
+    @Override
+    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ChannelSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getGroup(), ChannelSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
+            dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+        }
+        //如果存在子分组
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
+            DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ChannelSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getSubGroup(), ChannelSqlTable.FieldEnum.NAME.getProValue());
+            dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+        }
+    }
+
+    @Override
+    public LinkedHashMap<String, String> getMyExchangeToDashboardGroupDataMap(List<Map<String, String>> mapList) {
+        LinkedHashMap<String, String> groupDataMap = new LinkedHashMap<>();
+        for (Map<String, String> dataMap : mapList) {
+            groupDataMap.put(dataMap.get(ChannelSqlTable.FieldEnum.UUID.getProValue()), dataMap.get("count"));
+        }
+        return groupDataMap;
     }
 }

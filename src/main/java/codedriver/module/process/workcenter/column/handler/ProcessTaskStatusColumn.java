@@ -113,14 +113,14 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
             mapList.set(i,tmpMap);
         }
         //
-        if (getName().equals(workcenterVo.getGroup())) {
-            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getGroup(), "statusText", workcenterVo.getGroupDataCountMap());
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getDashboardConfigVo().getGroup(), "statusText", workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
             dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
         }
         //如果存在子分组
-        if (getName().equals(workcenterVo.getSubGroup())) {
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
             DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getSubGroup(), "statusText");
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), workcenterVo.getDashboardConfigVo().getSubGroup(), "statusText");
             dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
         }
     }

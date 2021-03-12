@@ -191,14 +191,14 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 
 	@Override
 	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
-		if (getName().equals(workcenterVo.getGroup())) {
-			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("stepUserUserUuid", workcenterVo.getGroup(), "stepUserUserName", workcenterVo.getGroupDataCountMap());
+		if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
+			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("stepUserUserUuid", workcenterVo.getDashboardConfigVo().getGroup(), "stepUserUserName", workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
 			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
 		}
 		//如果存在子分组
-		if (getName().equals(workcenterVo.getSubGroup())) {
+		if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
 			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("stepUserUserUuid", workcenterVo.getSubGroup(), "stepUserUserName");
+			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("stepUserUserUuid", workcenterVo.getDashboardConfigVo().getSubGroup(), "stepUserUserName");
 			dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
 		}
 	}

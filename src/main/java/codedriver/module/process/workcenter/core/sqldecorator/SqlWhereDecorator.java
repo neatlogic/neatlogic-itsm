@@ -77,34 +77,45 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
             JSONArray keywordConditionList = workcenterVo.getKeywordConditionList();
             //获取过滤最终工单idList
             if (CollectionUtils.isNotEmpty(keywordConditionList)) {
-                for(Object keywordCondition : keywordConditionList){
+                for (Object keywordCondition : keywordConditionList) {
                     JSONObject keywordConditionJson = JSONObject.parseObject(JSONObject.toJSONString(keywordCondition));
                     String handler = keywordConditionJson.getString("name");
                     JSONArray valueArray = keywordConditionJson.getJSONArray("valueList");
-                    List<String> valueList =  JSONObject.parseArray(valueArray.toJSONString(), String.class);
-                    getFullTextSql(sqlSb,String.join("\" \"", valueList),handler);
+                    List<String> valueList = JSONObject.parseArray(valueArray.toJSONString(), String.class);
+                    getFullTextSql(sqlSb, String.join("\" \"", valueList), handler);
                 }
             } else {//获取关键字搜索下拉选项
-                getFullTextSql(sqlSb,workcenterVo.getKeyword(),workcenterVo.getKeywordHandler());
+                getFullTextSql(sqlSb, workcenterVo.getKeyword(), workcenterVo.getKeywordHandler());
             }
         });
 
         buildWhereMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
             getCountWhereSql(sqlSb, workcenterVo);
-            LinkedHashMap<String,String> groupDataMap = workcenterVo.getGroupDataCountMap();
+            IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getDashboardConfigVo().getGroup());
+            //拼接sql，对二次过滤选项，如：数值图需要二次过滤选项
+            JSONObject chartConfig = workcenterVo.getDashboardConfigVo().getChartConfig();
             List<String> groupDataList = new ArrayList<>();
-            if(MapUtils.isNotEmpty(groupDataMap)) {
+            if (chartConfig.containsKey("configlist")) {
+                JSONArray configArray = chartConfig.getJSONArray("configlist");
+                groupDataList = JSONObject.parseArray(configArray.toJSONString(), String.class);
+            }
+            //拼接sql，则根据查出的权重，排序截取最大组数量，查出二维数据
+            LinkedHashMap<String, String> groupDataMap = workcenterVo.getDashboardConfigVo().getGroupDataCountMap();
+            if (MapUtils.isNotEmpty(groupDataMap)) {
                 for (Map.Entry<String, String> entry : groupDataMap.entrySet()) {
                     groupDataList.add(entry.getKey());
                 }
             }
-            IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(workcenterVo.getGroup());
-            if (columnHandler != null && MapUtils.isNotEmpty(groupDataMap)) {
+
+            if (columnHandler != null){
                 List<TableSelectColumnVo> columnVoList = columnHandler.getTableSelectColumn();
-               OUT: for (TableSelectColumnVo columnVo : columnVoList) {
+                OUT:
+                for (TableSelectColumnVo columnVo : columnVoList) {
                     for (SelectColumnVo column : columnVo.getColumnList()) {
-                        if(column.getIsPrimary()){
-                            sqlSb.append(String.format(" AND %s.`%s` IN ('%s') ", columnVo.getTableShortName(),column.getColumnName(),String.join("','", groupDataList)));
+                        if (column.getIsPrimary()) {
+                            if (CollectionUtils.isNotEmpty(groupDataList)) {
+                                sqlSb.append(String.format(" AND %s.`%s` IN ('%s') ", columnVo.getTableShortName(), column.getColumnName(), String.join("','", groupDataList)));
+                            }
                             break OUT;
                         }
                     }
@@ -113,7 +124,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
         });
     }
 
-    private void getFullTextSql(StringBuilder sqlSb,String value,String handler){
+    private void getFullTextSql(StringBuilder sqlSb, String value, String handler) {
         IProcessTaskColumn columnHandler = ProcessTaskColumnFactory.getHandler(handler);
         if (columnHandler != null) {
             List<String> columnList = new ArrayList<>();
@@ -182,7 +193,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                     //append condition
                     String handler = conditionVo.getName();
                     //如果是form
-                    if(conditionVo.getType().equals(ProcessFieldType.FORM.getValue())){
+                    if (conditionVo.getType().equals(ProcessFieldType.FORM.getValue())) {
                         handler = ProcessFieldType.FORM.getValue();
                     }
                     IProcessTaskCondition sqlCondition = (IProcessTaskCondition) ConditionHandlerFactory.getHandler(handler);
@@ -209,12 +220,12 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
             sqlCondition.getSqlConditionWhere(null, 0, sqlSb);
         }
         //keyword搜索框搜索 idList 过滤
-        if(CollectionUtils.isNotEmpty(workcenterVo.getProcessTaskIdList())){
+        if (CollectionUtils.isNotEmpty(workcenterVo.getProcessTaskIdList())) {
             sqlSb.append(String.format(" and pt.id in ( %s )", workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining(","))));
         }
         //隐藏工单 过滤
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
-        if(!isHasProcessTaskAuth){
+        if (!isHasProcessTaskAuth) {
             sqlSb.append(" and pt.is_show = 1 ");
         }
         //其它条件过滤

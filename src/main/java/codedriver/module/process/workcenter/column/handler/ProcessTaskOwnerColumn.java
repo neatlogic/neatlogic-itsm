@@ -128,14 +128,14 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 
 	@Override
 	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
-		if (getName().equals(workcenterVo.getGroup())) {
-			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("ownerUuid", workcenterVo.getGroup(), "ownerName", workcenterVo.getGroupDataCountMap());
+		if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
+			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("ownerUuid", workcenterVo.getDashboardConfigVo().getGroup(), "ownerName", workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
 			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
 		}
 		//如果存在子分组
-		if (getName().equals(workcenterVo.getSubGroup())) {
+		if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
 			DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
-			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("ownerUuid", workcenterVo.getSubGroup(), "ownerName");
+			dashboardDataSubGroupVo = new DashboardDataSubGroupVo("ownerUuid", workcenterVo.getDashboardConfigVo().getSubGroup(), "ownerName");
 			dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
 		}
 	}
