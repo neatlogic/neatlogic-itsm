@@ -67,7 +67,9 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
 
 	@Override
 	public JSONObject getConfig() {
-		List<ChannelTypeVo>  channellist = channelTypeMapper.searchChannelTypeList(new ChannelTypeVo());
+		ChannelTypeVo searchVo = new ChannelTypeVo();
+		searchVo.setIsActive(1);
+		List<ChannelTypeVo>  channellist = channelTypeMapper.searchChannelTypeList(searchVo);
 		JSONArray dataList = new JSONArray();
 		for(ChannelTypeVo channelType:channellist) {
 			dataList.add(new ValueTextVo(channelType.getUuid(), channelType.getName()));
