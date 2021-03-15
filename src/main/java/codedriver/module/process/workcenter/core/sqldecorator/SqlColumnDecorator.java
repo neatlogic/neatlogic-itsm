@@ -125,7 +125,7 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
             IProcessTaskColumn column = columnComponentMap.get(theadName);
             for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
                 for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
-                    String columnStr = String.format(" %s.%s as %s ", tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
+                    String columnStr = String.format(" any_value(%s.%s) as %s ", tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
                     if (!columnList.contains(columnStr)) {
                         columnList.add(columnStr);
                     }
