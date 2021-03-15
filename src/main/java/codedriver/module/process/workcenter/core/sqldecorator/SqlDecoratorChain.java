@@ -39,9 +39,9 @@ public class SqlDecoratorChain implements ApplicationContextAware, InitializingB
         }
         List<ISqlDecorator> decoratorList = beansOfTypeMap.values().stream().sorted((e1, e2) -> e1.getSort() - e2.getSort()).collect(Collectors.toList());
         for (int i = 0; i < decoratorList.size(); i++) {
-            ISqlDecorator payHandler = decoratorList.get(i);
+            ISqlDecorator decoratorHandler = decoratorList.get(i);
             if (i != decoratorList.size() - 1) {
-                payHandler.setNextSqlDecorator(decoratorList.get(i + 1));
+                decoratorHandler.setNextSqlDecorator(decoratorList.get(i + 1));
             }
         }
         firstSqlDecorator = decoratorList.get(0);

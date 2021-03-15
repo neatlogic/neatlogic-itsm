@@ -1,5 +1,8 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
+import codedriver.framework.dashboard.dto.DashboardDataVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -9,6 +12,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.PrioritySqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
@@ -17,122 +21,143 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Component
-public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
-	@Autowired
-	PriorityMapper priorityMapper;
-	@Override
-	public String getName() {
-		return "priority";
-	}
+public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
+    @Autowired
+    PriorityMapper priorityMapper;
 
-	@Override
-	public String getDisplayName() {
-		return "优先级";
-	}
+    @Override
+    public String getName() {
+        return "priority";
+    }
 
-	@Override
-	public Object getMyValue(JSONObject json) throws RuntimeException {
-		String priorityUuid = json.getString(this.getName());
-		JSONObject priorityJson = new JSONObject();
-		if(StringUtils.isNotBlank(priorityUuid)) {
-			priorityJson.put("value", priorityUuid);
-			PriorityVo priority = priorityMapper.getPriorityByUuid(priorityUuid);
-			if(priority != null) {
-				priorityJson.put("text", priority.getName());
-				priorityJson.put("color", priority.getColor());
-			}
-		}
-		return priorityJson;
-	}
-	
-	@Override
-	public JSONObject getMyValueText(JSONObject json) {
-		return (JSONObject) getMyValue(json);
-	}
+    @Override
+    public String getDisplayName() {
+        return "优先级";
+    }
 
-	@Override
-	public Boolean allowSort() {
-		return false;
-	}
+    @Override
+    public Object getMyValue(JSONObject json) throws RuntimeException {
+        String priorityUuid = json.getString(this.getName());
+        JSONObject priorityJson = new JSONObject();
+        if (StringUtils.isNotBlank(priorityUuid)) {
+            priorityJson.put("value", priorityUuid);
+            PriorityVo priority = priorityMapper.getPriorityByUuid(priorityUuid);
+            if (priority != null) {
+                priorityJson.put("text", priority.getName());
+                priorityJson.put("color", priority.getColor());
+            }
+        }
+        return priorityJson;
+    }
 
-	@Override
-	public String getType() {
-		return ProcessFieldType.COMMON.getValue();
-	}
+    @Override
+    public JSONObject getMyValueText(JSONObject json) {
+        return (JSONObject) getMyValue(json);
+    }
 
-	@Override
-	public String getClassName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Boolean allowSort() {
+        return false;
+    }
 
-	@Override
-	public Integer getSort() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
+    @Override
+    public String getType() {
+        return ProcessFieldType.COMMON.getValue();
+    }
 
-	@Override
-	public Object getSimpleValue(Object json) {
-		String priority = null;
-		if(json != null){
-			priority = JSONObject.parseObject(json.toString()).getString("text");
-		}
-		return priority;
-	}
+    @Override
+    public String getClassName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Object getValue(ProcessTaskVo processTaskVo) {
-		JSONObject priorityJson = new JSONObject();
-		if(processTaskVo.getPriority() == null){
-			priorityJson.put("value", "优先级已被删除");
-			priorityJson.put("text", "优先级已被删除");
-			priorityJson.put("color", "rgb(255, 102, 102)");
-		}else {
-			priorityJson.put("value", processTaskVo.getPriority().getUuid());
-			priorityJson.put("text", processTaskVo.getPriority().getName());
-			priorityJson.put("color", processTaskVo.getPriority().getColor());
-		}
-		return priorityJson;
-	}
+    @Override
+    public Integer getSort() {
+        // TODO Auto-generated method stub
+        return 3;
+    }
 
-	@Override
-	public List<TableSelectColumnVo> getTableSelectColumn() {
-		return new ArrayList<TableSelectColumnVo>(){
-			{
-				add(new TableSelectColumnVo(new PrioritySqlTable(), Arrays.asList(
-						new SelectColumnVo(PrioritySqlTable.FieldEnum.UUID.getValue(),"priorityUuid"),
-						new SelectColumnVo(PrioritySqlTable.FieldEnum.NAME.getValue(),"priorityName"),
-						new SelectColumnVo(PrioritySqlTable.FieldEnum.COLOR.getValue(),"priorityColor")
-				)));
-			}
-		};
-	}
+    @Override
+    public Object getSimpleValue(Object json) {
+        String priority = null;
+        if (json != null) {
+            priority = JSONObject.parseObject(json.toString()).getString("text");
+        }
+        return priority;
+    }
 
-	@Override
-	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
-		return new ArrayList<JoinTableColumnVo>() {
-			{
-				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new PrioritySqlTable(), new HashMap<String, String>() {{
-					put(ProcessTaskSqlTable.FieldEnum.PRIORITY_UUID.getValue(), PrioritySqlTable.FieldEnum.UUID.getValue());
-				}}));
-			}
-		};
-	}
+    @Override
+    public Object getValue(ProcessTaskVo processTaskVo) {
+        JSONObject priorityJson = new JSONObject();
+        if (processTaskVo.getPriority() == null) {
+            priorityJson.put("value", "优先级已被删除");
+            priorityJson.put("text", "优先级已被删除");
+            priorityJson.put("color", "rgb(255, 102, 102)");
+        } else {
+            priorityJson.put("value", processTaskVo.getPriority().getUuid());
+            priorityJson.put("text", processTaskVo.getPriority().getName());
+            priorityJson.put("color", processTaskVo.getPriority().getColor());
+        }
+        return priorityJson;
+    }
 
-	@Override
-	public String getMySortSqlColumn(){
-		return PrioritySqlTable.FieldEnum.SORT.getValue();
-	}
+    @Override
+    public List<TableSelectColumnVo> getTableSelectColumn() {
+        return new ArrayList<TableSelectColumnVo>() {
+            {
+                add(new TableSelectColumnVo(new PrioritySqlTable(), Arrays.asList(
+                        new SelectColumnVo(PrioritySqlTable.FieldEnum.UUID.getValue(), PrioritySqlTable.FieldEnum.UUID.getProValue(), true),
+                        new SelectColumnVo(PrioritySqlTable.FieldEnum.NAME.getValue(), PrioritySqlTable.FieldEnum.NAME.getProValue()),
+                        new SelectColumnVo(PrioritySqlTable.FieldEnum.COLOR.getValue(), PrioritySqlTable.FieldEnum.COLOR.getProValue())
+                )));
+            }
+        };
+    }
 
-	@Override
-	public ISqlTable getMySortSqlTable(){
-		return new PrioritySqlTable();
-	}
+    @Override
+    public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+        return new ArrayList<JoinTableColumnVo>() {
+            {
+                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new PrioritySqlTable(), new HashMap<String, String>() {{
+                    put(ProcessTaskSqlTable.FieldEnum.PRIORITY_UUID.getValue(), PrioritySqlTable.FieldEnum.UUID.getValue());
+                }}));
+            }
+        };
+    }
+
+    @Override
+    public String getMySortSqlColumn() {
+        return PrioritySqlTable.FieldEnum.SORT.getValue();
+    }
+
+    @Override
+    public ISqlTable getMySortSqlTable() {
+        return new PrioritySqlTable();
+    }
+
+    @Override
+    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
+            DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
+            dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
+        }
+        //如果存在子分组
+        if (getName().equals(workcenterVo.getDashboardConfigVo().getSubGroup())) {
+            DashboardDataSubGroupVo dashboardDataSubGroupVo = null;
+            dashboardDataSubGroupVo = new DashboardDataSubGroupVo(PrioritySqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getSubGroup(), PrioritySqlTable.FieldEnum.NAME.getProValue());
+            dashboardDataVo.setDataSubGroupVo(dashboardDataSubGroupVo);
+        }
+    }
+
+    @Override
+    public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
+        LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
+        for (Map<String, Object> dataMap : mapList) {
+            groupDataMap.put(dataMap.get(PrioritySqlTable.FieldEnum.UUID.getProValue()).toString(), dataMap.get("count"));
+        }
+        return groupDataMap;
+    }
 }

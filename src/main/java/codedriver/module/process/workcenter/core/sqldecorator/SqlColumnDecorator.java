@@ -7,13 +7,12 @@ import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import codedriver.framework.process.workcenter.table.ProcessTaskSqlTableFactory;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -101,6 +100,39 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
                 }
             }
         });
+
+        buildFieldMap.put(FieldTypeEnum.GROUP_COUNT.getValue(), (workcenterVo, sqlSb) -> {
+            Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+            List<String> columnList = new ArrayList<>();
+            getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardConfigVo().getGroup());
+            if(StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup())){
+                getColumnSqlList(columnComponentMap, columnList, workcenterVo.getDashboardConfigVo().getSubGroup());
+            }
+            columnList.add("count(1) `count`");
+            sqlSb.append(String.join(",", columnList));
+        });
+    }
+
+    /**
+     * @Description: 获取column sql list
+     * @Author: 89770
+     * @Date: 2021/2/26 17:53
+     * @Params: [columnComponentMap, columnList, theadVo]
+     * @Returns: void
+     **/
+    private void getColumnSqlList(Map<String, IProcessTaskColumn> columnComponentMap, List<String> columnList, String theadName) {
+        if (columnComponentMap.containsKey(theadName)) {
+            IProcessTaskColumn column = columnComponentMap.get(theadName);
+            for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
+                for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
+                    String columnStr = String.format(" %s.%s as %s ", tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
+                    if (!columnList.contains(columnStr)) {
+                        columnList.add(columnStr);
+                    }
+                }
+            }
+
+        }
     }
 
     @FunctionalInterface
@@ -129,25 +161,13 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
      **/
     private void buildField(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-        Map<String, ISqlTable> tableComponentMap = ProcessTaskSqlTableFactory.tableComponentMap;
         List<String> columnList = new ArrayList<>();
         for (WorkcenterTheadVo theadVo : workcenterVo.getTheadVoList()) {
             //去掉沒有勾选的thead
             if (theadVo.getIsShow() != 1) {
                 continue;
             }
-            if (columnComponentMap.containsKey(theadVo.getName())) {
-                IProcessTaskColumn column = columnComponentMap.get(theadVo.getName());
-                for (TableSelectColumnVo tableSelectColumnVo : column.getTableSelectColumn()) {
-                    for (SelectColumnVo selectColumnVo : tableSelectColumnVo.getColumnList()) {
-                        String columnStr = String.format(" %s.%s as %s ", tableSelectColumnVo.getTableShortName(), selectColumnVo.getColumnName(), selectColumnVo.getPropertyName());
-                        if (!columnList.contains(columnStr)) {
-                            columnList.add(columnStr);
-                        }
-                    }
-                }
-
-            }
+            getColumnSqlList(columnComponentMap, columnList, theadVo.getName());
         }
         //查询是否隐藏
         columnList.add(String.format(" %s.%s as %s ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.IS_SHOW.getValue(), ProcessTaskSqlTable.FieldEnum.IS_SHOW.getValue()));
