@@ -100,9 +100,9 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                 groupDataList = JSONObject.parseArray(configArray.toJSONString(), String.class);
             }
             //拼接sql，则根据查出的权重，排序截取最大组数量，查出二维数据
-            LinkedHashMap<String, String> groupDataMap = workcenterVo.getDashboardConfigVo().getGroupDataCountMap();
+            LinkedHashMap<String, Object> groupDataMap = workcenterVo.getDashboardConfigVo().getGroupDataCountMap();
             if (MapUtils.isNotEmpty(groupDataMap)) {
-                for (Map.Entry<String, String> entry : groupDataMap.entrySet()) {
+                for (Map.Entry<String, Object> entry : groupDataMap.entrySet()) {
                     groupDataList.add(entry.getKey());
                 }
             }

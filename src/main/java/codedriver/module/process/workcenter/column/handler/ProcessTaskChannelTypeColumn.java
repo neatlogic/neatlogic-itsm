@@ -119,7 +119,7 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	}
 
 	@Override
-	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
+	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
 		if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
 			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo(ChannelTypeSqlTable.FieldEnum.UUID.getProValue(), workcenterVo.getDashboardConfigVo().getGroup(), ChannelTypeSqlTable.FieldEnum.NAME.getProValue(), workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
 			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
@@ -133,10 +133,10 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	}
 
 	@Override
-	public LinkedHashMap<String, String> getMyExchangeToDashboardGroupDataMap(List<Map<String, String>> mapList) {
-		LinkedHashMap<String, String> groupDataMap = new LinkedHashMap<>();
-		for (Map<String, String> dataMap : mapList) {
-			groupDataMap.put(dataMap.get(ChannelTypeSqlTable.FieldEnum.UUID.getProValue()), dataMap.get("count"));
+	public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
+		LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
+		for (Map<String, Object> dataMap : mapList) {
+			groupDataMap.put(dataMap.get(ChannelTypeSqlTable.FieldEnum.UUID.getProValue()).toString(), dataMap.get("count"));
 		}
 		return groupDataMap;
 	}

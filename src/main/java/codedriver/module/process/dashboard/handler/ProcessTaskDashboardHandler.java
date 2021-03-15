@@ -13,6 +13,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
@@ -20,9 +21,9 @@ import codedriver.module.process.workcenter.core.SqlBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +31,11 @@ import java.util.Map;
 @Component
 public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
 
-    @Autowired
+    @Resource
     WorkcenterMapper workcenterMapper;
+
+    @Resource
+    ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getName() {
@@ -63,7 +67,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             //设置chartConfig 以备后续特殊情况，如：数值图需要二次过滤选项
             workcenterVo.getDashboardConfigVo().setChartConfig(configChart);
             SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.GROUP_COUNT);
-            List<Map<String, String>> groupMapList = workcenterMapper.getWorkcenterProcessTaskMapBySql(sb.build());
+            List<Map<String, Object>> groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
             IProcessTaskColumn groupColumn = ProcessTaskColumnFactory.columnComponentMap.get(groupField);
 
             IProcessTaskColumn subGroupColumn = null;
@@ -76,7 +80,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
                     groupColumn.getExchangeToDashboardGroupDataMap(groupMapList, workcenterVo);
                     //根据分组groupDataList、子分组 再次搜索
                     sb = new SqlBuilder(workcenterVo, FieldTypeEnum.GROUP_COUNT);
-                    groupMapList = workcenterMapper.getWorkcenterProcessTaskMapBySql(sb.build());
+                    groupMapList = processTaskMapper.getWorkcenterProcessTaskMapBySql(sb.build());
                     subGroupColumn.getDashboardDataVo(dashboardDataVo, workcenterVo, groupMapList);
                 }
             }
@@ -86,6 +90,8 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             /* end: 从mysql 获取源数据 */
             /* start: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
             data.put("dataList", chart.getData(dashboardDataVo).get("dataList"));
+            data.put("columnList",chart.getData(dashboardDataVo).get("columnList"));
+            data.put("theadList",chart.getData(dashboardDataVo).get("theadList"));
             /* end: 将mysql源数据 按不同dashboard插件处理返回结果数据*/
             data.put("configObj", configChart);
             if (configChart.containsKey(DashboardShowConfig.GROUPFIELD.getValue())) {

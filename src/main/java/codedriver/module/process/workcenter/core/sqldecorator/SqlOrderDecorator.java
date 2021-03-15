@@ -74,7 +74,7 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
             if (StringUtils.isNotBlank(workcenterVo.getDashboardConfigVo().getSubGroup())&&MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
                 List<String> groupDataList = new ArrayList<>();
                 if(MapUtils.isNotEmpty(workcenterVo.getDashboardConfigVo().getGroupDataCountMap())) {
-                    for (Map.Entry<String, String> entry : workcenterVo.getDashboardConfigVo().getGroupDataCountMap().entrySet()) {
+                    for (Map.Entry<String, Object> entry : workcenterVo.getDashboardConfigVo().getGroupDataCountMap().entrySet()) {
                         groupDataList.add(entry.getKey());
                     }
                 }

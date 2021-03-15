@@ -190,7 +190,7 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 	}
 
 	@Override
-	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
+	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
 		if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
 			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("stepUserUserUuid", workcenterVo.getDashboardConfigVo().getGroup(), "stepUserUserName", workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
 			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
@@ -204,10 +204,12 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 	}
 
 	@Override
-	public LinkedHashMap<String, String> getMyExchangeToDashboardGroupDataMap(List<Map<String, String>> mapList) {
-		LinkedHashMap<String, String> groupDataMap = new LinkedHashMap<>();
-		for (Map<String, String> dataMap : mapList) {
-			groupDataMap.put(dataMap.get("stepUserUserUuid"), dataMap.get("count"));
+	public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
+		LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
+		for (Map<String, Object> dataMap : mapList) {
+			if(dataMap.containsKey("stepUserUserUuid")) {
+				groupDataMap.put(dataMap.get("stepUserUserUuid").toString(), dataMap.get("count"));
+			}
 		}
 		return groupDataMap;
 	}

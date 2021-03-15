@@ -97,16 +97,16 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo,List<Map<String, String>> mapList) {
+    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo,List<Map<String, Object>> mapList) {
         //补充text
         for( int i =0 ; i < mapList.size();i++){
-            Map<String, String> tmpMap = new HashMap<>();
-            Map<String,String> map = mapList.get(i);
-            for(Map.Entry<String,String> entry : map.entrySet()){
+            Map<String, Object> tmpMap = new HashMap<>();
+            Map<String,Object> map = mapList.get(i);
+            for(Map.Entry<String,Object> entry : map.entrySet()){
                 String key = entry.getKey();
-                String value = String.valueOf(entry.getValue());
+                Object value = entry.getValue();
                 if(key.equals(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue())){
-                    tmpMap.put("statusText",ProcessTaskStatus.getText(value));
+                    tmpMap.put("statusText",ProcessTaskStatus.getText(value.toString()));
                 }
                 tmpMap.put(key,value);
             }
@@ -126,10 +126,10 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     }
 
     @Override
-    public LinkedHashMap<String, String> getMyExchangeToDashboardGroupDataMap(List<Map<String, String>> mapList) {
-        LinkedHashMap<String, String> groupDataMap = new LinkedHashMap<>();
-        for (Map<String, String> dataMap : mapList) {
-            groupDataMap.put(dataMap.get(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue()), dataMap.get("count"));
+    public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
+        LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
+        for (Map<String, Object> dataMap : mapList) {
+            groupDataMap.put(dataMap.get(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue()).toString(), dataMap.get("count"));
         }
         return groupDataMap;
     }

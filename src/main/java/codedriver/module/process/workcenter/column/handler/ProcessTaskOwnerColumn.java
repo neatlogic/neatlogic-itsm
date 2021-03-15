@@ -127,7 +127,7 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 	}
 
 	@Override
-	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, String>> mapList) {
+	public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
 		if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {
 			DashboardDataGroupVo dashboardDataGroupVo = new DashboardDataGroupVo("ownerUuid", workcenterVo.getDashboardConfigVo().getGroup(), "ownerName", workcenterVo.getDashboardConfigVo().getGroupDataCountMap());
 			dashboardDataVo.setDataGroupVo(dashboardDataGroupVo);
@@ -141,10 +141,10 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 	}
 
 	@Override
-	public LinkedHashMap<String, String> getMyExchangeToDashboardGroupDataMap(List<Map<String, String>> mapList) {
-		LinkedHashMap<String, String> groupDataMap = new LinkedHashMap<>();
-		for (Map<String, String> dataMap : mapList) {
-			groupDataMap.put(dataMap.get("ownerUuid"), dataMap.get("count"));
+	public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
+		LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
+		for (Map<String, Object> dataMap : mapList) {
+			groupDataMap.put(dataMap.get("ownerUuid").toString(), dataMap.get("count"));
 		}
 		return groupDataMap;
 	}
