@@ -156,6 +156,9 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
         LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
         for (Map<String, Object> dataMap : mapList) {
+            if(!dataMap.containsKey(PrioritySqlTable.FieldEnum.UUID.getProValue())){
+                continue;
+            }
             groupDataMap.put(dataMap.get(PrioritySqlTable.FieldEnum.UUID.getProValue()).toString(), dataMap.get("count"));
         }
         return groupDataMap;

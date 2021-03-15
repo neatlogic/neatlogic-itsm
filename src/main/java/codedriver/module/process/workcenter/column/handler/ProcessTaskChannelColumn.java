@@ -142,6 +142,9 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
     public LinkedHashMap<String, Object> getMyExchangeToDashboardGroupDataMap(List<Map<String, Object>> mapList) {
         LinkedHashMap<String, Object> groupDataMap = new LinkedHashMap<>();
         for (Map<String, Object> dataMap : mapList) {
+            if(!dataMap.containsKey(ChannelSqlTable.FieldEnum.UUID.getProValue())){
+                continue;
+            }
             groupDataMap.put(dataMap.get(ChannelSqlTable.FieldEnum.UUID.getProValue()).toString(), dataMap.get("count"));
         }
         return groupDataMap;
