@@ -8,6 +8,10 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.notify.core.*;
 import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
 import codedriver.framework.notify.dto.NotifyVo;
@@ -21,8 +25,8 @@ import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
 import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
+import codedriver.module.process.notify.handler.TaskNotifyPolicyHandler;
 import codedriver.module.process.service.ProcessTaskService;
-import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,6 +56,15 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 	@Resource
 	private NotifyJobMapper notifyJobMapper;
+
+	@Resource
+	private UserMapper userMapper;
+
+	@Resource
+	private RoleMapper roleMapper;
+
+	@Resource
+	private TeamMapper teamMapper;
 
     @Resource
     protected ProcessTaskService processTaskService;
@@ -95,6 +108,8 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	private static List<String> notifyHandlersWhichCanChooseTaskColumn = new ArrayList<>();
 
 	private static Map<String,BuildNotifyHandler> handlerMap = new HashMap<>();
+
+	private static Map<String,ICondition> conditionOptionsMap = new HashMap<>();
 
 	@PostConstruct
 	public void init() {
@@ -398,7 +413,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 					if(MapUtils.isNotEmpty(userTaskMap)){
 						for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
-							NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(TaskNotifyTriggerType.URGE, ProcessTaskMessageHandler.class);
+							NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(TaskNotifyTriggerType.URGE, ProcessTaskMessageHandler.class, TaskNotifyPolicyHandler.class.getName());
 							notifyBuilder.withTitleTemplate(title != null ? title : null);
 							notifyBuilder.addUserUuid(entry.getKey());
 
@@ -423,6 +438,42 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 					}
 				}
 				return notifyList;
+			}
+		});
+
+		/**
+		 * 将来扩展ConditionOptions时，在conditionOptionsMap中put对应的实现类，实现自己的参数拼接方法
+		**/
+		conditionOptionsMap.put(ConditionOptions.STEPTEAM.getValue(), new ICondition() {
+			@Override
+			public void getConditionMap(Map<String,Object> map,JSONObject conditionConfig) {
+
+				List<String> teamUuidList = new ArrayList<>();
+				List<String> userUuidList = new ArrayList<>();
+				List<String> uuidList = new ArrayList<>();
+				List<UserVo> userList = new ArrayList<>();
+				JSONArray stepTeam = conditionConfig.getJSONArray(ConditionOptions.STEPTEAM.getValue());
+				if (CollectionUtils.isNotEmpty(stepTeam)) {
+					teamUuidList = teamMapper.checkTeamUuidListIsExists(stepTeam.toJavaList(String.class)
+							.stream().map(o -> o.split("#")[1]).collect(Collectors.toList()));
+				}
+				if(CollectionUtils.isNotEmpty(teamUuidList)){
+					uuidList.addAll((teamUuidList));
+					userUuidList.addAll(userMapper.getUserUuidListByTeamUuidList(teamUuidList));
+					userList.addAll(userMapper.getUserTeamRoleListByTeamUuidList(teamUuidList));
+					if(CollectionUtils.isNotEmpty(userUuidList)){
+						uuidList.addAll(userUuidList);
+						uuidList.addAll(roleMapper.getRoleUuidListByUserUuidList(userUuidList));
+					}else{
+						userUuidList.add("''");
+					}
+
+					Map<String,List> uuidListMap = new HashMap<>();
+					uuidListMap.put("userUuidList",userUuidList);
+					uuidListMap.put("uuidList",uuidList);
+					map.put(ConditionOptions.STEPTEAM.getValue(),uuidListMap);
+				}
+				map.put("userList",userList);
 			}
 		});
 	}
@@ -464,6 +515,11 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 					});
 					obj.put("multiple", true);
 					obj.put("search", true);
+					obj.put("validateList", new JSONArray(){
+						{
+							this.add("required");
+						}
+					});
 				}
 				params.add(obj);
 			}
@@ -543,53 +599,15 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	 * @Returns: java.util.Map<java.lang.String,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>>
 	**/
 	private Map<String, List<Map<String, Object>>> getUserTaskMap(JSONObject config) {
-		/** 获取工单查询条件 */
-		List<String> stepTeamUuidList = new ArrayList<>();
 		JSONObject conditionConfig = config.getJSONObject("conditionConfig");
-		if (MapUtils.isNotEmpty(conditionConfig)) {
-			JSONArray stepTeam = conditionConfig.getJSONArray(ConditionOptions.STEPTEAM.getValue());
-			if (CollectionUtils.isNotEmpty(stepTeam)) {
-				for (Object o : stepTeam) {
-					stepTeamUuidList.add(o.toString().split("#")[1]);
-				}
-			}
+		Map<String,Object> conditionMap = new HashMap<>();
+		for(ConditionOptions option : ConditionOptions.values()){
+			ICondition condition = conditionOptionsMap.get(option.getValue());
+			condition.getConditionMap(conditionMap,conditionConfig);
 		}
-
 		/** 查询工单 */
-		List<Map<String, Object>> originalTaskList = processTaskService.getTaskListByStepTeamUuidList(stepTeamUuidList);
+		Map<String,List<Map<String,Object>>> userTaskMap = processTaskService.getProcessingUserTaskMapByCondition(conditionMap);
 
-		/** 按处理人给工单分类 */
-		return classifyTaskByUser(originalTaskList);
-	}
-
-	/**
-	 * @Description: 按用户将工单分类
-	 * @Author: laiwt
-	 * @Date: 2021/1/8 14:21
-	 * @Params: [originalTaskList]
-	 * @Returns: java.util.Map<java.lang.String,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>>
-	**/
-	private Map<String, List<Map<String, Object>>> classifyTaskByUser(List<Map<String, Object>> originalTaskList) {
-		Map<String, List<Map<String, Object>>> userTaskMap = new HashMap<>();
-		if (CollectionUtils.isNotEmpty(originalTaskList)) {
-			String currentStepNameWorker = new ProcessTaskCurrentStepWorkerColumn().getName();
-			for (Map<String, Object> map : originalTaskList) {
-				Object o = map.get(currentStepNameWorker);
-				if (o != null) {
-					Set<String> array = (HashSet<String>) o;
-					for (String uuid : array) {
-						List<Map<String, Object>> mapList = new ArrayList<>();
-						if (userTaskMap.get(uuid) != null) {
-							mapList = userTaskMap.get(uuid);
-						}
-						if (!mapList.stream().anyMatch(task -> task.get(ProcessWorkcenterField.ID.getValue()).toString().equals(map.get(ProcessWorkcenterField.ID.getValue()).toString()))) {
-							mapList.add(map);
-						}
-						userTaskMap.put(uuid, mapList);
-					}
-				}
-			}
-		}
 		return userTaskMap;
 	}
 

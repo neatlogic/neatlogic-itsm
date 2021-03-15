@@ -35,7 +35,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
-
+@Deprecated//这个接口前端没有使用
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskFormApi extends PrivateApiComponentBase {
@@ -133,7 +133,7 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
                 /** 当前用户有处理权限，根据当前步骤表单属性显示设置控制表单属性展示 **/
                 Map<String, String> formAttributeActionMap = new HashMap<>();
                 List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList =
-                    processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskStepId);
+                    processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskId, processTaskStepId);
                 if (processTaskStepFormAttributeList.size() > 0) {
                     for (ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
                         formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(),
