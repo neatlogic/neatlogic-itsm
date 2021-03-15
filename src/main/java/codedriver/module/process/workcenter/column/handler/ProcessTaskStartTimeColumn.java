@@ -11,12 +11,16 @@ import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Component
 public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
+
+    static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public String getName() {
@@ -62,7 +66,7 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
     @Override
     public Object getSimpleValue(Object json) {
         if(json != null){
-            return json.toString();
+            return sdf.format((Date)json);
         }
         return null;
     }

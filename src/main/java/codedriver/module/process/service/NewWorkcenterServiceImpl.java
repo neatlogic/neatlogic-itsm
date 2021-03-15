@@ -9,6 +9,7 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -26,9 +27,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,11 +47,14 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     Logger logger = LoggerFactory.getLogger(WorkcenterServiceImpl.class);
 
-    @Autowired
+    @Resource
     WorkcenterMapper workcenterMapper;
 
-    @Autowired
+    @Resource
     FormMapper formMapper;
+
+    @Resource
+    ProcessTaskMapper processTaskMapper;
 
     @Override
     public JSONObject doSearch(WorkcenterVo workcenterVo) {
@@ -71,7 +75,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.TOTAL_COUNT);
 //        System.out.println("countSql:-------------------------------------------------------------------------------");
 //        System.out.println(sb.build());
-        int total = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
+        int total = processTaskMapper.getProcessTaskCountBySql(sb.build());
 //        Date time11 = new Date();
 //        System.out.println("---------------------------workcenter cost time ---------------------------------------- ");
 //        System.out.println("theadTime:"+(time11.getTime()-time1.getTime()));
@@ -80,7 +84,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
 //        System.out.println("idSql:-------------------------------------------------------------------------------");
 //        System.out.println(sb.build());
-        List<ProcessTaskVo> processTaskList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
+        List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskBySql(sb.build());
         workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
 //        Date time22 = new Date();
 //        System.out.println("searchIdTime:"+(time22.getTime()-time2.getTime()));
@@ -92,7 +96,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
 //        System.out.println("fieldSql:-------------------------------------------------------------------------------");
 //        System.out.println(sb.build());
-        List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskInfoBySql(sb.build());
+        List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
 //        Date time33 = new Date();
 //        System.out.println("searchInfoByIdTime:"+(time33.getTime()-time3.getTime()));
         ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
@@ -153,7 +157,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
 //        System.out.println("countProcessingOfMineSql:-------------------------------------------------------------------------------");
 //        System.out.println(sb.build());
-        Integer count  = workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
+        Integer count  = processTaskMapper.getProcessTaskCountBySql(sb.build());
         returnObj.put("processingOfMineCount", count>99?"99+":count.toString());
 //        Date time77 = new Date();
 //        System.out.println("processingOfMineTotalTime:"+(time77.getTime()-time66.getTime()));
@@ -166,7 +170,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
         //System.out.println("fullTextSql:-------------------------------------------------------------------------------");
 //        System.out.println(sb.build());
-        return workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
+        return processTaskMapper.getProcessTaskBySql(sb.build());
     }
 
     @Override
@@ -174,7 +178,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.LIMIT_COUNT);
         //System.out.println("countSql:-------------------------------------------------------------------------------");
         //System.out.println(sb.build());
-        return workcenterMapper.getWorkcenterProcessTaskCountBySql(sb.build());
+        return processTaskMapper.getProcessTaskCountBySql(sb.build());
     }
 
     /**
@@ -326,7 +330,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
 //        System.out.println("fullTextGetIdListSql:-------------------------------------------------------------------------------");
 //        System.out.println(sb.build());
-            List<ProcessTaskVo> processTaskVoList = workcenterMapper.getWorkcenterProcessTaskIdBySql(sb.build());
+            List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
             return processTaskVoList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList());
         }
         return null;
