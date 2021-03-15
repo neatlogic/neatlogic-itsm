@@ -2,18 +2,14 @@ package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
-import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.elasticsearch.core.ElasticSearchHandlerFactory;
-import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.*;
-import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
@@ -21,14 +17,10 @@ import codedriver.framework.process.operationauth.core.ProcessAuthManager.Builde
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.workcenter.operate.WorkcenterOperateBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.QueryResultSet;
-import com.techsure.multiattrsearch.query.QueryResult;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -78,7 +70,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     @Transactional
     public JSONObject doSearch(WorkcenterVo workcenterVo) throws ParseException {
         JSONObject returnObj = new JSONObject();
-        JSONArray sortColumnList = new JSONArray();
+        /*JSONArray sortColumnList = new JSONArray();
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         // 搜索es
         Date time1 = new Date();
@@ -159,7 +151,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         workcenterVo.setIsProcessingOfMine(1);
         workcenterVo.setPageSize(100);
         Integer meWillDoCount = doSearchCount(workcenterVo);
-        returnObj.put("meWillDoRowNum", meWillDoCount > 99 ? "99+" : meWillDoCount.toString());
+        returnObj.put("meWillDoRowNum", meWillDoCount > 99 ? "99+" : meWillDoCount.toString());*/
         return returnObj;
     }
     
@@ -213,7 +205,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
      * @Param
      * @return
      */
-    public ProcessTaskVo getProcessTaskByEsElement(MultiAttrsObject el)
+    /*public ProcessTaskVo getProcessTaskByEsElement(MultiAttrsObject el)
         throws ParseException {
         JSONObject commonJson = (JSONObject)el.getJSON(ProcessFieldType.COMMON.getValue());
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
@@ -271,7 +263,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         }
         processTaskVo.setStepList(stepList);
         return processTaskVo;
-    }
+    }*/
 
     /**
      * 
@@ -356,12 +348,12 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         return action;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
+
+    /*@Override
     public QueryResultSet searchTaskIterate(WorkcenterVo workcenterVo) {
         return (QueryResultSet)ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue())
             .iterateSearch(workcenterVo);
-    }
+    }*/
 
     /**
      * 工单中心根据条件获取工单列表数据
@@ -369,19 +361,19 @@ public class WorkcenterServiceImpl implements WorkcenterService {
      * @param workcenterVo
      * @return
      */
-    @SuppressWarnings("unchecked")
+   /* @SuppressWarnings("unchecked")
     @Override
     public Integer doSearchCount(WorkcenterVo workcenterVo) {
         // 搜索es
         IElasticSearchHandler<WorkcenterVo, ?> esHandler =
             ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
         return esHandler.searchCount(workcenterVo);
-    }
+    }*/
 
     /**
      * 流式分批获取并处理数据
      */
-    @Override
+   /* @Override
     public JSONObject getSearchIterate(QueryResultSet resultSet, WorkcenterVo workcenterVo) {
         JSONObject returnObj = new JSONObject();
         List<JSONObject> dataList = new ArrayList<JSONObject>();
@@ -405,7 +397,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         }
         returnObj.put("tbodyList", dataList);
         return returnObj;
-    }
+    }*/
 
     private JSONObject assembleSingleProcessTask(ProcessTaskVo processTaskVo) {
         if (processTaskVo != null) {

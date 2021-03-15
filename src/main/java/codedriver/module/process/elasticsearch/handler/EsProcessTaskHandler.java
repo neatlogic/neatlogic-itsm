@@ -1,47 +1,15 @@
 package codedriver.module.process.elasticsearch.handler;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthActionChecker;
-import codedriver.framework.common.constvalue.DeviceType;
-import codedriver.framework.common.constvalue.Expression;
-import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.common.constvalue.UserType;
-import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserVo;
-import codedriver.framework.dto.condition.ConditionGroupRelVo;
-import codedriver.framework.dto.condition.ConditionGroupVo;
-import codedriver.framework.dto.condition.ConditionRelVo;
-import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.elasticsearch.core.ElasticSearchHandlerBase;
-import codedriver.framework.process.condition.core.IProcessTaskCondition;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
-import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
 import codedriver.module.process.service.WorkcenterService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.QueryResultSet;
-import com.techsure.multiattrsearch.query.QueryResult;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jsoup.internal.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 @Service
 public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo, Object> {
@@ -64,14 +32,14 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
     @Autowired
     UserMapper userMapper;
 
-    @Override
+    /*@Override
     public String getDocument() {
         return ESHandler.PROCESSTASK.getValue();
     }
 
     @Override
     public JSONObject mySave(Long taskId) {
-        /** 获取工单信息 **/
+        *//** 获取工单信息 **//*
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(taskId);
         JSONObject esObject = new JSONObject();
         if (processTaskVo != null) {
@@ -115,9 +83,9 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         return sql;
     }
     
-    /*
+    *//*
      * 隐藏工单过滤
-     */
+     *//*
     private String getIsShowCondition(WorkcenterVo workcenterVo,String where) {
         String isShowCondition = String.format(Expression.UNEQUAL.getExpressionEs(), ((IProcessTaskCondition)ConditionHandlerFactory.getHandler(ProcessWorkcenterField.IS_SHOW.getValue())).getEsName(), 0);
         if (StringUtils.isBlank(where)) {
@@ -128,10 +96,10 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         return where;
     }
 
-    /**
+    *//**
      * 
      * 获取设备（移动端|pc端）服务过滤条件
-     */
+     *//*
     private String getChannelDeviceCondition(WorkcenterVo workcenterVo,String where) {
         //如果是pc端，则可以查看所有工单，包括移动端的
         if(DeviceType.PC.getValue().equals(workcenterVo.getDevice())) {
@@ -166,11 +134,11 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         return where;
     }
 
-    /**
+    *//**
      * TODO 需要改成过滤条件联动 附加我的待办条件
      * 
      * @return
-     */
+     *//*
     @Deprecated
     private String getMeWillDoCondition(WorkcenterVo workcenterVo,String where) {
         String meWillDoSql = StringUtils.EMPTY;
@@ -224,13 +192,13 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
         return where;
     }
 
-    /**
+    *//**
     * @Author 89770
     * @Time 2020年10月19日  
     * @Description:  拼接order条件 
     * @Param 
     * @return
-     */
+     *//*
     private String assembleOrderBy(WorkcenterVo workcenterVo) {
         StringBuilder orderSb = new StringBuilder(" order by ");
         List<String> orderList = new ArrayList<String>();
@@ -258,12 +226,12 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
     }
     
     
-    /**
+    *//**
      * 拼接where条件
      * TODO 需重构
      * @param workcenterVo
      * @return
-     */
+     *//*
     @SuppressWarnings("unchecked")
     private String assembleWhere(WorkcenterVo workcenterVo) {
         Map<String, String> groupRelMap = new HashMap<String, String>();
@@ -478,6 +446,6 @@ public class EsProcessTaskHandler extends ElasticSearchHandlerBase<WorkcenterVo,
     protected QueryResultSet makeupQueryIterateResult(WorkcenterVo t, QueryResultSet result) {
         // TODO Auto-generated method stub
         return result;
-    }
+    }*/
 
 }

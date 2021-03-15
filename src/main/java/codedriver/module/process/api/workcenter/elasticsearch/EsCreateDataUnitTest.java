@@ -1,21 +1,9 @@
 package codedriver.module.process.api.workcenter.elasticsearch;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
 // import org.junit.Test;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
-import com.techsure.multiattrsearch.MultiAttrsObjectPool;
-import com.techsure.multiattrsearch.MultiAttrsSearch;
-import com.techsure.multiattrsearch.MultiAttrsSearchConfig;
-
 public class EsCreateDataUnitTest {
-    private MultiAttrsObjectPool workcenterObjectPool;
+    /*private MultiAttrsObjectPool workcenterObjectPool;
     private CountDownLatch latch = new CountDownLatch(10);
     List<String> arrayList = Arrays.asList("sucess", "pending", "running", "failded", "hanged", "accepted");
     List<String> userList = new ArrayList<String>();
@@ -125,5 +113,5 @@ public class EsCreateDataUnitTest {
             latch.countDown(); // 执行完毕，计数器减1
         }
 
-    }
+    }*/
 }

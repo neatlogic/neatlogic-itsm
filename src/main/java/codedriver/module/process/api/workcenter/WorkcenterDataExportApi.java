@@ -6,8 +6,8 @@ import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.ExcelUtil;
 import codedriver.module.process.service.WorkcenterService;
@@ -15,9 +15,6 @@ import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentSte
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepNameColumn;
 import codedriver.module.process.workcenter.column.handler.ProcessTaskCurrentStepWorkerColumn;
 import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.QueryResultSet;
-import com.techsure.multiattrsearch.query.QueryResult;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -112,7 +109,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 		List<Map<String,Object>> list = new ArrayList<>();
 		Set<String> headList = new LinkedHashSet<>();
 		Set<String> columnList = new LinkedHashSet<>();
-		QueryResultSet resultSet = workcenterService.searchTaskIterate(workcenterVo);
+		/*QueryResultSet resultSet = workcenterService.searchTaskIterate(workcenterVo);
 		if(CollectionUtils.isNotEmpty(theadList) && resultSet.hasMoreResults()){
 			while(resultSet.hasMoreResults()){
 				QueryResult result = resultSet.fetchResult();
@@ -130,7 +127,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 					}
 				}
 			}
-		}
+		}*/
 
 		SXSSFWorkbook workbook = new SXSSFWorkbook();
 		ExcelUtil.exportData(workbook,headList.stream().collect(Collectors.toList()), columnList.stream().collect(Collectors.toList()), list,new Integer(35),0);

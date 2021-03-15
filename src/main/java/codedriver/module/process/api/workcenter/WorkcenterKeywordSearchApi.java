@@ -2,27 +2,18 @@ package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.Expression;
-import codedriver.framework.elasticsearch.core.ElasticSearchHandlerFactory;
-import codedriver.framework.elasticsearch.core.IElasticSearchHandler;
-import codedriver.framework.process.column.core.IProcessTaskColumn;
-import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionFactory;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.elasticsearch.constvalue.ESHandler;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.condition.handler.ProcessTaskSerialNumberCondition;
-import codedriver.module.process.condition.handler.ProcessTaskTitleCondition;
 import codedriver.module.process.service.NewWorkcenterService;
 import codedriver.module.process.service.WorkcenterService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.query.QueryResult;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +80,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
     @Deprecated
     private JSONArray getKeywordOptionMB(List<IProcessTaskCondition> conditionList, String keyword, Integer pageSize) {
         JSONArray returnArray = new JSONArray();
-        WorkcenterVo workcenter = getKeywordConditionMB(conditionList, keyword);
+        /*WorkcenterVo workcenter = getKeywordConditionMB(conditionList, keyword);
         workcenter.setPageSize(pageSize);
         IElasticSearchHandler<WorkcenterVo, QueryResult> esHandler =
             ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue());
@@ -111,7 +102,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
             }
             titleObj.put("dataList", resultDateList);
             returnArray.add(titleObj);
-        }
+        }*/
         return returnArray;
     }
 
@@ -170,7 +161,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
      * @param keyword
      * @return
      */
-    @SuppressWarnings("unchecked")
+   /* @SuppressWarnings("unchecked")
     @Deprecated
     private JSONArray getKeywordOptionPC(IProcessTaskCondition condition, String keyword, Integer pageSize) {
         JSONArray returnArray = new JSONArray();
@@ -195,7 +186,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
             returnArray.add(titleObj);
         }
         return returnArray;
-    }
+    }*/
 
     /**
      * 拼接关键字过滤选项 pc端
@@ -231,12 +222,12 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
      * @param keyword
      * @return
      */
-    @Deprecated
+   /* @Deprecated
     private JSONArray getKeywordOptionsPC(String keyword, Integer pageSize) {
         // 搜索标题
         JSONArray returnArray = getKeywordOptionPC(new ProcessTaskTitleCondition(), keyword, pageSize);
         // 搜索ID
         returnArray.addAll(getKeywordOptionPC(new ProcessTaskSerialNumberCondition(), keyword, pageSize));
         return returnArray;
-    }
+    }*/
 }
