@@ -84,6 +84,10 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("channelList", new ArrayList<>());
 		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
+		/** 查询所有收藏的服务时，parentUuid设为空即可 **/
+		if(channelVo.getIsFavorite() != null && channelVo.getIsFavorite() == 1 && "0".equals(channelVo.getParentUuid())){
+			channelVo.setParentUuid(null);
+		}
 		channelVo.setUserUuid(UserContext.get().getUserUuid(true));
 		boolean hasData = true;
 		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
