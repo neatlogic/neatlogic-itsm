@@ -244,27 +244,6 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         return timeCost;
     }
 
-    protected static void calculate(ProcessTaskVo currentProcessTaskVo, boolean isAsync) {
-        calculate(currentProcessTaskVo, null, isAsync);
-    }
-
-    protected static void calculate(ProcessTaskVo currentProcessTaskVo) {
-        calculate(currentProcessTaskVo, null, true);
-    }
-
-    protected static void calculate(ProcessTaskStepVo currentProcessTaskStepVo) {
-        calculate(null, currentProcessTaskStepVo, true);
-    }
-
-    protected static void calculate(ProcessTaskVo currentProcessTaskVo, ProcessTaskStepVo currentProcessTaskStepVo,
-                                    boolean isAsync) {
-        if (!isAsync) {
-            new ProcessTaskSlaThread(currentProcessTaskVo, currentProcessTaskStepVo).execute();
-        }else{
-            CachedThreadPool.execute(new ProcessTaskSlaThread(currentProcessTaskVo, currentProcessTaskStepVo));
-        }
-    }
-
     private static long getRealtime(int time, String unit) {
         if ("hour".equals(unit)) {
             return time * 60 * 60 * 1000;
@@ -363,7 +342,6 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 throw new RuntimeException("计算剩余时间失败");
             }
         }
-        // System.out.println(slaTimeVo);
     }
 
     private void adjustJob(ProcessTaskSlaTimeVo slaTimeVo, JSONObject slaConfigObj, Date oldExpireTime) {
@@ -401,12 +379,6 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                     processTaskMapper.deleteProcessTaskSlaTransferBySlaId(slaTimeVo.getSlaId());
                     processTaskMapper.deleteProcessTaskSlaNotifyBySlaId(slaTimeVo.getSlaId());
                     jobStarted = false;
-                    // for(ProcessTaskSlaNotifyVo processTaskSlaNotifyVo : processTaskSlaNotifyList) {
-                    // processTaskMapper.deleteProcessTaskSlaNotifyById(processTaskSlaNotifyVo.getId());
-                    // }
-                    // for(ProcessTaskSlaTransferVo processTaskSlaTransferVo : processTaskSlaTransferList) {
-                    // processTaskMapper.deleteProcessTaskSlaTransferById(processTaskSlaTransferVo.getId());
-                    // }
                 }
             }
             /** 作业需要启动，且未启动时，加载定时作业 **/
@@ -543,7 +515,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                                 }
                                 /** 由于Date类型数据保存到MySql数据库时会丢失毫秒数值，只保留到秒的精度，所以两次计算超时时间点的差值小于1000时，说明时效没有被条件改变，不用更新 **/
                                 if(expireTimeLong - oldExpireTimeLong < 1000){
-                                    return;
+                                    continue;
                                 }
                             }
                             slaTimeVo.setProcessTaskId(processTaskId);
