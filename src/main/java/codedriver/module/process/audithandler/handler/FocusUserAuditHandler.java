@@ -37,7 +37,7 @@ public class FocusUserAuditHandler implements IProcessTaskStepAuditDetailHandler
             focusUserUuidList.add(content);
         }
         for (String uuid : focusUserUuidList) {
-            UserVo userVo = userMapper.getUserBaseInfoByUuid(uuid);
+            UserVo userVo = userMapper.getUserBaseInfoByUuid(uuid.split("#")[1]);
             if (userVo != null) {
                 Map<String, String> userMap = new HashMap<>();
                 userMap.put("type", GroupSearch.USER.getValue());
