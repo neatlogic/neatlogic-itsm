@@ -1271,7 +1271,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         List<String> focusUserUuidList = processTaskMapper.getFocusUserListByTaskId(processTaskId);
         if(CollectionUtils.isNotEmpty(focusUserUuidList)){
             processTaskVo.setFocusUserUuidList(focusUserUuidList);
-            processTaskVo.setFocusUserList(userMapper.getUserByUserUuidList(focusUserUuidList));
         }
         return processTaskVo;
     }
@@ -1529,7 +1528,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 List<String> focusUserUuidList = JSON.parseArray(dataObj.getString("focusUserUuidList"),String.class);
                 if(CollectionUtils.isNotEmpty(focusUserUuidList)){
                     processTaskVo.setFocusUserUuidList(focusUserUuidList);
-                    processTaskVo.setFocusUserList(userMapper.getUserByUserUuidList(focusUserUuidList));
                 }
             }
         }

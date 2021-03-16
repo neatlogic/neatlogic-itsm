@@ -568,7 +568,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         JSONArray focusUserUuidList = paramObj.getJSONArray("focusUserUuidList");
         if(CollectionUtils.isNotEmpty(focusUserUuidList)){
             for(int i = 0;i < focusUserUuidList.size();i++){
-                String useUuid = focusUserUuidList.getString(i);
+                String useUuid = focusUserUuidList.getString(i).split("#")[1];
                 processTaskMapper.insertProcessTaskFocus(currentProcessTaskStepVo.getProcessTaskId(),useUuid);
             }
             paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getParamName(), focusUserUuidList.toJSONString());
