@@ -89,7 +89,7 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 		}else{//新增
 			catalogMapper.insertCatalog(catalogVo);
 			//更新插入位置右边的左右编码值
-			LRCodeManager.addTreeNodeAfter("catalog", "uuid", "parent_uuid", catalogVo.getUuid());
+			LRCodeManager.afterAddTreeNode("catalog", "uuid", "parent_uuid", catalogVo.getUuid());
 		}
 
 		List<AuthorityVo> authorityList = catalogVo.getAuthorityVoList();
