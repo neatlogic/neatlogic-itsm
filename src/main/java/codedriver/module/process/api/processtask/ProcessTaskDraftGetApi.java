@@ -12,7 +12,10 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundExc
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
+import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -22,9 +25,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,28 +37,28 @@ import java.util.Map;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private ChannelMapper channelMapper;
 
-    @Autowired
+    @Resource
     private ChannelTypeMapper channelTypeMapper;
 
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
 
-    @Autowired
+    @Resource
     private FormMapper formMapper;
 
-    @Autowired
+    @Resource
     private CatalogService catalogService;
 
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
 
-    @Autowired
+    @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
 
     @Override
@@ -200,8 +203,14 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         ProcessTaskStepVo oldStartProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
         ProcessTaskStepVo startProcessTaskStepVo = processTaskVo.getStartProcessTaskStep();
         startProcessTaskStepVo.setComment(oldStartProcessTaskStepVo.getComment());
-        startProcessTaskStepVo.setHandlerStepInfo(oldStartProcessTaskStepVo.getHandlerStepInfo());
-
+//        startProcessTaskStepVo.setHandlerStepInfo(oldStartProcessTaskStepVo.getHandlerStepInfo());
+        /** 当前步骤特有步骤信息 **/
+        IProcessStepInternalHandler startProcessStepUtilHandler =
+                ProcessStepInternalHandlerFactory.getHandler(oldStartProcessTaskStepVo.getHandler());
+        if (startProcessStepUtilHandler == null) {
+            throw new ProcessStepHandlerNotFoundException(oldStartProcessTaskStepVo.getHandler());
+        }
+        startProcessTaskStepVo.setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInitInfo(oldStartProcessTaskStepVo));
         processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(copyProcessTaskId, processTaskVo.getFormConfig()));
         // 标签列表
         processTaskVo.setTagVoList(processTaskMapper.getProcessTaskTagListByProcessTaskId(copyProcessTaskId));
@@ -265,10 +274,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             if (fromProcessTaskId != null) {
                 processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(fromProcessTaskId, processTaskVo.getFormConfig()));
             }
-//            if (CollectionUtils.isNotEmpty(processTaskVo.getTranferReportProcessTaskList())
-//                    && StringUtils.isNotBlank(processTaskVo.getTranferReportProcessTaskList().get(0).getFormConfig())) {
-//                transferFormAttributeValue(processTaskVo.getTranferReportProcessTaskList().get(0), processTaskVo);
-//            }
+
             List<ProcessStepFormAttributeVo> processStepFormAttributeList = processMapper.getProcessStepFormAttributeByStepUuid(startProcessTaskStepVo.getProcessUuid(), startProcessTaskStepVo.getProcessStepUuid());
             if (CollectionUtils.isNotEmpty(processStepFormAttributeList)) {
                 Map<String, String> formAttributeActionMap = new HashMap<>();
