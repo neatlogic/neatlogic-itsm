@@ -125,10 +125,10 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         List<String> tagNameList =
             JSONObject.parseArray(JSON.toJSONString(jsonObj.getJSONArray("tagList")), String.class);
         if (tagNameList != null) {
-            jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
             List<ProcessTagVo> oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
             processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
             if (CollectionUtils.isNotEmpty(tagNameList)) {
+                jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
                 List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
                 List<String> existTagNameList =
                     existTagList.stream().map(ProcessTagVo::getName).collect(Collectors.toList());
@@ -143,6 +143,8 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                     processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId, processTagVo.getId()));
                 }
                 processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
+            }else{
+                jsonObj.remove(ProcessTaskAuditDetailType.TAGLIST.getParamName());
             }
             int diffCount = tagNameList.stream()
                 .filter(a -> !oldTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a))
