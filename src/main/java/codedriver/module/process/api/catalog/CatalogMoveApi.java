@@ -3,6 +3,7 @@ package codedriver.module.process.api.catalog;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.lrcode.LRCodeManager;
+import codedriver.framework.lrcode.constvalue.MoveType;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -47,7 +48,7 @@ public class CatalogMoveApi extends PrivateApiComponentBase {
 		String uuid = jsonObj.getString("uuid");
 		String moveType = jsonObj.getString("moveType");
 		String targetUuid = jsonObj.getString("targetUuid");
-		LRCodeManager.moveTreeNode("catalog", "uuid", "parent_uuid", uuid, moveType, targetUuid);
+		LRCodeManager.moveTreeNode("catalog", "uuid", "parent_uuid", uuid, MoveType.getMoveType(moveType), targetUuid);
 		return null;
 	}
 //	private Object backup(JSONObject jsonObj) throws Exception {
