@@ -77,7 +77,7 @@ public class CatalogDeteleApi extends PrivateApiComponentBase {
 		if(CollectionUtils.isNotEmpty(channelList)) {
 			throw new CatalogIllegalParameterException("服务目录：'" + uuid + "'还存在子服务");
 		}
-		LRCodeManager.deleteTreeNode("catalog", "uuid", "parent_uuid", uuid);
+		LRCodeManager.deleteTreeNodeBefore("catalog", "uuid", "parent_uuid", uuid);
 		catalogMapper.deleteCatalogByUuid(uuid);
 		catalogMapper.deleteCatalogAuthorityByCatalogUuid(uuid);
 		return null;
