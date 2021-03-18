@@ -82,14 +82,16 @@ public class CatalogSaveApi extends PrivateApiComponentBase {
 		if(StringUtils.isNotBlank(uuid)){//修改
 			CatalogVo existedCatalog = catalogMapper.getCatalogByUuid(uuid);
 			if(existedCatalog == null){
-				throw new CatalogNotFoundException(parentUuid);
+				throw new CatalogNotFoundException(uuid);
 			}
 			catalogMapper.deleteCatalogAuthorityByCatalogUuid(uuid);
 			catalogMapper.updateCatalogByUuid(catalogVo);
 		}else{//新增
-			catalogMapper.insertCatalog(catalogVo);
 			//更新插入位置右边的左右编码值
-			LRCodeManager.afterAddTreeNode("catalog", "uuid", "parent_uuid", catalogVo.getUuid());
+			int lft = LRCodeManager.afterAddTreeNode("catalog", "uuid", "parent_uuid", parentUuid);
+			catalogVo.setLft(lft);
+			catalogVo.setRht(lft + 1);
+			catalogMapper.insertCatalog(catalogVo);
 		}
 
 		List<AuthorityVo> authorityList = catalogVo.getAuthorityVoList();
