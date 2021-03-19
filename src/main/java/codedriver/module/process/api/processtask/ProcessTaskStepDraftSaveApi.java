@@ -70,7 +70,6 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
     @ResubmitInterval(value = 5)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        System.out.println("processtask/step/draft/save start");
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         ProcessTaskVo processTaskVo =
@@ -96,7 +95,6 @@ public class ProcessTaskStepDraftSaveApi extends PrivateApiComponentBase {
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
         processTaskStepDataVo.setData(jsonObj.toJSONString());
         processTaskStepDataMapper.replaceProcessTaskStepData(processTaskStepDataVo);
-        System.out.println("processtask/step/draft/save end");
         return null;
     }
 
