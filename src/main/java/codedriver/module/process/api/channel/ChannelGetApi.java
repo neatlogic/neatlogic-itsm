@@ -87,38 +87,34 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 		channel.getChannelRelationList().clear();
 		List<ChannelRelationVo> channelRelationList = channelMapper.getChannelRelationListBySource(uuid);
 		if(CollectionUtils.isNotEmpty(channelRelationList)) {
-		    ChannelTypeRelationVo channelTypeRelationVo = new ChannelTypeRelationVo();
-		    channelTypeRelationVo.setIsActive(1);
-		    channelTypeRelationVo.setNeedPage(false);
-		    List<ChannelTypeRelationVo> activeChannelTypeRelationList = channelTypeMapper.getChannelTypeRelationList(channelTypeRelationVo);
-		    List<Long> activeChannelTypeRelationIdList = activeChannelTypeRelationList.stream().map(ChannelTypeRelationVo::getId).collect(Collectors.toList());
 		    Map<Long, List<String>> channelRelationTargetMap = new HashMap<>();
 		    for(ChannelRelationVo channelRelationVo : channelRelationList) {
-		        if(activeChannelTypeRelationIdList.contains(channelRelationVo.getChannelTypeRelationId())){
-	                channelRelationTargetMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getTarget());		            
-		        }
+				channelRelationTargetMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getTarget());
 		    }
 		    Map<Long, List<String>> channelRelationAuthorityMap = new HashMap<>();
 	        List<ChannelRelationVo> channelRelationAuthorityList = channelMapper.getChannelRelationAuthorityListBySource(uuid);
 	        for(ChannelRelationVo channelRelationVo : channelRelationAuthorityList) {
-                if(activeChannelTypeRelationIdList.contains(channelRelationVo.getChannelTypeRelationId())){
-                    channelRelationAuthorityMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getUuid());
-                }
+				channelRelationAuthorityMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getUuid());
             }
-	        
-	        for(Entry<Long, List<String>> entry : channelRelationTargetMap.entrySet()) {
-	            ChannelRelationVo channelRelationVo = new ChannelRelationVo();
-	            channelRelationVo.setChannelTypeRelationId(entry.getKey());
-	            channelRelationVo.setTargetList(entry.getValue());
-	            List<String> authorityList = channelRelationAuthorityMap.get(entry.getKey());
-	            if(CollectionUtils.isNotEmpty(authorityList)) {
-	                channelRelationVo.setAuthorityList(authorityList);
-	            }
-	            channel.getChannelRelationList().add(channelRelationVo);
-	        }
-	        if(CollectionUtils.isNotEmpty(channel.getChannelRelationList())) {
-	            channel.setAllowTranferReport(1);
-	        }
+	        Long channelRelationId = null;
+			for(ChannelRelationVo channelRelation : channelRelationList) {
+				if(channelRelation.getChannelTypeRelationId().equals(channelRelationId)){
+					continue;
+				}
+				channelRelationId = channelRelation.getChannelTypeRelationId();
+				ChannelRelationVo channelRelationVo = new ChannelRelationVo();
+				channelRelationVo.setChannelTypeRelationId(channelRelationId);
+				List<String> targetList = channelRelationTargetMap.get(channelRelationId);
+				if(CollectionUtils.isNotEmpty(targetList)){
+					channelRelationVo.setTargetList(targetList);
+				}
+				List<String> authorityList = channelRelationAuthorityMap.get(channelRelationId);
+				if(CollectionUtils.isNotEmpty(authorityList)) {
+					channelRelationVo.setAuthorityList(authorityList);
+				}
+				channel.getChannelRelationList().add(channelRelationVo);
+			}
+			channel.setAllowTranferReport(1);
 		}
 		return channel;
 	}

@@ -78,6 +78,7 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
 	@Description(desc = "工单完成接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+	    System.out.println("processtask/complete start");
 		Long processTaskId = jsonObj.getLong("processTaskId");
         Long processTaskStepId = jsonObj.getLong("processTaskStepId");
         Long nextStepId = jsonObj.getLong("nextStepId");
@@ -143,6 +144,7 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
             throw new PermissionDeniedException();
         }
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
+        System.out.println("processtask/complete end");
 		return null;
 	}
 
