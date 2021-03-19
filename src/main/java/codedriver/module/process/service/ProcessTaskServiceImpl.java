@@ -837,6 +837,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Override
     public boolean saveProcessTaskStepReply(JSONObject jsonObj, ProcessTaskStepReplyVo oldReplyVo) {
+        if(oldReplyVo == null){
+            return false;
+        }
         String content = jsonObj.getString("content");
         List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
         if (content == null && fileIdList == null) {
@@ -845,61 +848,71 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         Long processTaskId = oldReplyVo.getProcessTaskId();
         Long processTaskStepId = oldReplyVo.getProcessTaskStepId();
         boolean isUpdate = false;
-        // 获取上传附件uuid
+        // 获取上传附件id列表
         List<Long> oldFileIdList = new ArrayList<>();
-        // 获取上报描述内容hash
-        String oldContentHash = null;
+        // 获取上报描述内容
+        String oldContent = null;
         Long oldContentId = null;
         if (oldReplyVo.getId() != null) {
             parseProcessTaskStepReply(oldReplyVo);
             oldContentId = oldReplyVo.getId();
-            oldContentHash = oldReplyVo.getContentHash();
+            oldContent = oldReplyVo.getContent();
             oldFileIdList = oldReplyVo.getFileIdList();
         }
-        /** 保存新附件uuid **/
-        if (fileIdList == null) {
-            fileIdList = new ArrayList<>();
-        }
 
-        if (StringUtils.isNotBlank(content)) {
-            ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
-            if (Objects.equals(oldContentHash, contentVo.getHash())) {
+        if(StringUtils.isNotBlank(content) && StringUtils.isNotBlank(oldContent)){
+            if(content.equals(oldContent)){
                 jsonObj.remove("content");
             } else {
-                isUpdate = true;
-                String oldContent = selectContentByHashMapper.getProcessTaskContentStringByHash(oldContentHash);
                 jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
+                isUpdate = true;
+                ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
                 processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
                 if (oldContentId == null) {
                     ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue());
                     processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
                     oldContentId = processTaskStepContentVo.getId();
                 } else {
-                    processTaskMapper.updateProcessTaskStepContentById(
-                        new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
+                    processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
                 }
             }
-        } else if (oldContentHash != null) {
+        } else if(StringUtils.isNotBlank(content)){
             isUpdate = true;
-            String oldContent = selectContentByHashMapper.getProcessTaskContentStringByHash(oldContentHash);
-            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
-            if (CollectionUtils.isEmpty(fileIdList)) {
-                processTaskMapper.deleteProcessTaskStepContentById(oldContentId);
+            ProcessTaskContentVo contentVo = new ProcessTaskContentVo(content);
+            processTaskMapper.insertIgnoreProcessTaskContent(contentVo);
+            if (oldContentId == null) {
+                ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, contentVo.getHash(), ProcessTaskOperationType.TASK_START.getValue());
+                processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
+                oldContentId = processTaskStepContentVo.getId();
             } else {
-                processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, null));
+                processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, contentVo.getHash()));
+            }
+        } else if(StringUtils.isNotBlank(oldContent)){
+            isUpdate = true;
+            jsonObj.remove("content");
+            jsonObj.put(ProcessTaskAuditDetailType.CONTENT.getOldDataParamName(), oldContent);
+            processTaskMapper.updateProcessTaskStepContentById(new ProcessTaskStepContentVo(oldContentId, null));
+            if (CollectionUtils.isEmpty(fileIdList)) {
+            } else {
+
             }
         } else {
             jsonObj.remove("content");
         }
 
-        if (Objects.equals(oldFileIdList, fileIdList)) {
-            jsonObj.remove("fileIdList");
-        } else {
-            isUpdate = true;
-            processTaskMapper.deleteProcessTaskStepFileByContentId(oldContentId);
-            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), JSON.toJSONString(oldFileIdList));
-            /** 保存附件uuid **/
-            if (CollectionUtils.isNotEmpty(fileIdList)) {
+        /** 保存新附件uuid **/
+        if(CollectionUtils.isNotEmpty(fileIdList) && CollectionUtils.isNotEmpty(oldFileIdList)){
+            if(Objects.equals(oldFileIdList, fileIdList)){
+                jsonObj.remove("fileIdList");
+            }else {
+                processTaskMapper.deleteProcessTaskStepFileByContentId(oldContentId);
+                jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), JSON.toJSONString(oldFileIdList));
+                isUpdate = true;
+                if (oldContentId == null) {
+                    ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, null, ProcessTaskOperationType.TASK_START.getValue());
+                    processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
+                    oldContentId = processTaskStepContentVo.getId();
+                }
                 ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
                 processTaskStepFileVo.setProcessTaskId(processTaskId);
                 processTaskStepFileVo.setProcessTaskStepId(processTaskStepId);
@@ -912,6 +925,35 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
                 }
             }
+        }else if(CollectionUtils.isNotEmpty(fileIdList)){
+            isUpdate = true;
+            if (oldContentId == null) {
+                ProcessTaskStepContentVo processTaskStepContentVo = new ProcessTaskStepContentVo(processTaskId, processTaskStepId, null, ProcessTaskOperationType.TASK_START.getValue());
+                processTaskMapper.insertProcessTaskStepContent(processTaskStepContentVo);
+                oldContentId = processTaskStepContentVo.getId();
+            }
+            ProcessTaskStepFileVo processTaskStepFileVo = new ProcessTaskStepFileVo();
+            processTaskStepFileVo.setProcessTaskId(processTaskId);
+            processTaskStepFileVo.setProcessTaskStepId(processTaskStepId);
+            processTaskStepFileVo.setContentId(oldContentId);
+            for (Long fileId : fileIdList) {
+                if (fileMapper.getFileById(fileId) == null) {
+                    throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
+                }
+                processTaskStepFileVo.setFileId(fileId);
+                processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
+            }
+        }else if(CollectionUtils.isNotEmpty(oldFileIdList)){
+            processTaskMapper.deleteProcessTaskStepFileByContentId(oldContentId);
+            jsonObj.put(ProcessTaskAuditDetailType.FILE.getOldDataParamName(), JSON.toJSONString(oldFileIdList));
+            isUpdate = true;
+            jsonObj.remove("fileIdList");
+        }else {
+            jsonObj.remove("fileIdList");
+        }
+
+        if(oldContentId != null && StringUtils.isBlank(content) && CollectionUtils.isEmpty(fileIdList)){
+            processTaskMapper.deleteProcessTaskStepContentById(oldContentId);
         }
         return isUpdate;
     }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +68,11 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
 	@Description(desc = "工单回复编辑接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		String content = jsonObj.getString("content");
+		List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+		if(content == null && fileIdList == null){
+			return null;
+		}
 		Long id = jsonObj.getLong("id");
 		ProcessTaskStepContentVo processTaskStepContentVo= processTaskMapper.getProcessTaskStepContentById(id);
         if(processTaskStepContentVo == null) {

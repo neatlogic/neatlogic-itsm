@@ -166,22 +166,27 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         // 获取开始步骤id
         ProcessTaskStepVo startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
         Long startProcessTaskStepId = startProcessTaskStepVo.getId();
-        ProcessTaskStepReplyVo oldReplyVo = null;
-        List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
-        for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-            if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
-                oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContent);
-                break;
+        String content = jsonObj.getString("content");
+        List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
+        if(content != null || fileIdList != null){
+            ProcessTaskStepReplyVo oldReplyVo = null;
+            List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
+            for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
+                if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
+                    oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContent);
+                    break;
+                }
             }
-        }
-        if (oldReplyVo == null) {
-            oldReplyVo = new ProcessTaskStepReplyVo();
-            oldReplyVo.setProcessTaskId(processTaskId);
-            oldReplyVo.setProcessTaskStepId(startProcessTaskStepId);
-        }
-        Boolean tmpIsUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
-        if (tmpIsUpdate) {
-            isUpdate = true;
+            if (oldReplyVo == null) {
+                if(StringUtils.isNotBlank(content) || CollectionUtils.isNotEmpty(fileIdList)){
+                    oldReplyVo = new ProcessTaskStepReplyVo();
+                    oldReplyVo.setProcessTaskId(processTaskId);
+                    oldReplyVo.setProcessTaskStepId(startProcessTaskStepId);
+                    isUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
+                }
+            }else{
+                isUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
+            }
         }
 
         // 生成活动
