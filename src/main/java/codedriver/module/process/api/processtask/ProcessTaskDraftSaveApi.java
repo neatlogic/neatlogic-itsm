@@ -95,7 +95,6 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 		@Param(name="processTaskStepId", type = ApiParamType.LONG, desc="步骤id")
 	})
 	@Description(desc = "工单上报暂存接口")
-	@ResubmitInterval(value = 5)
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String channelUuid = jsonObj.getString("channelUuid");
