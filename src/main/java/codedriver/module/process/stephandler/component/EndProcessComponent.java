@@ -79,6 +79,11 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
+	protected int myRedo(ProcessTaskStepVo currentProcessTaskStepVo) {
+		return 0;
+	}
+
+	@Override
 	protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
 		
 		return 1;
