@@ -5,6 +5,8 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
+import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
+import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -16,6 +18,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.fulltextindex.FullTextIndexType;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.*;
@@ -146,6 +149,12 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("processTaskId", startProcessTaskStepVo.getProcessTaskId());
 		resultObj.put("processTaskStepId", startProcessTaskStepVo.getId());
+
+		//创建全文检索索引
+		IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK);
+		if (indexHandler != null) {
+			indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
+		}
 		return resultObj;
 	}
 

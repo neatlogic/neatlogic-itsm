@@ -292,7 +292,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         JSONArray workcenterFirstOperateArray = workcenterFirstOperateBuilder.setHandleOperate(handleArray)
                 .setAbortRecoverOperate(isHasAbort, isHasRecover, processTaskVo).setUrgeOperate(isHasUrge, processTaskVo)
                 .build();
-        Boolean isNeedFirstOperate = false;
+        boolean isNeedFirstOperate = false;
         for (Object firstOperate : workcenterFirstOperateArray) {
             JSONObject firstOperateJson = JSONObject.parseObject(firstOperate.toString());
             if (firstOperateJson.getInteger("isEnable") == 1) {
