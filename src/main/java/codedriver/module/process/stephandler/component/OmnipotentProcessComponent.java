@@ -102,6 +102,11 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
+	protected int myRedo(ProcessTaskStepVo currentProcessTaskStepVo) {
+		return 0;
+	}
+
+	@Override
 	protected int myStartProcess(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 1;
 	}
