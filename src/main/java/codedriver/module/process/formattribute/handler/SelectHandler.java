@@ -1,24 +1,22 @@
 package codedriver.module.process.formattribute.handler;
 
-import java.util.*;
-
-import codedriver.framework.restful.core.IApiComponent;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
-import codedriver.framework.restful.dto.ApiVo;
-import com.alibaba.fastjson.JSONArray;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.FormHandlerBase;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.restful.core.IApiComponent;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 @Component
 public class SelectHandler extends FormHandlerBase {
@@ -215,4 +213,25 @@ public class SelectHandler extends FormHandlerBase {
         return true;
     }
 
+    @Override
+    protected List<String> myIndexFieldContentList(String data){
+        List<String> contentList = new ArrayList<>();
+        if(data.startsWith("[")&&data.endsWith("]")){
+            JSONArray jsonArray = JSONArray.parseArray(data);
+            for (Object obj : jsonArray){
+                if(obj != null){
+                    contentList.addAll(Arrays.asList(obj.toString().split("&=&")));
+                }
+            }
+            return JSONObject.parseArray(jsonArray.toJSONString(), String.class);
+        }else{
+            contentList.addAll(Arrays.asList(data.split("&=&")));
+        }
+        return contentList;
+    }
+
+    @Override
+    public Boolean isNeedSliceWord() {
+        return false;
+    }
 }

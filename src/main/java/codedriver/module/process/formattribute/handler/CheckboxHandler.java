@@ -1,20 +1,5 @@
 package codedriver.module.process.formattribute.handler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import codedriver.framework.restful.core.IApiComponent;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
-import codedriver.framework.restful.dto.ApiVo;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
@@ -22,6 +7,20 @@ import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.FormHandlerBase;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.restful.core.IApiComponent;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class CheckboxHandler extends FormHandlerBase {
@@ -178,4 +177,17 @@ public class CheckboxHandler extends FormHandlerBase {
         return true;
     }
 
+    @Override
+    protected List<String> myIndexFieldContentList(String data){
+        if(data.startsWith("[")&&data.endsWith("]")){
+            JSONArray jsonArray = JSONArray.parseArray(data);
+            return JSONObject.parseArray(jsonArray.toJSONString(), String.class);
+        }
+        return null;
+    }
+
+    @Override
+    public Boolean isNeedSliceWord() {
+        return false;
+    }
 }
