@@ -58,7 +58,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
     public void fieldDispatcherInit() {
         buildWhereMap.put(FieldTypeEnum.FIELD.getValue(), (workcenterVo, sqlSb) -> {
             //根据column获取需要的表
-            sqlSb.append(String.format(" and %s.%s in ( '%s' ) ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.ID.getValue(), workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining("','"))));
+            sqlSb.append(String.format(" and %s.%s in ( %s ) ", new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.ID.getValue(), workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining(","))));
         });
 
         buildWhereMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(), (workcenterVo, sqlSb) -> {
@@ -220,8 +220,18 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
             sqlCondition.getSqlConditionWhere(null, 0, sqlSb);
         }
         //keyword搜索框搜索 idList 过滤
-        if (CollectionUtils.isNotEmpty(workcenterVo.getProcessTaskIdList())) {
-            sqlSb.append(String.format(" and pt.id in ( %s )", workcenterVo.getProcessTaskIdList().stream().map(Object::toString).collect(Collectors.joining(","))));
+        if (CollectionUtils.isNotEmpty(workcenterVo.getKeywordConditionList())) {
+            for(Object obj : workcenterVo.getKeywordConditionList()){
+                JSONObject condition = JSONObject.parseObject(obj.toString());
+                //title serialNumber 全词匹配
+                if(ProcessTaskSqlTable.FieldEnum.TITLE.getValue().equals(condition.getString("name"))){
+                    sqlSb.append(String.format(" AND pt.title in ('%s') ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
+                }else if(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue().equals(condition.getString("name"))){
+                    sqlSb.append(String.format(" AND pt.serial_number in (%s) ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining(","))));
+                }else {
+                    sqlSb.append(String.format("  AND EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` WHERE ff.`target_id` = pt.id  AND ff.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s') )", condition.getString("name"), condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
+                }
+            }
         }
         //隐藏工单 过滤
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());

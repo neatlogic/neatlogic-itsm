@@ -185,4 +185,9 @@ public class CheckboxHandler extends FormHandlerBase {
         }
         return null;
     }
+
+    @Override
+    public Boolean isNeedSliceWord() {
+        return false;
+    }
 }

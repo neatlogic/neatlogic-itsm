@@ -1,17 +1,5 @@
 package codedriver.module.process.formattribute.handler;
 
-import java.util.List;
-
-import codedriver.framework.restful.core.IApiComponent;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
-import codedriver.framework.restful.dto.ApiVo;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
@@ -19,6 +7,16 @@ import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.FormHandlerBase;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.restful.core.IApiComponent;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class RadioHandler extends FormHandlerBase {
@@ -156,4 +154,8 @@ public class RadioHandler extends FormHandlerBase {
         return true;
     }
 
+    @Override
+    public Boolean isNeedSliceWord() {
+        return false;
+    }
 }

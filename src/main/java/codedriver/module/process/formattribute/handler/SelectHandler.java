@@ -229,4 +229,9 @@ public class SelectHandler extends FormHandlerBase {
         }
         return contentList;
     }
+
+    @Override
+    public Boolean isNeedSliceWord() {
+        return false;
+    }
 }

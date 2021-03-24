@@ -43,10 +43,11 @@ public class ProcessTaskFulltextIndexRebuildApi extends PrivateApiComponentBase 
     @Input({@Param(name = "idList", type = ApiParamType.JSONARRAY, desc = "工单idList") })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONArray idArray = jsonObj.getJSONArray("versionIdList");
+        JSONArray idArray = jsonObj.getJSONArray("idList");
         List<Long> idList = null;
         //创建全文检索索引
         IFullTextIndexHandler handler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK);
+        IFullTextIndexHandler handlerForm = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK_FORM);
         if (handler != null) {
             if(CollectionUtils.isNotEmpty(idArray)){
                 idList = JSONObject.parseArray(idArray.toJSONString(), Long.class);
@@ -56,6 +57,7 @@ public class ProcessTaskFulltextIndexRebuildApi extends PrivateApiComponentBase 
             }
             for(Long idObj : idList ){
                 handler.createIndex(idObj);
+                handlerForm.createIndex(idObj);
             }
         }
         return null;

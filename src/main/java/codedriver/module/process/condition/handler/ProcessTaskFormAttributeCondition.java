@@ -11,6 +11,7 @@ import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.util.Md5Util;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -20,7 +21,11 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -82,8 +87,8 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                     value = String.format("'%s'", value);
                 }
                 where += String.format(
-                    " [ form.key = '%s' and " + Expression.getExpressionEs(condition.getExpression()) + " ] ", formKey,
-                    formValueKey, value);
+                        " [ form.key = '%s' and " + Expression.getExpressionEs(condition.getExpression()) + " ] ", formKey,
+                        formValueKey, value);
                 return where + ")";
             }
         }
@@ -104,23 +109,23 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                         config.put("name", formAttribute.getLabel());
                         if (value != null) {
                             IFormAttributeHandler formAttributeHandler =
-                                FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
+                                    FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
                             if (formAttributeHandler != null) {
                                 AttributeDataVo attributeDataVo = new AttributeDataVo();
                                 attributeDataVo.setAttributeUuid(attributeUuid);
                                 if (value instanceof String) {
-                                    attributeDataVo.setData((String)value);
+                                    attributeDataVo.setData((String) value);
                                 } else if (value instanceof JSONArray) {
                                     attributeDataVo.setData(JSON.toJSONString(value));
                                 }
                                 Object text = formAttributeHandler.valueConversionText(attributeDataVo,
-                                    JSON.parseObject(formAttribute.getConfig()));
+                                        JSON.parseObject(formAttribute.getConfig()));
                                 if (text instanceof String) {
                                     return text;
                                 } else if (text instanceof List) {
                                     List<String> textList = JSON.parseArray(JSON.toJSONString(text), String.class);
                                     if ("formdate".equals(formAttribute.getHandler())
-                                        || "formtime".equals(formAttribute.getHandler())) {
+                                            || "formtime".equals(formAttribute.getHandler())) {
                                         return String.join("-", textList);
                                     } else if ("formcascadelist".equals(formAttribute.getHandler())) {
                                         return String.join("/", textList);
@@ -140,6 +145,14 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
 
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-
+        ConditionVo conditionVo = conditionList.get(index);
+        IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(conditionVo.getHandler());
+        JSONArray valueArray = JSONArray.parseArray(conditionVo.getValueList().toString());
+        List<String> valueList = new ArrayList<>();
+        for(Object valueObj : valueArray){
+            valueList.addAll(Arrays.stream(valueObj.toString().split("&=&")).map(o -> formAttributeHandler.isNeedSliceWord() ? o : Md5Util.encryptBASE64(o).toLowerCase(Locale.ROOT)).collect(Collectors.toList()));
+        }
+        sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` WHERE ff.`target_id` = pt.id  AND ff.`target_type` = 'processtask_form' AND ff.`target_field` = '%s' AND fw.word IN ('%s')) ",
+                conditionVo.getName(), String.join("','",valueList)));
     }
 }

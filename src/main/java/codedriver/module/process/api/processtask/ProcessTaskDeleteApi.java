@@ -2,12 +2,15 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
+import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskSerialNumberMapper;
 import codedriver.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
+import codedriver.framework.process.fulltextindex.FullTextIndexType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -105,6 +108,16 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         processTaskSerialNumberMapper.deleteProcessTaskSerialNumberByProcessTaskId(processTaskId);
         /** 删除es对应工单信息 **/
 //        ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).delete(processTaskId.toString());
+
+        //删除全文检索索引
+        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK);
+        if (indexHandler != null) {
+            indexHandler.deleteIndex(processTaskId);
+        }
+        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK_FORM);
+        if (indexFormHandler != null) {
+            indexFormHandler.deleteIndex(processTaskId);
+        }
         return null;
     }
 

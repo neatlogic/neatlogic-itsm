@@ -207,7 +207,10 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         if (indexHandler != null) {
             indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
         }
-
+        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK_FORM);
+        if (indexFormHandler != null) {
+            indexFormHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
+        }
         return null;
     }
 
