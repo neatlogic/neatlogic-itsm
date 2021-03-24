@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +52,10 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private TeamMapper teamMapper;
-	
+
+	@Autowired
+	private UserMapper userMapper;
+
 	@Override
 	public String getToken() {
 		return "process/catalog/breadcrumb";
@@ -110,6 +115,17 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
 		//已授权的服务uuid
 		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+		if(StringUtils.isNotBlank(agentUuid)){
+			List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
+			List<String> agentRoleUuidList = userMapper.getRoleUuidListByUserUuid(agentUuid);
+			for(String authorizedChannelUuid : channelMapper.getAuthorizedChannelUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
+				if(currentUserAuthorizedChannelUuidList.contains(authorizedChannelUuid)){
+					continue;
+				}
+				currentUserAuthorizedChannelUuidList.add(authorizedChannelUuid);
+			}
+		}
 		if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
 			return resultObj;
 		}
@@ -135,7 +151,16 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 			}
 			//已授权的目录uuid
 			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
-
+			if(StringUtils.isNotBlank(agentUuid)){
+				List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
+				List<String> agentRoleUuidList = userMapper.getRoleUuidListByUserUuid(agentUuid);
+				for(String authorizedCatalogUuid : catalogMapper.getAuthorizedCatalogUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
+					if(currentUserAuthorizedCatalogUuidList.contains(authorizedCatalogUuid)){
+						continue;
+					}
+					currentUserAuthorizedCatalogUuidList.add(authorizedCatalogUuid);
+				}
+			}
 			Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 			for(CatalogVo catalogVo : catalogList) {
 				if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())) {

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -12,6 +13,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +46,10 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private TeamMapper teamMapper;
-	
+
+	@Autowired
+	private UserMapper userMapper;
+
 	@Override
 	public String getToken() {
 		return "process/catalog/tree";
@@ -89,9 +94,30 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 		    List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
 	        //已授权的目录uuid
 	        List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+			String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+			if(StringUtils.isNotBlank(agentUuid)){
+				List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
+				List<String> agentRoleUuidList = userMapper.getRoleUuidListByUserUuid(agentUuid);
+				for(String authorizedCatalogUuid : catalogMapper.getAuthorizedCatalogUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
+					if(currentUserAuthorizedCatalogUuidList.contains(authorizedCatalogUuid)){
+						continue;
+					}
+					currentUserAuthorizedCatalogUuidList.add(authorizedCatalogUuid);
+				}
+			}
 	        if(CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
 	          //已授权的服务uuid
 	            List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+				if(StringUtils.isNotBlank(agentUuid)){
+					List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
+					List<String> agentRoleUuidList = userMapper.getRoleUuidListByUserUuid(agentUuid);
+					for(String authorizedChannelUuid : channelMapper.getAuthorizedChannelUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
+						if(currentUserAuthorizedChannelUuidList.contains(authorizedChannelUuid)){
+							continue;
+						}
+						currentUserAuthorizedChannelUuidList.add(authorizedChannelUuid);
+					}
+				}
 	            List<String> authorizedUuidList = ListUtils.retainAll(currentUserAuthorizedChannelUuidList, channelRelationTargetChannelUuidList);
 	            if(CollectionUtils.isNotEmpty(authorizedUuidList)) {
 	              //查出有已启用且有授权服务的目录uuid

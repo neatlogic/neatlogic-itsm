@@ -179,7 +179,12 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		}
 		return nextStepSet;
 	}
-	
+
+	@Override
+	protected int myRedo(ProcessTaskStepVo currentProcessTaskStepVo) {
+		return 0;
+	}
+
 	@Override
 	protected int myStart(ProcessTaskStepVo processTaskStepVo) {
 		return 0;

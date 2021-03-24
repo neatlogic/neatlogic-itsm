@@ -4,6 +4,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
@@ -52,7 +53,10 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
     
     @Autowired
     private CatalogService catalogService;
-	
+
+    @Autowired
+    private UserMapper userMapper;
+
 	@Override
 	public String getToken() {
 		return "processtask/draft/save";
@@ -124,7 +128,14 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 			startProcessTaskStepVo.setProcessUuid(processUuid);
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
             if(!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))){
-                throw new PermissionDeniedException();
+				String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+				if(StringUtils.isNotBlank(agentUuid)){
+					if(!catalogService.channelIsAuthority(channelUuid, agentUuid)){
+						throw new PermissionDeniedException();
+					}
+				}else{
+					throw new PermissionDeniedException();
+				}
             }
             ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
 			startProcessTaskStepVo.setHandler(startProcessStepVo.getHandler());
