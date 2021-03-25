@@ -17,9 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.Comparator;
-
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -112,30 +109,27 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 			ParamType paramType = condition.getParamType();
 			if(paramType != null) {
 				commonObj.put("defaultExpression", paramType.getDefaultExpression().getExpression());
-				JSONArray expressiobArray = new JSONArray();
+				JSONArray expressionArray = new JSONArray();
 				for(Expression expression:paramType.getExpressionList()) {
 					JSONObject expressionObj = new JSONObject();
 					expressionObj.put("expression", expression.getExpression());
 					expressionObj.put("expressionName", expression.getExpressionName());
-					expressiobArray.add(expressionObj);
-					commonObj.put("expressionList", expressiobArray);
+					expressionArray.add(expressionObj);
+					commonObj.put("expressionList", expressionArray);
 				}
 			}
 			
 			resultArray.add(commonObj);
 		}
-		Collections.sort(resultArray, new Comparator<Object>() {
-			@Override
-			public int compare(Object o1, Object o2) {
-				try {
-					JSONObject obj1 = (JSONObject) o1;
-					JSONObject obj2 = (JSONObject) o2;
-					return obj1.getIntValue("sort") - obj2.getIntValue("sort");
-				} catch (Exception ex) {
+		resultArray.sort((o1, o2) -> {
+			try {
+				JSONObject obj1 = (JSONObject) o1;
+				JSONObject obj2 = (JSONObject) o2;
+				return obj1.getIntValue("sort") - obj2.getIntValue("sort");
+			} catch (Exception ignored) {
 
-				}
-				return 0;
 			}
+			return 0;
 		});
 		return resultArray;
 	}

@@ -1,15 +1,12 @@
 package codedriver.module.process.formattribute.handler;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ParamType;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.formattribute.core.FormHandlerBase;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -33,10 +30,10 @@ public class TextareaHandler extends FormHandlerBase {
 
     @Override
     public String getHandlerType(String model) {
-        if (model != null && model.equals(ProcessConditionModel.CUSTOM.getValue())) {
+       /* if (model != null && model.equals(ProcessConditionModel.CUSTOM.getValue())) {
             return "input";
-        }
-        return "textarea";
+        }*/
+        return "input";//富文本不管是哪种模式下过滤都是input
     }
 
     @Override

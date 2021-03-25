@@ -1,15 +1,5 @@
 package codedriver.module.process.api.channel;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.FormMapper;
@@ -24,13 +14,17 @@ import codedriver.framework.process.exception.form.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -94,16 +88,12 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
             }
             String conditionModel = jsonObj.getString("conditionModel");
             List<FormAttributeVo> formAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
-            ListIterator<FormAttributeVo> formiterator = formAttributeList.listIterator();
-            while (formiterator.hasNext()) {
-                FormAttributeVo formAttributeVo = formiterator.next();
+            ListIterator<FormAttributeVo> formIterator = formAttributeList.listIterator();
+            while (formIterator.hasNext()) {
+                FormAttributeVo formAttributeVo = formIterator.next();
                 IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                /*if(formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMCASCADELIST.getHandler())
-                		||formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDIVIDER.getHandler())
-                		||formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMDYNAMICLIST.getHandler())
-                		||formAttributeVo.getHandler().equals(ProcessFormHandlerType.FORMSTATICLIST.getHandler())){*/
                 if (handler != null && !handler.isConditionable()) {
-                    formiterator.remove();
+                    formIterator.remove();
                     continue;
                 }
                 formAttributeVo.setConditionModel(conditionModel);
