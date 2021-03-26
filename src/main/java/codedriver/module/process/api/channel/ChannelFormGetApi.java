@@ -92,12 +92,13 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
             while (formIterator.hasNext()) {
                 FormAttributeVo formAttributeVo = formIterator.next();
                 IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                if (handler != null && !handler.isConditionable()) {
+                if (handler == null || !handler.isConditionable()) {
                     formIterator.remove();
                     continue;
                 }
                 formAttributeVo.setConditionModel(conditionModel);
                 formAttributeVo.setType("form");
+                formAttributeVo.setIsUseFormConfig(handler.isUseFormConfig());
             }
             allFormAttributeList.addAll(formAttributeList);
         }

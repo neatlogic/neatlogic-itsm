@@ -154,7 +154,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
         for (Object valueObj : valueArray) {
             String[] valueTmpList = valueObj.toString().split("&=&");
             for (String valueTmp : valueTmpList) {
-                //如果需要分词，则搜索的时候关键字也许分词搜索
+                //如果需要分词，则搜索的时候关键字也需分词搜索
                 if (formAttributeHandler.isNeedSliceWord()) {
                     Set<String> sliceKeySet = null;
                     try {
