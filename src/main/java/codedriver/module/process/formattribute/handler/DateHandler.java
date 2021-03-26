@@ -1,20 +1,5 @@
 package codedriver.module.process.formattribute.handler;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.TemporalAccessor;
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -28,6 +13,19 @@ import codedriver.framework.process.exception.form.AttributeValidException;
 import codedriver.framework.process.exception.form.FormIllegalParameterException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.formattribute.core.FormHandlerBase;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
+import java.util.List;
 
 @Component
 public class DateHandler extends FormHandlerBase {
@@ -54,7 +52,7 @@ public class DateHandler extends FormHandlerBase {
 
     @Override
     public String getHandlerType(String model) {
-        return "date";
+        return "timerange";
     }
 
     @Override
@@ -187,6 +185,11 @@ public class DateHandler extends FormHandlerBase {
     @Override
     public boolean isAudit() {
         return true;
+    }
+
+    @Override
+    public Boolean isUseFormConfig() {
+        return false;
     }
 
 }
