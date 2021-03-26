@@ -7,6 +7,7 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -59,7 +60,7 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType type) {
         JSONArray dataList = new JSONArray();
         dataList.add(new ValueTextVo("1", "是"));
         // TODO es 封装暂时不支持 判断空key

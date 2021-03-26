@@ -9,6 +9,7 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
@@ -18,6 +19,7 @@ import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable
 import codedriver.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,13 +60,31 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType configType) {
         JSONObject returnObj = new JSONObject();
         returnObj.put("type", FormHandlerType.USERSELECT.toString());
-        returnObj.put("groupList", Collections.singletonList("team"));
-        returnObj.put("includeList", Arrays.asList(GroupSearch.TEAM.getValuePlugin()+UserType.LOGIN_TEAM.getValue(),GroupSearch.TEAM.getValuePlugin()+UserType.LOGIN_DEPARTMENT.getValue()));
         returnObj.put("multiple", true);
         returnObj.put("isMultiple", true);
+        returnObj.put("initConfig", new JSONObject() {
+            {
+                this.put("excludeList", new JSONArray() {
+
+                });
+                this.put("groupList", new JSONArray() {
+                    {
+                        this.add(GroupSearch.TEAM.getValue());
+                    }
+                });
+                this.put("includeList", new JSONArray() {
+                    {
+                        if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
+                            this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_TEAM.getValue());
+                            this.add(GroupSearch.TEAM.getValuePlugin() + UserType.LOGIN_DEPARTMENT.getValue());
+                        }
+                    }
+                });
+            }
+        });
         return returnObj;
     }
 
@@ -186,7 +206,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
         List<TeamVo> departmentTeamList = new ArrayList<>();
         if (stepTeamValueList.contains(loginDepartment)) {
             List<TeamVo> teamTmpList = teamMapper.searchTeamByUserUuidAndLevelList(UserContext.get().getUserUuid(true), Arrays.asList(TeamLevel.TEAM.getValue(), TeamLevel.DEPARTMENT.getValue()));
-            if(CollectionUtils.isNotEmpty(teamTmpList)){
+            if (CollectionUtils.isNotEmpty(teamTmpList)) {
                 departmentTeamList.addAll(teamMapper.getDepartmentTeamUuidByTeamList(teamTmpList));
                 if (CollectionUtils.isNotEmpty(departmentTeamList)) {
                     List<TeamVo> groupTeamList = teamMapper.getAllSonTeamByParentTeamList(departmentTeamList);

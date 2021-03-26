@@ -5,6 +5,7 @@ import codedriver.framework.common.constvalue.*;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.restful.annotation.*;
@@ -69,42 +70,17 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 					) {
 				continue;
 			}
+			JSONObject config = condition.getConfig(ConditionConfigType.WORKCENTER);
 			JSONObject commonObj = new JSONObject();
-			/**
-			 * initConfig用于控制组件的入参，例如控制user/role/team/search的返回值类型
-			 */
-			if(ProcessWorkcenterField.STEP_TEAM.getValue().equals(condition.getName())){
-				commonObj.put("initConfig",new JSONObject(){
-					{
-						this.put("excludeList",new JSONArray(){
-							{
-								this.add(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue());
-							}
-						});
-						this.put("groupList",new JSONArray(){
-							{
-								this.add(GroupSearch.COMMON.getValue());
-								this.add(GroupSearch.TEAM.getValue());
-							}
-						});
-						this.put("includeList",new JSONArray(){
-							{
-								this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_TEAM.getValue());
-								this.add(GroupSearch.TEAM.getValue() + UserType.LOGIN_DEPARTMENT.getValue());
-							}
-						});
-					}
-				});
-			}
 			commonObj.put("handler", condition.getName());
 			commonObj.put("handlerName", condition.getDisplayName());
 			commonObj.put("handlerType", condition.getHandler(conditionModel));
-			if(condition.getConfig() != null) {
-				commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
+			if(config != null) {
+				commonObj.put("isMultiple",config.getBoolean("isMultiple"));
 			}
 			commonObj.put("conditionModel", condition.getHandler(conditionModel));
 			commonObj.put("type", condition.getType());
-			commonObj.put("config", condition.getConfig() == null?"": condition.getConfig().toJSONString());
+			commonObj.put("config", config);
 			commonObj.put("sort", condition.getSort());
 			ParamType paramType = condition.getParamType();
 			if(paramType != null) {

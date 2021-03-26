@@ -7,6 +7,7 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
@@ -14,13 +15,13 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -49,10 +50,28 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType configType) {
         JSONObject config = new JSONObject();
         config.put("type", FormHandlerType.USERSELECT.toString());
-        config.put("groupList", Collections.singletonList("user"));
+        config.put("initConfig", new JSONObject() {
+            {
+                this.put("excludeList", new JSONArray() {
+
+                });
+                this.put("groupList", new JSONArray() {
+                    {
+                        this.add(GroupSearch.USER.getValue());
+                    }
+                });
+                this.put("includeList", new JSONArray() {
+                    {
+                        if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
+                            this.add(GroupSearch.USER.getValuePlugin() + UserType.LOGIN_USER.getValue());
+                        }
+                    }
+                });
+            }
+        });
         config.put("multiple", true);
         /** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
         config.put("isMultiple", true);

@@ -6,6 +6,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.fulltextindex.utils.FullTextIndexUtil;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.dto.FormAttributeVo;
@@ -52,7 +53,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType type) {
         return null;
     }
 
@@ -145,31 +146,31 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     }
 
     @Override
-    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb){
+    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
         ConditionVo conditionVo = conditionList.get(index);
         IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(conditionVo.getHandler());
         JSONArray valueArray = JSONArray.parseArray(conditionVo.getValueList().toString());
         List<String> valueList = new ArrayList<>();
-        for(Object valueObj : valueArray){
+        for (Object valueObj : valueArray) {
             String[] valueTmpList = valueObj.toString().split("&=&");
-            for (String valueTmp :valueTmpList){
+            for (String valueTmp : valueTmpList) {
                 //如果需要分词，则搜索的时候关键字也许分词搜索
-                if(formAttributeHandler.isNeedSliceWord()){
+                if (formAttributeHandler.isNeedSliceWord()) {
                     Set<String> sliceKeySet = null;
                     try {
                         sliceKeySet = FullTextIndexUtil.sliceKeyword(valueTmp);
-                    }catch (IOException ex){
+                    } catch (IOException ex) {
                         throw new RuntimeException(ex.getMessage());
                     }
-                    if(CollectionUtils.isNotEmpty(sliceKeySet)){
+                    if (CollectionUtils.isNotEmpty(sliceKeySet)) {
                         valueList.addAll(new ArrayList<>(sliceKeySet));
                     }
-                }else{//否则直接md5作为整体搜索
+                } else {//否则直接md5作为整体搜索
                     valueList.add(Md5Util.encryptBASE64(valueTmp).toLowerCase(Locale.ROOT));
                 }
             }
         }
         sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` WHERE ff.`target_id` = pt.id  AND ff.`target_type` = 'processtask_form' AND ff.`target_field` = '%s' AND fw.word IN ('%s')) ",
-                conditionVo.getName(), String.join("','",valueList)));
+                conditionVo.getName(), String.join("','", valueList)));
     }
 }

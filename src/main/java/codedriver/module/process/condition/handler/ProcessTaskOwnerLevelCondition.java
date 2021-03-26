@@ -6,6 +6,7 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -38,7 +39,7 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType type) {
         JSONObject config = new JSONObject();
         config.put("type", FormHandlerType.SELECT.toString());
 //		config.put("multiple", true);

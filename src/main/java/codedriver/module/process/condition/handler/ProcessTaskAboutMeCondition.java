@@ -128,7 +128,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType type) {
         JSONArray dataList = new JSONArray();
         dataList.add(new ValueTextVo("doneOfMine", "已办"));
         dataList.add(new ValueTextVo("focusOfMine", "已关注"));
