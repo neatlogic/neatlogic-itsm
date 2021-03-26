@@ -4,6 +4,7 @@ import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
@@ -29,7 +30,7 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public String getHandler(String processWorkcenterConditionType) {
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
         return FormHandlerType.SELECT.toString();
     }
 

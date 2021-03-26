@@ -20,8 +20,8 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 
 @Service
 public class FormAuditHandler implements IProcessTaskStepAuditDetailHandler {

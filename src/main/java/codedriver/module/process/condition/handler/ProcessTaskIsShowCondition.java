@@ -8,8 +8,8 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ConditionConfigType;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
@@ -39,18 +39,18 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
         return "是否隐藏";
     }
 
-    @Override
-    public String getHandler(String processWorkcenterConditionType) {
-        if (ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-            formHandlerType = FormHandlerType.RADIO.toString();
-        }
-        return formHandlerType;
-    }
-
-    @Override
-    public String getType() {
-        return ProcessFieldType.COMMON.getValue();
-    }
+	@Override
+	public String getHandler(FormConditionModel processWorkcenterConditionType) {
+		if(FormConditionModel.SIMPLE == processWorkcenterConditionType) {
+			formHandlerType = FormHandlerType.RADIO.toString();
+		}
+		return formHandlerType;
+	}
+	
+	@Override
+	public String getType() {
+		return ProcessFieldType.COMMON.getValue();
+	}
 
     @Override
     public JSONObject getConfig(ConditionConfigType type) {

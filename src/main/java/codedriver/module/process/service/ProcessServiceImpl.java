@@ -16,7 +16,7 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
-import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessDraftVo;
 import codedriver.framework.process.dto.ProcessFormVo;
@@ -26,7 +26,7 @@ import codedriver.framework.process.dto.ProcessStepRelVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessVo;
-import codedriver.framework.process.exception.form.FormNotFoundException;
+import codedriver.framework.form.exception.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 
 @Service

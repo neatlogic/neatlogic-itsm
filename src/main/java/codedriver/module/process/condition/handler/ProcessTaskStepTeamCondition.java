@@ -7,6 +7,7 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
@@ -50,7 +51,7 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
     }
 
     @Override
-    public String getHandler(String processWorkcenterConditionType) {
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
         return FormHandlerType.TEAMSELECT.toString();
     }
 

@@ -18,13 +18,13 @@ import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.ExpressionVo;
-import codedriver.framework.process.constvalue.ConditionFormOptions;
+import codedriver.framework.form.constvalue.ConditionFormOptions;
 import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.form.constvalue.FormConditionModel;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -61,7 +61,6 @@ public class ProcessConditionList extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray resultArray = new JSONArray();
-        String conditionModel = ProcessConditionModel.CUSTOM.getValue();
         // 固定字段条件
         for (ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {
             IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
@@ -69,7 +68,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
                 ConditionParamVo conditionParamVo = new ConditionParamVo();
                 conditionParamVo.setName(condition.getName());
                 conditionParamVo.setLabel(condition.getDisplayName());
-                conditionParamVo.setController(condition.getHandler(conditionModel));
+                conditionParamVo.setController(condition.getHandler(FormConditionModel.CUSTOM));
                 if (condition.getConfig() != null) {
                     conditionParamVo.setConfig(condition.getConfig().toJSONString());
                 }
@@ -102,7 +101,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
                     continue;
                 }
                 formAttributeVo.setType("form");
-                formAttributeVo.setConditionModel(conditionModel);
+                formAttributeVo.setConditionModel(FormConditionModel.CUSTOM);
                 ConditionParamVo conditionParamVo = new ConditionParamVo();
                 conditionParamVo.setName(formAttributeVo.getUuid());
                 conditionParamVo.setLabel(formAttributeVo.getLabel());

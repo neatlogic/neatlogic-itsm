@@ -5,6 +5,7 @@ import codedriver.framework.common.constvalue.*;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
@@ -36,15 +37,15 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
         return "上报人";
     }
 
-    @Override
-    public String getHandler(String processWorkcenterConditionType) {
-        return FormHandlerType.USERSELECT.toString();
-    }
-
-    @Override
-    public String getType() {
-        return ProcessFieldType.COMMON.getValue();
-    }
+	@Override
+	public String getHandler(FormConditionModel processWorkcenterConditionType) {
+		return FormHandlerType.USERSELECT.toString();
+	}
+	
+	@Override
+	public String getType() {
+		return ProcessFieldType.COMMON.getValue();
+	}
 
     @Override
     public JSONObject getConfig(ConditionConfigType configType) {

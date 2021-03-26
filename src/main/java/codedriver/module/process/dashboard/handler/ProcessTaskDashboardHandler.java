@@ -11,7 +11,7 @@ import codedriver.framework.dashboard.dto.DashboardShowConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
@@ -111,7 +111,7 @@ public class ProcessTaskDashboardHandler extends DashboardHandlerBase {
             if (!isSub && ChartType.NUMBERCHART.getValue().equals(widgetVo.getChartType())) {
                 groupFieldJson = ConditionHandlerFactory.getHandler(groupField.getValue()).getConfig();
                 groupFieldJson.remove("isMultiple");
-                groupFieldJson.put("handler", ConditionHandlerFactory.getHandler(groupField.getValue()).getHandler(ProcessConditionModel.CUSTOM.getValue()));
+                groupFieldJson.put("handler", ConditionHandlerFactory.getHandler(groupField.getValue()).getHandler(FormConditionModel.CUSTOM));
 
             }
             groupFieldDataArray.add(JSONObject.parse(String.format("{'value':'%s','text':'%s',config:%s}", groupField.getValue(), groupField.getName(), groupFieldJson)));

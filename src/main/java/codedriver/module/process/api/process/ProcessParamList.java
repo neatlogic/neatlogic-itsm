@@ -12,12 +12,12 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.ConditionParamVo;
-import codedriver.framework.process.constvalue.ConditionFormOptions;
+import codedriver.framework.form.constvalue.ConditionFormOptions;
 import codedriver.framework.process.constvalue.ProcessTaskParams;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;

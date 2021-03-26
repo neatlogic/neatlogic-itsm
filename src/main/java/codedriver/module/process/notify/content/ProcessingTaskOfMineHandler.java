@@ -21,8 +21,7 @@ import codedriver.framework.notify.handler.EmailNotifyHandler;
 import codedriver.framework.notify.handler.MessageNotifyHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
 import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
 import codedriver.module.process.notify.handler.TaskNotifyPolicyHandler;
@@ -503,7 +502,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
 			if(condition != null) {
 				JSONObject obj = condition.getConfig();
-				obj.put("type",condition.getHandler(ProcessConditionModel.SIMPLE.getValue()));
+				obj.put("type",condition.getHandler(FormConditionModel.SIMPLE));
 				obj.put("name",condition.getName());
 				obj.put("label",condition.getDisplayName());
 				/** 不同的条件有其特殊的表单属性，根据需要自行添加 */

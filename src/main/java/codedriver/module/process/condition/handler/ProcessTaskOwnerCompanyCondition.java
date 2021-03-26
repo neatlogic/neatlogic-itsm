@@ -5,6 +5,7 @@ import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
@@ -33,10 +34,10 @@ public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase i
         return "上报人公司";
     }
 
-    @Override
-    public String getHandler(String processWorkcenterConditionType) {
-        return FormHandlerType.SELECT.toString();
-    }
+	@Override
+	public String getHandler(FormConditionModel processWorkcenterConditionType) {
+		return FormHandlerType.SELECT.toString();
+	}
 
     @Override
     public String getType() {

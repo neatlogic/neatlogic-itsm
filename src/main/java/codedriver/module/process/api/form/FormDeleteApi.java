@@ -2,10 +2,11 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.auth.label.FORM_MODIFY;
+import codedriver.framework.auth.label.FORM_MODIFY;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,19 +17,23 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.exception.form.FormNotFoundException;
-import codedriver.framework.process.exception.form.FormReferencedCannotBeDeletedException;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.form.exception.FormNotFoundException;
+import codedriver.framework.form.exception.FormReferencedCannotBeDeletedException;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
 @AuthAction(action = FORM_MODIFY.class)
+@Deprecated
 public class FormDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;
+
+	@Autowired
+	private ProcessMapper processMapper;
 	
 	@Override
 	public String getToken() {
@@ -59,7 +64,7 @@ public class FormDeleteApi extends PrivateApiComponentBase {
 		if(formMapper.checkFormIsExists(uuid) == 0) {
 			throw new FormNotFoundException(uuid);
 		}
-		if(formMapper.getFormReferenceCount(uuid) > 0) {
+		if(processMapper.getFormReferenceCount(uuid) > 0) {
 			throw new FormReferencedCannotBeDeletedException(uuid);
 		}
 		List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);

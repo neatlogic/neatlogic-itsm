@@ -3,6 +3,7 @@ package codedriver.module.process.condition.handler;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
@@ -33,7 +34,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
     }
 
     @Override
-    public String getHandler(String processWorkcenterConditionType) {
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
         return FormHandlerType.DATE.toString();
     }
 

@@ -2,6 +2,7 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -15,18 +16,22 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.process.dto.ProcessFormVo;
 import codedriver.framework.process.dto.ProcessVo;
-import codedriver.framework.process.exception.form.FormNotFoundException;
+import codedriver.framework.form.exception.FormNotFoundException;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class FormReferenceList extends PrivateApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;
-	
+
+	@Autowired
+	private ProcessMapper processMapper;
+
 	@Override
 	public String getToken() {
 		return "process/form/reference/list";
@@ -65,7 +70,7 @@ public class FormReferenceList extends PrivateApiComponentBase {
 		}
 		JSONObject resultObj = new JSONObject();
 		if(processFormVo.getNeedPage()) {
-			int rowNum = formMapper.getFormReferenceCount(processFormVo.getFormUuid());
+			int rowNum = processMapper.getFormReferenceCount(processFormVo.getFormUuid());
 			int pageCount = PageUtil.getPageCount(rowNum,processFormVo.getPageSize());
 			processFormVo.setPageCount(pageCount);
 			processFormVo.setRowNum(rowNum);
@@ -74,7 +79,7 @@ public class FormReferenceList extends PrivateApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
 		}	
-		List<ProcessVo> processList = formMapper.getFormReferenceList(processFormVo);
+		List<ProcessVo> processList = processMapper.getFormReferenceList(processFormVo);
 		resultObj.put("processList", processList);
 		return resultObj;
 	}
