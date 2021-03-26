@@ -1,5 +1,8 @@
 package codedriver.module.process.api.worktime;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.process.dto.WorktimeVo;
+import codedriver.framework.process.exception.worktime.WorktimeHasBeenRelatedByChannelException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,15 +52,29 @@ public class WorktimeDeleteApi extends PrivateApiComponentBase {
 	@Description(desc = "工作时间窗口删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		/**
+		 * 如果被服务引用，则不能删除
+		 * 如果没被服务引用，却被工单引用，则逻辑删除
+		 */
 		String uuid = jsonObj.getString("uuid");
 		if(worktimeMapper.checkWorktimeIsExists(uuid) == 0) {
 			throw new WorktimeNotFoundException(uuid);
 		}
-		
-		worktimeMapper.deleteWorktimeByUuid(uuid);
-		WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
-		worktimeRangeVo.setWorktimeUuid(uuid);
-		worktimeMapper.deleteWorktimeRange(worktimeRangeVo);
+		WorktimeVo worktime = worktimeMapper.getWorktimeByUuid(uuid);
+		if(worktimeMapper.checkWorktimeHasBeenRelatedByChannel(uuid) > 0){
+			throw new WorktimeHasBeenRelatedByChannelException(worktime.getName());
+		}
+		if(worktimeMapper.checkWorktimeHasBeenRelatedByTask(uuid) > 0){
+			worktime.setIsDelete(1);
+			worktime.setLcu(UserContext.get().getUserUuid());
+			worktimeMapper.updateWorktimeDeleteStatus(worktime);
+		}else{
+			worktimeMapper.deleteWorktimeByUuid(uuid);
+			WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
+			worktimeRangeVo.setWorktimeUuid(uuid);
+			worktimeMapper.deleteWorktimeRange(worktimeRangeVo);
+		}
+
 		return null;
 	}
 
