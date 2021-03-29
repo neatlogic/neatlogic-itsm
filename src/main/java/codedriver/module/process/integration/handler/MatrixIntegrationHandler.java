@@ -14,7 +14,12 @@ public class MatrixIntegrationHandler extends IntegrationHandlerBase {
 
 	@Override
 	public String getName() {
-		return "矩阵外部数据源查询";
+		return Type.MATRIX.getText();
+	}
+
+	@Override
+	public String getType() {
+		return Type.MATRIX.getValue();
 	}
 
 	@Override
