@@ -6,7 +6,8 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
+import codedriver.framework.form.constvalue.FormConditionModel;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
@@ -19,23 +20,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class ProcessTaskStatusCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
+public class ProcessTaskStatusCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
-	private String formHandlerType = FormHandlerType.SELECT.toString();
-	
-	@Override
-	public String getName() {
-		return "status";
-	}
+    private String formHandlerType = FormHandlerType.SELECT.toString();
+
+    @Override
+    public String getName() {
+        return "status";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "工单状态";
+    }
 
 	@Override
-	public String getDisplayName() {
-		return "工单状态";
-	}
-
-	@Override
-	public String getHandler(String processWorkcenterConditionType) {
-		if(ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
+	public String getHandler(FormConditionModel processWorkcenterConditionType) {
+		if(FormConditionModel.SIMPLE == processWorkcenterConditionType) {
 			formHandlerType = FormHandlerType.CHECKBOX.toString();
 		}
 		return formHandlerType;
@@ -46,65 +47,65 @@ public class ProcessTaskStatusCondition extends ProcessTaskConditionBase impleme
 		return ProcessFieldType.COMMON.getValue();
 	}
 
-	@Override
-	public JSONObject getConfig() {		
-		JSONArray dataList = new JSONArray();
-		dataList.add(new ValueTextVo(ProcessTaskStatus.RUNNING.getValue(), ProcessTaskStatus.RUNNING.getText()));
-		dataList.add(new ValueTextVo(ProcessTaskStatus.ABORTED.getValue(), ProcessTaskStatus.ABORTED.getText()));
-		dataList.add(new ValueTextVo(ProcessTaskStatus.FAILED.getValue(), ProcessTaskStatus.FAILED.getText()));
-		dataList.add(new ValueTextVo(ProcessTaskStatus.SUCCEED.getValue(), ProcessTaskStatus.SUCCEED.getText()));
-		dataList.add(new ValueTextVo(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.DRAFT.getText()));
-		dataList.add(new ValueTextVo(ProcessTaskStatus.SCORED.getValue(), ProcessTaskStatus.SCORED.getText()));
+    @Override
+    public JSONObject getConfig(ConditionConfigType type) {
+        JSONArray dataList = new JSONArray();
+        dataList.add(new ValueTextVo(ProcessTaskStatus.RUNNING.getValue(), ProcessTaskStatus.RUNNING.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStatus.ABORTED.getValue(), ProcessTaskStatus.ABORTED.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStatus.FAILED.getValue(), ProcessTaskStatus.FAILED.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStatus.SUCCEED.getValue(), ProcessTaskStatus.SUCCEED.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStatus.DRAFT.getValue(), ProcessTaskStatus.DRAFT.getText()));
+        dataList.add(new ValueTextVo(ProcessTaskStatus.SCORED.getValue(), ProcessTaskStatus.SCORED.getText()));
 
-		JSONObject config = new JSONObject();
-		config.put("type", formHandlerType);
-		config.put("search", false);
-		config.put("multiple", true);
-		config.put("value", "");
-		config.put("defaultValue", "");
-		config.put("dataList", dataList);
-		/** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
-		config.put("isMultiple", true);
-		return config;
-	}
+        JSONObject config = new JSONObject();
+        config.put("type", formHandlerType);
+        config.put("search", false);
+        config.put("multiple", true);
+        config.put("value", "");
+        config.put("defaultValue", "");
+        config.put("dataList", dataList);
+        /** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
+        config.put("isMultiple", true);
+        return config;
+    }
 
-	@Override
-	public Integer getSort() {
-		return 7;
-	}
+    @Override
+    public Integer getSort() {
+        return 7;
+    }
 
-	@Override
-	public ParamType getParamType() {
-		return ParamType.ARRAY;
-	}
+    @Override
+    public ParamType getParamType() {
+        return ParamType.ARRAY;
+    }
 
-	@Override
-	public Object valueConversionText(Object value, JSONObject config) {
-		if(value != null) {
-			if(value instanceof String) {
-				String text = ProcessTaskStatus.getText(value.toString());
-				if(text != null) {
-					return text;
-				}
-			}else if(value instanceof List){
-				List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
-				List<String> textList = new ArrayList<>();
-				for(String valueStr : valueList) {
-					String text = ProcessTaskStatus.getText(valueStr);
-					if(text != null) {
-						textList.add(text);					
-					}else {
-						textList.add(valueStr);
-					}
-				}
-				return String.join("、", textList);
-			}
-		}		
-		return value;
-	}
+    @Override
+    public Object valueConversionText(Object value, JSONObject config) {
+        if (value != null) {
+            if (value instanceof String) {
+                String text = ProcessTaskStatus.getText(value.toString());
+                if (text != null) {
+                    return text;
+                }
+            } else if (value instanceof List) {
+                List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
+                List<String> textList = new ArrayList<>();
+                for (String valueStr : valueList) {
+                    String text = ProcessTaskStatus.getText(valueStr);
+                    if (text != null) {
+                        textList.add(text);
+                    } else {
+                        textList.add(valueStr);
+                    }
+                }
+                return String.join("、", textList);
+            }
+        }
+        return value;
+    }
 
-	@Override
-	public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-		getSimpleSqlConditionWhere(conditionList.get(index), sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.STATUS.getValue());
-	}
+    @Override
+    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+        getSimpleSqlConditionWhere(conditionList.get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue());
+    }
 }

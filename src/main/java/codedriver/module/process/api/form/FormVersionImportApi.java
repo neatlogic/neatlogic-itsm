@@ -18,10 +18,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.exception.form.FormImportException;
-import codedriver.framework.process.exception.form.FormNotFoundException;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.form.exception.FormImportException;
+import codedriver.framework.form.exception.FormNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -29,12 +29,13 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import codedriver.module.process.auth.label.FORM_MODIFY;
+import codedriver.framework.auth.label.FORM_MODIFY;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
 @AuthAction(action = FORM_MODIFY.class)
+@Deprecated
 public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase{
 
 	@Autowired

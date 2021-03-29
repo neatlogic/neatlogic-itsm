@@ -2,6 +2,7 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ProcessMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,22 +10,26 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.dto.FormVo;
-import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
-import codedriver.framework.process.exception.form.FormIllegalParameterException;
-import codedriver.framework.process.exception.form.FormNotFoundException;
-import codedriver.framework.process.exception.form.FormVersionNotFoundException;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.form.dto.FormVo;
+import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
+import codedriver.framework.form.exception.FormIllegalParameterException;
+import codedriver.framework.form.exception.FormNotFoundException;
+import codedriver.framework.form.exception.FormVersionNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class FormGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;
+
+	@Autowired
+	private ProcessMapper processMapper;
 	
 	@Override
 	public String getToken() {
@@ -80,7 +85,7 @@ public class FormGetApi extends PrivateApiComponentBase {
 		List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);
 		formVo.setVersionList(formVersionList);
 		//引用数量
-		int count = formMapper.getFormReferenceCount(uuid);
+		int count = processMapper.getFormReferenceCount(uuid);
 		formVo.setReferenceCount(count);
 		return formVo;
 	}

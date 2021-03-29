@@ -13,21 +13,22 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.exception.form.FormIllegalParameterException;
-import codedriver.framework.process.exception.form.FormNotFoundException;
-import codedriver.framework.process.exception.form.FormVersionNotFoundException;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.form.exception.FormIllegalParameterException;
+import codedriver.framework.form.exception.FormNotFoundException;
+import codedriver.framework.form.exception.FormVersionNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.auth.label.FORM_MODIFY;
+import codedriver.framework.auth.label.FORM_MODIFY;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = FORM_MODIFY.class)
+@Deprecated
 public class FormVersionActiveApi extends PrivateApiComponentBase {
 
 	@Autowired

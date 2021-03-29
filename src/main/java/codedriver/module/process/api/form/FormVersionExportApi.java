@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.dto.FormVo;
-import codedriver.framework.process.exception.form.FormIllegalParameterException;
-import codedriver.framework.process.exception.form.FormNotFoundException;
-import codedriver.framework.process.exception.form.FormVersionNotFoundException;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.form.dto.FormVo;
+import codedriver.framework.form.exception.FormIllegalParameterException;
+import codedriver.framework.form.exception.FormNotFoundException;
+import codedriver.framework.form.exception.FormVersionNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -31,6 +31,7 @@ import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiCompon
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class FormVersionExportApi extends PrivateBinaryStreamApiComponentBase {
 
 	@Autowired

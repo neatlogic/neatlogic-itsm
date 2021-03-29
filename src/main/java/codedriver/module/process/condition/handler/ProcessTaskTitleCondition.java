@@ -4,8 +4,10 @@ import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
@@ -28,7 +30,7 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
     }
 
     @Override
-    public String getHandler(String processWorkcenterConditionType) {
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
         return FormHandlerType.INPUT.toString();
     }
 
@@ -38,7 +40,7 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType type) {
         JSONObject config = new JSONObject();
         config.put("type", "text");
         config.put("value", "");
@@ -90,6 +92,6 @@ public class ProcessTaskTitleCondition extends ProcessTaskConditionBase implemen
 
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        getSimpleSqlConditionWhere(conditionList.get(index), sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
+        getSimpleSqlConditionWhere(conditionList.get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.TITLE.getValue());
     }
 }

@@ -11,6 +11,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionGroupVo;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.*;
@@ -95,8 +96,8 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
     }
 
     @Override
-    public String getHandler(String processWorkcenterConditionType) {
-        if (ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
+        if (FormConditionModel.SIMPLE == processWorkcenterConditionType) {
             formHandlerType = FormHandlerType.RADIO.toString();
         }
         return formHandlerType;
@@ -128,7 +129,7 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType type) {
         JSONArray dataList = new JSONArray();
         dataList.add(new ValueTextVo("doneOfMine", "已办"));
         dataList.add(new ValueTextVo("focusOfMine", "已关注"));

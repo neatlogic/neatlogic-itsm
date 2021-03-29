@@ -3,8 +3,10 @@ package codedriver.module.process.condition.handler;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
@@ -32,7 +34,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
     }
 
     @Override
-    public String getHandler(String processWorkcenterConditionType) {
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
         return FormHandlerType.DATE.toString();
     }
 
@@ -42,7 +44,7 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType type) {
         JSONObject config = new JSONObject();
         config.put("type", "datetimerange");
         config.put("value", "");
@@ -87,6 +89,6 @@ public class ProcessTaskStartTimeCondition extends ProcessTaskConditionBase impl
 
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-        getDateSqlWhereByValueList(conditionList.get(index),sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.START_TIME.getValue());
+        getDateSqlWhereByValueList(conditionList.get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.START_TIME.getValue());
     }
 }

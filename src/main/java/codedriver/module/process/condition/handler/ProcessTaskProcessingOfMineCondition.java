@@ -3,8 +3,10 @@ package codedriver.module.process.condition.handler;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
@@ -25,7 +27,7 @@ public class ProcessTaskProcessingOfMineCondition extends ProcessTaskConditionBa
     }
 
     @Override
-    public String getHandler(String processWorkcenterConditionType) {
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
         return FormHandlerType.SELECT.toString();
     }
 
@@ -35,7 +37,7 @@ public class ProcessTaskProcessingOfMineCondition extends ProcessTaskConditionBa
     }
 
     @Override
-    public JSONObject getConfig() {
+    public JSONObject getConfig(ConditionConfigType type) {
         return new JSONObject();
     }
 

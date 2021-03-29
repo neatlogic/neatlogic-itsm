@@ -4,8 +4,10 @@ import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
+import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSON;
@@ -16,19 +18,19 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase implements IProcessTaskCondition{
-	@Override
-	public String getName() {
-		return "serialnumber";
-	}
+public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+    @Override
+    public String getName() {
+        return "serialnumber";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "工单号";
+    }
 
 	@Override
-	public String getDisplayName() {
-		return "工单号";
-	}
-
-	@Override
-	public String getHandler(String processWorkcenterConditionType) {
+	public String getHandler(FormConditionModel processWorkcenterConditionType) {
 		return FormHandlerType.INPUT.toString();
 	}
 	
@@ -37,59 +39,59 @@ public class ProcessTaskSerialNumberCondition extends ProcessTaskConditionBase i
 		return ProcessFieldType.COMMON.getValue();
 	}
 
-	@Override
-	public JSONObject getConfig() {
-		JSONObject config = new JSONObject();
-		config.put("type", "text");
-		config.put("value", "");
-		config.put("defaultValue", "");
-		config.put("maxlength", 16);
+    @Override
+    public JSONObject getConfig(ConditionConfigType type) {
+        JSONObject config = new JSONObject();
+        config.put("type", "text");
+        config.put("value", "");
+        config.put("defaultValue", "");
+        config.put("maxlength", 16);
 //		config.put("name", "");
 //		config.put("label", "");
-		return config;
-	}
+        return config;
+    }
 
-	@Override
-	public Integer getSort() {
-		return 1;
-	}
+    @Override
+    public Integer getSort() {
+        return 1;
+    }
 
-	@Override
-	public ParamType getParamType() {
-		return ParamType.STRING;
-	}
-	
-	@Override
-	protected String getMyEsWhere(Integer index,List<ConditionVo> conditionList) {
-		ConditionVo condition = conditionList.get(index);
-		String where = StringUtils.EMPTY;
-		if(condition.getValueList() instanceof String) {
-			Object value = condition.getValueList();
-			where += String.format(Expression.getExpressionEs(condition.getExpression()),this.getEsName(),String.format("'%s'",  value));
-		}else if(condition.getValueList() instanceof List) {
-			List<String> keywordList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
-			if(keywordList.size() == 1) {
-				Object value = keywordList.get(0);
-				where += String.format(Expression.getExpressionEs(condition.getExpression()),this.getEsName(),String.format("'%s'",  value));
-			}else {
-				for(int i=0;i<keywordList.size();i++) {
-					if(i!=0) {
-						where += " or ";
-					}
-					where += String.format(Expression.getExpressionEs(condition.getExpression()),this.getEsName(),String.format("'%s'",  keywordList.get(i)));
-				}
-			}
-		}
-		return where;
-	}
+    @Override
+    public ParamType getParamType() {
+        return ParamType.STRING;
+    }
 
-	@Override
-	public Object valueConversionText(Object value, JSONObject config) {
-		return value;
-	}
+    @Override
+    protected String getMyEsWhere(Integer index, List<ConditionVo> conditionList) {
+        ConditionVo condition = conditionList.get(index);
+        String where = StringUtils.EMPTY;
+        if (condition.getValueList() instanceof String) {
+            Object value = condition.getValueList();
+            where += String.format(Expression.getExpressionEs(condition.getExpression()), this.getEsName(), String.format("'%s'", value));
+        } else if (condition.getValueList() instanceof List) {
+            List<String> keywordList = JSON.parseArray(JSON.toJSONString(condition.getValueList()), String.class);
+            if (keywordList.size() == 1) {
+                Object value = keywordList.get(0);
+                where += String.format(Expression.getExpressionEs(condition.getExpression()), this.getEsName(), String.format("'%s'", value));
+            } else {
+                for (int i = 0; i < keywordList.size(); i++) {
+                    if (i != 0) {
+                        where += " or ";
+                    }
+                    where += String.format(Expression.getExpressionEs(condition.getExpression()), this.getEsName(), String.format("'%s'", keywordList.get(i)));
+                }
+            }
+        }
+        return where;
+    }
 
-	@Override
-	public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
-		getSimpleSqlConditionWhere(conditionList.get(index), sqlSb,new ProcessTaskSqlTable().getShortName(),ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
-	}
+    @Override
+    public Object valueConversionText(Object value, JSONObject config) {
+        return value;
+    }
+
+    @Override
+    public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
+        getSimpleSqlConditionWhere(conditionList.get(index), sqlSb, new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue());
+    }
 }
