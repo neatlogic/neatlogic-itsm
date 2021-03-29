@@ -2,6 +2,8 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.restful.annotation.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,12 +31,8 @@ import codedriver.framework.form.exception.FormIllegalParameterException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.OperationType;
 
 import javax.annotation.Resource;
 
@@ -76,6 +74,9 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 		@Param(name = "data", type = ApiParamType.STRING, isRequired= true, desc = "属性值"),
 		@Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired= true, desc = "校验用到的相关数据")
 	})
+	@Output({
+			@Param(name = "Return", type = ApiParamType.BOOLEAN, desc = "校验结果")
+	})
 	@Description(desc = "表单属性值校验接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -92,11 +93,11 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 			worktimeUuid = processTaskVo.getWorktimeUuid();
 			ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
 			if(processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContentHash())) {
-				throw new FormIllegalParameterException("工单：'" + processTaskId + "'没有绑定表单");
+				return false;
 			}
 			String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
             if(StringUtils.isBlank(formContent)) {
-                throw new FormIllegalParameterException("工单：'" + processTaskId + "'没有绑定表单");
+				return false;
             }
 			formVersionVo = new FormVersionVo();
 			formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
@@ -111,14 +112,14 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 			worktimeUuid = channelVo.getWorktimeUuid();
 			ProcessFormVo processFormVo = processMapper.getProcessFormByProcessUuid(channelVo.getProcessUuid());
 			if(processFormVo == null) {
-				throw new FormIllegalParameterException("流程：'" + channelVo.getProcessUuid() + "'没有绑定表单");
+				return false;
 			}
 			formVersionVo = formMapper.getActionFormVersionByFormUuid(processFormVo.getFormUuid());
 			if(formVersionVo == null) {
 				throw new FormActiveVersionNotFoundExcepiton(processFormVo.getFormUuid());
 			}
 		}else {
-			throw new FormIllegalParameterException("config参数中必须包含'processTaskId'或'channelUuid'");
+			throw new ParamIrregularException("config参数中必须包含'processTaskId'或'channelUuid'");
 		}
 		String attributeUuid = jsonObj.getString("attributeUuid");
 		List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();

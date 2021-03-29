@@ -72,7 +72,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
         for (ChannelVo channel : channelList) {
             String processUuid = channel.getProcessUuid();
             if (processUuid == null) {
-                throw new FormIllegalParameterException("服务:'" + channel.getUuid() + "'没有绑定流程图");
+                continue;
             }
             ProcessVo process = processMapper.getProcessByUuid(processUuid);
             if (process == null) {
