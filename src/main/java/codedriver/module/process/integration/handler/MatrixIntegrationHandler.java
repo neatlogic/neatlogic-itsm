@@ -8,6 +8,7 @@ import java.util.Set;
 import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixExternalNoReturnException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -78,31 +79,36 @@ public class MatrixIntegrationHandler extends IntegrationHandlerBase {
 
 	@Override
 	public void validate(IntegrationResultVo resultVo) throws ApiRuntimeException {
-		if(resultVo != null && StringUtils.isBlank(resultVo.getError())
-				&& StringUtils.isNotBlank(resultVo.getTransformedResult())){
-			JSONObject transformedResult = null;
-			try {
-				transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-			}catch (Exception ex){
-				throw new MatrixExternalException("返回结果不是JSON格式");
-			}
-			if(MapUtils.isNotEmpty(transformedResult)){
-				Set<String> keys = transformedResult.keySet();
-				Set<String> keySet = new HashSet<>();
-				getOutputPattern().stream().forEach(o -> keySet.add(o.getName()));
-				if(!CollectionUtils.containsAll(keys,keySet)){
-					throw new MatrixExternalException("返回结果不符合格式，缺少" + JSON.toJSONString(CollectionUtils.removeAll(keySet, keys)));
+		if(StringUtils.isBlank(resultVo.getError())){
+			if(StringUtils.isNotBlank(resultVo.getTransformedResult())){
+				JSONObject transformedResult = null;
+				try {
+					transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+				}catch (Exception ex){
+					throw new MatrixExternalException("返回结果不是JSON格式");
 				}
-				JSONArray theadList = transformedResult.getJSONArray("theadList");
-				if(CollectionUtils.isNotEmpty(theadList)){
-					for(int i = 0; i < theadList.size();i++){
-						if(!theadList.getJSONObject(i).containsKey("key") || !theadList.getJSONObject(i).containsKey("title")){
-							throw new MatrixExternalException("返回结果不符合格式,theadList缺少key或title");
+				if(MapUtils.isNotEmpty(transformedResult)){
+					Set<String> keys = transformedResult.keySet();
+					Set<String> keySet = new HashSet<>();
+					getOutputPattern().stream().forEach(o -> keySet.add(o.getName()));
+					if(!CollectionUtils.containsAll(keys,keySet)){
+						throw new MatrixExternalException("返回结果不符合格式，缺少" + JSON.toJSONString(CollectionUtils.removeAll(keySet, keys)));
+					}
+					JSONArray theadList = transformedResult.getJSONArray("theadList");
+					if(CollectionUtils.isNotEmpty(theadList)){
+						for(int i = 0; i < theadList.size();i++){
+							if(!theadList.getJSONObject(i).containsKey("key") || !theadList.getJSONObject(i).containsKey("title")){
+								throw new MatrixExternalException("返回结果不符合格式,theadList缺少key或title");
+							}
 						}
+					}else{
+						throw new MatrixExternalException("返回结果不符合格式,缺少theadList");
 					}
 				}else{
-					throw new MatrixExternalException("返回结果不符合格式,缺少theadList");
+					throw new MatrixExternalNoReturnException();
 				}
+			}else{
+				throw new MatrixExternalNoReturnException();
 			}
 		}
 	}
