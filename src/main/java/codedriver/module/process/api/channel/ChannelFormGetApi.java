@@ -1,19 +1,20 @@
 package codedriver.module.process.api.channel;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.dto.FormVo;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.dto.FormVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.form.FormIllegalParameterException;
-import codedriver.framework.process.exception.form.FormNotFoundException;
+import codedriver.framework.form.exception.FormIllegalParameterException;
+import codedriver.framework.form.exception.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -71,7 +72,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
         for (ChannelVo channel : channelList) {
             String processUuid = channel.getProcessUuid();
             if (processUuid == null) {
-                throw new FormIllegalParameterException("服务:'" + channel.getUuid() + "'没有绑定流程图");
+                continue;
             }
             ProcessVo process = processMapper.getProcessByUuid(processUuid);
             if (process == null) {
@@ -96,7 +97,7 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
                     formIterator.remove();
                     continue;
                 }
-                formAttributeVo.setConditionModel(conditionModel);
+                formAttributeVo.setConditionModel(FormConditionModel.getFormConditionModel(conditionModel));
                 formAttributeVo.setType("form");
                 formAttributeVo.setIsUseFormConfig(handler.isUseFormConfig());
             }

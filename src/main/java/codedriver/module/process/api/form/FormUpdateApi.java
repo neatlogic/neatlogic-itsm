@@ -5,7 +5,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.auth.label.FORM_MODIFY;
+import codedriver.framework.auth.label.FORM_MODIFY;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,14 +16,15 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormVo;
-import codedriver.framework.process.exception.form.FormNameRepeatException;
-import codedriver.framework.process.exception.form.FormNotFoundException;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormVo;
+import codedriver.framework.form.exception.FormNameRepeatException;
+import codedriver.framework.form.exception.FormNotFoundException;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = FORM_MODIFY.class)
+@Deprecated
 public class FormUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired

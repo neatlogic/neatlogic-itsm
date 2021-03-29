@@ -18,7 +18,7 @@ import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Service
@@ -57,18 +57,17 @@ public class DashboardGetConditionApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray resultArray = new JSONArray();
-		String conditionModel = ProcessConditionModel.CUSTOM.getValue();
 		//固定字段条件
 		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
 			if(condition instanceof IProcessTaskCondition && ProcessWorkcenterField.getValue(condition.getName()) != null) {
 				JSONObject commonObj = new JSONObject();
 				commonObj.put("handler", condition.getName());
 				commonObj.put("handlerName", condition.getDisplayName());
-				commonObj.put("handlerType", condition.getHandler(conditionModel));
+				commonObj.put("handlerType", condition.getHandler(FormConditionModel.CUSTOM));
 				if(condition.getConfig() != null) {
 					commonObj.put("isMultiple",condition.getConfig().getBoolean("isMultiple"));
 				}
-				commonObj.put("conditionModel", condition.getHandler(conditionModel));
+				commonObj.put("conditionModel", condition.getHandler(FormConditionModel.CUSTOM));
 				commonObj.put("type", condition.getType());
 				commonObj.put("config", condition.getConfig() == null?"": condition.getConfig().toJSONString());
 				commonObj.put("defaultExpression", condition.getParamType().getDefaultExpression().getExpression());

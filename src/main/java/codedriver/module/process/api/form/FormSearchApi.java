@@ -2,6 +2,7 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -15,15 +16,19 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormVo;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormVo;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class FormSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private FormMapper formMapper;
+
+	@Autowired
+	private ProcessMapper processMapper;
 	
 	@Override
 	public String getToken() {
@@ -71,7 +76,7 @@ public class FormSearchApi extends PrivateApiComponentBase {
 		List<FormVo> formList = formMapper.searchFormList(formVo);
 		int count = 0;
 		for(FormVo form : formList) {
-			count = formMapper.getFormReferenceCount(form.getUuid());
+			count = processMapper.getFormReferenceCount(form.getUuid());
 			form.setReferenceCount(count);
 		}
 		resultObj.put("formList", formList);

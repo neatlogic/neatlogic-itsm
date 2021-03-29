@@ -2,6 +2,8 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.restful.annotation.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,47 +12,46 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.FormMapper;
+import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
-import codedriver.framework.process.dto.AttributeDataVo;
+import codedriver.framework.form.dto.AttributeDataVo;
 import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.dto.FormVersionVo;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.dto.ProcessFormVo;
 import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.form.FormActiveVersionNotFoundExcepiton;
-import codedriver.framework.process.exception.form.FormAttributeHandlerNotFoundException;
-import codedriver.framework.process.exception.form.FormAttributeNotFoundException;
-import codedriver.framework.process.exception.form.FormIllegalParameterException;
+import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
+import codedriver.framework.form.exception.FormAttributeHandlerNotFoundException;
+import codedriver.framework.form.exception.FormAttributeNotFoundException;
+import codedriver.framework.form.exception.FormIllegalParameterException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.OperationType;
+
+import javax.annotation.Resource;
+
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FormAttributeCheckApi extends PrivateApiComponentBase {
 	
-	@Autowired
+	@Resource
 	private ProcessTaskMapper processTaskMapper;
 
-	@Autowired
+	@Resource
 	private ChannelMapper channelMapper;
 
-	@Autowired
+	@Resource
 	private ProcessMapper processMapper;
 	
-	@Autowired
+	@Resource
 	private FormMapper formMapper;
-    @Autowired
+    @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
@@ -73,6 +74,9 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 		@Param(name = "data", type = ApiParamType.STRING, isRequired= true, desc = "属性值"),
 		@Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired= true, desc = "校验用到的相关数据")
 	})
+	@Output({
+			@Param(name = "Return", type = ApiParamType.BOOLEAN, desc = "校验结果")
+	})
 	@Description(desc = "表单属性值校验接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -80,18 +84,20 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 		Long processTaskId = configObj.getLong("processTaskId");
 		String channelUuid = configObj.getString("channelUuid");
 		FormVersionVo formVersionVo = null;
+		String worktimeUuid = null;
 		if(processTaskId != null) {
 			ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 			if(processTaskVo == null) {
 				throw new ProcessTaskNotFoundException(processTaskId.toString());
 			}
+			worktimeUuid = processTaskVo.getWorktimeUuid();
 			ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
 			if(processTaskFormVo == null || StringUtils.isBlank(processTaskFormVo.getFormContentHash())) {
-				throw new FormIllegalParameterException("工单：'" + processTaskId + "'没有绑定表单");
+				return false;
 			}
 			String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
             if(StringUtils.isBlank(formContent)) {
-                throw new FormIllegalParameterException("工单：'" + processTaskId + "'没有绑定表单");
+				return false;
             }
 			formVersionVo = new FormVersionVo();
 			formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
@@ -103,16 +109,17 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 			if(channelVo == null) {
 				throw new ChannelNotFoundException(channelUuid);
 			}
+			worktimeUuid = channelVo.getWorktimeUuid();
 			ProcessFormVo processFormVo = processMapper.getProcessFormByProcessUuid(channelVo.getProcessUuid());
 			if(processFormVo == null) {
-				throw new FormIllegalParameterException("流程：'" + channelVo.getProcessUuid() + "'没有绑定表单");
+				return false;
 			}
 			formVersionVo = formMapper.getActionFormVersionByFormUuid(processFormVo.getFormUuid());
 			if(formVersionVo == null) {
 				throw new FormActiveVersionNotFoundExcepiton(processFormVo.getFormUuid());
 			}
 		}else {
-			throw new FormIllegalParameterException("config参数中必须包含'processTaskId'或'channelUuid'");
+			throw new ParamIrregularException("config参数中必须包含'processTaskId'或'channelUuid'");
 		}
 		String attributeUuid = jsonObj.getString("attributeUuid");
 		List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
@@ -124,6 +131,7 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 					attributeDataVo.setAttributeUuid(attributeUuid);
 					attributeDataVo.setData(jsonObj.getString("data"));
 					configObj.put("attributeConfig", formAttribute.getConfig());
+					configObj.put("worktimeUuid", worktimeUuid);
 					return handler.valid(attributeDataVo, configObj);
 				}else {
 					throw new FormAttributeHandlerNotFoundException(formAttribute.getHandler());

@@ -6,7 +6,7 @@ import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ConditionConfigType;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -54,7 +54,9 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray resultArray = new JSONArray();
-		String conditionModel = jsonObj.getString("conditionModel") == null?ProcessConditionModel.CUSTOM.getValue():jsonObj.getString("conditionModel");
+		String conditionModel = jsonObj.getString("conditionModel");
+		FormConditionModel formConditionModel = FormConditionModel.getFormConditionModel(conditionModel);
+		formConditionModel = formConditionModel == null ? FormConditionModel.CUSTOM : formConditionModel;
 		//固定字段条件
 		for(IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
 			//不支持endTime过滤，如果是简单模式 title、id、content 不返回
@@ -74,11 +76,11 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 			JSONObject commonObj = new JSONObject();
 			commonObj.put("handler", condition.getName());
 			commonObj.put("handlerName", condition.getDisplayName());
-			commonObj.put("handlerType", condition.getHandler(conditionModel));
+			commonObj.put("handlerType", condition.getHandler(formConditionModel));
 			if(config != null) {
 				commonObj.put("isMultiple",config.getBoolean("isMultiple"));
 			}
-			commonObj.put("conditionModel", condition.getHandler(conditionModel));
+			commonObj.put("conditionModel", condition.getHandler(formConditionModel));
 			commonObj.put("type", condition.getType());
 			commonObj.put("config", config);
 			commonObj.put("sort", condition.getSort());

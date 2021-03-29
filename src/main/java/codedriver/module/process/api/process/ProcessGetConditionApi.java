@@ -14,12 +14,12 @@ import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ProcessField;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -62,14 +62,13 @@ public class ProcessGetConditionApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray resultArray = new JSONArray();
-        String conditionModel = ProcessConditionModel.CUSTOM.getValue();
         // 固定字段条件
         for (IConditionHandler condition : ConditionHandlerFactory.getConditionHandlerList()) {
             if (condition instanceof IProcessTaskCondition && ProcessField.getValue(condition.getName()) != null) {
                 JSONObject commonObj = new JSONObject();
                 commonObj.put("handler", condition.getName());
                 commonObj.put("handlerName", condition.getDisplayName());
-                commonObj.put("handlerType", condition.getHandler(conditionModel));
+                commonObj.put("handlerType", condition.getHandler(FormConditionModel.CUSTOM));
                 if (condition.getConfig() != null) {
                     commonObj.put("isMultiple", condition.getConfig().getBoolean("isMultiple"));
                     commonObj.put("config", condition.getConfig().toJSONString());
@@ -102,7 +101,7 @@ public class ProcessGetConditionApi extends PrivateApiComponentBase {
                     continue;
                 }
                 formAttributeVo.setType("form");
-                formAttributeVo.setConditionModel(conditionModel);
+                formAttributeVo.setConditionModel(FormConditionModel.CUSTOM);
                 resultArray.add(JSONObject.toJSON(formAttributeVo));
             }
         }

@@ -2,6 +2,7 @@ package codedriver.module.process.api.process;
 
 import java.util.List;
 
+import codedriver.framework.form.constvalue.FormHandlerTypeBak;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,13 +19,12 @@ import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.ExpressionVo;
-import codedriver.framework.process.constvalue.ConditionFormOptions;
 import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.form.constvalue.FormConditionModel;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -61,7 +61,6 @@ public class ProcessConditionList extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray resultArray = new JSONArray();
-        String conditionModel = ProcessConditionModel.CUSTOM.getValue();
         // 固定字段条件
         for (ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {
             IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
@@ -69,7 +68,7 @@ public class ProcessConditionList extends PrivateApiComponentBase {
                 ConditionParamVo conditionParamVo = new ConditionParamVo();
                 conditionParamVo.setName(condition.getName());
                 conditionParamVo.setLabel(condition.getDisplayName());
-                conditionParamVo.setController(condition.getHandler(conditionModel));
+                conditionParamVo.setController(condition.getHandler(FormConditionModel.CUSTOM));
                 if (condition.getConfig() != null) {
                     conditionParamVo.setConfig(condition.getConfig().toJSONString());
                 }
@@ -98,50 +97,50 @@ public class ProcessConditionList extends PrivateApiComponentBase {
         if (StringUtils.isNotBlank(formUuid)) {
             List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
             for (FormAttributeVo formAttributeVo : formAttrList) {
-                if (ConditionFormOptions.getConditionFormOption(formAttributeVo.getHandler()) == null) {
+
+                IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                if(formHandler == null){
                     continue;
                 }
-                formAttributeVo.setType("form");
-                formAttributeVo.setConditionModel(conditionModel);
-                ConditionParamVo conditionParamVo = new ConditionParamVo();
-                conditionParamVo.setName(formAttributeVo.getUuid());
-                conditionParamVo.setLabel(formAttributeVo.getLabel());
-                conditionParamVo.setController(formAttributeVo.getHandlerType());
-                // conditionParamVo.setIsMultiple(formAttributeVo.getIsMultiple());
-                conditionParamVo.setType(formAttributeVo.getType());
-                conditionParamVo.setHandler(formAttributeVo.getHandler());
-                conditionParamVo.setConfig(formAttributeVo.getConfig());
-                IFormAttributeHandler formHandler =
-                    FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                if ("formdate".equals(formAttributeVo.getHandler())) {
-                    JSONObject config = conditionParamVo.getConfig();
-                    if (MapUtils.isNotEmpty(config)) {
-                        config.put("type", "datetimerange");
-                        conditionParamVo.setConfig(config.toJSONString());
-                    }
-                } else if ("formtime".equals(formAttributeVo.getHandler())) {
-                    JSONObject config = conditionParamVo.getConfig();
-                    if (MapUtils.isNotEmpty(config)) {
-                        config.put("type", "timerange");
-                        conditionParamVo.setConfig(config.toJSONString());
-                    }
-                }
-                ParamType paramType = formHandler.getParamType();
-                if (paramType != null) {
-                    conditionParamVo.setParamType(paramType.getName());
-                    conditionParamVo.setParamTypeName(paramType.getText());
-                    Expression expression = paramType.getDefaultExpression();
-                    if (expression != null) {
-                        conditionParamVo.setDefaultExpression(expression.getExpression());
-                    }
-                    if (CollectionUtils.isNotEmpty(paramType.getExpressionList())) {
-                        for (Expression exp : paramType.getExpressionList()) {
-                            conditionParamVo.getExpressionList().add(new ExpressionVo(exp));
+                if (formHandler.isConditionable()) {
+                    formAttributeVo.setType("form");
+                    formAttributeVo.setConditionModel(FormConditionModel.CUSTOM);
+                    ConditionParamVo conditionParamVo = new ConditionParamVo();
+                    conditionParamVo.setName(formAttributeVo.getUuid());
+                    conditionParamVo.setLabel(formAttributeVo.getLabel());
+                    conditionParamVo.setController(formAttributeVo.getHandlerType());
+                    conditionParamVo.setType(formAttributeVo.getType());
+                    conditionParamVo.setHandler(formAttributeVo.getHandler());
+                    conditionParamVo.setConfig(formAttributeVo.getConfig());
+                    if ("formdate".equals(formAttributeVo.getHandler())) {
+                        JSONObject config = conditionParamVo.getConfig();
+                        if (MapUtils.isNotEmpty(config)) {
+                            config.put("type", "datetimerange");
+                            conditionParamVo.setConfig(config.toJSONString());
+                        }
+                    } else if ("formtime".equals(formAttributeVo.getHandler())) {
+                        JSONObject config = conditionParamVo.getConfig();
+                        if (MapUtils.isNotEmpty(config)) {
+                            config.put("type", "timerange");
+                            conditionParamVo.setConfig(config.toJSONString());
                         }
                     }
+                    ParamType paramType = formHandler.getParamType();
+                    if (paramType != null) {
+                        conditionParamVo.setParamType(paramType.getName());
+                        conditionParamVo.setParamTypeName(paramType.getText());
+                        Expression expression = paramType.getDefaultExpression();
+                        if (expression != null) {
+                            conditionParamVo.setDefaultExpression(expression.getExpression());
+                        }
+                        if (CollectionUtils.isNotEmpty(paramType.getExpressionList())) {
+                            for (Expression exp : paramType.getExpressionList()) {
+                                conditionParamVo.getExpressionList().add(new ExpressionVo(exp));
+                            }
+                        }
+                    }
+                    resultArray.add(conditionParamVo);
                 }
-
-                resultArray.add(conditionParamVo);
             }
         }
         return resultArray;

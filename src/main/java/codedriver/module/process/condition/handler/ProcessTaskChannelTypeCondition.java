@@ -7,7 +7,7 @@ import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
-import codedriver.framework.process.constvalue.ProcessConditionModel;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
@@ -42,18 +42,18 @@ public class ProcessTaskChannelTypeCondition extends ProcessTaskConditionBase im
         return "服务类型";
     }
 
-    @Override
-    public String getHandler(String processWorkcenterConditionType) {
-        if (ProcessConditionModel.SIMPLE.getValue().equals(processWorkcenterConditionType)) {
-            formHandlerType = FormHandlerType.CHECKBOX.toString();
-        }
-        return formHandlerType;
-    }
-
-    @Override
-    public String getType() {
-        return ProcessFieldType.COMMON.getValue();
-    }
+	@Override
+	public String getHandler(FormConditionModel processWorkcenterConditionType) {
+		if(FormConditionModel.SIMPLE == processWorkcenterConditionType) {
+			formHandlerType = FormHandlerType.CHECKBOX.toString();
+		}
+		return formHandlerType;
+	}
+	
+	@Override
+	public String getType() {
+		return ProcessFieldType.COMMON.getValue();
+	}
 
     @Override
     public JSONObject getConfig(ConditionConfigType type) {

@@ -8,6 +8,7 @@ import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.ExpressionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.notify.core.INotifyPolicyHandlerGroup;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.core.NotifyHandlerType;
@@ -118,14 +119,13 @@ public class AutomaticNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     @Override
     protected List<ConditionParamVo> mySystemConditionOptionList() {
         List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
-        String conditionModel = ProcessConditionModel.CUSTOM.getValue();
         for(ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {
             IConditionHandler condition = ConditionHandlerFactory.getHandler(option.getValue());
             if(condition != null) {
                 ConditionParamVo param = new ConditionParamVo();
                 param.setName(condition.getName());
                 param.setLabel(condition.getDisplayName());
-                param.setController(condition.getHandler(conditionModel));
+                param.setController(condition.getHandler(FormConditionModel.CUSTOM));
                 if(condition.getConfig() != null) {
                     param.setConfig(condition.getConfig().toJSONString());
                 }

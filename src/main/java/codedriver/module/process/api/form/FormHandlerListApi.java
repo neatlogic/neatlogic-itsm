@@ -9,7 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.process.constvalue.IProcessFormHandlerType;
+import codedriver.framework.form.constvalue.IFormHandlerType;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
@@ -19,6 +19,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class FormHandlerListApi extends PrivateApiComponentBase {
     /** 标记是否未初始化数据，只初始化一次 **/
     private static volatile boolean isUninitialized = true;
@@ -51,14 +52,14 @@ public class FormHandlerListApi extends PrivateApiComponentBase {
 
     static {
         if (isUninitialized) {
-            synchronized (IProcessFormHandlerType.class) {
+            synchronized (IFormHandlerType.class) {
                 if (isUninitialized) {
                     Reflections reflections = new Reflections("codedriver");
-                    Set<Class<? extends IProcessFormHandlerType>> classSet =
-                        reflections.getSubTypesOf(IProcessFormHandlerType.class);
-                    for (Class<? extends IProcessFormHandlerType> c : classSet) {
+                    Set<Class<? extends IFormHandlerType>> classSet =
+                        reflections.getSubTypesOf(IFormHandlerType.class);
+                    for (Class<? extends IFormHandlerType> c : classSet) {
                         try {
-                            for (IProcessFormHandlerType type : c.getEnumConstants()) {
+                            for (IFormHandlerType type : c.getEnumConstants()) {
                                 JSONObject jsonObj = new JSONObject();
                                 jsonObj.put("handler", type.getHandler());
                                 jsonObj.put("name", type.getHandlerName());

@@ -3,18 +3,19 @@ package codedriver.module.process.condition.handler;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
+import codedriver.framework.form.constvalue.FormHandlerTypeBak;
 import codedriver.framework.fulltextindex.utils.FullTextIndexUtil;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
-import codedriver.framework.process.constvalue.ConditionFormOptions;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.form.dto.AttributeDataVo;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.process.dto.AttributeDataVo;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.dto.FormVersionVo;
-import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.util.Md5Util;
 import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSON;
@@ -44,7 +45,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     }
 
     @Override
-    public String getHandler(String processWorkcenterConditionType) {
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
         return null;
     }
 
@@ -152,7 +153,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
         IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(conditionVo.getHandler());
         JSONArray valueArray = JSONArray.parseArray(conditionVo.getValueList().toString());
 
-        if (ConditionFormOptions.FORMDATE.getValue().equals(conditionVo.getHandler())) {
+        if (FormHandlerTypeBak.FORMDATE.getHandler().equals(conditionVo.getHandler())) {
             dateSqlBuild(valueArray, conditionVo, sqlSb);
         } else {
             defaultSqlBuild(valueArray, conditionVo, formAttributeHandler, sqlSb);

@@ -3,6 +3,7 @@ package codedriver.module.process.api.process;
 import java.util.List;
 
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.form.constvalue.FormHandlerTypeBak;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,12 +13,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.ConditionParamVo;
-import codedriver.framework.process.constvalue.ConditionFormOptions;
 import codedriver.framework.process.constvalue.ProcessTaskParams;
-import codedriver.framework.process.dao.mapper.FormMapper;
-import codedriver.framework.process.dto.FormAttributeVo;
-import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -79,20 +79,21 @@ public class ProcessParamList extends PrivateApiComponentBase {
         if (StringUtils.isNotBlank(formUuid)) {
             List<FormAttributeVo> formAttrList = formMapper.getFormAttributeList(new FormAttributeVo(formUuid));
             for (FormAttributeVo formAttributeVo : formAttrList) {
-                if (ConditionFormOptions.getConditionFormOption(formAttributeVo.getHandler()) == null) {
+                IFormAttributeHandler formHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                if(formHandler == null){
                     continue;
                 }
-                ConditionParamVo conditionParamVo = new ConditionParamVo();
-                conditionParamVo.setName(formAttributeVo.getUuid());
-                conditionParamVo.setLabel(formAttributeVo.getLabel());
-                IFormAttributeHandler formHandler =
-                    FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                if (formHandler != null && formHandler.getParamType() != null) {
-                    conditionParamVo.setParamType(formHandler.getParamType().getName());
-                    conditionParamVo.setParamTypeName(formHandler.getParamType().getText());
+                if (formHandler.isConditionable()) {
+                    ConditionParamVo conditionParamVo = new ConditionParamVo();
+                    conditionParamVo.setName(formAttributeVo.getUuid());
+                    conditionParamVo.setLabel(formAttributeVo.getLabel());
+                    if (formHandler != null && formHandler.getParamType() != null) {
+                        conditionParamVo.setParamType(formHandler.getParamType().getName());
+                        conditionParamVo.setParamTypeName(formHandler.getParamType().getText());
+                    }
+                    conditionParamVo.setIsEditable(0);
+                    resultArray.add(conditionParamVo);
                 }
-                conditionParamVo.setIsEditable(0);
-                resultArray.add(conditionParamVo);
             }
         }
         return resultArray;
