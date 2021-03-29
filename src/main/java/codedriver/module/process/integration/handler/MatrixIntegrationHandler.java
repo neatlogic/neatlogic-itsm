@@ -1,8 +1,19 @@
 package codedriver.module.process.integration.handler;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.integration.dto.IntegrationResultVo;
+import codedriver.framework.matrix.exception.MatrixExternalException;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -14,12 +25,7 @@ public class MatrixIntegrationHandler extends IntegrationHandlerBase {
 
 	@Override
 	public String getName() {
-		return Type.MATRIX.getText();
-	}
-
-	@Override
-	public String getType() {
-		return Type.MATRIX.getValue();
+		return "矩阵外部数据源查询";
 	}
 
 	@Override
@@ -70,4 +76,34 @@ public class MatrixIntegrationHandler extends IntegrationHandlerBase {
 		
 	}
 
+	@Override
+	public void validate(IntegrationResultVo resultVo) throws ApiRuntimeException {
+		if(resultVo != null && StringUtils.isBlank(resultVo.getError())
+				&& StringUtils.isNotBlank(resultVo.getTransformedResult())){
+			JSONObject transformedResult = null;
+			try {
+				transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+			}catch (Exception ex){
+				throw new MatrixExternalException("返回结果不是JSON格式");
+			}
+			if(MapUtils.isNotEmpty(transformedResult)){
+				Set<String> keys = transformedResult.keySet();
+				Set<String> keySet = new HashSet<>();
+				getOutputPattern().stream().forEach(o -> keySet.add(o.getName()));
+				if(!CollectionUtils.containsAll(keys,keySet)){
+					throw new MatrixExternalException("返回结果不符合格式，缺少" + JSON.toJSONString(CollectionUtils.removeAll(keySet, keys)));
+				}
+				JSONArray theadList = transformedResult.getJSONArray("theadList");
+				if(CollectionUtils.isNotEmpty(theadList)){
+					for(int i = 0; i < theadList.size();i++){
+						if(!theadList.getJSONObject(i).containsKey("key") || !theadList.getJSONObject(i).containsKey("title")){
+							throw new MatrixExternalException("返回结果不符合格式,theadList缺少key或title");
+						}
+					}
+				}else{
+					throw new MatrixExternalException("返回结果不符合格式,缺少theadList");
+				}
+			}
+		}
+	}
 }
