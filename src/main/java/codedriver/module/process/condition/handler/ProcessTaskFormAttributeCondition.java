@@ -7,13 +7,16 @@ import codedriver.framework.fulltextindex.utils.FullTextIndexUtil;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
+import codedriver.framework.process.constvalue.ConditionFormOptions;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dto.AttributeDataVo;
 import codedriver.framework.process.dto.FormAttributeVo;
 import codedriver.framework.process.dto.FormVersionVo;
 import codedriver.framework.process.formattribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.process.formattribute.core.IFormAttributeHandler;
 import codedriver.framework.util.Md5Util;
+import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -24,10 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Component
 public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -150,6 +151,52 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
         ConditionVo conditionVo = conditionList.get(index);
         IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(conditionVo.getHandler());
         JSONArray valueArray = JSONArray.parseArray(conditionVo.getValueList().toString());
+
+        if (ConditionFormOptions.FORMDATE.getValue().equals(conditionVo.getHandler())) {
+            dateSqlBuild(valueArray, conditionVo, sqlSb);
+        } else {
+            defaultSqlBuild(valueArray, conditionVo, formAttributeHandler, sqlSb);
+        }
+    }
+
+    /**
+     * date的sql拼凑
+     *
+     * @param valueArray  条件的值
+     * @param conditionVo 条件
+     * @param sqlSb       拼凑的sql
+     */
+    private void dateSqlBuild(JSONArray valueArray, ConditionVo conditionVo, StringBuilder sqlSb) {
+        List<String> valueList = new ArrayList<>();
+        String startTime = StringUtils.EMPTY;
+        String endTime = StringUtils.EMPTY;
+        String expression = Expression.BETWEEN.getExpression();
+        for (Object valueObj : valueArray) {
+            JSONObject dateValue = JSONObject.parseObject(valueObj.toString());
+            SimpleDateFormat format = new SimpleDateFormat(TimeUtil.YYYY_MM_DD_HH_MM_SS);
+            if (dateValue.containsKey(ProcessWorkcenterField.STARTTIME.getValuePro())) {
+                startTime = format.format(new Date(dateValue.getLong(ProcessWorkcenterField.STARTTIME.getValuePro())));
+                endTime = format.format(new Date(dateValue.getLong(ProcessWorkcenterField.ENDTIME.getValuePro())));
+            }
+            break;
+        }
+
+        if (StringUtils.isNotBlank(startTime)) {
+            sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` WHERE ff.`target_id` = pt.id  AND ff.`target_type` = 'processtask_form' AND ff.`target_field` = '%s' AND fw.word between '%s' and '%s' ) ",
+                    conditionVo.getName(), startTime, endTime));
+        }
+
+    }
+
+    /**
+     * 除date外的sql拼凑
+     *
+     * @param valueArray           条件的值
+     * @param conditionVo          条件
+     * @param formAttributeHandler 表单处理器
+     * @param sqlSb                拼凑的sql
+     */
+    private void defaultSqlBuild(JSONArray valueArray, ConditionVo conditionVo, IFormAttributeHandler formAttributeHandler, StringBuilder sqlSb) {
         List<String> valueList = new ArrayList<>();
         for (Object valueObj : valueArray) {
             String[] valueTmpList = valueObj.toString().split("&=&");
