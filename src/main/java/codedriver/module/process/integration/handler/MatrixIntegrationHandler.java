@@ -7,8 +7,7 @@ import java.util.Set;
 
 import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.integration.dto.IntegrationResultVo;
-import codedriver.framework.matrix.exception.MatrixExternalException;
-import codedriver.framework.matrix.exception.MatrixExternalNoReturnException;
+import codedriver.framework.matrix.exception.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -85,24 +84,24 @@ public class MatrixIntegrationHandler extends IntegrationHandlerBase {
 				try {
 					transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
 				}catch (Exception ex){
-					throw new MatrixExternalException("返回结果不是JSON格式");
+					throw new MatrixExternalDataIsNotJsonException();
 				}
 				if(MapUtils.isNotEmpty(transformedResult)){
 					Set<String> keys = transformedResult.keySet();
 					Set<String> keySet = new HashSet<>();
 					getOutputPattern().stream().forEach(o -> keySet.add(o.getName()));
 					if(!CollectionUtils.containsAll(keys,keySet)){
-						throw new MatrixExternalException("返回结果不符合格式，缺少" + JSON.toJSONString(CollectionUtils.removeAll(keySet, keys)));
+						throw new MatrixExternalDataNotFormattedException(JSON.toJSONString(CollectionUtils.removeAll(keySet, keys)));
 					}
 					JSONArray theadList = transformedResult.getJSONArray("theadList");
 					if(CollectionUtils.isNotEmpty(theadList)){
 						for(int i = 0; i < theadList.size();i++){
 							if(!theadList.getJSONObject(i).containsKey("key") || !theadList.getJSONObject(i).containsKey("title")){
-								throw new MatrixExternalException("返回结果不符合格式,theadList缺少key或title");
+								throw new MatrixExternalDataLostKeyOrTitleInTheadListException();
 							}
 						}
 					}else{
-						throw new MatrixExternalException("返回结果不符合格式,缺少theadList");
+						throw new MatrixExternalDataNotFormattedException("theadList");
 					}
 				}else{
 					throw new MatrixExternalNoReturnException();
