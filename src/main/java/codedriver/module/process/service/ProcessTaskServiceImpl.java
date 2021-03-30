@@ -1237,11 +1237,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 processTaskVo.setChannelType(channelTypeVo.clone());
             } catch (CloneNotSupportedException e) {
             }
-        }else{
-            if(processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(new BasePageVo() , Collections.singletonList(processTaskVo.getChannelUuid())) > 0) {
-                processTaskVo.setChannelName("服务已被删除");
-                processTaskVo.setChannelPath("服务已被删除");
-            }
         }
         // 耗时
         if (processTaskVo.getEndTime() != null) {
