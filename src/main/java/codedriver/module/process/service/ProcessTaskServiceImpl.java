@@ -1317,13 +1317,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskVo.setFocusUserUuidList(focusUserUuidList);
         }
         /** 查询当前用户是否有权限修改工单关注人 **/
-        int canEditFocusUser = 1;
-        try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_FOCUSUSER_UPDATE).build()
-                    .checkAndNoPermissionThrowException();
-        } catch (ProcessTaskNoPermissionException e) {
-            canEditFocusUser = 0;
-        }
+        int canEditFocusUser = new ProcessAuthManager
+                .TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_FOCUSUSER_UPDATE).build()
+                .check() == true ? 1 : 0;
         processTaskVo.setCanEditFocusUser(canEditFocusUser);
 
         return processTaskVo;
