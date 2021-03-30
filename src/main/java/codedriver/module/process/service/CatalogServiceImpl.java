@@ -121,12 +121,7 @@ public class CatalogServiceImpl implements CatalogService {
 	public boolean channelIsAuthority(String channelUuid, String userUuid) {
 		ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
 		if(channel == null) {
-			//如果存在工单依赖，则说明服务之前存在，现在被删除了，则返回合法权限
-			if(processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(new BasePageVo() , Collections.singletonList(channelUuid)) > 0){
-				return true;
-			}else {
-				throw new ChannelNotFoundException(channelUuid);
-			}
+			throw new ChannelNotFoundException(channelUuid);
 		}
 		/** 服务状态必须是激活**/
 		if(Objects.equals(channel.getIsActive(), 1)) {
