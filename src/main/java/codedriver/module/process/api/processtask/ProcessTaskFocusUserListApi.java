@@ -17,13 +17,11 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-@Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
 @AuthAction(action = NO_AUTH.class)
 public class ProcessTaskFocusUserListApi extends PrivateApiComponentBase {
