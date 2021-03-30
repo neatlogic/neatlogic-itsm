@@ -1,6 +1,7 @@
 package codedriver.module.process.api.catalog;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,11 +55,13 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "catalogUuid", type = ApiParamType.STRING, desc = "服务目录uuid,0：所有" , isRequired = true)
+		@Param(name = "catalogUuid", type = ApiParamType.STRING, desc = "服务目录uuid,0：所有"),
+		@Param(name = "isFavorite", type = ApiParamType.ENUM, rule = "0,1", desc = "是否收藏(1:是;0:否)")
 	})
 	@Output({
 		@Param(explode=BasePageVo.class),
-		@Param(name="treeList",explode=CatalogVo[].class,desc="目录及服务列表")
+		@Param(name="favoriteList",explode=ChannelVo[].class,desc="收藏的服务列表"),
+		@Param(name="list",explode=CatalogVo[].class,desc="目录及服务列表")
 	})
 	@Description(desc = "查看目录及服务列表(移动端)")
 	@Override
@@ -66,7 +69,18 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		JSONArray listArray = new JSONArray();
 		String catalogUuid = jsonObj.getString("catalogUuid");
+		Integer isFavorite = jsonObj.getInteger("isFavorite");
 		ChannelVo paramChannel = new ChannelVo();
+		/** 如果isFavorite=1，则直接查询所有收藏的服务 **/
+		if(isFavorite != null && Objects.equals(isFavorite,1)){
+			paramChannel.setUserUuid(UserContext.get().getUserUuid(true));
+			//查出当前用户已授权的服务
+			paramChannel.setAuthorizedUuidList(catalogService.getCurrentUserAuthorizedChannelUuidList());
+			paramChannel.setIsActive(1);
+			List<ChannelVo> favoriteChannelList = channelMapper.getFavoriteChannelList(paramChannel);
+			resultObj.put("favoriteList", favoriteChannelList);
+			return resultObj;
+		}
 		//如果服务目录catalogUuid == 0，则展示所有一级服务目录,否则仅展示对应的catalogUuid
 		if(catalogUuid.equals(CatalogVo.ROOT_UUID)) {
 			catalogUuid = null;
@@ -84,15 +98,6 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 		    listArray = catalogService.getCatalogChannelByCatalogUuid(catalog,true).getJSONArray("list");
 		}
 		resultObj.put("list", listArray);
-		/** 获取对应目录下的收藏服务 **/
-		paramChannel.setIsFavorite(1);
-		paramChannel.setUserUuid(UserContext.get().getUserUuid(true));
-		//查出当前用户已授权的服务
-		paramChannel.setAuthorizedUuidList(catalogService.getCurrentUserAuthorizedChannelUuidList());
-		paramChannel.setIsActive(1);
-		paramChannel.setParentUuid(catalogUuid);
-		resultObj.put("favoriteList", channelMapper.searchChannelList(paramChannel));
-			
 		return resultObj;
 	}
 
