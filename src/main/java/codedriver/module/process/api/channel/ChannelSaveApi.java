@@ -3,6 +3,10 @@ package codedriver.module.process.api.channel;
 import java.util.List;
 
 import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.process.exception.channel.ChannelParentUuidCannotBeZeroException;
+import codedriver.framework.process.exception.priority.PriorityNotFoundException;
+import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.exception.worktime.WorktimeNotFoundException;
 import codedriver.framework.restful.core.IValid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +106,7 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 		//获取父级信息
 		String parentUuid = channelVo.getParentUuid();
 		if(CatalogVo.ROOT_UUID.equals(parentUuid)) {
-			throw new ChannelIllegalParameterException("不能在根目录下创建通道，parentUuid=" + parentUuid);
+			throw new ChannelParentUuidCannotBeZeroException();
 		}
 		if(catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
 			throw new CatalogNotFoundException(parentUuid);
@@ -125,19 +129,19 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
 		channelVo.setSort(sort);
 		channelMapper.replaceChannel(channelVo);
 		if(processMapper.checkProcessIsExists(channelVo.getProcessUuid()) == 0) {
-			throw new ChannelIllegalParameterException("流程图：'" + channelVo.getProcessUuid() + "'不存在");
+			throw new ProcessNotFoundException(channelVo.getProcessUuid());
 		}
 		channelMapper.replaceChannelProcess(uuid, channelVo.getProcessUuid());
 
 		if(worktimeMapper.checkWorktimeIsExists(channelVo.getWorktimeUuid()) == 0) {
-			throw new ChannelIllegalParameterException("工作时间窗口：'" + channelVo.getWorktimeUuid() + "'不存在");
+			throw new WorktimeNotFoundException(channelVo.getWorktimeUuid());
 		}
 		channelMapper.replaceChannelWorktime(uuid, channelVo.getWorktimeUuid());
 		String defaultPriorityUuid = channelVo.getDefaultPriorityUuid();
 		List<String> priorityUuidList = channelVo.getPriorityUuidList();
 		for(String priorityUuid : priorityUuidList) {
 			if(priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
-				throw new ChannelIllegalParameterException("优先级：'" + priorityUuid + "'不存在");
+				throw new PriorityNotFoundException(priorityUuid);
 			}
 			ChannelPriorityVo channelPriority = new ChannelPriorityVo();
 			channelPriority.setChannelUuid(uuid);
