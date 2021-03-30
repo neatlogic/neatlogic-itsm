@@ -38,8 +38,10 @@ import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
@@ -1314,6 +1316,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if(CollectionUtils.isNotEmpty(focusUserUuidList)){
             processTaskVo.setFocusUserUuidList(focusUserUuidList);
         }
+        /** 查询当前用户是否有权限修改工单关注人 **/
+        int canEditFocusUser = new ProcessAuthManager
+                .TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_FOCUSUSER_UPDATE).build()
+                .check() == true ? 1 : 0;
+        processTaskVo.setCanEditFocusUser(canEditFocusUser);
+
         return processTaskVo;
     }
 
