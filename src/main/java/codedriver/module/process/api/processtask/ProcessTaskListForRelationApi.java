@@ -84,6 +84,7 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         List<Long> relatedProcessTaskIdList = processTaskMapper.getRelatedProcessTaskIdListByProcessTaskId(processTaskId);
+        relatedProcessTaskIdList.add(processTaskId);
         Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
         if(channelTypeMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
