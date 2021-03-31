@@ -51,7 +51,6 @@ public class CatalogMoveApi extends PrivateApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被移动的服务目录uuid"),
-		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired = true, desc = "移动后的父级uuid"),
 		@Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "目标节点uuid"),
 		@Param(name = "moveType", type = ApiParamType.ENUM, rule = "inner,prev,next", isRequired = true, desc = "移动类型")
 	})
@@ -62,7 +61,9 @@ public class CatalogMoveApi extends PrivateApiComponentBase {
 		String moveType = jsonObj.getString("moveType");
 		String targetUuid = jsonObj.getString("targetUuid");
 		LRCodeManager.moveTreeNode("catalog", "uuid", "parent_uuid", uuid, MoveType.getMoveType(moveType), targetUuid);
+		String parentUuid = catalogMapper.getParentUuidByUuid(uuid);
 		CatalogVo catalogVo = catalogMapper.getCatalogByUuid(uuid);
+		catalogVo.setParentUuid(parentUuid);
 		//判断移动后相同目录下是否有同名目录
 		if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
 			throw new CatalogNameRepeatException(catalogVo.getName());
