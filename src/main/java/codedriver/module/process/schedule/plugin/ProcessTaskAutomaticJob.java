@@ -3,6 +3,7 @@ package codedriver.module.process.schedule.plugin;
 import java.util.Date;
 import java.util.List;
 
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.service.ProcessTaskService;
 
 @Component
+@DisallowConcurrentExecution
 public class ProcessTaskAutomaticJob extends JobBase {
 	@Autowired
 	ProcessTaskService processTaskService;

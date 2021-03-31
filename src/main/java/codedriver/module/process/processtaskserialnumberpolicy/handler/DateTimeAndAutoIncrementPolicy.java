@@ -12,6 +12,7 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 
 import org.quartz.CronExpression;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -217,9 +218,12 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
                 // 切换租户数据源
                 TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
                 IJob job = SchedulerManager.getHandler(ProcessTaskSerialNumberSeedResetJob.class.getName());
-                JobObject.Builder jobObjectBuilder = new JobObject.Builder(UuidUtil.randomUuid(), job.getGroupName(),
-                        job.getClassName(), TenantContext.get().getTenantUuid()).addData("handler",
-                        DateTimeAndAutoIncrementPolicy.class.getName());
+                JobObject.Builder jobObjectBuilder = new JobObject.Builder(
+                        UuidUtil.randomUuid(),
+                        job.getGroupName(),
+                        job.getClassName(),
+                        TenantContext.get().getTenantUuid())
+                        .addData("handler", DateTimeAndAutoIncrementPolicy.class.getName());
                 JobObject jobObject = jobObjectBuilder.build();
                 job.reloadJob(jobObject);
             } catch (Exception e) {
@@ -231,6 +235,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
     }
 
     @Component
+    @DisallowConcurrentExecution
     private static class ProcessTaskSerialNumberSeedResetJob extends JobBase {
 
         private String cron = "0 0 0 * * ?";
