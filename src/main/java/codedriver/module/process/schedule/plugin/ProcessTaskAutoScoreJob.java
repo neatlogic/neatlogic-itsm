@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.WorktimeMapper;
+import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -29,7 +30,7 @@ import codedriver.framework.process.dto.score.ProcessTaskScoreVo;
 import codedriver.framework.process.dto.score.ScoreTemplateDimensionVo;
 import codedriver.framework.process.dto.score.ScoreTemplateVo;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
-import codedriver.framework.process.util.WorkTimeUtil;
+import codedriver.framework.util.WorkTimeUtil;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
 
@@ -37,6 +38,7 @@ import codedriver.framework.scheduler.dto.JobObject;
  * 工单自动评分定时类
  */
 @Component
+@DisallowConcurrentExecution
 public class ProcessTaskAutoScoreJob extends JobBase {
 	static Logger logger = LoggerFactory.getLogger(ProcessTaskAutoScoreJob.class);
 

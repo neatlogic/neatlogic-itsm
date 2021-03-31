@@ -11,6 +11,7 @@ import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
 import codedriver.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.NotifyPolicyUtil;
 
 @Component
+@DisallowConcurrentExecution
 public class ProcessTaskSlaNotifyJob extends JobBase {
     static Logger logger = LoggerFactory.getLogger(ProcessTaskSlaNotifyJob.class);
 
