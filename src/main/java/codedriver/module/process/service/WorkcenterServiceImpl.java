@@ -53,6 +53,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     @Autowired
     ChannelMapper channelMapper;
     @Autowired
+    ProcessMapper processMapper;
+    @Autowired
     CatalogMapper catalogMapper;
     @Autowired
     WorktimeMapper worktimeMapper;
@@ -527,14 +529,17 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             } else {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();
                 if (CollectionUtils.isNotEmpty(channelUuidList)) {
-                    List<FormAttributeVo> formAttrList =
-                        formMapper.getFormAttributeListByChannelUuidList(channelUuidList);
-                    List<FormAttributeVo> theadFormList = formAttrList.stream()
-                        .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
-                    if (CollectionUtils.isEmpty(theadFormList)) {
-                        it.remove();
-                    } else {
-                        thead.setDisplayName(theadFormList.get(0).getLabel());
+                    List<String> formUuidList = processMapper.getFormUuidListByChannelUuidList(channelUuidList);
+                    if(CollectionUtils.isNotEmpty(formUuidList)){
+                        List<FormAttributeVo> formAttrList =
+                                formMapper.getFormAttributeListByFormUuidList(channelUuidList);
+                        List<FormAttributeVo> theadFormList = formAttrList.stream()
+                                .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
+                        if (CollectionUtils.isEmpty(theadFormList)) {
+                            it.remove();
+                        } else {
+                            thead.setDisplayName(theadFormList.get(0).getLabel());
+                        }
                     }
                 }
             }
