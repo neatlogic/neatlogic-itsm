@@ -195,13 +195,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         return processTaskMapper.getProcessTaskCountBySql(sb.build());
     }
 
-    /**
-     * @Description: 获取用户工单中心table column theadList
-     * @Author: 89770
-     * @Date: 2021/1/19 20:38
-     * @Params: [workcenterVo, columnComponentMap, sortColumnList]
-     * @Returns: java.util.List<codedriver.framework.process.workcenter.dto.WorkcenterTheadVo>
-     **/
+    @Override
     public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList) {
         List<WorkcenterTheadVo> theadList = workcenterMapper.getWorkcenterThead(new WorkcenterTheadVo(workcenterVo.getUuid(), UserContext.get().getUserUuid()));
         // 矫正theadList 或存在表单属性或固定字段增删

@@ -1,11 +1,14 @@
 package codedriver.module.process.service;
 
+import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Title: NewWorkcenterService
@@ -54,5 +57,15 @@ public interface NewWorkcenterService {
      * @Returns: com.alibaba.fastjson.JSONArray
      **/
     public JSONArray getKeywordOptionsPCNew(WorkcenterVo workcenterVo);
+
+
+    /**
+     * @Description: 获取用户工单中心table column theadList
+     * @Author: 89770
+     * @Date: 2021/1/19 20:38
+     * @Params: [workcenterVo, columnComponentMap, sortColumnList]
+     * @Returns: java.util.List<codedriver.framework.process.workcenter.dto.WorkcenterTheadVo>
+     **/
+    public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList);
 
 }
