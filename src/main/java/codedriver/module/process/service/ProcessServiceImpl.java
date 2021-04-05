@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.exception.integration.IntegrationNotFoundException;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
-import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
@@ -41,9 +40,6 @@ public class ProcessServiceImpl implements ProcessService {
 
     @Autowired
     private NotifyMapper notifyMapper;
-
-    @Autowired
-    private NotifyPolicyInvokerManager notifyPolicyInvokerManager;
 
     @Autowired
     private IntegrationMapper integrationMapper;

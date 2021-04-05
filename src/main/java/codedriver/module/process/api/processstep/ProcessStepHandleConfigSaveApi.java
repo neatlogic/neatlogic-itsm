@@ -3,7 +3,6 @@ package codedriver.module.process.api.processstep;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dependency.core.DependencyManager;
-import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -37,9 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_STEP_HANDLER_MODIFY.class)
 public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
-
-    @Autowired
-    private NotifyPolicyInvokerManager notifyPolicyInvokerManager;
 
     @Autowired
     private ProcessStepHandlerMapper stepHandlerMapper;
