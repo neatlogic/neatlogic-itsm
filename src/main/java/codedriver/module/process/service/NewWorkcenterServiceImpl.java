@@ -9,7 +9,7 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.form.dao.mapper.FormMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
@@ -56,7 +56,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     FormMapper formMapper;
 
     @Resource
-    ProcessMapper processMapper;
+    ChannelMapper channelMapper;
 
     @Resource
     ProcessTaskMapper processTaskMapper;
@@ -220,7 +220,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             } else {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();
                 if (CollectionUtils.isNotEmpty(channelUuidList)) {
-                    List<String> formUuidList = processMapper.getFormUuidListByChannelUuidList(channelUuidList);
+                    List<String> formUuidList = channelMapper.getFormUuidListByChannelUuidList(channelUuidList);
                     if(CollectionUtils.isNotEmpty(formUuidList)){
                         List<FormAttributeVo> formAttrList =
                                 formMapper.getFormAttributeListByFormUuidList(formUuidList);

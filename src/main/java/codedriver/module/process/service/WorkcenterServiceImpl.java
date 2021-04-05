@@ -53,8 +53,6 @@ public class WorkcenterServiceImpl implements WorkcenterService {
     @Autowired
     ChannelMapper channelMapper;
     @Autowired
-    ProcessMapper processMapper;
-    @Autowired
     CatalogMapper catalogMapper;
     @Autowired
     WorktimeMapper worktimeMapper;
@@ -529,7 +527,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             } else {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();
                 if (CollectionUtils.isNotEmpty(channelUuidList)) {
-                    List<String> formUuidList = processMapper.getFormUuidListByChannelUuidList(channelUuidList);
+                    List<String> formUuidList = channelMapper.getFormUuidListByChannelUuidList(channelUuidList);
                     if(CollectionUtils.isNotEmpty(formUuidList)){
                         List<FormAttributeVo> formAttrList =
                                 formMapper.getFormAttributeListByFormUuidList(channelUuidList);
