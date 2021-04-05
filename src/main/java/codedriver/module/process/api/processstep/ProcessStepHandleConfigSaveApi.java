@@ -2,9 +2,8 @@ package codedriver.module.process.api.processstep;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
-import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -17,6 +16,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.PROCESS_STEP_HANDLER_MODIFY;
 
+import codedriver.module.process.dependency.handler.NotifyPolicyProcessStepHandlerDependencyHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
@@ -74,19 +74,21 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                     stepHandlerVo.setConfig(config.toJSONString());
                     stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
                     stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
-                    notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
+//                    notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
+                    DependencyManager.delete(NotifyPolicyProcessStepHandlerDependencyHandler.class, stepHandlerVo.getHandler());
                     JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
                     Long policyId = notifyPolicyConfig.getLong("policyId");
                     if (policyId != null) {
-                    	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
-                    	notifyPolicyInvokerVo.setPolicyId(policyId);
-                    	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());
-                    	JSONObject notifyPolicyInvokerConfig = new JSONObject();
-                    	notifyPolicyInvokerConfig.put("function", "processstephandler");
-                    	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandlerType.getName(stepHandlerVo.getHandler()));
-                    	notifyPolicyInvokerConfig.put("handler", stepHandlerVo.getHandler());
-                    	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
-                    	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
+//                    	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
+//                    	notifyPolicyInvokerVo.setPolicyId(policyId);
+//                    	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());
+//                    	JSONObject notifyPolicyInvokerConfig = new JSONObject();
+//                    	notifyPolicyInvokerConfig.put("function", "processstephandler");
+//                    	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandlerTypeFactory.getName(stepHandlerVo.getHandler()));
+//                    	notifyPolicyInvokerConfig.put("handler", stepHandlerVo.getHandler());
+//                    	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
+//                    	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
+                        DependencyManager.insert(NotifyPolicyProcessStepHandlerDependencyHandler.class, policyId, stepHandlerVo.getHandler());
                     }
     			} 			
     		}

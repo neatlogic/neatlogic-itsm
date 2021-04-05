@@ -1,11 +1,15 @@
 package codedriver.module.process.api.process;
 
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.PROCESS_MODIFY;
 
+import codedriver.module.process.dependency.handler.NotifyPolicyProcessDependencyHandler;
+import codedriver.module.process.dependency.handler.NotifyPolicyProcessSlaDependencyHandler;
+import codedriver.module.process.dependency.handler.NotifyPolicyProcessStepDependencyHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +23,8 @@ import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessDraftVo;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessReferencedCannotBeDeleteException;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -66,7 +72,11 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 		if(processMapper.getProcessReferenceCount(uuid) > 0) {
 			throw new ProcessReferencedCannotBeDeleteException(uuid);
 		}
-		
+		List<String> slaUuidList = processMapper.getSlaUuidListByProcessUuid(uuid);
+		List<String> processStepUuidList = processMapper.getProcessStepUuidListByProcessUuid(uuid);
+		DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, uuid);
+		DependencyManager.delete(NotifyPolicyProcessStepDependencyHandler.class, processStepUuidList);
+		DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaUuidList);
 		processMapper.deleteProcessByUuid(uuid);
 		processMapper.deleteProcessStepByProcessUuid(uuid);
 		processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
@@ -77,7 +87,7 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 		processMapper.deleteProcessDraft(processDraftVo);
 		processMapper.deleteProcessFormByProcessUuid(uuid);
 		processMapper.deleteProcessSlaByProcessUuid(uuid);
-		notifyPolicyInvokerManager.removeInvoker(uuid);
+//		notifyPolicyInvokerManager.removeInvoker(uuid);
 		//删除关联的评分模版
 		scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
 		return uuid;
