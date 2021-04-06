@@ -20,12 +20,14 @@ import javax.annotation.Resource;
 
 /**
  * 节点关理组件引用通知策略处理器
+ *
  * @author: linbq
  * @since: 2021/4/5 14:31
  **/
 public class NotifyPolicyProcessStepHandlerDependencyHandler extends DependencyHandlerBase {
     @Resource
     private ProcessStepHandlerMapper processStepHandlerMapper;
+
     /**
      * 表名
      *
@@ -57,20 +59,21 @@ public class NotifyPolicyProcessStepHandlerDependencyHandler extends DependencyH
     }
 
     /**
-     * 解析数据，拼装跳转url
+     * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
-     * @param caller
+     * @param caller 调用者值
      * @return
      */
     @Override
     protected ValueTextVo parse(Object caller) {
-        String handler = (String) caller;
-        String name = ProcessStepHandlerTypeFactory.getName(handler);
-        if (StringUtils.isNotBlank(name)) {
-            ValueTextVo valueTextVo = new ValueTextVo();
-            valueTextVo.setValue(caller);
-            valueTextVo.setText(String.format("<a href=\"/%s/process.html#/\">%s</a>", TenantContext.get().getTenantUuid(), name));
-            return valueTextVo;
+        if (caller instanceof String) {
+            String name = ProcessStepHandlerTypeFactory.getName((String) caller);
+            if (StringUtils.isNotBlank(name)) {
+                ValueTextVo valueTextVo = new ValueTextVo();
+                valueTextVo.setValue(caller);
+                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\">%s</a>", TenantContext.get().getTenantUuid(), name));
+                return valueTextVo;
+            }
         }
         return null;
     }

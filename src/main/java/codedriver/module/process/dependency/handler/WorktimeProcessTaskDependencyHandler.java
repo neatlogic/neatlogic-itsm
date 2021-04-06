@@ -12,6 +12,7 @@ import codedriver.framework.dependency.core.ICalleeType;
 
 /**
  * 工单引用服务窗口处理器
+ *
  * @author: linbq
  * @since: 2021/4/2 18:14
  **/
@@ -47,9 +48,9 @@ public class WorktimeProcessTaskDependencyHandler extends DependencyHandlerBase 
     }
 
     /**
-     * 解析数据，拼装跳转url
+     * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
-     * @param caller
+     * @param caller 调用者值
      * @return
      */
     @Override

@@ -17,12 +17,14 @@ import javax.annotation.Resource;
 
 /**
  * 流程引用通知策略处理器
+ *
  * @author: linbq
  * @since: 2021/4/5 16:18
  **/
 public class NotifyPolicyProcessDependencyHandler extends DependencyHandlerBase {
     @Resource
     private ProcessMapper processMapper;
+
     /**
      * 表名
      *
@@ -54,19 +56,21 @@ public class NotifyPolicyProcessDependencyHandler extends DependencyHandlerBase 
     }
 
     /**
-     * 解析数据，拼装跳转url
+     * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
-     * @param caller
+     * @param caller 调用者值
      * @return
      */
     @Override
     protected ValueTextVo parse(Object caller) {
-        ProcessVo processVo = processMapper.getProcessByUuid((String)caller);
-        if (processVo != null) {
-            ValueTextVo valueTextVo = new ValueTextVo();
-            valueTextVo.setValue(caller);
-            valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\">%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName()));
-            return valueTextVo;
+        if (caller instanceof String) {
+            ProcessVo processVo = processMapper.getProcessByUuid((String) caller);
+            if (processVo != null) {
+                ValueTextVo valueTextVo = new ValueTextVo();
+                valueTextVo.setValue(caller);
+                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\">%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName()));
+                return valueTextVo;
+            }
         }
         return null;
     }

@@ -76,7 +76,6 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                     stepHandlerVo.setConfig(config.toJSONString());
                     stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
                     stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
-//                    notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
                     DependencyManager.delete(NotifyPolicyProcessStepHandlerDependencyHandler.class, stepHandlerVo.getHandler());
                     JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
                     Long policyId = notifyPolicyConfig.getLong("policyId");
@@ -84,15 +83,6 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                         if(notifyMapper.checkNotifyPolicyIsExists(policyId) == 0){
                             throw new NotifyPolicyNotFoundException(policyId.toString());
                         }
-//                    	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
-//                    	notifyPolicyInvokerVo.setPolicyId(policyId);
-//                    	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());
-//                    	JSONObject notifyPolicyInvokerConfig = new JSONObject();
-//                    	notifyPolicyInvokerConfig.put("function", "processstephandler");
-//                    	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandlerTypeFactory.getName(stepHandlerVo.getHandler()));
-//                    	notifyPolicyInvokerConfig.put("handler", stepHandlerVo.getHandler());
-//                    	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
-//                    	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
                         DependencyManager.insert(NotifyPolicyProcessStepHandlerDependencyHandler.class, policyId, stepHandlerVo.getHandler());
                     }
     			} 			

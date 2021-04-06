@@ -83,8 +83,6 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 		processMapper.deleteProcessDraft(processDraftVo);
 		processMapper.deleteProcessFormByProcessUuid(uuid);
 		processMapper.deleteProcessSlaByProcessUuid(uuid);
-//		notifyPolicyInvokerManager.removeInvoker(uuid);
-		//删除关联的评分模版
 		scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
 		return uuid;
 	}

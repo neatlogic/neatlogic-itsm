@@ -60,7 +60,6 @@ public class ProcessServiceImpl implements ProcessService {
             processMapper.deleteProcessStepFormAttributeByProcessUuid(uuid);
             processMapper.deleteProcessFormByProcessUuid(uuid);
             processMapper.deleteProcessSlaByProcessUuid(uuid);
-//            notifyPolicyInvokerManager.removeInvoker(uuid);
             DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, uuid);
             DependencyManager.delete(IntegrationProcessDependencyHandler.class, uuid);
             scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
@@ -69,7 +68,7 @@ public class ProcessServiceImpl implements ProcessService {
             processVo.setFcu(UserContext.get().getUserUuid(true));
             processMapper.insertProcess(processVo);
         }
-        // 删除草稿
+
         ProcessDraftVo processDraftVo = new ProcessDraftVo();
         processDraftVo.setProcessUuid(uuid);
         processDraftVo.setFcu(UserContext.get().getUserUuid(true));
@@ -94,17 +93,6 @@ public class ProcessServiceImpl implements ProcessService {
                     for (Long notifyPolicyId : slaVo.getNotifyPolicyIdList()) {
                         if (notifyMapper.checkNotifyPolicyIsExists(notifyPolicyId) == 0) {
                             throw new NotifyPolicyNotFoundException(notifyPolicyId.toString());
-//                            NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
-//                            notifyPolicyInvokerVo.setPolicyId(notifyPolicyId);
-//                            notifyPolicyInvokerVo.setInvoker(processVo.getUuid());
-//                            JSONObject notifyPolicyInvokerConfig = new JSONObject();
-//                            notifyPolicyInvokerConfig.put("function", "processSla");
-//                            notifyPolicyInvokerConfig.put("name",
-//                                "流程管理-" + processVo.getName() + "-" + "时效设置" + "-" + slaVo.getName());
-//                            notifyPolicyInvokerConfig.put("processUuid", processVo.getUuid());
-//                            notifyPolicyInvokerConfig.put("slaUuid", slaVo.getUuid());
-//                            notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
-//                            notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
                         }
                         DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyId, slaVo.getUuid());
                     }
@@ -114,7 +102,6 @@ public class ProcessServiceImpl implements ProcessService {
 
         if (CollectionUtils.isNotEmpty(processVo.getStepList())) {
             for (ProcessStepVo stepVo : processVo.getStepList()) {
-                /** 判断引用的外部调用是否存在 **/
                 DependencyManager.delete(IntegrationProcessStepDependencyHandler.class, stepVo.getUuid());
                 List<String> integrationUuidList = stepVo.getIntegrationUuidList();
                 if (CollectionUtils.isNotEmpty(integrationUuidList)) {
@@ -140,22 +127,11 @@ public class ProcessServiceImpl implements ProcessService {
                 if (stepVo.getNotifyPolicyId() != null) {
                     if (notifyMapper.checkNotifyPolicyIsExists(stepVo.getNotifyPolicyId()) == 0) {
                         throw new NotifyPolicyNotFoundException(stepVo.getNotifyPolicyId().toString());
-//                        NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
-//                        notifyPolicyInvokerVo.setPolicyId(stepVo.getNotifyPolicyId());
-//                        notifyPolicyInvokerVo.setInvoker(processVo.getUuid());
-//                        JSONObject notifyPolicyInvokerConfig = new JSONObject();
-//                        notifyPolicyInvokerConfig.put("function", "processstep");
-//                        notifyPolicyInvokerConfig.put("name", "流程管理-" + processVo.getName() + "-" + stepVo.getName());
-//                        notifyPolicyInvokerConfig.put("processUuid", processVo.getUuid());
-//                        notifyPolicyInvokerConfig.put("processStepUuid", stepVo.getUuid());
-//                        notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
-//                        notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
                     }
                     DependencyManager.insert(NotifyPolicyProcessStepDependencyHandler.class, stepVo.getNotifyPolicyId(), stepVo.getUuid());
                 }
-                //保存回复模版配置
                 processMapper.deleteProcessStepCommentTemplate(stepVo.getUuid());
-                if(stepVo.getCommentTemplateId() != null){
+                if (stepVo.getCommentTemplateId() != null) {
                     processMapper.insertProcessStepCommentTemplate(stepVo);
                 }
             }
@@ -167,7 +143,6 @@ public class ProcessServiceImpl implements ProcessService {
             }
         }
 
-        /** 保存评分设置 */
         if (processVo.getProcessScoreTemplateVo() != null) {
             scoreTemplateMapper.insertProcessScoreTemplate(processVo.getProcessScoreTemplateVo());
         }
@@ -175,21 +150,12 @@ public class ProcessServiceImpl implements ProcessService {
         if (processVo.getNotifyPolicyId() != null) {
             if (notifyMapper.checkNotifyPolicyIsExists(processVo.getNotifyPolicyId()) == 0) {
                 throw new NotifyPolicyNotFoundException(processVo.getNotifyPolicyId().toString());
-//                NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
-//                notifyPolicyInvokerVo.setPolicyId(processVo.getNotifyPolicyId());
-//                notifyPolicyInvokerVo.setInvoker(processVo.getUuid());
-//                JSONObject notifyPolicyInvokerConfig = new JSONObject();
-//                notifyPolicyInvokerConfig.put("function", "process");
-//                notifyPolicyInvokerConfig.put("name", "流程管理-" + processVo.getName());
-//                notifyPolicyInvokerConfig.put("processUuid", processVo.getUuid());
-//                notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
-//                notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
             }
             DependencyManager.insert(NotifyPolicyProcessDependencyHandler.class, processVo.getNotifyPolicyId(), uuid);
         }
-        if(CollectionUtils.isNotEmpty(processVo.getIntegrationUuidList())){
-            for(String integrationUuid : processVo.getIntegrationUuidList()){
-                if(integrationMapper.checkIntegrationExists(integrationUuid) == 0){
+        if (CollectionUtils.isNotEmpty(processVo.getIntegrationUuidList())) {
+            for (String integrationUuid : processVo.getIntegrationUuidList()) {
+                if (integrationMapper.checkIntegrationExists(integrationUuid) == 0) {
                     throw new IntegrationNotFoundException(integrationUuid);
                 }
                 DependencyManager.insert(IntegrationProcessDependencyHandler.class, integrationUuid, uuid);
