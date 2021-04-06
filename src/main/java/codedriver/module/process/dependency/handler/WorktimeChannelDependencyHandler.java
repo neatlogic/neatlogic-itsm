@@ -12,6 +12,7 @@ import codedriver.framework.dependency.core.DependencyHandlerBase;
 import codedriver.framework.dependency.core.ICalleeType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
@@ -21,6 +22,7 @@ import javax.annotation.Resource;
  * @author: linbq
  * @since: 2021/4/2 17:41
  **/
+@Service
 public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
 
     @Resource

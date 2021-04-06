@@ -9,6 +9,7 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dependency.constvalue.CalleeType;
 import codedriver.framework.dependency.core.DependencyHandlerBase;
 import codedriver.framework.dependency.core.ICalleeType;
+import org.springframework.stereotype.Service;
 
 /**
  * 工单引用服务窗口处理器
@@ -16,6 +17,7 @@ import codedriver.framework.dependency.core.ICalleeType;
  * @author: linbq
  * @since: 2021/4/2 18:14
  **/
+@Service
 public class WorktimeProcessTaskDependencyHandler extends DependencyHandlerBase {
     /**
      * 表名

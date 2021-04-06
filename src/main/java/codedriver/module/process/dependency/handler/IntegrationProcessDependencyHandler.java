@@ -12,6 +12,7 @@ import codedriver.framework.dependency.core.DependencyHandlerBase;
 import codedriver.framework.dependency.core.ICalleeType;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessVo;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
@@ -21,6 +22,7 @@ import javax.annotation.Resource;
  * @author: linbq
  * @since: 2021/4/6 10:58
  **/
+@Service
 public class IntegrationProcessDependencyHandler extends DependencyHandlerBase {
     @Resource
     private ProcessMapper processMapper;

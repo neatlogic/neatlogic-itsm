@@ -15,6 +15,7 @@ import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerTypeFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
@@ -24,6 +25,7 @@ import javax.annotation.Resource;
  * @author: linbq
  * @since: 2021/4/5 14:31
  **/
+@Service
 public class NotifyPolicyProcessStepHandlerDependencyHandler extends DependencyHandlerBase {
     @Resource
     private ProcessStepHandlerMapper processStepHandlerMapper;
