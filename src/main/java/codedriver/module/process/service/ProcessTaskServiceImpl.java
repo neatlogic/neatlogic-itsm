@@ -1001,12 +1001,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     /**
-     * @Description: 检查当前用户是否配置该权限
-     * @Author: linbq
-     * @Date: 2020/4/2 8:25
-     * @Params:[processTaskVo, operationType, userUuid]
-     * @Returns:boolean
-     **/
+     * 检查当前用户是否配置该权限
+     *
+     * @param processTaskVo 作业信息
+     * @param operationType 操作类型
+     * @param userUuid      用户uuid
+     * @return 是否拥有权限
+     */
     @Override
     public boolean checkOperationAuthIsConfigured(ProcessTaskVo processTaskVo, ProcessTaskOperationType operationType,
                                                   String userUuid) {
