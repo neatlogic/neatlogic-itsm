@@ -7,9 +7,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.PROCESS_MODIFY;
 
-import codedriver.module.process.dependency.handler.NotifyPolicyProcessDependencyHandler;
-import codedriver.module.process.dependency.handler.NotifyPolicyProcessSlaDependencyHandler;
-import codedriver.module.process.dependency.handler.NotifyPolicyProcessStepDependencyHandler;
+import codedriver.module.process.dependency.handler.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,6 +71,8 @@ public class ProcessDeleteApi extends PrivateApiComponentBase {
 		DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, uuid);
 		DependencyManager.delete(NotifyPolicyProcessStepDependencyHandler.class, processStepUuidList);
 		DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaUuidList);
+		DependencyManager.delete(IntegrationProcessDependencyHandler.class, uuid);
+		DependencyManager.delete(IntegrationProcessStepDependencyHandler.class, processStepUuidList);
 		processMapper.deleteProcessByUuid(uuid);
 		processMapper.deleteProcessStepByProcessUuid(uuid);
 		processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);

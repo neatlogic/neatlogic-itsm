@@ -3,6 +3,8 @@ package codedriver.module.process.api.processstep;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dependency.core.DependencyManager;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -22,9 +24,10 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.List;
 
 import org.apache.commons.collections4.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 /**
  * @program: codedriver
@@ -37,8 +40,11 @@ import org.springframework.transaction.annotation.Transactional;
 @AuthAction(action = PROCESS_STEP_HANDLER_MODIFY.class)
 public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ProcessStepHandlerMapper stepHandlerMapper;
+
+    @Resource
+    private NotifyMapper notifyMapper;
 
     @Override
     public String getToken() {
@@ -75,6 +81,9 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                     JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
                     Long policyId = notifyPolicyConfig.getLong("policyId");
                     if (policyId != null) {
+                        if(notifyMapper.checkNotifyPolicyIsExists(policyId) == 0){
+                            throw new NotifyPolicyNotFoundException(policyId.toString());
+                        }
 //                    	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
 //                    	notifyPolicyInvokerVo.setPolicyId(policyId);
 //                    	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());

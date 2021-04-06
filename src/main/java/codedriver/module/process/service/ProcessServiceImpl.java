@@ -3,13 +3,11 @@ package codedriver.module.process.service;
 import java.util.List;
 
 import codedriver.framework.dependency.core.DependencyManager;
+import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
-import codedriver.module.process.dependency.handler.NotifyPolicyProcessDependencyHandler;
-import codedriver.module.process.dependency.handler.NotifyPolicyProcessSlaDependencyHandler;
-import codedriver.module.process.dependency.handler.NotifyPolicyProcessStepDependencyHandler;
+import codedriver.module.process.dependency.handler.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -29,22 +27,24 @@ import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.form.exception.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 
+import javax.annotation.Resource;
+
 @Service
 public class ProcessServiceImpl implements ProcessService {
 
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
 
-    @Autowired
+    @Resource
     private FormMapper formMapper;
 
-    @Autowired
+    @Resource
     private NotifyMapper notifyMapper;
 
-    @Autowired
+    @Resource
     private IntegrationMapper integrationMapper;
 
-    @Autowired
+    @Resource
     private ScoreTemplateMapper scoreTemplateMapper;
 
     @Override
@@ -53,7 +53,7 @@ public class ProcessServiceImpl implements ProcessService {
             throw new ProcessNameRepeatException(processVo.getName());
         }
         String uuid = processVo.getUuid();
-        if (processMapper.checkProcessIsExists(processVo.getUuid()) > 0) {
+        if (processMapper.checkProcessIsExists(uuid) > 0) {
             processMapper.deleteProcessStepWorkerPolicyByProcessUuid(uuid);
             processMapper.deleteProcessStepByProcessUuid(uuid);
             processMapper.deleteProcessStepRelByProcessUuid(uuid);
@@ -62,6 +62,7 @@ public class ProcessServiceImpl implements ProcessService {
             processMapper.deleteProcessSlaByProcessUuid(uuid);
 //            notifyPolicyInvokerManager.removeInvoker(uuid);
             DependencyManager.delete(NotifyPolicyProcessDependencyHandler.class, uuid);
+            DependencyManager.delete(IntegrationProcessDependencyHandler.class, uuid);
             scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
             processMapper.updateProcess(processVo);
         } else {
@@ -82,7 +83,7 @@ public class ProcessServiceImpl implements ProcessService {
             processMapper.insertProcessForm(new ProcessFormVo(uuid, formUuid));
         }
 
-        if (processVo.getSlaList() != null && processVo.getSlaList().size() > 0) {
+        if (CollectionUtils.isNotEmpty(processVo.getSlaList())) {
             for (ProcessSlaVo slaVo : processVo.getSlaList()) {
                 if (slaVo.getProcessStepUuidList().size() > 0) {
                     processMapper.insertProcessSla(slaVo);
@@ -91,7 +92,8 @@ public class ProcessServiceImpl implements ProcessService {
                     }
                     DependencyManager.delete(NotifyPolicyProcessSlaDependencyHandler.class, slaVo.getUuid());
                     for (Long notifyPolicyId : slaVo.getNotifyPolicyIdList()) {
-                        if (notifyMapper.checkNotifyPolicyIsExists(notifyPolicyId) != 0) {
+                        if (notifyMapper.checkNotifyPolicyIsExists(notifyPolicyId) == 0) {
+                            throw new NotifyPolicyNotFoundException(notifyPolicyId.toString());
 //                            NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
 //                            notifyPolicyInvokerVo.setPolicyId(notifyPolicyId);
 //                            notifyPolicyInvokerVo.setInvoker(processVo.getUuid());
@@ -103,39 +105,41 @@ public class ProcessServiceImpl implements ProcessService {
 //                            notifyPolicyInvokerConfig.put("slaUuid", slaVo.getUuid());
 //                            notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
 //                            notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
-                            DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyId, slaVo.getUuid());
                         }
+                        DependencyManager.insert(NotifyPolicyProcessSlaDependencyHandler.class, notifyPolicyId, slaVo.getUuid());
                     }
                 }
             }
         }
 
-        if (processVo.getStepList() != null && processVo.getStepList().size() > 0) {
-
+        if (CollectionUtils.isNotEmpty(processVo.getStepList())) {
             for (ProcessStepVo stepVo : processVo.getStepList()) {
                 /** 判断引用的外部调用是否存在 **/
+                DependencyManager.delete(IntegrationProcessStepDependencyHandler.class, stepVo.getUuid());
                 List<String> integrationUuidList = stepVo.getIntegrationUuidList();
                 if (CollectionUtils.isNotEmpty(integrationUuidList)) {
                     for (String integrationUuid : integrationUuidList) {
-                        if (integrationMapper.getIntegrationByUuid(integrationUuid) == null) {
+                        if (integrationMapper.checkIntegrationExists(integrationUuid) == 0) {
                             throw new IntegrationNotFoundException(integrationUuid);
                         }
+                        DependencyManager.insert(IntegrationProcessStepDependencyHandler.class, integrationUuid, stepVo.getUuid());
                     }
                 }
                 processMapper.insertProcessStep(stepVo);
-                if (stepVo.getFormAttributeList() != null && stepVo.getFormAttributeList().size() > 0) {
+                if (CollectionUtils.isNotEmpty(stepVo.getFormAttributeList())) {
                     for (ProcessStepFormAttributeVo processStepAttributeVo : stepVo.getFormAttributeList()) {
                         processMapper.insertProcessStepFormAttribute(processStepAttributeVo);
                     }
                 }
-                if (stepVo.getWorkerPolicyList() != null && stepVo.getWorkerPolicyList().size() > 0) {
+                if (CollectionUtils.isNotEmpty(stepVo.getWorkerPolicyList())) {
                     for (ProcessStepWorkerPolicyVo processStepWorkerPolicyVo : stepVo.getWorkerPolicyList()) {
                         processMapper.insertProcessStepWorkerPolicy(processStepWorkerPolicyVo);
                     }
                 }
                 DependencyManager.delete(NotifyPolicyProcessStepDependencyHandler.class, stepVo.getUuid());
                 if (stepVo.getNotifyPolicyId() != null) {
-                    if (notifyMapper.checkNotifyPolicyIsExists(stepVo.getNotifyPolicyId()) != 0) {
+                    if (notifyMapper.checkNotifyPolicyIsExists(stepVo.getNotifyPolicyId()) == 0) {
+                        throw new NotifyPolicyNotFoundException(stepVo.getNotifyPolicyId().toString());
 //                        NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
 //                        notifyPolicyInvokerVo.setPolicyId(stepVo.getNotifyPolicyId());
 //                        notifyPolicyInvokerVo.setInvoker(processVo.getUuid());
@@ -146,8 +150,8 @@ public class ProcessServiceImpl implements ProcessService {
 //                        notifyPolicyInvokerConfig.put("processStepUuid", stepVo.getUuid());
 //                        notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
 //                        notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
-                        DependencyManager.insert(NotifyPolicyProcessStepDependencyHandler.class, stepVo.getNotifyPolicyId(), stepVo.getUuid());
                     }
+                    DependencyManager.insert(NotifyPolicyProcessStepDependencyHandler.class, stepVo.getNotifyPolicyId(), stepVo.getUuid());
                 }
                 //保存回复模版配置
                 processMapper.deleteProcessStepCommentTemplate(stepVo.getUuid());
@@ -157,7 +161,7 @@ public class ProcessServiceImpl implements ProcessService {
             }
         }
 
-        if (processVo.getStepRelList() != null && processVo.getStepRelList().size() > 0) {
+        if (CollectionUtils.isNotEmpty(processVo.getStepRelList())) {
             for (ProcessStepRelVo stepRelVo : processVo.getStepRelList()) {
                 processMapper.insertProcessStepRel(stepRelVo);
             }
@@ -169,7 +173,8 @@ public class ProcessServiceImpl implements ProcessService {
         }
 
         if (processVo.getNotifyPolicyId() != null) {
-            if (notifyMapper.checkNotifyPolicyIsExists(processVo.getNotifyPolicyId()) != 0) {
+            if (notifyMapper.checkNotifyPolicyIsExists(processVo.getNotifyPolicyId()) == 0) {
+                throw new NotifyPolicyNotFoundException(processVo.getNotifyPolicyId().toString());
 //                NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
 //                notifyPolicyInvokerVo.setPolicyId(processVo.getNotifyPolicyId());
 //                notifyPolicyInvokerVo.setInvoker(processVo.getUuid());
@@ -179,7 +184,15 @@ public class ProcessServiceImpl implements ProcessService {
 //                notifyPolicyInvokerConfig.put("processUuid", processVo.getUuid());
 //                notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
 //                notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
-                DependencyManager.insert(NotifyPolicyProcessDependencyHandler.class, processVo.getNotifyPolicyId(), processVo.getUuid());
+            }
+            DependencyManager.insert(NotifyPolicyProcessDependencyHandler.class, processVo.getNotifyPolicyId(), uuid);
+        }
+        if(CollectionUtils.isNotEmpty(processVo.getIntegrationUuidList())){
+            for(String integrationUuid : processVo.getIntegrationUuidList()){
+                if(integrationMapper.checkIntegrationExists(integrationUuid) == 0){
+                    throw new IntegrationNotFoundException(integrationUuid);
+                }
+                DependencyManager.insert(IntegrationProcessDependencyHandler.class, integrationUuid, uuid);
             }
         }
         return 1;

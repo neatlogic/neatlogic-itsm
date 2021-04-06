@@ -10,20 +10,20 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dependency.constvalue.CalleeType;
 import codedriver.framework.dependency.core.DependencyHandlerBase;
 import codedriver.framework.dependency.core.ICalleeType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dto.ProcessStepVo;
+import codedriver.framework.process.dto.ProcessVo;
 
 import javax.annotation.Resource;
 
 /**
- * 服务引用服务窗口处理器
+ * 流程步骤动作引用集成处理器
  * @author: linbq
- * @since: 2021/4/2 17:41
+ * @since: 2021/4/6 10:59
  **/
-public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
-
+public class IntegrationProcessStepDependencyHandler extends DependencyHandlerBase {
     @Resource
-    private ChannelMapper channelMapper;
+    private ProcessMapper processMapper;
     /**
      * 表名
      *
@@ -31,7 +31,7 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
      */
     @Override
     protected String getTableName() {
-        return "channel_worktime";
+        return "process_step_integration";
     }
 
     /**
@@ -41,7 +41,7 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
      */
     @Override
     protected String getCalleeField() {
-        return "worktime_uuid";
+        return "integration_uuid";
     }
 
     /**
@@ -51,7 +51,7 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
      */
     @Override
     protected String getCallerField() {
-        return "channel_uuid";
+        return "process_step_uuid";
     }
 
     /**
@@ -62,12 +62,15 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
      */
     @Override
     protected ValueTextVo parse(Object caller) {
-        ChannelVo channelVo = channelMapper.getChannelByUuid((String) caller);
-        if(channelVo != null) {
-            ValueTextVo valueTextVo = new ValueTextVo();
-            valueTextVo.setValue(caller);
-            valueTextVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
-            return valueTextVo;
+        ProcessStepVo processStepVo = processMapper.getProcessStepByUuid((String) caller);
+        if(processStepVo != null){
+            ProcessVo processVo = processMapper.getProcessByUuid(processStepVo.getProcessUuid());
+            if (processVo != null) {
+                ValueTextVo valueTextVo = new ValueTextVo();
+                valueTextVo.setValue(caller);
+                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\">%s-%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName(), processStepVo.getName()));
+                return valueTextVo;
+            }
         }
         return null;
     }
@@ -79,6 +82,6 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
      */
     @Override
     public ICalleeType getCalleeType() {
-        return CalleeType.WORKTIME;
+        return CalleeType.INTEGRATION;
     }
 }
