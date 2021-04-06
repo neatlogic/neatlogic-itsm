@@ -13,10 +13,12 @@ import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.fulltextindex.FullTextIndexType;
@@ -31,6 +33,10 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
 @AuthAction(action = NO_AUTH.class)
@@ -111,6 +117,12 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 		String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
 		if(processMapper.checkProcessIsExists(processUuid) == 0) {
 			throw new ProcessNotFoundException(processUuid);
+		}
+		List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+		List<String> priorityUuidList = new ArrayList<>(channelPriorityList.size());
+		channelPriorityList.stream().forEach(o -> priorityUuidList.add(o.getPriorityUuid()));
+		if (!priorityUuidList.contains(jsonObj.getString("priorityUuid"))) {
+			throw new ProcessTaskRuntimeException("工单优先级与服务优先级级不匹配");
 		}
 		String owner = jsonObj.getString("owner");
 		if(StringUtils.isNotBlank(owner) && owner.contains("#")) {
