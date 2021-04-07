@@ -71,7 +71,7 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
             if (channelVo != null) {
                 ValueTextVo valueTextVo = new ValueTextVo();
                 valueTextVo.setValue(caller);
-                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
+                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
                 return valueTextVo;
             }
         }

@@ -73,7 +73,7 @@ public class NotifyPolicyProcessStepDependencyHandler extends DependencyHandlerB
                 if (processVo != null) {
                     ValueTextVo valueTextVo = new ValueTextVo();
                     valueTextVo.setValue(caller);
-                    valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\">%s-%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName(), processStepVo.getName()));
+                    valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName(), processStepVo.getName()));
                     return valueTextVo;
                 }
             }

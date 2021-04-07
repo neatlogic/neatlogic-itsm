@@ -70,7 +70,7 @@ public class FormProcessDependencyHandler extends DependencyHandlerBase {
             if (processVo != null) {
                 ValueTextVo valueTextVo = new ValueTextVo();
                 valueTextVo.setValue(caller);
-                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\">%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName()));
+                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName()));
                 return valueTextVo;
             }
         }
