@@ -31,13 +31,13 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private CatalogMapper catalogMapper;
-	
+
 	@Autowired
 	private ChannelMapper channelMapper;
-	
+
 	@Autowired
 	private CatalogService catalogService;
-	
+
 	@Override
 	public String getToken() {
 		return "/catalog/channel/search/mobile";
@@ -52,7 +52,7 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
-	
+
 	@Input({
 		@Param(name = "catalogUuid", type = ApiParamType.STRING, desc = "服务目录uuid,0：所有" , isRequired = true)
 	})
@@ -92,7 +92,7 @@ public class CatalogChannelSearchForMobileApi extends PrivateApiComponentBase {
 		paramChannel.setIsActive(1);
 		paramChannel.setParentUuid(catalogUuid);
 		resultObj.put("favoriteList", channelMapper.searchChannelList(paramChannel));
-			
+
 		return resultObj;
 	}
 

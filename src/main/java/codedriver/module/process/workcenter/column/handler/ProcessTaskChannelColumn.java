@@ -7,7 +7,6 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
@@ -15,8 +14,6 @@ import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ChannelSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +35,7 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
         return "服务";
     }
 
-    @Override
+    /*@Override
     public Object getMyValue(JSONObject json) throws RuntimeException {
         String channelUuid = json.getString(this.getName());
         String channelName = StringUtils.EMPTY;
@@ -47,9 +44,9 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
             channelName = channelVo.getName();
         }
         return channelName;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public JSONObject getMyValueText(JSONObject json) {
         String channelUuid = json.getString(this.getName());
         JSONObject channelJson = new JSONObject();
@@ -60,7 +57,7 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
             channelJson.put("color", channelVo.getColor());
         }
         return channelJson;
-    }
+    }*/
 
     @Override
     public Boolean allowSort() {
@@ -83,12 +80,17 @@ public class ProcessTaskChannelColumn extends ProcessTaskColumnBase implements I
         return 9;
     }
 
-    @Override
+    /*@Override
     public Object getSimpleValue(Object json) {
         if (json != null) {
             return json.toString();
         }
         return null;
+    }*/
+
+    @Override
+    public String getSimpleValue(ProcessTaskVo taskVo) {
+        return getValue(taskVo).toString();
     }
 
     @Override

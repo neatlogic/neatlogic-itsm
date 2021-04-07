@@ -3,9 +3,7 @@ package codedriver.module.process.workcenter.column.handler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.dto.WorktimeVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -13,8 +11,7 @@ import codedriver.framework.process.workcenter.table.ChannelSqlTable;
 import codedriver.framework.process.workcenter.table.ChannelWorkTimeSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.WorkTimeSqlTable;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
+import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +34,7 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 		return "时间窗口";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String worktimeUuid = json.getString(this.getName());
 		String worktimeName = StringUtils.EMPTY;
@@ -48,7 +45,7 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 			}
 		}
 		return worktimeName;
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -71,12 +68,17 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 		return 12;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		if(json != null){
 			return json.toString();
 		}
 		return null;
+	}*/
+
+	@Override
+	public String getSimpleValue(ProcessTaskVo processTaskVo) {
+		return processTaskVo.getWorktimeName();
 	}
 
 	@Override

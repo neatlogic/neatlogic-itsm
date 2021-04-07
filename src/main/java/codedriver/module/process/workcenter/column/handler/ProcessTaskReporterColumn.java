@@ -1,8 +1,6 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -12,7 +10,6 @@ import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.UserTable;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +33,7 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 		return "代报人";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONObject userJson = new JSONObject();
 		String userUuid = json.getString(this.getName());
@@ -53,7 +50,7 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 		}
 		userJson.put("uuid", userUuid);
 		return userJson;
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -76,13 +73,21 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 		return 4;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		String username = null;
 		if(json != null){
 			username = ((UserVo)json).getUserName();
 		}
 		return username;
+	}*/
+
+	@Override
+	public String getSimpleValue(ProcessTaskVo processTaskVo) {
+		if(processTaskVo.getReporterVo() != null &&(processTaskVo.getOwnerVo() == null || !processTaskVo.getOwnerVo().getUuid().equals(processTaskVo.getReporterVo().getUuid()))){
+			return processTaskVo.getReporterVo().getName();
+		}
+		return StringUtils.EMPTY;
 	}
 
 	@Override

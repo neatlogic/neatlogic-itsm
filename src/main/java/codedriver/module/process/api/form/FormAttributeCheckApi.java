@@ -5,7 +5,6 @@ import java.util.List;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.restful.annotation.*;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -27,7 +26,6 @@ import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.form.exception.FormAttributeHandlerNotFoundException;
 import codedriver.framework.form.exception.FormAttributeNotFoundException;
-import codedriver.framework.form.exception.FormIllegalParameterException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;

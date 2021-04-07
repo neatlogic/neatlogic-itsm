@@ -7,7 +7,6 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
@@ -15,33 +14,34 @@ import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 @Component
-public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
-	@Autowired
-	UserMapper userMapper;
-	@Autowired
-	RoleMapper roleMapper;
-	@Autowired
-	TeamMapper teamMapper;
-	@Override
-	public String getName() {
-		return "currentstepname";
-	}
+public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
+    @Autowired
+    UserMapper userMapper;
+    @Autowired
+    RoleMapper roleMapper;
+    @Autowired
+    TeamMapper teamMapper;
 
-	@Override
-	public String getDisplayName() {
-		return "当前步骤名";
-	}
+    @Override
+    public String getName() {
+        return "currentstepname";
+    }
 
-	@Override
+    @Override
+    public String getDisplayName() {
+        return "当前步骤名";
+    }
+
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONArray stepArray = null;
 		try {
@@ -65,30 +65,30 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 			}
 		}
 		return stepNameList;
-	}
+	}*/
 
-	@Override
-	public Boolean allowSort() {
-		return false;
-	}
+    @Override
+    public Boolean allowSort() {
+        return false;
+    }
 
-	@Override
-	public String getType() {
-		return ProcessFieldType.COMMON.getValue();
-	}
+    @Override
+    public String getType() {
+        return ProcessFieldType.COMMON.getValue();
+    }
 
-	@Override
-	public String getClassName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getClassName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Integer getSort() {
-		return 5;
-	}
+    @Override
+    public Integer getSort() {
+        return 5;
+    }
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		if(json != null && json instanceof List){
 			@SuppressWarnings("unchecked")
@@ -98,45 +98,51 @@ public class ProcessTaskCurrentStepNameColumn extends ProcessTaskColumnBase impl
 			}
 		}
 		return null;
-	}
+	}*/
 
-	@Override
-	public Object getValue(ProcessTaskVo processTaskVo) {
-		List<ProcessTaskStepVo> stepVoList = processTaskVo.getStepList();
-		List<String> stepNameList = new ArrayList<>();
-		if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-			for (ProcessTaskStepVo stepVo : stepVoList) {
-				if((ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus())||(ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus())&& stepVo.getIsActive() == 1)||ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
-					stepNameList.add(stepVo.getName());
-				}
-			}
-		}
-		return stepNameList;
-	}
+    @Override
+    public String getSimpleValue(ProcessTaskVo processTaskVo) {
+        List<String> stepNameList = (List<String>) getValue(processTaskVo);
+        return String.join(",", stepNameList);
+    }
 
-	@Override
-	public List<TableSelectColumnVo> getTableSelectColumn() {
-		return new ArrayList<TableSelectColumnVo>(){
-			{
-				add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"processTaskStepId"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(),"processTaskId"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(),"processTaskStepStatus"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(),"processTaskStepName"),
-						new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.IS_ACTIVE.getValue(),"processTaskStepIsActive")
-				)));
-			}
-		};
-	}
+    @Override
+    public Object getValue(ProcessTaskVo processTaskVo) {
+        List<ProcessTaskStepVo> stepVoList = processTaskVo.getStepList();
+        List<String> stepNameList = new ArrayList<>();
+        if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+            for (ProcessTaskStepVo stepVo : stepVoList) {
+                if ((ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) || (ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1) || ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
+                    stepNameList.add(stepVo.getName());
+                }
+            }
+        }
+        return stepNameList;
+    }
 
-	@Override
-	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
-		return new ArrayList<JoinTableColumnVo>() {
-			{
-				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new HashMap<String, String>() {{
-					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
-				}}));
-			}
-		};
-	}
+    @Override
+    public List<TableSelectColumnVo> getTableSelectColumn() {
+        return new ArrayList<TableSelectColumnVo>() {
+            {
+                add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
+                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(), "processTaskStepId"),
+                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(), "processTaskId"),
+                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(), "processTaskStepStatus"),
+                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.NAME.getValue(), "processTaskStepName"),
+                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.IS_ACTIVE.getValue(), "processTaskStepIsActive")
+                )));
+            }
+        };
+    }
+
+    @Override
+    public List<JoinTableColumnVo> getMyJoinTableColumnList() {
+        return new ArrayList<JoinTableColumnVo>() {
+            {
+                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskStepSqlTable(), new HashMap<String, String>() {{
+                    put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+                }}));
+            }
+        };
+    }
 }

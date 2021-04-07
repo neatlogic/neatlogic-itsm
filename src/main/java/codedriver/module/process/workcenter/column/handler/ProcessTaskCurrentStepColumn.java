@@ -12,7 +12,6 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -22,15 +21,11 @@ import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -50,7 +45,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 		return "当前步骤";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		//TODO 临时测试
 		JSONArray stepArray = null;
@@ -153,7 +148,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 			}
 		}
 		return stepResultArray;
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -176,7 +171,7 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 		return 5;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		StringBuilder sb = new StringBuilder();
 		if(json != null){
@@ -188,6 +183,20 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 			}
 		}
 		return sb.toString();
+	}*/
+
+	@Override
+	public String getSimpleValue(ProcessTaskVo processTaskVo) {
+		List<ProcessTaskStepVo> stepVoList = processTaskVo.getStepList();
+		List<String> stepNameList = new ArrayList<>();
+		if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+			for (ProcessTaskStepVo stepVo : stepVoList) {
+				if ((ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) || (ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1) || ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()))) {
+					stepNameList.add(stepVo.getName());
+				}
+			}
+		}
+		return String.join(",", stepNameList);
 	}
 	
 	@Override

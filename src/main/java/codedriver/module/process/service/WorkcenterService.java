@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
-
+@Deprecated
 public interface WorkcenterService {
 
     /**

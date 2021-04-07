@@ -12,7 +12,6 @@ import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskFocusSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.UserTable;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -42,7 +41,7 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 		return true;
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONObject focusUserObj = new JSONObject();
 		JSONArray focusUsers = json.getJSONArray(this.getName());
@@ -54,7 +53,7 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 		}
 		focusUserObj.put("isCurrentUserFocus",isCurrentUserFocus ? 1 : 0);
 		return focusUserObj;
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -76,10 +75,10 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 		return -1;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		return null;
-	}
+	}*/
 
 	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {

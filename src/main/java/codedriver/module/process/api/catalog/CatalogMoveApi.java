@@ -1,9 +1,17 @@
+/*
+ * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.catalog;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.lrcode.LRCodeManager;
 import codedriver.framework.lrcode.constvalue.MoveType;
+import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dto.CatalogVo;
+import codedriver.framework.process.exception.catalog.CatalogNameRepeatException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -15,11 +23,16 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = CATALOG_MODIFY.class)
 public class CatalogMoveApi extends PrivateApiComponentBase {
+
+	@Resource
+	private CatalogMapper catalogMapper;
 
 	@Override
 	public String getToken() {
@@ -38,7 +51,6 @@ public class CatalogMoveApi extends PrivateApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "被移动的服务目录uuid"),
-		@Param(name = "parentUuid", type = ApiParamType.STRING, isRequired = true, desc = "移动后的父级uuid"),
 		@Param(name = "targetUuid", type = ApiParamType.STRING, isRequired = true, desc = "目标节点uuid"),
 		@Param(name = "moveType", type = ApiParamType.ENUM, rule = "inner,prev,next", isRequired = true, desc = "移动类型")
 	})
@@ -49,6 +61,13 @@ public class CatalogMoveApi extends PrivateApiComponentBase {
 		String moveType = jsonObj.getString("moveType");
 		String targetUuid = jsonObj.getString("targetUuid");
 		LRCodeManager.moveTreeNode("catalog", "uuid", "parent_uuid", uuid, MoveType.getMoveType(moveType), targetUuid);
+		String parentUuid = catalogMapper.getParentUuidByUuid(uuid);
+		CatalogVo catalogVo = catalogMapper.getCatalogByUuid(uuid);
+		catalogVo.setParentUuid(parentUuid);
+		//判断移动后相同目录下是否有同名目录
+		if(catalogMapper.checkCatalogNameIsRepeat(catalogVo) > 0) {
+			throw new CatalogNameRepeatException(catalogVo.getName());
+		}
 		return null;
 	}
 //	private Object backup(JSONObject jsonObj) throws Exception {

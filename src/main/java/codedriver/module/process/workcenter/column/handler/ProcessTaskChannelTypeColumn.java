@@ -16,6 +16,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ChannelTypeSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +38,7 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 		return "服务类型";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String channelTypeUuid = json.getString(this.getName());
 		JSONObject channelTypeJson = new JSONObject();
@@ -54,6 +55,17 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 	@Override
 	public JSONObject getMyValueText(JSONObject json) {
 		return (JSONObject) getMyValue(json);
+	}*/
+
+	@Override
+	public String getSimpleValue(ProcessTaskVo processTaskVo) {
+		if (processTaskVo.getChannelVo() != null) {
+			if(processTaskVo.getChannelVo().getChannelTypeVo() != null){
+				ChannelTypeVo channelTypeVo = processTaskVo.getChannelVo().getChannelTypeVo();
+				return channelTypeVo.getName();
+			}
+		}
+		return StringUtils.EMPTY;
 	}
 	
 	@Override
@@ -77,14 +89,14 @@ public class ProcessTaskChannelTypeColumn extends ProcessTaskColumnBase implemen
 		return 8;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		String channelType = null;
 		if(json != null){
 			channelType = JSONObject.parseObject(json.toString()).getString("text");
 		}
 		return channelType;
-	}
+	}*/
 
 	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {

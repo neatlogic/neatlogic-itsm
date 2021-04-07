@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,9 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
     private ProcessTaskMapper processTaskMapper;
 
     @Autowired
+    private ProcessTaskService processTaskService;
+
+    @Autowired
     private CatalogService catalogService;
 
     @Override
@@ -62,7 +66,8 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
     @Input({
         @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "模糊匹配，支持标题"),
         @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, isRequired = true, desc = "服务类型关系id"),        
-        @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid"),
+//        @Param(name = "channelUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务uuid"),
+        @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
         @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
         @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
         @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
@@ -76,22 +81,22 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
         resultObj.put("tbodyList", new ArrayList<>());
-        String channelUuid = jsonObj.getString("channelUuid");
-        if(channelMapper.checkChannelIsExists(channelUuid) == 0) {
-            throw new ChannelNotFoundException(channelUuid);
-        }
+        Long processTaskId = jsonObj.getLong("processTaskId");
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        List<Long> relatedProcessTaskIdList = processTaskMapper.getRelatedProcessTaskIdListByProcessTaskId(processTaskId);
+        relatedProcessTaskIdList.add(processTaskId);
         Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-        if(channelTypeRelationId != null && channelTypeMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
+        if(channelTypeMapper.checkChannelTypeRelationIsExists(channelTypeRelationId) == 0) {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
-        List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(channelUuid, channelTypeRelationId);
+        List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(processTaskVo.getChannelUuid(), channelTypeRelationId);
         
         BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
         int pageCount = 0;
         if(basePageVo.getNeedPage()) {
             int rowNum = 0;
             if(CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
-                rowNum = processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(basePageVo, channelRelationTargetChannelUuidList);
+                rowNum = processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(basePageVo, relatedProcessTaskIdList, channelRelationTargetChannelUuidList);
             }              
             pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
             resultObj.put("currentPage", basePageVo.getCurrentPage());
@@ -100,7 +105,7 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
             resultObj.put("rowNum", rowNum);               
         }
         if(!basePageVo.getNeedPage() || basePageVo.getCurrentPage() <= pageCount) {
-            List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndChannelUuidList(basePageVo, channelRelationTargetChannelUuidList);
+            List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndChannelUuidList(basePageVo, relatedProcessTaskIdList, channelRelationTargetChannelUuidList);
             resultObj.put("tbodyList", processTaskList);
         }
         return resultObj;

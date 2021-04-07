@@ -45,7 +45,7 @@ public class ProcessTaskScoreColumn extends ProcessTaskColumnBase implements IPr
 		return true;
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONObject obj = new JSONObject();
 		Long id = json.getLong(new ProcessTaskIdColumn().getName());
@@ -63,7 +63,7 @@ public class ProcessTaskScoreColumn extends ProcessTaskColumnBase implements IPr
 			obj.put("content",scoreObj.getString("content"));
 		}
 		return obj;
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -85,10 +85,10 @@ public class ProcessTaskScoreColumn extends ProcessTaskColumnBase implements IPr
 		return -2;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		return null;
-	}
+	}*/
 
 	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {

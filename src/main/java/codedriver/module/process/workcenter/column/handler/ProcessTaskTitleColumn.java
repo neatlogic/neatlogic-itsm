@@ -8,7 +8,6 @@ import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -28,10 +27,10 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 		return "标题";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		return json.getString(this.getName());
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -53,12 +52,16 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 		return 1;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		if(json != null){
 			return json.toString();
 		}
 		return null;
+	}*/
+	@Override
+	public String getSimpleValue(ProcessTaskVo processTaskVo) {
+		return processTaskVo.getTitle();
 	}
 
 	@Override

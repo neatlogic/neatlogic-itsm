@@ -74,10 +74,6 @@ public class CatalogChannelTreeApi extends PrivateApiComponentBase {
             
             if(CollectionUtils.isNotEmpty(channelList)) {
                 Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
-                if(catalogMapper.checkLeftRightCodeIsWrong() > 0) {
-                    catalogMapper.getCatalogCountOnLock();
-                    catalogService.rebuildLeftRightCode();
-                }
                 CatalogVo rootCatalog = catalogService.buildRootCatalog();
                 List<CatalogVo> catalogList = catalogMapper.getCatalogListForTree(rootCatalog.getLft(), rootCatalog.getRht());
                 if(CollectionUtils.isNotEmpty(catalogList)) {
