@@ -13,6 +13,7 @@ import codedriver.framework.process.audithandler.core.IProcessTaskAuditType;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.form.exception.FormAttributeRequiredException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
@@ -318,13 +319,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         }
         List<ChannelPriorityVo> channelPriorityList =
                 channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
-        List<String> priorityUuidlist = new ArrayList<>(channelPriorityList.size());
-        for (ChannelPriorityVo channelPriorityVo : channelPriorityList) {
-            priorityUuidlist.add(channelPriorityVo.getPriorityUuid());
+        if (!channelPriorityList.stream().anyMatch(o -> o.getPriorityUuid().equals(processTaskVo.getPriorityUuid()))) {
+            throw new ProcessTaskPriorityNotMatchException();
         }
-        if (!priorityUuidlist.contains(processTaskVo.getPriorityUuid())) {
-            throw new ProcessTaskRuntimeException("工单优先级与服务优先级级不匹配");
-        }
+
         paramObj.put(ProcessTaskAuditDetailType.PRIORITY.getParamName(), processTaskVo.getPriorityUuid());
 
         // 获取上报描述内容
@@ -552,7 +550,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
             processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
             paramObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
-        }else {
+        } else {
             paramObj.remove("tagList");
         }
     }
@@ -563,19 +561,19 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
      * @Date: 2021/2/19 11:20
      * @Params: [currentProcessTaskStepVo]
      * @Returns: void
-    **/
+     **/
     @Override
     public void saveFocusUserList(ProcessTaskStepVo currentProcessTaskStepVo) {
         processTaskMapper.deleteProcessTaskFocusByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
         JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
         JSONArray focusUserUuidList = paramObj.getJSONArray("focusUserUuidList");
-        if(CollectionUtils.isNotEmpty(focusUserUuidList)){
-            for(int i = 0;i < focusUserUuidList.size();i++){
+        if (CollectionUtils.isNotEmpty(focusUserUuidList)) {
+            for (int i = 0; i < focusUserUuidList.size(); i++) {
                 String useUuid = focusUserUuidList.getString(i).split("#")[1];
-                processTaskMapper.insertProcessTaskFocus(currentProcessTaskStepVo.getProcessTaskId(),useUuid);
+                processTaskMapper.insertProcessTaskFocus(currentProcessTaskStepVo.getProcessTaskId(), useUuid);
             }
             paramObj.put(ProcessTaskAuditDetailType.FOCUSUSER.getParamName(), focusUserUuidList.toJSONString());
-        }else{
+        } else {
             paramObj.remove("focusUserUuidList");
         }
     }
@@ -594,7 +592,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         if (processTaskFormVo != null) {
             JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
             JSONArray formAttributeDataList = paramObj.getJSONArray("formAttributeDataList");
-            if(formAttributeDataList == null){
+            if (formAttributeDataList == null) {
                 /** 如果参数中没有formAttributeDataList字段，则不改变表单属性值，这样可以兼容自动节点自动完成场景 **/
                 return;
             }
@@ -615,7 +613,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
             /** 校验表单属性是否合法 **/
             FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processTaskFormVo.getFormUuid());
-            if(CollectionUtils.isNotEmpty(formVersionVo.getFormAttributeList())) {
+            if (CollectionUtils.isNotEmpty(formVersionVo.getFormAttributeList())) {
                 for (FormAttributeVo formAttributeVo : formVersionVo.getFormAttributeList()) {
                     if (formAttributeVo.isRequired()) {
                         if (hidecomponentList.contains(formAttributeVo.getUuid())) {
