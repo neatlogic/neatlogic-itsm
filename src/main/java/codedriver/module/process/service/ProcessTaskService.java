@@ -305,11 +305,16 @@ public interface ProcessTaskService {
     public void setTemporaryData(ProcessTaskVo processTaskVo, ProcessTaskStepVo processTaskStepVo);
 
     /**
-     * @Description: 查询待处理的工单，构造"用户uuid->List<工单字段中文名->值>"的map集合
-     * @Author: laiwt
-     * @Date: 2021/1/8 14:23
-     * @Params: [map]
-     * @Returns: java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
-     **/
-    public Map<String,List<Map<String,Object>>> getProcessingUserTaskMapByCondition(Map<String,Object> map);
+     * 查询待处理的工单，构造"用户uuid->List<工单字段中文名->值>"的map集合
+     * @param conditionMap 工单查询条件
+     * @return "用户uuid->List<工单字段中文名->值>"的map集合
+     */
+    public Map<String,List<Map<String,Object>>> getProcessingUserTaskMapByCondition(Map<String,Object> conditionMap);
+
+    /**
+     * 查询每个用户待处理的工单数量，构造"用户uuid->工单数"的map集合
+     * @param conditionMap 工单查询条件
+     * @return "用户uuid->工单数"的map集合
+     */
+    public Map<String,Integer> getProcessingUserTaskCountByCondition(Map<String,Object> conditionMap);
 }

@@ -408,10 +408,10 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 					}
 
 					/** 获取按用户分好类的工单列表 */
-					Map<String, List<Map<String, Object>>> userTaskMap = getUserTaskMap(config);
+					Map<String, Integer> userTaskMap = getUserTaskCountMap(config);
 
 					if(MapUtils.isNotEmpty(userTaskMap)){
-						for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
+						for (Map.Entry<String, Integer> entry : userTaskMap.entrySet()) {
 							NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(TaskNotifyTriggerType.URGE, ProcessTaskMessageHandler.class, TaskNotifyPolicyHandler.class.getName());
 							notifyBuilder.withTitleTemplate(title != null ? title : null);
 							notifyBuilder.addUserUuid(entry.getKey());
@@ -422,11 +422,11 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 							}
 							if(StringUtils.isNotBlank(taskOverviewUrl)){
 								contentSb.append("您有 <span style=\"color:red\">"
-										+ entry.getValue().size() + "</span> 条待处理工单，请前往<a href=\""
+										+ entry.getValue() + "</span> 条待处理工单，请前往<a href=\""
 										+ taskOverviewUrl + "\" target=\"_blank\">【工单中心】</a>，点击【我的待办】按钮查看");
 							}else{
 								contentSb.append("您有 <span style=\"color:red\">"
-										+ entry.getValue().size()
+										+ entry.getValue()
 										+ "</span> 条待处理工单，请前往【IT服务->工单中心->所有】，点击【我的待办】按钮查看");
 							}
 
@@ -591,12 +591,10 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 	}
 
 	/**
-	 * @Description: 查询工单，并按用户分类
-	 * @Author: laiwt
-	 * @Date: 2021/3/4 15:15
-	 * @Params: [config]
-	 * @Returns: java.util.Map<java.lang.String,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>>
-	**/
+	 * 查询工单，并按用户分类
+	 * @param config 定时任务的config
+	 * @return key->用户UUID，value->工单列表
+	 */
 	private Map<String, List<Map<String, Object>>> getUserTaskMap(JSONObject config) {
 		JSONObject conditionConfig = config.getJSONObject("conditionConfig");
 		Map<String,Object> conditionMap = new HashMap<>();
@@ -606,6 +604,23 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 		}
 		/** 查询工单 */
 		Map<String,List<Map<String,Object>>> userTaskMap = processTaskService.getProcessingUserTaskMapByCondition(conditionMap);
+
+		return userTaskMap;
+	}
+
+	/**
+	 * 查询每个用户的工单数量
+	 * @param config 定时任务的config
+	 * @return key->用户UUID，value->工单数量
+	 */
+	private Map<String, Integer> getUserTaskCountMap(JSONObject config) {
+		JSONObject conditionConfig = config.getJSONObject("conditionConfig");
+		Map<String,Object> conditionMap = new HashMap<>();
+		for(ConditionOptions option : ConditionOptions.values()){
+			ICondition condition = conditionOptionsMap.get(option.getValue());
+			condition.getConditionMap(conditionMap,conditionConfig);
+		}
+		Map<String,Integer> userTaskMap = processTaskService.getProcessingUserTaskCountByCondition(conditionMap);
 
 		return userTaskMap;
 	}

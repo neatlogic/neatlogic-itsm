@@ -1584,47 +1584,82 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
 
+    /**
+     * 查询待处理的工单，构造"用户uuid->List<工单字段中文名->值>"的map集合
+     * @param conditionMap 工单查询条件
+     * @return "用户uuid->List<工单字段中文名->值>"的map集合
+     */
     @Override
     public Map<String,List<Map<String,Object>>> getProcessingUserTaskMapByCondition(Map<String,Object> conditionMap) {
 
-        Map<String,List<Map<String,Object>>> userTaskMap = new HashMap<>();
-        List<UserVo> userList = (List<UserVo>)conditionMap.get("userList");
+        Map<String, List<Map<String, Object>>> userTaskMap = new HashMap<>();
+        List<UserVo> userList = (List<UserVo>) conditionMap.get("userList");
         /** 以处理组中的用户为单位，查询每个用户的待办工单 **/
-        if(CollectionUtils.isNotEmpty(userList)){
-            for(UserVo user : userList){
-                conditionMap.remove("teamUuidList");
-                conditionMap.remove("roleUuidList");
+        if (CollectionUtils.isNotEmpty(userList)) {
+            for (UserVo user : userList) {
+                getConditionMap(conditionMap, user);
                 List<Map<String, Object>> taskList = new ArrayList<>();
-                /** 补充user的uuid与teamUuid、roleUuid **/
-                List<String> teamUuidList = user.getTeamUuidList();
-                List<String> roleUuidList = user.getRoleUuidList();
-                conditionMap.put("userUuid",user.getUuid());
-                if(CollectionUtils.isNotEmpty(teamUuidList)){
-                    conditionMap.put("teamUuidList",teamUuidList);
-                }
-                if(CollectionUtils.isNotEmpty(roleUuidList)){
-                    conditionMap.put("roleUuidList",roleUuidList);
-                }
                 /** 查询工单 **/
                 List<Long> taskIdList = processTaskMapper.getProcessingTaskIdListByCondition(conditionMap);
-                if(CollectionUtils.isNotEmpty(taskIdList)){
+                if (CollectionUtils.isNotEmpty(taskIdList)) {
                     List<ProcessTaskVo> processTaskList = processTaskMapper.getTaskListByIdList(taskIdList);
                     for (ProcessTaskVo processTaskVo : processTaskList) {
-                        Map<String,Object> map = new HashMap<>();
-                        for(IProcessTaskColumn column : ProcessTaskColumnFactory.columnComponentMap.values()){
-                            if(!column.getDisabled() && column.getIsShow() && column.getIsExport()){
-                                map.put(column.getDisplayName(),column.getSimpleValue(processTaskVo));
+                        Map<String, Object> map = new HashMap<>();
+                        for (IProcessTaskColumn column : ProcessTaskColumnFactory.columnComponentMap.values()) {
+                            if (!column.getDisabled() && column.getIsShow() && column.getIsExport()) {
+                                map.put(column.getDisplayName(), column.getSimpleValue(processTaskVo));
                             }
                         }
                         taskList.add(map);
                     }
                 }
-                if(CollectionUtils.isNotEmpty(taskList)){
-                    userTaskMap.put(user.getUuid(),taskList);
+                if (CollectionUtils.isNotEmpty(taskList)) {
+                    userTaskMap.put(user.getUuid(), taskList);
                 }
             }
         }
 
         return userTaskMap;
+    }
+
+    /**
+     * 查询每个用户待处理的工单数量，构造"用户uuid->工单数"的map集合
+     * @param conditionMap 工单查询条件
+     * @return "用户uuid->工单数"的map集合
+     */
+    @Override
+    public Map<String, Integer> getProcessingUserTaskCountByCondition(Map<String, Object> conditionMap) {
+        Map<String, Integer> userTaskMap = new HashMap<>();
+        List<UserVo> userList = (List<UserVo>) conditionMap.get("userList");
+        /* 以处理组中的用户为单位，查询每个用户的待办工单数量 **/
+        if (CollectionUtils.isNotEmpty(userList)) {
+            for (UserVo user : userList) {
+                getConditionMap(conditionMap, user);
+                int taskCount = processTaskMapper.getProcessingTaskCountByCondition(conditionMap);
+                if (taskCount > 0) {
+                    userTaskMap.put(user.getUuid(), taskCount);
+                }
+            }
+        }
+        return userTaskMap;
+    }
+
+    /**
+     * 把查询用户的待处理工单需要的userUuid、teamUuidList、roleUuidList条件put到conditionMap
+     * @param conditionMap 查询条件
+     * @param user 用户
+     */
+    private void getConditionMap(Map<String, Object> conditionMap, UserVo user) {
+        conditionMap.remove("teamUuidList");
+        conditionMap.remove("roleUuidList");
+        List<String> teamUuidList = user.getTeamUuidList();
+        List<String> roleUuidList = user.getRoleUuidList();
+        conditionMap.put("userUuid", user.getUuid());
+        if (CollectionUtils.isNotEmpty(teamUuidList)) {
+            conditionMap.put("teamUuidList", teamUuidList);
+        }
+        if (CollectionUtils.isNotEmpty(roleUuidList)) {
+            conditionMap.put("roleUuidList", roleUuidList);
+        }
     }
 }
