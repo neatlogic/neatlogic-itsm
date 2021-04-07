@@ -1594,12 +1594,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
         Map<String, List<Map<String, Object>>> userTaskMap = new HashMap<>();
         List<UserVo> userList = (List<UserVo>) conditionMap.get("userList");
-        /* 以处理组中的用户为单位，查询每个用户的待办工单 **/
+        /** 以处理组中的用户为单位，查询每个用户的待办工单 **/
         if (CollectionUtils.isNotEmpty(userList)) {
             for (UserVo user : userList) {
                 getConditionMap(conditionMap, user);
                 List<Map<String, Object>> taskList = new ArrayList<>();
-                /* 查询工单 **/
+                /** 查询工单 **/
                 List<Long> taskIdList = processTaskMapper.getProcessingTaskIdListByCondition(conditionMap);
                 if (CollectionUtils.isNotEmpty(taskIdList)) {
                     List<ProcessTaskVo> processTaskList = processTaskMapper.getTaskListByIdList(taskIdList);
@@ -1607,7 +1607,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                         Map<String, Object> map = new HashMap<>();
                         for (IProcessTaskColumn column : ProcessTaskColumnFactory.columnComponentMap.values()) {
                             if (!column.getDisabled() && column.getIsShow() && column.getIsExport()) {
-                                map.put(column.getDisplayName(), column.getSimpleValue(column.getValue(processTaskVo)));
+                                map.put(column.getDisplayName(), column.getSimpleValue(processTaskVo));
                             }
                         }
                         taskList.add(map);
