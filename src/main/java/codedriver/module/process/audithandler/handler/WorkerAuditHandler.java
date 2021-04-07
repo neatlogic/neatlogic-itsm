@@ -53,27 +53,27 @@ public class WorkerAuditHandler implements IProcessTaskStepAuditDetailHandler {
 				UserVo userVo = userMapper.getUserBaseInfoByUuid(split[1]);
 				if(userVo != null) {
 					Map<String, String> userMap = new HashMap<>();
-					userMap.put("type", GroupSearch.USER.getValue());
-					userMap.put("value", userVo.getUuid());
-					userMap.put("text", userVo.getUserName());
+					userMap.put("initType", GroupSearch.USER.getValue());
+					userMap.put("uuid", userVo.getUuid());
+					userMap.put("name", userVo.getUserName());
 					resultList.add(userMap);
 				}
 			}else if(GroupSearch.TEAM.getValue().equals(split[0])) {
 				TeamVo teamVo = teamMapper.getTeamByUuid(split[1]);
 				if(teamVo != null) {
 					Map<String, String> teamMap = new HashMap<>();
-					teamMap.put("type", GroupSearch.TEAM.getValue());
-					teamMap.put("value", teamVo.getUuid());
-					teamMap.put("text", teamVo.getName());
+					teamMap.put("initType", GroupSearch.TEAM.getValue());
+					teamMap.put("uuid", teamVo.getUuid());
+					teamMap.put("name", teamVo.getName());
 					resultList.add(teamMap);
 				}
 			}else if(GroupSearch.ROLE.getValue().equals(split[0])) {
 				RoleVo roleVo = roleMapper.getRoleByUuid(split[1]);
 				if(roleVo != null) {
 					Map<String, String> roleMap = new HashMap<>();
-					roleMap.put("type", GroupSearch.ROLE.getValue());
-					roleMap.put("value", roleVo.getUuid());
-					roleMap.put("text", roleVo.getName());
+					roleMap.put("initType", GroupSearch.ROLE.getValue());
+					roleMap.put("uuid", roleVo.getUuid());
+					roleMap.put("name", roleVo.getName());
 					resultList.add(roleMap);
 				}
 			}
