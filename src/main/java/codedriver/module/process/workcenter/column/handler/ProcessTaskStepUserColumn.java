@@ -1,33 +1,25 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataVo;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
@@ -48,7 +40,7 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 		return "步骤处理人";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		return null;
 	}
@@ -141,7 +133,7 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 			userArrayResult.add(entry.getValue());
 		}
 		return userArrayResult;
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -169,10 +161,10 @@ public class ProcessTaskStepUserColumn extends ProcessTaskColumnBase implements 
 		return false;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		return null;
-	}
+	}*/
 
 	@Override
 	public Object getValue(ProcessTaskVo processTaskVo) {

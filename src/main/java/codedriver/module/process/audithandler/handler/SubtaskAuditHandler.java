@@ -1,5 +1,6 @@
 package codedriver.module.process.audithandler.handler;
 
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.audithandler.core.IProcessTaskStepAuditDetailHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +46,10 @@ public class SubtaskAuditHandler implements IProcessTaskStepAuditDetailHandler {
 			JSONObject userName = new JSONObject();
 			userName.put("type", "userName");
 			userName.put("typeName", "处理人");
+			userName.put("initType", GroupSearch.USER.getValue());
+			userName.put("uuid", processTaskStepSubtaskVo.getUserUuid());
 			userName.put("newContent", processTaskStepSubtaskVo.getUserName());
-			targetTime.put("changeType", "new");
+			userName.put("changeType", "new");
 
 			if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getOldContent())) {
 				ProcessTaskStepSubtaskVo oldProcessTaskStepSubtaskVo = JSON.parseObject(processTaskStepAuditDetailVo.getOldContent(), new TypeReference<ProcessTaskStepSubtaskVo>(){});		

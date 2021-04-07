@@ -4,18 +4,21 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
-import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
-import codedriver.framework.process.constvalue.*;
-import codedriver.framework.process.dao.mapper.*;
+import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessStepType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.dao.mapper.CatalogMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.dto.*;
-import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
-import codedriver.framework.process.operationauth.core.ProcessAuthManager;
-import codedriver.framework.process.operationauth.core.ProcessAuthManager.Builder;
 import codedriver.framework.process.workcenter.dto.WorkcenterFieldBuilder;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -38,6 +41,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Deprecated
 public class WorkcenterServiceImpl implements WorkcenterService {
     Logger logger = LoggerFactory.getLogger(WorkcenterServiceImpl.class);
     @Autowired
@@ -163,7 +167,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskAndStepById(processtaskId);
         JSONObject taskJson = null;
-        if (processTaskVo != null) {
+        /*if (processTaskVo != null) {
             //获取工单&&步骤操作
             Builder builder = new ProcessAuthManager.Builder();
             builder.addProcessTaskId(processTaskVo.getId());
@@ -185,7 +189,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
             for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                 IProcessTaskColumn column = entry.getValue();
-                taskJson.put(column.getName(), column.getMyValue(task));
+                taskJson.put(column.getName(), column.getMyValue(processTaskVo));
             }
 
             taskJson.put("taskid", processTaskVo.getId());
@@ -197,7 +201,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
             // 显示/隐藏
             taskJson.put("isShow", task.getInteger(ProcessWorkcenterField.IS_SHOW.getValue()));
-        }
+        }*/
         return taskJson;
     }
 
@@ -527,14 +531,17 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             } else {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();
                 if (CollectionUtils.isNotEmpty(channelUuidList)) {
-                    List<FormAttributeVo> formAttrList =
-                        formMapper.getFormAttributeListByChannelUuidList(channelUuidList);
-                    List<FormAttributeVo> theadFormList = formAttrList.stream()
-                        .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
-                    if (CollectionUtils.isEmpty(theadFormList)) {
-                        it.remove();
-                    } else {
-                        thead.setDisplayName(theadFormList.get(0).getLabel());
+                    List<String> formUuidList = channelMapper.getFormUuidListByChannelUuidList(channelUuidList);
+                    if(CollectionUtils.isNotEmpty(formUuidList)){
+                        List<FormAttributeVo> formAttrList =
+                                formMapper.getFormAttributeListByFormUuidList(channelUuidList);
+                        List<FormAttributeVo> theadFormList = formAttrList.stream()
+                                .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
+                        if (CollectionUtils.isEmpty(theadFormList)) {
+                            it.remove();
+                        } else {
+                            thead.setDisplayName(theadFormList.get(0).getLabel());
+                        }
                     }
                 }
             }

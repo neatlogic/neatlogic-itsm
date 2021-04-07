@@ -3,6 +3,7 @@ package codedriver.module.process.api.processtask.tmp;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +65,7 @@ public class ProcessTaskMobileisFitApi extends PrivateApiComponentBase {
 			String handler = processTaskStepVo.getHandler().toLowerCase();
 			if(blackList.contains(handler)) {
 				result.put("isfit", false);
-				result.put("msg", String.format("抱歉！移动端暂时不支持查看/处理含有‘%s’步骤节点的工单", ProcessStepHandlerType.getName(handler)));
+				result.put("msg", String.format("抱歉！移动端暂时不支持查看/处理含有‘%s’步骤节点的工单", ProcessStepHandlerTypeFactory.getName(handler)));
 				break;
 			}
 		}

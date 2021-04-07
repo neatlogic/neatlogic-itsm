@@ -1,11 +1,9 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dto.DashboardDataGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataSubGroupVo;
 import codedriver.framework.dashboard.dto.DashboardDataVo;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -16,9 +14,6 @@ import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.UserTable;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +33,7 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 		return "上报人";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 //		JSONObject userJson = new JSONObject();
 		String userUuid = json.getString(this.getName());
@@ -51,9 +46,9 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 //			userJson.put("vipLevel",userVo.getVipLevel());
 //		}
 		return userVo != null ? JSON.parseObject(JSONObject.toJSONString(userVo)) : null;
-	}
+	}*/
 	
-	@Override
+	/*@Override
 	public JSONObject getMyValueText(JSONObject json) {
 		JSONObject userJson = new JSONObject();
 		String userUuid = json.getString(this.getName());
@@ -63,7 +58,7 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 			userJson.put("value", userVo.getUserId());
 		}
 		return userJson;
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -86,13 +81,21 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 		return 3;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		String userName = null;
 		if(json != null){
 			userName = ((UserVo)json).getUserName();
 		}
 		return userName;
+	}*/
+
+	@Override
+	public String getSimpleValue(ProcessTaskVo taskVo) {
+		if(taskVo.getOwnerVo() != null) {
+			return taskVo.getOwnerVo().getName();
+		}
+		return null;
 	}
 
 	@Override

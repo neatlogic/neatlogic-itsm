@@ -7,6 +7,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,15 @@ public interface NewWorkcenterService {
      * @Returns: com.alibaba.fastjson.JSONObject
      **/
     JSONObject doSearch(WorkcenterVo workcenterVo);
+
+
+    /**
+     * 根据工单号查询工单信息  目前主要用于单个工单刷新
+     * @param processtaskId 工单号
+     * @return json格式工单操作信息
+     * @throws ParseException 转换异常
+     */
+    public JSONObject doSearch(Long processtaskId) throws ParseException;
 
     /**
      * @Description: 搜索工单数
