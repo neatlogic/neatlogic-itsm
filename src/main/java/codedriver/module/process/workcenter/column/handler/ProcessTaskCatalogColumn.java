@@ -7,7 +7,6 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
-import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
@@ -16,8 +15,6 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.CatalogSqlTable;
 import codedriver.framework.process.workcenter.table.ChannelSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +35,7 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
         return "服务目录";
     }
 
-    @Override
+    /*@Override
     public Object getMyValue(JSONObject json) throws RuntimeException {
         String catalogUuid = json.getString(this.getName());
         String catalogName = StringUtils.EMPTY;
@@ -47,7 +44,7 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
             catalogName = catalogVo.getName();
         }
         return catalogName;
-    }
+    }*/
 
     @Override
     public Boolean allowSort() {
@@ -70,12 +67,17 @@ public class ProcessTaskCatalogColumn extends ProcessTaskColumnBase implements I
         return 7;
     }
 
-    @Override
+    /*@Override
     public Object getSimpleValue(Object json) {
         if (json != null) {
             return json.toString();
         }
         return null;
+    }*/
+
+    @Override
+    public String getSimpleValue(ProcessTaskVo taskVo) {
+        return getValue(taskVo).toString();
     }
 
     @Override

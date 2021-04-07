@@ -7,16 +7,16 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @Component
 public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
-
+	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	@Override
 	public String getName() {
 		return "endtime";
@@ -27,11 +27,11 @@ public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements I
 		return "结束时间";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		String endTime = json.getString(this.getName());
 		return endTime;
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -54,10 +54,18 @@ public class ProcessTaskEndTimeColumn extends ProcessTaskColumnBase implements I
 		return 13;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		if(json != null){
 			return json.toString();
+		}
+		return null;
+	}*/
+
+	@Override
+	public String getSimpleValue(ProcessTaskVo taskVo) {
+		if(taskVo.getEndTime() != null) {
+			return sdf.format(taskVo.getEndTime());
 		}
 		return null;
 	}

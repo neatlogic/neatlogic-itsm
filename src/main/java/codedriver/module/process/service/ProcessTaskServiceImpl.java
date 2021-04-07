@@ -1095,7 +1095,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         List<ProcessTaskStepVo> stepVoList =
                 processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskStepVo stepVo : stepVoList) {
-            /* 找到所有已激活步骤 **/
+            /** 找到所有已激活步骤 **/
             if (stepVo.getIsActive().equals(1)) {
                 resultSet.addAll(getRetractableStepListByProcessTaskStepId(processTaskVo, stepVo.getId(), userUuid));
             }
@@ -1115,9 +1115,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     public List<ProcessTaskStepVo> getRetractableStepListByProcessTaskStepId(ProcessTaskVo processTaskVo,
                                                                              Long processTaskStepId, String userUuid) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        /* 所有前置步骤 **/
+        /** 所有前置步骤 **/
         List<ProcessTaskStepVo> fromStepList = processTaskMapper.getFromProcessTaskStepByToId(processTaskStepId);
-        /* 找到所有已完成步骤 **/
+        /** 找到所有已完成步骤 **/
         for (ProcessTaskStepVo fromStep : fromStepList) {
             IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(fromStep.getHandler());
             if (handler != null) {
@@ -1169,9 +1169,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             String contentHash = processTaskStepRemindVo.getContentHash();
             if (StringUtils.isNotBlank(contentHash)) {
                 String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
-                if (StringUtils.isNotBlank(content)) {
-                    /* 有图片标签才显式点击详情 **/
-                    if (content.contains("<figure class=\"image\">") && content.contains("</figure>")) {
+                if(StringUtils.isNotBlank(content)) {
+                    /** 有图片标签才显式点击详情 **/
+                    if(content.contains("<figure class=\"image\">") && content.contains("</figure>")) {
                         processTaskStepRemindVo.setDetail(content);
                     }
                     processTaskStepRemindVo.setContent(pattern_html.matcher(content).replaceAll(""));
@@ -1193,7 +1193,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         List<ProcessTaskStepVo> stepVoList =
                 processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskVo.getId());
         for (ProcessTaskStepVo stepVo : stepVoList) {
-            /* 找到所有已激活步骤 **/
+            /** 找到所有已激活步骤 **/
             if (stepVo.getIsActive().equals(1)) {
                 if (checkOperationAuthIsConfigured(stepVo, processTaskVo.getOwner(), processTaskVo.getReporter(),
                         ProcessTaskOperationType.STEP_TRANSFER, userUuid)) {
@@ -1272,7 +1272,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
             }
         }
-        /* 上报人公司列表 **/
+        /** 上报人公司列表 **/
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
         if (CollectionUtils.isNotEmpty(teamUuidList)) {
             List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
@@ -1284,11 +1284,11 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
             }
         }
-        /* 获取评分信息 */
+        /** 获取评分信息 */
         String scoreInfo = processTaskMapper.getProcessTaskScoreInfoById(processTaskId);
         processTaskVo.setScoreInfo(scoreInfo);
 
-        /* 转报数据 **/
+        /** 转报数据 **/
         Long fromProcessTaskId = processTaskMapper.getFromProcessTaskIdByToProcessTaskId(processTaskId);
         if (fromProcessTaskId != null) {
             processTaskVo.getTranferReportProcessTaskList().add(getFromProcessTasById(fromProcessTaskId));
@@ -1459,12 +1459,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         ProcessTaskVo processTaskVo =
                 processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
         if (processTaskVo != null) {
-            /* 上报人 **/
+            /** 上报人 **/
             if (StringUtils.isNotBlank(processTaskVo.getOwner())) {
                 receiverMap.computeIfAbsent(ProcessUserType.OWNER.getValue(), k -> new ArrayList<>())
                         .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskVo.getOwner()));
             }
-            /* 代报人 **/
+            /** 代报人 **/
             if (StringUtils.isNotBlank(processTaskVo.getReporter())) {
                 receiverMap.computeIfAbsent(ProcessUserType.REPORTER.getValue(), k -> new ArrayList<>())
                         .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskVo.getReporter()));
@@ -1473,21 +1473,21 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         ProcessTaskStepUserVo processTaskStepUser = new ProcessTaskStepUserVo();
         processTaskStepUser.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
         processTaskStepUser.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-        /* 主处理人 **/
+        /** 主处理人 **/
         processTaskStepUser.setUserType(ProcessUserType.MAJOR.getValue());
         List<ProcessTaskStepUserVo> majorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
         for (ProcessTaskStepUserVo processTaskStepUserVo : majorUserList) {
             receiverMap.computeIfAbsent(ProcessUserType.MAJOR.getValue(), k -> new ArrayList<>())
                     .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskStepUserVo.getUserVo().getUuid()));
         }
-        /* 子任务处理人 **/
+        /** 子任务处理人 **/
         processTaskStepUser.setUserType(ProcessUserType.MINOR.getValue());
         List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserList(processTaskStepUser);
         for (ProcessTaskStepUserVo processTaskStepUserVo : minorUserList) {
             receiverMap.computeIfAbsent(ProcessUserType.MINOR.getValue(), k -> new ArrayList<>())
                     .add(new NotifyReceiverVo(GroupSearch.USER.getValue(), processTaskStepUserVo.getUserVo().getUuid()));
         }
-        /* 待处理人 **/
+        /** 待处理人 **/
         List<ProcessTaskStepWorkerVo> workerList =
                 processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(
                         currentProcessTaskStepVo.getProcessTaskId(), currentProcessTaskStepVo.getId());
@@ -1496,7 +1496,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     .add(new NotifyReceiverVo(processTaskStepWorkerVo.getType(), processTaskStepWorkerVo.getUuid()));
         }
 
-        /* 工单关注人 */
+        /** 工单关注人 */
         List<String> focusUserList =
                 processTaskMapper.getFocusUsersOfProcessTask(currentProcessTaskStepVo.getProcessTaskId());
         for (String user : focusUserList) {
@@ -1505,10 +1505,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     .add(new NotifyReceiverVo(split[0], split[1]));
         }
 
-        /* 异常处理人 **/
+        /** 异常处理人 **/
         if (StringUtils.isNotBlank(currentProcessTaskStepVo.getConfig())) {
             String defaultWorker =
-                    (String) JSONPath.read(currentProcessTaskStepVo.getConfig(), "workerPolicyConfig.defaultWorker");
+                    (String)JSONPath.read(currentProcessTaskStepVo.getConfig(), "workerPolicyConfig.defaultWorker");
             if (StringUtils.isNotBlank(defaultWorker)) {
                 String[] split = defaultWorker.split("#");
                 receiverMap.computeIfAbsent(ProcessUserType.DEFAULT_WORKER.getValue(), k -> new ArrayList<>())
@@ -1534,7 +1534,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (stepDraftSaveData != null) {
             JSONObject dataObj = stepDraftSaveData.getData();
             if (MapUtils.isNotEmpty(dataObj)) {
-                /* 表单属性 **/
+                /** 表单属性 **/
                 JSONArray formAttributeDataList = dataObj.getJSONArray("formAttributeDataList");
                 if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
                     Map<String, Object> formAttributeDataMap = new HashMap<>();
@@ -1545,7 +1545,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 //                    processTaskStepVo.setFormAttributeDataMap(formAttributeDataMap);
                     processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
                 }
-                /* 描述及附件 **/
+                /** 描述及附件 **/
                 ProcessTaskStepReplyVo commentVo = new ProcessTaskStepReplyVo();
                 String content = dataObj.getString("content");
                 commentVo.setContent(content);
@@ -1554,12 +1554,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     commentVo.setFileList(fileMapper.getFileListByIdList(fileIdList));
                 }
                 processTaskStepVo.setComment(commentVo);
-                /* 当前步骤特有步骤信息 **/
+                /** 当前步骤特有步骤信息 **/
                 JSONObject handlerStepInfo = dataObj.getJSONObject("handlerStepInfo");
                 if (handlerStepInfo != null) {
                     processTaskStepVo.setHandlerStepInfo(handlerStepInfo);
                 }
-                /* 优先级 **/
+                /** 优先级 **/
                 String priorityUuid = dataObj.getString("priorityUuid");
                 if (StringUtils.isNotBlank(priorityUuid)) {
                     processTaskVo.setPriorityUuid(priorityUuid);
@@ -1570,14 +1570,14 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     }
                     processTaskVo.setPriority(priorityVo);
                 }
-                /* 标签列表 **/
+                /** 标签列表 **/
                 List<String> tagList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("tagList")), String.class);
-                if (tagList != null) {
+                if(tagList != null){
                     processTaskVo.setTagList(tagList);
                 }
-                /* 工单关注人列表 **/
-                List<String> focusUserUuidList = JSON.parseArray(dataObj.getString("focusUserUuidList"), String.class);
-                if (CollectionUtils.isNotEmpty(focusUserUuidList)) {
+                /** 工单关注人列表 **/
+                List<String> focusUserUuidList = JSON.parseArray(dataObj.getString("focusUserUuidList"),String.class);
+                if(CollectionUtils.isNotEmpty(focusUserUuidList)){
                     processTaskVo.setFocusUserUuidList(focusUserUuidList);
                 }
             }
@@ -1586,42 +1586,42 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
 
     @Override
-    public Map<String, List<Map<String, Object>>> getProcessingUserTaskMapByCondition(Map<String, Object> conditionMap) {
+    public Map<String,List<Map<String,Object>>> getProcessingUserTaskMapByCondition(Map<String,Object> conditionMap) {
 
-        Map<String, List<Map<String, Object>>> userTaskMap = new HashMap<>();
-        List<UserVo> userList = (List<UserVo>) conditionMap.get("userList");
-        /* 以处理组中的用户为单位，查询每个用户的待办工单 **/
-        if (CollectionUtils.isNotEmpty(userList)) {
-            for (UserVo user : userList) {
+        Map<String,List<Map<String,Object>>> userTaskMap = new HashMap<>();
+        List<UserVo> userList = (List<UserVo>)conditionMap.get("userList");
+        /** 以处理组中的用户为单位，查询每个用户的待办工单 **/
+        if(CollectionUtils.isNotEmpty(userList)){
+            for(UserVo user : userList){
                 conditionMap.remove("teamUuidList");
                 conditionMap.remove("roleUuidList");
                 List<Map<String, Object>> taskList = new ArrayList<>();
-                /* 补充user的uuid与teamUuid、roleUuid **/
+                /** 补充user的uuid与teamUuid、roleUuid **/
                 List<String> teamUuidList = user.getTeamUuidList();
                 List<String> roleUuidList = user.getRoleUuidList();
-                conditionMap.put("userUuid", user.getUuid());
-                if (CollectionUtils.isNotEmpty(teamUuidList)) {
-                    conditionMap.put("teamUuidList", teamUuidList);
+                conditionMap.put("userUuid",user.getUuid());
+                if(CollectionUtils.isNotEmpty(teamUuidList)){
+                    conditionMap.put("teamUuidList",teamUuidList);
                 }
-                if (CollectionUtils.isNotEmpty(roleUuidList)) {
-                    conditionMap.put("roleUuidList", roleUuidList);
+                if(CollectionUtils.isNotEmpty(roleUuidList)){
+                    conditionMap.put("roleUuidList",roleUuidList);
                 }
-                /* 查询工单 **/
+                /** 查询工单 **/
                 List<Long> taskIdList = processTaskMapper.getProcessingTaskIdListByCondition(conditionMap);
-                if (CollectionUtils.isNotEmpty(taskIdList)) {
+                if(CollectionUtils.isNotEmpty(taskIdList)){
                     List<ProcessTaskVo> processTaskList = processTaskMapper.getTaskListByIdList(taskIdList);
                     for (ProcessTaskVo processTaskVo : processTaskList) {
-                        Map<String, Object> map = new HashMap<>();
-                        for (IProcessTaskColumn column : ProcessTaskColumnFactory.columnComponentMap.values()) {
-                            if (!column.getDisabled() && column.getIsShow() && column.getIsExport()) {
-                                map.put(column.getDisplayName(), column.getSimpleValue(column.getValue(processTaskVo)));
+                        Map<String,Object> map = new HashMap<>();
+                        for(IProcessTaskColumn column : ProcessTaskColumnFactory.columnComponentMap.values()){
+                            if(!column.getDisabled() && column.getIsShow() && column.getIsExport()){
+                                map.put(column.getDisplayName(),column.getSimpleValue(processTaskVo));
                             }
                         }
                         taskList.add(map);
                     }
                 }
-                if (CollectionUtils.isNotEmpty(taskList)) {
-                    userTaskMap.put(user.getUuid(), taskList);
+                if(CollectionUtils.isNotEmpty(taskList)){
+                    userTaskMap.put(user.getUuid(),taskList);
                 }
             }
         }

@@ -13,6 +13,7 @@ import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -30,7 +31,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
         return "工单状态";
     }
 
-    @Override
+  /*  @Override
     public Object getMyValue(JSONObject json) throws RuntimeException {
         JSONObject statusJson = new JSONObject();
         String status = json.getString(this.getName());
@@ -43,7 +44,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     @Override
     public JSONObject getMyValueText(JSONObject json) {
         return (JSONObject) getMyValue(json);
-    }
+    }*/
 
     @Override
     public Boolean allowSort() {
@@ -66,13 +67,21 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
         return 5;
     }
 
-    @Override
+   /* @Override
     public Object getSimpleValue(Object json) {
         String status = null;
         if (json != null) {
             status = JSONObject.parseObject(json.toString()).getString("text");
         }
         return status;
+    }*/
+
+    @Override
+    public String getSimpleValue(ProcessTaskVo processTaskVo) {
+        if (processTaskVo.getStatus() != null) {
+            return ProcessTaskStatus.getText(processTaskVo.getStatus());
+        }
+        return StringUtils.EMPTY;
     }
 
     @Override
@@ -80,7 +89,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(),true)
+                        new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), true)
                 )));
             }
         };
@@ -97,20 +106,20 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
     }
 
     @Override
-    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo,List<Map<String, Object>> mapList) {
+    public void getMyDashboardDataVo(DashboardDataVo dashboardDataVo, WorkcenterVo workcenterVo, List<Map<String, Object>> mapList) {
         //补充text
-        for( int i =0 ; i < mapList.size();i++){
+        for (int i = 0; i < mapList.size(); i++) {
             Map<String, Object> tmpMap = new HashMap<>();
-            Map<String,Object> map = mapList.get(i);
-            for(Map.Entry<String,Object> entry : map.entrySet()){
+            Map<String, Object> map = mapList.get(i);
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
-                if(key.equals(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue())){
-                    tmpMap.put("statusText",ProcessTaskStatus.getText(value.toString()));
+                if (key.equals(ProcessTaskSqlTable.FieldEnum.STATUS.getProValue())) {
+                    tmpMap.put("statusText", ProcessTaskStatus.getText(value.toString()));
                 }
-                tmpMap.put(key,value);
+                tmpMap.put(key, value);
             }
-            mapList.set(i,tmpMap);
+            mapList.set(i, tmpMap);
         }
         //
         if (getName().equals(workcenterVo.getDashboardConfigVo().getGroup())) {

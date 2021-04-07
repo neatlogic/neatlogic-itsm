@@ -8,13 +8,11 @@ import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 @Component
@@ -32,10 +30,10 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
         return "上报时间";
     }
 
-    @Override
+   /* @Override
     public Object getMyValue(JSONObject json) throws RuntimeException {
         return json.getString(this.getName());
-    }
+    }*/
 
     @Override
     public Boolean allowSort() {
@@ -63,12 +61,17 @@ public class ProcessTaskStartTimeColumn extends ProcessTaskColumnBase implements
         return true;
     }
 
-    @Override
+   /* @Override
     public Object getSimpleValue(Object json) {
         if(json != null){
             return sdf.format((Date)json);
         }
         return null;
+    }*/
+
+    @Override
+    public String getSimpleValue(ProcessTaskVo processTaskVo) {
+        return sdf.format(processTaskVo.getStartTime());
     }
 
     @Override

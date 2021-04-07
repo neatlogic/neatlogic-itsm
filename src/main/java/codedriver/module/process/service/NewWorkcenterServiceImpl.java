@@ -3,16 +3,16 @@ package codedriver.module.process.service;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -178,6 +179,43 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     }
 
     @Override
+    public JSONObject doSearch(Long processtaskId) throws ParseException {
+        Boolean isHasProcessTaskAuth = AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName());
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskAndStepById(processtaskId);
+        JSONObject taskJson = null;
+        if (processTaskVo != null) {
+            Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
+            //获取工单&&步骤操作
+            ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
+            builder.addProcessTaskId(processTaskVo.getId());
+            for (ProcessTaskStepVo processStep : processTaskVo.getStepList()) {
+                builder.addProcessTaskStepId(processStep.getId());
+            }
+            Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
+                    builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
+                            .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
+                            .addOperationType(ProcessTaskOperationType.TASK_URGE)
+                            .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
+
+            processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
+            taskJson = new JSONObject();
+            //重新渲染工单字段
+            for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
+                IProcessTaskColumn column = entry.getValue();
+                taskJson.put(column.getName(), column.getValue(processTaskVo));
+            }
+            // route 供前端跳转路由信息
+            JSONObject routeJson = new JSONObject();
+            routeJson.put("taskid", processTaskVo.getId());
+            taskJson.put("route", routeJson);
+            taskJson.put("taskid", processTaskVo.getId());
+            // operate 获取对应工单的操作
+            taskJson.put("action", getTaskOperate(processTaskVo, operateTypeSetMap));
+        }
+        return taskJson;
+    }
+
+    @Override
     public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo) {
         //找出符合条件分页后的工单ID List
         //SqlBuilder sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FULL_TEXT);
@@ -188,7 +226,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         if (CollectionUtils.isNotEmpty(workcenterVo.getKeywordList())) {
             keywordList = new ArrayList<>(workcenterVo.getKeywordList());
         }
-        return processTaskMapper.getProcessTaskByIndexKeyword(keywordList, workcenterVo.getPageSize(), workcenterVo.getKeywordColumn(),workcenterVo.getKeywordPro());
+        return processTaskMapper.getProcessTaskByIndexKeyword(keywordList, workcenterVo.getPageSize(), workcenterVo.getKeywordColumn(), workcenterVo.getKeywordPro());
     }
 
     @Override
@@ -221,7 +259,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();
                 if (CollectionUtils.isNotEmpty(channelUuidList)) {
                     List<String> formUuidList = channelMapper.getFormUuidListByChannelUuidList(channelUuidList);
-                    if(CollectionUtils.isNotEmpty(formUuidList)){
+                    if (CollectionUtils.isNotEmpty(formUuidList)) {
                         List<FormAttributeVo> formAttrList =
                                 formMapper.getFormAttributeListByFormUuidList(formUuidList);
                         List<FormAttributeVo> theadFormList = formAttrList.stream()

@@ -7,7 +7,6 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
-import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
@@ -38,7 +37,7 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
         return "优先级";
     }
 
-    @Override
+   /* @Override
     public Object getMyValue(JSONObject json) throws RuntimeException {
         String priorityUuid = json.getString(this.getName());
         JSONObject priorityJson = new JSONObject();
@@ -56,7 +55,7 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     @Override
     public JSONObject getMyValueText(JSONObject json) {
         return (JSONObject) getMyValue(json);
-    }
+    }*/
 
     @Override
     public Boolean allowSort() {
@@ -80,13 +79,21 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
         return 3;
     }
 
-    @Override
+   /* @Override
     public Object getSimpleValue(Object json) {
         String priority = null;
         if (json != null) {
             priority = JSONObject.parseObject(json.toString()).getString("text");
         }
         return priority;
+    }*/
+
+    @Override
+    public String getSimpleValue(ProcessTaskVo taskVo) {
+        if(taskVo.getPriority() != null){
+            return taskVo.getPriority().getName();
+        }
+        return StringUtils.EMPTY;
     }
 
     @Override

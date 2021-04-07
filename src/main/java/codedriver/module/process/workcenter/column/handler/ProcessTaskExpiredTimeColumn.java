@@ -4,8 +4,6 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
-import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -17,6 +15,7 @@ import codedriver.framework.process.workcenter.table.ProcessTaskSlaSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSlaTimeSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
+import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -44,7 +43,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 		return "剩余时间";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		JSONArray resultArray = new JSONArray();
 		String worktimeUuid = json.getString("worktime");
@@ -85,7 +84,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 			}
 		}
 		return resultArray;
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -113,7 +112,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 	    return true;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		StringBuilder sb = new StringBuilder();
 		if(json != null){
@@ -137,6 +136,34 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 								.append(Math.floor(time / (1000 * 60 * 60 * 24)))
 								.append("天;");
 					}
+				}
+			}
+		}
+		return sb.toString();
+	}*/
+
+	@Override
+	public String getSimpleValue(ProcessTaskVo taskVo) {
+		StringBuilder sb = new StringBuilder();
+		JSONArray resultArray = JSONArray.parseArray(getValue(taskVo).toString());
+		if(CollectionUtils.isNotEmpty(resultArray)){
+			for(int i = 0;i < resultArray.size();i++){
+				JSONObject object = resultArray.getJSONObject(i);
+				Long expireTime = object.getLong("expireTime");
+				Long willOverTime = object.getLong("willOverTime");
+				long time;
+				if(willOverTime != null && System.currentTimeMillis() > willOverTime){
+					time = System.currentTimeMillis() - willOverTime;
+					sb.append(object.getString("slaName"))
+							.append("距离超时：")
+							.append(Math.floor(time / (1000 * 60 * 60 * 24)))
+							.append("天;");
+				}else if(expireTime != null && System.currentTimeMillis() > expireTime){
+					time = System.currentTimeMillis() - expireTime;
+					sb.append(object.getString("slaName"))
+							.append("已超时：")
+							.append(Math.floor(time / (1000 * 60 * 60 * 24)))
+							.append("天;");
 				}
 			}
 		}

@@ -7,7 +7,6 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,10 +26,10 @@ public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase impleme
 		return "工单号";
 	}
 
-	@Override
+	/*@Override
 	public Object getMyValue(JSONObject json) throws RuntimeException {
 		return json.getString(this.getName());
-	}
+	}*/
 
 	@Override
 	public Boolean allowSort() {
@@ -52,12 +51,17 @@ public class ProcessTaskSerialNumberColumn extends ProcessTaskColumnBase impleme
 		return 2;
 	}
 
-	@Override
+	/*@Override
 	public Object getSimpleValue(Object json) {
 		if(json != null){
 			return json.toString();
 		}
 		return null;
+	}*/
+
+	@Override
+	public String getSimpleValue(ProcessTaskVo processTaskVo) {
+		return processTaskVo.getSerialNumber();
 	}
 
 	@Override

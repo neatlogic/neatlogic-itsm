@@ -89,7 +89,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 
         WorkcenterVo workcenterVo = new WorkcenterVo(jsonObj);
         Map<String, IProcessTaskColumn> columnComponentMap = ProcessTaskColumnFactory.columnComponentMap;
-        /** 获取表头 */
+        /* 获取表头 */
         List<WorkcenterTheadVo> theadList = newWorkcenterService.getWorkcenterTheadList(workcenterVo, columnComponentMap, null);
         if (CollectionUtils.isNotEmpty(theadList)) {
             /** 如果勾选了当前步骤，却没有勾选当前步骤名与当前步骤处理人，自动加上 */
@@ -135,9 +135,11 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
                     //重新渲染工单字段
                     for (Map.Entry<String, IProcessTaskColumn> entry : columnComponentMap.entrySet()) {
                         IProcessTaskColumn column = entry.getValue();
-                        map.put(column.getName(), column.getValue(taskVo));
-                        headList.add(column.getDisplayName());
-                        columnList.add(column.getDisplayName());
+                        if(column.getIsShow() && column.getIsExport() && !column.getDisabled()) {
+                            map.put(column.getDisplayName(), column.getSimpleValue(taskVo));
+                            headList.add(column.getDisplayName());
+                            columnList.add(column.getDisplayName());
+                        }
                     }
                     list.add(map);
                 }
@@ -164,9 +166,9 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
 		}*/
 
         SXSSFWorkbook workbook = new SXSSFWorkbook();
-        ExcelUtil.exportData(workbook, headList.stream().collect(Collectors.toList()), columnList.stream().collect(Collectors.toList()), list, new Integer(35), 0);
+        ExcelUtil.exportData(workbook, new ArrayList<>(headList), new ArrayList<>(columnList), list, 35, 0);
         String fileNameEncode = (StringUtils.isNotBlank(title) ? title : "工单数据") + ".xlsx";
-        Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+        boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
         if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
             fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
         } else {
