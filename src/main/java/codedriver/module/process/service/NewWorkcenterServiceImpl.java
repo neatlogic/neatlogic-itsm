@@ -9,6 +9,7 @@ import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
@@ -53,6 +54,9 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     @Resource
     FormMapper formMapper;
+
+    @Resource
+    ChannelMapper channelMapper;
 
     @Resource
     ProcessTaskMapper processTaskMapper;
@@ -216,14 +220,17 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             } else {
                 List<String> channelUuidList = workcenterVo.getChannelUuidList();
                 if (CollectionUtils.isNotEmpty(channelUuidList)) {
-                    List<FormAttributeVo> formAttrList =
-                            formMapper.getFormAttributeListByChannelUuidList(channelUuidList);
-                    List<FormAttributeVo> theadFormList = formAttrList.stream()
-                            .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
-                    if (CollectionUtils.isEmpty(theadFormList)) {
-                        it.remove();
-                    } else {
-                        thead.setDisplayName(theadFormList.get(0).getLabel());
+                    List<String> formUuidList = channelMapper.getFormUuidListByChannelUuidList(channelUuidList);
+                    if(CollectionUtils.isNotEmpty(formUuidList)){
+                        List<FormAttributeVo> formAttrList =
+                                formMapper.getFormAttributeListByFormUuidList(formUuidList);
+                        List<FormAttributeVo> theadFormList = formAttrList.stream()
+                                .filter(attr -> attr.getUuid().equals(thead.getName())).collect(Collectors.toList());
+                        if (CollectionUtils.isEmpty(theadFormList)) {
+                            it.remove();
+                        } else {
+                            thead.setDisplayName(theadFormList.get(0).getLabel());
+                        }
                     }
                 }
             }

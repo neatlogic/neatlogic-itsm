@@ -2,9 +2,9 @@ package codedriver.module.process.api.processstep;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.notify.core.NotifyPolicyInvokerManager;
-import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
+import codedriver.framework.dependency.core.DependencyManager;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -17,15 +17,17 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.auth.label.PROCESS_STEP_HANDLER_MODIFY;
 
+import codedriver.module.process.dependency.handler.NotifyPolicyProcessStepHandlerDependencyHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
 import org.apache.commons.collections4.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 /**
  * @program: codedriver
@@ -38,11 +40,11 @@ import org.springframework.transaction.annotation.Transactional;
 @AuthAction(action = PROCESS_STEP_HANDLER_MODIFY.class)
 public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
-    private NotifyPolicyInvokerManager notifyPolicyInvokerManager;
-
-    @Autowired
+    @Resource
     private ProcessStepHandlerMapper stepHandlerMapper;
+
+    @Resource
+    private NotifyMapper notifyMapper;
 
     @Override
     public String getToken() {
@@ -74,19 +76,14 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                     stepHandlerVo.setConfig(config.toJSONString());
                     stepHandlerMapper.deleteProcessStepHandlerConfigByHandler(stepHandlerVo.getHandler());
                     stepHandlerMapper.insertProcessStepHandlerConfig(stepHandlerVo);
-                    notifyPolicyInvokerManager.removeInvoker(stepHandlerVo.getHandler());
+                    DependencyManager.delete(NotifyPolicyProcessStepHandlerDependencyHandler.class, stepHandlerVo.getHandler());
                     JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
                     Long policyId = notifyPolicyConfig.getLong("policyId");
                     if (policyId != null) {
-                    	NotifyPolicyInvokerVo notifyPolicyInvokerVo = new NotifyPolicyInvokerVo();
-                    	notifyPolicyInvokerVo.setPolicyId(policyId);
-                    	notifyPolicyInvokerVo.setInvoker(stepHandlerVo.getHandler());
-                    	JSONObject notifyPolicyInvokerConfig = new JSONObject();
-                    	notifyPolicyInvokerConfig.put("function", "processstephandler");
-                    	notifyPolicyInvokerConfig.put("name", "节点管理-" + ProcessStepHandlerType.getName(stepHandlerVo.getHandler()));
-                    	notifyPolicyInvokerConfig.put("handler", stepHandlerVo.getHandler());
-                    	notifyPolicyInvokerVo.setConfig(notifyPolicyInvokerConfig.toJSONString());
-                    	notifyPolicyInvokerManager.addInvoker(notifyPolicyInvokerVo);
+                        if(notifyMapper.checkNotifyPolicyIsExists(policyId) == 0){
+                            throw new NotifyPolicyNotFoundException(policyId.toString());
+                        }
+                        DependencyManager.insert(NotifyPolicyProcessStepHandlerDependencyHandler.class, policyId, stepHandlerVo.getHandler());
                     }
     			} 			
     		}
