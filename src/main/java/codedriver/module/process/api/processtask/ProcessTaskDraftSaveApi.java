@@ -118,6 +118,11 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase  {
 		if(processMapper.checkProcessIsExists(processUuid) == 0) {
 			throw new ProcessNotFoundException(processUuid);
 		}
+		/**
+		 * 由于批量上报是暂存与提交一并完成，
+		 * 如果不校验优先级，那么会出现批量上报记录显示上报失败，
+		 * 而实际上已经生成工单，只是状态是草稿
+		 */
 		List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
 		List<String> priorityUuidList = new ArrayList<>(channelPriorityList.size());
 		channelPriorityList.stream().forEach(o -> priorityUuidList.add(o.getPriorityUuid()));
