@@ -675,7 +675,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 processTaskStepReplyList.add(processTaskStepReplyVo);
             }
         }
-        processTaskStepReplyList.sort((e1, e2) -> e1.getId().compareTo(e2.getId()));
         return processTaskStepReplyList;
     }
 
