@@ -44,11 +44,13 @@ public class SubtaskAuditHandler implements IProcessTaskStepAuditDetailHandler {
 			targetTime.put("changeType", "new");
 
 			JSONObject userName = new JSONObject();
-			userName.put("type", "userName");
+			userName.put("type", "worker");
 			userName.put("typeName", "处理人");
-			userName.put("initType", GroupSearch.USER.getValue());
-			userName.put("uuid", processTaskStepSubtaskVo.getUserUuid());
-			userName.put("newContent", processTaskStepSubtaskVo.getUserName());
+			JSONObject newUserObj = new JSONObject();
+			newUserObj.put("initType", GroupSearch.USER.getValue());
+			newUserObj.put("uuid", processTaskStepSubtaskVo.getUserUuid());
+			newUserObj.put("name", processTaskStepSubtaskVo.getUserName());
+			userName.put("newContent", newUserObj);
 			userName.put("changeType", "new");
 
 			if(StringUtils.isNotBlank(processTaskStepAuditDetailVo.getOldContent())) {
@@ -63,7 +65,11 @@ public class SubtaskAuditHandler implements IProcessTaskStepAuditDetailHandler {
 					targetTime.put("changeType", "update");
 				}
 				if(!Objects.equal(oldProcessTaskStepSubtaskVo.getUserName(), processTaskStepSubtaskVo.getUserName())) {
-					userName.put("oldContent", oldProcessTaskStepSubtaskVo.getUserName());
+					JSONObject oldUserObj = new JSONObject();
+					oldUserObj.put("initType", GroupSearch.USER.getValue());
+					oldUserObj.put("uuid", oldProcessTaskStepSubtaskVo.getUserUuid());
+					oldUserObj.put("name", oldProcessTaskStepSubtaskVo.getUserName());
+					userName.put("oldContent", oldUserObj);
 					userName.put("changeType", "update");
 				}
 			}
