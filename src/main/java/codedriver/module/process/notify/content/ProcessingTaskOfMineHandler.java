@@ -12,6 +12,7 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.message.handler.TimedTaskMessgeHandler;
 import codedriver.framework.notify.core.*;
 import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
 import codedriver.framework.notify.dto.NotifyVo;
@@ -22,9 +23,8 @@ import codedriver.framework.notify.handler.MessageNotifyHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.form.constvalue.FormConditionModel;
-import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
-import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
-import codedriver.module.process.notify.handler.TaskNotifyPolicyHandler;
+import codedriver.module.process.notify.constvalue.TimedTaskTriggerType;
+import codedriver.module.process.notify.handler.TimedTaskNotifyPolicyHandler;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -279,7 +279,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			private void drawTaskTable(List<NotifyVo> notifyList, String title, String content, List<String> columnList, Map<String, List<Map<String, Object>>> userTaskMap) {
 				if(MapUtils.isNotEmpty(userTaskMap)){
 					for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
-						NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null,null);
+						NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(TimedTaskTriggerType.PENDINGPROCESSTASK);
 						notifyBuilder.withTitleTemplate(title != null ? title : null);
 						notifyBuilder.addUserUuid(entry.getKey());
 
@@ -412,7 +412,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 
 					if(MapUtils.isNotEmpty(userTaskMap)){
 						for (Map.Entry<String, Integer> entry : userTaskMap.entrySet()) {
-							NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(TaskNotifyTriggerType.URGE, ProcessTaskMessageHandler.class, TaskNotifyPolicyHandler.class.getName());
+							NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(TimedTaskTriggerType.PENDINGPROCESSTASK, TimedTaskMessgeHandler.class, TimedTaskNotifyPolicyHandler.class.getName());
 							notifyBuilder.withTitleTemplate(title != null ? title : null);
 							notifyBuilder.addUserUuid(entry.getKey());
 

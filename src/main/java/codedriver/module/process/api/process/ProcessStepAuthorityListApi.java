@@ -15,6 +15,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class ProcessStepAuthorityListApi extends PrivateApiComponentBase {
 
 	@Override
