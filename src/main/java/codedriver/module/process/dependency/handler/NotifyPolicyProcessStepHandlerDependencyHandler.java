@@ -73,7 +73,7 @@ public class NotifyPolicyProcessStepHandlerDependencyHandler extends DependencyH
             if (StringUtils.isNotBlank(name)) {
                 ValueTextVo valueTextVo = new ValueTextVo();
                 valueTextVo.setValue(caller);
-                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), name));
+                valueTextVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), "节点管理", name));
                 return valueTextVo;
             }
         }
