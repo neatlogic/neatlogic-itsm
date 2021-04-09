@@ -123,7 +123,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
         if (total > 0) {
             int pageCount = PageUtil.getPageCount(total, workcenterVo.getPageSize());
             workcenterVo.setRowNum(total);
-            for (int i = 1; i < pageCount; i++) {
+            for (int i = 1; i <= pageCount; i++) {
                 workcenterVo.setCurrentPage(i);
                 sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
                 List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskBySql(sb.build());
