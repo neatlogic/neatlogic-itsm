@@ -279,7 +279,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			private void drawTaskTable(List<NotifyVo> notifyList, String title, String content, List<String> columnList, Map<String, List<Map<String, Object>>> userTaskMap) {
 				if(MapUtils.isNotEmpty(userTaskMap)){
 					for (Map.Entry<String, List<Map<String, Object>>> entry : userTaskMap.entrySet()) {
-						NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null,null);
+						NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(TimedTaskTriggerType.PENDINGPROCESSTASK);
 						notifyBuilder.withTitleTemplate(title != null ? title : null);
 						notifyBuilder.addUserUuid(entry.getKey());
 
