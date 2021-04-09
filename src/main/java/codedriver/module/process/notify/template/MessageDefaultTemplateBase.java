@@ -3,14 +3,14 @@ package codedriver.module.process.notify.template;
 import codedriver.framework.notify.core.NotifyHandlerType;
 import codedriver.framework.process.notify.core.IDefaultTemplate;
 
-public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
+public abstract class MessageDefaultTemplateBase implements IDefaultTemplate {
 
     @Override
     public String getNotifyHandlerType() {
-        return NotifyHandlerType.REMIND.getValue();
+        return NotifyHandlerType.MESSAGE.getValue();
     }
 
-    public static class Active extends RemindDefaultTemplateBase {
+    public static class Active extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -32,7 +32,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
 
     }
 
-    public static class Start extends RemindDefaultTemplateBase {
+    public static class Start extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -54,7 +54,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
 
     }
 
-    public static class Transfer extends RemindDefaultTemplateBase {
+    public static class Transfer extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -77,7 +77,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
 
     }
 
-    public static class Urge extends RemindDefaultTemplateBase {
+    public static class Urge extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -98,7 +98,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class Succeed extends RemindDefaultTemplateBase {
+    public static class Succeed extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -119,7 +119,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class Back extends RemindDefaultTemplateBase {
+    public static class Back extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -141,7 +141,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class Retreat extends RemindDefaultTemplateBase {
+    public static class Retreat extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -163,7 +163,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class Hang extends RemindDefaultTemplateBase {
+    public static class Hang extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -185,7 +185,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class Abort extends RemindDefaultTemplateBase {
+    public static class Abort extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -206,7 +206,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class Recover extends RemindDefaultTemplateBase {
+    public static class Recover extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -227,7 +227,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class Failed extends RemindDefaultTemplateBase {
+    public static class Failed extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -249,7 +249,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class CreateSubtask extends RemindDefaultTemplateBase {
+    public static class CreateSubtask extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -270,7 +270,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class EditSubtask extends RemindDefaultTemplateBase {
+    public static class EditSubtask extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -292,7 +292,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class CompleteSubtask extends RemindDefaultTemplateBase {
+    public static class CompleteSubtask extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -314,7 +314,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class RedoSubtask extends RemindDefaultTemplateBase {
+    public static class RedoSubtask extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
@@ -337,7 +337,7 @@ public abstract class RemindDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    public static class AbortSubtask extends RemindDefaultTemplateBase {
+    public static class AbortSubtask extends MessageDefaultTemplateBase {
 
         @Override
         public String getTitle() {
