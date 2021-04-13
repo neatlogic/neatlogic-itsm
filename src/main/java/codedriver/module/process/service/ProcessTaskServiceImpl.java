@@ -1253,7 +1253,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             long timeCost = worktimeMapper.calculateCostTime(processTaskVo.getWorktimeUuid(),
                     processTaskVo.getStartTime().getTime(), processTaskVo.getEndTime().getTime());
             processTaskVo.setTimeCost(timeCost);
-            processTaskVo.setTimeCostStr(TimeUtil.millisecondsTranferMaxTimeUnit(timeCost));
+            processTaskVo.setTimeCostStr(TimeUtil.millisecondsTransferMaxTimeUnit(timeCost));
         }
 
         // 获取工单表单信息
