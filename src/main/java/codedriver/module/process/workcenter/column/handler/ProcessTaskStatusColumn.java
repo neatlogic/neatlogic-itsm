@@ -89,7 +89,7 @@ public class ProcessTaskStatusColumn extends ProcessTaskColumnBase implements IP
         return new ArrayList<TableSelectColumnVo>() {
             {
                 add(new TableSelectColumnVo(new ProcessTaskSqlTable(), Collections.singletonList(
-                        new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskSqlTable.FieldEnum.STATUS.getProValue(), true)
+                        new SelectColumnVo(ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), true)
                 )));
             }
         };
