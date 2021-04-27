@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 @Service
 public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
-    Logger logger = LoggerFactory.getLogger(WorkcenterServiceImpl.class);
+    Logger logger = LoggerFactory.getLogger(NewWorkcenterServiceImpl.class);
 
     @Resource
     WorkcenterMapper workcenterMapper;
