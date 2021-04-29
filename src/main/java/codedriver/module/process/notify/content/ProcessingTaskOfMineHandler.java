@@ -377,10 +377,12 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 		handlerMap.put(MessageNotifyHandler.class.getName(),new BuildNotifyHandler(){
 			private final String homeUrl = Config.HOME_URL();
 
+			private final String allProcessTaskUrl = "process.html#/task-overview-allProcessTask";
+
 			@Override
 			public String getPreviewContent(JSONObject config) {
 				if(StringUtils.isNotBlank(homeUrl)){
-					String taskOverviewUrl = homeUrl + TenantContext.get().getTenantUuid() + File.separator + "process.html#/task-overview";
+					String taskOverviewUrl = homeUrl + TenantContext.get().getTenantUuid() + File.separator + allProcessTaskUrl;
 					return "您有 <span style=\"color:red\">"
 							+ "5</span> 条待处理工单，请前往<a href=\"" + taskOverviewUrl
 							+ "\" target=\"_blank\">【工单中心】</a>，点击【我的待办】按钮查看";
@@ -394,7 +396,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			public List<NotifyVo> getNotifyVoList(JSONObject config) {
 				String taskOverviewUrl = null;
 				if(StringUtils.isNotBlank(homeUrl)){
-					taskOverviewUrl = homeUrl + TenantContext.get().getTenantUuid() + File.separator + "process.html#/task-overview";
+					taskOverviewUrl = homeUrl + TenantContext.get().getTenantUuid() + File.separator + allProcessTaskUrl;
 				}
 				List<NotifyVo> notifyList = new ArrayList<>();
 
