@@ -14,10 +14,10 @@ import codedriver.framework.dto.TenantVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,10 +33,10 @@ public class WorkcenterInit extends ApplicationListenerBase {
     public List<WorkcenterVo> workcenterList = new ArrayList<>();
     private List<TenantVo> tenantList = new ArrayList<>();
 
-    @Autowired
+    @Resource
     private TenantMapper tenantMapper;
 
-    @Autowired
+    @Resource
     private WorkcenterMapper workcenterMapper;
 
     /**
