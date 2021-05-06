@@ -68,19 +68,22 @@ public class ProcessTaskStepTeamCondition extends ProcessTaskConditionBase imple
         returnObj.put("isMultiple", true);
         returnObj.put("initConfig", new JSONObject() {
             {
-                this.put("excludeList", new JSONArray() {
-
-                });
+                this.put("excludeList", new JSONArray() {{
+                    if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
+                        this.add(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue());
+                    }
+                }});
                 this.put("groupList", new JSONArray() {
                     {
                         this.add(GroupSearch.TEAM.getValue());
+                        this.add(GroupSearch.COMMON.getValue());
                     }
                 });
                 this.put("includeList", new JSONArray() {
                     {
                         if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
                             this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_TEAM.getValue());
-                            this.add(GroupSearch.TEAM.getValuePlugin() + UserType.LOGIN_DEPARTMENT.getValue());
+                            this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_DEPARTMENT.getValue());
                         }
                     }
                 });

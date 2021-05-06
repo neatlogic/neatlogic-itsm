@@ -54,19 +54,22 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
         config.put("multiple", true);
         config.put("initConfig", new JSONObject() {
             {
-                this.put("excludeList", new JSONArray() {
-
-                });
+                this.put("excludeList", new JSONArray() {{
+                    if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
+                        this.add(GroupSearch.COMMON.getValuePlugin() + UserType.ALL.getValue());
+                    }
+                }});
                 this.put("groupList", new JSONArray() {
                     {
+                        this.add(GroupSearch.COMMON.getValue());
                         this.add(GroupSearch.USER.getValue());
                     }
                 });
                 this.put("includeList", new JSONArray() {
                     {
                         if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
-                            this.add(GroupSearch.USER.getValuePlugin() + UserType.VIP_USER.getValue());
-                            this.add(GroupSearch.USER.getValuePlugin() + UserType.LOGIN_USER.getValue());
+                            this.add(GroupSearch.COMMON.getValuePlugin() + UserType.VIP_USER.getValue());
+                            this.add(GroupSearch.COMMON.getValuePlugin() + UserType.LOGIN_USER.getValue());
                         }
                     }
                 });
