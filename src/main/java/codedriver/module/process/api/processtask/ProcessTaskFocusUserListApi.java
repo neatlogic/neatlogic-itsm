@@ -7,8 +7,8 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
@@ -23,7 +23,7 @@ import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-@AuthAction(action = NO_AUTH.class)
+@AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskFocusUserListApi extends PrivateApiComponentBase {
 
     @Resource

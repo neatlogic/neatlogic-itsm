@@ -1,9 +1,9 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -32,7 +32,7 @@ import java.util.List;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-@AuthAction(action = NO_AUTH.class)
+@AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
 
     @Resource

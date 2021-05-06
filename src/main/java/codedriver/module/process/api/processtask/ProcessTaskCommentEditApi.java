@@ -1,21 +1,9 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
-import com.alibaba.fastjson.JSON;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -23,14 +11,24 @@ import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepReplyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepCommentNotFoundException;
-import codedriver.module.process.service.ProcessTaskService;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.service.ProcessTaskService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-@AuthAction(action = NO_AUTH.class)
+@AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
 
 	@Autowired

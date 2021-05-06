@@ -38,7 +38,7 @@ import codedriver.framework.process.exception.channel.ChannelRelationSettingExce
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.auth.label.CATALOG_MODIFY;
+import codedriver.framework.process.auth.CATALOG_MODIFY;
 
 import javax.annotation.Resource;
 

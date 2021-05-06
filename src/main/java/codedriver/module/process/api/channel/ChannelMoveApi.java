@@ -27,7 +27,7 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.auth.label.CATALOG_MODIFY;
+import codedriver.framework.process.auth.CATALOG_MODIFY;
 
 import javax.annotation.Resource;
 

@@ -25,7 +25,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import codedriver.module.process.auth.label.PROCESS_MODIFY;
+import codedriver.framework.process.auth.PROCESS_MODIFY;
 import codedriver.module.process.service.ProcessService;
 @Service
 @Transactional

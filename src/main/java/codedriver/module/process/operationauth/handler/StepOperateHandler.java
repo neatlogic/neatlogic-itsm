@@ -17,7 +17,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
-import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 
 @Component
 public class StepOperateHandler extends OperationAuthHandlerBase {

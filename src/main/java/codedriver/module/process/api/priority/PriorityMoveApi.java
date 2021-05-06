@@ -17,7 +17,7 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.auth.label.PRIORITY_MODIFY;
+import codedriver.framework.process.auth.PRIORITY_MODIFY;
 
 @Service
 @Transactional

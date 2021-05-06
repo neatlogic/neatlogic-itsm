@@ -1,7 +1,9 @@
 package codedriver.module.process.api.workcenter;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
  * 同时支持按分类导出与实时查询结果导出
  */
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase {
     @Resource

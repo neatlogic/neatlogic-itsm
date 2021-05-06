@@ -5,7 +5,7 @@ import codedriver.framework.process.exception.channeltype.ChannelTypeRelationHas
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.auth.label.CATALOG_MODIFY;
+import codedriver.framework.process.auth.CATALOG_MODIFY;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

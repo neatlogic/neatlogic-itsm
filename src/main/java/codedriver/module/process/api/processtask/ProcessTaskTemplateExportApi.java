@@ -1,22 +1,26 @@
 package codedriver.module.process.api.processtask;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.form.dto.FormAttributeVo;
-import codedriver.framework.form.dto.FormVersionVo;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.form.dao.mapper.FormMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.dto.*;
-import codedriver.framework.process.exception.channel.ChannelNotFoundException;
-import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.process.util.ProcessConfigUtil;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import codedriver.framework.util.ExcelUtil;
 import codedriver.framework.form.attribute.handler.DivideHandler;
 import codedriver.framework.form.attribute.handler.LinkHandler;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.ProcessFormVo;
+import codedriver.framework.process.dto.ProcessVo;
+import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.process.exception.process.ProcessNotFoundException;
+import codedriver.framework.process.util.ProcessConfigUtil;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.util.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -40,6 +44,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponentBase {
     static Logger logger = LoggerFactory.getLogger(ProcessTaskTemplateExportApi.class);

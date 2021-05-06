@@ -21,7 +21,7 @@ import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiCompon
 import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.framework.util.ExcelUtil;
-import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.form.attribute.handler.DivideHandler;
 import codedriver.framework.form.attribute.handler.LinkHandler;
 import com.alibaba.fastjson.JSONArray;

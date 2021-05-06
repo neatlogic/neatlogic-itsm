@@ -2,7 +2,6 @@ package codedriver.module.process.api.agent;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAgentVo;
@@ -11,8 +10,9 @@ import codedriver.framework.exception.user.AgentIsUserSelfException;
 import codedriver.framework.exception.user.UserAgentLoopException;
 import codedriver.framework.exception.user.UserAgentRepeatException;
 import codedriver.framework.exception.user.UserHasAgentException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-@AuthAction(action = NO_AUTH.class)
+@AuthAction(action = PROCESS_BASE.class)
 public class UserAgentSaveApi extends PrivateApiComponentBase {
 
 	@Autowired

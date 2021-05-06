@@ -58,7 +58,7 @@ import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.framework.util.TimeUtil;
 import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
-import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.module.process.integration.handler.ProcessRequestFrom;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 import com.alibaba.fastjson.JSON;

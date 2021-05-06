@@ -1,8 +1,8 @@
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-@AuthAction(action = NO_AUTH.class)
+@AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 
   

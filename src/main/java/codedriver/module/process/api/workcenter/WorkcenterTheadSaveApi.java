@@ -16,7 +16,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.auth.label.WORKCENTER_MODIFY;
+import codedriver.framework.process.auth.WORKCENTER_MODIFY;
 @Transactional
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)

@@ -21,7 +21,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.framework.util.Md5Util;
-import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.module.process.workcenter.core.SqlBuilder;
 import codedriver.module.process.workcenter.operate.WorkcenterOperateBuilder;
 import com.alibaba.fastjson.JSONArray;

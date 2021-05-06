@@ -11,7 +11,7 @@ import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.auth.label.PROCESSTASK_MODIFY;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.module.process.condition.handler.ProcessTaskIsShowCondition;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

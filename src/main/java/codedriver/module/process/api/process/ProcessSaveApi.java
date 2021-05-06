@@ -18,7 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.dto.ProcessVo;
-import codedriver.module.process.auth.label.PROCESS_MODIFY;
+import codedriver.framework.process.auth.PROCESS_MODIFY;
 import codedriver.module.process.service.ProcessService;
 
 @Service

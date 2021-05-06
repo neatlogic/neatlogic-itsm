@@ -12,7 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
-import codedriver.module.process.auth.label.CATALOG_MODIFY;
+import codedriver.framework.process.auth.CATALOG_MODIFY;
 import codedriver.module.process.service.CatalogService;
 
 @Service

@@ -25,7 +25,7 @@ import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.module.process.auth.label.PROCESS_MODIFY;
+import codedriver.framework.process.auth.PROCESS_MODIFY;
 import codedriver.module.process.service.ProcessService;
 
 @Service
