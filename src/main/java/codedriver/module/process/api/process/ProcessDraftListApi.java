@@ -2,7 +2,6 @@ package codedriver.module.process.api.process;
 
 import java.util.List;
 
-import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -21,7 +20,6 @@ import codedriver.framework.process.dto.ProcessDraftVo;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 @AuthAction(action = PROCESS_MODIFY.class)
-@AuthAction(action = PROCESS_BASE.class)
 public class ProcessDraftListApi extends PrivateApiComponentBase {
 
 	@Autowired
