@@ -3,6 +3,8 @@ package codedriver.module.process.api.processtask;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,6 +32,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
     

@@ -3,6 +3,8 @@ package codedriver.module.process.api.process;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.ChannelTypeVo;
@@ -24,6 +26,7 @@ import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ChannelProcessVo;
 import codedriver.framework.process.dto.ChannelVo;
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessReferenceListApi extends PrivateApiComponentBase {
 

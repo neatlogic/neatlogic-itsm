@@ -2,6 +2,8 @@ package codedriver.module.process.api.priority;
 
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -18,6 +20,7 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dto.PriorityVo;
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class PrioritySearchApi extends PrivateApiComponentBase {
 

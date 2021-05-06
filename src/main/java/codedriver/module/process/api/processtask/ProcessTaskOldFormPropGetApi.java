@@ -3,6 +3,8 @@ package codedriver.module.process.api.processtask;
 
 import java.util.Map;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @SuppressWarnings("deprecation")
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskOldFormPropGetApi extends PrivateApiComponentBase {
 

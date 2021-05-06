@@ -3,11 +3,13 @@ package codedriver.module.process.api.processtask;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.WorkAssignmentUnitVo;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskAuditListApi extends PrivateApiComponentBase {
 

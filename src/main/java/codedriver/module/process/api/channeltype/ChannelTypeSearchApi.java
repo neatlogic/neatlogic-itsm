@@ -2,6 +2,8 @@ package codedriver.module.process.api.channeltype;
 
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -19,6 +21,7 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.dto.ChannelTypeVo;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ChannelTypeSearchApi extends PrivateApiComponentBase {
 

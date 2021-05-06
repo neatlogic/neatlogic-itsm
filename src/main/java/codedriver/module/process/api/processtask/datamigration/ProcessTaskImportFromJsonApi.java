@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,6 +55,7 @@ import codedriver.framework.util.TimeUtil;
 @SuppressWarnings("deprecation")
 @Service
 @Transactional
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentBase {
     static Logger logger = LoggerFactory.getLogger(ProcessTaskImportFromJsonApi.class);

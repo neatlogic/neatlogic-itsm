@@ -1,5 +1,7 @@
 package codedriver.module.process.api.channeltype.relation;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -24,6 +26,7 @@ import codedriver.framework.process.dto.ChannelTypeRelationVo;
 import codedriver.framework.process.dto.ChannelTypeVo;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ChannelTypeRelationListApi extends PrivateApiComponentBase {
 
