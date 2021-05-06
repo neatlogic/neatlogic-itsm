@@ -1,6 +1,8 @@
 package codedriver.module.process.api.processstep;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @create: 2020-03-18 11:05
  **/
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessStepHandlerSearchApi extends PrivateApiComponentBase {
 

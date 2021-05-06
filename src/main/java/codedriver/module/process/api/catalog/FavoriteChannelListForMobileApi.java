@@ -6,6 +6,8 @@
 package codedriver.module.process.api.catalog;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.restful.annotation.*;
@@ -19,6 +21,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FavoriteChannelListForMobileApi extends PrivateApiComponentBase {
 

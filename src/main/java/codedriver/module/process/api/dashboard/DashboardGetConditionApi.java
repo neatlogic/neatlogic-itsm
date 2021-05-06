@@ -3,6 +3,8 @@ package codedriver.module.process.api.dashboard;
 import java.util.Collections;
 import java.util.Comparator;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -23,6 +25,7 @@ import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 
 @Service
 @Transactional
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DashboardGetConditionApi extends PrivateApiComponentBase {
 

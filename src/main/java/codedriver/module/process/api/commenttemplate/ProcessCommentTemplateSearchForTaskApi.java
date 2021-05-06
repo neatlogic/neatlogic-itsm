@@ -1,6 +1,7 @@
 package codedriver.module.process.api.commenttemplate;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.UserType;
@@ -8,6 +9,7 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import codedriver.framework.process.dto.ProcessCommentTemplateVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentBase {
 

@@ -1,6 +1,8 @@
 package codedriver.module.process.api.channeltype.relation;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -33,6 +35,7 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase {
 

@@ -2,6 +2,8 @@ package codedriver.module.process.api.catalog.relation;
 
 import java.util.*;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -22,6 +24,7 @@ import codedriver.framework.process.dto.ChannelVo;
 import codedriver.module.process.service.CatalogService;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 @Transactional
 public class CatalogChannelTreeApi extends PrivateApiComponentBase {

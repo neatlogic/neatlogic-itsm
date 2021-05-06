@@ -2,7 +2,9 @@ package codedriver.module.process.api.process;
 
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.form.constvalue.FormHandlerTypeBak;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +36,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessConditionList extends PrivateApiComponentBase {
 

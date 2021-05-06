@@ -2,7 +2,9 @@ package codedriver.module.process.api.form;
 
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.restful.annotation.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import javax.annotation.Resource;
 
 @Service
+@AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FormAttributeCheckApi extends PrivateApiComponentBase {
 	
