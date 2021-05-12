@@ -35,7 +35,7 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
     }
 
     @Override
-    protected void myDeleteFile(Long fileId) {
-
+    protected boolean myDeleteFile(Long fileId) {
+        return true;
     }
 }
