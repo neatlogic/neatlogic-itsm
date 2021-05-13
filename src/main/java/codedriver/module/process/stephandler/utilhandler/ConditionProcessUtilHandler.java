@@ -48,9 +48,4 @@ public class ConditionProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		return null;
 	}
 
-    @Override
-    protected IOperationAuthHandlerType MyOperationAuthHandlerType() {
-        return null;
-    }
-
 }
