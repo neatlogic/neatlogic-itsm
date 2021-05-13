@@ -110,9 +110,4 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         return resultObj;
 	}
 
-    @Override
-    protected IOperationAuthHandlerType MyOperationAuthHandlerType() {
-        return null;
-    }
-
 }

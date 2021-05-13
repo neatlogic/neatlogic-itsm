@@ -306,9 +306,4 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         return resultObj;
     }
 
-    @Override
-    protected IOperationAuthHandlerType MyOperationAuthHandlerType() {
-        return OperationAuthHandlerType.OMNIPOTENT;
-    }
-
 }

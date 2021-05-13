@@ -198,9 +198,4 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		return resultObj;
 	}
 
-    @Override
-    protected IOperationAuthHandlerType MyOperationAuthHandlerType() {
-        return OperationAuthHandlerType.AUTOMATIC;
-    }
-
 }

@@ -48,9 +48,4 @@ public class StartProcessUtilHandler extends ProcessStepInternalHandlerBase {
 		return null;
 	}
 
-    @Override
-    protected IOperationAuthHandlerType MyOperationAuthHandlerType() {
-        return null;
-    }
-
 }

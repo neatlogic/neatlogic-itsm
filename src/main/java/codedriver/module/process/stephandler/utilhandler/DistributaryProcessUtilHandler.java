@@ -48,9 +48,4 @@ public class DistributaryProcessUtilHandler extends ProcessStepInternalHandlerBa
 		return null;
 	}
 
-    @Override
-    protected IOperationAuthHandlerType MyOperationAuthHandlerType() {
-        return null;
-    }
-
 }
