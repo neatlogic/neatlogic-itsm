@@ -48,4 +48,9 @@ public class DistributaryProcessUtilHandler extends ProcessStepInternalHandlerBa
 		return null;
 	}
 
+	@Override
+	public JSONObject makeupProcessStepConfig(JSONObject configObj) {
+		return null;
+	}
+
 }

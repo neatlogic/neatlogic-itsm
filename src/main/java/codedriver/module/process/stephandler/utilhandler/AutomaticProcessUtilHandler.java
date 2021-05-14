@@ -198,4 +198,9 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		return resultObj;
 	}
 
+	@Override
+	public JSONObject makeupProcessStepConfig(JSONObject configObj) {
+		return null;
+	}
+
 }
