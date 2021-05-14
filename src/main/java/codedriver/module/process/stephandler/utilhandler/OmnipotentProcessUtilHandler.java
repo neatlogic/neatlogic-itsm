@@ -362,7 +362,9 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                     ProcessTaskOperationType.SUBTASK_REDO,
                     ProcessTaskOperationType.SUBTASK_EDIT
             };
-            JSONArray customButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, stepButtons, subtaskButtons);
+            JSONArray customButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, stepButtons);
+            JSONArray subtaskcustomButtonArray = ProcessConfigUtil.makeupSubtaskCustomButtonList(customButtonList, subtaskButtons);
+            customButtonArray.addAll(subtaskcustomButtonArray);
             resultObj.put("customButtonList", customButtonArray);
         }
         /** 状态映射列表 **/
