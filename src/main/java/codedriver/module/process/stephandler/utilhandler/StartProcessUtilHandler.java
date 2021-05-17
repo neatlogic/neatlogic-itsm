@@ -48,9 +48,4 @@ public class StartProcessUtilHandler extends ProcessStepInternalHandlerBase {
 		return null;
 	}
 
-	@Override
-	public JSONObject makeupProcessStepConfig(JSONObject configObj) {
-		return null;
-	}
-
 }

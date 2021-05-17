@@ -48,9 +48,4 @@ public class ConditionProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		return null;
 	}
 
-	@Override
-	public JSONObject makeupProcessStepConfig(JSONObject configObj) {
-		return null;
-	}
-
 }
