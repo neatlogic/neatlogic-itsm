@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.module.process.notify.handler.AutomaticNotifyPolicyHandler;
 import codedriver.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
 import com.alibaba.fastjson.JSONPath;
@@ -200,7 +201,140 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 
 	@Override
 	public JSONObject makeupProcessStepConfig(JSONObject configObj) {
-		return null;
+		if (configObj == null) {
+			configObj = new JSONObject();
+		}
+		JSONObject resultObj = new JSONObject();
+
+		/** 授权 **/
+		ProcessTaskOperationType[] stepActions = {
+				ProcessTaskOperationType.STEP_VIEW,
+				ProcessTaskOperationType.STEP_TRANSFER
+		};
+		JSONArray authorityList = configObj.getJSONArray("authorityList");
+		if (CollectionUtils.isNotEmpty(authorityList)) {
+			JSONArray authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
+			resultObj.put("authorityList", authorityArray);
+		}
+
+		/** 通知 **/
+		JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
+		if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
+			JSONObject notifyPolicyObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, OmnipotentNotifyPolicyHandler.class);
+			resultObj.put("notifyPolicyConfig", notifyPolicyObj);
+		}
+
+		JSONArray customButtonList = configObj.getJSONArray("customButtonList");
+		if (CollectionUtils.isNotEmpty(customButtonList)) {
+			/** 按钮映射列表 **/
+			ProcessTaskOperationType[] stepButtons = {
+					ProcessTaskOperationType.STEP_COMPLETE,
+					ProcessTaskOperationType.STEP_BACK,
+					ProcessTaskOperationType.TASK_TRANSFER,
+					ProcessTaskOperationType.STEP_START
+			};
+			JSONArray customButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, stepButtons);
+			resultObj.put("customButtonList", customButtonArray);
+		}
+		/** 状态映射列表 **/
+		JSONArray customStatusList = configObj.getJSONArray("customStatusList");
+		if (CollectionUtils.isNotEmpty(customStatusList)) {
+			JSONArray customStatusArray = ProcessConfigUtil.makeupCustomStatusList(customStatusList);
+			resultObj.put("customStatusList", customStatusArray);
+		}
+
+		/** 自动化配置 **/
+		String failPolicy = "";
+		String integrationUuid = "";
+		JSONArray paramArray = new JSONArray();
+		JSONObject successObj = new JSONObject();
+		String resultTemplate = "";
+		String type = "none";
+		JSONObject intervalObj = new JSONObject();
+		JSONObject timeWindowObj = new JSONObject();
+
+		JSONObject automaticConfig = configObj.getJSONObject("automaticConfig");
+		if (MapUtils.isNotEmpty(automaticConfig)) {
+			/** 外部调用 **/
+			JSONObject requestConfig = automaticConfig.getJSONObject("requestConfig");
+			if (MapUtils.isNotEmpty(requestConfig)) {
+				failPolicy = requestConfig.getString("failPolicy");
+				integrationUuid = requestConfig.getString("integrationUuid");
+				JSONArray paramList = requestConfig.getJSONArray("paramList");
+				if (CollectionUtils.isNotEmpty(paramList)) {
+					for (int i = 0; i < paramList.size(); i++) {
+						JSONObject paramConfig = paramList.getJSONObject(i);
+						if (MapUtils.isNotEmpty(paramConfig)) {
+							String name = paramConfig.getString("name");
+							String mappingType = paramConfig.getString("type");
+							String value = paramConfig.getString("value");
+							JSONObject paramObj = new JSONObject();
+							paramObj.put("name", name);
+							paramObj.put("type", mappingType);
+							paramObj.put("value", value);
+							paramArray.add(paramObj);
+						}
+					}
+				}
+				JSONObject successConfig = requestConfig.getJSONObject("successConfig");
+				if (MapUtils.isNotEmpty(successConfig)) {
+					String name = successConfig.getString("name");
+					String expression = successConfig.getString("expression");
+					String value = successConfig.getString("value");
+					successObj.put("name", name);
+					successObj.put("expression", expression);
+					successObj.put("value", value);
+				}
+				resultTemplate = requestConfig.getString("resultTemplate");
+			}
+			/** 是否回调 **/
+			JSONObject callbackConfig = automaticConfig.getJSONObject("callbackConfig");
+			if (MapUtils.isNotEmpty(callbackConfig)) {
+				type = callbackConfig.getString("type");
+				JSONObject intervalConfig = callbackConfig.getJSONObject("config");
+				if (MapUtils.isNotEmpty(intervalConfig)) {
+					String intervalIntegrationUuid = intervalConfig.getString("integrationUuid");
+					Integer interval = intervalConfig.getInteger("interval");
+					String intervalResultTemplate = intervalConfig.getString("resultTemplate");
+					intervalObj.put("integrationUuid", intervalIntegrationUuid);
+					intervalObj.put("interval", interval);
+					intervalObj.put("resultTemplate", intervalResultTemplate);
+				}
+			}
+			/** 时间窗口 **/
+			JSONObject timeWindowConfig = automaticConfig.getJSONObject("timeWindowConfig");
+			if (MapUtils.isNotEmpty(timeWindowConfig)) {
+				String startTime = timeWindowConfig.getString("startTime");
+				String endTime = timeWindowConfig.getString("endTime");
+				timeWindowObj.put("startTime", startTime);
+				timeWindowObj.put("endTime", endTime);
+			}
+		}
+
+		JSONObject automaticObj = new JSONObject();
+		JSONObject requestObj = new JSONObject();
+		requestObj.put("failPolicy", failPolicy);
+		requestObj.put("integrationUuid", integrationUuid);
+		requestObj.put("paramList", paramArray);
+		requestObj.put("successConfig", successObj);
+		requestObj.put("resultTemplate", resultTemplate);
+		automaticObj.put("requestConfig", requestObj);
+
+		JSONObject callbackObj = new JSONObject();
+		callbackObj.put("type", type);
+		callbackObj.put("config", intervalObj);
+		automaticObj.put("callbackConfig", callbackObj);
+
+		automaticObj.put("timeWindowConfig", timeWindowObj);
+		resultObj.put("automaticConfig", automaticObj);
+
+		/** 分配处理人 **/
+		JSONObject workerPolicyConfig = configObj.getJSONObject("workerPolicyConfig");
+		if (MapUtils.isNotEmpty(workerPolicyConfig)) {
+			JSONObject workerPolicyObj = ProcessConfigUtil.makeupWorkerPolicyConfig(workerPolicyConfig);
+			resultObj.put("workerPolicyConfig", workerPolicyObj);
+		}
+		return resultObj;
 	}
 
 }
