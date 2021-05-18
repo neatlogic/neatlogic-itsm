@@ -18,6 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,8 +53,7 @@ public class ProcessTaskFulltextIndexRebuildApi extends PrivateApiComponentBase 
             if(CollectionUtils.isNotEmpty(idArray)){
                 idList = JSONObject.parseArray(idArray.toJSONString(), Long.class);
             }else{
-                //TODO 慎用临时处理数据
-                idList = processTaskMapper.getAllProcessTaskIdList();
+                idList = new ArrayList<>();
             }
             for(Long idObj : idList ){
                 handler.createIndex(idObj);
