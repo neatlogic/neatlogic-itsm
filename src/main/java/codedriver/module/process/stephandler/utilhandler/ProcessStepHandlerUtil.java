@@ -5,7 +5,6 @@ import codedriver.framework.asynchronization.threadpool.TransactionSynchronizati
 import codedriver.framework.common.RootComponent;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.notify.core.INotifyTriggerType;
@@ -26,8 +25,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,22 +41,20 @@ import java.util.stream.Collectors;
  **/
 @RootComponent
 public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
-    @Autowired
+    @Resource
     private ProcessTaskStepTimeAuditMapper processTaskStepTimeAuditMapper;
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
-    @Autowired
+    @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
-    @Autowired
+    @Resource
     private UserMapper userMapper;
-    @Autowired
+    @Resource
     private ChannelMapper channelMapper;
-    @Autowired
+    @Resource
     private FileMapper fileMapper;
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
-    @Autowired
-    private FormMapper formMapper;
 
     /**
      * @param currentProcessTaskStepVo
@@ -612,9 +609,15 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 readcomponentList = new ArrayList<>();
             }
             /** 校验表单属性是否合法 **/
-            FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processTaskFormVo.getFormUuid());
-            if (CollectionUtils.isNotEmpty(formVersionVo.getFormAttributeList())) {
-                for (FormAttributeVo formAttributeVo : formVersionVo.getFormAttributeList()) {
+            String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+            FormVersionVo formVersionVo = new FormVersionVo();
+            formVersionVo.setFormUuid(processTaskFormVo.getFormUuid());
+            formVersionVo.setFormName(processTaskFormVo.getFormName());
+            formVersionVo.setFormConfig(formContent);
+            List<FormAttributeVo> formAttributeVoList = formVersionVo.getFormAttributeList();
+//            FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processTaskFormVo.getFormUuid());
+            if (CollectionUtils.isNotEmpty(formAttributeVoList)) {
+                for (FormAttributeVo formAttributeVo : formAttributeVoList) {
                     if (formAttributeVo.isRequired()) {
                         if (hidecomponentList.contains(formAttributeVo.getUuid())) {
                             continue;
