@@ -1,9 +1,9 @@
 package codedriver.module.process.stephandler.utilhandler;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
+import codedriver.framework.process.dto.processconfig.FormAttributeAuthorityVo;
+import codedriver.framework.process.dto.processconfig.SlaTransferPolicyVo;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
 import codedriver.module.process.notify.handler.SlaNotifyPolicyHandler;
@@ -122,12 +122,30 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         }
         JSONObject resultObj = new JSONObject();
         /** 流程设置 **/
+        JSONObject processConfig = configObj.getJSONObject("processConfig");
+        JSONObject processObj = makeuPprocessConfig(processConfig);
+        resultObj.put("processConfig", processObj);
+        /** 表单设置 **/
+        JSONObject formConfig = configObj.getJSONObject("formConfig");
+        JSONObject formObj = makeupFormConfig(formConfig);
+        resultObj.put("formConfig", formObj);
+        /** 评分设置 **/
+        JSONObject scoreConfig = configObj.getJSONObject("scoreConfig");
+        JSONObject scoreConfigObj = makeupScoreConfig(scoreConfig);
+        resultObj.put("scoreConfig", scoreConfigObj);
+        /** 时效设置 **/
+        JSONArray slaList = configObj.getJSONArray("slaList");
+        JSONArray slaArray = makeupSlaList(slaList);
+        resultObj.put("slaList", slaArray);
+        return resultObj;
+    }
+
+    private JSONObject makeuPprocessConfig(JSONObject processConfig){
         String uuid = "";
         String name = "";
         JSONArray authorityArray = new JSONArray();
         JSONObject notifyPolicyObj = new JSONObject();
         JSONObject actionObj = new JSONObject();
-        JSONObject processConfig = configObj.getJSONObject("processConfig");
         if (MapUtils.isNotEmpty(processConfig)) {
             uuid = processConfig.getString("uuid");
             name = processConfig.getString("name");
@@ -160,38 +178,32 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         processObj.put("authorityList", authorityArray);
         processObj.put("notifyPolicyConfig", notifyPolicyObj);
         processObj.put("actionConfig", actionObj);
-        resultObj.put("processConfig", processObj);
-        /** 表单设置 **/
+        return processObj;
+    }
+    private JSONObject makeupFormConfig(JSONObject formConfig){
         String formUuid = "";
-        JSONArray formAuthorityArray = new JSONArray();
-        JSONObject formConfig = configObj.getJSONObject("formConfig");
+        List<FormAttributeAuthorityVo> formAuthorityList = new ArrayList<>();
         if (MapUtils.isNotEmpty(formConfig)) {
             formUuid = formConfig.getString("uuid");
             JSONArray authorityList = formConfig.getJSONArray("authorityList");
-            for (int i = 0; i < authorityList.size(); i++) {
-                JSONObject authority = authorityList.getJSONObject(i);
-                if (MapUtils.isNotEmpty(authority)) {
-                    JSONArray attributeUuidList = authority.getJSONArray("attributeUuidList");
-                    JSONArray processStepUuidList = authority.getJSONArray("processStepUuidList");
-                    String action = authority.getString("action");
-                    String type = authority.getString("type");
-                    JSONObject authorityObj = new JSONObject();
-                    authorityObj.put("attributeUuidList", attributeUuidList);
-                    authorityObj.put("processStepUuidList", processStepUuidList);
-                    authorityObj.put("action", action);
-                    authorityObj.put("type", type);
-                    formAuthorityArray.add(authorityObj);
+            if(CollectionUtils.isNotEmpty(authorityList)){
+                authorityList.removeIf(e -> e == null);
+                for (int i = 0; i < authorityList.size(); i++) {
+                    FormAttributeAuthorityVo formAttributeAuthorityVo = authorityList.getObject(i, FormAttributeAuthorityVo.class);
+                    if(formAttributeAuthorityVo != null){
+                        formAuthorityList.add(formAttributeAuthorityVo);
+                    }
                 }
             }
         }
         JSONObject formObj = new JSONObject();
         formObj.put("uuid", formUuid);
-        formObj.put("authorityList", formAuthorityArray);
-        resultObj.put("formConfig", formObj);
-        /** 评分设置 **/
+        formObj.put("authorityList", formAuthorityList);
+        return formObj;
+    }
+    private JSONObject makeupScoreConfig(JSONObject scoreConfig){
         JSONObject scoreConfigObj = new JSONObject();
         Integer isActive = 0;
-        JSONObject scoreConfig = configObj.getJSONObject("scoreConfig");
         if (MapUtils.isNotEmpty(scoreConfig)) {
             isActive = scoreConfig.getInteger("isActive");
             if (Objects.equals(isActive, 1)) {
@@ -217,44 +229,40 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
             }
         }
         scoreConfigObj.put("isActive", isActive);
-        resultObj.put("scoreConfig", scoreConfigObj);
-        /** 时效设置 **/
+        return scoreConfigObj;
+    }
+    private JSONArray makeupSlaList(JSONArray slaList){
         JSONArray slaArray = new JSONArray();
-        JSONArray slaList = configObj.getJSONArray("slaList");
         if (CollectionUtils.isNotEmpty(slaList)) {
             for (int i = 0; i < slaList.size(); i++) {
                 JSONObject sla = slaList.getJSONObject(i);
                 if (MapUtils.isNotEmpty(sla)) {
                     JSONObject slaObj = new JSONObject();
-                    JSONArray transferPolicyArray = new JSONArray();
+                    List<SlaTransferPolicyVo> slaTransferPolicyList = new ArrayList<>();
                     JSONArray transferPolicyList = sla.getJSONArray("transferPolicyList");
                     if (CollectionUtils.isNotEmpty(transferPolicyList)) {
+                        transferPolicyList.removeIf(e -> e == null);
                         for (int j = 0; j < transferPolicyList.size(); j++) {
-                            JSONObject transferPolicy = transferPolicyList.getJSONObject(j);
-                            if (MapUtils.isNotEmpty(transferPolicy)) {
-                                String unit = transferPolicy.getString("unit");
-                                String expression = transferPolicy.getString("expression");
-                                String transferTo = transferPolicy.getString("transferTo");
-                                String transferPolicyUuid = transferPolicy.getString("uuid");
-                                JSONObject transferPolicyObj = new JSONObject();
-                                transferPolicyObj.put("unit", unit);
-                                transferPolicyObj.put("expression", expression);
-                                transferPolicyObj.put("transferTo", transferTo);
-                                transferPolicyObj.put("uuid", transferPolicyUuid);
-                                transferPolicyArray.add(transferPolicyObj);
+                            SlaTransferPolicyVo slaTransferPolicyVo = transferPolicyList.getObject(j, SlaTransferPolicyVo.class);
+                            if(slaTransferPolicyVo != null){
+                                slaTransferPolicyList.add(slaTransferPolicyVo);
                             }
                         }
                     }
-                    slaObj.put("transferPolicyList", transferPolicyArray);
+                    slaObj.put("transferPolicyList", slaTransferPolicyList);
 
-                    JSONArray processStepUuidList = sla.getJSONArray("processStepUuidList");
+                    List<String> processStepUuidList = sla.getJSONArray("processStepUuidList").toJavaList(String.class);
                     if (processStepUuidList == null) {
-                        processStepUuidList = new JSONArray();
+                        processStepUuidList = new ArrayList();
+                    }else {
+                        processStepUuidList.removeIf(e -> e == null);
                     }
                     slaObj.put("processStepUuidList", processStepUuidList);
+
                     JSONArray calculatePolicyArray = new JSONArray();
                     JSONArray calculatePolicyList = sla.getJSONArray("calculatePolicyList");
                     if (CollectionUtils.isNotEmpty(calculatePolicyList)) {
+                        calculatePolicyList.removeIf(e -> e == null);
                         for (int j = 0; j < calculatePolicyList.size(); j++) {
                             JSONObject calculatePolicy = calculatePolicyList.getJSONObject(j);
                             if (MapUtils.isNotEmpty(calculatePolicy)) {
@@ -316,8 +324,6 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                 }
             }
         }
-        resultObj.put("slaList", slaArray);
-        return resultObj;
+        return slaArray;
     }
-
 }
