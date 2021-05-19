@@ -67,7 +67,7 @@ public class ProcessExportApi extends PrivateBinaryStreamApiComponentBase {
 		} else {
 			fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
 		}
-		response.setContentType("aplication/x-msdownload");
+		response.setContentType("application/x-msdownload");
 		
 		response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
 		//获取序列化字节数组
