@@ -3,8 +3,11 @@ package codedriver.module.process.stephandler.utilhandler;
 import java.util.*;
 
 import codedriver.framework.process.dto.processconfig.FormAttributeAuthorityVo;
+import codedriver.framework.process.dto.processconfig.SlaCalculatePolicyVo;
+import codedriver.framework.process.dto.processconfig.SlaNotifyPolicyVo;
 import codedriver.framework.process.dto.processconfig.SlaTransferPolicyVo;
 import codedriver.framework.process.util.ProcessConfigUtil;
+import codedriver.module.process.notify.constvalue.SlaNotifyTriggerType;
 import codedriver.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
 import codedriver.module.process.notify.handler.SlaNotifyPolicyHandler;
 import com.alibaba.fastjson.JSON;
@@ -46,15 +49,15 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
 	@Override
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@SuppressWarnings("serial")
 	@Override
 	public JSONObject makeupConfig(JSONObject configObj) {
@@ -62,12 +65,12 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
             configObj = new JSONObject();
         }
         JSONObject resultObj = new JSONObject();
-        
+
         /** 授权 **/
         JSONArray authorityArray = new JSONArray();
         ProcessTaskOperationType[] stepActions = {
-              ProcessTaskOperationType.TASK_ABORT, 
-              ProcessTaskOperationType.TASK_UPDATE, 
+              ProcessTaskOperationType.TASK_ABORT,
+              ProcessTaskOperationType.TASK_UPDATE,
               ProcessTaskOperationType.TASK_URGE
         };
         for(ProcessTaskOperationType stepAction : stepActions) {
@@ -94,7 +97,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
             }
         }
         resultObj.put("authorityList", authorityArray);
-        
+
         /** 通知 **/
         JSONObject notifyPolicyObj = new JSONObject();
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
@@ -103,7 +106,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         }
         notifyPolicyObj.put("handler", TaskNotifyPolicyHandler.class.getName());
         resultObj.put("notifyPolicyConfig", notifyPolicyObj);
-        
+
         /** 动作 **/
         JSONObject actionConfig = configObj.getJSONObject("actionConfig");
         if(actionConfig == null) {
@@ -140,7 +143,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         return resultObj;
     }
 
-    private JSONObject makeuPprocessConfig(JSONObject processConfig){
+    private JSONObject makeuPprocessConfig(JSONObject processConfig) {
         String uuid = "";
         String name = "";
         JSONArray authorityArray = new JSONArray();
@@ -180,17 +183,18 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         processObj.put("actionConfig", actionObj);
         return processObj;
     }
-    private JSONObject makeupFormConfig(JSONObject formConfig){
+
+    private JSONObject makeupFormConfig(JSONObject formConfig) {
         String formUuid = "";
         List<FormAttributeAuthorityVo> formAuthorityList = new ArrayList<>();
         if (MapUtils.isNotEmpty(formConfig)) {
             formUuid = formConfig.getString("uuid");
             JSONArray authorityList = formConfig.getJSONArray("authorityList");
-            if(CollectionUtils.isNotEmpty(authorityList)){
+            if (CollectionUtils.isNotEmpty(authorityList)) {
                 authorityList.removeIf(e -> e == null);
                 for (int i = 0; i < authorityList.size(); i++) {
                     FormAttributeAuthorityVo formAttributeAuthorityVo = authorityList.getObject(i, FormAttributeAuthorityVo.class);
-                    if(formAttributeAuthorityVo != null){
+                    if (formAttributeAuthorityVo != null) {
                         formAuthorityList.add(formAttributeAuthorityVo);
                     }
                 }
@@ -201,7 +205,8 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         formObj.put("authorityList", formAuthorityList);
         return formObj;
     }
-    private JSONObject makeupScoreConfig(JSONObject scoreConfig){
+
+    private JSONObject makeupScoreConfig(JSONObject scoreConfig) {
         JSONObject scoreConfigObj = new JSONObject();
         Integer isActive = 0;
         if (MapUtils.isNotEmpty(scoreConfig)) {
@@ -231,7 +236,8 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         scoreConfigObj.put("isActive", isActive);
         return scoreConfigObj;
     }
-    private JSONArray makeupSlaList(JSONArray slaList){
+
+    private JSONArray makeupSlaList(JSONArray slaList) {
         JSONArray slaArray = new JSONArray();
         if (CollectionUtils.isNotEmpty(slaList)) {
             for (int i = 0; i < slaList.size(); i++) {
@@ -244,7 +250,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                         transferPolicyList.removeIf(e -> e == null);
                         for (int j = 0; j < transferPolicyList.size(); j++) {
                             SlaTransferPolicyVo slaTransferPolicyVo = transferPolicyList.getObject(j, SlaTransferPolicyVo.class);
-                            if(slaTransferPolicyVo != null){
+                            if (slaTransferPolicyVo != null) {
                                 slaTransferPolicyList.add(slaTransferPolicyVo);
                             }
                         }
@@ -254,64 +260,35 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                     List<String> processStepUuidList = sla.getJSONArray("processStepUuidList").toJavaList(String.class);
                     if (processStepUuidList == null) {
                         processStepUuidList = new ArrayList();
-                    }else {
+                    } else {
                         processStepUuidList.removeIf(e -> e == null);
                     }
                     slaObj.put("processStepUuidList", processStepUuidList);
 
-                    JSONArray calculatePolicyArray = new JSONArray();
+                    List<SlaCalculatePolicyVo> calculatePolicyArray = new ArrayList<>();
                     JSONArray calculatePolicyList = sla.getJSONArray("calculatePolicyList");
                     if (CollectionUtils.isNotEmpty(calculatePolicyList)) {
                         calculatePolicyList.removeIf(e -> e == null);
                         for (int j = 0; j < calculatePolicyList.size(); j++) {
-                            JSONObject calculatePolicy = calculatePolicyList.getJSONObject(j);
-                            if (MapUtils.isNotEmpty(calculatePolicy)) {
-                                Integer enablePriority = calculatePolicy.getInteger("enablePriority");
-                                Boolean isshow = calculatePolicy.getBoolean("isshow");
-                                String unit = calculatePolicy.getString("unit");
-                                String calculatePolicyUuid = calculatePolicy.getString("uuid");
-                                JSONArray priorityList = calculatePolicy.getJSONArray("priorityList");
-                                JSONArray conditionGroupList = calculatePolicy.getJSONArray("conditionGroupList");
-                                JSONArray conditionGroupRelList = calculatePolicy.getJSONArray("conditionGroupRelList");
-                                JSONObject calculatePolicyObj = new JSONObject();
-                                calculatePolicyObj.put("enablePriority", enablePriority);
-                                calculatePolicyObj.put("isshow", isshow);
-                                calculatePolicyObj.put("unit", unit);
-                                calculatePolicyObj.put("uuid", calculatePolicyUuid);
-                                calculatePolicyObj.put("priorityList", priorityList);
-                                calculatePolicyObj.put("conditionGroupList", conditionGroupList);
-                                calculatePolicyObj.put("conditionGroupRelList", conditionGroupRelList);
-                                calculatePolicyArray.add(calculatePolicyObj);
+                            SlaCalculatePolicyVo slaCalculatePolicyVo = calculatePolicyList.getObject(i, SlaCalculatePolicyVo.class);
+                            if (slaCalculatePolicyVo != null) {
+                                calculatePolicyArray.add(slaCalculatePolicyVo);
                             }
                         }
                     }
                     slaObj.put("calculatePolicyList", calculatePolicyArray);
 
-                    JSONArray notifyPolicyArray = new JSONArray();
+                    List<SlaNotifyPolicyVo> notifyPolicyArray = new ArrayList<>();
                     JSONArray notifyPolicyList = sla.getJSONArray("notifyPolicyList");
                     if (CollectionUtils.isNotEmpty(notifyPolicyList)) {
+                        notifyPolicyList.removeIf(e -> e == null);
                         for (int j = 0; j < notifyPolicyList.size(); j++) {
-                            JSONObject notifyPolicy = notifyPolicyList.getJSONObject(j);
-                            if (MapUtils.isNotEmpty(notifyPolicy)) {
-                                String executeType = notifyPolicy.getString("executeType");
-                                String unit = notifyPolicy.getString("unit");
-                                String expression = notifyPolicy.getString("expression");
-                                String intervalUnit = notifyPolicy.getString("intervalUnit");
-                                String notifyPolicyUuid = notifyPolicy.getString("uuid");
-                                String time = notifyPolicy.getString("time");
-                                String intervalTime = notifyPolicy.getString("intervalTime");
-                                JSONObject notifyPolicyConfig = notifyPolicy.getJSONObject("notifyPolicyConfig");
+                            SlaNotifyPolicyVo slaNotifyPolicyVo = notifyPolicyList.getObject(j, SlaNotifyPolicyVo.class);
+                            if (slaNotifyPolicyVo != null) {
+                                JSONObject notifyPolicyConfig = slaNotifyPolicyVo.getNotifyPolicyConfig();
                                 JSONObject notifyPolicyConfigObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, SlaNotifyPolicyHandler.class);
-                                JSONObject notifyPolicyObj2 = new JSONObject();
-                                notifyPolicyObj2.put("executeType", executeType);
-                                notifyPolicyObj2.put("unit", unit);
-                                notifyPolicyObj2.put("expression", expression);
-                                notifyPolicyObj2.put("intervalUnit", intervalUnit);
-                                notifyPolicyObj2.put("uuid", notifyPolicyUuid);
-                                notifyPolicyObj2.put("time", time);
-                                notifyPolicyObj2.put("intervalTime", intervalTime);
-                                notifyPolicyObj2.put("notifyPolicyConfig", notifyPolicyConfigObj);
-                                notifyPolicyArray.add(notifyPolicyObj2);
+                                slaNotifyPolicyVo.setNotifyPolicyConfig(notifyPolicyConfigObj);
+                                notifyPolicyArray.add(slaNotifyPolicyVo);
                             }
                         }
                     }
