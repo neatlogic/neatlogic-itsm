@@ -90,6 +90,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
         if (processMapper.checkProcessIsExists(processUuid) == 0) {
             throw new ProcessNotFoundException(processUuid);
         }
+        /** 如果表单属性数据列表，使用的唯一标识是label时，需要转换成attributeUuid **/
         JSONArray formAttributeDataList = jsonObj.getJSONArray("formAttributeDataList");
         if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
             int count = 0;
@@ -127,7 +128,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
                 }
             }
         }
-
+        /** 如果优先级使用名称时，需要转换成uuid **/
         String priorityUuid = jsonObj.getString("priorityUuid");
         if (StringUtils.isBlank(priorityUuid)) {
             String priorityName = jsonObj.getString("priorityName");
