@@ -69,7 +69,7 @@ public class ProcessExportApi extends PrivateBinaryStreamApiComponentBase {
 		}
 		response.setContentType("aplication/x-msdownload");
 		
-		response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+		response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
 		//获取序列化字节数组
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(baos);
