@@ -31,9 +31,9 @@ import codedriver.module.process.service.CatalogService;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @Service
@@ -41,25 +41,25 @@ import java.util.List;
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ChannelMapper channelMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
 
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskStepDataMapper processTaskStepDataMapper;
 
-    @Autowired
+    @Resource
     private CatalogService catalogService;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     @Override
@@ -80,6 +80,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
     //	"formAttributeDataList": [
 //  		{
 //  			"attributeUuid": "属性uuid",
+//  			"label": "属性名",
 //  			"handler": "formselect",
 //  			"dataList": [
 //  				"value"
@@ -93,15 +94,16 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
             @Param(name = "owner", type = ApiParamType.STRING, desc = "请求人"),
             @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
             @Param(name = "formAttributeDataList", type = ApiParamType.JSONARRAY, desc = "表单属性数据列表"),
-            @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "隐藏表单属性列表"),
-            @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "只读表单属性列表"),
+            @Param(name = "hidecomponentList", type = ApiParamType.JSONARRAY, desc = "隐藏表单属性列表"),
+            @Param(name = "readcomponentList", type = ApiParamType.JSONARRAY, desc = "只读表单属性列表"),
             @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
             @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表"),
             @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "标签列表"),
             @Param(name = "focusUserUuidList", type = ApiParamType.JSONARRAY, desc = "工单关注人列表"),
             @Param(name = "handlerStepInfo", type = ApiParamType.JSONOBJECT, desc = "处理器特有的步骤信息"),
             @Param(name = "fromProcessTaskId", type = ApiParamType.LONG, desc = "来源工单id，从转报进入上报页时，传fromProcessTaskId"),
-            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "关系类型id，从转报进入上报页时，传channelTypeRelationId")
+            @Param(name = "channelTypeRelationId", type = ApiParamType.LONG, desc = "关系类型id，从转报进入上报页时，传channelTypeRelationId"),
+            @Param(name = "source", type = ApiParamType.STRING, desc = "来源")
     })
     @Output({
             @Param(name = "processTaskId", type = ApiParamType.LONG, desc = "工单id"),

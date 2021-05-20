@@ -178,7 +178,7 @@ public class WorkcenterDataExportApi extends PrivateBinaryStreamApiComponentBase
             fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
         }
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
         try (OutputStream os = response.getOutputStream()) {
             workbook.write(os);
         } catch (IOException e) {
