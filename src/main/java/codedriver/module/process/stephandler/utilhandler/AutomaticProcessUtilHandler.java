@@ -9,6 +9,7 @@ import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.dto.processconfig.AutomaticCallbackConfigVo;
 import codedriver.framework.process.dto.processconfig.AutomaticRequestConfigVo;
 import codedriver.framework.process.dto.processconfig.AutomaticTimeWindowConfigVo;
+import codedriver.framework.process.dto.processconfig.NotifyPolicyConfigVo;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.module.process.notify.handler.AutomaticNotifyPolicyHandler;
 import codedriver.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
@@ -224,8 +225,11 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		/** 通知 **/
 		JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
 		if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-			JSONObject notifyPolicyObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, OmnipotentNotifyPolicyHandler.class);
-			resultObj.put("notifyPolicyConfig", notifyPolicyObj);
+//			JSONObject notifyPolicyObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, AutomaticNotifyPolicyHandler.class);
+//			resultObj.put("notifyPolicyConfig", notifyPolicyObj);
+			NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
+//			notifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
+			resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
 		}
 
 		JSONArray customButtonList = configObj.getJSONArray("customButtonList");

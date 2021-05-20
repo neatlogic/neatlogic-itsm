@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.process.dto.processconfig.ActionConfigVo;
+import codedriver.framework.process.dto.processconfig.NotifyPolicyConfigVo;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
@@ -329,15 +331,21 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
         if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-            JSONObject notifyPolicyObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, OmnipotentNotifyPolicyHandler.class);
-            resultObj.put("notifyPolicyConfig", notifyPolicyObj);
+//            JSONObject notifyPolicyObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, OmnipotentNotifyPolicyHandler.class);
+//            resultObj.put("notifyPolicyConfig", notifyPolicyObj);
+            NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
+//            notifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+            resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
         }
 
         /** 动作 **/
         JSONObject actionConfig = configObj.getJSONObject("actionConfig");
         if (MapUtils.isNotEmpty(actionConfig)) {
-            JSONObject actionObj = ProcessConfigUtil.makeupActionConfig(actionConfig, OmnipotentNotifyPolicyHandler.class);
-            resultObj.put("actionConfig", actionObj);
+//            JSONObject actionObj = ProcessConfigUtil.makeupActionConfig(actionConfig, OmnipotentNotifyPolicyHandler.class);
+//            resultObj.put("actionConfig", actionObj);
+            ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+            actionConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+            resultObj.put("actionConfig", actionConfigVo);
         }
 
         JSONArray customButtonList = configObj.getJSONArray("customButtonList");
