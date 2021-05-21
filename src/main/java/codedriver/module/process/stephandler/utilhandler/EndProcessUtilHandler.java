@@ -88,7 +88,6 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
             actionConfigVo = new ActionConfigVo();
         }
         actionConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
-        actionConfigVo.setIntegrationHandler("");
         resultObj.put("actionConfig", actionConfigVo);
         return resultObj;
     }
@@ -101,24 +100,24 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         JSONObject resultObj = new JSONObject();
         /** 流程设置 **/
         JSONObject processConfig = configObj.getJSONObject("processConfig");
-        JSONObject processObj = makeupProcessConfig(processConfig);
+        JSONObject processObj = regulateProcessConfig(processConfig);
         resultObj.put("processConfig", processObj);
         /** 表单设置 **/
         JSONObject formConfig = configObj.getJSONObject("formConfig");
-        JSONObject formObj = makeupFormConfig(formConfig);
+        JSONObject formObj = regulateFormConfig(formConfig);
         resultObj.put("formConfig", formObj);
         /** 评分设置 **/
         JSONObject scoreConfig = configObj.getJSONObject("scoreConfig");
-        JSONObject scoreConfigObj = makeupScoreConfig(scoreConfig);
+        JSONObject scoreConfigObj = regulateScoreConfig(scoreConfig);
         resultObj.put("scoreConfig", scoreConfigObj);
         /** 时效设置 **/
         JSONArray slaList = configObj.getJSONArray("slaList");
-        JSONArray slaArray = makeupSlaList(slaList);
+        JSONArray slaArray = regulateSlaList(slaList);
         resultObj.put("slaList", slaArray);
         return resultObj;
     }
 
-    private JSONObject makeupProcessConfig(JSONObject processConfig) {
+    private JSONObject regulateProcessConfig(JSONObject processConfig) {
         String uuid = "";
         String name = "";
         JSONObject processObj = new JSONObject();
@@ -163,7 +162,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         return processObj;
     }
 
-    private JSONObject makeupFormConfig(JSONObject formConfig) {
+    private JSONObject regulateFormConfig(JSONObject formConfig) {
         String formUuid = "";
         List<FormAttributeAuthorityVo> formAuthorityList = new ArrayList<>();
         if (MapUtils.isNotEmpty(formConfig)) {
@@ -185,7 +184,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         return formObj;
     }
 
-    private JSONObject makeupScoreConfig(JSONObject scoreConfig) {
+    private JSONObject regulateScoreConfig(JSONObject scoreConfig) {
         JSONObject scoreConfigObj = new JSONObject();
         Integer isActive = 0;
         if (MapUtils.isNotEmpty(scoreConfig)) {
@@ -216,7 +215,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         return scoreConfigObj;
     }
 
-    private JSONArray makeupSlaList(JSONArray slaList) {
+    private JSONArray regulateSlaList(JSONArray slaList) {
         JSONArray slaArray = new JSONArray();
         if (CollectionUtils.isNotEmpty(slaList)) {
             for (int i = 0; i < slaList.size(); i++) {

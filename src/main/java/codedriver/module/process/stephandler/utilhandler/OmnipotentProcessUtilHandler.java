@@ -257,7 +257,6 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
             actionConfigVo = new ActionConfigVo();
         }
         actionConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
-        actionConfigVo.setIntegrationHandler("");
         resultObj.put("actionConfig", actionConfigVo);
         return resultObj;
     }
