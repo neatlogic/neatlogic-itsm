@@ -10,7 +10,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 
 import java.util.ArrayList;
@@ -49,11 +48,6 @@ public class ConditionProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		
 	}
 
-	@Override
-	public JSONObject makeupConfig(JSONObject configObj) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	@Override
 	public JSONObject makeupProcessStepConfig(JSONObject configObj) {
 		if (configObj == null) {

@@ -5,14 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.dto.processconfig.AutomaticCallbackConfigVo;
 import codedriver.framework.process.dto.processconfig.AutomaticRequestConfigVo;
 import codedriver.framework.process.dto.processconfig.AutomaticTimeWindowConfigVo;
 import codedriver.framework.process.dto.processconfig.NotifyPolicyConfigVo;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.module.process.notify.handler.AutomaticNotifyPolicyHandler;
-import codedriver.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
 import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -27,8 +25,6 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessStepVo;
 import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
-import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 
 @Service
@@ -225,8 +221,6 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		/** 通知 **/
 		JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
 		if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-//			JSONObject notifyPolicyObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, AutomaticNotifyPolicyHandler.class);
-//			resultObj.put("notifyPolicyConfig", notifyPolicyObj);
 			NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
 //			notifyPolicyConfigVo.setHandler(AutomaticNotifyPolicyHandler.class.getName());
 			resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
@@ -252,17 +246,6 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		}
 
 		/** 自动化配置 **/
-//		String failPolicy = "";
-//		String integrationUuid = "";
-//		JSONArray paramArray = new JSONArray();
-//		JSONObject successObj = new JSONObject();
-//		String resultTemplate = "";
-//		JSONObject requestObj = new JSONObject();
-
-//		String type = "none";
-//		JSONObject intervalObj = new JSONObject();
-//		JSONObject timeWindowObj = new JSONObject();
-
 		AutomaticRequestConfigVo requestConfigVo = null;
 		AutomaticCallbackConfigVo callbackConfigVo = null;
 		AutomaticTimeWindowConfigVo timeWindowConfigVo = null;
@@ -272,75 +255,20 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 			JSONObject requestConfig = automaticConfig.getJSONObject("requestConfig");
 			if (MapUtils.isNotEmpty(requestConfig)) {
 				requestConfigVo = JSONObject.toJavaObject(requestConfig, AutomaticRequestConfigVo.class);
-//				failPolicy = requestConfig.getString("failPolicy");
-//				integrationUuid = requestConfig.getString("integrationUuid");
-//				JSONArray paramList = requestConfig.getJSONArray("paramList");
-//				if (CollectionUtils.isNotEmpty(paramList)) {
-//					for (int i = 0; i < paramList.size(); i++) {
-//						JSONObject paramConfig = paramList.getJSONObject(i);
-//						if (MapUtils.isNotEmpty(paramConfig)) {
-//							String name = paramConfig.getString("name");
-//							String mappingType = paramConfig.getString("type");
-//							String value = paramConfig.getString("value");
-//							JSONObject paramObj = new JSONObject();
-//							paramObj.put("name", name);
-//							paramObj.put("type", mappingType);
-//							paramObj.put("value", value);
-//							paramArray.add(paramObj);
-//						}
-//					}
-//				}
-//				JSONObject successConfig = requestConfig.getJSONObject("successConfig");
-//				if (MapUtils.isNotEmpty(successConfig)) {
-//					String name = successConfig.getString("name");
-//					String expression = successConfig.getString("expression");
-//					String value = successConfig.getString("value");
-//					successObj.put("name", name);
-//					successObj.put("expression", expression);
-//					successObj.put("value", value);
-//				}
-//				resultTemplate = requestConfig.getString("resultTemplate");
 			}
-//			requestObj.put("failPolicy", failPolicy);
-//			requestObj.put("integrationUuid", integrationUuid);
-//			requestObj.put("paramList", paramArray);
-//			requestObj.put("successConfig", successObj);
-//			requestObj.put("resultTemplate", resultTemplate);
 			/** 是否回调 **/
 			JSONObject callbackConfig = automaticConfig.getJSONObject("callbackConfig");
 			if (MapUtils.isNotEmpty(callbackConfig)) {
 				callbackConfigVo = JSONObject.toJavaObject(callbackConfig, AutomaticCallbackConfigVo.class);
-//				type = callbackConfig.getString("type");
-//				JSONObject intervalConfig = callbackConfig.getJSONObject("config");
-//				if (MapUtils.isNotEmpty(intervalConfig)) {
-//					String intervalIntegrationUuid = intervalConfig.getString("integrationUuid");
-//					Integer interval = intervalConfig.getInteger("interval");
-//					String intervalResultTemplate = intervalConfig.getString("resultTemplate");
-//					intervalObj.put("integrationUuid", intervalIntegrationUuid);
-//					intervalObj.put("interval", interval);
-//					intervalObj.put("resultTemplate", intervalResultTemplate);
-//				}
 			}
 			/** 时间窗口 **/
 			JSONObject timeWindowConfig = automaticConfig.getJSONObject("timeWindowConfig");
 			if (MapUtils.isNotEmpty(timeWindowConfig)) {
 				timeWindowConfigVo = JSONObject.toJavaObject(timeWindowConfig, AutomaticTimeWindowConfigVo.class);
-//				String startTime = timeWindowConfig.getString("startTime");
-//				String endTime = timeWindowConfig.getString("endTime");
-//				timeWindowObj.put("startTime", startTime);
-//				timeWindowObj.put("endTime", endTime);
 			}
 		}
 
 		JSONObject automaticObj = new JSONObject();
-//		automaticObj.put("requestConfig", requestObj);
-
-//		JSONObject callbackObj = new JSONObject();
-//		callbackObj.put("type", type);
-//		callbackObj.put("config", intervalObj);
-//		automaticObj.put("callbackConfig", callbackObj);
-
-//		automaticObj.put("timeWindowConfig", timeWindowObj);
 
 		automaticObj.put("requestConfig", requestConfigVo);
 		automaticObj.put("callbackConfig", callbackConfigVo);

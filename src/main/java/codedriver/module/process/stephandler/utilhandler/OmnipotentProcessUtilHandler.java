@@ -36,8 +36,6 @@ import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
-import codedriver.framework.process.operationauth.core.IOperationAuthHandlerType;
-import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 
 @Service
@@ -331,8 +329,6 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
         if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-//            JSONObject notifyPolicyObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, OmnipotentNotifyPolicyHandler.class);
-//            resultObj.put("notifyPolicyConfig", notifyPolicyObj);
             NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
 //            notifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
             resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
@@ -341,8 +337,6 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         /** 动作 **/
         JSONObject actionConfig = configObj.getJSONObject("actionConfig");
         if (MapUtils.isNotEmpty(actionConfig)) {
-//            JSONObject actionObj = ProcessConfigUtil.makeupActionConfig(actionConfig, OmnipotentNotifyPolicyHandler.class);
-//            resultObj.put("actionConfig", actionObj);
             ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
             actionConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
             resultObj.put("actionConfig", actionConfigVo);

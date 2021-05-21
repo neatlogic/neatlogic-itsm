@@ -42,10 +42,4 @@ public class StartProcessUtilHandler extends ProcessStepInternalHandlerBase {
 		
 	}
 
-	@Override
-	public JSONObject makeupConfig(JSONObject configObj) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

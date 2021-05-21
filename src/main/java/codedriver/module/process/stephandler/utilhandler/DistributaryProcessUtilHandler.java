@@ -42,10 +42,4 @@ public class DistributaryProcessUtilHandler extends ProcessStepInternalHandlerBa
 		
 	}
 
-	@Override
-	public JSONObject makeupConfig(JSONObject configObj) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
