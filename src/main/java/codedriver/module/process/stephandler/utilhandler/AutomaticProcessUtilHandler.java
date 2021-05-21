@@ -128,7 +128,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 				ProcessTaskOperationType.STEP_TRANSFER
 		};
 		JSONArray authorityList = configObj.getJSONArray("authorityList");
-		JSONArray authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
+		JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
 		resultObj.put("authorityList", authorityArray);
 
 		/** 按钮映射 **/
@@ -139,7 +139,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 				ProcessTaskOperationType.STEP_START
 		};
 		JSONArray customButtonList = configObj.getJSONArray("customButtonList");
-		JSONArray customButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, stepButtons);
+		JSONArray customButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, stepButtons);
 		resultObj.put("customButtonList", customButtonArray);
 
 		/** 通知 **/
@@ -157,7 +157,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 	}
 
 	@Override
-	public JSONObject makeupProcessStepConfig(JSONObject configObj) {
+	public JSONObject regulateProcessStepConfig(JSONObject configObj) {
 		if (configObj == null) {
 			configObj = new JSONObject();
 		}
@@ -170,7 +170,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		};
 		JSONArray authorityList = configObj.getJSONArray("authorityList");
 		if (CollectionUtils.isNotEmpty(authorityList)) {
-			JSONArray authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
+			JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
 			resultObj.put("authorityList", authorityArray);
 		}
 
@@ -191,13 +191,13 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 					ProcessTaskOperationType.TASK_TRANSFER,
 					ProcessTaskOperationType.STEP_START
 			};
-			JSONArray customButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, stepButtons);
+			JSONArray customButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, stepButtons);
 			resultObj.put("customButtonList", customButtonArray);
 		}
 		/** 状态映射列表 **/
 		JSONArray customStatusList = configObj.getJSONArray("customStatusList");
 		if (CollectionUtils.isNotEmpty(customStatusList)) {
-			JSONArray customStatusArray = ProcessConfigUtil.makeupCustomStatusList(customStatusList);
+			JSONArray customStatusArray = ProcessConfigUtil.regulateCustomStatusList(customStatusList);
 			resultObj.put("customStatusList", customStatusArray);
 		}
 
@@ -233,7 +233,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		/** 分配处理人 **/
 		JSONObject workerPolicyConfig = configObj.getJSONObject("workerPolicyConfig");
 		if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-			JSONObject workerPolicyObj = ProcessConfigUtil.makeupWorkerPolicyConfig(workerPolicyConfig);
+			JSONObject workerPolicyObj = ProcessConfigUtil.regulateWorkerPolicyConfig(workerPolicyConfig);
 			resultObj.put("workerPolicyConfig", workerPolicyObj);
 		}
 		return resultObj;

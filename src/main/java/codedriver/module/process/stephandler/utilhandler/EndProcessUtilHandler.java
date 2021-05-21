@@ -65,7 +65,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                 ProcessTaskOperationType.TASK_URGE
         };
         JSONArray authorityList = configObj.getJSONArray("authorityList");
-        JSONArray authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
+        JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
         resultObj.put("authorityList", authorityArray);
 
         /** 通知 **/
@@ -94,7 +94,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
     }
 
     @Override
-    public JSONObject makeupProcessStepConfig(JSONObject configObj) {
+    public JSONObject regulateProcessStepConfig(JSONObject configObj) {
         if (configObj == null) {
             configObj = new JSONObject();
         }
@@ -135,7 +135,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                             ProcessTaskOperationType.TASK_UPDATE,
                             ProcessTaskOperationType.TASK_URGE
                     };
-                    authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
+                    authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
                 } else {
                     authorityArray = new JSONArray();
                 }

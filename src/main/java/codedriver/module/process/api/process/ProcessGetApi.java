@@ -1,26 +1,11 @@
 package codedriver.module.process.api.process;
 
-import codedriver.framework.lcs.LCSUtil;
-import codedriver.framework.lcs.PrintSingeColorFormatUtil;
-import codedriver.framework.lcs.SegmentPair;
-import codedriver.framework.lcs.SegmentRange;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
-import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
-import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.process.auth.PROCESS_MODIFY;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -31,16 +16,14 @@ import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 @AuthAction(action = PROCESS_MODIFY.class)
 public class ProcessGetApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ProcessMapper processMapper;
 
     @Override
@@ -72,7 +55,7 @@ public class ProcessGetApi extends PrivateApiComponentBase {
         if (processVo == null) {
             throw new ProcessNotFoundException(uuid);
         }
-        processVo.setConfig(ProcessConfigUtil.makeupProcessConfig(processVo.getConfig()));
+        processVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processVo.getConfig()));
         int count = processMapper.getProcessReferenceCount(uuid);
         processVo.setReferenceCount(count);
         return processVo;
