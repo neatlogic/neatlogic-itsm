@@ -1,10 +1,8 @@
 package codedriver.module.process.stephandler.utilhandler;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import codedriver.framework.dto.UserVo;
@@ -204,39 +202,16 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         JSONObject resultObj = new JSONObject();
 
         /** 授权 **/
-        JSONArray authorityArray = new JSONArray();
         ProcessTaskOperationType[] stepActions = {
                 ProcessTaskOperationType.STEP_VIEW,
                 ProcessTaskOperationType.STEP_TRANSFER,
                 ProcessTaskOperationType.STEP_RETREAT
         };
-        for (ProcessTaskOperationType stepAction : stepActions) {
-            authorityArray.add(new JSONObject() {{
-                this.put("action", stepAction.getValue());
-                this.put("text", stepAction.getText());
-                this.put("acceptList", stepAction.getAcceptList());
-                this.put("groupList", stepAction.getGroupList());
-            }});
-        }
         JSONArray authorityList = configObj.getJSONArray("authorityList");
-        if (CollectionUtils.isNotEmpty(authorityList)) {
-            Map<String, JSONArray> authorityMap = new HashMap<>();
-            for (int i = 0; i < authorityList.size(); i++) {
-                JSONObject authority = authorityList.getJSONObject(i);
-                authorityMap.put(authority.getString("action"), authority.getJSONArray("acceptList"));
-            }
-            for (int i = 0; i < authorityArray.size(); i++) {
-                JSONObject authority = authorityArray.getJSONObject(i);
-                JSONArray acceptList = authorityMap.get(authority.getString("action"));
-                if (acceptList != null) {
-                    authority.put("acceptList", acceptList);
-                }
-            }
-        }
+        JSONArray authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
         resultObj.put("authorityList", authorityArray);
 
         /** 按钮映射列表 **/
-        JSONArray customButtonArray = new JSONArray();
         ProcessTaskOperationType[] stepButtons = {
                 ProcessTaskOperationType.STEP_COMPLETE,
                 ProcessTaskOperationType.STEP_BACK,
@@ -246,13 +221,6 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.TASK_ABORT,
                 ProcessTaskOperationType.TASK_RECOVER
         };
-        for (ProcessTaskOperationType stepButton : stepButtons) {
-            customButtonArray.add(new JSONObject() {{
-                this.put("name", stepButton.getValue());
-                this.put("customText", stepButton.getText());
-                this.put("value", "");
-            }});
-        }
         /** 子任务按钮映射列表 **/
         ProcessTaskOperationType[] subtaskButtons = {
                 ProcessTaskOperationType.SUBTASK_ABORT,
@@ -262,48 +230,35 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.SUBTASK_REDO,
                 ProcessTaskOperationType.SUBTASK_EDIT
         };
-        for (ProcessTaskOperationType subtaskButton : subtaskButtons) {
-            customButtonArray.add(new JSONObject() {{
-                this.put("name", subtaskButton.getValue());
-                this.put("customText", subtaskButton.getText() + "(子任务)");
-                this.put("value", "");
-            }});
-        }
 
         JSONArray customButtonList = configObj.getJSONArray("customButtonList");
-        if (CollectionUtils.isNotEmpty(customButtonList)) {
-            Map<String, String> customButtonMap = new HashMap<>();
-            for (int i = 0; i < customButtonList.size(); i++) {
-                JSONObject customButton = customButtonList.getJSONObject(i);
-                customButtonMap.put(customButton.getString("name"), customButton.getString("value"));
-            }
-            for (int i = 0; i < customButtonArray.size(); i++) {
-                JSONObject customButton = customButtonArray.getJSONObject(i);
-                String value = customButtonMap.get(customButton.getString("name"));
-                if (StringUtils.isNotBlank(value)) {
-                    customButton.put("value", value);
-                }
-            }
-        }
+        JSONArray customButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, stepButtons);
+        JSONArray subtaskCustomButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, stepButtons, "子任务");
+        customButtonArray.addAll(subtaskCustomButtonArray);
         resultObj.put("customButtonList", customButtonArray);
 
         /** 通知 **/
-        JSONObject notifyPolicyObj = new JSONObject();
+        NotifyPolicyConfigVo notifyPolicyConfigVo = null;
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
         if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-            notifyPolicyObj.putAll(notifyPolicyConfig);
+            notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
+        } else {
+            notifyPolicyConfigVo = new NotifyPolicyConfigVo();
         }
-        notifyPolicyObj.put("handler", OmnipotentNotifyPolicyHandler.class.getName());
-        resultObj.put("notifyPolicyConfig", notifyPolicyObj);
+        notifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+        resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
 
         /** 动作 **/
+        ActionConfigVo actionConfigVo = null;
         JSONObject actionConfig = configObj.getJSONObject("actionConfig");
-        if (actionConfig == null) {
-            actionConfig = new JSONObject();
+        if (MapUtils.isNotEmpty(actionConfig)) {
+            actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+        } else {
+            actionConfigVo = new ActionConfigVo();
         }
-        actionConfig.put("handler", OmnipotentNotifyPolicyHandler.class.getName());
-        actionConfig.put("integrationHandler", "");
-        resultObj.put("actionConfig", actionConfig);
+        actionConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+        actionConfigVo.setIntegrationHandler("");
+        resultObj.put("actionConfig", actionConfigVo);
         return resultObj;
     }
 
@@ -315,13 +270,13 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         JSONObject resultObj = new JSONObject();
 
         /** 授权 **/
-        ProcessTaskOperationType[] stepActions = {
-                ProcessTaskOperationType.STEP_VIEW,
-                ProcessTaskOperationType.STEP_TRANSFER,
-                ProcessTaskOperationType.STEP_RETREAT
-        };
         JSONArray authorityList = configObj.getJSONArray("authorityList");
         if (CollectionUtils.isNotEmpty(authorityList)) {
+            ProcessTaskOperationType[] stepActions = {
+                    ProcessTaskOperationType.STEP_VIEW,
+                    ProcessTaskOperationType.STEP_TRANSFER,
+                    ProcessTaskOperationType.STEP_RETREAT
+            };
             JSONArray authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
             resultObj.put("authorityList", authorityArray);
         }
@@ -365,8 +320,8 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                     ProcessTaskOperationType.SUBTASK_EDIT
             };
             JSONArray customButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, stepButtons);
-            JSONArray subtaskcustomButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, subtaskButtons, "子任务");
-            customButtonArray.addAll(subtaskcustomButtonArray);
+            JSONArray subtaskCustomButtonArray = ProcessConfigUtil.makeupCustomButtonList(customButtonList, subtaskButtons, "子任务");
+            customButtonArray.addAll(subtaskCustomButtonArray);
             resultObj.put("customButtonList", customButtonArray);
         }
         /** 状态映射列表 **/

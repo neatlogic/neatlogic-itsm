@@ -50,65 +50,48 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
 	}
 
-	@SuppressWarnings("serial")
-	@Override
-	public JSONObject makeupConfig(JSONObject configObj) {
-	    if(configObj == null) {
+    @SuppressWarnings("serial")
+    @Override
+    public JSONObject makeupConfig(JSONObject configObj) {
+        if (configObj == null) {
             configObj = new JSONObject();
         }
         JSONObject resultObj = new JSONObject();
 
         /** 授权 **/
-        JSONArray authorityArray = new JSONArray();
         ProcessTaskOperationType[] stepActions = {
-              ProcessTaskOperationType.TASK_ABORT,
-              ProcessTaskOperationType.TASK_UPDATE,
-              ProcessTaskOperationType.TASK_URGE
+                ProcessTaskOperationType.TASK_ABORT,
+                ProcessTaskOperationType.TASK_UPDATE,
+                ProcessTaskOperationType.TASK_URGE
         };
-        for(ProcessTaskOperationType stepAction : stepActions) {
-            authorityArray.add(new JSONObject() {{
-                this.put("action", stepAction.getValue());
-                this.put("text", stepAction.getText());
-                this.put("acceptList", stepAction.getAcceptList());
-                this.put("groupList", stepAction.getGroupList());
-            }});
-        }
         JSONArray authorityList = configObj.getJSONArray("authorityList");
-        if(CollectionUtils.isNotEmpty(authorityList)) {
-            Map<String, JSONArray> authorityMap = new HashMap<>();
-            for(int i = 0; i < authorityList.size(); i++) {
-                JSONObject authority = authorityList.getJSONObject(i);
-                authorityMap.put(authority.getString("action"), authority.getJSONArray("acceptList"));
-            }
-            for(int i = 0; i < authorityArray.size(); i++) {
-                JSONObject authority = authorityArray.getJSONObject(i);
-                JSONArray acceptList = authorityMap.get(authority.getString("action"));
-                if(acceptList != null) {
-                    authority.put("acceptList", acceptList);
-                }
-            }
-        }
+        JSONArray authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
         resultObj.put("authorityList", authorityArray);
 
         /** 通知 **/
-        JSONObject notifyPolicyObj = new JSONObject();
+        NotifyPolicyConfigVo notifyPolicyConfigVo = null;
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        if(MapUtils.isNotEmpty(notifyPolicyConfig)) {
-            notifyPolicyObj.putAll(notifyPolicyConfig);
+        if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
+            notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
+        } else {
+            notifyPolicyConfigVo = new NotifyPolicyConfigVo();
         }
-        notifyPolicyObj.put("handler", TaskNotifyPolicyHandler.class.getName());
-        resultObj.put("notifyPolicyConfig", notifyPolicyObj);
+        notifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
+        resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
 
         /** 动作 **/
+        ActionConfigVo actionConfigVo = null;
         JSONObject actionConfig = configObj.getJSONObject("actionConfig");
-        if(actionConfig == null) {
-            actionConfig = new JSONObject();
+        if (MapUtils.isNotEmpty(actionConfig)) {
+            actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+        } else {
+            actionConfigVo = new ActionConfigVo();
         }
-        actionConfig.put("handler", TaskNotifyPolicyHandler.class.getName());
-        actionConfig.put("integrationHandler", "");
-        resultObj.put("actionConfig", actionConfig);
+        actionConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
+        actionConfigVo.setIntegrationHandler("");
+        resultObj.put("actionConfig", actionConfigVo);
         return resultObj;
-	}
+    }
 
     @Override
     public JSONObject makeupProcessStepConfig(JSONObject configObj) {
@@ -146,14 +129,14 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
             JSONArray authorityList = processConfig.getJSONArray("authorityList");
             if (authorityList != null) {
                 JSONArray authorityArray = null;
-                if(CollectionUtils.isNotEmpty(authorityList)){
+                if (CollectionUtils.isNotEmpty(authorityList)) {
                     ProcessTaskOperationType[] stepActions = {
                             ProcessTaskOperationType.TASK_ABORT,
                             ProcessTaskOperationType.TASK_UPDATE,
                             ProcessTaskOperationType.TASK_URGE
                     };
                     authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
-                }else {
+                } else {
                     authorityArray = new JSONArray();
                 }
                 processObj.put("authorityList", authorityArray);
