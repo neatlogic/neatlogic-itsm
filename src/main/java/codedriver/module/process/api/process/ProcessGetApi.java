@@ -8,6 +8,7 @@ import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
+import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -71,69 +72,7 @@ public class ProcessGetApi extends PrivateApiComponentBase {
         if (processVo == null) {
             throw new ProcessNotFoundException(uuid);
         }
-        String config = processVo.getConfig();
-        if (StringUtils.isNotBlank(config)) {
-            JSONObject configObj = JSONObject.parseObject(config);
-            if (MapUtils.isNotEmpty(configObj)) {
-                String oldConfig = JSONObject.toJSONString(configObj, SerializerFeature.MapSortField);
-                JSONObject process = configObj.getJSONObject("process");
-                if (MapUtils.isNotEmpty(process)) {
-                    JSONArray connectionList = process.getJSONArray("connectionList");
-                    process.remove("connectionList");
-                    String source = JSONObject.toJSONString(process, SerializerFeature.MapSortField);
-                    IProcessStepInternalHandler processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(ProcessStepHandlerType.END.getHandler());
-                    if (processStepInternalHandler == null) {
-                        throw new ProcessStepUtilHandlerNotFoundException(ProcessStepHandlerType.END.getHandler());
-                    }
-                    JSONObject processObj = processStepInternalHandler.makeupProcessStepConfig(process);
-                    JSONArray stepList = process.getJSONArray("stepList");
-                    if (CollectionUtils.isNotEmpty(stepList)) {
-                        stepList.removeIf(Objects::isNull);
-                        for (int i = 0; i < stepList.size(); i++) {
-                            JSONObject step = stepList.getJSONObject(i);
-                            String handler = step.getString("handler");
-                            if(!Objects.equals(handler, ProcessStepHandlerType.END.getHandler())){
-                                processStepInternalHandler = ProcessStepInternalHandlerFactory.getHandler(handler);
-                                if (processStepInternalHandler == null) {
-                                    throw new ProcessStepUtilHandlerNotFoundException(handler);
-                                }
-                                JSONObject stepConfig = step.getJSONObject("stepConfig");
-                                JSONObject stepConfigObj = processStepInternalHandler.makeupProcessStepConfig(stepConfig);
-                                step.put("stepConfig", stepConfigObj);
-                            }
-                        }
-                    }
-                    processObj.put("stepList", stepList);
-                    String target = JSONObject.toJSONString(processObj, SerializerFeature.MapSortField);
-                    if (CollectionUtils.isNotEmpty(connectionList)) {
-                        connectionList.removeIf(Objects::isNull);
-                    } else {
-                        connectionList = new JSONArray();
-                    }
-                    processObj.put("connectionList", connectionList);
-                    configObj.put("process", processObj);
-					String newConfig = JSONObject.toJSONString(configObj, SerializerFeature.MapSortField);
-					System.out.println("-------------------------");
-//					System.out.println(config);
-//					System.out.println(oldConfig);
-//					System.out.println(newConfig);
-                    List<SegmentPair> segmentPairList = LCSUtil.LCSCompare(source, target);
-                    List<SegmentRange> oldSegmentRangeList = new ArrayList<>();
-                    List<SegmentRange> newSegmentRangeList = new ArrayList<>();
-                    for(SegmentPair segmentpair : segmentPairList) {
-//                    System.out.println(segmentpair);
-                        oldSegmentRangeList.add(new SegmentRange(segmentpair.getOldBeginIndex(), segmentpair.getOldEndIndex(), segmentpair.isMatch()));
-                        newSegmentRangeList.add(new SegmentRange(segmentpair.getNewBeginIndex(), segmentpair.getNewEndIndex(), segmentpair.isMatch()));
-                    }
-                    String oldResult = LCSUtil.wrapChangePlace(source, oldSegmentRangeList, LCSUtil.SPAN_CLASS_DELETE, LCSUtil.SPAN_END);
-                    PrintSingeColorFormatUtil.println();
-                    String newResult = LCSUtil.wrapChangePlace(target, newSegmentRangeList, LCSUtil.SPAN_CLASS_INSERT, LCSUtil.SPAN_END);
-                    PrintSingeColorFormatUtil.println();
-					System.out.println("=========================");
-//                    processVo.setConfig(newConfig);
-                }
-            }
-        }
+        processVo.setConfig(ProcessConfigUtil.makeupProcessConfig(processVo.getConfig()));
         int count = processMapper.getProcessReferenceCount(uuid);
         processVo.setReferenceCount(count);
         return processVo;
