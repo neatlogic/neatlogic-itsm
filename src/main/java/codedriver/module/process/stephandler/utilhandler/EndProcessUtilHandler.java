@@ -143,49 +143,45 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
     private JSONObject makeupProcessConfig(JSONObject processConfig) {
         String uuid = "";
         String name = "";
-        JSONArray authorityArray = new JSONArray();
-//        JSONObject notifyPolicyObj = new JSONObject();
-        NotifyPolicyConfigVo notifyPolicyConfigVo = null;
-//        JSONObject actionObj = new JSONObject();
-        ActionConfigVo actionConfigVo = null;
+        JSONObject processObj = new JSONObject();
         if (MapUtils.isNotEmpty(processConfig)) {
             uuid = processConfig.getString("uuid");
             name = processConfig.getString("name");
             /** 授权 **/
-            ProcessTaskOperationType[] stepActions = {
-                    ProcessTaskOperationType.TASK_ABORT,
-                    ProcessTaskOperationType.TASK_UPDATE,
-                    ProcessTaskOperationType.TASK_URGE
-            };
             JSONArray authorityList = processConfig.getJSONArray("authorityList");
-            if (CollectionUtils.isNotEmpty(authorityList)) {
-                authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
+            if (authorityList != null) {
+                JSONArray authorityArray = null;
+                if(CollectionUtils.isNotEmpty(authorityList)){
+                    ProcessTaskOperationType[] stepActions = {
+                            ProcessTaskOperationType.TASK_ABORT,
+                            ProcessTaskOperationType.TASK_UPDATE,
+                            ProcessTaskOperationType.TASK_URGE
+                    };
+                    authorityArray = ProcessConfigUtil.makeupAuthorityList(authorityList, stepActions);
+                }else {
+                    authorityArray = new JSONArray();
+                }
+                processObj.put("authorityList", authorityArray);
             }
 
             /** 通知 **/
             JSONObject notifyPolicyConfig = processConfig.getJSONObject("notifyPolicyConfig");
-            if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-//                notifyPolicyObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, TaskNotifyPolicyHandler.class);
-                notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-                notifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
+            if (notifyPolicyConfig != null) {
+                NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
+//                notifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
+                processObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
             }
 
             /** 动作 **/
             JSONObject actionConfig = processConfig.getJSONObject("actionConfig");
             if (MapUtils.isNotEmpty(actionConfig)) {
-//                actionObj = ProcessConfigUtil.makeupActionConfig(actionConfig, TaskNotifyPolicyHandler.class);
-                actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+                ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
                 actionConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
+                processObj.put("actionConfig", actionConfigVo);
             }
         }
-        JSONObject processObj = new JSONObject();
         processObj.put("uuid", uuid);
         processObj.put("name", name);
-        processObj.put("authorityList", authorityArray);
-//        processObj.put("notifyPolicyConfig", notifyPolicyObj);
-        processObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
-//        processObj.put("actionConfig", actionObj);
-        processObj.put("actionConfig", actionConfigVo);
         return processObj;
     }
 
@@ -275,7 +271,7 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                     if (CollectionUtils.isNotEmpty(calculatePolicyList)) {
                         calculatePolicyList.removeIf(e -> e == null);
                         for (int j = 0; j < calculatePolicyList.size(); j++) {
-                            SlaCalculatePolicyVo slaCalculatePolicyVo = calculatePolicyList.getObject(i, SlaCalculatePolicyVo.class);
+                            SlaCalculatePolicyVo slaCalculatePolicyVo = calculatePolicyList.getObject(j, SlaCalculatePolicyVo.class);
                             if (slaCalculatePolicyVo != null) {
                                 calculatePolicyArray.add(slaCalculatePolicyVo);
                             }
@@ -290,10 +286,8 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                         for (int j = 0; j < notifyPolicyList.size(); j++) {
                             SlaNotifyPolicyVo slaNotifyPolicyVo = notifyPolicyList.getObject(j, SlaNotifyPolicyVo.class);
                             if (slaNotifyPolicyVo != null) {
-                                NotifyPolicyConfigVo notifyPolicyConfigVo = slaNotifyPolicyVo.getNotifyPolicyConfig();
-                                notifyPolicyConfigVo.setHandler(SlaNotifyPolicyHandler.class.getName());
-//                                JSONObject notifyPolicyConfigObj = ProcessConfigUtil.makeupNotifyPolicyConfig(notifyPolicyConfig, SlaNotifyPolicyHandler.class);
-//                                slaNotifyPolicyVo.setNotifyPolicyConfig(notifyPolicyConfigObj);
+//                                NotifyPolicyConfigVo notifyPolicyConfigVo = slaNotifyPolicyVo.getNotifyPolicyConfig();
+//                                notifyPolicyConfigVo.setHandler(SlaNotifyPolicyHandler.class.getName());
                                 notifyPolicyArray.add(slaNotifyPolicyVo);
                             }
                         }
