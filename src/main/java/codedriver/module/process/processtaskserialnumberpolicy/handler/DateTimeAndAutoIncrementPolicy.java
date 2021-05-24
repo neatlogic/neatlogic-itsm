@@ -44,7 +44,6 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.UuidUtil;
 
 @Service
-@DependsOn({"ProcessTaskSerialNumberSeedResetJob"})
 public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
     private Logger logger = LoggerFactory.getLogger(DateTimeAndAutoIncrementPolicy.class);
     @Autowired
@@ -197,45 +196,6 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         return rowNum % max;
     }
 
-    @PostConstruct
-    public void init() {
-        List<TenantVo> tenantList = tenantMapper.getAllActiveTenant();
-        for (TenantVo tenantVo : tenantList) {
-            CachedThreadPool.execute(new ScheduleLoadJobRunner(tenantVo.getUuid()));
-        }
-    }
-
-    class ScheduleLoadJobRunner extends CodeDriverThread {
-        private String tenantUuid;
-
-        public ScheduleLoadJobRunner(String _tenantUuid) {
-            tenantUuid = _tenantUuid;
-        }
-
-        @Override
-        protected void execute() {
-            String oldThreadName = Thread.currentThread().getName();
-            try {
-                Thread.currentThread().setName("PROCESSTASKSERIALNUMBERSEEDRESETJOB-SCHEDULE-JOB-LOADER-" + tenantUuid);
-                // 切换租户数据源
-                TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
-                IJob job = SchedulerManager.getHandler(ProcessTaskSerialNumberSeedResetJob.class.getName());
-                JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                        UuidUtil.randomUuid(),
-                        job.getGroupName(),
-                        job.getClassName(),
-                        TenantContext.get().getTenantUuid())
-                        .addData("handler", DateTimeAndAutoIncrementPolicy.class.getName());
-                JobObject jobObject = jobObjectBuilder.build();
-                job.reloadJob(jobObject);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            } finally {
-                Thread.currentThread().setName(oldThreadName);
-            }
-        }
-    }
-
     @Component
     @DisallowConcurrentExecution
     private static class ProcessTaskSerialNumberSeedResetJob extends JobBase {
@@ -271,7 +231,14 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
 
         @Override
         public void initJob(String tenantUuid) {
-
+            JobObject.Builder jobObjectBuilder = new JobObject.Builder(
+                    UuidUtil.randomUuid(),
+                    this.getGroupName(),
+                    this.getClassName(),
+                    TenantContext.get().getTenantUuid())
+                    .addData("handler", DateTimeAndAutoIncrementPolicy.class.getName());
+            JobObject jobObject = jobObjectBuilder.build();
+            this.reloadJob(jobObject);
         }
 
         @Override
