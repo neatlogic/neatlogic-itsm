@@ -1,30 +1,5 @@
 package codedriver.module.process.processtaskserialnumberpolicy.handler;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import javax.annotation.PostConstruct;
-
-import org.quartz.CronExpression;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
@@ -42,9 +17,25 @@ import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.UuidUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.quartz.CronExpression;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
 
 @Service
-@DependsOn({"ProcessTaskSerialNumberSeedResetJob"})
 public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
     private Logger logger = LoggerFactory.getLogger(DateTimeAndAutoIncrementPolicy.class);
     @Autowired
