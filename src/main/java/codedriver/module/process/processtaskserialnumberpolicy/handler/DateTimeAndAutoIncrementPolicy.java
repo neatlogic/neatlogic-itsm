@@ -18,6 +18,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,7 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.UuidUtil;
 
 @Service
+@DependsOn({"ProcessTaskSerialNumberSeedResetJob"})
 public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberPolicyHandler {
     private Logger logger = LoggerFactory.getLogger(DateTimeAndAutoIncrementPolicy.class);
     @Autowired
