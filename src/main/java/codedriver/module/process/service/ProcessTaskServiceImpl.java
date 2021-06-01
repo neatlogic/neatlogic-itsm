@@ -28,8 +28,8 @@ import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.matrix.exception.MatrixExternalException;
 import codedriver.framework.notify.dto.NotifyReceiverVo;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.column.core.ProcessTaskUtil;
@@ -58,7 +58,6 @@ import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.framework.util.TimeUtil;
 import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.module.process.integration.handler.ProcessRequestFrom;
 import codedriver.module.process.schedule.plugin.ProcessTaskAutomaticJob;
 import com.alibaba.fastjson.JSON;
@@ -308,10 +307,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             auditResult.put("json", resultJson);
             auditResult.put("template",
                     FreemarkerUtil.transform(JSONObject.parse(resultVo.getTransformedResult()), template));
-            if (StringUtils.isNotBlank(resultVo.getError())) {
+           /* if (StringUtils.isNotBlank(resultVo.getError())) {
                 logger.error(resultVo.getError());
                 throw new MatrixExternalException("外部接口访问异常");
-            } else if (StringUtils.isNotBlank(resultJson)) {
+            } else if (StringUtils.isNotBlank(resultJson)) {*/
                 if (predicate(successConfig, resultVo, true)) {// 如果执行成功
                     audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
                     if (!automaticConfigVo.getIsRequest() || !automaticConfigVo.getIsHasCallback()) {// 第一次请求
@@ -383,7 +382,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.RUNNING.getValue()));
                     // continue
                 }
-            }
+//            }
 
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
