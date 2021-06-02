@@ -134,11 +134,14 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人，且步骤有回退（虚线）方向的连线
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_BACK, (processTaskVo, processTaskStepVo, userUuid) -> {
-            if(processTaskVo.getIsShow() == 1) {               
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-                    if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
-                        return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo,
-                            processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD);
+            if(processTaskVo.getIsShow() == 1) {
+                /** 考虑到取消工单的时候步骤状态不变，isActive=-1，所以这里要判断isActive是否等于1 **/
+                if(processTaskStepVo.getIsActive() == 1){
+                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                        if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
+                            return checkNextStepIsExistsByProcessTaskStepIdAndProcessFlowDirection(processTaskVo,
+                                    processTaskStepVo.getId(), ProcessFlowDirection.BACKWARD);
+                        }
                     }
                 }
             }
@@ -151,7 +154,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_SAVE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if(processTaskVo.getIsShow() == 1) {                
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                     return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
                 }
             }
@@ -179,7 +182,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          */
         operationBiPredicateMap.put(ProcessTaskOperationType.STEP_PAUSE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if(processTaskVo.getIsShow() == 1) {                
-                if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                     return checkOperationAuthIsConfigured(processTaskVo, processTaskStepVo,
                         ProcessTaskOperationType.STEP_PAUSE, userUuid);
                 }
@@ -246,7 +249,7 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.SUBTASK_CREATE,
             (processTaskVo, processTaskStepVo, userUuid) -> {
                 if(processTaskVo.getIsShow() == 1) {
-                    if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                    if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                         return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
                     }
                 }
