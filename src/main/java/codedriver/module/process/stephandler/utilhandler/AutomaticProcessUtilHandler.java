@@ -49,10 +49,13 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 	public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
 		/** 组装通知策略id **/
 		JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
-        Long policyId = notifyPolicyConfig.getLong("policyId");
-        if(policyId != null) {
-        	processStepVo.setNotifyPolicyId(policyId);
-        }
+		if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
+			Long policyId = notifyPolicyConfig.getLong("policyId");
+			if(policyId != null) {
+				processStepVo.setNotifyPolicyId(policyId);
+			}
+		}
+
 
 		JSONArray actionList = (JSONArray) JSONPath.read(stepConfigObj.toJSONString(), "actionConfig.actionList");
 		if(CollectionUtils.isNotEmpty(actionList)){
