@@ -67,10 +67,6 @@ public class ProcessSearchApi extends PrivateApiComponentBase {
 		JSONArray defaultValue = processVo.getDefaultValue();
 		if (CollectionUtils.isNotEmpty(defaultValue)) {
 			List<ProcessVo> processList = processMapper.getProcessListByUuidList(defaultValue.toJavaList(String.class));
-			resultObj.put("currentPage", processList.size());
-			resultObj.put("pageSize", processList.size());
-			resultObj.put("pageCount", 1);
-			resultObj.put("rowNum", processList.size());
 			resultObj.put("processList", processList);
 			return resultObj;
 		}
