@@ -8,12 +8,12 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import com.alibaba.fastjson.JSONArray;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -45,6 +45,7 @@ public class ProcessSearchApi extends PrivateApiComponentBase {
 
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
+		@Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "默认值"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
 		@Param(name = "isICreated", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否只查询我创建的"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
@@ -61,12 +62,18 @@ public class ProcessSearchApi extends PrivateApiComponentBase {
 	@Description(desc = "流程列表搜索接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		ProcessVo processVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessVo>() {});
+		JSONObject resultObj = new JSONObject();
+		ProcessVo processVo = JSONObject.toJavaObject(jsonObj, ProcessVo.class);
+		JSONArray defaultValue = processVo.getDefaultValue();
+		if (CollectionUtils.isNotEmpty(defaultValue)) {
+			List<ProcessVo> processList = processMapper.getProcessListByUuidList(defaultValue.toJavaList(String.class));
+			resultObj.put("processList", processList);
+			return resultObj;
+		}
 		int isICreated = jsonObj.getIntValue("isICreated");
 		if(isICreated == 1) {
 			processVo.setFcu(UserContext.get().getUserUuid(true));
 		}
-		JSONObject resultObj = new JSONObject();
 		if(processVo.getNeedPage()) {
 			int rowNum = processMapper.searchProcessCount(processVo);
 			int pageCount = PageUtil.getPageCount(rowNum, processVo.getPageSize());
