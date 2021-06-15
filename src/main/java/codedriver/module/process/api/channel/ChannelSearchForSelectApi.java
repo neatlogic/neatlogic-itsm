@@ -62,7 +62,7 @@ public class ChannelSearchForSelectApi extends PrivateApiComponentBase {
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字，匹配名称"),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, desc = "服务目录uuid"),
-		@Param(name = "valueList", type = ApiParamType.JSONARRAY,  desc = "用于回显的参数列表", xss = true),
+		@Param(name = "defaultValue", type = ApiParamType.JSONARRAY,  desc = "用于回显的参数列表", xss = true),
 		@Param(name = "isFavorite", type = ApiParamType.ENUM, desc = "是否只查询已收藏的数据，1：已收藏，0：全部", rule = "0,1"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
 		@Param(name = "isAuthenticate", type = ApiParamType.ENUM, desc = "是否需要鉴权", rule = "0,1"),
@@ -81,7 +81,7 @@ public class ChannelSearchForSelectApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
-		ChannelVo channelVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ChannelVo>() {});
+		ChannelVo channelVo = JSONObject.toJavaObject(jsonObj, ChannelVo.class);
 		channelVo.setUserUuid(UserContext.get().getUserUuid(true));
 		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
 		List<ValueTextVo> channelList = new ArrayList<>();
@@ -91,19 +91,19 @@ public class ChannelSearchForSelectApi extends PrivateApiComponentBase {
             channelVo.setIsActive(1);
         }
 		//回显服务
-		JSONArray valueList = jsonObj.getJSONArray("valueList");
-        if(CollectionUtils.isNotEmpty(valueList)) {
+		JSONArray defaultValue = channelVo.getDefaultValue();
+        if(CollectionUtils.isNotEmpty(defaultValue)) {
             List<String> authorizationUuidList = channelVo.getAuthorizedUuidList();
             if(CollectionUtils.isNotEmpty(authorizationUuidList)) {
                 Iterator<String> authUuidIterator = authorizationUuidList.iterator();
                 while(authUuidIterator.hasNext()) {
                     String uuid = authUuidIterator.next();
-                    if(!valueList.contains(uuid)) {
+                    if(!defaultValue.contains(uuid)) {
                         authUuidIterator.remove();
                     }
                 }
             }else {
-                channelVo.setAuthorizedUuidList(Arrays.asList(valueList.toArray()).stream().map(object -> object.toString()).collect(Collectors.toList()));
+                channelVo.setAuthorizedUuidList(Arrays.asList(defaultValue.toArray()).stream().map(object -> object.toString()).collect(Collectors.toList()));
             }
             channelVo.setNeedPage(false);
         }
