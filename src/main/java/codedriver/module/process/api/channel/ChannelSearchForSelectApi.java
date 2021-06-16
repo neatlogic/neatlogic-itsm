@@ -33,7 +33,8 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.CatalogService;
 
-@Service
+//@Service
+@Deprecated
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ChannelSearchForSelectApi extends PrivateApiComponentBase {
