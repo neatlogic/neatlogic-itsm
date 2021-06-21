@@ -424,6 +424,8 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         if (channel == null) {
             channel = new ChannelVo();
         }
+        String worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(processTaskVo.getChannelUuid());
+        channel.setWorktimeUuid(worktimeUuid);
         /** 获取服务目录信息 **/
         CatalogVo catalog = null;
         if (StringUtils.isNotBlank(channel.getParentUuid())) {

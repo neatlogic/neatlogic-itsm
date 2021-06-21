@@ -115,12 +115,13 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             if(channelVo == null){
                 throw new ChannelNotFoundException(channelUuid);
             }
-            ProcessVo processVo = processMapper.getProcessByUuid(channelVo.getProcessUuid());
+            String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
+            ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
             if(processVo == null){
-                throw new ProcessNotFoundException(channelVo.getProcessUuid());
+                throw new ProcessNotFoundException(processUuid);
             }
             Date startTime = new Date();
-            ProcessStepVo processStepVo = processMapper.getStartProcessStepByProcessUuid(channelVo.getProcessUuid());
+            ProcessStepVo processStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
             ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo(processStepVo);
             processTaskStepVo.setIsAutoGenerateId(false);
             processTaskStepVo.setStartTime(startTime);

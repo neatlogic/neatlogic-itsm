@@ -110,8 +110,9 @@ public class FormAttributeCheckApi extends PrivateApiComponentBase {
 			if(channelVo == null) {
 				throw new ChannelNotFoundException(channelUuid);
 			}
-			worktimeUuid = channelVo.getWorktimeUuid();
-			ProcessFormVo processFormVo = processMapper.getProcessFormByProcessUuid(channelVo.getProcessUuid());
+			worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(channelUuid);
+			String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
+			ProcessFormVo processFormVo = processMapper.getProcessFormByProcessUuid(processUuid);
 			if(processFormVo == null) {
 				return false;
 			}

@@ -66,10 +66,15 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		ChannelVo channel = channelMapper.getChannelByUuid(uuid);
-		if(channel == null) {
+		ChannelVo channelVo = channelMapper.getChannelByUuid(uuid);
+		if(channelVo == null) {
 			throw new ChannelNotFoundException(uuid);
 		}
+		ChannelVo channel = new ChannelVo(channelVo);
+		String processUuid = channelMapper.getProcessUuidByChannelUuid(uuid);
+		channel.setProcessUuid(processUuid);
+		String worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(uuid);
+		channel.setWorktimeUuid(worktimeUuid);
 		List<String> priorityUuidList = new ArrayList<>();
 		List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(uuid);
 		for(ChannelPriorityVo channelPriority : channelPriorityList) {
@@ -87,7 +92,6 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 		    channel.setIsFavorite(1);
 		}
 		/** 转报设置 **/
-		channel.getChannelRelationList().clear();
 		List<ChannelRelationVo> channelRelationList = channelMapper.getChannelRelationListBySource(uuid);
 		if(CollectionUtils.isNotEmpty(channelRelationList)) {
 		    Map<Long, List<String>> channelRelationTargetMap = new HashMap<>();
