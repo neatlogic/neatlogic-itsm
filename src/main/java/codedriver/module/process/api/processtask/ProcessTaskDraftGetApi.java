@@ -253,10 +253,10 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         if (channelTypeVo == null) {
             throw new ChannelTypeNotFoundException(channel.getChannelTypeUuid());
         }
-
-        ProcessVo processVo = processMapper.getProcessByUuid(channel.getProcessUuid());
+        String processUuid = channelMapper.getProcessUuidByChannelUuid(channelUuid);
+        ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
         if (processVo == null) {
-            throw new ProcessNotFoundException(channel.getProcessUuid());
+            throw new ProcessNotFoundException(processUuid);
         }
         ProcessTaskVo processTaskVo = new ProcessTaskVo();
         processTaskVo.setIsAutoGenerateId(false);
@@ -265,9 +265,10 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         } catch (CloneNotSupportedException e) {
         }
         processTaskVo.setChannelUuid(channelUuid);
-        processTaskVo.setProcessUuid(channel.getProcessUuid());
+        processTaskVo.setProcessUuid(processUuid);
         processTaskVo.setConfig(processVo.getConfig());
-        processTaskVo.setWorktimeUuid(channel.getWorktimeUuid());
+        String worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(channelUuid);
+        processTaskVo.setWorktimeUuid(worktimeUuid);
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
         for (ChannelPriorityVo channelPriority : channelPriorityList) {
             if (channelPriority.getIsDefault().intValue() == 1) {
@@ -275,12 +276,12 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             }
         }
 
-        ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(channel.getProcessUuid());
+        ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
         ProcessTaskStepVo startProcessTaskStepVo = new ProcessTaskStepVo(startProcessStepVo);
         startProcessTaskStepVo.setIsAutoGenerateId(false);
 
         // 获取须指派的步骤列表
-        startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(channel.getProcessUuid(), startProcessTaskStepVo.getProcessStepUuid()));
+        startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(processUuid, startProcessTaskStepVo.getProcessStepUuid()));
         startProcessTaskStepVo.setIsRequired((Integer) JSONPath.read(startProcessTaskStepVo.getConfig(), "workerPolicyConfig.isRequired"));
         startProcessTaskStepVo.setIsNeedContent((Integer) JSONPath.read(startProcessTaskStepVo.getConfig(), "workerPolicyConfig.isNeedContent"));
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
