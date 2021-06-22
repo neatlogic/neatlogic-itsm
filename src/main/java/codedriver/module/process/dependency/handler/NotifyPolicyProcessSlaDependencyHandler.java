@@ -16,6 +16,8 @@ import codedriver.framework.process.dto.ProcessVo;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 流程时效引用通知策略处理器
@@ -58,6 +60,11 @@ public class NotifyPolicyProcessSlaDependencyHandler extends DependencyHandlerBa
         return "sla_uuid";
     }
 
+    @Override
+    protected List<String> getCallerFieldList() {
+        return null;
+    }
+
     /**
      * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
@@ -66,13 +73,15 @@ public class NotifyPolicyProcessSlaDependencyHandler extends DependencyHandlerBa
      */
     @Override
     protected ValueTextVo parse(Object caller) {
-        if (caller instanceof String) {
-            ProcessSlaVo processSlaVo = processMapper.getProcessSlaByUuid((String) caller);
+        if (caller instanceof Map) {
+            Map<String, Object> map = (Map)caller;
+            String slaUuid =  (String) map.get("sla_uuid");
+            ProcessSlaVo processSlaVo = processMapper.getProcessSlaByUuid(slaUuid);
             if (processSlaVo != null) {
                 ProcessVo processVo = processMapper.getProcessByUuid(processSlaVo.getProcessUuid());
                 if (processVo != null) {
                     ValueTextVo valueTextVo = new ValueTextVo();
-                    valueTextVo.setValue(caller);
+                    valueTextVo.setValue(slaUuid);
                     valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName(), processSlaVo.getName()));
                     return valueTextVo;
                 }
