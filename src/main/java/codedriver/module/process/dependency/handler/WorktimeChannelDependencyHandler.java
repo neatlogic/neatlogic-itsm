@@ -15,6 +15,8 @@ import codedriver.framework.process.dto.ChannelVo;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 服务引用服务窗口处理器
@@ -58,6 +60,11 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
         return "channel_uuid";
     }
 
+    @Override
+    protected List<String> getCallerFieldList() {
+        return null;
+    }
+
     /**
      * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
@@ -66,11 +73,13 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
      */
     @Override
     protected ValueTextVo parse(Object caller) {
-        if (caller instanceof String) {
-            ChannelVo channelVo = channelMapper.getChannelByUuid((String) caller);
+        if (caller instanceof Map) {
+            Map<String, Object> map = (Map)caller;
+            String channelUuid =  (String) map.get("channel_uuid");
+            ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);
             if (channelVo != null) {
                 ValueTextVo valueTextVo = new ValueTextVo();
-                valueTextVo.setValue(caller);
+                valueTextVo.setValue(channelVo.getUuid());
                 valueTextVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
                 return valueTextVo;
             }

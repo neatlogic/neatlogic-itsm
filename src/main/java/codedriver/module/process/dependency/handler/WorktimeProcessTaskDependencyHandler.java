@@ -11,6 +11,8 @@ import codedriver.framework.dependency.core.DependencyHandlerBase;
 import codedriver.framework.dependency.core.ICalleeType;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 工单引用服务窗口处理器
  *
@@ -47,6 +49,11 @@ public class WorktimeProcessTaskDependencyHandler extends DependencyHandlerBase 
     @Override
     protected String getCallerField() {
         return "id";
+    }
+
+    @Override
+    protected List<String> getCallerFieldList() {
+        return null;
     }
 
     /**

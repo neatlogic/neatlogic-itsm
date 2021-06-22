@@ -10,14 +10,12 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dependency.constvalue.CalleeType;
 import codedriver.framework.dependency.core.DependencyHandlerBase;
 import codedriver.framework.dependency.core.ICalleeType;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
-import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
-import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerTypeFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 节点关理组件引用通知策略处理器
@@ -27,8 +25,6 @@ import javax.annotation.Resource;
  **/
 @Service
 public class NotifyPolicyProcessStepHandlerDependencyHandler extends DependencyHandlerBase {
-    @Resource
-    private ProcessStepHandlerMapper processStepHandlerMapper;
 
     /**
      * 表名
@@ -60,6 +56,11 @@ public class NotifyPolicyProcessStepHandlerDependencyHandler extends DependencyH
         return "handler";
     }
 
+    @Override
+    protected List<String> getCallerFieldList() {
+        return null;
+    }
+
     /**
      * 解析数据，拼装跳转url，返回引用下拉列表一个选项数据结构
      *
@@ -68,11 +69,13 @@ public class NotifyPolicyProcessStepHandlerDependencyHandler extends DependencyH
      */
     @Override
     protected ValueTextVo parse(Object caller) {
-        if (caller instanceof String) {
-            String name = ProcessStepHandlerTypeFactory.getName((String) caller);
+        if (caller instanceof Map) {
+            Map<String, Object> map = (Map)caller;
+            String handler =  (String) map.get("handler");
+            String name = ProcessStepHandlerTypeFactory.getName(handler);
             if (StringUtils.isNotBlank(name)) {
                 ValueTextVo valueTextVo = new ValueTextVo();
-                valueTextVo.setValue(caller);
+                valueTextVo.setValue(handler);
                 valueTextVo.setText(String.format("<a href=\"/%s/process.html#/node-manage\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), "节点管理", name));
                 return valueTextVo;
             }
