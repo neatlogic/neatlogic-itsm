@@ -79,7 +79,7 @@ public class WorktimeChannelDependencyHandler extends DependencyHandlerBase {
             ChannelVo channelVo = channelMapper.getChannelByUuid(channelUuid);
             if (channelVo != null) {
                 ValueTextVo valueTextVo = new ValueTextVo();
-                valueTextVo.setValue(channelUuid);
+                valueTextVo.setValue(channelVo.getUuid());
                 valueTextVo.setText(String.format("<a href=\"/%s/process.html#/catalog-manage?uuid=%s\" target=\"_blank\">%s</a>", TenantContext.get().getTenantUuid(), channelVo.getUuid(), channelVo.getName()));
                 return valueTextVo;
             }

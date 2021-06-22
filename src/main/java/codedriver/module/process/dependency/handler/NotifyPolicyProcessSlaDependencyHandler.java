@@ -81,7 +81,7 @@ public class NotifyPolicyProcessSlaDependencyHandler extends DependencyHandlerBa
                 ProcessVo processVo = processMapper.getProcessByUuid(processSlaVo.getProcessUuid());
                 if (processVo != null) {
                     ValueTextVo valueTextVo = new ValueTextVo();
-                    valueTextVo.setValue(slaUuid);
+                    valueTextVo.setValue(processSlaVo.getUuid());
                     valueTextVo.setText(String.format("<a href=\"/%s/process.html#/flow-edit?uuid=%s\" target=\"_blank\">%s-%s</a>", TenantContext.get().getTenantUuid(), processVo.getUuid(), processVo.getName(), processSlaVo.getName()));
                     return valueTextVo;
                 }
