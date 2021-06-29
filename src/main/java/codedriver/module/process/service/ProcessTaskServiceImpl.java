@@ -553,7 +553,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 } else if (type.equals("integration")) {
                     integrationParam.put(name, resultJson.get(value));
                 } else {// 常量
-                    //linbq 设置参数映射值为外部调用返回结果时，type的值为constant（有bug），应该是integration才对,msjy poc时临时修改逻辑应付
+                    //TODO linbq 设置参数映射值为外部调用返回结果时，type的值为constant（有bug），应该是integration才对,msjy poc时临时修改逻辑应付
                     Object paramValue = resultJson.get(value);
                     if (paramValue != null) {
                         integrationParam.put(name, paramValue);
