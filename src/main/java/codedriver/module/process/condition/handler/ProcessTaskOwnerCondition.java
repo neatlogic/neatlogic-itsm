@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -178,7 +179,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
                 }
             }
         }
-        String value = String.join("','", valueList);
+        String value = valueList.stream().map(o->o.replaceAll(GroupSearch.USER.getValuePlugin(),"")).collect(Collectors.joining("','"));
         sqlSb.append(Expression.getExpressionSql(condition.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.OWNER.getValue(), value.toString()));
     }
 
