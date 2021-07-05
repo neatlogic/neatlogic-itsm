@@ -90,7 +90,7 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         Set<Integer> showAttrRows = new HashSet<>();
         int isNeedContent = 0;
         ProcessVo process = processMapper.getProcessBaseInfoByUuid(processUuid);
-        JSONObject configObj = process.getConfigObj();
+        JSONObject configObj = process.getConfig();
         /** 判断是否需要描述框 */
         isNeedContent = ProcessConfigUtil.getIsNeedContent(configObj);
         /** 判断是否所有表单属性可编辑&获取可编辑的表单属性或行号 */

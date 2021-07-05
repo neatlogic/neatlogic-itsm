@@ -126,10 +126,11 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                             break;
                         }
                         processTask.setProcessUuid(process.getUuid());
-                        if (StringUtils.isNotBlank(process.getConfig())) {
-                            String hash = DigestUtils.md5DigestAsHex(process.getConfig().getBytes());
+                        String configStr = process.getConfigStr();
+                        if (StringUtils.isNotBlank(configStr)) {
+                            String hash = DigestUtils.md5DigestAsHex(configStr.getBytes());
                             processTask.setConfigHash(hash);
-                            processTaskMapper.insertIgnoreProcessTaskConfig(new ProcessTaskConfigVo(hash, process.getConfig()));
+                            processTaskMapper.insertIgnoreProcessTaskConfig(new ProcessTaskConfigVo(hash, configStr));
                         }
                         break;
                     case "channelName":

@@ -1,5 +1,6 @@
 package codedriver.module.process.api.process;
 
+import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -50,8 +51,7 @@ public class ProcessDraftSaveApi extends PrivateApiComponentBase {
 	@Description(desc = "流程草稿保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		ProcessDraftVo processDraftVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessDraftVo>() {
-		});
+		ProcessDraftVo processDraftVo = JSONObject.toJavaObject(jsonObj, ProcessDraftVo.class);
 		processDraftVo.setFcu(UserContext.get().getUserUuid(true));
 		if (processMapper.checkProcessDraftIsExists(processDraftVo) > 0) {
 			return null;
@@ -68,6 +68,7 @@ public class ProcessDraftSaveApi extends PrivateApiComponentBase {
 		if (earliestUuid != null) {
 			processMapper.deleteProcessDraftByUuid(earliestUuid);
 		}
+		processDraftVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processDraftVo.getConfig()));
 		processMapper.insertProcessDraft(processDraftVo);
 		return processDraftVo.getUuid();
 	}

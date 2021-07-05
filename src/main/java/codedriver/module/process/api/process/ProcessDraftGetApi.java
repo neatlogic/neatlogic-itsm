@@ -1,5 +1,6 @@
 package codedriver.module.process.api.process;
 
+import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -48,6 +49,7 @@ public class ProcessDraftGetApi extends PrivateApiComponentBase {
 		if(processDraftVo == null) {
 			throw new ProcessDraftNotFoundException(uuid);
 		}
+		processDraftVo.setConfig(ProcessConfigUtil.regulateProcessConfig(processDraftVo.getConfig()));
 		return processDraftVo;
 	}
 
