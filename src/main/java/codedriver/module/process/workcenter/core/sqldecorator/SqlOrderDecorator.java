@@ -48,7 +48,7 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
     @PostConstruct
     public void fieldDispatcherInit() {
         buildOrderMap.put(FieldTypeEnum.FIELD.getValue(), (workcenterVo, sqlSb) -> {
-            getDistinctOrFieldSql(sqlSb, workcenterVo);
+            getFieldSql(sqlSb, workcenterVo);
         });
 
         buildOrderMap.put(FieldTypeEnum.LIMIT_COUNT.getValue(), (workcenterVo, sqlSb) -> {
@@ -56,7 +56,7 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
         });
 
         buildOrderMap.put(FieldTypeEnum.DISTINCT_ID.getValue(), (workcenterVo, sqlSb) -> {
-            getDistinctOrFieldSql(sqlSb, workcenterVo);
+            getDistinctSql(sqlSb, workcenterVo);
         });
 
         buildOrderMap.put(FieldTypeEnum.TOTAL_COUNT.getValue(), (workcenterVo, sqlSb) -> {
@@ -100,6 +100,14 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
         });
     }
 
+    private void getFieldSql(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
+        sqlSb.append(" order by case ");
+        for(int i =0;i<workcenterVo.getProcessTaskIdList().size();i++){
+            sqlSb.append(String.format(" WHEN  pt.id = %s THEN %s ",workcenterVo.getProcessTaskIdList().get(i).toString(),String.valueOf(i)));
+        }
+        sqlSb.append(" ELSE 1000 END ASC");
+    }
+
     /**
      * @Description: 获取FIELD、DISTINCT_ID 的 order sql
      * @Author: 89770
@@ -107,7 +115,7 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
      * @Params: [sqlSb, workcenterVo]
      * @Returns: void
      **/
-    private void getDistinctOrFieldSql(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
+    private void getDistinctSql(StringBuilder sqlSb, WorkcenterVo workcenterVo) {
         sqlSb.append(" order by ");
         JSONArray sortJsonArray = workcenterVo.getSortList();
         if (CollectionUtils.isNotEmpty(sortJsonArray)) {
@@ -118,13 +126,13 @@ public class SqlOrderDecorator extends SqlDecoratorBase {
                     String value = entry.getValue().toString();
                     IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(key);
                     if (column != null && column.getIsSort()) {
-                        sqlSb.append(String.format(" %s.%s %s ", column.getSortSqlTable().getShortName(), column.getSortSqlColumn(), value));
+                        sqlSb.append(String.format(" %s %s ", column.getSortSqlColumn(false), value));
                     }
                 }
             }
         } else {
             IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(ProcessWorkcenterField.STARTTIME.getValue());
-            sqlSb.append(String.format(" %s.%s %s ", column.getSortSqlTable().getShortName(), column.getSortSqlColumn(), " DESC "));
+            sqlSb.append(String.format(" %s %s ", column.getSortSqlColumn(false), " DESC "));
         }
     }
 

@@ -109,6 +109,9 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
 //          Date time33 = new Date();
 //          System.out.println("searchInfoByIdTime:"+(time33.getTime()-time3.getTime()));
+            //纠正顺序
+
+            //按钮权限
             ProcessAuthManager.Builder builder = new ProcessAuthManager.Builder();
             for (ProcessTaskVo processTaskVo : processTaskVoList) {
                 builder.addProcessTaskId(processTaskVo.getId());

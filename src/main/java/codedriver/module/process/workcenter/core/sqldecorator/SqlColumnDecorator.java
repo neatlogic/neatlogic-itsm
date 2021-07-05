@@ -57,13 +57,13 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
                         String key = entry.getKey();
                         IProcessTaskColumn processTaskColumn = ProcessTaskColumnFactory.getHandler(key);
                         if (processTaskColumn != null && processTaskColumn.getIsSort()) {
-                            sqlSb.append(String.format(",%s.%s", processTaskColumn.getSortSqlTable().getShortName(), processTaskColumn.getSortSqlColumn()));
+                            sqlSb.append(String.format(",%s", processTaskColumn.getSortSqlColumn(true)));
                         }
                     }
                 }
             } else {
                 IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(ProcessWorkcenterField.STARTTIME.getValue());
-                sqlSb.append(String.format(",%s.%s", new ProcessTaskSqlTable().getShortName(), column.getSortSqlColumn()));
+                sqlSb.append(String.format(",%s", column.getSortSqlColumn(true)));
             }
         });
 

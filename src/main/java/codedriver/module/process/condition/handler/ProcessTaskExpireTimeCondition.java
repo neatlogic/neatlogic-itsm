@@ -6,16 +6,17 @@ import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
-import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSlaTimeSqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSON;
@@ -143,6 +144,8 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
         sqlSb.append(" and ");
         if ("1".equals(value)) {
             // 超时单
+            sqlSb.append(Expression.getExpressionSql(Expression.EQUAL.getExpression(), new ProcessTaskStepSqlTable().getShortName(),ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue(),ProcessTaskStatus.RUNNING.getValue()));
+            sqlSb.append(" and ");
             sqlSb.append(Expression.getExpressionSql(Expression.LESSTHAN.getExpression(), new ProcessTaskSlaTimeSqlTable().getShortName(), ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue(), TimeUtil.timeNow()));
         } else {
             sqlSb.append(Expression.getExpressionSql(Expression.GREATERTHAN.getExpression(), new ProcessTaskSlaTimeSqlTable().getShortName(), ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue(), TimeUtil.timeNow()));

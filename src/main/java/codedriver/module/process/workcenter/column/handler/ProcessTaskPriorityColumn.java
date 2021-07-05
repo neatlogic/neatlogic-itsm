@@ -136,7 +136,7 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     }
 
     @Override
-    public String getMySortSqlColumn() {
+    public String getMySortSqlColumn(Boolean isColumn) {
         return PrioritySqlTable.FieldEnum.SORT.getValue();
     }
 

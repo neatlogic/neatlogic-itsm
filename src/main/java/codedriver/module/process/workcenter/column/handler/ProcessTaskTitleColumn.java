@@ -70,7 +70,7 @@ public class ProcessTaskTitleColumn extends ProcessTaskColumnBase implements IPr
 	}
 
 	@Override
-	public String getSortSqlColumn(){
+	public String getSortSqlColumn(Boolean isColumn){
 		return ProcessTaskSqlTable.FieldEnum.TITLE.getText();
 	}
 

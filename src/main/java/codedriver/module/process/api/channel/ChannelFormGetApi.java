@@ -66,6 +66,9 @@ public class ChannelFormGetApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<String> channelUuidList =
             JSONObject.parseArray(jsonObj.getJSONArray("channelUuidList").toJSONString(), String.class);
+        if (CollectionUtils.isEmpty(channelUuidList)) {
+            throw new ChannelNotFoundException(channelUuidList.toString());
+        }
         List<ChannelVo> channelList = channelMapper.getChannelByUuidList(channelUuidList);
         if (CollectionUtils.isEmpty(channelList)) {
             throw new ChannelNotFoundException(channelList.toString());

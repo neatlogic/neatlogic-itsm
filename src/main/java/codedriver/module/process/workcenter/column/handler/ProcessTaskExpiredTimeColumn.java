@@ -19,6 +19,7 @@ import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -252,8 +253,8 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 	}
 
 	@Override
-	public String getMySortSqlColumn(){
-		return ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue();
+	public String getMySortSqlColumn(Boolean isColumn){
+		return String.format(" %s%s.%s",isColumn? StringUtils.EMPTY:"-",getMySortSqlTable().getShortName() , ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue());
 	}
 
 	@Override
