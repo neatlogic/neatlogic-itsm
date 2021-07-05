@@ -6,34 +6,35 @@ import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.exception.type.PermissionDeniedException;
+import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.auth.PROCESS_COMMENT_TEMPLATE_MODIFY;
 import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import codedriver.framework.process.dto.ProcessCommentTemplateAuthVo;
 import codedriver.framework.process.dto.ProcessCommentTemplateVo;
 import codedriver.framework.process.exception.commenttemplate.ProcessCommentTemplateNotFoundException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.process.auth.PROCESS_COMMENT_TEMPLATE_MODIFY;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-@AuthAction(action = PROCESS_COMMENT_TEMPLATE_MODIFY.class)
+@AuthAction(action = PROCESS_BASE.class)
 public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ProcessCommentTemplateMapper commentTemplateMapper;
 
     @Override
