@@ -151,7 +151,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             List<ProcessTaskStepVo> processTaskStepList = new ArrayList<>();
             processTaskStepList.add(processTaskStepVo);
             JSONObject resultObj = new JSONObject();
-            resultObj.put("config", JSONObject.parseObject(processVo.getConfig()));
+            resultObj.put("config", processVo.getConfig());
             resultObj.put("processTaskStepList", processTaskStepList);
             resultObj.put("processTaskStepRelList", new ArrayList<>());
             return resultObj;

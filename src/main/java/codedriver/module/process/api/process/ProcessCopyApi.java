@@ -77,7 +77,7 @@ public class ProcessCopyApi extends PrivateApiComponentBase {
 		}
 		
 		String newUuid = processVo.getUuid();
-		String config = processVo.getConfig();
+		String config = processVo.getConfigStr();
 		config = config.replace(uuid, newUuid);
 		
 		ProcessStepVo processStepVo = new ProcessStepVo();
@@ -98,7 +98,6 @@ public class ProcessCopyApi extends PrivateApiComponentBase {
 			config = config.replace(processSla.getUuid(), newSlaUuid);
 		}
 		processVo.setConfig(config);
-		processVo.setConfigObj(null);
 		processVo.makeupConfigObj();
 		processService.saveProcess(processVo);
 		processVo.setConfig(null);

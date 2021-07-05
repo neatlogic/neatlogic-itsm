@@ -135,7 +135,7 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             }
 
             ProcessVo process = processMapper.getProcessBaseInfoByUuid(processUuid);
-            JSONObject configObj = process.getConfigObj();
+            JSONObject configObj = process.getConfig();
             boolean allAttrCanEdit = false;
             Set<String> showAttrs = new HashSet<>();
             Set<Integer> showAttrRows = new HashSet<>();

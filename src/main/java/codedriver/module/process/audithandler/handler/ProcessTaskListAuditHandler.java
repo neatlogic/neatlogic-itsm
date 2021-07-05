@@ -43,6 +43,7 @@ public class ProcessTaskListAuditHandler implements IProcessTaskStepAuditDetailH
 	        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
 	        if(processTaskVo != null) {
 	            resultObj.put("title", processTaskVo.getTitle());
+	            resultObj.put("serialNumber", processTaskVo.getSerialNumber());
 	            ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
 	            if(channelVo != null) {
 	                ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
