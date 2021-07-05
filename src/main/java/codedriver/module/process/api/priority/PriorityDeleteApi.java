@@ -1,5 +1,7 @@
 package codedriver.module.process.api.priority;
 
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.exception.priority.PriorityIsInvokedException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,9 @@ public class PriorityDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private PriorityMapper priorityMapper;
-	
+	@Autowired
+	private ProcessTaskMapper processTaskMapper;
+
 	@Override
 	public String getToken() {
 		return "process/priority/delete";
@@ -49,8 +53,14 @@ public class PriorityDeleteApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
 		PriorityVo priorityVo = priorityMapper.getPriorityByUuid(uuid);
-		if(priorityVo == null) {
+		if (priorityVo == null) {
 			throw new PriorityNotFoundException(uuid);
+		}
+		if (priorityMapper.checkPriorityIsInvoked(uuid) > 0){
+			throw new PriorityIsInvokedException(priorityVo.getName());
+		}
+		if (processTaskMapper.getProcessTaskIdByPriorityUuidLimitOne(uuid) != null) {
+			throw new PriorityIsInvokedException(priorityVo.getName());
 		}
 		priorityMapper.deletePriorityByUuid(uuid);
 		priorityMapper.updateSortDecrement(priorityVo.getSort(), null);
