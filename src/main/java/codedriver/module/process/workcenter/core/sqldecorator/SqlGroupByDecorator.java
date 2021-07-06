@@ -5,6 +5,7 @@ import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -54,6 +55,9 @@ public class SqlGroupByDecorator extends SqlDecoratorBase {
                 }
             }
             sqlSb.append(String.format(" group by %s ",String.join(",",columnList)));
+        }
+        if(FieldTypeEnum.DISTINCT_ID.getValue().equals(workcenterVo.getSqlFieldType())) {
+            sqlSb.append(String.format(" group by %s.%s ", new ProcessTaskSqlTable().getShortName(), "id"));
         }
     }
 

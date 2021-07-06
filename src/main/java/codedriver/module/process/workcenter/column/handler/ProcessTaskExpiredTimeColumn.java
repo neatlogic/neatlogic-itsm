@@ -261,7 +261,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
 
     @Override
     public String getMySortSqlColumn(Boolean isColumn) {
-        return String.format(" %s%s.%s", isColumn ? StringUtils.EMPTY : "-", getMySortSqlTable().getShortName(), ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue());
+        return String.format(" %s MAX(%s.%s) ", isColumn ? StringUtils.EMPTY : "-", getMySortSqlTable().getShortName(), ProcessTaskSlaTimeSqlTable.FieldEnum.EXPIRE_TIME.getValue());
     }
 
     @Override

@@ -2,7 +2,6 @@ package codedriver.module.process.workcenter.core.sqldecorator;
 
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
-import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
@@ -10,7 +9,6 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -47,9 +45,9 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
         buildFieldMap.put(FieldTypeEnum.DISTINCT_ID.getValue(), (workcenterVo, sqlSb) -> {
             ProcessTaskSqlTable processTaskSqlTable = new ProcessTaskSqlTable();
 
-            sqlSb.append(String.format(" DISTINCT %s.%s ", processTaskSqlTable.getShortName(), "id"));
+            sqlSb.append(String.format(" %s.%s ", processTaskSqlTable.getShortName(), "id"));
             //拼接排序字段
-            JSONArray sortList = workcenterVo.getSortList();
+            /*JSONArray sortList = workcenterVo.getSortList();
             if (CollectionUtils.isNotEmpty(sortList)) {
                 for (Object sortObj : sortList) {
                     JSONObject sortJson = JSONObject.parseObject(sortObj.toString());
@@ -64,7 +62,7 @@ public class SqlColumnDecorator extends SqlDecoratorBase {
             } else {
                 IProcessTaskColumn column = ProcessTaskColumnFactory.getHandler(ProcessWorkcenterField.STARTTIME.getValue());
                 sqlSb.append(String.format(",%s", column.getSortSqlColumn(true)));
-            }
+            }*/
         });
 
         buildFieldMap.put(FieldTypeEnum.TOTAL_COUNT.getValue(), (workcenterVo, sqlSb) -> {
