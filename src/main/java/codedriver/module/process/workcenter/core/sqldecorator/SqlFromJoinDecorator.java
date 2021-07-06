@@ -94,7 +94,7 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
      * @Params: [workcenterVo, joinTableKeyList]
      * @Returns: java.util.List<codedriver.framework.process.workcenter.dto.JoinTableColumnVo>
      **/
-    private List<JoinTableColumnVo> getJoinTableOfOrder(WorkcenterVo workcenterVo, List<String> joinTableKeyList, List<JoinTableColumnVo> joinTableColumnList) {
+    private void getJoinTableOfOrder(WorkcenterVo workcenterVo, List<String> joinTableKeyList, List<JoinTableColumnVo> joinTableColumnList) {
         JSONArray sortJsonArray = workcenterVo.getSortList();
         if (CollectionUtils.isNotEmpty(sortJsonArray)) {
             for (Object sortObj : sortJsonArray) {
@@ -115,7 +115,6 @@ public class SqlFromJoinDecorator extends SqlDecoratorBase {
                 }
             }
         }
-        return joinTableColumnList;
     }
 
     /**

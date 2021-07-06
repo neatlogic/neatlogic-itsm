@@ -95,7 +95,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 //          Date time2 = new Date();
             sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
 //          System.out.println("idSql:-------------------------------------------------------------------------------");
-//          System.out.println(sb.build());
+          System.out.println(sb.build());
             List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskBySql(sb.build());
 
             workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
@@ -105,7 +105,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 //          Date time3 = new Date();
             sb = new SqlBuilder(workcenterVo, FieldTypeEnum.FIELD);
 //          System.out.println("fieldSql:-------------------------------------------------------------------------------");
-//          System.out.println(sb.build());
+//            System.out.println(sb.build());
             List<ProcessTaskVo> processTaskVoList = processTaskMapper.getProcessTaskBySql(sb.build());
 //          Date time33 = new Date();
 //          System.out.println("searchInfoByIdTime:"+(time33.getTime()-time3.getTime()));

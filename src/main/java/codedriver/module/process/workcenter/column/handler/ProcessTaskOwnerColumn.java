@@ -8,10 +8,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
-import codedriver.framework.process.workcenter.dto.SelectColumnVo;
-import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.dto.*;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.UserTable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,8 +119,8 @@ public class ProcessTaskOwnerColumn extends ProcessTaskColumnBase implements IPr
 	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
 		return new ArrayList<JoinTableColumnVo>() {
 			{
-				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new UserTable(),"owner", new HashMap<String, String>() {{
-					put(ProcessTaskSqlTable.FieldEnum.OWNER.getValue(), UserTable.FieldEnum.UUID.getValue());
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new UserTable(),"owner", new ArrayList<JoinOnVo>() {{
+					add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.OWNER.getValue(), UserTable.FieldEnum.UUID.getValue()));
 				}}));
 			}
 		};

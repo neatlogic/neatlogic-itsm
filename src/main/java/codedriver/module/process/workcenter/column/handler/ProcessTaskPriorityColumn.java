@@ -8,10 +8,7 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
-import codedriver.framework.process.workcenter.dto.SelectColumnVo;
-import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
-import codedriver.framework.process.workcenter.dto.WorkcenterVo;
+import codedriver.framework.process.workcenter.dto.*;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.PrioritySqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
@@ -128,8 +125,8 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     public List<JoinTableColumnVo> getMyJoinTableColumnList() {
         return new ArrayList<JoinTableColumnVo>() {
             {
-                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new PrioritySqlTable(), new HashMap<String, String>() {{
-                    put(ProcessTaskSqlTable.FieldEnum.PRIORITY_UUID.getValue(), PrioritySqlTable.FieldEnum.UUID.getValue());
+                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new PrioritySqlTable(), new ArrayList<JoinOnVo>() {{
+                    add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.PRIORITY_UUID.getValue(), PrioritySqlTable.FieldEnum.UUID.getValue()));
                 }}));
             }
         };

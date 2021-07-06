@@ -4,6 +4,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.JoinOnVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -96,14 +96,14 @@ public class ProcessTaskWorkTimeColumn extends ProcessTaskColumnBase implements 
 	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
 		return new ArrayList<JoinTableColumnVo>() {
 			{
-				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ChannelSqlTable(), new HashMap<String, String>() {{
-					put(ProcessTaskSqlTable.FieldEnum.CHANNEL_UUID.getValue(), ChannelSqlTable.FieldEnum.UUID.getValue());
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ChannelSqlTable(), new ArrayList<JoinOnVo>() {{
+					add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.CHANNEL_UUID.getValue(), ChannelSqlTable.FieldEnum.UUID.getValue()));
 				}}));
-				add(new JoinTableColumnVo(new ChannelSqlTable(), new ChannelWorkTimeSqlTable(), new HashMap<String, String>() {{
-					put(ChannelSqlTable.FieldEnum.UUID.getValue(), ChannelWorkTimeSqlTable.FieldEnum.CHANNEL_UUID.getValue());
+				add(new JoinTableColumnVo(new ChannelSqlTable(), new ChannelWorkTimeSqlTable(), new ArrayList<JoinOnVo>() {{
+					add(new JoinOnVo(ChannelSqlTable.FieldEnum.UUID.getValue(), ChannelWorkTimeSqlTable.FieldEnum.CHANNEL_UUID.getValue()));
 				}}));
-				add(new JoinTableColumnVo(new ChannelWorkTimeSqlTable(), new WorkTimeSqlTable(), new HashMap<String, String>() {{
-					put(ChannelWorkTimeSqlTable.FieldEnum.WORKTIME_UUID.getValue(), WorkTimeSqlTable.FieldEnum.UUID.getValue());
+				add(new JoinTableColumnVo(new ChannelWorkTimeSqlTable(), new WorkTimeSqlTable(), new ArrayList<JoinOnVo>() {{
+					add(new JoinOnVo(ChannelWorkTimeSqlTable.FieldEnum.WORKTIME_UUID.getValue(), WorkTimeSqlTable.FieldEnum.UUID.getValue()));
 				}}));
 			}
 		};
