@@ -4,6 +4,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.JoinOnVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -12,7 +13,10 @@ import codedriver.framework.process.workcenter.table.UserTable;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
@@ -114,8 +118,8 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
     public List<JoinTableColumnVo> getMyJoinTableColumnList() {
         return new ArrayList<JoinTableColumnVo>() {
             {
-                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new UserTable(), "reporter", new HashMap<String, String>() {{
-                    put(ProcessTaskSqlTable.FieldEnum.REPORTER.getValue(), UserTable.FieldEnum.UUID.getValue());
+                add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new UserTable(), "reporter", new ArrayList<JoinOnVo>() {{
+                    add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.REPORTER.getValue(), UserTable.FieldEnum.UUID.getValue()));
                 }}));
             }
         };

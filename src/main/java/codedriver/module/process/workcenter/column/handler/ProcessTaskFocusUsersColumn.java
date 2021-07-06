@@ -6,6 +6,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.JoinOnVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,11 +114,11 @@ public class ProcessTaskFocusUsersColumn extends ProcessTaskColumnBase implement
 	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
 		return new ArrayList<JoinTableColumnVo>() {
 			{
-				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskFocusSqlTable(), new HashMap<String, String>() {{
-					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskFocusSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskFocusSqlTable(), new ArrayList<JoinOnVo>() {{
+					add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskFocusSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
 				}}));
-				add(new JoinTableColumnVo(new ProcessTaskFocusSqlTable(), new UserTable(),"focus", new HashMap<String, String>() {{
-					put(ProcessTaskFocusSqlTable.FieldEnum.USER_UUID.getValue(), UserTable.FieldEnum.UUID.getValue());
+				add(new JoinTableColumnVo(new ProcessTaskFocusSqlTable(), new UserTable(),"focus", new ArrayList<JoinOnVo>() {{
+					add(new JoinOnVo(ProcessTaskFocusSqlTable.FieldEnum.USER_UUID.getValue(), UserTable.FieldEnum.UUID.getValue()));
 				}}));
 			}
 		};

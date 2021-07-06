@@ -5,6 +5,7 @@ import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.workcenter.dto.JoinOnVo;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -127,8 +127,8 @@ public class ProcessTaskScoreColumn extends ProcessTaskColumnBase implements IPr
 	public List<JoinTableColumnVo> getMyJoinTableColumnList() {
 		return new ArrayList<JoinTableColumnVo>() {
 			{
-				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskScoreSqlTable(), new HashMap<String, String>() {{
-					put(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskScoreSqlTable.FieldEnum.PROCESSTASK_ID.getValue());
+				add(new JoinTableColumnVo(new ProcessTaskSqlTable(), new ProcessTaskScoreSqlTable(), new ArrayList<JoinOnVo>() {{
+					add(new JoinOnVo(ProcessTaskSqlTable.FieldEnum.ID.getValue(), ProcessTaskScoreSqlTable.FieldEnum.PROCESSTASK_ID.getValue()));
 				}}));
 			}
 		};
