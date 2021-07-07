@@ -1,5 +1,6 @@
 package codedriver.module.process.workcenter.column.handler;
 
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -82,19 +83,20 @@ public class ProcessTaskReporterColumn extends ProcessTaskColumnBase implements 
 
     @Override
     public String getSimpleValue(ProcessTaskVo processTaskVo) {
-        if (processTaskVo.getReporterVo() != null) {
-            if (!(processTaskVo.getOwnerVo() != null
-                    && Objects.equals(processTaskVo.getOwnerVo().getUuid(), processTaskVo.getReporterVo().getUuid()))) {
-                return processTaskVo.getReporterVo().getName();
-            }
+        Object value = getValue(processTaskVo);
+        if (value != null) {
+            return ((UserVo) value).getName();
         }
         return StringUtils.EMPTY;
     }
 
     @Override
     public Object getValue(ProcessTaskVo processTaskVo) {
-        if (processTaskVo.getReporterVo() != null || (processTaskVo.getOwnerVo() != null && !processTaskVo.getOwnerVo().getUuid().equals(processTaskVo.getReporterVo().getUuid()))) {
-            return processTaskVo.getReporterVo();
+        if (processTaskVo.getReporterVo() != null) {
+            if (!(processTaskVo.getOwnerVo() != null
+                    && Objects.equals(processTaskVo.getOwnerVo().getUuid(), processTaskVo.getReporterVo().getUuid()))) {
+                return processTaskVo.getReporterVo();
+            }
         }
         return null;
     }
