@@ -95,7 +95,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 //          Date time2 = new Date();
             sb = new SqlBuilder(workcenterVo, FieldTypeEnum.DISTINCT_ID);
 //          System.out.println("idSql:-------------------------------------------------------------------------------");
-          System.out.println(sb.build());
+//          System.out.println(sb.build());
             List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskBySql(sb.build());
 
             workcenterVo.setProcessTaskIdList(processTaskList.stream().map(ProcessTaskVo::getId).collect(Collectors.toList()));
