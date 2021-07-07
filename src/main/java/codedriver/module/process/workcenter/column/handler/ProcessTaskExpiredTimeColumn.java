@@ -20,10 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
@@ -175,7 +172,7 @@ public class ProcessTaskExpiredTimeColumn extends ProcessTaskColumnBase implemen
         if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus()) && CollectionUtils.isNotEmpty(processTaskSlaList)) {
             for (ProcessTaskSlaVo slaVo : processTaskSlaList) {
                 //判断需要 同时满足 该步骤是进行中状态，以及包含sla策略
-                if (processTaskVo.getStepList().stream().noneMatch(o -> o.getStatus().equals(ProcessTaskStatus.RUNNING.getValue()) && o.getSlaTimeList().stream().anyMatch(c-> c.getSlaId().equals(slaVo.getId())))) {
+                if (processTaskVo.getStepList().stream().noneMatch(o -> Objects.equals(o.getStatus(),ProcessTaskStatus.RUNNING.getValue()) && CollectionUtils.isNotEmpty(o.getSlaTimeList()) && o.getSlaTimeList().stream().anyMatch(c -> Objects.equals(c.getSlaId(),slaVo.getId())))) {
                     continue;
                 }
                 JSONObject tmpJson = new JSONObject();
