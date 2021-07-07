@@ -52,7 +52,7 @@ public class WorkcenterKeywordSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", isRequired = true),
+    @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
         @Param(name = "pageSize", type = ApiParamType.STRING, desc = "选项显示数量"),
         @Param(name = "isCombine", type = ApiParamType.INTEGER, desc = "分开：1（pc端）；融合：0（移动端）；  默认1；")})
     @Output({@Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "展示的值")})
