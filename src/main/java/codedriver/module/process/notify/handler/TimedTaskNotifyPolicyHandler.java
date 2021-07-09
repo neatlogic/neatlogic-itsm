@@ -41,7 +41,11 @@ public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 
     @Override
     protected List<NotifyTriggerVo> myNotifyTriggerList() {
-        return null;
+        List<NotifyTriggerVo> returnList = new ArrayList<>();
+        for (TimedTaskTriggerType type : TimedTaskTriggerType.values()) {
+            returnList.add(new NotifyTriggerVo(type.getTrigger(), type.getText(), type.getDescription()));
+        }
+        return returnList;
     }
 
     @Override
