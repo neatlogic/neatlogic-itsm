@@ -29,6 +29,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 // @Service
 // @Transactional
 // @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class ProcessGetConditionApi extends PrivateApiComponentBase {
 
     @Autowired

@@ -62,7 +62,9 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
                 }});
                 this.put("groupList", new JSONArray() {
                     {
-                        this.add(GroupSearch.COMMON.getValue());
+                        if (ConditionConfigType.WORKCENTER.getValue().equals(configType.getValue())) {
+                            this.add(GroupSearch.COMMON.getValue());
+                        }
                         this.add(GroupSearch.USER.getValue());
                     }
                 });
