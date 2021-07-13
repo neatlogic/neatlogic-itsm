@@ -39,18 +39,20 @@ public class ProcessTaskIsShowCondition extends ProcessTaskConditionBase impleme
         return "是否隐藏";
     }
 
-	@Override
-	public String getHandler(FormConditionModel processWorkcenterConditionType) {
-		if(FormConditionModel.SIMPLE == processWorkcenterConditionType) {
-			formHandlerType = FormHandlerType.RADIO.toString();
-		}
-		return formHandlerType;
-	}
-	
-	@Override
-	public String getType() {
-		return ProcessFieldType.COMMON.getValue();
-	}
+    @Override
+    public String getHandler(FormConditionModel formConditionModel) {
+        if (FormConditionModel.SIMPLE == formConditionModel) {
+            formHandlerType = FormHandlerType.CHECKBOX.toString();
+        } else {
+            formHandlerType = FormHandlerType.SELECT.toString();
+        }
+        return formHandlerType;
+    }
+
+    @Override
+    public String getType() {
+        return ProcessFieldType.COMMON.getValue();
+    }
 
     @Override
     public JSONObject getConfig(ConditionConfigType type) {

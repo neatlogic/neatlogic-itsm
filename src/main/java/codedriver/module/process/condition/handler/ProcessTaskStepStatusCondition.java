@@ -41,9 +41,11 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public String getHandler(FormConditionModel processWorkcenterConditionType) {
-        if (FormConditionModel.SIMPLE == processWorkcenterConditionType) {
+    public String getHandler(FormConditionModel formConditionModel) {
+        if (FormConditionModel.SIMPLE == formConditionModel) {
             formHandlerType = FormHandlerType.CHECKBOX.toString();
+        } else {
+            formHandlerType = FormHandlerType.SELECT.toString();
         }
         return formHandlerType;
     }
@@ -145,6 +147,6 @@ public class ProcessTaskStepStatusCondition extends ProcessTaskConditionBase imp
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
         getSimpleSqlConditionWhere(conditionList.get(index), sqlSb, new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.STATUS.getValue());
         sqlSb.append(" and ");
-        sqlSb.append(Expression.getExpressionSql(Expression.EXCLUDE.getExpression(), new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.IS_ACTIVE.getValue(),"0','-1"));
+        sqlSb.append(Expression.getExpressionSql(Expression.EXCLUDE.getExpression(), new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.IS_ACTIVE.getValue(), "0','-1"));
     }
 }

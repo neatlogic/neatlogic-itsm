@@ -100,9 +100,11 @@ public class ProcessTaskAboutMeCondition extends ProcessTaskConditionBase implem
     }
 
     @Override
-    public String getHandler(FormConditionModel processWorkcenterConditionType) {
-        if (FormConditionModel.SIMPLE == processWorkcenterConditionType) {
-            formHandlerType = FormHandlerType.RADIO.toString();
+    public String getHandler(FormConditionModel formConditionModel) {
+        if (FormConditionModel.SIMPLE == formConditionModel) {
+            formHandlerType = FormHandlerType.CHECKBOX.toString();
+        } else {
+            formHandlerType = FormHandlerType.SELECT.toString();
         }
         return formHandlerType;
     }

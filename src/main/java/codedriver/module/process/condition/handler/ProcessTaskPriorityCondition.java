@@ -39,10 +39,12 @@ public class ProcessTaskPriorityCondition extends ProcessTaskConditionBase imple
     }
 
 	@Override
-	public String getHandler(FormConditionModel processWorkcenterConditionType) {
-		if(FormConditionModel.SIMPLE == processWorkcenterConditionType) {
-			formHandlerType = FormHandlerType.CHECKBOX.toString();
-		}
+	public String getHandler(FormConditionModel formConditionModel) {
+        if (FormConditionModel.SIMPLE == formConditionModel) {
+            formHandlerType = FormHandlerType.CHECKBOX.toString();
+        } else {
+            formHandlerType = FormHandlerType.SELECT.toString();
+        }
 		return formHandlerType;
 	}
 	
