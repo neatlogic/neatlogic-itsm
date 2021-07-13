@@ -9,8 +9,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +49,9 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
 
     @Autowired
     private TeamMapper teamMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Autowired
     private WorktimeMapper worktimeMapper;
@@ -87,13 +92,25 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
         if (processTaskVo == null) {
             throw new ProcessTaskNotFoundException(currentProcessTaskId.toString());
         }
+        String currentUserUuid = UserContext.get().getUserUuid(true);
         JSONObject resultObj = new JSONObject();
         ProcessTaskStepWorkerVo searchVo = JSON.toJavaObject(jsonObj, ProcessTaskStepWorkerVo.class);
-        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+        List<String> userUuidList = new ArrayList<>();
+        List<String> teamUuidList = new ArrayList<>();
+        List<String> roleUuidList = new ArrayList<>();
+        userUuidList.add(currentUserUuid);
+        teamUuidList.addAll(teamMapper.getTeamUuidListByUserUuid(currentUserUuid));
+        roleUuidList.addAll(UserContext.get().getRoleUuidList());
+        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(currentUserUuid, "processtask");
+        if (StringUtils.isNotBlank(userUuid)) {
+            userUuidList.add(userUuid);
+            teamUuidList.addAll(teamMapper.getTeamUuidListByUserUuid(userUuid));
+            roleUuidList.addAll(userMapper.getRoleUuidListByUserUuid(userUuid));
+        }
         searchVo.setProcessTaskId(currentProcessTaskId);
-        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+        searchVo.setUserUuidList(userUuidList);
         searchVo.setTeamUuidList(teamUuidList);
-        searchVo.setRoleUuidList(UserContext.get().getRoleUuidList());
+        searchVo.setRoleUuidList(roleUuidList);
         int rowNum =
             processTaskMapper.getProcessTaskStepWorkerCountByProcessTaskIdUserUuidTeamUuidListRoleUuidList(searchVo);
         if (rowNum > 0) {
