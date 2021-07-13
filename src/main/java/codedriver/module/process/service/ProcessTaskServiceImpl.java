@@ -1279,12 +1279,18 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         /** 上报人公司列表 **/
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
         if (CollectionUtils.isNotEmpty(teamUuidList)) {
+            Set<Long> idSet = new HashSet<>();
             List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
             for (TeamVo teamVo : teamList) {
                 List<TeamVo> companyList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(),
                         TeamLevel.COMPANY.getValue());
                 if (CollectionUtils.isNotEmpty(companyList)) {
-                    processTaskVo.getOwnerCompanyList().addAll(companyList);
+                    for (TeamVo team : companyList) {
+                        if (!idSet.contains(team.getId())) {
+                            idSet.add(team.getId());
+                            processTaskVo.getOwnerCompanyList().add(team);
+                        }
+                    }
                 }
             }
         }
