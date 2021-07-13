@@ -8,10 +8,7 @@ import codedriver.framework.process.audithandler.core.IProcessTaskAuditType;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskContentVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditDetailVo;
-import codedriver.framework.process.dto.ProcessTaskStepAuditVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.util.FreemarkerUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -77,6 +74,11 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
                     processTaskStepName = processTaskMapper.getProcessTaskStepNameById(currentProcessTaskStepVo.getId());
                 }
                 paramObj.put("processTaskStepName", processTaskStepName);
+            } else {
+                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
+                if (processTaskVo != null) {
+                    paramObj.put("processTaskStepName", processTaskVo.getTitle());
+                }
             }
             Long nextStepId = paramObj.getLong("nextStepId");
             if (nextStepId != null) {
