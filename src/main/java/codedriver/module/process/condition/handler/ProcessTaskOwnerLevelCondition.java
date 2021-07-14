@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -70,7 +71,12 @@ public class ProcessTaskOwnerLevelCondition extends ProcessTaskConditionBase imp
 
     @Override
     public Object valueConversionText(Object value, JSONObject config) {
-        return null;
+        if (Objects.equals(value, "1")) {
+            return "是";
+        } else if (Objects.equals(value, "0")) {
+            return "否";
+        }
+        return value;
     }
 
     @Override
