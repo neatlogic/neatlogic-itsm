@@ -1,27 +1,5 @@
 package codedriver.module.process.notify.schedule.plugin;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
-import codedriver.module.process.service.ProcessTaskService;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
@@ -31,15 +9,25 @@ import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
-import codedriver.framework.process.dto.ProcessTaskSlaNotifyVo;
-import codedriver.framework.process.dto.ProcessTaskSlaTimeVo;
-import codedriver.framework.process.dto.ProcessTaskSlaVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.module.process.notify.constvalue.SlaNotifyTriggerType;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.NotifyPolicyUtil;
+import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
+import codedriver.module.process.notify.constvalue.SlaNotifyTriggerType;
+import codedriver.module.process.service.ProcessTaskService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobExecutionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 @Component
 @DisallowConcurrentExecution
@@ -161,7 +149,7 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
     }
 
     @Override
-    public void executeInternal(JobExecutionContext context, JobObject jobObject) throws JobExecutionException {
+    public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
         Long slaNotifyId = (Long)jobObject.getData("slaNotifyId");
         ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskSlaNotifyById(slaNotifyId);
         if (processTaskSlaNotifyVo != null) {
