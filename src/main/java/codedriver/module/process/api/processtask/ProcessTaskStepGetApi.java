@@ -326,7 +326,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                         .getTemplateByStepUuidAndAuth(processTaskStepVo.getProcessStepUuid(), authList);
                 processTaskStepVo.setCommentTemplate(commentTemplate);
             }
-
+            processTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(processTaskStepVo));
             return processTaskStepVo;
         }
         return null;

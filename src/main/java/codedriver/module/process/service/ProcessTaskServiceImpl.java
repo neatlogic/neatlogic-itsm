@@ -1218,12 +1218,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskVo.setIsFocus(1);
         }
         // 获取工单流程图信息
-        ProcessTaskConfigVo processTaskConfig =
-                selectContentByHashMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
-        if (processTaskConfig == null) {
-            throw new ProcessTaskRuntimeException("没有找到工单：'" + processTaskId + "'的流程图配置信息");
-        }
-        processTaskVo.setConfig(processTaskConfig.getConfig());
+//        ProcessTaskConfigVo processTaskConfig =
+//                selectContentByHashMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
+//        if (processTaskConfig == null) {
+//            throw new ProcessTaskRuntimeException("没有找到工单：'" + processTaskId + "'的流程图配置信息");
+//        }
+//        processTaskVo.setConfig(processTaskConfig.getConfig());
 
         // 优先级
         PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
@@ -1369,6 +1369,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         startProcessTaskStepVo
                 .setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
+        startProcessTaskStepVo.setReplaceableTextList(getReplaceableTextList(startProcessTaskStepVo));
         return startProcessTaskStepVo;
     }
 
@@ -1672,5 +1673,50 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (CollectionUtils.isNotEmpty(roleUuidList)) {
             conditionMap.put("roleUuidList", roleUuidList);
         }
+    }
+
+    @Override
+    public JSONArray getReplaceableTextList(ProcessTaskStepVo processTaskStepVo) {
+        String config = processTaskStepVo.getConfig();
+        if (StringUtils.isBlank(config)) {
+            String configHash = processTaskStepVo.getConfigHash();
+            if (StringUtils.isNotBlank(configHash)) {
+                config = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
+            }
+        }
+        boolean stepLevelTakesEffect = false;
+        JSONArray replaceableTextList = (JSONArray) JSONPath.read(config, "replaceableTextList");
+        if (CollectionUtils.isNotEmpty(replaceableTextList)) {
+            for (int i = 0; i < replaceableTextList.size(); i++) {
+                JSONObject replaceableText = replaceableTextList.getJSONObject(i);
+                if (StringUtils.isNotBlank(replaceableText.getString("customText"))) {
+                    stepLevelTakesEffect = true;
+                    break;
+                }
+            }
+        }
+        if (!stepLevelTakesEffect) {
+            String handler = processTaskStepVo.getHandler();
+            if (StringUtils.isNotBlank(handler)) {
+                ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(handler);
+                if (processStepHandlerVo != null) {
+                    JSONObject configObj = processStepHandlerVo.getConfig();
+                    if (MapUtils.isNotEmpty(configObj)) {
+                        replaceableTextList = configObj.getJSONArray("replaceableTextList");
+                    }
+                }
+            }
+        }
+        if (CollectionUtils.isEmpty(replaceableTextList)) {
+            replaceableTextList = new JSONArray();
+            for (ReplaceableText replaceableText : ReplaceableText.values()) {
+                replaceableTextList.add(new JSONObject() {{
+                    this.put("value", replaceableText.getValue());
+                    this.put("text", replaceableText.getText());
+                    this.put("customText", "");
+                }});
+            }
+        }
+        return replaceableTextList;
     }
 }

@@ -266,7 +266,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
         processTaskVo.setChannelUuid(channelUuid);
         processTaskVo.setProcessUuid(processUuid);
-        processTaskVo.setConfig(processVo.getConfigStr());
+//        processTaskVo.setConfig(processVo.getConfigStr());
         String worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(channelUuid);
         processTaskVo.setWorktimeUuid(worktimeUuid);
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);

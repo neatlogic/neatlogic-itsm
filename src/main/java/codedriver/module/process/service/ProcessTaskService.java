@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import codedriver.framework.notify.dto.NotifyReceiverVo;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -317,4 +318,11 @@ public interface ProcessTaskService {
      * @return "用户uuid->工单数"的map集合
      */
     public Map<String,Integer> getProcessingUserTaskCountByCondition(Map<String,Object> conditionMap);
+
+    /**
+     * 获取该步骤可替换文本列表数据
+     * @param processTaskStepVo
+     * @return
+     */
+    public JSONArray getReplaceableTextList(ProcessTaskStepVo processTaskStepVo);
 }
