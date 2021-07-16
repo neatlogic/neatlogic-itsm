@@ -1278,9 +1278,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         /** 上报人公司列表 **/
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
+        List<TeamVo> teamList = null;
         if (CollectionUtils.isNotEmpty(teamUuidList)) {
             Set<Long> idSet = new HashSet<>();
-            List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+            teamList = teamMapper.getTeamByUuidList(teamUuidList);
             for (TeamVo teamVo : teamList) {
                 List<TeamVo> companyList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(),
                         TeamLevel.COMPANY.getValue());
@@ -1335,6 +1336,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 .TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_FOCUSUSER_UPDATE).build()
                 .check() ? 1 : 0;
         processTaskVo.setCanEditFocusUser(canEditFocusUser);
+
+        String owner = processTaskVo.getOwner();
+        UserVo ownerVo = userMapper.getUserBaseInfoByUuid(owner);
+        if (ownerVo != null) {
+            ownerVo.setTeamList(teamList);
+            processTaskVo.setOwnerVo(ownerVo);
+        }
 
         return processTaskVo;
     }
