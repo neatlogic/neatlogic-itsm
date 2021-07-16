@@ -146,9 +146,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		resultObj.put("customButtonList", customButtonArray);
 
 		/** 可替换文本列表 **/
-		JSONArray replaceableTextList = configObj.getJSONArray("replaceableTextList");
-		JSONArray replaceableTextArray = ProcessConfigUtil.regulateReplaceableTextList(replaceableTextList);
-		resultObj.put("replaceableTextList", replaceableTextArray);
+		resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
 
 		/** 通知 **/
 		NotifyPolicyConfigVo notifyPolicyConfigVo = null;
@@ -210,9 +208,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
 		}
 
 		/** 可替换文本列表 **/
-		JSONArray replaceableTextList = configObj.getJSONArray("replaceableTextList");
-		JSONArray replaceableTextArray = ProcessConfigUtil.regulateReplaceableTextList(replaceableTextList);
-		resultObj.put("replaceableTextList", replaceableTextArray);
+		resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
 
 		/** 自动化配置 **/
 		AutomaticRequestConfigVo requestConfigVo = null;

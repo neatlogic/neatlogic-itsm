@@ -238,9 +238,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         resultObj.put("customButtonList", customButtonArray);
 
         /** 可替换文本列表 **/
-        JSONArray replaceableTextList = configObj.getJSONArray("replaceableTextList");
-        JSONArray replaceableTextArray = ProcessConfigUtil.regulateReplaceableTextList(replaceableTextList);
-        resultObj.put("replaceableTextList", replaceableTextArray);
+        resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
 
         /** 通知 **/
         NotifyPolicyConfigVo notifyPolicyConfigVo = null;
@@ -336,9 +334,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         }
 
         /** 可替换文本列表 **/
-        JSONArray replaceableTextList = configObj.getJSONArray("replaceableTextList");
-        JSONArray replaceableTextArray = ProcessConfigUtil.regulateReplaceableTextList(replaceableTextList);
-        resultObj.put("replaceableTextList", replaceableTextArray);
+        resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
 
         /** 分配处理人 **/
         JSONObject workerPolicyConfig = configObj.getJSONObject("workerPolicyConfig");
