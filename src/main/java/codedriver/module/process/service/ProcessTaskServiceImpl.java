@@ -1218,12 +1218,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskVo.setIsFocus(1);
         }
         // 获取工单流程图信息
-//        ProcessTaskConfigVo processTaskConfig =
-//                selectContentByHashMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
-//        if (processTaskConfig == null) {
-//            throw new ProcessTaskRuntimeException("没有找到工单：'" + processTaskId + "'的流程图配置信息");
-//        }
-//        processTaskVo.setConfig(processTaskConfig.getConfig());
+        ProcessTaskConfigVo processTaskConfig =
+                selectContentByHashMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
+        if (processTaskConfig == null) {
+            throw new ProcessTaskRuntimeException("没有找到工单：'" + processTaskId + "'的流程图配置信息");
+        }
+        processTaskVo.setConfig(processTaskConfig.getConfig());
 
         // 优先级
         PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
