@@ -45,9 +45,11 @@ public class ProcessTaskExpireTimeCondition extends ProcessTaskConditionBase imp
     }
 
     @Override
-    public String getHandler(FormConditionModel processWorkcenterConditionType) {
-        if (FormConditionModel.SIMPLE == processWorkcenterConditionType) {
+    public String getHandler(FormConditionModel formConditionModel) {
+        if (FormConditionModel.SIMPLE == formConditionModel) {
             formHandlerType = FormHandlerType.RADIO.toString();
+        } else {
+            formHandlerType = FormHandlerType.SELECT.toString();
         }
         return formHandlerType;
     }
