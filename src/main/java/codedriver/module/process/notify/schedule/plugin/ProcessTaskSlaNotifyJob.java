@@ -186,8 +186,6 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
                         Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
                         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-                            String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-                            processTaskStepVo.setConfig(stepConfig);
                             processTaskService.getReceiverMap(processTaskStepVo, receiverMap);
                         }
                         NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo.getConfig(), paramMappingList,

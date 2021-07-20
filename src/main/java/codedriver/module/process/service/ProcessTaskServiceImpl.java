@@ -981,22 +981,23 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter,
                                                   ProcessTaskOperationType operationType, String userUuid) {
+        JSONArray authorityList = null;
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-        JSONArray authorityList = (JSONArray) JSONPath.read(stepConfig, "authorityList");
-        if (CollectionUtils.isEmpty(authorityList)) {
-            IProcessStepInternalHandler processStepUtilHandler =
-                    ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        Integer enableAuthority = (Integer) JSONPath.read(stepConfig, "enableAuthority");
+        if (Objects.equals(enableAuthority, 1)) {
+            authorityList = (JSONArray) JSONPath.read(stepConfig, "authorityList");
+        } else {
+            String handler = processTaskStepVo.getHandler();
+            IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(handler);
             if (processStepUtilHandler == null) {
-                throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+                throw new ProcessStepUtilHandlerNotFoundException(handler);
             }
-            ProcessStepHandlerVo processStepHandlerConfig =
-                    processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
+            ProcessStepHandlerVo processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerByHandler(handler);
             JSONObject globalConfig = processStepUtilHandler
                     .makeupConfig(processStepHandlerConfig != null ? processStepHandlerConfig.getConfig() : null);
             authorityList = (JSONArray) JSONPath.read(JSON.toJSONString(globalConfig), "authorityList");
         }
 
-        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
         if (CollectionUtils.isNotEmpty(authorityList)) {
             return checkOperationAuthIsConfigured(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(),
                     owner, reporter, operationType, authorityList, userUuid);
@@ -1524,9 +1525,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
 
         /** 异常处理人 **/
-        if (StringUtils.isNotBlank(currentProcessTaskStepVo.getConfig())) {
-            String defaultWorker =
-                    (String)JSONPath.read(currentProcessTaskStepVo.getConfig(), "workerPolicyConfig.defaultWorker");
+        String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(currentProcessTaskStepVo.getConfigHash());
+        if (StringUtils.isNotBlank(stepConfig)) {
+            String defaultWorker = (String) JSONPath.read(stepConfig, "workerPolicyConfig.defaultWorker");
             if (StringUtils.isNotBlank(defaultWorker)) {
                 String[] split = defaultWorker.split("#");
                 receiverMap.computeIfAbsent(ProcessUserType.DEFAULT_WORKER.getValue(), k -> new ArrayList<>())

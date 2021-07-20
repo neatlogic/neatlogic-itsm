@@ -105,9 +105,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                 if (processStepUtilHandler == null) {
                     throw new ProcessStepUtilHandlerNotFoundException(stepVo.getHandler());
                 }
-                String stepConfig =
-                        selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
-                currentProcessTaskStepVo.setConfig(stepConfig);
+                String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
                 notifyPolicyConfig = (JSONObject)JSONPath.read(stepConfig, "notifyPolicyConfig");
                 if (MapUtils.isEmpty(notifyPolicyConfig)) {
                     ProcessStepHandlerVo processStepHandlerVo =
