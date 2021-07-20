@@ -152,6 +152,10 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         JSONArray customButtonList = configObj.getJSONArray("customButtonList");
         JSONArray customButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, stepButtons);
         resultObj.put("customButtonList", customButtonArray);
+        /** 状态映射列表 **/
+        JSONArray customStatusList = configObj.getJSONArray("customStatusList");
+        JSONArray customStatusArray = ProcessConfigUtil.regulateCustomStatusList(customStatusList);
+        resultObj.put("customStatusList", customStatusArray);
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
