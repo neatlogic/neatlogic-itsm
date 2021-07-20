@@ -1,9 +1,6 @@
 package codedriver.module.process.stephandler.utilhandler;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.dto.processconfig.ActionConfigVo;
@@ -14,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -207,7 +205,14 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.STEP_TRANSFER,
                 ProcessTaskOperationType.STEP_RETREAT
         };
-        JSONArray authorityList = configObj.getJSONArray("authorityList");
+        JSONArray authorityList = null;
+        Integer enableAuthority = configObj.getInteger("enableAuthority");
+        if (Objects.equals(enableAuthority, 1)) {
+            authorityList = configObj.getJSONArray("authorityList");
+        } else {
+            enableAuthority = 1;
+        }
+        resultObj.put("enableAuthority", enableAuthority);
         JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
         resultObj.put("authorityList", authorityArray);
 
@@ -237,23 +242,24 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         customButtonArray.addAll(subtaskCustomButtonArray);
         resultObj.put("customButtonList", customButtonArray);
 
+        /** 状态映射列表 **/
+        JSONArray customStatusList = configObj.getJSONArray("customStatusList");
+        JSONArray customStatusArray = ProcessConfigUtil.regulateCustomStatusList(customStatusList);
+        resultObj.put("customStatusList", customStatusArray);
+
         /** 通知 **/
-        NotifyPolicyConfigVo notifyPolicyConfigVo = null;
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-            notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-        } else {
+        NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
+        if (notifyPolicyConfigVo == null) {
             notifyPolicyConfigVo = new NotifyPolicyConfigVo();
         }
         notifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
         resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
 
         /** 动作 **/
-        ActionConfigVo actionConfigVo = null;
         JSONObject actionConfig = configObj.getJSONObject("actionConfig");
-        if (MapUtils.isNotEmpty(actionConfig)) {
-            actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
-        } else {
+        ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+        if (actionConfigVo == null) {
             actionConfigVo = new ActionConfigVo();
         }
         actionConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
@@ -269,73 +275,77 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         JSONObject resultObj = new JSONObject();
 
         /** 授权 **/
-        JSONArray authorityList = configObj.getJSONArray("authorityList");
-        if (CollectionUtils.isNotEmpty(authorityList)) {
-            ProcessTaskOperationType[] stepActions = {
-                    ProcessTaskOperationType.STEP_VIEW,
-                    ProcessTaskOperationType.STEP_TRANSFER,
-                    ProcessTaskOperationType.STEP_RETREAT
-            };
-            JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
-            resultObj.put("authorityList", authorityArray);
+        ProcessTaskOperationType[] stepActions = {
+                ProcessTaskOperationType.STEP_VIEW,
+                ProcessTaskOperationType.STEP_TRANSFER,
+                ProcessTaskOperationType.STEP_RETREAT
+        };
+        JSONArray authorityList = null;
+        Integer enableAuthority = configObj.getInteger("enableAuthority");
+        if (Objects.equals(enableAuthority, 1)) {
+            authorityList = configObj.getJSONArray("authorityList");
+        } else {
+            enableAuthority = 0;
         }
+        resultObj.put("enableAuthority", enableAuthority);
+        JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
+        resultObj.put("authorityList", authorityArray);
 
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
-        if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-            NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-//            notifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
-            resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
+        NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
+        if (notifyPolicyConfigVo == null) {
+            notifyPolicyConfigVo = new NotifyPolicyConfigVo();
         }
+        notifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+        resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
 
         /** 动作 **/
         JSONObject actionConfig = configObj.getJSONObject("actionConfig");
-        if (MapUtils.isNotEmpty(actionConfig)) {
-            ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
-            actionConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
-            resultObj.put("actionConfig", actionConfigVo);
+        ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+        if (actionConfigVo == null) {
+            actionConfigVo = new ActionConfigVo();
         }
+        actionConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
+        resultObj.put("actionConfig", actionConfigVo);
 
         JSONArray customButtonList = configObj.getJSONArray("customButtonList");
-        if (CollectionUtils.isNotEmpty(customButtonList)) {
-            /** 按钮映射列表 **/
-            ProcessTaskOperationType[] stepButtons = {
-                    ProcessTaskOperationType.STEP_COMPLETE,
-                    ProcessTaskOperationType.STEP_BACK,
-                    ProcessTaskOperationType.STEP_COMMENT,
-                    ProcessTaskOperationType.TASK_TRANSFER,
-                    ProcessTaskOperationType.STEP_START,
-                    ProcessTaskOperationType.TASK_ABORT,
-                    ProcessTaskOperationType.TASK_RECOVER
-            };
+        /** 按钮映射列表 **/
+        ProcessTaskOperationType[] stepButtons = {
+                ProcessTaskOperationType.STEP_COMPLETE,
+                ProcessTaskOperationType.STEP_BACK,
+                ProcessTaskOperationType.STEP_COMMENT,
+                ProcessTaskOperationType.TASK_TRANSFER,
+                ProcessTaskOperationType.STEP_START,
+                ProcessTaskOperationType.TASK_ABORT,
+                ProcessTaskOperationType.TASK_RECOVER
+        };
 
-            /** 子任务按钮映射列表 **/
-            ProcessTaskOperationType[] subtaskButtons = {
-                    ProcessTaskOperationType.SUBTASK_ABORT,
-                    ProcessTaskOperationType.SUBTASK_COMMENT,
-                    ProcessTaskOperationType.SUBTASK_COMPLETE,
-                    ProcessTaskOperationType.SUBTASK_CREATE,
-                    ProcessTaskOperationType.SUBTASK_REDO,
-                    ProcessTaskOperationType.SUBTASK_EDIT
-            };
-            JSONArray customButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, stepButtons);
-            JSONArray subtaskCustomButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, subtaskButtons, "子任务");
-            customButtonArray.addAll(subtaskCustomButtonArray);
-            resultObj.put("customButtonList", customButtonArray);
-        }
+        /** 子任务按钮映射列表 **/
+        ProcessTaskOperationType[] subtaskButtons = {
+                ProcessTaskOperationType.SUBTASK_ABORT,
+                ProcessTaskOperationType.SUBTASK_COMMENT,
+                ProcessTaskOperationType.SUBTASK_COMPLETE,
+                ProcessTaskOperationType.SUBTASK_CREATE,
+                ProcessTaskOperationType.SUBTASK_REDO,
+                ProcessTaskOperationType.SUBTASK_EDIT
+        };
+        JSONArray customButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, stepButtons);
+        JSONArray subtaskCustomButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, subtaskButtons, "子任务");
+        customButtonArray.addAll(subtaskCustomButtonArray);
+        resultObj.put("customButtonList", customButtonArray);
         /** 状态映射列表 **/
         JSONArray customStatusList = configObj.getJSONArray("customStatusList");
-        if (CollectionUtils.isNotEmpty(customStatusList)) {
-            JSONArray customStatusArray = ProcessConfigUtil.regulateCustomStatusList(customStatusList);
-            resultObj.put("customStatusList", customStatusArray);
-        }
+        JSONArray customStatusArray = ProcessConfigUtil.regulateCustomStatusList(customStatusList);
+        resultObj.put("customStatusList", customStatusArray);
 
         /** 分配处理人 **/
         JSONObject workerPolicyConfig = configObj.getJSONObject("workerPolicyConfig");
-        if (MapUtils.isNotEmpty(workerPolicyConfig)) {
-            JSONObject workerPolicyObj = ProcessConfigUtil.regulateWorkerPolicyConfig(workerPolicyConfig);
-            resultObj.put("workerPolicyConfig", workerPolicyObj);
-        }
+        JSONObject workerPolicyObj = ProcessConfigUtil.regulateWorkerPolicyConfig(workerPolicyConfig);
+        resultObj.put("workerPolicyConfig", workerPolicyObj);
+
+        JSONObject simpleSettings = ProcessConfigUtil.regulateSimpleSettings(configObj);
+        resultObj.putAll(simpleSettings);
         return resultObj;
     }
 
