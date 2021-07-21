@@ -981,22 +981,26 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     @Override
     public boolean checkOperationAuthIsConfigured(ProcessTaskStepVo processTaskStepVo, String owner, String reporter,
                                                   ProcessTaskOperationType operationType, String userUuid) {
+        JSONArray authorityList = null;
         String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-        JSONArray authorityList = (JSONArray) JSONPath.read(stepConfig, "authorityList");
-        if (CollectionUtils.isEmpty(authorityList)) {
-            IProcessStepInternalHandler processStepUtilHandler =
-                    ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+        Integer enableAuthority = (Integer) JSONPath.read(stepConfig, "enableAuthority");
+        if (Objects.equals(enableAuthority, 1)) {
+            authorityList = (JSONArray) JSONPath.read(stepConfig, "authorityList");
+        } else {
+            String handler = processTaskStepVo.getHandler();
+            IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(handler);
             if (processStepUtilHandler == null) {
-                throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
+                throw new ProcessStepUtilHandlerNotFoundException(handler);
             }
-            ProcessStepHandlerVo processStepHandlerConfig =
-                    processStepHandlerMapper.getProcessStepHandlerByHandler(processTaskStepVo.getHandler());
-            JSONObject globalConfig = processStepUtilHandler
-                    .makeupConfig(processStepHandlerConfig != null ? processStepHandlerConfig.getConfig() : null);
-            authorityList = (JSONArray) JSONPath.read(JSON.toJSONString(globalConfig), "authorityList");
+            String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
+            JSONObject globalConfig = null;
+            if (StringUtils.isNotBlank(processStepHandlerConfig)) {
+                globalConfig = JSONObject.parseObject(processStepHandlerConfig);
+            }
+            globalConfig = processStepUtilHandler.makeupConfig(globalConfig);
+            authorityList = globalConfig.getJSONArray("authorityList");
         }
 
-        // 如果步骤自定义权限设置为空，则用组件的全局权限设置
         if (CollectionUtils.isNotEmpty(authorityList)) {
             return checkOperationAuthIsConfigured(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(),
                     owner, reporter, operationType, authorityList, userUuid);
@@ -1218,12 +1222,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskVo.setIsFocus(1);
         }
         // 获取工单流程图信息
-        ProcessTaskConfigVo processTaskConfig =
-                selectContentByHashMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
-        if (processTaskConfig == null) {
-            throw new ProcessTaskRuntimeException("没有找到工单：'" + processTaskId + "'的流程图配置信息");
-        }
-        processTaskVo.setConfig(processTaskConfig.getConfig());
+        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+        processTaskVo.setConfig(taskConfig);
 
         // 优先级
         PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
@@ -1278,9 +1278,10 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         /** 上报人公司列表 **/
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
+        List<TeamVo> teamList = null;
         if (CollectionUtils.isNotEmpty(teamUuidList)) {
             Set<Long> idSet = new HashSet<>();
-            List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+            teamList = teamMapper.getTeamByUuidList(teamUuidList);
             for (TeamVo teamVo : teamList) {
                 List<TeamVo> companyList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(),
                         TeamLevel.COMPANY.getValue());
@@ -1335,6 +1336,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 .TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_FOCUSUSER_UPDATE).build()
                 .check() ? 1 : 0;
         processTaskVo.setCanEditFocusUser(canEditFocusUser);
+
+        String owner = processTaskVo.getOwner();
+        UserVo ownerVo = userMapper.getUserBaseInfoByUuid(owner);
+        if (ownerVo != null) {
+            ownerVo.setTeamList(teamList);
+            processTaskVo.setOwnerVo(ownerVo);
+        }
 
         return processTaskVo;
     }
@@ -1517,9 +1525,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
 
         /** 异常处理人 **/
-        if (StringUtils.isNotBlank(currentProcessTaskStepVo.getConfig())) {
-            String defaultWorker =
-                    (String)JSONPath.read(currentProcessTaskStepVo.getConfig(), "workerPolicyConfig.defaultWorker");
+        String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(currentProcessTaskStepVo.getConfigHash());
+        if (StringUtils.isNotBlank(stepConfig)) {
+            String defaultWorker = (String) JSONPath.read(stepConfig, "workerPolicyConfig.defaultWorker");
             if (StringUtils.isNotBlank(defaultWorker)) {
                 String[] split = defaultWorker.split("#");
                 receiverMap.computeIfAbsent(ProcessUserType.DEFAULT_WORKER.getValue(), k -> new ArrayList<>())

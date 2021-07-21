@@ -218,7 +218,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                                     case "configHash":
                                         String configHash = DigestUtils.md5DigestAsHex(taskStepValue.getBytes());
                                         processTaskStep.setConfigHash(configHash);
-                                        processTaskMapper.replaceProcessTaskStepConfig(new ProcessTaskStepConfigVo(configHash,taskStepValue));
+                                        processTaskMapper.insertIgnoreProcessTaskStepConfig(new ProcessTaskStepConfigVo(configHash,taskStepValue));
                                         break;
                                     case "processTaskStepContentList":
                                         jsonReader.startArray();
