@@ -18,7 +18,6 @@ import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ActionVo;
-import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
@@ -114,8 +113,12 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                     if (processStepUtilHandler == null) {
                         throw new ProcessStepUtilHandlerNotFoundException(stepVo.getHandler());
                     }
-                    ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(stepVo.getHandler());
-                    JSONObject globalConfig = processStepUtilHandler.makeupConfig(processStepHandlerVo != null ? processStepHandlerVo.getConfig() : null);
+                    String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(stepVo.getHandler());
+                    JSONObject globalConfig = null;
+                    if (StringUtils.isNotBlank(processStepHandlerConfig)) {
+                        globalConfig = JSONObject.parseObject(processStepHandlerConfig);
+                    }
+                    globalConfig = processStepUtilHandler.makeupConfig(globalConfig);
                     actionList = (JSONArray)JSONPath.read(JSON.toJSONString(globalConfig), "actionConfig.actionList");
                 }
             }

@@ -992,10 +992,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             if (processStepUtilHandler == null) {
                 throw new ProcessStepUtilHandlerNotFoundException(handler);
             }
-            ProcessStepHandlerVo processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerByHandler(handler);
-            JSONObject globalConfig = processStepUtilHandler
-                    .makeupConfig(processStepHandlerConfig != null ? processStepHandlerConfig.getConfig() : null);
-            authorityList = (JSONArray) JSONPath.read(JSON.toJSONString(globalConfig), "authorityList");
+            String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
+            JSONObject globalConfig = null;
+            if (StringUtils.isNotBlank(processStepHandlerConfig)) {
+                globalConfig = JSONObject.parseObject(processStepHandlerConfig);
+            }
+            globalConfig = processStepUtilHandler.makeupConfig(globalConfig);
+            authorityList = globalConfig.getJSONArray("authorityList");
         }
 
         if (CollectionUtils.isNotEmpty(authorityList)) {
@@ -1219,12 +1222,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskVo.setIsFocus(1);
         }
         // 获取工单流程图信息
-        ProcessTaskConfigVo processTaskConfig =
-                selectContentByHashMapper.getProcessTaskConfigByHash(processTaskVo.getConfigHash());
-        if (processTaskConfig == null) {
-            throw new ProcessTaskRuntimeException("没有找到工单：'" + processTaskId + "'的流程图配置信息");
-        }
-        processTaskVo.setConfig(processTaskConfig.getConfig());
+        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+        processTaskVo.setConfig(taskConfig);
 
         // 优先级
         PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
