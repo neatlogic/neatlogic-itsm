@@ -121,49 +121,48 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
     }
 
     private JSONObject regulateProcessConfig(JSONObject processConfig) {
-        String uuid = "";
-        String name = "";
         JSONObject processObj = new JSONObject();
-        if (MapUtils.isNotEmpty(processConfig)) {
-            uuid = processConfig.getString("uuid");
-            name = processConfig.getString("name");
-            /** 授权 **/
-            ProcessTaskOperationType[] stepActions = {
-                    ProcessTaskOperationType.TASK_ABORT,
-                    ProcessTaskOperationType.TASK_UPDATE,
-                    ProcessTaskOperationType.TASK_URGE
-            };
-            JSONArray authorityList = null;
-            Integer enableAuthority = processConfig.getInteger("enableAuthority");
-            if (Objects.equals(enableAuthority, 1)) {
-                authorityList = processConfig.getJSONArray("authorityList");
-            } else {
-                enableAuthority = 0;
-            }
-            processObj.put("enableAuthority", enableAuthority);
-            JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
-            processObj.put("authorityList", authorityArray);
-
-            /** 通知 **/
-            JSONObject notifyPolicyConfig = processConfig.getJSONObject("notifyPolicyConfig");
-            NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
-            if (notifyPolicyConfigVo == null) {
-                notifyPolicyConfigVo = new NotifyPolicyConfigVo();
-            }
-            notifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
-            processObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
-
-            /** 动作 **/
-            JSONObject actionConfig = processConfig.getJSONObject("actionConfig");
-            ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
-            if (actionConfigVo == null) {
-                actionConfigVo = new ActionConfigVo();
-            }
-            actionConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
-            processObj.put("actionConfig", actionConfigVo);
+        if (processConfig == null) {
+            processConfig = new JSONObject();
         }
+        String uuid = processConfig.getString("uuid");
+        String name = processConfig.getString("name");
         processObj.put("uuid", uuid);
         processObj.put("name", name);
+        /** 授权 **/
+        ProcessTaskOperationType[] stepActions = {
+                ProcessTaskOperationType.TASK_ABORT,
+                ProcessTaskOperationType.TASK_UPDATE,
+                ProcessTaskOperationType.TASK_URGE
+        };
+        JSONArray authorityList = null;
+        Integer enableAuthority = processConfig.getInteger("enableAuthority");
+        if (Objects.equals(enableAuthority, 1)) {
+            authorityList = processConfig.getJSONArray("authorityList");
+        } else {
+            enableAuthority = 0;
+        }
+        processObj.put("enableAuthority", enableAuthority);
+        JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
+        processObj.put("authorityList", authorityArray);
+
+        /** 通知 **/
+        JSONObject notifyPolicyConfig = processConfig.getJSONObject("notifyPolicyConfig");
+        NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
+        if (notifyPolicyConfigVo == null) {
+            notifyPolicyConfigVo = new NotifyPolicyConfigVo();
+        }
+        notifyPolicyConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
+        processObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
+
+        /** 动作 **/
+        JSONObject actionConfig = processConfig.getJSONObject("actionConfig");
+        ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+        if (actionConfigVo == null) {
+            actionConfigVo = new ActionConfigVo();
+        }
+        actionConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
+        processObj.put("actionConfig", actionConfigVo);
         return processObj;
     }
 
