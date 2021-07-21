@@ -1685,13 +1685,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Override
     public JSONArray getReplaceableTextList(ProcessTaskStepVo processTaskStepVo) {
-        String config = processTaskStepVo.getConfig();
-        if (StringUtils.isBlank(config)) {
-            String configHash = processTaskStepVo.getConfigHash();
-            if (StringUtils.isNotBlank(configHash)) {
-                config = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
-            }
-        }
+        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
         boolean stepLevelTakesEffect = false;
         JSONArray replaceableTextList = (JSONArray) JSONPath.read(config, "replaceableTextList");
         if (CollectionUtils.isNotEmpty(replaceableTextList)) {
@@ -1706,9 +1700,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (!stepLevelTakesEffect) {
             String handler = processTaskStepVo.getHandler();
             if (StringUtils.isNotBlank(handler)) {
-                ProcessStepHandlerVo processStepHandlerVo = processStepHandlerMapper.getProcessStepHandlerByHandler(handler);
-                if (processStepHandlerVo != null) {
-                    JSONObject configObj = processStepHandlerVo.getConfig();
+                String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
+                if (StringUtils.isNotBlank(processStepHandlerConfig)) {
+                    JSONObject configObj = JSONObject.parseObject(processStepHandlerConfig);
                     if (MapUtils.isNotEmpty(configObj)) {
                         replaceableTextList = configObj.getJSONArray("replaceableTextList");
                     }
