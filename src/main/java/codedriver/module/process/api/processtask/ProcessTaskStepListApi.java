@@ -84,7 +84,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW).build()
             .checkAndNoPermissionThrowException();
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
-
+        startProcessTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(startProcessTaskStepVo));
         Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper
             .getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
@@ -234,5 +234,6 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                         processTaskStepVo.getId(), UserContext.get().getUserUuid())) > 0 ? 1 : 0);
             processTaskStepVo.setProcessTaskStepData(stepDataJson);
         }
+        processTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(processTaskStepVo));
     }
 }

@@ -1377,6 +1377,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         }
         startProcessTaskStepVo
                 .setHandlerStepInfo(startProcessStepUtilHandler.getHandlerStepInfo(startProcessTaskStepVo));
+        startProcessTaskStepVo.setReplaceableTextList(getReplaceableTextList(startProcessTaskStepVo));
         return startProcessTaskStepVo;
     }
 
@@ -1680,5 +1681,44 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (CollectionUtils.isNotEmpty(roleUuidList)) {
             conditionMap.put("roleUuidList", roleUuidList);
         }
+    }
+
+    @Override
+    public JSONArray getReplaceableTextList(ProcessTaskStepVo processTaskStepVo) {
+        String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+        boolean stepLevelTakesEffect = false;
+        JSONArray replaceableTextList = (JSONArray) JSONPath.read(config, "replaceableTextList");
+        if (CollectionUtils.isNotEmpty(replaceableTextList)) {
+            for (int i = 0; i < replaceableTextList.size(); i++) {
+                JSONObject replaceableText = replaceableTextList.getJSONObject(i);
+                if (StringUtils.isNotBlank(replaceableText.getString("value"))) {
+                    stepLevelTakesEffect = true;
+                    break;
+                }
+            }
+        }
+        if (!stepLevelTakesEffect) {
+            String handler = processTaskStepVo.getHandler();
+            if (StringUtils.isNotBlank(handler)) {
+                String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(handler);
+                if (StringUtils.isNotBlank(processStepHandlerConfig)) {
+                    JSONObject configObj = JSONObject.parseObject(processStepHandlerConfig);
+                    if (MapUtils.isNotEmpty(configObj)) {
+                        replaceableTextList = configObj.getJSONArray("replaceableTextList");
+                    }
+                }
+            }
+        }
+        if (CollectionUtils.isEmpty(replaceableTextList)) {
+            replaceableTextList = new JSONArray();
+            for (ReplaceableText replaceableText : ReplaceableText.values()) {
+                replaceableTextList.add(new JSONObject() {{
+                    this.put("name", replaceableText.getValue());
+                    this.put("text", replaceableText.getText());
+                    this.put("value", "");
+                }});
+            }
+        }
+        return replaceableTextList;
     }
 }

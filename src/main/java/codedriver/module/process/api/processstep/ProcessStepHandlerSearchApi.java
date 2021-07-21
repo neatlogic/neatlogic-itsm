@@ -3,6 +3,7 @@ package codedriver.module.process.api.processstep;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -74,6 +75,9 @@ public class ProcessStepHandlerSearchApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(handlerList)){
         	String keywork = jsonObj.getString("keywork");
             for (ProcessStepHandlerVo handler : handlerList){
+                if (ProcessStepType.END.getValue().equals(handler.getType())) {
+                    continue;
+                }
         		if(StringUtils.isBlank(keywork) || handler.getName().toLowerCase().contains(keywork.toLowerCase())) {
                     ProcessStepHandlerVo handlerConfig = handlerConfigMap.get(handler.getHandler());
                     IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(handler.getHandler());

@@ -8,8 +8,11 @@ import codedriver.framework.process.audithandler.core.IProcessTaskAuditType;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.util.FreemarkerUtil;
+import codedriver.module.process.service.ProcessTaskService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Objects;
 
 /**
@@ -32,12 +36,17 @@ import java.util.Objects;
 public class ProcessTaskAuditThread extends CodeDriverThread {
     private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
     private static ProcessTaskMapper processTaskMapper;
+    private static ProcessTaskService processTaskService;
 
     @Autowired
     public void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
         processTaskMapper = _processTaskMapper;
     }
 
+    @Resource
+    public void setProcessTaskService(ProcessTaskService _processTaskService) {
+        processTaskService = _processTaskService;
+    }
     private ProcessTaskStepVo currentProcessTaskStepVo;
     private IProcessTaskAuditType action;
 
@@ -74,6 +83,23 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
                     processTaskStepName = processTaskMapper.getProcessTaskStepNameById(currentProcessTaskStepVo.getId());
                 }
                 paramObj.put("processTaskStepName", processTaskStepName);
+                String configHash = currentProcessTaskStepVo.getConfigHash();
+                if (StringUtils.isBlank(configHash)) {
+                    ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+                    if (processTaskStepVo != null) {
+                        currentProcessTaskStepVo = processTaskStepVo;
+                    }
+                }
+                JSONArray replaceableTextList = processTaskService.getReplaceableTextList(currentProcessTaskStepVo);
+                for (int i = 0; i < replaceableTextList.size(); i++) {
+                    JSONObject replaceableText = replaceableTextList.getJSONObject(i);
+                    String name = replaceableText.getString("name");
+                    String value = replaceableText.getString("value");
+                    if (StringUtils.isBlank(value)) {
+                        value = replaceableText.getString("text");
+                    }
+                    paramObj.put(name, value);
+                }
             } else {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
                 if (processTaskVo != null) {

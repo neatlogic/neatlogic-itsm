@@ -164,6 +164,9 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         JSONArray customStatusArray = ProcessConfigUtil.regulateCustomStatusList(customStatusList);
         resultObj.put("customStatusList", customStatusArray);
 
+        /** 可替换文本列表 **/
+        resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
+
         /** 通知 **/
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
         NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
@@ -222,6 +225,9 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         JSONArray customStatusList = configObj.getJSONArray("customStatusList");
         JSONArray customStatusArray = ProcessConfigUtil.regulateCustomStatusList(customStatusList);
         resultObj.put("customStatusList", customStatusArray);
+
+        /** 可替换文本列表 **/
+        resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
 
         /** 自动化配置 **/
         JSONObject automaticObj = new JSONObject();
