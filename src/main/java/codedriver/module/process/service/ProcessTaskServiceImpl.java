@@ -1691,7 +1691,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (CollectionUtils.isNotEmpty(replaceableTextList)) {
             for (int i = 0; i < replaceableTextList.size(); i++) {
                 JSONObject replaceableText = replaceableTextList.getJSONObject(i);
-                if (StringUtils.isNotBlank(replaceableText.getString("customText"))) {
+                if (StringUtils.isNotBlank(replaceableText.getString("value"))) {
                     stepLevelTakesEffect = true;
                     break;
                 }
@@ -1713,9 +1713,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             replaceableTextList = new JSONArray();
             for (ReplaceableText replaceableText : ReplaceableText.values()) {
                 replaceableTextList.add(new JSONObject() {{
-                    this.put("value", replaceableText.getValue());
+                    this.put("name", replaceableText.getValue());
                     this.put("text", replaceableText.getText());
-                    this.put("customText", "");
+                    this.put("value", "");
                 }});
             }
         }

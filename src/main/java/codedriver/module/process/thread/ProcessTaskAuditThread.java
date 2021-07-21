@@ -93,12 +93,12 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
                 JSONArray replaceableTextList = processTaskService.getReplaceableTextList(currentProcessTaskStepVo);
                 for (int i = 0; i < replaceableTextList.size(); i++) {
                     JSONObject replaceableText = replaceableTextList.getJSONObject(i);
+                    String name = replaceableText.getString("name");
                     String value = replaceableText.getString("value");
-                    String customText = replaceableText.getString("customText");
-                    if (StringUtils.isBlank(customText)) {
-                        customText = replaceableText.getString("text");
+                    if (StringUtils.isBlank(value)) {
+                        value = replaceableText.getString("text");
                     }
-                    paramObj.put(value, customText);
+                    paramObj.put(name, value);
                 }
             } else {
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(currentProcessTaskStepVo.getProcessTaskId());
