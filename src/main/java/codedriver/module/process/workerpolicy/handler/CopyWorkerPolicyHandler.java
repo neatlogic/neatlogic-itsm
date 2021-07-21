@@ -38,7 +38,7 @@ public class CopyWorkerPolicyHandler implements IWorkerPolicyHandler {
 	public List<ProcessTaskStepWorkerVo> execute(ProcessTaskStepWorkerPolicyVo workerPolicyVo, ProcessTaskStepVo currentProcessTaskStepVo) {
 		List<ProcessTaskStepWorkerVo> processTaskStepWorkerList = new ArrayList<>();
 		if (MapUtils.isNotEmpty(workerPolicyVo.getConfigObj())) {
-			String processStepUuid = workerPolicyVo.getConfigObj().getString("processStepUuidList");
+			String processStepUuid = workerPolicyVo.getConfigObj().getString("processStepUuid");
 			if(StringUtils.isNotBlank(processStepUuid)) {
 				ProcessTaskStepVo processTaskStep = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskIdAndProcessStepUuid(currentProcessTaskStepVo.getProcessTaskId(), processStepUuid);
 				if(processTaskStep != null) {

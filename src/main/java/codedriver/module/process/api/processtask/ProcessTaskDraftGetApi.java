@@ -282,8 +282,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
         // 获取须指派的步骤列表
         startProcessTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(processUuid, startProcessTaskStepVo.getProcessStepUuid()));
-        startProcessTaskStepVo.setIsRequired((Integer) JSONPath.read(startProcessTaskStepVo.getConfig(), "workerPolicyConfig.isRequired"));
-        startProcessTaskStepVo.setIsNeedContent((Integer) JSONPath.read(startProcessTaskStepVo.getConfig(), "workerPolicyConfig.isNeedContent"));
+        startProcessTaskStepVo.setIsRequired((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isRequired"));
+        startProcessTaskStepVo.setIsNeedContent((Integer) JSONPath.read(startProcessStepVo.getConfig(), "isNeedContent"));
         processTaskVo.setStartProcessTaskStep(startProcessTaskStepVo);
 
         if (fromProcessTaskId != null) {

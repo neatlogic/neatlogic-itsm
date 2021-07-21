@@ -11,7 +11,6 @@ import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
-import codedriver.framework.process.dto.ProcessStepHandlerVo;
 import codedriver.framework.process.dto.ProcessTaskStepNotifyPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -26,6 +25,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,30 +92,26 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
             JSONObject notifyPolicyConfig = null;
             if (notifyTriggerType instanceof TaskNotifyTriggerType) {
                 /** 获取工单配置信息 **/
-                ProcessTaskVo processTaskVo =
-                        processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
-                String config =
-                        selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+                ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
+                String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
                 notifyPolicyConfig = (JSONObject) JSONPath.read(config, "process.processConfig.notifyPolicyConfig");
             } else {
                 /** 获取步骤配置信息 **/
-                ProcessTaskStepVo stepVo =
-                        processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+                ProcessTaskStepVo stepVo =  processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
                 IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(stepVo.getHandler());
                 if (processStepUtilHandler == null) {
                     throw new ProcessStepUtilHandlerNotFoundException(stepVo.getHandler());
                 }
-                String stepConfig =
-                        selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
-                currentProcessTaskStepVo.setConfig(stepConfig);
+                String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
                 notifyPolicyConfig = (JSONObject)JSONPath.read(stepConfig, "notifyPolicyConfig");
                 if (MapUtils.isEmpty(notifyPolicyConfig)) {
-                    ProcessStepHandlerVo processStepHandlerVo =
-                            processStepHandlerMapper.getProcessStepHandlerByHandler(stepVo.getHandler());
-                    JSONObject globalConfig = processStepUtilHandler
-                            .makeupConfig(processStepHandlerVo != null ? processStepHandlerVo.getConfig() : null);
-                    notifyPolicyConfig =
-                            (JSONObject)JSONPath.read(JSON.toJSONString(globalConfig), "notifyPolicyConfig");
+                    String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(stepVo.getHandler());
+                    JSONObject globalConfig = null;
+                    if (StringUtils.isNotBlank(processStepHandlerConfig)) {
+                        globalConfig = JSONObject.parseObject(processStepHandlerConfig);
+                    }
+                    globalConfig = processStepUtilHandler.makeupConfig(globalConfig);
+                    notifyPolicyConfig = globalConfig.getJSONObject("notifyPolicyConfig");
                 }
             }
 

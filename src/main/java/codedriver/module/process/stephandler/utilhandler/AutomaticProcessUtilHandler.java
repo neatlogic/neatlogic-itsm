@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import codedriver.framework.process.dto.processconfig.AutomaticCallbackConfigVo;
-import codedriver.framework.process.dto.processconfig.AutomaticRequestConfigVo;
-import codedriver.framework.process.dto.processconfig.AutomaticTimeWindowConfigVo;
-import codedriver.framework.process.dto.processconfig.NotifyPolicyConfigVo;
+import codedriver.framework.process.dto.processconfig.*;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.module.process.notify.handler.AutomaticNotifyPolicyHandler;
 import com.alibaba.fastjson.JSONPath;
@@ -50,24 +47,29 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
     public void makeupProcessStep(ProcessStepVo processStepVo, JSONObject stepConfigObj) {
         /** 组装通知策略id **/
         JSONObject notifyPolicyConfig = stepConfigObj.getJSONObject("notifyPolicyConfig");
-        if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-            Long policyId = notifyPolicyConfig.getLong("policyId");
+        NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
+        if (notifyPolicyConfigVo != null) {
+            Long policyId = notifyPolicyConfigVo.getPolicyId();
             if (policyId != null) {
                 processStepVo.setNotifyPolicyId(policyId);
             }
         }
 
-
-        JSONArray actionList = (JSONArray) JSONPath.read(stepConfigObj.toJSONString(), "actionConfig.actionList");
-        if (CollectionUtils.isNotEmpty(actionList)) {
-            for (int i = 0; i < actionList.size(); i++) {
-                JSONObject ationObj = actionList.getJSONObject(i);
-                String integrationUuid = ationObj.getString("integrationUuid");
-                if (StringUtils.isNotBlank(integrationUuid)) {
-                    processStepVo.getIntegrationUuidList().add(integrationUuid);
-                }
-            }
-        }
+//        JSONObject actionConfig = stepConfigObj.getJSONObject("actionConfig");
+//        ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
+//        if (actionConfigVo != null) {
+//            List<ActionConfigActionVo> actionList = actionConfigVo.getActionList();
+//            if (CollectionUtils.isNotEmpty(actionList)) {
+//                List<String> integrationUuidList = new ArrayList<>();
+//                for (ActionConfigActionVo actionVo : actionList) {
+//                    String integrationUuid = actionVo.getIntegrationUuid();
+//                    if (StringUtils.isNotBlank(integrationUuid)) {
+//                        integrationUuidList.add(integrationUuid);
+//                    }
+//                }
+//                processStepVo.setIntegrationUuidList(integrationUuidList);
+//            }
+//        }
 
         /** 组装分配策略 **/
         JSONObject workerPolicyConfig = stepConfigObj.getJSONObject("workerPolicyConfig");
@@ -94,23 +96,28 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         /** 收集引用的外部调用uuid **/
         JSONObject automaticConfig = stepConfigObj.getJSONObject("automaticConfig");
         if (MapUtils.isNotEmpty(automaticConfig)) {
+            List<String> integrationUuidList = new ArrayList<>();
             JSONObject requestConfig = automaticConfig.getJSONObject("requestConfig");
-            if (MapUtils.isNotEmpty(requestConfig)) {
-                String integrationUuid = requestConfig.getString("integrationUuid");
+            AutomaticRequestConfigVo requestConfigVo = JSONObject.toJavaObject(requestConfig, AutomaticRequestConfigVo.class);
+            if (requestConfigVo != null) {
+                String integrationUuid = requestConfigVo.getIntegrationUuid();
                 if (StringUtils.isNotBlank(integrationUuid)) {
-                    processStepVo.getIntegrationUuidList().add(integrationUuid);
+                    integrationUuidList.add(integrationUuid);
                 }
             }
+
             JSONObject callbackConfig = automaticConfig.getJSONObject("callbackConfig");
-            if (MapUtils.isNotEmpty(callbackConfig)) {
-                JSONObject config = callbackConfig.getJSONObject("config");
-                if (MapUtils.isNotEmpty(config)) {
-                    String integrationUuid = config.getString("integrationUuid");
+            AutomaticCallbackConfigVo callbackConfigVo = JSONObject.toJavaObject(callbackConfig, AutomaticCallbackConfigVo.class);
+            if (callbackConfigVo != null) {
+                AutomaticIntervalCallbackConfigVo configVo = callbackConfigVo.getConfig();
+                if (configVo != null) {
+                    String integrationUuid = configVo.getIntegrationUuid();
                     if (StringUtils.isNotBlank(integrationUuid)) {
-                        processStepVo.getIntegrationUuidList().add(integrationUuid);
+                        integrationUuidList.add(integrationUuid);
                     }
                 }
             }
+            processStepVo.setIntegrationUuidList(integrationUuidList);
         }
     }
 
