@@ -3,7 +3,6 @@ package codedriver.module.process.api.processstep;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dependency.core.DependencyManager;
-import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
@@ -47,9 +46,6 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
     @Resource
     private NotifyMapper notifyMapper;
 
-    @Resource
-    private IntegrationMapper integrationMapper;
-
     @Override
     public String getToken() {
         return "process/step/handler/config/save";
@@ -81,7 +77,6 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                     stepHandlerVo.setConfig(config.toJSONString());
                     stepHandlerMapper.replaceProcessStepHandlerConfig(stepHandlerVo);
                     DependencyManager.delete(NotifyPolicyProcessStepHandlerDependencyHandler.class, handler);
-//                    DependencyManager.delete(IntegrationProcessStepHandlerDependencyHandler.class, handler);
                     JSONObject notifyPolicyConfig = config.getJSONObject("notifyPolicyConfig");
                     NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
                     if (notifyPolicyConfigVo != null) {
@@ -93,22 +88,6 @@ public class ProcessStepHandleConfigSaveApi extends PrivateApiComponentBase {
                             DependencyManager.insert(NotifyPolicyProcessStepHandlerDependencyHandler.class, policyId, handler);
                         }
                     }
-//                    JSONObject actionConfig = config.getJSONObject("actionConfig");
-//                    ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
-//                    if (actionConfigVo != null) {
-//                        List<ActionConfigActionVo> actionList = actionConfigVo.getActionList();
-//                        if (CollectionUtils.isNotEmpty(actionList)) {
-//                            for (ActionConfigActionVo actionVo : actionList) {
-//                                String integrationUuid = actionVo.getIntegrationUuid();
-//                                if (StringUtils.isNotBlank(integrationUuid)) {
-//                                    if (integrationMapper.checkIntegrationExists(integrationUuid) == 0) {
-//                                        throw new IntegrationNotFoundException(integrationUuid);
-//                                    }
-//                                    DependencyManager.insert(IntegrationProcessStepHandlerDependencyHandler.class, integrationUuid, handler);
-//                                }
-//                            }
-//                        }
-//                    }
     			} 			
     		}
     	}        
