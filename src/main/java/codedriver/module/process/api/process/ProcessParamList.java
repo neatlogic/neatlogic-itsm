@@ -66,6 +66,7 @@ public class ProcessParamList extends PrivateApiComponentBase {
             param.setParamTypeName(processTaskParams.getParamType().getText());
             param.setFreemarkerTemplate(processTaskParams.getFreemarkerTemplate());
             param.setIsEditable(0);
+            param.setType("common");
             resultArray.add(param);
         }
         /** homeUrl参数 **/
@@ -75,6 +76,7 @@ public class ProcessParamList extends PrivateApiComponentBase {
         param.setParamType(ParamType.STRING.getName());
         param.setParamTypeName(ParamType.STRING.getText());
         param.setIsEditable(0);
+        param.setType("common");
         resultArray.add(param);
 
         // 表单条件
@@ -95,6 +97,7 @@ public class ProcessParamList extends PrivateApiComponentBase {
                         conditionParamVo.setParamTypeName(formHandler.getParamType().getText());
                     }
                     conditionParamVo.setIsEditable(0);
+                    conditionParamVo.setType("form");
                     resultArray.add(conditionParamVo);
                 }
             }

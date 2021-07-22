@@ -85,7 +85,6 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
             param.setParamTypeName(processTaskParams.getParamType().getText());
             param.setFreemarkerTemplate(processTaskParams.getFreemarkerTemplate());
             param.setIsEditable(0);
-            param.setType("common");
             notifyPolicyParamList.add(param);
 		}
 		return notifyPolicyParamList;
