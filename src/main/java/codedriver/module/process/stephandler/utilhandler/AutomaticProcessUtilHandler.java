@@ -143,7 +143,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         if (Objects.equals(enableAuthority, 1)) {
             authorityList = configObj.getJSONArray("authorityList");
         } else {
-            enableAuthority = 1;
+            enableAuthority = 0;
         }
         resultObj.put("enableAuthority", enableAuthority);
         JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
