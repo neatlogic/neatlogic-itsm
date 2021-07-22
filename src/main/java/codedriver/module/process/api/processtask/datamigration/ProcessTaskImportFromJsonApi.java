@@ -7,11 +7,12 @@ import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.PriorityMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyHandlerNotFoundException;
+import codedriver.framework.process.exception.processtaskserialnumberpolicy.ProcessTaskSerialNumberPolicyNotFoundException;
+import codedriver.framework.process.processtaskserialnumberpolicy.core.IProcessTaskSerialNumberPolicyHandler;
+import codedriver.framework.process.processtaskserialnumberpolicy.core.ProcessTaskSerialNumberPolicyHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -63,6 +64,9 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
     
     @Autowired
     private FileMapper fileMapper;
+
+    @Autowired
+    private ProcessTaskSerialNumberMapper processTaskSerialNumberMapper;
 
     @Override
     public String getToken() {
@@ -135,10 +139,35 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                         break;
                     case "channelName":
                         ChannelVo channel = channelMapper.getChannelByName(taskValue);
+                        if(channel == null) {
+                            isContinute = true;
+                            String errorTask = processTask.getId()+" 工单的 '"+taskValue+"' 服务不存在";
+                            logger.error(errorTask);
+                            errorTaskList.add(errorTask);
+                            break;
+                        }
                         processTask.setChannelUuid(channel.getUuid());
+                        /* 生成工单号 **/
+                        ProcessTaskSerialNumberPolicyVo processTaskSerialNumberPolicyVo = processTaskSerialNumberMapper.getProcessTaskSerialNumberPolicyLockByChannelTypeUuid(channel.getChannelTypeUuid());
+                        if (processTaskSerialNumberPolicyVo == null) {
+                            throw new ProcessTaskSerialNumberPolicyNotFoundException(channel.getChannelTypeUuid());
+                        }
+                        IProcessTaskSerialNumberPolicyHandler policyHandler = ProcessTaskSerialNumberPolicyHandlerFactory.getHandler(processTaskSerialNumberPolicyVo.getHandler());
+                        if (policyHandler == null) {
+                            throw new ProcessTaskSerialNumberPolicyHandlerNotFoundException(processTaskSerialNumberPolicyVo.getHandler());
+                        }
+                        String serialNumber = policyHandler.genarate(processTaskSerialNumberPolicyVo);
+                        processTask.setSerialNumber(serialNumber);
                         break;
                     case "priorityName":
                         PriorityVo priority = priorityMapper.getPriorityByName(taskValue);
+                        if(priority == null) {
+                            isContinute = true;
+                            String errorTask = processTask.getId()+" 工单的 '"+taskValue+"' 优先级不存在";
+                            logger.error(errorTask);
+                            errorTaskList.add(errorTask);
+                            break;
+                        }
                         processTask.setPriorityUuid(priority.getUuid());
                         break;
                     case "status":
@@ -156,7 +185,7 @@ public class ProcessTaskImportFromJsonApi extends PrivateJsonStreamApiComponentB
                     case "endTime":
                         processTask.setEndTime(TimeUtil.convertStringToDate(taskValue, TimeUtil.YYYY_MM_DD_HH_MM_SS));
                         break;
-                    case "workTimeName":
+                    case "worktimeName":
                         WorktimeVo worktime = worktimeMapper.getWorktimeByName(taskValue);
                         processTask.setWorktimeUuid(worktime.getUuid());
                         break;
