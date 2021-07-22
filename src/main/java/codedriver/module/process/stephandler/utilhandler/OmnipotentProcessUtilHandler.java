@@ -218,7 +218,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         if (Objects.equals(enableAuthority, 1)) {
             authorityList = configObj.getJSONArray("authorityList");
         } else {
-            enableAuthority = 1;
+            enableAuthority = 0;
         }
         resultObj.put("enableAuthority", enableAuthority);
         JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
@@ -266,15 +266,6 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         }
         notifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
         resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
-
-        /** 动作 **/
-        JSONObject actionConfig = configObj.getJSONObject("actionConfig");
-        ActionConfigVo actionConfigVo = JSONObject.toJavaObject(actionConfig, ActionConfigVo.class);
-        if (actionConfigVo == null) {
-            actionConfigVo = new ActionConfigVo();
-        }
-        actionConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
-        resultObj.put("actionConfig", actionConfigVo);
         return resultObj;
     }
 

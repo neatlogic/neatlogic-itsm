@@ -108,19 +108,6 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                 ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
                 actionList = (JSONArray)JSONPath.read(stepConfig, "actionConfig.actionList");
-                if (CollectionUtils.isEmpty(actionList)) {
-                    IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(stepVo.getHandler());
-                    if (processStepUtilHandler == null) {
-                        throw new ProcessStepUtilHandlerNotFoundException(stepVo.getHandler());
-                    }
-                    String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(stepVo.getHandler());
-                    JSONObject globalConfig = null;
-                    if (StringUtils.isNotBlank(processStepHandlerConfig)) {
-                        globalConfig = JSONObject.parseObject(processStepHandlerConfig);
-                    }
-                    globalConfig = processStepUtilHandler.makeupConfig(globalConfig);
-                    actionList = (JSONArray)JSONPath.read(JSON.toJSONString(globalConfig), "actionConfig.actionList");
-                }
             }
 
             /** 从步骤配置信息中获取动作列表 **/
