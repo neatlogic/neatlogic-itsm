@@ -56,10 +56,6 @@ public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase i
         config.put("multiple", true);
         config.put("value", "");
         config.put("defaultValue", "");
-//		config.put("name", "ownercompany");
-//		config.put("label", "");
-//		config.put("validateList", Arrays.asList("required"));
-//		config.put("dataList", "");
         /** 以下代码是为了兼容旧数据结构，前端有些地方还在用 **/
         config.put("isMultiple", true);
         JSONObject mappingObj = new JSONObject();
