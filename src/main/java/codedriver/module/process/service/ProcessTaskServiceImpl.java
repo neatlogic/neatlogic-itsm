@@ -1276,7 +1276,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
             }
         }
-        /** 上报人公司列表 **/
+        /** 上报人公司、部门列表 **/
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTaskVo.getOwner());
         List<TeamVo> teamList = null;
         if (CollectionUtils.isNotEmpty(teamUuidList)) {
@@ -1290,6 +1290,16 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                         if (!idSet.contains(team.getId())) {
                             idSet.add(team.getId());
                             processTaskVo.getOwnerCompanyList().add(team);
+                        }
+                    }
+                }
+                List<TeamVo> departmentList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(),
+                        TeamLevel.DEPARTMENT.getValue());
+                if (CollectionUtils.isNotEmpty(departmentList)) {
+                    for (TeamVo team : departmentList) {
+                        if (!idSet.contains(team.getId())) {
+                            idSet.add(team.getId());
+                            processTaskVo.getOwnerDepartmentList().add(team);
                         }
                     }
                 }
