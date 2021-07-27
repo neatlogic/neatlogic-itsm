@@ -138,19 +138,21 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                             notifyPolicyHandler = notifyPolicyVo.getHandler();
                         }
                     }
-                    ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
-                    processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
-                    processTaskVo.setCurrentProcessTaskStep(processTaskService.getCurrentProcessTaskStepDetail(currentProcessTaskStepVo));
-                    JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
-                    JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
-                    Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
-                    processTaskService.getReceiverMap(currentProcessTaskStepVo, receiverMap);
-                    /** 参数映射列表 **/
-                    List<ParamMappingVo> paramMappingList =
-                            JSON.parseArray(JSON.toJSONString(notifyPolicyConfig.getJSONArray("paramMappingList")),
-                                    ParamMappingVo.class);
-                    NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData,
-                            conditionParamData, receiverMap);
+                    if (policyConfig != null && notifyPolicyHandler != null) {
+                        ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
+                        processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
+                        processTaskVo.setCurrentProcessTaskStep(processTaskService.getCurrentProcessTaskStepDetail(currentProcessTaskStepVo));
+                        JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
+                        JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
+                        Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
+                        processTaskService.getReceiverMap(currentProcessTaskStepVo, receiverMap);
+                        /** 参数映射列表 **/
+                        List<ParamMappingVo> paramMappingList =
+                                JSON.parseArray(JSON.toJSONString(notifyPolicyConfig.getJSONArray("paramMappingList")),
+                                        ParamMappingVo.class);
+                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData,
+                                conditionParamData, receiverMap);
+                    }
                 }
             }
         } catch (Exception ex) {
