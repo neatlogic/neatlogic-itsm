@@ -23,24 +23,29 @@ import codedriver.framework.process.workcenter.table.ProcessTaskStepUserSqlTable
 import codedriver.framework.process.workcenter.table.ProcessTaskStepWorkerSqlTable;
 import codedriver.framework.process.workcenter.table.UserTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
+import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
-	@Autowired
+	@Resource
 	UserMapper userMapper;
-	@Autowired
+	@Resource
 	RoleMapper roleMapper;
-	@Autowired
+	@Resource
 	TeamMapper teamMapper;
+	@Resource
+    ProcessTaskService processTaskService;
 	@Override
 	public String getName() {
 		return "currentstepworker";
@@ -218,6 +223,16 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                             workerJson.put("workTypename", "变更步骤");
                         } else if (ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
                             workerJson.put("workTypename", "子任务");
+                            //子任务文案映射
+                            JSONArray replaceTextArray = processTaskService.getReplaceableTextList(stepVo);
+                            for(int i=0;i<replaceTextArray.size();i++){
+                                JSONObject replaceText = replaceTextArray.getJSONObject(i);
+                                if(Objects.equals(replaceText.getString("text"),"子任务") && StringUtils.isNotBlank(replaceText.getString("value"))){
+                                    workerJson.put("workTypename", replaceText.getString("value"));
+                                    break;
+                                }
+                            }
+
                         }
                         if (GroupSearch.USER.getValue().equals(workerVo.getType())) {
                             UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
@@ -260,6 +275,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
                 add(new TableSelectColumnVo(new ProcessTaskStepSqlTable(), Arrays.asList(
                         new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.ID.getValue(),"processTaskStepId"),
                         new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.PROCESSTASK_ID.getValue(),"processTaskId"),
+                        new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.CONFIG_HASH.getValue(),"processTaskConfigHash"),
                         new SelectColumnVo(ProcessTaskStepSqlTable.FieldEnum.HANDLER.getValue(),"processTaskStepHandler")
                 )));
                 add(new TableSelectColumnVo(new ProcessTaskStepWorkerSqlTable(), Arrays.asList(
