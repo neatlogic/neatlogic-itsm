@@ -5,6 +5,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
@@ -89,6 +90,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(processTaskStepList)) {
                 for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
                     processTaskService.setProcessTaskStepUser(processTaskStepVo);
+                    processTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(processTaskStepVo));
                     processTaskStepVo.setAssignableWorkerStepList(null);
                     processTaskStepVo.setBackwardNextStepList(null);
                     processTaskStepVo.setCommentList(null);
@@ -156,7 +158,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             resultObj.put("processTaskStepRelList", new ArrayList<>());
             return resultObj;
         } else {
-            throw new ProcessTaskRuntimeException("参数'processTaskId'和'channelUuid'，至少要传一个");
+            throw new ParamNotExistsException("processTaskId", "channelUuid");
         }
     }
 
