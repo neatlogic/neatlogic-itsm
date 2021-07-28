@@ -5,6 +5,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
@@ -110,7 +111,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
             return getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId);
         } else {
-            throw new ProcessTaskRuntimeException("参数'processTaskId'、'copyProcessTaskId'和'channelUuid'，至少要传一个");
+            throw new ParamNotExistsException("processTaskId", "copyProcessTaskId", "channelUuid");
         }
     }
 
@@ -266,7 +267,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
         processTaskVo.setChannelUuid(channelUuid);
         processTaskVo.setProcessUuid(processUuid);
-        processTaskVo.setConfig(processVo.getConfigStr());
+//        processTaskVo.setConfig(processVo.getConfigStr());
         String worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(channelUuid);
         processTaskVo.setWorktimeUuid(worktimeUuid);
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
