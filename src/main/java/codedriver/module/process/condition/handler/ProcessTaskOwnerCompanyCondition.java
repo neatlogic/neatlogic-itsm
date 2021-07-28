@@ -49,8 +49,8 @@ public class ProcessTaskOwnerCompanyCondition extends ProcessTaskConditionBase i
         JSONObject config = new JSONObject();
         config.put("type", FormHandlerType.SELECT.toString());
         config.put("search", true);
-        config.put("url", "/api/rest/team/search?currentPage=1&pageSize=20&level=company");
-        config.put("rootName", "teamList");
+        config.put("dynamicUrl", "/api/rest/team/list/forselect?level=company");
+        config.put("rootName", "tbodyList");
         config.put("valueName", "uuid");
         config.put("textName", "name");
         config.put("multiple", true);

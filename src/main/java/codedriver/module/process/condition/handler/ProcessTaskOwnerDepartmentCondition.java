@@ -54,8 +54,8 @@ public class ProcessTaskOwnerDepartmentCondition extends ProcessTaskConditionBas
         JSONObject config = new JSONObject();
         config.put("type", FormHandlerType.SELECT.toString());
         config.put("search", true);
-        config.put("url", "/api/rest/team/search?currentPage=1&pageSize=100&level=department");
-        config.put("rootName", "teamList");
+        config.put("dynamicUrl", "/api/rest/team/list/forselect?level=department");
+        config.put("rootName", "tbodyList");
         config.put("valueName", "uuid");
         config.put("textName", "name");
         config.put("multiple", true);
