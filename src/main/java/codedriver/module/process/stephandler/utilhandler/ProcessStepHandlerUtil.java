@@ -4,6 +4,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.RootComponent;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -338,7 +339,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         if (CollectionUtils.isNotEmpty(fileIdList)) {
             for (Long fileId : fileIdList) {
                 if (fileMapper.getFileById(fileId) == null) {
-                    throw new ProcessTaskRuntimeException("上传附件uuid:'" + fileId + "'不存在");
+                    throw new FileNotFoundException(fileId);
                 }
             }
             paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(fileIdList));

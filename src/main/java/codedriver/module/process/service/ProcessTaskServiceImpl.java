@@ -19,6 +19,7 @@ import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.WorkAssignmentUnitVo;
+import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -929,7 +930,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 processTaskStepFileVo.setContentId(oldContentId);
                 for (Long fileId : fileIdList) {
                     if (fileMapper.getFileById(fileId) == null) {
-                        throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
+                        throw new FileNotFoundException(fileId);
                     }
                     processTaskStepFileVo.setFileId(fileId);
                     processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
@@ -948,7 +949,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskStepFileVo.setContentId(oldContentId);
             for (Long fileId : fileIdList) {
                 if (fileMapper.getFileById(fileId) == null) {
-                    throw new ProcessTaskRuntimeException("上传附件id:'" + fileId + "'不存在");
+                    throw new FileNotFoundException(fileId);
                 }
                 processTaskStepFileVo.setFileId(fileId);
                 processTaskMapper.insertProcessTaskStepFile(processTaskStepFileVo);
@@ -1222,8 +1223,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskVo.setIsFocus(1);
         }
         // 获取工单流程图信息
-        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-        processTaskVo.setConfig(taskConfig);
+//        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+//        processTaskVo.setConfig(taskConfig);
 
         // 优先级
         PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
