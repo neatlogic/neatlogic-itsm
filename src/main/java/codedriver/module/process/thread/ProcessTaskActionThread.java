@@ -59,14 +59,17 @@ public class ProcessTaskActionThread extends CodeDriverThread {
     private static ProcessStepHandlerMapper processStepHandlerMapper;
     private static IntegrationMapper integrationMapper;
     private static ProcessTaskService processTaskService;
+
     @Autowired
     public void setProcessTaskService(ProcessTaskService _processTaskService) {
         processTaskService = _processTaskService;
     }
+
     @Autowired
     public void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
         processTaskMapper = _processTaskMapper;
     }
+
     @Autowired
     public void setSelectContentByHashMapper(SelectContentByHashMapper _selectContentByHashMapper) {
         selectContentByHashMapper = _selectContentByHashMapper;
@@ -85,7 +88,9 @@ public class ProcessTaskActionThread extends CodeDriverThread {
     private ProcessTaskStepVo currentProcessTaskStepVo;
     private INotifyTriggerType triggerType;
 
-    public ProcessTaskActionThread(){}
+    public ProcessTaskActionThread() {
+    }
+
     public ProcessTaskActionThread(ProcessTaskStepVo _currentProcessTaskStepVo, INotifyTriggerType _trigger) {
         currentProcessTaskStepVo = _currentProcessTaskStepVo;
         triggerType = _trigger;
@@ -107,7 +112,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                 /** 获取步骤配置信息 **/
                 ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
-                actionList = (JSONArray)JSONPath.read(stepConfig, "actionConfig.actionList");
+                actionList = (JSONArray) JSONPath.read(stepConfig, "actionConfig.actionList");
             }
 
             /** 从步骤配置信息中获取动作列表 **/
@@ -150,13 +155,14 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                                 }
                             }
                         }
+                        integrationVo.getParamObj().put("triggerType", triggerType.getTrigger());
                         boolean isSucceed = false;
                         IntegrationResultVo integrationResultVo =
                                 iIntegrationHandler.sendRequest(integrationVo, ProcessRequestFrom.PROCESS);
                         if (StringUtils.isNotBlank(integrationResultVo.getError())) {
                             logger.error(integrationResultVo.getError());
 //                                throw new IntegrationSendRequestException(integrationVo.getUuid());
-                        }else {
+                        } else {
                             JSONObject successConditionObj = actionObj.getJSONObject("successCondition");
                             if (MapUtils.isNotEmpty(successConditionObj)) {
                                 String name = successConditionObj.getString("name");
