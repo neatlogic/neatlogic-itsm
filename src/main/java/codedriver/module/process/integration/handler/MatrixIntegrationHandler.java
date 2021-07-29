@@ -1,13 +1,20 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.integration.handler;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.integration.core.IntegrationHandlerBase;
 import codedriver.framework.integration.dto.IntegrationResultVo;
-import codedriver.framework.matrix.exception.*;
+import codedriver.framework.integration.dto.IntegrationVo;
+import codedriver.framework.integration.dto.PatternVo;
+import codedriver.framework.matrix.exception.MatrixExternalDataIsNotJsonException;
+import codedriver.framework.matrix.exception.MatrixExternalDataLostKeyOrTitleInTheadListException;
+import codedriver.framework.matrix.exception.MatrixExternalDataNotFormattedException;
+import codedriver.framework.matrix.exception.MatrixExternalNoReturnException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -16,10 +23,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.integration.core.IntegrationHandlerBase;
-import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.integration.dto.PatternVo;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 @Component
 public class MatrixIntegrationHandler extends IntegrationHandlerBase {
 
@@ -79,24 +86,24 @@ public class MatrixIntegrationHandler extends IntegrationHandlerBase {
 	@Override
 	public void validate(IntegrationResultVo resultVo) throws ApiRuntimeException {
 		if(StringUtils.isBlank(resultVo.getError())){
-			if(StringUtils.isNotBlank(resultVo.getTransformedResult())){
-				JSONObject transformedResult = null;
+			if(StringUtils.isNotBlank(resultVo.getTransformedResult())) {
+				JSONObject transformedResult;
 				try {
 					transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-				}catch (Exception ex){
+				} catch (Exception ex) {
 					throw new MatrixExternalDataIsNotJsonException();
 				}
-				if(MapUtils.isNotEmpty(transformedResult)){
+				if (MapUtils.isNotEmpty(transformedResult)) {
 					Set<String> keys = transformedResult.keySet();
 					Set<String> keySet = new HashSet<>();
-					getOutputPattern().stream().forEach(o -> keySet.add(o.getName()));
-					if(!CollectionUtils.containsAll(keys,keySet)){
+					getOutputPattern().forEach(o -> keySet.add(o.getName()));
+					if (!CollectionUtils.containsAll(keys, keySet)) {
 						throw new MatrixExternalDataNotFormattedException(JSON.toJSONString(CollectionUtils.removeAll(keySet, keys)));
 					}
 					JSONArray theadList = transformedResult.getJSONArray("theadList");
-					if(CollectionUtils.isNotEmpty(theadList)){
-						for(int i = 0; i < theadList.size();i++){
-							if(!theadList.getJSONObject(i).containsKey("key") || !theadList.getJSONObject(i).containsKey("title")){
+					if (CollectionUtils.isNotEmpty(theadList)) {
+						for (int i = 0; i < theadList.size(); i++) {
+							if (!theadList.getJSONObject(i).containsKey("key") || !theadList.getJSONObject(i).containsKey("title")) {
 								throw new MatrixExternalDataLostKeyOrTitleInTheadListException();
 							}
 						}

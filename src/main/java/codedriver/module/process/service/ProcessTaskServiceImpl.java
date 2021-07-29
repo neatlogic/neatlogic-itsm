@@ -552,15 +552,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 if (type.equals("common") || type.equals("form")) {
                     integrationParam.put(name, processTaskJson.get(value));
                 } else if (type.equals("integration")) {
-                    integrationParam.put(name, resultJson.get(value));
+                    integrationParam.put(name, resultJson.get(value.replaceAll("integration#",StringUtils.EMPTY)));
                 } else {// 常量
-                    //TODO linbq 设置参数映射值为外部调用返回结果时，type的值为constant（有bug），应该是integration才对,msjy poc时临时修改逻辑应付
-                    Object paramValue = resultJson.get(value);
-                    if (paramValue != null) {
-                        integrationParam.put(name, paramValue);
-                    }else {
-                        integrationParam.put(name, value);
-                    }
+                    integrationParam.put(name, value);
                 }
             }
         }
@@ -1223,8 +1217,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskVo.setIsFocus(1);
         }
         // 获取工单流程图信息
-//        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-//        processTaskVo.setConfig(taskConfig);
+        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+        processTaskVo.setConfig(taskConfig);
 
         // 优先级
         PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
