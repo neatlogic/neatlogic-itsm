@@ -1,6 +1,7 @@
 package codedriver.module.process.api.channeltype.relation;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessUserType;
@@ -50,8 +51,12 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
 
     @Autowired
     private TeamMapper teamMapper;
+
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private RoleMapper roleMapper;
 
     @Override
     public String getToken() {
@@ -106,7 +111,7 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
             String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
             if(StringUtils.isNotBlank(agentUuid)){
                 List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
-                List<String> agentRoleUuidList = userMapper.getRoleUuidListByUserUuid(agentUuid);
+                List<String> agentRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
                 channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, agentUuid, agentTeamUuidList, agentRoleUuidList));
             }
             channelTypeRelationVo.setIdList(new ArrayList<>(channelTypeRelationIdSet));

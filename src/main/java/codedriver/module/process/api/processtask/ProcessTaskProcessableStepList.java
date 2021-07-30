@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +45,9 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
     
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private RoleMapper roleMapper;
 
 	@Override
 	public String getToken() {
@@ -127,7 +131,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 	private List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId, String userUuid) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-        List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+        List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
         for (ProcessTaskStepVo stepVo : processTaskStepList) {
             /** 找到所有已激活未处理的步骤 **/

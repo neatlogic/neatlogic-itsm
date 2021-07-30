@@ -6,9 +6,10 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
@@ -27,11 +28,8 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.common.config.ProcessConfig;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,13 +55,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     private ProcessTaskStepDataMapper processTaskStepDataMapper;
 
     @Autowired
-    private FileMapper fileMapper;
-
-    @Autowired
     private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
-
-    @Autowired
-    private SelectContentByHashMapper selectContentByHashMapper;
 
     @Autowired
     private ScoreTemplateMapper scoreTemplateMapper;
@@ -72,7 +64,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     private UserMapper userMapper;
 
     @Autowired
-    private PriorityMapper priorityMapper;
+    private TeamMapper teamMapper;
+
+    @Autowired
+    private RoleMapper roleMapper;
 
     @Autowired
     private ProcessCommentTemplateMapper commentTemplateMapper;
@@ -316,8 +311,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             /** 如果当前用户有处理权限，则获取其有权看到的配置的回复模版 */
             if (hasComplete) {
                 List<String> authList = new ArrayList<>();
-                List<String> teamUuidList = userMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid());
-                List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
+                List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid());
+                List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
                 authList.addAll(teamUuidList);
                 authList.addAll(roleUuidList);
                 authList.add(UserType.ALL.getValue());

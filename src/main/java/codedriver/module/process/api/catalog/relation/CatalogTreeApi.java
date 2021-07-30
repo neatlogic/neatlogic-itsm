@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
@@ -52,6 +53,9 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private UserMapper userMapper;
+
+	@Autowired
+	private RoleMapper roleMapper;
 
 	@Override
 	public String getToken() {
@@ -100,7 +104,7 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 			String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
 			if(StringUtils.isNotBlank(agentUuid)){
 				List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
-				List<String> agentRoleUuidList = userMapper.getRoleUuidListByUserUuid(agentUuid);
+				List<String> agentRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
 				for(String authorizedCatalogUuid : catalogMapper.getAuthorizedCatalogUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
 					if(currentUserAuthorizedCatalogUuidList.contains(authorizedCatalogUuid)){
 						continue;
@@ -113,7 +117,7 @@ public class CatalogTreeApi extends PrivateApiComponentBase {
 	            List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
 				if(StringUtils.isNotBlank(agentUuid)){
 					List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
-					List<String> agentRoleUuidList = userMapper.getRoleUuidListByUserUuid(agentUuid);
+					List<String> agentRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
 					for(String authorizedChannelUuid : channelMapper.getAuthorizedChannelUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
 						if(currentUserAuthorizedChannelUuidList.contains(authorizedChannelUuid)){
 							continue;

@@ -203,7 +203,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
                         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-                        List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+                        List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
                         List<String> processUserTypeList = new ArrayList<>();
                         if (userUuid.equals(processTaskVo.getOwner())) {
                             processUserTypeList.add(ProcessUserType.OWNER.getValue());
