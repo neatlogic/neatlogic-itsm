@@ -2,6 +2,7 @@ package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
@@ -37,7 +38,7 @@ public class CatalogServiceImpl implements CatalogService {
 	private TeamMapper teamMapper;
 	
 	@Autowired
-	private UserMapper userMapper;
+	private RoleMapper roleMapper;
 
 	@Autowired
 	private ProcessTaskMapper processTaskMapper;
@@ -126,7 +127,7 @@ public class CatalogServiceImpl implements CatalogService {
 		/** 服务状态必须是激活**/
 		if(Objects.equals(channel.getIsActive(), 1)) {
 			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-			List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+			List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
 			/** 查出当前用户所有已授权的服务uuid集合  **/
 			List<String> channelUuidList = channelMapper.getAuthorizedChannelUuidList(userUuid, teamUuidList, roleUuidList, channelUuid);
 			/** 服务已授权 **/

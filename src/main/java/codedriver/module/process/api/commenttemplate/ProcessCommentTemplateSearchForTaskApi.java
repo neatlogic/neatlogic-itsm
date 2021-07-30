@@ -7,6 +7,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.auth.PROCESS_BASE;
@@ -38,7 +39,7 @@ public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentB
     private ProcessCommentTemplateMapper commentTemplateMapper;
 
     @Autowired
-    private UserMapper userMapper;
+    private RoleMapper roleMapper;
 
     @Autowired
     private TeamMapper teamMapper;
@@ -72,7 +73,7 @@ public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentB
         ProcessCommentTemplateVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessCommentTemplateVo>() {});
         /** 根据当前用户所在组、角色筛选其能看到的模版 */
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid());
-        List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
+        List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
         List<String> uuidList = new ArrayList<>();
         uuidList.addAll(teamUuidList);
         uuidList.addAll(roleUuidList);

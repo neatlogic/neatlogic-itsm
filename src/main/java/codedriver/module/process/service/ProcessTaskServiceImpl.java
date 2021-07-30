@@ -1033,7 +1033,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 JSONArray acceptList = authorityObj.getJSONArray("acceptList");
                 if (CollectionUtils.isNotEmpty(acceptList)) {
                     List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-                    List<String> roleUuidList = userMapper.getRoleUuidListByUserUuid(userUuid);
+                    List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
                     ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
                     processTaskStepUserVo.setProcessTaskId(processTaskId);
                     processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);

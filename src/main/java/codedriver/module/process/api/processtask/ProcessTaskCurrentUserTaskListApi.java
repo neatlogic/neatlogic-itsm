@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
@@ -52,6 +53,9 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private RoleMapper roleMapper;
 
     @Autowired
     private WorktimeMapper worktimeMapper;
@@ -105,7 +109,7 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
         if (StringUtils.isNotBlank(userUuid)) {
             userUuidList.add(userUuid);
             teamUuidList.addAll(teamMapper.getTeamUuidListByUserUuid(userUuid));
-            roleUuidList.addAll(userMapper.getRoleUuidListByUserUuid(userUuid));
+            roleUuidList.addAll(roleMapper.getRoleUuidListByUserUuid(userUuid));
         }
         searchVo.setProcessTaskId(currentProcessTaskId);
         searchVo.setUserUuidList(userUuidList);
