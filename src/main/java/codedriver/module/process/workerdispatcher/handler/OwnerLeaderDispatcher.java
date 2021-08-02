@@ -23,48 +23,48 @@ import java.util.stream.Collectors;
 @Service
 public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 
-	@Resource
-	private ProcessTaskMapper processTaskMapper;
-	
-	@Resource
-	private TeamMapper teamMapper;
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
-	@Override
-	public String getName() {
-		return "上报人领导分派器";
-	}
+    @Resource
+    private TeamMapper teamMapper;
 
-	@Override
-	public JSONArray getConfig() {
-		JSONArray resultArray = new JSONArray();
-		/** 选择头衔 **/
-		JSONObject jsonObj = new JSONObject();
-		jsonObj.put("type", "select");
-		jsonObj.put("name", "teamUserTitle");
-		jsonObj.put("search", true);
-		jsonObj.put("dynamicUrl", "api/rest/user/title/search");
-		jsonObj.put("label", "头衔");
-		jsonObj.put("validateList", Collections.singletonList("required"));
-		jsonObj.put("multiple", false);
-		jsonObj.put("textName", "name");
-		jsonObj.put("valueName", "id");
-		jsonObj.put("rootName", "tbody");
-		jsonObj.put("value", "");
-		jsonObj.put("defaultValue", "");
-		resultArray.add(jsonObj);
-		return resultArray;
-	}
+    @Override
+    public String getName() {
+        return "上报人领导分派器";
+    }
 
-	@Override
-	public String getHelp() {
-		return "在上报人所在的组及父级组中，找出与选择头衔相同的用户作为当前步骤的处理人";
-	}
+    @Override
+    public JSONArray getConfig() {
+        JSONArray resultArray = new JSONArray();
+        /** 选择头衔 **/
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("type", "select");
+        jsonObj.put("name", "teamUserTitle");
+        jsonObj.put("search", true);
+        jsonObj.put("dynamicUrl", "api/rest/user/title/search");
+        jsonObj.put("label", "头衔");
+        jsonObj.put("validateList", Collections.singletonList("required"));
+        jsonObj.put("multiple", false);
+        jsonObj.put("textName", "name");
+        jsonObj.put("valueName", "name");
+        jsonObj.put("rootName", "tbodyList");
+        jsonObj.put("value", "");
+        jsonObj.put("defaultValue", "");
+        resultArray.add(jsonObj);
+        return resultArray;
+    }
 
-	@Override
-	protected List<String> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
-		List<String> resultList = new ArrayList<>();
-		String teamUserTitle = configObj.getString("teamUserTitle");
-		if(StringUtils.isNotBlank(teamUserTitle)) {
+    @Override
+    public String getHelp() {
+        return "在上报人所在的组及父级组中，找出与选择头衔相同的用户作为当前步骤的处理人";
+    }
+
+    @Override
+    protected List<String> myGetWorker(ProcessTaskStepVo processTaskStepVo, JSONObject configObj) {
+        List<String> resultList = new ArrayList<>();
+        String teamUserTitle = configObj.getString("teamUserTitle");
+        if (StringUtils.isNotBlank(teamUserTitle)) {
 //			TeamLevel teamLevel = null;
 //			if(TeamUserTitle.GROUPLEADER.getValue().equals(teamUserTitle)) {
 //				teamLevel = TeamLevel.GROUP;
@@ -79,26 +79,28 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 //			}else {
 //				return resultList;
 //			}
-			ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
-			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTask.getOwner());
-			if(CollectionUtils.isNotEmpty(teamUuidList)) {
-				List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
-				if(CollectionUtils.isNotEmpty(teamList)) {
-					for(TeamVo teamVo : teamList) {
-						List<TeamUserTitleVo> teamUserTileList = teamMapper.getTeamUserTitleListByTeamUuid(teamVo.getUuid());
-						//List<String> userUuidList = teamMapper.getTeamUserUuidListByLftRhtTitle(teamVo.getLft(), teamVo.getRht(), teamUserTitle);
-						if(CollectionUtils.isNotEmpty(teamUserTileList)) {
-							teamUserTileList = teamUserTileList.stream().filter(o-> Objects.equals(o.getTitle(),teamUserTitle)).collect(Collectors.toList());
-							if(CollectionUtils.isNotEmpty(teamUserTileList)) {
-								resultList.addAll(teamUserTileList.get(0).getUserList());
-							}
-						}
-					}
-				}
-			}
-		}
-	
-		return resultList;
-	}
+
+            ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTask.getOwner());
+            if (CollectionUtils.isNotEmpty(teamUuidList)) {
+                List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+                if (CollectionUtils.isNotEmpty(teamList)) {
+                    for (TeamVo teamVo : teamList) {
+                        List<TeamUserTitleVo> teamUserTileList = teamMapper.getTeamUserTitleListByTeamUuid(teamVo.getUuid());
+                        //List<String> userUuidList = teamMapper.getTeamUserUuidListByLftRhtTitle(teamVo.getLft(), teamVo.getRht(), teamUserTitle);
+                        if (CollectionUtils.isNotEmpty(teamUserTileList)) {
+                            teamUserTileList = teamUserTileList.stream().filter(o -> Objects.equals(o.getTitle(), teamUserTitle)).collect(Collectors.toList());
+                            if (CollectionUtils.isNotEmpty(teamUserTileList)) {
+                                resultList.addAll(teamUserTileList.get(0).getUserList());
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        return resultList;
+    }
 
 }

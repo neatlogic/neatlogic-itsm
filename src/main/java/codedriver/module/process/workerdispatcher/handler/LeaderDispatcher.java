@@ -104,8 +104,8 @@ public class LeaderDispatcher extends WorkerDispatcherBase {
             jsonObj.put("multiple", false);
             jsonObj.put("value", "");
             jsonObj.put("textName", "name");
-            jsonObj.put("valueName", "id");
-            jsonObj.put("rootName", "tbody");
+            jsonObj.put("valueName", "name");
+            jsonObj.put("rootName", "tbodyList");
             jsonObj.put("defaultValue", "");
             resultArray.add(jsonObj);
         }
