@@ -1,16 +1,5 @@
 package codedriver.module.process.schedule.plugin;
 
-import java.util.Date;
-import java.util.List;
-
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.SystemUser;
@@ -27,6 +16,16 @@ import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.process.service.ProcessTaskService;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.MapUtils;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.List;
 
 @Component
 @DisallowConcurrentExecution
@@ -66,8 +65,8 @@ public class ProcessTaskAutomaticJob extends JobBase {
 		Date startTime = new Date(System.currentTimeMillis());
 		/** 计算开始时间 **/
 		JSONObject timeWindowConfig = automaticConfigVo.getTimeWindowConfig();
-		if(timeWindowConfig != null) {
-			Integer isTimeToRun = TimeUtil.isInTimeWindow(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
+		if(MapUtils.isNotEmpty(timeWindowConfig)) {
+			int isTimeToRun = TimeUtil.isInTimeWindow(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
 			startTime = TimeUtil.getDateByHourMinute(timeWindowConfig.getString("startTime"),isTimeToRun>0?1:0);
 		}
 		String groupName = automaticConfigVo.getIsRequest()?"-REQUEST":"-CALLBACK";
