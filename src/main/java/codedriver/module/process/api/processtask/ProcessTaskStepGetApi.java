@@ -35,10 +35,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -312,9 +309,13 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if (hasComplete) {
                 List<String> authList = new ArrayList<>();
                 List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid());
-                List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
+                List<String> userRoleUuidList = roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
+                List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+                Set<String> roleUuidSet = new HashSet<>();
+                roleUuidSet.addAll(userRoleUuidList);
+                roleUuidSet.addAll(teamRoleUuidList);
                 authList.addAll(teamUuidList);
-                authList.addAll(roleUuidList);
+                authList.addAll(roleUuidSet);
                 authList.add(UserType.ALL.getValue());
                 authList.add(UserContext.get().getUserUuid());
                 ProcessCommentTemplateVo commentTemplate = commentTemplateMapper

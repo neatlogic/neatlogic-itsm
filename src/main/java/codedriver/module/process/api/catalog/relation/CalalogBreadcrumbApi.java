@@ -1,10 +1,6 @@
 package codedriver.module.process.api.catalog.relation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -120,12 +116,23 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
             return resultObj;
         }
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+		Set<String> roleUuidSet = new HashSet<>();
+		roleUuidSet.addAll(userRoleUuidList);
+		roleUuidSet.addAll(teamRoleUuidList);
+		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
 		//已授权的服务uuid
-		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
 		String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
 		if(StringUtils.isNotBlank(agentUuid)){
 			List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
-			List<String> agentRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
+			List<String> agentUserRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
+			List<String> agentTeamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(agentTeamUuidList);
+			Set<String> agentRoleUuidSet = new HashSet<>();
+			agentRoleUuidSet.addAll(agentUserRoleUuidList);
+			agentRoleUuidSet.addAll(agentTeamRoleUuidList);
+			List<String> agentRoleUuidList = new ArrayList<>(roleUuidSet);
 			for(String authorizedChannelUuid : channelMapper.getAuthorizedChannelUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
 				if(currentUserAuthorizedChannelUuidList.contains(authorizedChannelUuid)){
 					continue;
@@ -157,10 +164,15 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 				catalogList.add(catalog);
 			}
 			//已授权的目录uuid
-			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
 			if(StringUtils.isNotBlank(agentUuid)){
 				List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
-				List<String> agentRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
+				List<String> agentUserRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
+				List<String> agentTeamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(agentTeamUuidList);
+				Set<String> agentRoleUuidSet = new HashSet<>();
+				agentRoleUuidSet.addAll(agentUserRoleUuidList);
+				agentRoleUuidSet.addAll(agentTeamRoleUuidList);
+				List<String> agentRoleUuidList = new ArrayList<>(roleUuidSet);
 				for(String authorizedCatalogUuid : catalogMapper.getAuthorizedCatalogUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
 					if(currentUserAuthorizedCatalogUuidList.contains(authorizedCatalogUuid)){
 						continue;

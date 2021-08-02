@@ -105,13 +105,23 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
             channelTypeRelationVo.setUseIdList(true);
             String userUuid = UserContext.get().getUserUuid(true);
             List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-            List<String> roleUuidList = UserContext.get().getRoleUuidList();
+            List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+            List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+            Set<String> roleUuidSet = new HashSet<>();
+            roleUuidSet.addAll(userRoleUuidList);
+            roleUuidSet.addAll(teamRoleUuidList);
+            List<String> roleUuidList = new ArrayList<>(roleUuidSet);
             Long processTaskId = jsonObj.getLong("processTaskId");
             channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, userUuid, teamUuidList, roleUuidList));
             String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
             if(StringUtils.isNotBlank(agentUuid)){
                 List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
-                List<String> agentRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
+                List<String> agentUserRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
+                List<String> agentTeamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(agentTeamUuidList);
+                Set<String> agentRoleUuidSet = new HashSet<>();
+                agentRoleUuidSet.addAll(agentUserRoleUuidList);
+                agentRoleUuidSet.addAll(agentTeamRoleUuidList);
+                List<String> agentRoleUuidList = new ArrayList<>(roleUuidSet);
                 channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, agentUuid, agentTeamUuidList, agentRoleUuidList));
             }
             channelTypeRelationVo.setIdList(new ArrayList<>(channelTypeRelationIdSet));

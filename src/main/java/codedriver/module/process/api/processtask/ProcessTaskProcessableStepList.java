@@ -1,8 +1,6 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -131,7 +129,12 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 	private List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId, String userUuid) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-        List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+        List<String> userRoleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+		Set<String> roleUuidSet = new HashSet<>();
+		roleUuidSet.addAll(userRoleUuidList);
+		roleUuidSet.addAll(teamRoleUuidList);
+		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
         for (ProcessTaskStepVo stepVo : processTaskStepList) {
             /** 找到所有已激活未处理的步骤 **/

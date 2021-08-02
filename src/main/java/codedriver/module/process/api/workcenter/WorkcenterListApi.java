@@ -3,6 +3,7 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
@@ -24,10 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +41,9 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
 
     @Autowired
     TeamMapper teamMapper;
+
+    @Autowired
+    RoleMapper roleMapper;
 
     @Autowired
     NewWorkcenterService newWorkcenterService;
@@ -76,7 +77,13 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
         JSONObject workcenterJson = new JSONObject();
         String userUuid = UserContext.get().getUserUuid(true);
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-        List<String> workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid, teamUuidList, UserContext.get().getRoleUuidList());
+        List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+        List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+        Set<String> roleUuidSet = new HashSet<>();
+        roleUuidSet.addAll(userRoleUuidList);
+        roleUuidSet.addAll(teamRoleUuidList);
+        List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+        List<String> workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid, teamUuidList, roleUuidList);
         List<WorkcenterVo> workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
         List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid, WORKCENTER_MODIFY.class.getSimpleName()));
         WorkcenterUserProfileVo userProfile = workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);

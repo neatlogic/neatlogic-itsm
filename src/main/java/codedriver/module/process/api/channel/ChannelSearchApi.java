@@ -1,9 +1,12 @@
 package codedriver.module.process.api.channel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -46,7 +49,10 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
     private TeamMapper teamMapper;
-	
+
+	@Autowired
+    private RoleMapper roleMapper;
+
 	@Override
 	public String getToken() {
 		return "process/channel/search";
@@ -96,7 +102,13 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
 		if(Objects.equal(isAuthenticate, 1)) {
 		    List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-		    List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+			List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+			List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+			Set<String> roleUuidSet = new HashSet<>();
+			roleUuidSet.addAll(userRoleUuidList);
+			roleUuidSet.addAll(teamRoleUuidList);
+			List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+		    List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
 		    if(CollectionUtils.isNotEmpty(authorizedChannelUuidList)) {
 		        String channelUuid = jsonObj.getString("channelUuid");
 	            if(StringUtils.isNotBlank(channelUuid) && channelMapper.checkChannelIsExists(channelUuid) == 0) {

@@ -194,7 +194,13 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                                     break;
                                                 }
                                             } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
-                                                if (UserContext.get().getRoleUuidList().contains(split[1])) {
+                                                List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+                                                List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(currentUserTeamList);
+                                                Set<String> roleUuidSet = new HashSet<>();
+                                                roleUuidSet.addAll(userRoleUuidList);
+                                                roleUuidSet.addAll(teamRoleUuidList);
+                                                List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+                                                if (roleUuidList.contains(split[1])) {
                                                     action = FormAttributeAction.READ.getValue();
                                                     break;
                                                 }
@@ -1033,7 +1039,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 JSONArray acceptList = authorityObj.getJSONArray("acceptList");
                 if (CollectionUtils.isNotEmpty(acceptList)) {
                     List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-                    List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+                    List<String> userRoleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+                    List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+                    Set<String> roleUuidSet = new HashSet<>();
+                    roleUuidSet.addAll(userRoleUuidList);
+                    roleUuidSet.addAll(teamRoleUuidList);
+                    List<String> roleUuidList = new ArrayList<>(roleUuidSet);
                     ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
                     processTaskStepUserVo.setProcessTaskId(processTaskId);
                     processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);

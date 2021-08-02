@@ -28,7 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -73,7 +75,12 @@ public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentB
         ProcessCommentTemplateVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessCommentTemplateVo>() {});
         /** 根据当前用户所在组、角色筛选其能看到的模版 */
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid());
-        List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
+        List<String> userRoleUuidList = roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
+        List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+        Set<String> roleUuidSet = new HashSet<>();
+        roleUuidSet.addAll(userRoleUuidList);
+        roleUuidSet.addAll(teamRoleUuidList);
+        List<String> roleUuidList = new ArrayList<>(roleUuidSet);
         List<String> uuidList = new ArrayList<>();
         uuidList.addAll(teamUuidList);
         uuidList.addAll(roleUuidList);

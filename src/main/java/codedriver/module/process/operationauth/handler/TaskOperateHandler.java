@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -203,7 +204,12 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
                         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-                        List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+                        List<String> userRoleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+                        List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+                        Set<String> roleUuidSet = new HashSet<>();
+                        roleUuidSet.addAll(userRoleUuidList);
+                        roleUuidSet.addAll(teamRoleUuidList);
+                        List<String> roleUuidList = new ArrayList<>(roleUuidSet);
                         List<String> processUserTypeList = new ArrayList<>();
                         if (userUuid.equals(processTaskVo.getOwner())) {
                             processUserTypeList.add(ProcessUserType.OWNER.getValue());

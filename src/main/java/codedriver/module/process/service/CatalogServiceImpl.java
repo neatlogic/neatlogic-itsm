@@ -69,11 +69,17 @@ public class CatalogServiceImpl implements CatalogService {
 	public List<String> getCurrentUserAuthorizedChannelUuidList() {
 		List<String> resultList = new ArrayList<>();
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+		Set<String> roleUuidSet = new HashSet<>();
+		roleUuidSet.addAll(userRoleUuidList);
+		roleUuidSet.addAll(teamRoleUuidList);
+		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
 		/** 查出当前用户所有已授权的目录uuid集合  **/
-		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
 		if(CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
 			/** 查出当前用户所有已授权的服务uuid集合  **/
-			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
 			if(CollectionUtils.isNotEmpty(currentUserAuthorizedChannelUuidList)) {
 				Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 				//构造一个虚拟的root节点
@@ -127,7 +133,12 @@ public class CatalogServiceImpl implements CatalogService {
 		/** 服务状态必须是激活**/
 		if(Objects.equals(channel.getIsActive(), 1)) {
 			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-			List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+			List<String> userRoleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+			List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+			Set<String> roleUuidSet = new HashSet<>();
+			roleUuidSet.addAll(userRoleUuidList);
+			roleUuidSet.addAll(teamRoleUuidList);
+			List<String> roleUuidList = new ArrayList<>(roleUuidSet);
 			/** 查出当前用户所有已授权的服务uuid集合  **/
 			List<String> channelUuidList = channelMapper.getAuthorizedChannelUuidList(userUuid, teamUuidList, roleUuidList, channelUuid);
 			/** 服务已授权 **/
@@ -158,8 +169,14 @@ public class CatalogServiceImpl implements CatalogService {
     public List<CatalogVo> getCatalogByCatalogParentUuid(String catalogUuid) {
 	    List<CatalogVo> cataLogVoList = new ArrayList<>();
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+		Set<String> roleUuidSet = new HashSet<>();
+		roleUuidSet.addAll(userRoleUuidList);
+		roleUuidSet.addAll(teamRoleUuidList);
+		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
         //已授权的服务uuid
-        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
         if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
             return cataLogVoList;
         }
@@ -181,7 +198,7 @@ public class CatalogServiceImpl implements CatalogService {
         List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
                 UserContext.get().getUserUuid(),
                 teamUuidList,
-                UserContext.get().getRoleUuidList(),
+				roleUuidList,
                 catalogUuid,
                 null);
         for(CatalogVo catalogVo : catalogList) {
@@ -197,8 +214,14 @@ public class CatalogServiceImpl implements CatalogService {
 	    JSONArray sonListArray = new JSONArray();
         JSONObject catalogParentJson = new JSONObject();
         List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+		Set<String> roleUuidSet = new HashSet<>();
+		roleUuidSet.addAll(userRoleUuidList);
+		roleUuidSet.addAll(teamRoleUuidList);
+		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
 	    //已授权的服务uuid
-        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
         if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
             return catalogParentJson;
         }
@@ -224,7 +247,7 @@ public class CatalogServiceImpl implements CatalogService {
 		List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
 				UserContext.get().getUserUuid(),
 				teamUuidList,
-				UserContext.get().getRoleUuidList(),
+				roleUuidList,
 				catalog.getUuid(),
 				null);
 		for(CatalogVo catalogVo : catalogList) {
@@ -236,7 +259,7 @@ public class CatalogServiceImpl implements CatalogService {
 		}
 		//channel
 		if(isNeedChannel ==null || isNeedChannel) {
-    		channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),teamUuidList,UserContext.get().getRoleUuidList(),catalog.getUuid());
+    		channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),teamUuidList,roleUuidList,catalog.getUuid());
     		for(ChannelVo channelVo : channelList) {
     			JSONObject channelJson = (JSONObject) JSONObject.toJSON(channelVo);
     			channelJson.put("type", "channel");
