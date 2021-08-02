@@ -2,7 +2,6 @@ package codedriver.module.process.workerdispatcher.handler;
 
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamUserTitleVo;
-import codedriver.framework.dto.TeamVo;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -83,18 +82,10 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
             ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
             List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTask.getOwner());
             if (CollectionUtils.isNotEmpty(teamUuidList)) {
-                List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
-                if (CollectionUtils.isNotEmpty(teamList)) {
-                    for (TeamVo teamVo : teamList) {
-                        List<TeamUserTitleVo> teamUserTileList = teamMapper.getTeamUserTitleListByTeamUuid(teamVo.getUuid());
-                        //List<String> userUuidList = teamMapper.getTeamUserUuidListByLftRhtTitle(teamVo.getLft(), teamVo.getRht(), teamUserTitle);
-                        if (CollectionUtils.isNotEmpty(teamUserTileList)) {
-                            teamUserTileList = teamUserTileList.stream().filter(o -> Objects.equals(o.getTitle(), teamUserTitle)).collect(Collectors.toList());
-                            if (CollectionUtils.isNotEmpty(teamUserTileList)) {
-                                resultList.addAll(teamUserTileList.get(0).getUserList());
-                            }
-                        }
-                    }
+                List<TeamUserTitleVo> teamUserTileList = teamMapper.getTeamUserTitleListByTeamUuidList(teamUuidList);
+                teamUserTileList = teamUserTileList.stream().filter(o->Objects.equals(o.getTitle(),teamUserTitle)).collect(Collectors.toList());
+                for (TeamUserTitleVo teamUserTitleVo : teamUserTileList) {
+                    resultList.addAll(teamUserTitleVo.getUserList());
                 }
             }
 
