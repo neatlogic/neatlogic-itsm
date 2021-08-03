@@ -1,16 +1,14 @@
 package codedriver.module.process.api.catalog;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.service.CatalogService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +18,13 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
+
+import javax.annotation.Resource;
+
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -38,10 +38,10 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ChannelMapper channelMapper;
-	
-	@Autowired
-	private TeamMapper teamMapper;
-	
+
+	@Resource
+	private AuthenticationInfoService authenticationInfoService;
+
 	@Override
 	public String getToken() {
 		return "process/catalog/tree/search";
@@ -72,14 +72,14 @@ public class CatalogTreeSearchApi extends PrivateApiComponentBase {
 			throw new CatalogNotFoundException(catalogUuid);
 		}
 
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
 		//已授权的目录uuid
-		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		if(CollectionUtils.isEmpty(currentUserAuthorizedCatalogUuidList)) {
 			return new ArrayList<>();
 		}
 		//已授权的服务uuid
-		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
 		    return new ArrayList<>();
 		}

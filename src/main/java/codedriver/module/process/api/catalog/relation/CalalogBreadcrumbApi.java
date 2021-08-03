@@ -1,17 +1,14 @@
 package codedriver.module.process.api.catalog.relation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +22,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -37,6 +33,9 @@ import codedriver.module.process.service.CatalogService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
+import javax.annotation.Resource;
+
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -55,13 +54,10 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 	private ChannelTypeMapper channelTypeMapper;
 
 	@Autowired
-	private TeamMapper teamMapper;
-
-	@Autowired
 	private UserMapper userMapper;
 
-	@Autowired
-	private RoleMapper roleMapper;
+	@Resource
+	private AuthenticationInfoService authenticationInfoService;
 
 	@Override
 	public String getToken() {
@@ -119,14 +115,13 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
         if(CollectionUtils.isEmpty(channelRelationTargetChannelUuidList)) {
             return resultObj;
         }
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
+		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
 		//已授权的服务uuid
-		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
 		if(StringUtils.isNotBlank(agentUuid)){
-			List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
-			List<String> agentRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
-			for(String authorizedChannelUuid : channelMapper.getAuthorizedChannelUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
+			AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
+			for(String authorizedChannelUuid : channelMapper.getAuthorizedChannelUuidList(agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), null)){
 				if(currentUserAuthorizedChannelUuidList.contains(authorizedChannelUuid)){
 					continue;
 				}
@@ -157,11 +152,10 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 				catalogList.add(catalog);
 			}
 			//已授权的目录uuid
-			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 			if(StringUtils.isNotBlank(agentUuid)){
-				List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
-				List<String> agentRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
-				for(String authorizedCatalogUuid : catalogMapper.getAuthorizedCatalogUuidList(agentUuid, agentTeamUuidList, agentRoleUuidList, null)){
+				AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
+				for(String authorizedCatalogUuid : catalogMapper.getAuthorizedCatalogUuidList(agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), null)){
 					if(currentUserAuthorizedCatalogUuidList.contains(authorizedCatalogUuid)){
 						continue;
 					}

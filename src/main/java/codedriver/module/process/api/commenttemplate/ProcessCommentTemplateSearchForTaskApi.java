@@ -7,9 +7,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import codedriver.framework.process.dto.ProcessCommentTemplateVo;
@@ -20,6 +18,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.process.auth.PROCESS_COMMENT_TEMPLATE_MODIFY;
+import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -27,6 +26,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,11 +38,8 @@ public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentB
     @Autowired
     private ProcessCommentTemplateMapper commentTemplateMapper;
 
-    @Autowired
-    private RoleMapper roleMapper;
-
-    @Autowired
-    private TeamMapper teamMapper;
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     @Override
     public String getToken() {
@@ -72,11 +69,10 @@ public class ProcessCommentTemplateSearchForTaskApi extends PrivateApiComponentB
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessCommentTemplateVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessCommentTemplateVo>() {});
         /** 根据当前用户所在组、角色筛选其能看到的模版 */
-        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid());
-        List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
+        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
         List<String> uuidList = new ArrayList<>();
-        uuidList.addAll(teamUuidList);
-        uuidList.addAll(roleUuidList);
+        uuidList.addAll(authenticationInfoVo.getTeamUuidList());
+        uuidList.addAll(authenticationInfoVo.getRoleUuidList());
         uuidList.add(UserContext.get().getUserUuid());
         uuidList.add(UserType.ALL.getValue());
         vo.setAuthList(uuidList);

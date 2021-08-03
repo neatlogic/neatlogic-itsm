@@ -4,6 +4,8 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -202,8 +204,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
         operationBiPredicateMap.put(ProcessTaskOperationType.TASK_TRANFERREPORT,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
-                        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-                        List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+                        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
                         List<String> processUserTypeList = new ArrayList<>();
                         if (userUuid.equals(processTaskVo.getOwner())) {
                             processUserTypeList.add(ProcessUserType.OWNER.getValue());
@@ -221,7 +222,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                             processUserTypeList.add(ProcessUserType.MINOR.getValue());
                         }
                         List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(
-                                processTaskVo.getChannelUuid(), userUuid, teamUuidList, roleUuidList, processUserTypeList);
+                                processTaskVo.getChannelUuid(), userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), processUserTypeList);
                         if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
                             ChannelRelationVo channelRelationVo = new ChannelRelationVo();
                             channelRelationVo.setSource(processTaskVo.getChannelUuid());

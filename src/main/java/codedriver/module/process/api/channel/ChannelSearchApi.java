@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import codedriver.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,12 +26,14 @@ import com.google.common.base.Objects;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
 import codedriver.module.process.service.CatalogService;
+
+import javax.annotation.Resource;
+
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -44,9 +48,9 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 	@Autowired
 	private CatalogService catalogService;
 
-	@Autowired
-    private TeamMapper teamMapper;
-	
+	@Resource
+	private AuthenticationInfoService authenticationInfoService;
+
 	@Override
 	public String getToken() {
 		return "process/channel/search";
@@ -95,8 +99,8 @@ public class ChannelSearchApi extends PrivateApiComponentBase {
 		boolean hasData = true;
 		Integer isAuthenticate = jsonObj.getInteger("isAuthenticate");
 		if(Objects.equal(isAuthenticate, 1)) {
-		    List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-		    List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, UserContext.get().getRoleUuidList(), null);
+			AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+		    List<String> authorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		    if(CollectionUtils.isNotEmpty(authorizedChannelUuidList)) {
 		        String channelUuid = jsonObj.getString("channelUuid");
 	            if(StringUtils.isNotBlank(channelUuid) && channelMapper.checkChannelIsExists(channelUuid) == 0) {
