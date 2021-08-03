@@ -196,12 +196,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                                     break;
                                                 }
                                             } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
-//                                                List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
-//                                                List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(currentUserTeamList);
-//                                                Set<String> roleUuidSet = new HashSet<>();
-//                                                roleUuidSet.addAll(userRoleUuidList);
-//                                                roleUuidSet.addAll(teamRoleUuidList);
-//                                                List<String> roleUuidList = new ArrayList<>(roleUuidSet);
                                                 if (roleUuidList.contains(split[1])) {
                                                     action = FormAttributeAction.READ.getValue();
                                                     break;
