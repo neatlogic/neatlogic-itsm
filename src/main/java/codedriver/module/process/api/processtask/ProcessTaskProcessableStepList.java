@@ -4,8 +4,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -27,6 +27,9 @@ import codedriver.module.process.service.ProcessTaskService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
+import javax.annotation.Resource;
+
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -39,13 +42,10 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
     private ProcessTaskService processTaskService;
     
     @Autowired
-    private TeamMapper teamMapper;
-    
-    @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private RoleMapper roleMapper;
+	@Resource
+	private AuthenticationInfoService authenticationInfoService;
 
 	@Override
 	public String getToken() {
@@ -128,18 +128,12 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
      */
 	private List<ProcessTaskStepVo> getProcessableStepList(Long processTaskId, String userUuid) {
         List<ProcessTaskStepVo> resultList = new ArrayList<>();
-        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-        List<String> userRoleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
-		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-		Set<String> roleUuidSet = new HashSet<>();
-		roleUuidSet.addAll(userRoleUuidList);
-		roleUuidSet.addAll(teamRoleUuidList);
-		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
         List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepBaseInfoByProcessTaskId(processTaskId);
         for (ProcessTaskStepVo stepVo : processTaskStepList) {
             /** 找到所有已激活未处理的步骤 **/
             if (stepVo.getIsActive().equals(1)) {
-                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), null, userUuid, teamUuidList, roleUuidList) > 0) {
+                if(processTaskMapper.checkIsWorker(processTaskId, stepVo.getId(), null, userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList()) > 0) {
                     resultList.add(stepVo);
                 }
             }

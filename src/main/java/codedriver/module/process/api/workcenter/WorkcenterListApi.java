@@ -3,9 +3,8 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.auth.WORKCENTER_MODIFY;
@@ -16,6 +15,7 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.service.NewWorkcenterService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,11 +40,8 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
     @Autowired
     UserMapper userMapper;
 
-    @Autowired
-    TeamMapper teamMapper;
-
-    @Autowired
-    RoleMapper roleMapper;
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     @Autowired
     NewWorkcenterService newWorkcenterService;
@@ -76,14 +74,8 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
         Integer isAll = jsonObj.getInteger("isAll");
         JSONObject workcenterJson = new JSONObject();
         String userUuid = UserContext.get().getUserUuid(true);
-        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-        List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
-        List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-        Set<String> roleUuidSet = new HashSet<>();
-        roleUuidSet.addAll(userRoleUuidList);
-        roleUuidSet.addAll(teamRoleUuidList);
-        List<String> roleUuidList = new ArrayList<>(roleUuidSet);
-        List<String> workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid, teamUuidList, roleUuidList);
+        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+        List<String> workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList());
         List<WorkcenterVo> workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
         List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid, WORKCENTER_MODIFY.class.getSimpleName()));
         WorkcenterUserProfileVo userProfile = workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);

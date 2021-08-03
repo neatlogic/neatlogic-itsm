@@ -1,8 +1,8 @@
 package codedriver.module.process.api.channeltype.relation;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,8 +33,9 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dto.ChannelTypeRelationVo;
+
+import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -50,13 +52,10 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
     private ProcessTaskMapper processTaskMapper;
 
     @Autowired
-    private TeamMapper teamMapper;
-
-    @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private RoleMapper roleMapper;
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     @Override
     public String getToken() {
@@ -104,25 +103,13 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
             Set<Long> channelTypeRelationIdSet = new HashSet<>();
             channelTypeRelationVo.setUseIdList(true);
             String userUuid = UserContext.get().getUserUuid(true);
-            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-            List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
-            List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-            Set<String> roleUuidSet = new HashSet<>();
-            roleUuidSet.addAll(userRoleUuidList);
-            roleUuidSet.addAll(teamRoleUuidList);
-            List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
             Long processTaskId = jsonObj.getLong("processTaskId");
-            channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, userUuid, teamUuidList, roleUuidList));
+            channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList()));
             String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
             if(StringUtils.isNotBlank(agentUuid)){
-                List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(agentUuid);
-                List<String> agentUserRoleUuidList = roleMapper.getRoleUuidListByUserUuid(agentUuid);
-                List<String> agentTeamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(agentTeamUuidList);
-                Set<String> agentRoleUuidSet = new HashSet<>();
-                agentRoleUuidSet.addAll(agentUserRoleUuidList);
-                agentRoleUuidSet.addAll(agentTeamRoleUuidList);
-                List<String> agentRoleUuidList = new ArrayList<>(roleUuidSet);
-                channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, agentUuid, agentTeamUuidList, agentRoleUuidList));
+                AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
+                channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList()));
             }
             channelTypeRelationVo.setIdList(new ArrayList<>(channelTypeRelationIdSet));
         }

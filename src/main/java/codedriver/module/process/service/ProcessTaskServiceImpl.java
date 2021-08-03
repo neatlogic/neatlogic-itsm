@@ -15,10 +15,7 @@ import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.RoleVo;
-import codedriver.framework.dto.TeamVo;
-import codedriver.framework.dto.UserVo;
-import codedriver.framework.dto.WorkAssignmentUnitVo;
+import codedriver.framework.dto.*;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
@@ -55,6 +52,7 @@ import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.framework.util.TimeUtil;
@@ -74,6 +72,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
@@ -98,6 +97,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Autowired
     private RoleMapper roleMapper;
+
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     @Autowired
     private FileMapper fileMapper;
@@ -144,7 +146,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     JSONArray controllerList = formConfigObj.getJSONArray("controllerList");
                     if (CollectionUtils.isNotEmpty(controllerList)) {
                         List<String> currentUserProcessUserTypeList = new ArrayList<>();
-                        List<String> currentUserTeamList = new ArrayList<>();
+                        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+                        List<String> currentUserTeamList = authenticationInfoVo.getTeamUuidList();
+                        List<String> roleUuidList = authenticationInfoVo.getRoleUuidList();
                         if (mode == 0) {
                             currentUserProcessUserTypeList.add(UserType.ALL.getValue());
                             if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
@@ -153,8 +157,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                             if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
                                 currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
                             }
-                            currentUserTeamList =
-                                    teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
                         } else if (mode == 1) {
                             if (formAttributeActionMap == null) {
                                 formAttributeActionMap = new HashMap<>();
@@ -194,12 +196,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                                     break;
                                                 }
                                             } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
-                                                List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
-                                                List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(currentUserTeamList);
-                                                Set<String> roleUuidSet = new HashSet<>();
-                                                roleUuidSet.addAll(userRoleUuidList);
-                                                roleUuidSet.addAll(teamRoleUuidList);
-                                                List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+//                                                List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+//                                                List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(currentUserTeamList);
+//                                                Set<String> roleUuidSet = new HashSet<>();
+//                                                roleUuidSet.addAll(userRoleUuidList);
+//                                                roleUuidSet.addAll(teamRoleUuidList);
+//                                                List<String> roleUuidList = new ArrayList<>(roleUuidSet);
                                                 if (roleUuidList.contains(split[1])) {
                                                     action = FormAttributeAction.READ.getValue();
                                                     break;
@@ -1038,13 +1040,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             if (operationType.getValue().equals(action)) {
                 JSONArray acceptList = authorityObj.getJSONArray("acceptList");
                 if (CollectionUtils.isNotEmpty(acceptList)) {
-                    List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-                    List<String> userRoleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
-                    List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-                    Set<String> roleUuidSet = new HashSet<>();
-                    roleUuidSet.addAll(userRoleUuidList);
-                    roleUuidSet.addAll(teamRoleUuidList);
-                    List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+                    AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+                    List<String> teamUuidList = authenticationInfoVo.getTeamUuidList();
+                    List<String> roleUuidList = authenticationInfoVo.getRoleUuidList();
                     ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
                     processTaskStepUserVo.setProcessTaskId(processTaskId);
                     processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);

@@ -1,18 +1,15 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.CatalogVo;
 import codedriver.framework.process.dto.ChannelRelationVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
+import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 @Service
@@ -34,14 +32,8 @@ public class CatalogServiceImpl implements CatalogService {
 	@Autowired
 	private ChannelTypeMapper channelTypeMapper;
 
-	@Autowired
-	private TeamMapper teamMapper;
-	
-	@Autowired
-	private RoleMapper roleMapper;
-
-	@Autowired
-	private ProcessTaskMapper processTaskMapper;
+	@Resource
+	private AuthenticationInfoService authenticationInfoService;
 
 	@Override
 	public void rebuildLeftRightCode() {
@@ -68,18 +60,12 @@ public class CatalogServiceImpl implements CatalogService {
 	@Override
 	public List<String> getCurrentUserAuthorizedChannelUuidList() {
 		List<String> resultList = new ArrayList<>();
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-		List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
-		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-		Set<String> roleUuidSet = new HashSet<>();
-		roleUuidSet.addAll(userRoleUuidList);
-		roleUuidSet.addAll(teamRoleUuidList);
-		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
 		/** 查出当前用户所有已授权的目录uuid集合  **/
-		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
+		List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		if(CollectionUtils.isNotEmpty(currentUserAuthorizedCatalogUuidList)) {
 			/** 查出当前用户所有已授权的服务uuid集合  **/
-			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
+			List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 			if(CollectionUtils.isNotEmpty(currentUserAuthorizedChannelUuidList)) {
 				Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 				//构造一个虚拟的root节点
@@ -132,21 +118,15 @@ public class CatalogServiceImpl implements CatalogService {
 		}
 		/** 服务状态必须是激活**/
 		if(Objects.equals(channel.getIsActive(), 1)) {
-			List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-			List<String> userRoleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
-			List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-			Set<String> roleUuidSet = new HashSet<>();
-			roleUuidSet.addAll(userRoleUuidList);
-			roleUuidSet.addAll(teamRoleUuidList);
-			List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+			AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
 			/** 查出当前用户所有已授权的服务uuid集合  **/
-			List<String> channelUuidList = channelMapper.getAuthorizedChannelUuidList(userUuid, teamUuidList, roleUuidList, channelUuid);
+			List<String> channelUuidList = channelMapper.getAuthorizedChannelUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), channelUuid);
 			/** 服务已授权 **/
 			if(channelUuidList.contains(channelUuid)) {
 				CatalogVo catalogVo = catalogMapper.getCatalogByUuid(channel.getParentUuid());
 				if(catalogVo != null && !CatalogVo.ROOT_UUID.equals(catalogVo.getUuid())) {
 					/** 查出当前用户所有已授权的目录uuid集合  **/
-					List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(userUuid, teamUuidList, roleUuidList, null);
+					List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 					List<CatalogVo> ancestorsAndSelfList = catalogMapper.getAncestorsAndSelfByLftRht(catalogVo.getLft(), catalogVo.getRht());
 					for(CatalogVo catalog : ancestorsAndSelfList) {
 						if(!CatalogVo.ROOT_UUID.equals(catalog.getUuid())) {
@@ -168,15 +148,9 @@ public class CatalogServiceImpl implements CatalogService {
 	@Override
     public List<CatalogVo> getCatalogByCatalogParentUuid(String catalogUuid) {
 	    List<CatalogVo> cataLogVoList = new ArrayList<>();
-        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-		List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
-		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-		Set<String> roleUuidSet = new HashSet<>();
-		roleUuidSet.addAll(userRoleUuidList);
-		roleUuidSet.addAll(teamRoleUuidList);
-		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
         //已授权的服务uuid
-        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
+        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
         if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
             return cataLogVoList;
         }
@@ -197,8 +171,7 @@ public class CatalogServiceImpl implements CatalogService {
         //catalog
         List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
                 UserContext.get().getUserUuid(),
-                teamUuidList,
-				roleUuidList,
+				authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(),
                 catalogUuid,
                 null);
         for(CatalogVo catalogVo : catalogList) {
@@ -213,15 +186,9 @@ public class CatalogServiceImpl implements CatalogService {
 	public JSONObject getCatalogChannelByCatalogUuid(CatalogVo catalog,Boolean isNeedChannel) {
 	    JSONArray sonListArray = new JSONArray();
         JSONObject catalogParentJson = new JSONObject();
-        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-		List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
-		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-		Set<String> roleUuidSet = new HashSet<>();
-		roleUuidSet.addAll(userRoleUuidList);
-		roleUuidSet.addAll(teamRoleUuidList);
-		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
 	    //已授权的服务uuid
-        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
+        List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
         if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
             return catalogParentJson;
         }
@@ -246,8 +213,7 @@ public class CatalogServiceImpl implements CatalogService {
 		//catalog
 		List<CatalogVo> catalogList = catalogMapper.getAuthorizedCatalogList(
 				UserContext.get().getUserUuid(),
-				teamUuidList,
-				roleUuidList,
+				authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(),
 				catalog.getUuid(),
 				null);
 		for(CatalogVo catalogVo : catalogList) {
@@ -259,7 +225,7 @@ public class CatalogServiceImpl implements CatalogService {
 		}
 		//channel
 		if(isNeedChannel ==null || isNeedChannel) {
-    		channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),teamUuidList,roleUuidList,catalog.getUuid());
+    		channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(),catalog.getUuid());
     		for(ChannelVo channelVo : channelList) {
     			JSONObject channelJson = (JSONObject) JSONObject.toJSON(channelVo);
     			channelJson.put("type", "channel");

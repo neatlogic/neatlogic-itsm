@@ -9,10 +9,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.service.AuthenticationInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
@@ -40,6 +40,8 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import javax.annotation.Resource;
+
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -49,13 +51,10 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
     private ProcessTaskMapper processTaskMapper;
 
     @Autowired
-    private TeamMapper teamMapper;
-
-    @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private RoleMapper roleMapper;
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     @Autowired
     private WorktimeMapper worktimeMapper;
@@ -100,29 +99,32 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         ProcessTaskStepWorkerVo searchVo = JSON.toJavaObject(jsonObj, ProcessTaskStepWorkerVo.class);
         List<String> userUuidList = new ArrayList<>();
-        Set<String> teamUuidSet = new HashSet<>();
-        Set<String> roleUuidSet = new HashSet<>();
         userUuidList.add(currentUserUuid);
-        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(currentUserUuid);
-        List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
-        List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-        roleUuidSet.addAll(userRoleUuidList);
-        roleUuidSet.addAll(teamRoleUuidList);
-        teamUuidSet.addAll(teamUuidList);
+//        Set<String> teamUuidSet = new HashSet<>();
+//        Set<String> roleUuidSet = new HashSet<>();
+//        List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(currentUserUuid);
+//        List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
+//        List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+//        roleUuidSet.addAll(userRoleUuidList);
+//        roleUuidSet.addAll(teamRoleUuidList);
+//        teamUuidSet.addAll(teamUuidList);
         String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(currentUserUuid, "processtask");
         if (StringUtils.isNotBlank(userUuid)) {
             userUuidList.add(userUuid);
-            List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-            List<String> agentUserRoleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
-            List<String> agentTeamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-            roleUuidSet.addAll(agentUserRoleUuidList);
-            roleUuidSet.addAll(agentTeamRoleUuidList);
-            teamUuidSet.addAll(agentTeamUuidList);
+//            List<String> agentTeamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+//            List<String> agentUserRoleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+//            List<String> agentTeamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
+//            roleUuidSet.addAll(agentUserRoleUuidList);
+//            roleUuidSet.addAll(agentTeamRoleUuidList);
+//            teamUuidSet.addAll(agentTeamUuidList);
         }
         searchVo.setProcessTaskId(currentProcessTaskId);
         searchVo.setUserUuidList(userUuidList);
-        searchVo.setTeamUuidList(new ArrayList<>(teamUuidSet));
-        searchVo.setRoleUuidList(new ArrayList<>(roleUuidSet));
+//        searchVo.setTeamUuidList(new ArrayList<>(teamUuidSet));
+//        searchVo.setRoleUuidList(new ArrayList<>(roleUuidSet));
+        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuidList);
+        searchVo.setTeamUuidList(authenticationInfoVo.getTeamUuidList());
+        searchVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
         int rowNum =
             processTaskMapper.getProcessTaskStepWorkerCountByProcessTaskIdUserUuidTeamUuidListRoleUuidList(searchVo);
         if (rowNum > 0) {

@@ -4,8 +4,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.CatalogVo;
@@ -27,6 +27,9 @@ import codedriver.module.process.service.CatalogService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
+import javax.annotation.Resource;
+
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -40,12 +43,9 @@ public class CalalogBreadcrumbSearchApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ChannelMapper channelMapper;
-	
-	@Autowired
-	private TeamMapper teamMapper;
 
-	@Autowired
-	private RoleMapper roleMapper;
+	@Resource
+	private AuthenticationInfoService authenticationInfoService;
 
 	@Override
 	public String getToken() {
@@ -87,18 +87,12 @@ public class CalalogBreadcrumbSearchApi extends PrivateApiComponentBase {
 				throw new CatalogNotFoundException(catalogUuid);
 			}
 		}
-		
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
-		List<String> userRoleUuidList = UserContext.get().getRoleUuidList();
-		List<String> teamRoleUuidList = roleMapper.getRoleUuidListByTeamUuidList(teamUuidList);
-		Set<String> roleUuidSet = new HashSet<>();
-		roleUuidSet.addAll(userRoleUuidList);
-		roleUuidSet.addAll(teamRoleUuidList);
-		List<String> roleUuidList = new ArrayList<>(roleUuidSet);
+
+		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("breadcrumbList", new ArrayList<>());
 		//已授权的服务uuid
-		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
+		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 		if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
 			return resultObj;
 		}
@@ -120,7 +114,7 @@ public class CalalogBreadcrumbSearchApi extends PrivateApiComponentBase {
 				catalogList.add(catalog);
 			}
 			//已授权的目录uuid
-			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), teamUuidList, roleUuidList, null);
+			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
 
 			Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 			for(CatalogVo catalogVo : catalogList) {
