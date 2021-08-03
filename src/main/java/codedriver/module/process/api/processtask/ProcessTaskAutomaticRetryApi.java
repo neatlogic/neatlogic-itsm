@@ -18,6 +18,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -78,11 +79,17 @@ public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 			if( dataObject.containsKey("callbackAudit")&&ProcessTaskStatus.SUCCEED.getValue().equals(requestStatus.getString("value"))){
 				JSONObject callbackStatus = dataObject.getJSONObject("callbackAudit").getJSONObject("status");
 				if(!ProcessTaskStatus.SUCCEED.getValue().equals(callbackStatus.getString("value"))
-						&&!ProcessTaskStatus.FAILED.getValue().equals(callbackStatus.getString("value"))) {
+						&& ProcessTaskStatus.FAILED.getValue().equals(callbackStatus.getString("value"))) {
 					String config = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
-					automaticConfigVo = new AutomaticConfigVo(JSONObject.parseObject(config));
-					automaticConfigVo.setIsRequest(false);
-					isRetry = true;
+					JSONObject stepConfig = JSONObject.parseObject(config);
+					if(MapUtils.isNotEmpty(stepConfig)) {
+						JSONObject automaticConfig = stepConfig.getJSONObject("automaticConfig");
+						if(MapUtils.isNotEmpty(automaticConfig)) {
+							automaticConfigVo = new AutomaticConfigVo(automaticConfig);
+							automaticConfigVo.setIsRequest(false);
+							isRetry = true;
+						}
+					}
 				}
 			}
 			

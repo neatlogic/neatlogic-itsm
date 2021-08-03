@@ -11,6 +11,7 @@ import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
+import codedriver.framework.process.exception.processtask.AutomaticConfigException;
 import codedriver.framework.scheduler.core.JobBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobObject;
@@ -58,6 +59,9 @@ public class ProcessTaskAutomaticJob extends JobBase {
 	@Override
 	public void reloadJob(JobObject jobObject) {
 		AutomaticConfigVo automaticConfigVo = (AutomaticConfigVo) jobObject.getData("automaticConfigVo");
+		if(automaticConfigVo == null){
+			throw new AutomaticConfigException(jobObject.getJobName());
+		}
 		JSONObject data = (JSONObject) jobObject.getData("data");
 		JobObject.Builder newJobObjectBuilder = null;
 		JSONObject audit = null;
