@@ -6,9 +6,8 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
@@ -25,6 +24,7 @@ import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerF
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.common.config.ProcessConfig;
 import codedriver.module.process.service.ProcessTaskService;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
@@ -35,10 +35,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Resource;
+import java.util.*;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -63,11 +61,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private TeamMapper teamMapper;
-
-    @Autowired
-    private RoleMapper roleMapper;
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     @Autowired
     private ProcessCommentTemplateMapper commentTemplateMapper;
@@ -311,10 +306,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             /** 如果当前用户有处理权限，则获取其有权看到的配置的回复模版 */
             if (hasComplete) {
                 List<String> authList = new ArrayList<>();
-                List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid());
-                List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid());
-                authList.addAll(teamUuidList);
-                authList.addAll(roleUuidList);
+                AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+                authList.addAll(authenticationInfoVo.getTeamUuidList());
+                authList.addAll(authenticationInfoVo.getRoleUuidList());
                 authList.add(UserType.ALL.getValue());
                 authList.add(UserContext.get().getUserUuid());
                 ProcessCommentTemplateVo commentTemplate = commentTemplateMapper

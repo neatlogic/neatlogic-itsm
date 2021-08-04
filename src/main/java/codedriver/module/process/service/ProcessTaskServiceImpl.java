@@ -15,10 +15,7 @@ import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.RoleVo;
-import codedriver.framework.dto.TeamVo;
-import codedriver.framework.dto.UserVo;
-import codedriver.framework.dto.WorkAssignmentUnitVo;
+import codedriver.framework.dto.*;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.type.PermissionDeniedException;
@@ -55,6 +52,7 @@ import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.util.FreemarkerUtil;
 import codedriver.framework.util.TimeUtil;
@@ -74,6 +72,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
@@ -98,6 +97,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     @Autowired
     private RoleMapper roleMapper;
+
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     @Autowired
     private FileMapper fileMapper;
@@ -144,7 +146,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     JSONArray controllerList = formConfigObj.getJSONArray("controllerList");
                     if (CollectionUtils.isNotEmpty(controllerList)) {
                         List<String> currentUserProcessUserTypeList = new ArrayList<>();
-                        List<String> currentUserTeamList = new ArrayList<>();
+                        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+                        List<String> currentUserTeamList = authenticationInfoVo.getTeamUuidList();
+                        List<String> roleUuidList = authenticationInfoVo.getRoleUuidList();
                         if (mode == 0) {
                             currentUserProcessUserTypeList.add(UserType.ALL.getValue());
                             if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
@@ -153,8 +157,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                             if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
                                 currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
                             }
-                            currentUserTeamList =
-                                    teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true));
                         } else if (mode == 1) {
                             if (formAttributeActionMap == null) {
                                 formAttributeActionMap = new HashMap<>();
@@ -194,7 +196,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                                                     break;
                                                 }
                                             } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
-                                                if (UserContext.get().getRoleUuidList().contains(split[1])) {
+                                                if (roleUuidList.contains(split[1])) {
                                                     action = FormAttributeAction.READ.getValue();
                                                     break;
                                                 }
@@ -312,32 +314,35 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 logger.error(resultVo.getError());
                 throw new MatrixExternalException("外部接口访问异常");
             } else if (StringUtils.isNotBlank(resultJson)) {*/
-                if (predicate(successConfig, resultVo, true)) {// 如果执行成功
-                    audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
-                    if (!automaticConfigVo.getIsRequest() || !automaticConfigVo.getIsHasCallback()) {// 第一次请求
-                        //补充下一步骤id
-                        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
-                        currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepList.get(0).getId());
-                        processHandler.complete(currentProcessTaskStepVo);
-                    } else {// 回调请求
-                        if (CallbackType.WAIT.getValue().equals(automaticConfigVo.getCallbackType())) {
-                            // 等待回调,挂起
-                            // processHandler.hang(currentProcessTaskStepVo);
-                        }
-                        if (CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
-                            automaticConfigVo.setIsRequest(false);
-                            automaticConfigVo.setResultJson(JSONObject.parseObject(resultJson));
-                            data =
-                                    initProcessTaskStepData(currentProcessTaskStepVo, automaticConfigVo, data, "callback");
-                            initJob(automaticConfigVo, currentProcessTaskStepVo, data);
-                        }
+            if (predicate(successConfig, resultVo, true)) {// 如果执行成功
+                audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
+                if (!automaticConfigVo.getIsRequest() || !automaticConfigVo.getIsHasCallback()) {// 第一次请求
+                    //补充下一步骤id
+                    List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+                    currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepList.get(0).getId());
+                    processHandler.complete(currentProcessTaskStepVo);
+                } else {// 回调请求
+                    if (CallbackType.WAIT.getValue().equals(automaticConfigVo.getCallbackType())) {
+                        // 等待回调,挂起
+                        // processHandler.hang(currentProcessTaskStepVo);
                     }
-                    isUnloadJob = true;
-                } else if (automaticConfigVo.getIsRequest()
-                        || (!automaticConfigVo.getIsRequest() && predicate(failConfig, resultVo, false))) {// 失败
-                    audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
-                    //拼凑失败原因
-                    String failedReason = StringUtils.EMPTY;
+                    if (CallbackType.INTERVAL.getValue().equals(automaticConfigVo.getCallbackType())) {
+                        automaticConfigVo.setIsRequest(false);
+                        automaticConfigVo.setResultJson(JSONObject.parseObject(resultJson));
+                        data =
+                                initProcessTaskStepData(currentProcessTaskStepVo, automaticConfigVo, data, "callback");
+                        initJob(automaticConfigVo, currentProcessTaskStepVo, data);
+                    }
+                }
+                isUnloadJob = true;
+            } else if (automaticConfigVo.getIsRequest()
+                    || (!automaticConfigVo.getIsRequest() && predicate(failConfig, resultVo, false))) {// 失败
+                audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.FAILED.getValue()));
+                //拼凑失败原因
+                String failedReason = StringUtils.EMPTY;
+                if (StringUtils.isNotBlank(resultVo.getError())) {
+                    failedReason = integrationVo.getUrl()+"\n"+resultVo.getError();
+                }else {
                     if (MapUtils.isNotEmpty(successConfig)) {
                         if (StringUtils.isBlank(successConfig.getString("name"))) {
                             failedReason = "-";
@@ -351,38 +356,39 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                             failedReason = String.format("满足失败条件：%s%s%s", failConfig.getString("name"), failConfig.getString("expressionName"), failConfig.getString("value"));
                         }
                     }
-                    audit.put("failedReason", failedReason);
-                    if (FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
-                        List<ProcessTaskStepVo> backStepList =
-                                getBackwardNextStepListByProcessTaskStepId(currentProcessTaskStepVo.getId());
-                        if (backStepList.size() == 1) {
-                            ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
-                            if (processHandler != null) {
-                                JSONObject jsonParam = new JSONObject();
-                                jsonParam.put("action", ProcessTaskOperationType.STEP_BACK.getValue());
-                                jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
-                                jsonParam.put("content", failedReason);
-                                currentProcessTaskStepVo.setParamObj(jsonParam);
-                                processHandler.complete(currentProcessTaskStepVo);
-                            }
-                        } else {// 如果存在多个回退线，保持running
-                            // processHandler.hang(currentProcessTaskStepVo);
+                }
+                audit.put("failedReason", failedReason);
+                if (FailPolicy.BACK.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
+                    List<ProcessTaskStepVo> backStepList =
+                            getBackwardNextStepListByProcessTaskStepId(currentProcessTaskStepVo.getId());
+                    if (backStepList.size() == 1) {
+                        ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
+                        if (processHandler != null) {
+                            JSONObject jsonParam = new JSONObject();
+                            jsonParam.put("action", ProcessTaskOperationType.STEP_BACK.getValue());
+                            jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
+                            jsonParam.put("content", failedReason);
+                            currentProcessTaskStepVo.setParamObj(jsonParam);
+                            processHandler.complete(currentProcessTaskStepVo);
                         }
-                    } else if (FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
-                        //补充下一步骤id
-                        List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
-                        currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepList.get(0).getId());
-                        processHandler.complete(currentProcessTaskStepVo);
-                    } else if (FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
-                        processHandler.abortProcessTask(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));
-                    } else {// hang
+                    } else {// 如果存在多个回退线，保持running
                         // processHandler.hang(currentProcessTaskStepVo);
                     }
-                    isUnloadJob = true;
-                } else {
-                    audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.RUNNING.getValue()));
-                    // continue
+                } else if (FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
+                    //补充下一步骤id
+                    List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+                    currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepList.get(0).getId());
+                    processHandler.complete(currentProcessTaskStepVo);
+                } else if (FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
+                    processHandler.abortProcessTask(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));
+                } else {// hang
+                    // processHandler.hang(currentProcessTaskStepVo);
                 }
+                isUnloadJob = true;
+            } else {
+                audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.RUNNING.getValue()));
+                // continue
+            }
 //            }
 
         } catch (Exception ex) {
@@ -552,7 +558,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 if (type.equals("common") || type.equals("form")) {
                     integrationParam.put(name, processTaskJson.get(value));
                 } else if (type.equals("integration")) {
-                    integrationParam.put(name, resultJson.get(value.replaceAll("integration#",StringUtils.EMPTY)));
+                    integrationParam.put(name, resultJson.get(value.replaceAll("integration#", StringUtils.EMPTY)));
                 } else {// 常量
                     integrationParam.put(name, value);
                 }
@@ -1032,8 +1038,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             if (operationType.getValue().equals(action)) {
                 JSONArray acceptList = authorityObj.getJSONArray("acceptList");
                 if (CollectionUtils.isNotEmpty(acceptList)) {
-                    List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
-                    List<String> roleUuidList = roleMapper.getRoleUuidListByUserUuid(userUuid);
+                    AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
+                    List<String> teamUuidList = authenticationInfoVo.getTeamUuidList();
+                    List<String> roleUuidList = authenticationInfoVo.getRoleUuidList();
                     ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
                     processTaskStepUserVo.setProcessTaskId(processTaskId);
                     processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);
@@ -1172,9 +1179,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             String contentHash = processTaskStepRemindVo.getContentHash();
             if (StringUtils.isNotBlank(contentHash)) {
                 String content = selectContentByHashMapper.getProcessTaskContentStringByHash(contentHash);
-                if(StringUtils.isNotBlank(content)) {
+                if (StringUtils.isNotBlank(content)) {
                     /** 有图片标签才显式点击详情 **/
-                    if(content.contains("<figure class=\"image\">") && content.contains("</figure>")) {
+                    if (content.contains("<figure class=\"image\">") && content.contains("</figure>")) {
                         processTaskStepRemindVo.setDetail(content);
                     }
                     processTaskStepRemindVo.setContent(pattern_html.matcher(content).replaceAll(""));
@@ -1596,12 +1603,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 }
                 /** 标签列表 **/
                 List<String> tagList = JSON.parseArray(JSON.toJSONString(dataObj.getJSONArray("tagList")), String.class);
-                if(tagList != null){
+                if (tagList != null) {
                     processTaskVo.setTagList(tagList);
                 }
                 /** 工单关注人列表 **/
-                List<String> focusUserUuidList = JSON.parseArray(dataObj.getString("focusUserUuidList"),String.class);
-                if(CollectionUtils.isNotEmpty(focusUserUuidList)){
+                List<String> focusUserUuidList = JSON.parseArray(dataObj.getString("focusUserUuidList"), String.class);
+                if (CollectionUtils.isNotEmpty(focusUserUuidList)) {
                     processTaskVo.setFocusUserUuidList(focusUserUuidList);
                 }
             }
@@ -1611,11 +1618,12 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     /**
      * 查询待处理的工单，构造"用户uuid->List<工单字段中文名->值>"的map集合
+     *
      * @param conditionMap 工单查询条件
      * @return "用户uuid->List<工单字段中文名->值>"的map集合
      */
     @Override
-    public Map<String,List<Map<String,Object>>> getProcessingUserTaskMapByCondition(Map<String,Object> conditionMap) {
+    public Map<String, List<Map<String, Object>>> getProcessingUserTaskMapByCondition(Map<String, Object> conditionMap) {
 
         Map<String, List<Map<String, Object>>> userTaskMap = new HashMap<>();
         List<UserVo> userList = (List<UserVo>) conditionMap.get("userList");
@@ -1649,6 +1657,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     /**
      * 查询每个用户待处理的工单数量，构造"用户uuid->工单数"的map集合
+     *
      * @param conditionMap 工单查询条件
      * @return "用户uuid->工单数"的map集合
      */
@@ -1671,8 +1680,9 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
 
     /**
      * 把查询用户的待处理工单需要的userUuid、teamUuidList、roleUuidList条件put到conditionMap
+     *
      * @param conditionMap 查询条件
-     * @param user 用户
+     * @param user         用户
      */
     private void getConditionMap(Map<String, Object> conditionMap, UserVo user) {
         conditionMap.remove("teamUuidList");
