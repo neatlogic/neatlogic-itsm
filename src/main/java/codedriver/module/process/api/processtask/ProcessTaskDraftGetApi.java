@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -10,14 +15,13 @@ import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
+import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.channeltype.ChannelTypeNotFoundException;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
-import codedriver.framework.form.exception.FormActiveVersionNotFoundExcepiton;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
@@ -164,7 +168,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             throw new PermissionDeniedException();
         }
         ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
-        /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
+        /* 判断当前用户是否拥有channelUuid服务的上报权限 **/
         if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
             String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
             if(StringUtils.isNotBlank(agentUuid)){
