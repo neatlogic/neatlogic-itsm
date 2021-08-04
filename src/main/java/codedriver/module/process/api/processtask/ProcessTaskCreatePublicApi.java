@@ -20,7 +20,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
-import codedriver.framework.restful.dto.ApiVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -145,16 +144,12 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
         //暂存
         jsonObj.put("isNeedValid", 1);
         ProcessTaskDraftSaveApi drafSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-        ApiVo drafSaveApiVo = PrivateApiComponentFactory.getApiByToken(drafSaveApi.getToken());
-        drafSaveApiVo.setInnerCall(true);
-        JSONObject saveResultObj = JSONObject.parseObject(drafSaveApi.doService(drafSaveApiVo, jsonObj, null).toString());
+        JSONObject saveResultObj = JSONObject.parseObject(drafSaveApi.myDoService(jsonObj).toString());
         saveResultObj.put("action", "start");
 
         //查询可执行下一步骤
         ProcessTaskProcessableStepList stepListApi = (ProcessTaskProcessableStepList) PrivateApiComponentFactory.getInstance(ProcessTaskProcessableStepList.class.getName());
-        ApiVo stepListApiVo = PrivateApiComponentFactory.getApiByToken(stepListApi.getToken());
-        stepListApiVo.setInnerCall(true);
-        Object nextStepListObj = stepListApi.doService(stepListApiVo, saveResultObj, null);
+        Object nextStepListObj = stepListApi.myDoService(saveResultObj);
         List<ProcessTaskStepVo> nextStepList = (List<ProcessTaskStepVo>) nextStepListObj;
         if (CollectionUtils.isEmpty(nextStepList) && nextStepList.size() != 1) {
             throw new RuntimeException("抱歉！暂不支持开始节点连接多个后续节点。");
@@ -163,9 +158,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 
         //流转
         ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
-        ApiVo startProcessApiVo = PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken());
-        startProcessApiVo.setInnerCall(true);
-        startProcessApi.doService(startProcessApiVo, saveResultObj, null);
+        startProcessApi.myDoService(saveResultObj);
 
         result.put("processTaskId", saveResultObj.getString("processTaskId"));
         return result;
