@@ -144,12 +144,12 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
         //暂存
         jsonObj.put("isNeedValid", 1);
         ProcessTaskDraftSaveApi drafSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-        JSONObject saveResultObj = JSONObject.parseObject(drafSaveApi.doService(PrivateApiComponentFactory.getApiByToken(drafSaveApi.getToken()), jsonObj, null).toString());
+        JSONObject saveResultObj = JSONObject.parseObject(drafSaveApi.myDoService(jsonObj).toString());
         saveResultObj.put("action", "start");
 
         //查询可执行下一步骤
         ProcessTaskProcessableStepList stepListApi = (ProcessTaskProcessableStepList) PrivateApiComponentFactory.getInstance(ProcessTaskProcessableStepList.class.getName());
-        Object nextStepListObj = stepListApi.doService(PrivateApiComponentFactory.getApiByToken(stepListApi.getToken()), saveResultObj, null);
+        Object nextStepListObj = stepListApi.myDoService(saveResultObj);
         List<ProcessTaskStepVo> nextStepList = (List<ProcessTaskStepVo>) nextStepListObj;
         if (CollectionUtils.isEmpty(nextStepList) && nextStepList.size() != 1) {
             throw new RuntimeException("抱歉！暂不支持开始节点连接多个后续节点。");
@@ -158,7 +158,7 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
 
         //流转
         ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
-        startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()), saveResultObj, null);
+        startProcessApi.myDoService(saveResultObj);
 
         result.put("processTaskId", saveResultObj.getString("processTaskId"));
         return result;
