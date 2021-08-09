@@ -4,7 +4,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.RootComponent;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.exception.file.FileNotFoundException;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -16,6 +16,10 @@ import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchException;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.form.exception.FormAttributeRequiredException;
+import codedriver.framework.process.exception.processtask.ProcessTaskOwnerIsEmptyException;
+import codedriver.framework.process.exception.processtask.ProcessTaskPriorityIsEmptyException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepContentIsEmptyException;
+import codedriver.framework.process.exception.processtask.ProcessTaskTitleIsEmptyException;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.process.stepremind.core.IProcessTaskStepRemindType;
 import codedriver.module.process.thread.*;
@@ -298,7 +302,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     public boolean baseInfoValid(ProcessTaskStepVo currentProcessTaskStepVo, ProcessTaskVo processTaskVo) {
         JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
         if (processTaskVo.getTitle() == null) {
-            throw new ProcessTaskRuntimeException("工单标题格式不能为空");
+            throw new ProcessTaskTitleIsEmptyException();
         }
         /* 标题不限制输入
          * Pattern titlePattern = Pattern.compile("^[A-Za-z_\\d\\u4e00-\\u9fa5]+$"); if
@@ -307,13 +311,13 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
          */
         paramObj.put(ProcessTaskAuditDetailType.TITLE.getParamName(), processTaskVo.getTitle());
         if (StringUtils.isBlank(processTaskVo.getOwner())) {
-            throw new ProcessTaskRuntimeException("工单请求人不能为空");
+            throw new ProcessTaskOwnerIsEmptyException();
         }
         if (userMapper.getUserBaseInfoByUuid(processTaskVo.getOwner()) == null) {
-            throw new ProcessTaskRuntimeException("工单请求人账号:'" + processTaskVo.getOwner() + "'不存在");
+            throw new UserNotFoundException(processTaskVo.getOwner());
         }
         if (StringUtils.isBlank(processTaskVo.getPriorityUuid())) {
-            throw new ProcessTaskRuntimeException("工单优先级不能为空");
+            throw new ProcessTaskPriorityIsEmptyException();
         }
         List<ChannelPriorityVo> channelPriorityList =
                 channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
@@ -324,27 +328,27 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         paramObj.put(ProcessTaskAuditDetailType.PRIORITY.getParamName(), processTaskVo.getPriorityUuid());
 
         // 获取上报描述内容
-        List<Long> fileIdList = new ArrayList<>();
-        List<ProcessTaskStepContentVo> processTaskStepContentList =
-                processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(currentProcessTaskStepVo.getId());
-        for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-            if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
-                paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), selectContentByHashMapper
-                        .getProcessTaskContentStringByHash(processTaskStepContent.getContentHash()));
-                fileIdList = processTaskMapper.getFileIdListByContentId(processTaskStepContent.getId());
-                break;
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(fileIdList)) {
-            for (Long fileId : fileIdList) {
-                if (fileMapper.getFileById(fileId) == null) {
-                    throw new FileNotFoundException(fileId);
-                }
-            }
-            paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(fileIdList));
-        }
-        currentProcessTaskStepVo.setParamObj(paramObj);
+//        List<Long> fileIdList = new ArrayList<>();
+//        List<ProcessTaskStepContentVo> processTaskStepContentList =
+//                processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(currentProcessTaskStepVo.getId());
+//        for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
+//            if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
+//                paramObj.put(ProcessTaskAuditDetailType.CONTENT.getParamName(), selectContentByHashMapper
+//                        .getProcessTaskContentStringByHash(processTaskStepContent.getContentHash()));
+//                fileIdList = processTaskMapper.getFileIdListByContentId(processTaskStepContent.getId());
+//                break;
+//            }
+//        }
+//
+//        if (CollectionUtils.isNotEmpty(fileIdList)) {
+//            for (Long fileId : fileIdList) {
+//                if (fileMapper.getFileById(fileId) == null) {
+//                    throw new FileNotFoundException(fileId);
+//                }
+//            }
+//            paramObj.put(ProcessTaskAuditDetailType.FILE.getParamName(), JSON.toJSONString(fileIdList));
+//        }
+//        currentProcessTaskStepVo.setParamObj(paramObj);
         return true;
     }
 
@@ -516,6 +520,17 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             }
         } else {
             paramObj.remove("fileIdList");
+        }
+    }
+
+    @Override
+    public void chechContentIsRequired(ProcessTaskStepVo currentProcessTaskStepVo) {
+        if(Objects.equals(currentProcessTaskStepVo.getIsRequired(), 1)) {
+            JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+            String content = paramObj.getString("content");
+            if (StringUtils.isBlank(content)) {
+                throw new ProcessTaskStepContentIsEmptyException();
+            }
         }
     }
 
