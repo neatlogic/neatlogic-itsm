@@ -141,8 +141,6 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
             processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
             startProcessTaskStepVo = processTaskMapper.getStartProcessTaskStepByProcessTaskId(processTaskId);
         } else {
-            startProcessTaskStepVo = new ProcessTaskStepVo();
-            startProcessTaskStepVo.setProcessUuid(processUuid);
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
             if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
                 String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
@@ -154,6 +152,8 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
                     throw new PermissionDeniedException();
                 }
             }
+            startProcessTaskStepVo = new ProcessTaskStepVo();
+            startProcessTaskStepVo.setProcessUuid(processUuid);
             ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);
             startProcessTaskStepVo.setHandler(startProcessStepVo.getHandler());
         }

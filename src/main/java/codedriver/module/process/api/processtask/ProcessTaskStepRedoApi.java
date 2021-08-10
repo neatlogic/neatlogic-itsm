@@ -45,7 +45,7 @@ public class ProcessTaskStepRedoApi extends PrivateApiComponentBase {
     @Input({
         @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单Id"),
         @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "激活步骤Id"),
-        @Param(name = "content", type = ApiParamType.STRING, desc = "原因")
+        @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "原因")
     })
     @Description(desc = "打回重做步骤")
     @Override

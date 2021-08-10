@@ -9,6 +9,7 @@ import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
+import codedriver.framework.process.constvalue.ReplaceableText;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
@@ -91,8 +93,25 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
         List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
         for(ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
             if(ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus())) {
+                String subtaskText = "子任务";
+                JSONArray replaceableTextList = processTaskService.getReplaceableTextList(processTaskStepVo);
+                for (int i = 0; i < replaceableTextList.size(); i++) {
+                    JSONObject replaceableText = replaceableTextList.getJSONObject(i);
+                    String name = replaceableText.getString("name");
+                    if (Objects.equals(ReplaceableText.SUBTASK.getValue(), name)) {
+                        String value = replaceableText.getString("value");
+                        if (StringUtils.isNotBlank(value)) {
+                            subtaskText = value;
+                        } else {
+                            String text = replaceableText.getString("text");
+                            if (StringUtils.isNotBlank(text)) {
+                                subtaskText = text;
+                            }
+                        }
+                    }
+                }
                 //如果还有子任务未完成，该步骤不能流转
-                throw new ProcessTaskRuntimeException("请完成所有子任务后再流转");
+                throw new ProcessTaskRuntimeException("请完成所有" +  subtaskText + "后再流转");
             }
         }
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
