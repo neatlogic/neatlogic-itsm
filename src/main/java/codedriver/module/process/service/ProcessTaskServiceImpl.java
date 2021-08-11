@@ -556,7 +556,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 String value = param.getString("value");
                 String name = param.getString("name");
                 if (type.equals("common") || type.equals("form")) {
-                    integrationParam.put(name, processTaskJson.get(value));
+                    integrationParam.put(name, processTaskJson.get(value.replaceAll("common#", StringUtils.EMPTY).replaceAll("form#", StringUtils.EMPTY)));
                 } else if (type.equals("integration")) {
                     integrationParam.put(name, resultJson.get(value.replaceAll("integration#", StringUtils.EMPTY)));
                 } else {// 常量
