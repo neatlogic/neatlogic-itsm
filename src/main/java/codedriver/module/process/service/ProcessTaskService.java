@@ -285,7 +285,7 @@ public interface ProcessTaskService {
      * @param processTaskId
      * @return ProcessTaskVo
      */
-    public ProcessTaskVo getFromProcessTasById(Long processTaskId);
+    public ProcessTaskVo getFromProcessTaskById(Long processTaskId);
 
     /**
      * @Description: 获取所有工单干系人信息，用于通知接收人
