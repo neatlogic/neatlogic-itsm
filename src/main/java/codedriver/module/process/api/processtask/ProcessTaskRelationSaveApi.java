@@ -52,7 +52,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
     private ProcessTaskService processTaskService;
 
     @Autowired
-    private IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    private IProcessStepHandlerUtil processStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -105,14 +105,14 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
                         channelTypeRelationId);
                     processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                         JSON.toJSONString(Arrays.asList(processTaskId)));
-                    IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
+                    processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
                 }
                 jsonObj.put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(),
                     JSON.toJSONString(processTaskIdList));
                 ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
                 processTaskStepVo.setProcessTaskId(processTaskId);
                 processTaskStepVo.setParamObj(jsonObj);
-                IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
+                processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
             }
         }
         return null;
