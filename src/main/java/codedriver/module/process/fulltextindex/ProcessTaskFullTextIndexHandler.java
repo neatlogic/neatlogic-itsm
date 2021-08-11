@@ -10,7 +10,7 @@ import codedriver.framework.process.dto.ProcessTaskContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.fulltextindex.FullTextIndexType;
+import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -60,7 +60,7 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
 
     @Override
     public IFullTextIndexType getType() {
-        return FullTextIndexType.PROCESSTASK;
+        return ProcessFullTextIndexType.PROCESSTASK;
     }
 
     @Override

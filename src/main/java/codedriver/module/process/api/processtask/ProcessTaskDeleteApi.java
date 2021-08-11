@@ -10,7 +10,7 @@ import codedriver.framework.process.dao.mapper.score.ProcessTaskScoreMapper;
 import codedriver.framework.process.dto.ProcessTaskRelationVo;
 import codedriver.framework.process.dto.ProcessTaskSlaVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.fulltextindex.FullTextIndexType;
+import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -110,11 +110,11 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
 //        ElasticSearchHandlerFactory.getHandler(ESHandler.PROCESSTASK.getValue()).delete(processTaskId.toString());
 
         //删除全文检索索引
-        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK);
+        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK);
         if (indexHandler != null) {
             indexHandler.deleteIndex(processTaskId);
         }
-        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK_FORM);
+        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK_FORM);
         if (indexFormHandler != null) {
             indexFormHandler.deleteIndex(processTaskId);
         }

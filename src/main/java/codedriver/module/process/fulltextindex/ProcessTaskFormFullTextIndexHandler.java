@@ -8,7 +8,7 @@ import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
-import codedriver.framework.process.fulltextindex.FullTextIndexType;
+import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class ProcessTaskFormFullTextIndexHandler extends FullTextIndexHandlerBas
 
     @Override
     public IFullTextIndexType getType() {
-        return FullTextIndexType.PROCESSTASK_FORM;
+        return ProcessFullTextIndexType.PROCESSTASK_FORM;
     }
 
     @Override

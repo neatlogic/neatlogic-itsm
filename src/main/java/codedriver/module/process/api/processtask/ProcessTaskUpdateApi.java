@@ -15,7 +15,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.fulltextindex.FullTextIndexType;
+import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.Description;
@@ -203,11 +203,11 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         }
 
         //创建全文检索索引
-        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK);
+        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK);
         if (indexHandler != null) {
             indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
         }
-        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK_FORM);
+        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK_FORM);
         if (indexFormHandler != null) {
             indexFormHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
         }

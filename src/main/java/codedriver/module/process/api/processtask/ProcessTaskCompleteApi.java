@@ -19,7 +19,7 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.fulltextindex.FullTextIndexType;
+import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
@@ -164,7 +164,7 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 
         //创建全文检索索引
-        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK_FORM);
+        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK_FORM);
         if (indexFormHandler != null) {
             indexFormHandler.createIndex(processTaskStepVo.getProcessTaskId());
         }

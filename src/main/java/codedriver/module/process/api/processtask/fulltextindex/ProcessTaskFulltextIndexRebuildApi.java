@@ -5,7 +5,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.fulltextindex.FullTextIndexType;
+import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
@@ -47,8 +47,8 @@ public class ProcessTaskFulltextIndexRebuildApi extends PrivateApiComponentBase 
         JSONArray idArray = jsonObj.getJSONArray("idList");
         List<Long> idList = null;
         //创建全文检索索引
-        IFullTextIndexHandler handler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK);
-        IFullTextIndexHandler handlerForm = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK_FORM);
+        IFullTextIndexHandler handler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK);
+        IFullTextIndexHandler handlerForm = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK_FORM);
         if (handler != null) {
             if(CollectionUtils.isNotEmpty(idArray)){
                 idList = JSONObject.parseArray(idArray.toJSONString(), Long.class);

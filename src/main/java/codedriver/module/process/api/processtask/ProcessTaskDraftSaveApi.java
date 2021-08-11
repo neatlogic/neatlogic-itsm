@@ -21,7 +21,7 @@ import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchException;
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
-import codedriver.framework.process.fulltextindex.FullTextIndexType;
+import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.*;
@@ -179,11 +179,11 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
         resultObj.put("processTaskStepId", startProcessTaskStepVo.getId());
 
         //创建全文检索索引
-        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK);
+        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK);
         if (indexHandler != null) {
             indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
         }
-        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(FullTextIndexType.PROCESSTASK_FORM);
+        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK_FORM);
         if (indexFormHandler != null) {
             indexFormHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
         }
