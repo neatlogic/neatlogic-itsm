@@ -1224,8 +1224,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskVo.setIsFocus(1);
         }
         // 获取工单流程图信息
-        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-        processTaskVo.setConfig(taskConfig);
+//        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+//        processTaskVo.setConfig(taskConfig);
 
         // 优先级
         PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
@@ -1312,9 +1312,15 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         processTaskVo.setScoreInfo(scoreInfo);
 
         /** 转报数据 **/
-        Long fromProcessTaskId = processTaskMapper.getFromProcessTaskIdByToProcessTaskId(processTaskId);
-        if (fromProcessTaskId != null) {
-            processTaskVo.getTranferReportProcessTaskList().add(getFromProcessTasById(fromProcessTaskId));
+//        Long fromProcessTaskId = processTaskMapper.getFromProcessTaskIdByToProcessTaskId(processTaskId);
+        ProcessTaskTranferReportVo processTaskTranferReportVo = processTaskMapper.getProcessTaskTranferReportByToProcessTaskId(processTaskId);
+        if (processTaskTranferReportVo != null) {
+            ProcessTaskVo fromProcessTaskVo = getFromProcessTaskById(processTaskTranferReportVo.getFromProcessTaskId());
+            ChannelTypeRelationVo channelTypeRelationVo = channelTypeMapper.getChannelTypeRelationById(processTaskTranferReportVo.getChannelTypeRelationId());
+            if (channelTypeRelationVo != null) {
+                fromProcessTaskVo.setChannelTypeRelationName(channelTypeRelationVo.getName());
+            }
+            processTaskVo.getTranferReportProcessTaskList().add(fromProcessTaskVo);
         }
         List<Long> toProcessTaskIdList = processTaskMapper.getToProcessTaskIdListByFromProcessTaskId(processTaskId);
         for (Long toProcessTaskId : toProcessTaskIdList) {
@@ -1441,7 +1447,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
     }
 
     @Override
-    public ProcessTaskVo getFromProcessTasById(Long processTaskId) {
+    public ProcessTaskVo getFromProcessTaskById(Long processTaskId) {
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
         if (processTaskVo != null) {
             ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
