@@ -238,29 +238,39 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 if (StringUtils.isNotBlank(agentUuid)) {
                     userUuidList.add(agentUuid);
                 }
+                AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuidList);
                 List<String> currentUserProcessUserTypeList = new ArrayList<>();
                 currentUserProcessUserTypeList.add(UserType.ALL.getValue());
-                if (userUuidList.contains(processTaskVo.getOwner())) {
+                if (processTaskVo.getId() != null) {
+                    if (userUuidList.contains(processTaskVo.getOwner())) {
+                        currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
+                    }
+                    if (userUuidList.contains(processTaskVo.getReporter())) {
+                        currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
+                    }
+                    ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+                    processTaskStepUserVo.setProcessTaskId(processTaskVo.getId());
+                    processTaskStepUserVo.setUserUuidList(userUuidList);
+                    processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
+                    if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        currentUserProcessUserTypeList.add(ProcessUserType.MAJOR.getValue());
+                    }
+                    processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
+                    if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                        currentUserProcessUserTypeList.add(ProcessUserType.MINOR.getValue());
+                    }
+                    if (processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, authenticationInfoVo) > 0) {
+                        currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
+                    }
+                } else {
+                    // 没有工单id说明是在上报页，当用户即是上报人、代报人、处理人、协助处理人、待处理人
                     currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
-                }
-                if (userUuidList.contains(processTaskVo.getReporter())) {
                     currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
-                }
-                ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
-                processTaskStepUserVo.setProcessTaskId(processTaskVo.getId());
-                processTaskStepUserVo.setUserUuidList(userUuidList);
-                processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
-                if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
                     currentUserProcessUserTypeList.add(ProcessUserType.MAJOR.getValue());
-                }
-                processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
-                if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
                     currentUserProcessUserTypeList.add(ProcessUserType.MINOR.getValue());
-                }
-                AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuidList);
-                if (processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, authenticationInfoVo) > 0) {
                     currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
                 }
+
                 List<String> teamUuidList = authenticationInfoVo.getTeamUuidList();
                 List<String> roleUuidList = authenticationInfoVo.getRoleUuidList();
                 for (int i = 0; i < controllerList.size(); i++) {
