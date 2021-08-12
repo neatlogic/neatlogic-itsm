@@ -105,11 +105,11 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
             String userUuid = UserContext.get().getUserUuid(true);
             AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
             Long processTaskId = jsonObj.getLong("processTaskId");
-            channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList()));
+            channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, authenticationInfoVo));
             String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
             if(StringUtils.isNotBlank(agentUuid)){
                 AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
-                channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList()));
+                channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, agentAuthenticationInfoVo));
             }
             channelTypeRelationVo.setIdList(new ArrayList<>(channelTypeRelationIdSet));
         }
@@ -132,8 +132,9 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
         return resultObj;
     }
 
-    public List<Long> getChannelTypeRelationIdList(String sourceChannelUuid, Long processTaskId, String userUuid, List<String> teamUuidList, List<String> roleUuidList) throws Exception {
+    private List<Long> getChannelTypeRelationIdList(String sourceChannelUuid, Long processTaskId, AuthenticationInfoVo authenticationInfoVo) throws Exception {
         List<String> processUserTypeList = new ArrayList<>();
+        String userUuid = authenticationInfoVo.getUserUuid();
         if(processTaskId != null){
             ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
             if(userUuid.equals(processTaskVo.getOwner())){
@@ -153,12 +154,12 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
             if (processUserTypeList.contains(ProcessUserType.MAJOR.getValue())){
                 processUserTypeList.add(ProcessUserType.WORKER.getValue());
             }else {
-                if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, ProcessUserType.MAJOR.getValue(), userUuid, teamUuidList, roleUuidList) > 0){
+                if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, ProcessUserType.MAJOR.getValue(), authenticationInfoVo) > 0){
                     processUserTypeList.add(ProcessUserType.WORKER.getValue());
                 }
             }
         }
-        List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(sourceChannelUuid, userUuid, teamUuidList, roleUuidList, processUserTypeList);
+        List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(sourceChannelUuid, userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), processUserTypeList);
         return channelTypeRelationIdList;
     }
 }

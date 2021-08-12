@@ -138,97 +138,178 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         if (formAttributeDataMap == null) {
             formAttributeDataMap = new HashMap<>();
         }
-        String formConfig = processTaskVo.getFormConfig();
-        if (StringUtils.isNotBlank(formConfig)) {
-            try {
-                JSONObject formConfigObj = JSON.parseObject(formConfig);
-                if (MapUtils.isNotEmpty(formConfigObj)) {
-                    JSONArray controllerList = formConfigObj.getJSONArray("controllerList");
-                    if (CollectionUtils.isNotEmpty(controllerList)) {
-                        List<String> currentUserProcessUserTypeList = new ArrayList<>();
-                        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
-                        List<String> currentUserTeamList = authenticationInfoVo.getTeamUuidList();
-                        List<String> roleUuidList = authenticationInfoVo.getRoleUuidList();
-                        if (mode == 0) {
-                            currentUserProcessUserTypeList.add(UserType.ALL.getValue());
-                            if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
-                                currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
-                            }
-                            if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
-                                currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
-                            }
-                        } else if (mode == 1) {
-                            if (formAttributeActionMap == null) {
-                                formAttributeActionMap = new HashMap<>();
-                            }
-                        }
+        JSONObject formConfigObj = processTaskVo.getFormConfig();
+        if (MapUtils.isNotEmpty(formConfigObj)) {
+            JSONArray controllerList = formConfigObj.getJSONArray("controllerList");
+            if (CollectionUtils.isNotEmpty(controllerList)) {
+                List<String> currentUserProcessUserTypeList = new ArrayList<>();
+                AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+                List<String> currentUserTeamList = authenticationInfoVo.getTeamUuidList();
+                List<String> roleUuidList = authenticationInfoVo.getRoleUuidList();
+                if (mode == 0) {
+                    currentUserProcessUserTypeList.add(UserType.ALL.getValue());
+                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getOwner())) {
+                        currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
+                    }
+                    if (UserContext.get().getUserUuid(true).equals(processTaskVo.getReporter())) {
+                        currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
+                    }
+                } else if (mode == 1) {
+                    if (formAttributeActionMap == null) {
+                        formAttributeActionMap = new HashMap<>();
+                    }
+                }
 
-                        for (int i = 0; i < controllerList.size(); i++) {
-                            JSONObject attributeObj = controllerList.getJSONObject(i);
-                            String action = FormAttributeAction.HIDE.getValue();
-                            JSONObject config = attributeObj.getJSONObject("config");
-                            if (mode == 0) {
-                                if (MapUtils.isNotEmpty(config)) {
-                                    List<String> authorityList =
-                                            JSON.parseArray(config.getString("authorityConfig"), String.class);
-                                    if (CollectionUtils.isNotEmpty(authorityList)) {
-                                        for (String authority : authorityList) {
-                                            String[] split = authority.split("#");
-                                            if (GroupSearch.COMMON.getValue().equals(split[0])) {
-                                                if (currentUserProcessUserTypeList.contains(split[1])) {
-                                                    action = FormAttributeAction.READ.getValue();
-                                                    break;
-                                                }
-                                            } else if (ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue()
-                                                    .equals(split[0])) {
-                                                if (currentUserProcessUserTypeList.contains(split[1])) {
-                                                    action = FormAttributeAction.READ.getValue();
-                                                    break;
-                                                }
-                                            } else if (GroupSearch.USER.getValue().equals(split[0])) {
-                                                if (UserContext.get().getUserUuid(true).equals(split[1])) {
-                                                    action = FormAttributeAction.READ.getValue();
-                                                    break;
-                                                }
-                                            } else if (GroupSearch.TEAM.getValue().equals(split[0])) {
-                                                if (currentUserTeamList.contains(split[1])) {
-                                                    action = FormAttributeAction.READ.getValue();
-                                                    break;
-                                                }
-                                            } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
-                                                if (roleUuidList.contains(split[1])) {
-                                                    action = FormAttributeAction.READ.getValue();
-                                                    break;
-                                                }
-                                            }
+                for (int i = 0; i < controllerList.size(); i++) {
+                    JSONObject attributeObj = controllerList.getJSONObject(i);
+                    String action = FormAttributeAction.HIDE.getValue();
+                    JSONObject config = attributeObj.getJSONObject("config");
+                    if (mode == 0) {
+                        if (MapUtils.isNotEmpty(config)) {
+                            List<String> authorityList =
+                                    JSON.parseArray(config.getString("authorityConfig"), String.class);
+                            if (CollectionUtils.isNotEmpty(authorityList)) {
+                                for (String authority : authorityList) {
+                                    String[] split = authority.split("#");
+                                    if (GroupSearch.COMMON.getValue().equals(split[0])) {
+                                        if (currentUserProcessUserTypeList.contains(split[1])) {
+                                            action = FormAttributeAction.READ.getValue();
+                                            break;
+                                        }
+                                    } else if (ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue()
+                                            .equals(split[0])) {
+                                        if (currentUserProcessUserTypeList.contains(split[1])) {
+                                            action = FormAttributeAction.READ.getValue();
+                                            break;
+                                        }
+                                    } else if (GroupSearch.USER.getValue().equals(split[0])) {
+                                        if (UserContext.get().getUserUuid(true).equals(split[1])) {
+                                            action = FormAttributeAction.READ.getValue();
+                                            break;
+                                        }
+                                    } else if (GroupSearch.TEAM.getValue().equals(split[0])) {
+                                        if (currentUserTeamList.contains(split[1])) {
+                                            action = FormAttributeAction.READ.getValue();
+                                            break;
+                                        }
+                                    } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
+                                        if (roleUuidList.contains(split[1])) {
+                                            action = FormAttributeAction.READ.getValue();
+                                            break;
                                         }
                                     }
                                 }
-                            } else if (mode == 1) {
-                                action = formAttributeActionMap.get(attributeObj.getString("uuid"));
-                                if (StringUtils.isBlank(action)) {
-                                    action = formAttributeActionMap.get("all");
-                                }
-                            }
-                            if (FormAttributeAction.READ.getValue().equals(action)) {
-                                attributeObj.put("isReadonly", true);
-                            } else if (FormAttributeAction.HIDE.getValue().equals(action)) {
-                                attributeObj.put("isHide", true);
-                                formAttributeDataMap.remove(attributeObj.getString("uuid"));// 对于隐藏属性，不返回值
-                                if (config != null) {
-                                    config.remove("value");
-                                    config.remove("defaultValueList");// 对于隐藏属性，不返回默认值
-                                }
                             }
                         }
-                        processTaskVo.setFormConfig(formConfigObj.toJSONString());
+                    } else if (mode == 1) {
+                        action = formAttributeActionMap.get(attributeObj.getString("uuid"));
+                        if (StringUtils.isBlank(action)) {
+                            action = formAttributeActionMap.get("all");
+                        }
+                    }
+                    if (FormAttributeAction.READ.getValue().equals(action)) {
+                        attributeObj.put("isReadonly", true);
+                    } else if (FormAttributeAction.HIDE.getValue().equals(action)) {
+                        attributeObj.put("isHide", true);
+                        formAttributeDataMap.remove(attributeObj.getString("uuid"));// 对于隐藏属性，不返回值
+                        if (config != null) {
+                            config.remove("value");
+                            config.remove("defaultValueList");// 对于隐藏属性，不返回默认值
+                        }
                     }
                 }
-            } catch (Exception ex) {
-                logger.error("表单配置不是合法的JSON格式", ex);
+                processTaskVo.setFormConfig(formConfigObj);
             }
         }
 
+    }
+
+    @Override
+    public List<String> getFormConfigAuthorityConfig(ProcessTaskVo processTaskVo) {
+        List<String> resultList = new ArrayList<>();
+        JSONObject formConfigObj = processTaskVo.getFormConfig();
+        if (MapUtils.isNotEmpty(formConfigObj)) {
+            JSONArray controllerList = formConfigObj.getJSONArray("controllerList");
+            if (CollectionUtils.isNotEmpty(controllerList)) {
+                List<String> userUuidList = new ArrayList<>();
+                String userUuid = UserContext.get().getUserUuid(true);
+                userUuidList.add(userUuid);
+                String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
+                if (StringUtils.isNotBlank(agentUuid)) {
+                    userUuidList.add(agentUuid);
+                }
+                List<String> currentUserProcessUserTypeList = new ArrayList<>();
+                currentUserProcessUserTypeList.add(UserType.ALL.getValue());
+                if (userUuidList.contains(processTaskVo.getOwner())) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.OWNER.getValue());
+                }
+                if (userUuidList.contains(processTaskVo.getReporter())) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.REPORTER.getValue());
+                }
+                ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
+                processTaskStepUserVo.setProcessTaskId(processTaskVo.getId());
+                processTaskStepUserVo.setUserUuidList(userUuidList);
+                processTaskStepUserVo.setUserType(ProcessUserType.MAJOR.getValue());
+                if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.MAJOR.getValue());
+                }
+                processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
+                if (processTaskMapper.checkIsProcessTaskStepUser(processTaskStepUserVo) > 0) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.MINOR.getValue());
+                }
+                AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuidList);
+                if (processTaskMapper.checkIsWorker(processTaskVo.getId(), null, null, authenticationInfoVo) > 0) {
+                    currentUserProcessUserTypeList.add(ProcessUserType.WORKER.getValue());
+                }
+                List<String> teamUuidList = authenticationInfoVo.getTeamUuidList();
+                List<String> roleUuidList = authenticationInfoVo.getRoleUuidList();
+                for (int i = 0; i < controllerList.size(); i++) {
+                    JSONObject attributeObj = controllerList.getJSONObject(i);
+                    String uuid = attributeObj.getString("uuid");
+                    JSONObject config = attributeObj.getJSONObject("config");
+                    if (MapUtils.isNotEmpty(config)) {
+                        boolean isHide = true;
+                        JSONArray authorityArray = config.getJSONArray("authorityConfig");
+                        if (CollectionUtils.isNotEmpty(authorityArray)) {
+                            List<String> authorityList = authorityArray.toJavaList(String.class);
+                            for (String authority : authorityList) {
+                                String[] split = authority.split("#");
+                                if (GroupSearch.COMMON.getValue().equals(split[0])) {
+                                    if (currentUserProcessUserTypeList.contains(split[1])) {
+                                        isHide = false;
+                                        break;
+                                    }
+                                } else if (ProcessTaskGroupSearch.PROCESSUSERTYPE.getValue().equals(split[0])) {
+                                    if (currentUserProcessUserTypeList.contains(split[1])) {
+                                        isHide = false;
+                                        break;
+                                    }
+                                } else if (GroupSearch.USER.getValue().equals(split[0])) {
+                                    if (UserContext.get().getUserUuid(true).equals(split[1])) {
+                                        isHide = false;
+                                        break;
+                                    }
+                                } else if (GroupSearch.TEAM.getValue().equals(split[0])) {
+                                    if (teamUuidList.contains(split[1])) {
+                                        isHide = false;
+                                        break;
+                                    }
+                                } else if (GroupSearch.ROLE.getValue().equals(split[0])) {
+                                    if (roleUuidList.contains(split[1])) {
+                                        isHide = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (isHide) {
+                            resultList.add(uuid);
+                        }
+                    }
+                }
+            }
+        }
+        return resultList;
     }
 
     @Override
@@ -1044,7 +1125,8 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                     ProcessTaskStepUserVo processTaskStepUserVo = new ProcessTaskStepUserVo();
                     processTaskStepUserVo.setProcessTaskId(processTaskId);
                     processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);
-                    processTaskStepUserVo.setUserVo(new UserVo(userUuid));
+//                    processTaskStepUserVo.setUserVo(new UserVo(userUuid));
+                    processTaskStepUserVo.setUserUuid(userUuid);
                     for (int j = 0; j < acceptList.size(); j++) {
                         String accept = acceptList.getString(j);
                         String[] split = accept.split("#");
@@ -1224,7 +1306,6 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             processTaskVo.setIsFocus(1);
         }
         // 获取工单流程图信息
-//        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
 //        processTaskVo.setConfig(taskConfig);
 
         // 优先级
@@ -1266,16 +1347,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
         // 获取工单表单信息
         ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
         if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-            String formContent =
-                    selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+            String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
             if (StringUtils.isNotBlank(formContent)) {
-                processTaskVo.setFormConfig(formContent);
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList =
-                        processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
+                processTaskVo.setFormConfig(JSONObject.parseObject(formContent));
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
                 for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                    processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(),
-                            processTaskFormAttributeDataVo.getDataObj());
+                    processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
                 }
+                // 获取工单流程图信息
+                String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+                JSONArray formConfigAuthorityList = (JSONArray) JSONPath.read(taskConfig, "process.formConfig.authorityList");
+                processTaskVo.setFormConfigAuthorityList(formConfigAuthorityList);
+                List<String> formAttributeHideList = getFormConfigAuthorityConfig(processTaskVo);
+                processTaskVo.setFormAttributeHideList(formAttributeHideList);
             }
         }
         /** 上报人公司、部门列表 **/
@@ -1465,16 +1549,19 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
             // 获取工单表单信息
             ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
             if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-                String formContent =
-                        selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
+                String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
                 if (StringUtils.isNotBlank(formContent)) {
-                    processTaskVo.setFormConfig(formContent);
-                    List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList =
-                            processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
+                    processTaskVo.setFormConfig(JSONObject.parseObject(formContent));
+                    List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
                     for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                        processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(),
-                                processTaskFormAttributeDataVo.getDataObj());
+                        processTaskVo.getFormAttributeDataMap().put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
                     }
+                    // 获取工单流程图信息
+                    String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+                    JSONArray formConfigAuthorityList = (JSONArray) JSONPath.read(taskConfig, "process.formConfig.authorityList");
+                    processTaskVo.setFormConfigAuthorityList(formConfigAuthorityList);
+                    List<String> formAttributeHideList = getFormConfigAuthorityConfig(processTaskVo);
+                    processTaskVo.setFormAttributeHideList(formAttributeHideList);
                 }
             }
 

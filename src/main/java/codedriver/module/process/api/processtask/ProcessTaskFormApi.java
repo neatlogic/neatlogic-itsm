@@ -6,6 +6,7 @@ import java.util.Map;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -89,17 +90,21 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
             String formContent =
                 selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
             if (StringUtils.isNotBlank(formContent)) {
-                processTaskVo.setFormConfig(formContent);
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList =
-                    processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
+                processTaskVo.setFormConfig(JSONObject.parseObject(formContent));
+                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
                 if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
                     Map<String, Object> formAttributeDataMap = new HashMap<>();
                     for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                        formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(),
-                            processTaskFormAttributeDataVo.getDataObj());
+                        formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
                     }
                     processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
                 }
+                // 获取工单流程图信息
+                String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+                JSONArray formConfigAuthorityList = (JSONArray) JSONPath.read(taskConfig, "process.formConfig.authorityList");
+                processTaskVo.setFormConfigAuthorityList(formConfigAuthorityList);
+                List<String> formAttributeHideList = processTaskService.getFormConfigAuthorityConfig(processTaskVo);
+                processTaskVo.setFormAttributeHideList(formAttributeHideList);
             }
 
             if (processTaskStepId != null) {
@@ -131,25 +136,25 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
                 }
             }
 
-            if (processTaskStepId != null && new ProcessAuthManager.StepOperationChecker(processTaskStepId,
-                ProcessTaskOperationType.STEP_WORK).build().check()) {
-                /** 当前用户有处理权限，根据当前步骤表单属性显示设置控制表单属性展示 **/
-                Map<String, String> formAttributeActionMap = new HashMap<>();
-                List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList =
-                    processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskId, processTaskStepId);
-                if (processTaskStepFormAttributeList.size() > 0) {
-                    for (ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
-                        formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(),
-                            processTaskStepFormAttributeVo.getAction());
-                    }
-                }
-                processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
-            } else {
-                processTaskService.setProcessTaskFormAttributeAction(processTaskVo, null, 0);
-            }
+//            if (processTaskStepId != null && new ProcessAuthManager.StepOperationChecker(processTaskStepId,
+//                ProcessTaskOperationType.STEP_WORK).build().check()) {
+//                /** 当前用户有处理权限，根据当前步骤表单属性显示设置控制表单属性展示 **/
+//                Map<String, String> formAttributeActionMap = new HashMap<>();
+//                List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList =
+//                    processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskId, processTaskStepId);
+//                if (processTaskStepFormAttributeList.size() > 0) {
+//                    for (ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
+//                        formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(),
+//                            processTaskStepFormAttributeVo.getAction());
+//                    }
+//                }
+//                processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
+//            } else {
+//                processTaskService.setProcessTaskFormAttributeAction(processTaskVo, null, 0);
+//            }
 
             resultObj.put("formAttributeDataMap", processTaskVo.getFormAttributeDataMap());
-            resultObj.put("formConfig", JSON.parseObject(processTaskVo.getFormConfig()));
+            resultObj.put("formConfig", processTaskVo.getFormConfig());
         }
 
         return resultObj;
