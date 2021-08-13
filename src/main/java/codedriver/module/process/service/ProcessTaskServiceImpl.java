@@ -256,7 +256,7 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
                 if (processVo != null) {
                     String formUuid = processVo.getFormUuid();
-                    FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(processUuid);
+                    FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(formUuid);
                     if (formVersion == null) {
                         throw new FormActiveVersionNotFoundExcepiton(formUuid);
                     }
