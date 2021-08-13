@@ -28,8 +28,10 @@ public interface ProcessTaskService {
      *            0：查看页面，1：处理页面
      * @return void
      */
-    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
-        Map<String, String> formAttributeActionMap, int mode);
+//    public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
+//        Map<String, String> formAttributeActionMap, int mode);
+
+    void setProcessTaskFormInfo(ProcessTaskVo processTaskVo);
 
     public List<String> getFormConfigAuthorityConfig(ProcessTaskVo processTaskVo);
 

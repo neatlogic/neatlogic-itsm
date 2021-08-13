@@ -105,7 +105,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             }
         }
         processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId));
-//        Map<String, String> formAttributeActionMap = new HashMap<>();
         if (processTaskStepId != null) {
             ProcessTaskStepVo currentProcessTaskStepVo = getCurrentProcessTaskStepById(processTaskStepId);
             if (currentProcessTaskStepVo != null) {
@@ -114,24 +113,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     processTaskService.setTemporaryData(processTaskVo, currentProcessTaskStepVo);
                 }
                 processTaskVo.setCurrentProcessTaskStep(currentProcessTaskStepVo);
-//                if (StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
-//                    // 表单属性显示控制
-//                    List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList = processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskId, processTaskStepId);
-//                    for (ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
-//                        processTaskStepFormAttributeVo.setProcessStepUuid(currentProcessTaskStepVo.getProcessStepUuid());
-//                        formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(), processTaskStepFormAttributeVo.getAction());
-//                    }
-//                    currentProcessTaskStepVo.setStepFormConfig(processTaskStepFormAttributeList);
-//                }
             }
         }
-//        if (StringUtils.isNotBlank(processTaskVo.getFormConfig())) {
-//            boolean isAuthority = false;
-//            if (processTaskStepId != null) {
-//                isAuthority = new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_WORK).build().check();
-//            }
-//            processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, isAuthority ? 1 : 0);
-//        }
 
         // TODO 兼容老工单表单（判断是否存在旧表单）
         Map<String, String> oldFormPropMap = processTaskMapper.getProcessTaskOldFormAndPropByTaskId(processTaskId);
