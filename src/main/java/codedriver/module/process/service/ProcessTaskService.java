@@ -31,6 +31,8 @@ public interface ProcessTaskService {
     public void setProcessTaskFormAttributeAction(ProcessTaskVo processTaskVo,
         Map<String, String> formAttributeActionMap, int mode);
 
+    public List<String> getFormConfigAuthorityConfig(ProcessTaskVo processTaskVo);
+
     public void parseProcessTaskStepReply(ProcessTaskStepReplyVo processTaskStepReplyVo);
 
     /**

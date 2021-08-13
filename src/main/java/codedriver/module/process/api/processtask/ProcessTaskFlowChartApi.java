@@ -100,7 +100,6 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                     processTaskStepVo.setProcessTaskStepRemindList(null);
                     processTaskStepVo.setProcessTaskStepSubtaskList(null);
                     processTaskStepVo.setSlaTimeList(null);
-                    processTaskStepVo.setStepFormConfig(null);
                     processTaskStepVo.setUserList(null);
                     processTaskStepVo.setWorkerPolicyList(null);
                 }
@@ -139,7 +138,6 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             processTaskStepVo.setProcessTaskStepRemindList(null);
             processTaskStepVo.setProcessTaskStepSubtaskList(null);
             processTaskStepVo.setSlaTimeList(null);
-            processTaskStepVo.setStepFormConfig(null);
             processTaskStepVo.setUserList(null);
             processTaskStepVo.setWorkerPolicyList(null);
             ProcessTaskStepUserVo majorUser = new ProcessTaskStepUserVo();
