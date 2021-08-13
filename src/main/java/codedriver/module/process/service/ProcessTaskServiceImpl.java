@@ -256,24 +256,26 @@ public class ProcessTaskServiceImpl implements ProcessTaskService {
                 ProcessVo processVo = processMapper.getProcessByUuid(processUuid);
                 if (processVo != null) {
                     String formUuid = processVo.getFormUuid();
-                    FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(formUuid);
-                    if (formVersion == null) {
-                        throw new FormActiveVersionNotFoundExcepiton(formUuid);
-                    }
-                    processTaskVo.setFormConfig(JSONObject.parseObject(formVersion.getFormConfig()));
-                    JSONObject processConfig = processVo.getConfig();
-                    if (MapUtils.isNotEmpty(processConfig)) {
-                        JSONObject process = processConfig.getJSONObject("process");
-                        if (MapUtils.isNotEmpty(process)) {
-                            JSONObject formConfig = process.getJSONObject("formConfig");
-                            if (MapUtils.isNotEmpty(formConfig)) {
-                                JSONArray authorityList = formConfig.getJSONArray("authorityList");
-                                processTaskVo.setFormConfigAuthorityList(authorityList);
+                    if (StringUtils.isNotBlank(formUuid)) {
+                        FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(formUuid);
+                        if (formVersion == null) {
+                            throw new FormActiveVersionNotFoundExcepiton(formUuid);
+                        }
+                        processTaskVo.setFormConfig(JSONObject.parseObject(formVersion.getFormConfig()));
+                        JSONObject processConfig = processVo.getConfig();
+                        if (MapUtils.isNotEmpty(processConfig)) {
+                            JSONObject process = processConfig.getJSONObject("process");
+                            if (MapUtils.isNotEmpty(process)) {
+                                JSONObject formConfig = process.getJSONObject("formConfig");
+                                if (MapUtils.isNotEmpty(formConfig)) {
+                                    JSONArray authorityList = formConfig.getJSONArray("authorityList");
+                                    processTaskVo.setFormConfigAuthorityList(authorityList);
+                                }
                             }
                         }
+                        List<String> formAttributeHideList = getFormConfigAuthorityConfig(processTaskVo);
+                        processTaskVo.setFormAttributeHideList(formAttributeHideList);
                     }
-                    List<String> formAttributeHideList = getFormConfigAuthorityConfig(processTaskVo);
-                    processTaskVo.setFormAttributeHideList(formAttributeHideList);
                 }
             }
         }
