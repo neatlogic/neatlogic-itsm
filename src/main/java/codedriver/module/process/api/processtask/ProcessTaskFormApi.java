@@ -1,19 +1,15 @@
 package codedriver.module.process.api.processtask;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
-import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -21,13 +17,8 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStepDataType;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
-import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
-import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
-import codedriver.framework.process.dto.ProcessTaskFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepFormAttributeVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -45,15 +36,10 @@ import codedriver.module.process.service.ProcessTaskService;
 public class ProcessTaskFormApi extends PrivateApiComponentBase {
 
     @Autowired
-    private ProcessTaskMapper processTaskMapper;
-
-    @Autowired
     private ProcessTaskService processTaskService;
 
     @Autowired
     private ProcessTaskStepDataMapper processTaskStepDataMapper;
-    @Autowired
-    private SelectContentByHashMapper selectContentByHashMapper;
 
     @Override
     public String getToken() {
@@ -85,28 +71,8 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
         new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_VIEW).build()
             .checkAndNoPermissionThrowException();
         /** 检查工单是否存在表单 **/
-        ProcessTaskFormVo processTaskFormVo = processTaskMapper.getProcessTaskFormByProcessTaskId(processTaskId);
-        if (processTaskFormVo != null && StringUtils.isNotBlank(processTaskFormVo.getFormContentHash())) {
-            String formContent =
-                selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
-            if (StringUtils.isNotBlank(formContent)) {
-                processTaskVo.setFormConfig(JSONObject.parseObject(formContent));
-                List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
-                if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
-                    Map<String, Object> formAttributeDataMap = new HashMap<>();
-                    for (ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo : processTaskFormAttributeDataList) {
-                        formAttributeDataMap.put(processTaskFormAttributeDataVo.getAttributeUuid(), processTaskFormAttributeDataVo.getDataObj());
-                    }
-                    processTaskVo.setFormAttributeDataMap(formAttributeDataMap);
-                }
-                // 获取工单流程图信息
-                String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
-                JSONArray formConfigAuthorityList = (JSONArray) JSONPath.read(taskConfig, "process.formConfig.authorityList");
-                processTaskVo.setFormConfigAuthorityList(formConfigAuthorityList);
-                List<String> formAttributeHideList = processTaskService.getFormConfigAuthorityConfig(processTaskVo);
-                processTaskVo.setFormAttributeHideList(formAttributeHideList);
-            }
-
+        processTaskService.setProcessTaskFormInfo(processTaskVo);
+        if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
             if (processTaskStepId != null) {
                 if (new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.STEP_VIEW)
                     .build().check()) {
@@ -136,25 +102,10 @@ public class ProcessTaskFormApi extends PrivateApiComponentBase {
                 }
             }
 
-//            if (processTaskStepId != null && new ProcessAuthManager.StepOperationChecker(processTaskStepId,
-//                ProcessTaskOperationType.STEP_WORK).build().check()) {
-//                /** 当前用户有处理权限，根据当前步骤表单属性显示设置控制表单属性展示 **/
-//                Map<String, String> formAttributeActionMap = new HashMap<>();
-//                List<ProcessTaskStepFormAttributeVo> processTaskStepFormAttributeList =
-//                    processTaskMapper.getProcessTaskStepFormAttributeByProcessTaskStepId(processTaskId, processTaskStepId);
-//                if (processTaskStepFormAttributeList.size() > 0) {
-//                    for (ProcessTaskStepFormAttributeVo processTaskStepFormAttributeVo : processTaskStepFormAttributeList) {
-//                        formAttributeActionMap.put(processTaskStepFormAttributeVo.getAttributeUuid(),
-//                            processTaskStepFormAttributeVo.getAction());
-//                    }
-//                }
-//                processTaskService.setProcessTaskFormAttributeAction(processTaskVo, formAttributeActionMap, 1);
-//            } else {
-//                processTaskService.setProcessTaskFormAttributeAction(processTaskVo, null, 0);
-//            }
-
             resultObj.put("formAttributeDataMap", processTaskVo.getFormAttributeDataMap());
             resultObj.put("formConfig", processTaskVo.getFormConfig());
+            resultObj.put("formConfigAuthorityList", processTaskVo.getFormConfigAuthorityList());
+            resultObj.put("formAttributeHideList", processTaskVo.getFormAttributeHideList());
         }
 
         return resultObj;
