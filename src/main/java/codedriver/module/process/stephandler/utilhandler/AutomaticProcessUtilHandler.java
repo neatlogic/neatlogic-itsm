@@ -266,6 +266,11 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         JSONObject workerPolicyConfig = configObj.getJSONObject("workerPolicyConfig");
         JSONObject workerPolicyObj = ProcessConfigUtil.regulateWorkerPolicyConfig(workerPolicyConfig);
         resultObj.put("workerPolicyConfig", workerPolicyObj);
+
+        JSONArray tagList = configObj.getJSONArray("tagList");
+        if (CollectionUtils.isNotEmpty(tagList)) {
+            resultObj.put("tagList", tagList);
+        }
         return resultObj;
     }
 
