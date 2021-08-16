@@ -61,6 +61,7 @@ public class ProcessServiceImpl implements ProcessService {
             processMapper.deleteProcessFormByProcessUuid(uuid);
             processMapper.deleteProcessSlaByProcessUuid(uuid);
             scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
+            processMapper.deleteProcessStepTagByProcessUuid(uuid);
             processMapper.updateProcess(processVo);
         } else {
             processVo.setFcu(UserContext.get().getUserUuid(true));
