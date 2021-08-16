@@ -93,6 +93,11 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
                 processStepVo.setWorkerPolicyList(workerPolicyList);
             }
         }
+
+        JSONArray tagList = stepConfigObj.getJSONArray("tagList");
+        if (CollectionUtils.isNotEmpty(tagList)) {
+            processStepVo.setTagList(tagList.toJavaList(String.class));
+        }
         /** 收集引用的外部调用uuid **/
         JSONObject automaticConfig = stepConfigObj.getJSONObject("automaticConfig");
         if (MapUtils.isNotEmpty(automaticConfig)) {
