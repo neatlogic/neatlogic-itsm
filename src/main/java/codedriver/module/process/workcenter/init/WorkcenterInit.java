@@ -1,20 +1,20 @@
 /*
- * Copyright (c)  2021 TechSure Co.,Ltd.  All Rights Reserved.
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
 package codedriver.module.process.workcenter.init;
 
-import codedriver.framework.applicationlistener.core.ApplicationListenerBase;
+import codedriver.framework.applicationlistener.core.ModuleInitializedListenerBase;
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
+import codedriver.framework.bootstrap.CodedriverWebApplicationContext;
 import codedriver.framework.dao.mapper.TenantMapper;
 import codedriver.framework.dto.TenantVo;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -29,7 +29,7 @@ import java.util.List;
  * @Date: 2021/1/5 17:55
  **/
 @Component
-public class WorkcenterInit extends ApplicationListenerBase {
+public class WorkcenterInit extends ModuleInitializedListenerBase {
     public List<WorkcenterVo> workcenterList = new ArrayList<>();
     private List<TenantVo> tenantList = new ArrayList<>();
 
@@ -67,10 +67,11 @@ public class WorkcenterInit extends ApplicationListenerBase {
                 "}");
         workcenterVo.setType(ProcessWorkcenterType.FACTORY.getValue());
         workcenterVo.setSort(1);
-        return  workcenterVo;
+        return workcenterVo;
     }
+
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
+    public void onInitialized(CodedriverWebApplicationContext context) {
         for (TenantVo tenantVo : tenantList) {
             CachedThreadPool.execute(new InsertWorkcenterRunner(tenantVo.getUuid()));
         }
