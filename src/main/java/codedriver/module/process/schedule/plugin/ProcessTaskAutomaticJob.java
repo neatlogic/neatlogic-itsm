@@ -13,37 +13,33 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.processtask.AutomaticConfigException;
 import codedriver.framework.scheduler.core.JobBase;
-import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.TimeUtil;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskAutomaticService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.MapUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
 @Component
 @DisallowConcurrentExecution
 public class ProcessTaskAutomaticJob extends JobBase {
-	@Autowired
-	ProcessTaskService processTaskService;
+	@Resource
+	ProcessTaskAutomaticService processTaskAutomaticService;
 	
-	@Autowired
+	@Resource
 	ProcessTaskMapper processTaskMapper;
 	
-	@Autowired
+	@Resource
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
-	
-	@Autowired
-	SchedulerMapper schedulerMapper;
 
-    @Autowired
+    @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
 	
 	@Override
@@ -128,7 +124,7 @@ public class ProcessTaskAutomaticJob extends JobBase {
 			UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
 			ProcessTaskStepVo currentProcessTaskStepVo = (ProcessTaskStepVo) jobObject.getData("currentProcessTaskStepVo");
 			//excute
-			Boolean isUnloadJob = processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
+			Boolean isUnloadJob = processTaskAutomaticService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
 			//update nextFireTime
 			ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo(currentProcessTaskStepVo.getProcessTaskId(),currentProcessTaskStepVo.getId(),ProcessTaskStepDataType.AUTOMATIC.getValue(),SystemUser.SYSTEM.getUserId());
 			ProcessTaskStepDataVo stepData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);

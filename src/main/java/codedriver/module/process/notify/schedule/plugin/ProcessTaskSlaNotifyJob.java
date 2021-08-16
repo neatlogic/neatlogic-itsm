@@ -15,7 +15,7 @@ import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.util.NotifyPolicyUtil;
 import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
 import codedriver.module.process.notify.constvalue.SlaNotifyTriggerType;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.framework.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.MapUtils;

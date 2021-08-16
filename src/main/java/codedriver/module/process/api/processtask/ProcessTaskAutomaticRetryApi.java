@@ -16,27 +16,28 @@ import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskAutomaticService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	private ProcessTaskMapper processTaskMapper;
 	
-	@Autowired
-	ProcessTaskService processTaskService;
+	@Resource
+	ProcessTaskAutomaticService processTaskAutomaticService;
 	
-	@Autowired
+	@Resource
 	ProcessTaskStepDataMapper processTaskStepDataMapper;
 	
-	@Autowired
+	@Resource
 	SelectContentByHashMapper selectContentByHashMapper;
 
 	@Override
@@ -95,7 +96,7 @@ public class ProcessTaskAutomaticRetryApi extends PrivateApiComponentBase {
 			
 		}
 		if(isRetry) {
-			processTaskService.runRequest(automaticConfigVo, processTaskStepVo);
+			processTaskAutomaticService.runRequest(automaticConfigVo, processTaskStepVo);
 		}else {}
 		return null;
 	}

@@ -1,24 +1,8 @@
 package codedriver.module.process.stephandler.component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
-import org.apache.commons.collections4.MapUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
+import codedriver.framework.asynchronization.threadpool.TransactionSynchronizationPool;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
@@ -32,19 +16,30 @@ import codedriver.framework.process.dto.automatic.AutomaticConfigVo;
 import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.util.TimeUtil;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.module.process.service.ProcessTaskAutomaticService;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 	static Logger logger = LoggerFactory.getLogger(AutomaticProcessComponent.class);
 	private static final ThreadLocal<List<RequestFirstThread>> AUTOMATIC_LIST = new ThreadLocal<>();
 	
-	@Autowired
-	private ProcessTaskStepDataMapper processTaskStepDataMapper;
-	@Autowired
-	ProcessTaskService processTaskService;
-	
-	
+	@Resource
+	ProcessTaskStepDataMapper processTaskStepDataMapper;
+
+	@Resource
+	ProcessTaskAutomaticService processTaskAutomaticService;
+
+
 	@Override
 	public String getHandler() {
 		return ProcessStepHandlerType.AUTOMATIC.getHandler();
@@ -100,7 +95,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 		}
 		//初始化audit
 		AutomaticConfigVo automaticConfigVo = new AutomaticConfigVo(automaticConfig);
-		processTaskService.initProcessTaskStepData(currentProcessTaskStepVo,automaticConfigVo,null,"request");
+		processTaskAutomaticService.initProcessTaskStepData(currentProcessTaskStepVo,automaticConfigVo,null,"request");
 		requestFirst(currentProcessTaskStepVo,automaticConfig);
 		return 0;
 	}
@@ -133,7 +128,7 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 				isTimeToRun = TimeUtil.isInTimeWindow(timeWindowConfig.getString("startTime"),timeWindowConfig.getString("endTime"));
 			}
 			if(timeWindowConfig == null || isTimeToRun == 0) {
-				processTaskService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
+				processTaskAutomaticService.runRequest(automaticConfigVo,currentProcessTaskStepVo);
 			}else {//loadJob,定时执行第一次请求
 				//初始化audit执行状态
 				JSONObject audit = null;
@@ -141,16 +136,16 @@ public class AutomaticProcessComponent extends ProcessStepHandlerBase {
 				JSONObject dataObject = data.getData();
 				audit = dataObject.getJSONObject("requestAudit");
 				audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.PENDING.getValue()));
-				processTaskService.initJob(automaticConfigVo,currentProcessTaskStepVo,dataObject);
+				processTaskAutomaticService.initJob(automaticConfigVo,currentProcessTaskStepVo,dataObject);
 				data.setData(dataObject.toJSONString());
 				processTaskStepDataMapper.replaceProcessTaskStepData(data);
 			}
 		}
 		
 	}
-	
-	
-	
+
+
+
 	@Override
 	protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) throws ProcessTaskException {
 		return 1;

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import codedriver.framework.service.AuthenticationInfoService;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.framework.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

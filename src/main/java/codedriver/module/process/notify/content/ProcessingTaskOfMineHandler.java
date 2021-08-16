@@ -25,7 +25,7 @@ import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.module.process.notify.constvalue.TimedTaskTriggerType;
 import codedriver.module.process.notify.handler.TimedTaskNotifyPolicyHandler;
-import codedriver.module.process.service.ProcessTaskService;
+import codedriver.framework.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
