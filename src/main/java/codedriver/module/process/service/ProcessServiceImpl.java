@@ -5,6 +5,7 @@ import java.util.List;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import codedriver.framework.process.dto.*;
 import codedriver.module.process.dependency.handler.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,14 +17,6 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.process.dto.ProcessDraftVo;
-import codedriver.framework.process.dto.ProcessFormVo;
-import codedriver.framework.process.dto.ProcessSlaVo;
-import codedriver.framework.process.dto.ProcessStepFormAttributeVo;
-import codedriver.framework.process.dto.ProcessStepRelVo;
-import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessVo;
 import codedriver.framework.form.exception.FormNotFoundException;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 
@@ -68,6 +61,7 @@ public class ProcessServiceImpl implements ProcessService {
             processMapper.deleteProcessFormByProcessUuid(uuid);
             processMapper.deleteProcessSlaByProcessUuid(uuid);
             scoreTemplateMapper.deleteProcessScoreTemplateByProcessUuid(uuid);
+            processMapper.deleteProcessStepTagByProcessUuid(uuid);
             processMapper.updateProcess(processVo);
         } else {
             processVo.setFcu(UserContext.get().getUserUuid(true));
@@ -135,6 +129,26 @@ public class ProcessServiceImpl implements ProcessService {
                 processMapper.deleteProcessStepCommentTemplate(stepVo.getUuid());
                 if (stepVo.getCommentTemplateId() != null) {
                     processMapper.insertProcessStepCommentTemplate(stepVo);
+                }
+                List<String> tagNameList = stepVo.getTagList();
+                if (CollectionUtils.isNotEmpty(tagNameList)) {
+                    ProcessStepTagVo processStepTagVo = new ProcessStepTagVo();
+                    processStepTagVo.setProcessUuid(stepVo.getProcessUuid());
+                    processStepTagVo.setProcessStepUuid(stepVo.getUuid());
+                    List<ProcessTagVo> processTagList = processMapper.getProcessTagByNameList(tagNameList);
+                    for (ProcessTagVo processTagVo : processTagList) {
+                        processStepTagVo.setTagId(processTagVo.getId());
+                        tagNameList.remove(processTagVo.getName());
+                        processMapper.insertProcessStepTag(processStepTagVo);
+                    }
+                    if (CollectionUtils.isNotEmpty(tagNameList)) {
+                        for (String tagName : tagNameList) {
+                            ProcessTagVo processTagVo = new ProcessTagVo(tagName);
+                            processMapper.insertProcessTag(processTagVo);
+                            processStepTagVo.setTagId(processTagVo.getId());
+                            processMapper.insertProcessStepTag(processStepTagVo);
+                        }
+                    }
                 }
             }
         }

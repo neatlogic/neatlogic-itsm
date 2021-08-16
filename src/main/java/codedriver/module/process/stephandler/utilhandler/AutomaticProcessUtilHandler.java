@@ -93,6 +93,11 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
                 processStepVo.setWorkerPolicyList(workerPolicyList);
             }
         }
+
+        JSONArray tagList = stepConfigObj.getJSONArray("tagList");
+        if (CollectionUtils.isNotEmpty(tagList)) {
+            processStepVo.setTagList(tagList.toJavaList(String.class));
+        }
         /** 收集引用的外部调用uuid **/
         JSONObject automaticConfig = stepConfigObj.getJSONObject("automaticConfig");
         if (MapUtils.isNotEmpty(automaticConfig)) {
@@ -261,6 +266,11 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         JSONObject workerPolicyConfig = configObj.getJSONObject("workerPolicyConfig");
         JSONObject workerPolicyObj = ProcessConfigUtil.regulateWorkerPolicyConfig(workerPolicyConfig);
         resultObj.put("workerPolicyConfig", workerPolicyObj);
+
+        JSONArray tagList = configObj.getJSONArray("tagList");
+        if (CollectionUtils.isNotEmpty(tagList)) {
+            resultObj.put("tagList", tagList);
+        }
         return resultObj;
     }
 
