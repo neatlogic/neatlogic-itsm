@@ -12,7 +12,7 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.message.handler.TimedTaskMessgeHandler;
+import codedriver.module.framework.message.handler.TimedTaskMessgeHandler;
 import codedriver.framework.notify.core.*;
 import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
 import codedriver.framework.notify.dto.NotifyVo;
