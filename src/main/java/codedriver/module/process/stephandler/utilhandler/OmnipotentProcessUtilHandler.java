@@ -112,6 +112,11 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         //保存回复模版ID
         Long commentTemplateId = stepConfigObj.getLong("commentTemplateId");
         processStepVo.setCommentTemplateId(commentTemplateId);
+
+        JSONArray tagList = stepConfigObj.getJSONArray("tagList");
+        if (CollectionUtils.isNotEmpty(tagList)) {
+            processStepVo.setTagList(tagList.toJavaList(String.class));
+        }
     }
 
     @Override
