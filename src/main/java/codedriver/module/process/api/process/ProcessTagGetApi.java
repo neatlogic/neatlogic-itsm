@@ -70,9 +70,8 @@ public class ProcessTagGetApi extends PrivateApiComponentBase {
 		if (CollectionUtils.isNotEmpty(defaultValue)) {
 			List<String> tagNameList = defaultValue.toJavaList(String.class);
 			List<ValueTextVo> valueTextList = new ArrayList<>();
-			List<ProcessTagVo> processTagList = processMapper.getProcessTagByNameList(tagNameList);
-			for (ProcessTagVo processTag : processTagList) {
-				valueTextList.add(new ValueTextVo(processTag.getId(), processTag.getName()));
+			for (String tagName : tagNameList) {
+				valueTextList.add(new ValueTextVo(tagName, tagName));
 			}
 			resultObj.put("list", valueTextList);
 		} else {
