@@ -64,10 +64,9 @@ public class ProcessTaskListFormApi extends PrivateApiComponentBase {
     @Description(desc = "查询工单列表的表单数据")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        List<ProcessTaskVo> resultList = new ArrayList();
         JSONArray processTaskIdArray = paramObj.getJSONArray("processTaskIdList");
         if (CollectionUtils.isEmpty(processTaskIdArray)) {
-            return resultList;
+            return new ArrayList<>();
         }
         List<Long> processTaskIdList = processTaskIdArray.toJavaList(Long.class);
         List<Long> existsProcessTaskIdList = processTaskMapper.checkProcessTaskIdListIsExists(processTaskIdList);
@@ -97,11 +96,7 @@ public class ProcessTaskListFormApi extends PrivateApiComponentBase {
                 if (StringUtils.isNotBlank(formContent)) {
                     Long processTaskId = processTaskFormVo.getProcessTaskId();
                     ProcessTaskVo processTaskVo = processTaskMap.get(processTaskId);
-//                    ProcessTaskVo processTaskVo = new ProcessTaskVo();
-//                    processTaskVo.setId(processTaskId);
                     processTaskVo.setFormConfig(JSONObject.parseObject(formContent));
-                    resultList.add(processTaskVo);
-//                    processTaskMap.put(processTaskId, processTaskVo);
                     existsFormProcessTaskIdList.add(processTaskId);
                 }
             }
@@ -116,6 +111,6 @@ public class ProcessTaskListFormApi extends PrivateApiComponentBase {
                 }
             }
         }
-        return resultList;
+        return existsProcessTaskVoList;
     }
 }
