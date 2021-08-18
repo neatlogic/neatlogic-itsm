@@ -10,7 +10,7 @@ import codedriver.framework.notify.core.INotifyHandler;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.dto.NotifyVo;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
-import codedriver.module.framework.notify.handler.EmailNotifyHandler;
+import codedriver.framework.notify.handler.EmailNotifyHandler;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
