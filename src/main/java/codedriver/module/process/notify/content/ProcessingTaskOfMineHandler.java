@@ -12,14 +12,14 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.message.handler.TimedTaskMessgeHandler;
+import codedriver.module.framework.message.handler.TimedTaskMessgeHandler;
 import codedriver.framework.notify.core.*;
 import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
 import codedriver.framework.notify.dto.NotifyVo;
 import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
-import codedriver.framework.notify.handler.EmailNotifyHandler;
-import codedriver.framework.notify.handler.MessageNotifyHandler;
+import codedriver.module.framework.notify.handler.EmailNotifyHandler;
+import codedriver.module.framework.notify.handler.MessageNotifyHandler;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.form.constvalue.FormConditionModel;
@@ -118,7 +118,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 		 * 例如此插件下的邮件通知有邮件标题、邮件正文、接收人
 		 * 将来扩展通知方式插件时，可在messageAttrMap中put对应的插件类与属性
 		 */
-		messageAttrMap.put(EmailNotifyHandler.class.getName(),new JSONArray(){
+		messageAttrMap.put(EmailNotifyHandler.class.getSimpleName(),new JSONArray(){
 			{
 				this.add(new JSONObject(){
 					{
@@ -150,7 +150,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				});
 			}
 		});
-		messageAttrMap.put(MessageNotifyHandler.class.getName(),new JSONArray(){
+		messageAttrMap.put(MessageNotifyHandler.class.getSimpleName(),new JSONArray(){
 			{
 				this.add(new JSONObject(){
 					{
@@ -183,13 +183,13 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 			}
 		});
 
-		notifyHandlersWhichCanChooseTaskColumn.add(EmailNotifyHandler.class.getName());
+		notifyHandlersWhichCanChooseTaskColumn.add(EmailNotifyHandler.class.getSimpleName());
 
 		/**
 		 * 不同的通知方式返回内容形式不同的NotifyVo
 		 * 例如邮件通知的形式为工单列表
 		**/
-		handlerMap.put(EmailNotifyHandler.class.getName(),new BuildNotifyHandler(){
+		handlerMap.put(EmailNotifyHandler.class.getSimpleName(),new BuildNotifyHandler(){
 			@Override
 			public String getPreviewContent(JSONObject config) {
 				JSONArray dataColumnList = config.getJSONArray("dataColumnList");
@@ -374,7 +374,7 @@ public class ProcessingTaskOfMineHandler extends NotifyContentHandlerBase {
 				}
 			}
 		});
-		handlerMap.put(MessageNotifyHandler.class.getName(),new BuildNotifyHandler(){
+		handlerMap.put(MessageNotifyHandler.class.getSimpleName(),new BuildNotifyHandler(){
 			private final String homeUrl = Config.HOME_URL();
 
 			private final String allProcessTaskUrl = "process.html#/task-overview-allProcessTask";

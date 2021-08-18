@@ -10,7 +10,7 @@ import codedriver.framework.notify.core.INotifyHandler;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.dto.NotifyVo;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
-import codedriver.framework.notify.handler.EmailNotifyHandler;
+import codedriver.module.framework.notify.handler.EmailNotifyHandler;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
@@ -79,9 +79,9 @@ public class ProcessTaskBatchMergeReportActionApi extends PrivateApiComponentBas
     @Description(desc = "工单批量合并上报触发动作")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        INotifyHandler handler = NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getName());
+        INotifyHandler handler = NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getSimpleName());
         if (handler == null) {
-            throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getName());
+            throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getSimpleName());
         }
         Long processTaskId = paramObj.getLong("processTaskId");
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
