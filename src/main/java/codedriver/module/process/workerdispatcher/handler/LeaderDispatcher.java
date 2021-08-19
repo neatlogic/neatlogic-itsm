@@ -6,6 +6,7 @@ import codedriver.framework.dto.TeamUserTitleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherBase;
+import codedriver.framework.process.workerdispatcher.core.WorkerDispatcherForm;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -82,20 +83,20 @@ public class LeaderDispatcher extends WorkerDispatcherBase {
         /** 选择处理组 **/
         {
             JSONObject jsonObj = new JSONObject();
-            jsonObj.put("type", "userselect");
+            jsonObj.put("type", WorkerDispatcherForm.USER_SELECT.getValue());
             jsonObj.put("name", "team");
             jsonObj.put("label", "处理组");
-            jsonObj.put("validateList", Arrays.asList("required"));
+            jsonObj.put("validateList", Collections.singletonList("required"));
             jsonObj.put("multiple", false);
             jsonObj.put("value", "");
             jsonObj.put("defaultValue", "");
-            jsonObj.put("groupList", Arrays.asList("team"));
+            jsonObj.put("groupList", Collections.singletonList("team"));
             resultArray.add(jsonObj);
         }
         /** 选择头衔 **/
         {
             JSONObject jsonObj = new JSONObject();
-            jsonObj.put("type", "select");
+            jsonObj.put("type", WorkerDispatcherForm.SELECT.getValue());
             jsonObj.put("name", "teamUserTitle");
             jsonObj.put("search", true);
             jsonObj.put("dynamicUrl", "api/rest/user/title/search");
