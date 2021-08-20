@@ -22,8 +22,10 @@ import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerF
 import codedriver.framework.util.NotifyPolicyUtil;
 import codedriver.framework.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,15 +124,12 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                 if (policyId != null) {
                     String notifyPolicyHandler = null;
                     NotifyPolicyConfigVo policyConfig = null;
-                    ProcessTaskStepNotifyPolicyVo processTaskStepNotifyPolicyVo =
-                            new ProcessTaskStepNotifyPolicyVo();
+                    ProcessTaskStepNotifyPolicyVo processTaskStepNotifyPolicyVo = new ProcessTaskStepNotifyPolicyVo();
                     processTaskStepNotifyPolicyVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
                     processTaskStepNotifyPolicyVo.setPolicyId(policyId);
-                    processTaskStepNotifyPolicyVo =
-                            processTaskMapper.getProcessTaskStepNotifyPolicy(processTaskStepNotifyPolicyVo);
+                    processTaskStepNotifyPolicyVo = processTaskMapper.getProcessTaskStepNotifyPolicy(processTaskStepNotifyPolicyVo);
                     if (processTaskStepNotifyPolicyVo != null) {
-                        policyConfig = JSON.parseObject(processTaskStepNotifyPolicyVo.getPolicyConfig(),
-                                NotifyPolicyConfigVo.class);
+                        policyConfig = JSON.parseObject(processTaskStepNotifyPolicyVo.getPolicyConfig(), NotifyPolicyConfigVo.class);
                         notifyPolicyHandler = processTaskStepNotifyPolicyVo.getPolicyHandler();
                     } else {
                         NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
@@ -147,11 +147,12 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                         Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
                         processTaskService.getReceiverMap(currentProcessTaskStepVo, receiverMap);
                         /** 参数映射列表 **/
-                        List<ParamMappingVo> paramMappingList =
-                                JSON.parseArray(JSON.toJSONString(notifyPolicyConfig.getJSONArray("paramMappingList")),
-                                        ParamMappingVo.class);
-                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData,
-                                conditionParamData, receiverMap);
+                        List<ParamMappingVo> paramMappingList = new ArrayList<>();
+                        JSONArray paramMappingArray = notifyPolicyConfig.getJSONArray("paramMappingList");
+                        if (CollectionUtils.isNotEmpty(paramMappingArray)) {
+                            paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
+                        }
+                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData, conditionParamData, receiverMap);
                     }
                 }
             }
