@@ -83,14 +83,6 @@ public class ProcessTaskFormDataListForEmailApi extends PrivateApiComponentBase 
                             Object value = handler.dataTransformationForEmail(attributeDataVo, JSONObject.parseObject(formAttribute.getConfig()));
                             attributeDataVo.setTransformedResult(value);
                             attributeDataVo.setLabel(formAttribute.getLabel());
-//                            ProcessTaskFormAttributeDataVo processTaskFormAttributeDataVo = new ProcessTaskFormAttributeDataVo();
-//                            processTaskFormAttributeDataVo.setProcessTaskId(attributeDataVo.getProcessTaskId());
-//                            processTaskFormAttributeDataVo.setAttributeUuid(attributeDataVo.getAttributeUuid());
-//                            processTaskFormAttributeDataVo.setType(attributeDataVo.getType());
-//                            processTaskFormAttributeDataVo.setData(JSONObject.toJSONString(value));
-//                            processTaskFormAttributeDataVo.setSort(attributeDataVo.getSort());
-//                            processTaskFormAttributeDataVo.setLabel(formAttribute.getLabel());
-//                            processTaskFormAttributeDataVoList.add(attributeDataVo);
                         }
                     }
                 }
