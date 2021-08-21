@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.notify.schedule.plugin;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
@@ -47,8 +52,8 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
     private ProcessTaskService processTaskService;
 
     @Override
-    public Boolean checkCronIsExpired(JobObject jobObject) {
-        Long slaTransferId = (Long)jobObject.getData("slaNotifyId");
+    public Boolean isHealthy(JobObject jobObject) {
+        Long slaTransferId = (Long) jobObject.getData("slaNotifyId");
         ProcessTaskSlaNotifyVo processTaskSlaNotifyVo = processTaskMapper.getProcessTaskSlaNotifyById(slaTransferId);
         if (processTaskSlaNotifyVo == null) {
             return false;

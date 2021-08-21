@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.notify.schedule.plugin;
 
 import java.util.ArrayList;
@@ -58,15 +63,15 @@ public class ProcessTaskSlaTransferJob extends JobBase {
 	private RoleMapper roleMapper;
 
 	@Override
-	public Boolean checkCronIsExpired(JobObject jobObject) {
-		Long slaTransferId = (Long) jobObject.getData("slaTransferId");
-		ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskMapper.getProcessTaskSlaTransferById(slaTransferId);
-		if (processTaskSlaTransferVo == null) {
-			return false;
-		} else {
-			return true;
-		}
-	}
+    public Boolean isHealthy(JobObject jobObject) {
+        Long slaTransferId = (Long) jobObject.getData("slaTransferId");
+        ProcessTaskSlaTransferVo processTaskSlaTransferVo = processTaskMapper.getProcessTaskSlaTransferById(slaTransferId);
+        if (processTaskSlaTransferVo == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 
 	@Override
 	public void reloadJob(JobObject jobObject) {

@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.schedule.plugin;
 
 import java.util.Date;
@@ -55,15 +60,15 @@ public class ProcessTaskAutoScoreJob extends JobBase {
 	private WorktimeMapper worktimeMapper;
 
 	@Override
-	public Boolean checkCronIsExpired(JobObject jobObject) {
-		Long processTaskId = (Long) jobObject.getData("processTaskId");
-		List<ProcessTaskScoreVo> processtaskScoreVos = processTaskScoreMapper.searchProcessTaskScoreByProcesstaskId(processTaskId);
-		if (CollectionUtils.isEmpty(processtaskScoreVos)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+    public Boolean isHealthy(JobObject jobObject) {
+        Long processTaskId = (Long) jobObject.getData("processTaskId");
+        List<ProcessTaskScoreVo> processtaskScoreVos = processTaskScoreMapper.searchProcessTaskScoreByProcesstaskId(processTaskId);
+        if (CollectionUtils.isEmpty(processtaskScoreVos)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 	@Override
 	public void reloadJob(JobObject jobObject) {
