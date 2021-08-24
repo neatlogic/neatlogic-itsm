@@ -56,6 +56,11 @@ public class ProcessTaskFormDataListForEmailApi extends PrivateApiComponentBase 
         return null;
     }
 
+    @Override
+    public boolean disableReturnCircularReferenceDetect() {
+        return true;
+    }
+
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
     })
