@@ -1,7 +1,11 @@
 package codedriver.module.process.workerdispatcher.handler;
 
 import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamUserTitleVo;
+import codedriver.framework.dto.TeamVo;
+import codedriver.framework.dto.UserTitleVo;
+import codedriver.framework.exception.team.TeamUserTitleNotFoundException;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
@@ -16,8 +20,6 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
@@ -27,6 +29,9 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
 
     @Resource
     private TeamMapper teamMapper;
+
+    @Resource
+    private UserMapper userMapper;
 
     @Override
     public String getName() {
@@ -64,33 +69,23 @@ public class OwnerLeaderDispatcher extends WorkerDispatcherBase {
         List<String> resultList = new ArrayList<>();
         String teamUserTitle = configObj.getString("teamUserTitle");
         if (StringUtils.isNotBlank(teamUserTitle)) {
-//			TeamLevel teamLevel = null;
-//			if(TeamUserTitle.GROUPLEADER.getValue().equals(teamUserTitle)) {
-//				teamLevel = TeamLevel.GROUP;
-//			}else if(TeamUserTitle.COMPANYLEADER.getValue().equals(teamUserTitle)) {
-//				teamLevel = TeamLevel.COMPANY;
-//			}else if(TeamUserTitle.CENTERLEADER.getValue().equals(teamUserTitle)) {
-//				teamLevel = TeamLevel.CENTER;
-//			}else if(TeamUserTitle.DEPARTMENTLEADER.getValue().equals(teamUserTitle)) {
-//				teamLevel = TeamLevel.DEPARTMENT;
-//			}else if(TeamUserTitle.TEAMLEADER.getValue().equals(teamUserTitle)) {
-//				teamLevel = TeamLevel.TEAM;
-//			}else {
-//				return resultList;
-//			}
-
+            UserTitleVo userTitleVo = userMapper.getUserTitleByName(teamUserTitle);
+            if (userTitleVo == null) {
+                throw new TeamUserTitleNotFoundException(teamUserTitle);
+            }
             ProcessTaskVo processTask = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
-            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(processTask.getOwner());
-            if (CollectionUtils.isNotEmpty(teamUuidList)) {
-                List<TeamUserTitleVo> teamUserTileList = teamMapper.getTeamUserTitleListByTeamUuidList(teamUuidList);
-                teamUserTileList = teamUserTileList.stream().filter(o->Objects.equals(o.getTitle(),teamUserTitle)).collect(Collectors.toList());
-                for (TeamUserTitleVo teamUserTitleVo : teamUserTileList) {
-                    resultList.addAll(teamUserTitleVo.getUserList());
+            List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(processTask.getOwner());
+            if (CollectionUtils.isNotEmpty(teamList)) {
+                //需要逐级分组往上找，找到第一个符合的头衔的用户s
+                for (TeamVo teamVo : teamList) {
+                    List<TeamUserTitleVo> teamUserTitleVoList = teamMapper.getTeamUserTitleListByTeamlrAndTitleId(teamVo.getLft(), teamVo.getRht(), userTitleVo.getId());
+                    if (CollectionUtils.isNotEmpty(teamUserTitleVoList)) {
+                        resultList.addAll(teamUserTitleVoList.get(0).getUserList());
+                        break;
+                    }
                 }
             }
-
         }
-
         return resultList;
     }
 
