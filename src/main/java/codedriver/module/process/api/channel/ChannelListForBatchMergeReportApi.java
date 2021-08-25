@@ -47,9 +47,6 @@ public class ChannelListForBatchMergeReportApi extends PrivateApiComponentBase {
     private ProcessTaskService processTaskService;
 
     @Resource
-    private ProcessTaskMapper processTaskMapper;
-
-    @Resource
     private ChannelMapper channelMapper;
 
     @Resource
@@ -61,7 +58,7 @@ public class ChannelListForBatchMergeReportApi extends PrivateApiComponentBase {
     @Resource
     private AuthenticationInfoService authenticationInfoService;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     @Override
@@ -113,13 +110,13 @@ public class ChannelListForBatchMergeReportApi extends PrivateApiComponentBase {
         }
         String userUuid = UserContext.get().getUserUuid(true);
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
-        List<String> processUserTypeList = getProcessUserTypeList(processTaskId, authenticationInfoVo);
+        List<String> processUserTypeList = processTaskService.getProcessUserTypeList(processTaskId, authenticationInfoVo);
         List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(channelUuid, userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), processUserTypeList);
         if (CollectionUtils.isEmpty(channelTypeRelationIdList)) {
             String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
             if(StringUtils.isNotBlank(agentUuid)){
                 AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
-                processUserTypeList = getProcessUserTypeList(processTaskId, agentAuthenticationInfoVo);
+                processUserTypeList = processTaskService.getProcessUserTypeList(processTaskId, agentAuthenticationInfoVo);
                 channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(channelUuid, agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), processUserTypeList);
 
             }
@@ -127,6 +124,7 @@ public class ChannelListForBatchMergeReportApi extends PrivateApiComponentBase {
         if (CollectionUtils.isEmpty(channelTypeRelationIdList)) {
             return resultObj;
         }
+        channelTypeRelationIdList.sort(Long::compareTo);
         Long channelTypeRelationId = channelTypeRelationIdList.get(0);
         ChannelRelationVo channelRelationVo = new ChannelRelationVo();
         channelRelationVo.setSource(channelUuid);
@@ -192,39 +190,5 @@ public class ChannelListForBatchMergeReportApi extends PrivateApiComponentBase {
             return channelTypeMapper.getChannelUuidListByParentUuidListAndChannelTypeUuidList(parentUuidList, channelTypeUuidList);
         }
         return new ArrayList<>();
-    }
-
-    private List<String> getProcessUserTypeList(Long processTaskId, AuthenticationInfoVo authenticationInfoVo) {
-        List<String> processUserTypeList = new ArrayList<>();
-        if(processTaskId != null){
-            String userUuid = authenticationInfoVo.getUserUuid();
-            ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskId);
-            if(userUuid.equals(processTaskVo.getOwner())){
-                processUserTypeList.add(ProcessUserType.OWNER.getValue());
-            }
-            if(userUuid.equals(processTaskVo.getReporter())){
-                processUserTypeList.add(ProcessUserType.REPORTER.getValue());
-            }
-            List<ProcessTaskStepUserVo> processTaskStepUserList = processTaskMapper.getProcessTaskStepUserList(new ProcessTaskStepUserVo(processTaskId, null, userUuid));
-            for(ProcessTaskStepUserVo processTaskStepUserVo : processTaskStepUserList){
-                if(processTaskStepUserVo.getUserType().equals(ProcessUserType.MAJOR.getValue())){
-                    processUserTypeList.add(ProcessUserType.MAJOR.getValue());
-                }else {
-                    processUserTypeList.add(ProcessUserType.MINOR.getValue());
-                }
-            }
-            if (processUserTypeList.contains(ProcessUserType.MAJOR.getValue())){
-                processUserTypeList.add(ProcessUserType.WORKER.getValue());
-            }else {
-                if(processTaskMapper.checkIsWorker(processTaskVo.getId(), null, ProcessUserType.MAJOR.getValue(), authenticationInfoVo) > 0){
-                    processUserTypeList.add(ProcessUserType.WORKER.getValue());
-                }
-            }
-        } else {
-            processUserTypeList.add(ProcessUserType.OWNER.getValue());
-            processUserTypeList.add(ProcessUserType.REPORTER.getValue());
-            processUserTypeList.add(ProcessUserType.MAJOR.getValue());
-        }
-        return processUserTypeList;
     }
 }
