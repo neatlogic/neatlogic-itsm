@@ -3,10 +3,10 @@ package codedriver.module.process.condition.handler;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.ParamType;
-import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
-import codedriver.framework.dto.TeamVo;
+import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
 
     @Resource
-    private TeamMapper teamMapper;
+    private RoleMapper roleMapper;
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
@@ -96,17 +96,17 @@ public class ProcessTaskOwnerRoleCondition extends ProcessTaskConditionBase impl
     public Object valueConversionText(Object value, JSONObject config) {
         if (value != null) {
             if (value instanceof String) {
-                TeamVo teamVo = teamMapper.getTeamByUuid((String) value);
-                if (teamVo != null) {
-                    return teamVo.getName();
+                RoleVo roleVo = roleMapper.getRoleByUuid(value.toString().substring(5));
+                if (roleVo != null) {
+                    return roleVo.getName();
                 }
             } else if (value instanceof List) {
                 List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
                 List<String> textList = new ArrayList<>();
                 for (String valueStr : valueList) {
-                    TeamVo teamVo = teamMapper.getTeamByUuid(valueStr);
-                    if (teamVo != null) {
-                        textList.add(teamVo.getName());
+                    RoleVo roleVo = roleMapper.getRoleByUuid(valueStr.substring(5));
+                    if (roleVo != null) {
+                        textList.add(roleVo.getName());
                     } else {
                         textList.add(valueStr);
                     }
