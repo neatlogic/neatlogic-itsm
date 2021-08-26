@@ -114,24 +114,35 @@ public class ProcessTaskBatchMergeReportActionApi extends PrivateApiComponentBas
         List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
         for (ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataVoList) {
             if ("batchmergereport".equals(attributeDataVo.getType())) {
-                Object dataObj = attributeDataVo.getDataObj();
-                if (dataObj != null) {
-                    JSONArray dataArray = (JSONArray) dataObj;
-                    for (int i = 0; i < dataArray.size(); i++) {
-                        JSONObject data = dataArray.getJSONObject(i);
-                        if (MapUtils.isNotEmpty(data)) {
-                            Long id = data.getLong("id");
-                            if (id != null) {
-                                Integer checked = data.getInteger("checked");
-                                if (Objects.equals(checked, 1)) {
-                                    checkedProcessTaskIdList.add(id);
-                                } else {
-                                    uncheckedProcessTaskIdList.add(id);
-                                }
-                            }
-                        }
+                JSONObject dataObj = (JSONObject) attributeDataVo.getDataObj();
+                if (MapUtils.isNotEmpty(dataObj)) {
+                    JSONArray selectArray = dataObj.getJSONArray("selectList");
+                    if (CollectionUtils.isNotEmpty(selectArray)) {
+                        checkedProcessTaskIdList = selectArray.toJavaList(Long.class);
+                    }
+                    JSONArray unSelectArray = dataObj.getJSONArray("unSelectList");
+                    if (CollectionUtils.isNotEmpty(unSelectArray)) {
+                        uncheckedProcessTaskIdList = unSelectArray.toJavaList(Long.class);
                     }
                 }
+//                Object dataObj = attributeDataVo.getDataObj();
+//                if (dataObj != null) {
+//                    JSONArray dataArray = (JSONArray) dataObj;
+//                    for (int i = 0; i < dataArray.size(); i++) {
+//                        JSONObject data = dataArray.getJSONObject(i);
+//                        if (MapUtils.isNotEmpty(data)) {
+//                            Long id = data.getLong("id");
+//                            if (id != null) {
+//                                Integer checked = data.getInteger("checked");
+//                                if (Objects.equals(checked, 1)) {
+//                                    checkedProcessTaskIdList.add(id);
+//                                } else {
+//                                    uncheckedProcessTaskIdList.add(id);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
         if (CollectionUtils.isNotEmpty(checkedProcessTaskIdList)) {
