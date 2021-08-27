@@ -13,11 +13,9 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.process.auth.PROCESS_BASE;
-import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.restful.annotation.*;
@@ -27,7 +25,6 @@ import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -118,7 +115,6 @@ public class ChannelListForBatchMergeReportApi extends PrivateApiComponentBase {
                 AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
                 processUserTypeList = processTaskService.getProcessUserTypeList(processTaskId, agentAuthenticationInfoVo);
                 channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(channelUuid, agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), processUserTypeList);
-
             }
         }
         if (CollectionUtils.isEmpty(channelTypeRelationIdList)) {
