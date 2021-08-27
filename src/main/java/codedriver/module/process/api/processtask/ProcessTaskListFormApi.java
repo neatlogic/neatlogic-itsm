@@ -64,6 +64,7 @@ public class ProcessTaskListFormApi extends PrivateApiComponentBase {
     @Description(desc = "查询工单列表的表单数据")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        JSONArray resultArray = new JSONArray();
         JSONArray processTaskIdArray = paramObj.getJSONArray("processTaskIdList");
         if (CollectionUtils.isEmpty(processTaskIdArray)) {
             return new ArrayList<>();
@@ -87,6 +88,7 @@ public class ProcessTaskListFormApi extends PrivateApiComponentBase {
         List<ProcessTaskVo> existsProcessTaskVoList = processTaskMapper.getProcessTaskListByIdList(existsProcessTaskIdList);
         for (ProcessTaskVo processTaskVo : existsProcessTaskVoList) {
             processTaskMap.put(processTaskVo.getId(), processTaskVo);
+            resultArray.add(processTaskVo);
         }
         List<ProcessTaskFormVo> processTaskFormList = processTaskMapper.getProcessTaskFormListByProcessTaskIdList(existsProcessTaskIdList);;
         for (ProcessTaskFormVo processTaskFormVo : processTaskFormList) {
@@ -108,9 +110,15 @@ public class ProcessTaskListFormApi extends PrivateApiComponentBase {
                 ProcessTaskVo processTaskVo = processTaskMap.get(processTaskId);
                 if (processTaskVo != null) {
                     processTaskVo.getFormAttributeDataMap().put(dataVo.getAttributeUuid(), dataVo.getDataObj());
+                    List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList= processTaskVo.getProcessTaskFormAttributeDataList();
+                    if (processTaskFormAttributeDataVoList == null) {
+                        processTaskFormAttributeDataVoList = new ArrayList<>();
+                        processTaskVo.setProcessTaskFormAttributeDataList(processTaskFormAttributeDataVoList);
+                    }
+                    processTaskFormAttributeDataVoList.add(dataVo);
                 }
             }
         }
-        return existsProcessTaskVoList;
+        return resultArray;
     }
 }
