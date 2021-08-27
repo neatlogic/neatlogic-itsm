@@ -131,7 +131,7 @@ public class ChannelListForBatchMergeReportApi extends PrivateApiComponentBase {
         channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
         List<ChannelRelationVo> channelRelationTargetList = channelMapper.getChannelRelationTargetList(channelRelationVo);
         if(CollectionUtils.isEmpty(channelRelationTargetList)) {
-
+            return resultObj;
         }
         List<String> targetChannelUuidList = new ArrayList<>();
         List<String> targetCatalogUuidList = new ArrayList<>();
