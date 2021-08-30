@@ -38,14 +38,12 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author linbq
@@ -113,7 +111,7 @@ public class ProcessTaskBatchMergeReportActionApi extends PrivateApiComponentBas
         List<Long> uncheckedProcessTaskIdList = new ArrayList<>();
         List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskId);
         for (ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataVoList) {
-            if ("batchmergereport".equals(attributeDataVo.getType())) {
+            if ("custommergeprocess".equals(attributeDataVo.getType())) {
                 JSONObject dataObj = (JSONObject) attributeDataVo.getDataObj();
                 if (MapUtils.isNotEmpty(dataObj)) {
                     JSONArray selectArray = dataObj.getJSONArray("selectList");
