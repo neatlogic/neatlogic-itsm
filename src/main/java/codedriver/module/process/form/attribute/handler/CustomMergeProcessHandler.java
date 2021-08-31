@@ -48,7 +48,7 @@ public class CustomMergeProcessHandler extends FormHandlerBase {
     private final static Logger logger = LoggerFactory.getLogger(CustomMergeProcessHandler.class);
     private final static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private final static JSONArray theadList = new JSONArray();
-    {
+    static {
         JSONObject selection = new JSONObject();
         selection.put("title", "");
         selection.put("key", "selection");
