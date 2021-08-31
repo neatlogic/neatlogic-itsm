@@ -3,12 +3,14 @@ package codedriver.module.process.api.workcenter;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.*;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.condition.core.ConditionHandlerFactory;
 import codedriver.framework.condition.core.IConditionHandler;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.form.constvalue.FormConditionModel;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -19,6 +21,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -43,6 +48,7 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 
 	@Input({
 		@Param(name = "conditionModel", type = ApiParamType.STRING, desc = "条件模型 simple|custom,  simple:目前用于用于工单中心条件过滤简单模式, custom:目前用于用于工单中心条件过自定义模式;默认custom"),
+		@Param(name = "workcenterUuid", type = ApiParamType.STRING, isRequired = true, desc = "draftProcessTask 非草稿的时候，过滤条件：工单状态去掉”未提交“"),
 	})
 	@Output({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "组件uuid"),
@@ -58,6 +64,7 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray resultArray = new JSONArray();
 		String conditionModel = jsonObj.getString("conditionModel");
+		String workcenterUuid = jsonObj.getString("workcenterUuid");
 		FormConditionModel formConditionModel = FormConditionModel.getFormConditionModel(conditionModel);
 		formConditionModel = formConditionModel == null ? FormConditionModel.CUSTOM : formConditionModel;
 		//固定字段条件
@@ -76,6 +83,11 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
 				continue;
 			}
 			JSONObject config = condition.getConfig(ConditionConfigType.WORKCENTER);
+			//非草稿的时候，过滤条件：工单状态去掉”未提交“
+			if(condition.getName().equals(ProcessWorkcenterField.STATUS.getValue())&&!Objects.equals(workcenterUuid,"draftProcessTask")){
+				JSONArray dataArray = config.getJSONArray("dataList");
+				config.put("dataList",dataArray.stream().filter(o-> !Objects.equals(ProcessTaskStatus.DRAFT.getValue(), ((ValueTextVo)o).getValue())).collect(Collectors.toList()));
+			}
 			JSONObject commonObj = new JSONObject();
 			commonObj.put("handler", condition.getName());
 			commonObj.put("handlerName", condition.getDisplayName());

@@ -238,12 +238,12 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
         if (!isHasProcessTaskAuth) {
             sqlSb.append(" and pt.is_show = 1 ");
         }
-        //只有”我的草稿“分类才显示工单状态”未提交“的工单
-        if(!Objects.equals("draftProcessTask",workcenterVo.getUuid())){
-            sqlSb.append(" and pt.status != 'draft' ");
-        }
         //其它条件过滤
         buildWhereMap.get(workcenterVo.getSqlFieldType()).build(workcenterVo, sqlSb);
+        //只有”我的草稿“分类才显示工单状态”未提交“的工单
+        if(!Objects.equals("draftProcessTask",workcenterVo.getUuid()) && !sqlSb.toString().contains("draft")&&Arrays.asList(FieldTypeEnum.DISTINCT_ID.getValue(),FieldTypeEnum.LIMIT_COUNT.getValue()).contains(workcenterVo.getSqlFieldType())){
+            sqlSb.append(" and pt.status != 'draft' ");
+        }
 
     }
 
