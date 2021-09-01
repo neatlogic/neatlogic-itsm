@@ -1,14 +1,12 @@
 package codedriver.module.process.workcenter.operate;
 
-import java.util.Comparator;
-
-import org.apache.commons.collections4.CollectionUtils;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.Comparator;
 
 public class WorkcenterOperateBuilder {
 
@@ -37,14 +35,14 @@ public class WorkcenterOperateBuilder {
         if (isHasRecover) {
             configJson.put("taskid", processTaskVo.getId());
             configJson.put("interfaceurl", "api/rest/processtask/recover?processTaskId=" + processTaskVo.getId());
-            operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.TASK_RECOVER).setSort(2).setConfig(configJson).setIsEnable(1).build();
+            operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.PROCESSTASK_RECOVER).setSort(2).setConfig(configJson).setIsEnable(1).build();
         } else {
             if (isHasAbort) {
                 configJson.put("taskid", processTaskVo.getId());
                 configJson.put("interfaceurl", "api/rest/processtask/abort?processTaskId=" + processTaskVo.getId());
-                operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.TASK_ABORT).setSort(2).setConfig(configJson).setIsEnable(1).build();
+                operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.PROCESSTASK_ABORT).setSort(2).setConfig(configJson).setIsEnable(1).build();
             } else {
-                operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.TASK_ABORT).setSort(2).setIsEnable(0).build();
+                operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.PROCESSTASK_ABORT).setSort(2).setIsEnable(0).build();
             }
         }
         operateArray.add(operateJson);
@@ -57,10 +55,10 @@ public class WorkcenterOperateBuilder {
             JSONObject configJson = new JSONObject();
             configJson.put("taskid", processTaskVo.getId());
             configJson.put("interfaceurl", "api/rest/processtask/urge?processTaskId=" + processTaskVo.getId());
-            operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.TASK_URGE).setSort(3)
+            operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.PROCESSTASK_URGE).setSort(3)
                 .setConfig(configJson).setIsEnable(1).build();
         } else {
-            operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.TASK_URGE).setSort(3).setIsEnable(0).build();
+            operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.PROCESSTASK_URGE).setSort(3).setIsEnable(0).build();
         }
         operateArray.add(operateJson);
         return this;
@@ -69,9 +67,9 @@ public class WorkcenterOperateBuilder {
     public WorkcenterOperateBuilder setShowHideOperate(ProcessTaskVo processTaskVo) {
         if(processTaskVo.getParamObj().getBoolean("isHasProcessTaskAuth")) {
             int isShowParam = 1;
-            ProcessTaskOperationType type = ProcessTaskOperationType.TASK_SHOW;
+            ProcessTaskOperationType type = ProcessTaskOperationType.PROCESSTASK_SHOW;
             if(processTaskVo.getIsShow() == 1) {
-                type = ProcessTaskOperationType.TASK_HIDE;
+                type = ProcessTaskOperationType.PROCESSTASK_HIDE;
                 isShowParam = 0;
             }
             JSONObject configJson = new JSONObject();
@@ -88,7 +86,7 @@ public class WorkcenterOperateBuilder {
             JSONObject configJson = new JSONObject();
             configJson.put("taskid", processTaskVo.getId());
             configJson.put("interfaceurl", String.format("api/rest/processtask/delete?processTaskId=%s" , processTaskVo.getId()));
-            JSONObject operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.TASK_DELETE).setSort(5).setIsEnable(1).setConfig(configJson).build();
+            JSONObject operateJson = new WorkcenterBuildOperateBuilder().setOperate(ProcessTaskOperationType.PROCESSTASK_DELETE).setSort(5).setIsEnable(1).setConfig(configJson).build();
             operateArray.add(operateJson);
         }
         return this;

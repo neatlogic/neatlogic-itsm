@@ -78,7 +78,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_TRANFERREPORT)
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT)
                 .build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();

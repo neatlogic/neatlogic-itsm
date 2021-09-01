@@ -158,7 +158,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     private ProcessTaskVo getProcessTaskVoByProcessTaskId(Long processTaskId) throws Exception {
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        if(!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_START).build().check()){
+        if(!new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_START).build().check()){
             throw new PermissionDeniedException();
         }
         ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);

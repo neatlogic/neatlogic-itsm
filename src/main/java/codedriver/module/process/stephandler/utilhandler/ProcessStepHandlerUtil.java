@@ -192,7 +192,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                     processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(newAuditVo);
                 }
                 break;
-            case TASK_ABORT:
+            case PROCESSTASK_ABORT:
                 /** 如果找不到审计记录并且aborttime不为空，则新建审计记录 **/
                 newAuditVo.setAbortTime("now");
                 if (processTaskStepTimeAuditVo == null
@@ -214,7 +214,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                     processTaskStepTimeAuditMapper.updateProcessTaskStepTimeAudit(newAuditVo);
                 }
                 break;
-            case TASK_RECOVER:
+            case PROCESSTASK_RECOVER:
                 if (currentProcessTaskStepVo.getStatus().equals(ProcessTaskStatus.PENDING.getValue())) {
                     newAuditVo.setActiveTime("now");
                     if (processTaskStepTimeAuditVo == null

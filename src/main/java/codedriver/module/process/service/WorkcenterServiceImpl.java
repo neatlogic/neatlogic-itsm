@@ -294,13 +294,13 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             Set<ProcessTaskOperationType> operationTypeSet = operateTypeSetMap.get(processTaskVo.getId());
            
             if (CollectionUtils.isNotEmpty(operationTypeSet)) {
-                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_ABORT)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_ABORT)) {
                     isHasAbort = true;
                 }
-                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_RECOVER)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_RECOVER)) {
                     isHasRecover = true;
                 }
-                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_URGE)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_URGE)) {
                     isHasUrge = true;
                 }
             }
@@ -342,7 +342,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             workcenterSecondOperateBuilder.setShowHideOperate(processTaskVo).setDeleteOperate(processTaskVo).build();
         for (Object workcenterSecondOperateObj : workcenterSecondOperateJsonArray) {
             JSONObject workcenterSecondOperateJson = JSONObject.parseObject(workcenterSecondOperateObj.toString());
-            if (ProcessTaskOperationType.TASK_SHOW.getValue().equals(workcenterSecondOperateJson.getString("name"))) {
+            if (ProcessTaskOperationType.PROCESSTASK_SHOW.getValue().equals(workcenterSecondOperateJson.getString("name"))) {
                 isNeedFirstOperate = false;
             }
         }
@@ -442,7 +442,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
             List<ProcessTaskStepContentVo> processTaskStepContentList =
                 processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-                if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
+                if (ProcessTaskOperationType.PROCESSTASK_START.getValue().equals(processTaskStepContent.getType())) {
                     startContentVo =
                         selectContentByHashMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
                     break;
@@ -451,7 +451,7 @@ public class WorkcenterServiceImpl implements WorkcenterService {
         }
         /** 获取转交记录 **/
         List<ProcessTaskStepAuditVo> transferAuditList = processTaskMapper.getProcessTaskAuditList(
-            new ProcessTaskStepAuditVo(processTaskVo.getId(), ProcessTaskOperationType.TASK_TRANSFER.getValue()));
+            new ProcessTaskStepAuditVo(processTaskVo.getId(), ProcessTaskOperationType.PROCESSTASK_TRANSFER.getValue()));
 
         /** 获取工单当前步骤 **/
         @SuppressWarnings("serial")

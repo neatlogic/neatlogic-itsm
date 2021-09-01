@@ -70,7 +70,7 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
         JSONArray focusUserUuidList = jsonObj.getJSONArray("focusUserUuidList");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_FOCUSUSER_UPDATE).build()
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE).build()
                 .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();

@@ -89,7 +89,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
 
         try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.TASK_UPDATE).build()
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_UPDATE).build()
                 .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
@@ -175,7 +175,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             ProcessTaskStepReplyVo oldReplyVo = null;
             List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-                if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
+                if (ProcessTaskOperationType.PROCESSTASK_START.getValue().equals(processTaskStepContent.getType())) {
                     oldReplyVo = new ProcessTaskStepReplyVo(processTaskStepContent);
                     break;
                 }

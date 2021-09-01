@@ -60,9 +60,9 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
         /** 授权 **/
         ProcessTaskOperationType[] stepActions = {
-                ProcessTaskOperationType.TASK_ABORT,
-                ProcessTaskOperationType.TASK_UPDATE,
-                ProcessTaskOperationType.TASK_URGE
+                ProcessTaskOperationType.PROCESSTASK_ABORT,
+                ProcessTaskOperationType.PROCESSTASK_UPDATE,
+                ProcessTaskOperationType.PROCESSTASK_URGE
         };
         JSONArray authorityList = null;
         Integer enableAuthority = configObj.getInteger("enableAuthority");
@@ -122,9 +122,9 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         processObj.put("name", name);
         /** 授权 **/
         ProcessTaskOperationType[] stepActions = {
-                ProcessTaskOperationType.TASK_ABORT,
-                ProcessTaskOperationType.TASK_UPDATE,
-                ProcessTaskOperationType.TASK_URGE
+                ProcessTaskOperationType.PROCESSTASK_ABORT,
+                ProcessTaskOperationType.PROCESSTASK_UPDATE,
+                ProcessTaskOperationType.PROCESSTASK_URGE
         };
         JSONArray authorityList = null;
         Integer enableAuthority = processConfig.getInteger("enableAuthority");

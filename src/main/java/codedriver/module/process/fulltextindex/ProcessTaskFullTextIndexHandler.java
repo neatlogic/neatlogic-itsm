@@ -43,7 +43,7 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
             List<ProcessTaskStepContentVo> processTaskStepContentList =
                     processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startStepVo.getId());
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
-                if (ProcessTaskOperationType.TASK_START.getValue().equals(processTaskStepContent.getType())) {
+                if (ProcessTaskOperationType.PROCESSTASK_START.getValue().equals(processTaskStepContent.getType())) {
                     ProcessTaskContentVo processTaskContentVo = selectContentByHashMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
                     if(processTaskContentVo != null) {
                         fullTextIndexVo.addFieldContent("content", new FullTextIndexVo.WordVo(processTaskContentVo.getContent()));

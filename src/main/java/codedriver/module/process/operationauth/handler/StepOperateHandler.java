@@ -1,13 +1,7 @@
 package codedriver.module.process.operationauth.handler;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.stereotype.Component;
-
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -17,7 +11,11 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class StepOperateHandler extends OperationAuthHandlerBase {
@@ -255,6 +253,21 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 }
                 return false;
             });
+
+        /**
+         * 步骤创建任务权限
+         * 判断userUuid用户是否有步骤创建任务权限逻辑：
+         * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人
+         */
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_CREATE,
+                (processTaskVo, processTaskStepVo, userUuid) -> {
+                    if(processTaskVo.getIsShow() == 1) {
+                        if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                            return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
+                        }
+                    }
+                    return false;
+                });
     }
 
     @Override

@@ -7,12 +7,10 @@ import codedriver.framework.process.dto.processconfig.ActionConfigActionVo;
 import codedriver.framework.process.dto.processconfig.ActionConfigVo;
 import codedriver.framework.process.dto.processconfig.NotifyPolicyConfigVo;
 import codedriver.framework.process.util.ProcessConfigUtil;
-import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -234,10 +232,10 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.STEP_COMPLETE,
                 ProcessTaskOperationType.STEP_BACK,
                 ProcessTaskOperationType.STEP_COMMENT,
-                ProcessTaskOperationType.TASK_TRANSFER,
+                ProcessTaskOperationType.PROCESSTASK_TRANSFER,
                 ProcessTaskOperationType.STEP_START,
-                ProcessTaskOperationType.TASK_ABORT,
-                ProcessTaskOperationType.TASK_RECOVER
+                ProcessTaskOperationType.PROCESSTASK_ABORT,
+                ProcessTaskOperationType.PROCESSTASK_RECOVER
         };
         /** 子任务按钮映射列表 **/
         ProcessTaskOperationType[] subtaskButtons = {
@@ -322,10 +320,10 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.STEP_COMPLETE,
                 ProcessTaskOperationType.STEP_BACK,
                 ProcessTaskOperationType.STEP_COMMENT,
-                ProcessTaskOperationType.TASK_TRANSFER,
+                ProcessTaskOperationType.PROCESSTASK_TRANSFER,
                 ProcessTaskOperationType.STEP_START,
-                ProcessTaskOperationType.TASK_ABORT,
-                ProcessTaskOperationType.TASK_RECOVER
+                ProcessTaskOperationType.PROCESSTASK_ABORT,
+                ProcessTaskOperationType.PROCESSTASK_RECOVER
         };
 
         /** 子任务按钮映射列表 **/

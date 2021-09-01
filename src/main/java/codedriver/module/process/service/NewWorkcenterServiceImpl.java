@@ -121,8 +121,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             }
             Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
                     builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
-                            .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
-                            .addOperationType(ProcessTaskOperationType.TASK_URGE)
+                            .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
+                            .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
                             .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
 //          Date time44 = new Date();
 //          System.out.println("actionAuthTime:"+(time44.getTime()-time33.getTime()));
@@ -196,8 +196,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             }
             Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
                     builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
-                            .addOperationType(ProcessTaskOperationType.TASK_RECOVER)
-                            .addOperationType(ProcessTaskOperationType.TASK_URGE)
+                            .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
+                            .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
                             .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
 
             processTaskVo.getParamObj().put("isHasProcessTaskAuth", isHasProcessTaskAuth);
@@ -312,13 +312,13 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             Set<ProcessTaskOperationType> operationTypeSet = operateTypeSetMap.get(processTaskVo.getId());
 
             if (CollectionUtils.isNotEmpty(operationTypeSet)) {
-                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_ABORT)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_ABORT)) {
                     isHasAbort = true;
                 }
-                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_RECOVER)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_RECOVER)) {
                     isHasRecover = true;
                 }
-                if (operationTypeSet.contains(ProcessTaskOperationType.TASK_URGE)) {
+                if (operationTypeSet.contains(ProcessTaskOperationType.PROCESSTASK_URGE)) {
                     isHasUrge = true;
                 }
             }
@@ -360,7 +360,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 workcenterSecondOperateBuilder.setShowHideOperate(processTaskVo).setDeleteOperate(processTaskVo).build();
         for (Object workcenterSecondOperateObj : workcenterSecondOperateJsonArray) {
             JSONObject workcenterSecondOperateJson = JSONObject.parseObject(workcenterSecondOperateObj.toString());
-            if (ProcessTaskOperationType.TASK_SHOW.getValue().equals(workcenterSecondOperateJson.getString("name"))) {
+            if (ProcessTaskOperationType.PROCESSTASK_SHOW.getValue().equals(workcenterSecondOperateJson.getString("name"))) {
                 isNeedFirstOperate = false;
             }
         }

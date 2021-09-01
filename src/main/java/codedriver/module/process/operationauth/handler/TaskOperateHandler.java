@@ -4,7 +4,6 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
@@ -54,7 +53,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 4.userUuid用户是工单中某个“处理中”步骤的处理人或协助处理人
          * 5.userUuid用户有当前工单对应服务的上报权限
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_VIEW,
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_VIEW,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1 || AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                         if (!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
@@ -78,7 +77,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单提交权限逻辑：
          * 首先工单状态是“未提交”，然后userUuid用户是上报人或代报人，则有工单提交权限
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_START,
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_START,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
                         if (ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {
@@ -94,12 +93,12 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单取消权限逻辑：
          * 首先工单状态是“处理中”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“取消”的授权
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_ABORT,
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_ABORT,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
                         // 工单状态为进行中的才能终止
                         if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                            return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_ABORT, userUuid);
+                            return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.PROCESSTASK_ABORT, userUuid);
                         }
                     }
                     return false;
@@ -109,12 +108,12 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单恢复权限逻辑：
          * 首先工单状态是“已取消”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“取消”的授权
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_RECOVER,
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_RECOVER,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
                         // 工单状态为已终止的才能恢复
                         if (ProcessTaskStatus.ABORTED.getValue().equals(processTaskVo.getStatus())) {
-                            return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_ABORT, userUuid);
+                            return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.PROCESSTASK_ABORT, userUuid);
                         }
                     }
                     return false;
@@ -124,10 +123,10 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单修改上报内容权限逻辑：
          * 首先工单状态是“处理中”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“修改上报内容”的授权
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_UPDATE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskVo.getIsShow() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                    return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_UPDATE, userUuid);
+                    return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.PROCESSTASK_UPDATE, userUuid);
                 }
             }
             return false;
@@ -137,10 +136,10 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单催单权限逻辑：
          * 首先工单状态是“处理中”，然后userUuid用户在工单对应流程图的流程设置-权限设置中获得“催单”的授权
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_URGE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_URGE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskVo.getIsShow() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                    return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.TASK_URGE, userUuid);
+                    return checkOperationAuthIsConfigured(processTaskVo, ProcessTaskOperationType.PROCESSTASK_URGE, userUuid);
                 }
             }
             return false;
@@ -150,7 +149,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单处理权限逻辑：
          * 首先工单状态是“处理中”，然后userUuid用户是工单中某个步骤的处理人或协助处理人
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_WORK, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_WORK, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskVo.getIsShow() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                     // 有可处理步骤work
@@ -165,7 +164,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“处理中”，然后userUuid用户拥有工单中某个步骤的撤回权限，则有工单撤回权限
          * 步骤撤回权限逻辑在{@link codedriver.module.process.operationauth.handler.StepOperateHandler#init}中的ProcessTaskOperationType.STEP_RETREAT里
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_RETREAT, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_RETREAT, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskVo.getIsShow() == 1) {
                 // 撤销权限retreat
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
@@ -183,7 +182,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单评分权限逻辑：
          * 首先工单状态是“已完成”，然后userUuid用户是工单上报人，且在工单对应流程图的评分设置中启用评分
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_SCORE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_SCORE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskVo.getIsShow() == 1) {
                 // 评分权限score
                 if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
@@ -201,7 +200,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单转报权限逻辑：
          * userUuid用户在工单对应服务的转报设置中获得授权，且对转报服务有上报权限
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_TRANFERREPORT,
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_TRANFERREPORT,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
                         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
@@ -266,7 +265,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单复杂上报权限逻辑：
          * userUuid用户有当前工单对应服务的上报权限，则有工单复杂上报权限
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_COPYPROCESSTASK,
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_COPYPROCESSTASK,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
                         return catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), userUuid);
@@ -278,7 +277,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有工单重做权限逻辑：
          * 首先工单状态是“已完成”，然后userUuid用户是工单上报人，且在工单对应流程图的评分设置-评分前允许回退中设置了回退步骤列表
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_REDO, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_REDO, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskVo.getIsShow() == 1) {
                 if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskVo.getStatus())) {
                     if (userUuid.equals(processTaskVo.getOwner())) {
@@ -298,7 +297,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 首先工单状态是“处理中”，然后userUuid用户拥有工单中某个步骤的转交权限，则有工单转交权限
          * 步骤转交权限逻辑在{@link codedriver.module.process.operationauth.handler.StepOperateHandler#init}中的ProcessTaskOperationType.STEP_TRANSFER里
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_TRANSFER, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_TRANSFER, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskVo.getIsShow() == 1) {
                 if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
                     for (ProcessTaskStepVo processTaskStep : processTaskVo.getStepList()) {
@@ -310,19 +309,19 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
             }
             return false;
         });
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_SHOW, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_SHOW, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskVo.getIsShow() == 0) {
                 return AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName());
             }
             return false;
         });
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_HIDE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_HIDE, (processTaskVo, processTaskStepVo, userUuid) -> {
             if (processTaskVo.getIsShow() == 1) {
                 return AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName());
             }
             return false;
         });
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_DELETE, (processTaskVo, processTaskStepVo, userUuid) -> {
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_DELETE, (processTaskVo, processTaskStepVo, userUuid) -> {
             return AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName());
         });
         /**
@@ -334,7 +333,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
          * 3.userUuid用户是工单中某个“已完成”步骤的处理人或协助处理人
          * 4.userUuid用户是工单中某个“处理中”步骤的处理人或协助处理人
         **/
-        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_FOCUSUSER_UPDATE,
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_FOCUSUSER_UPDATE,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1 || AuthActionChecker.checkByUserUuid(userUuid, PROCESSTASK_MODIFY.class.getSimpleName())) {
                         if (!ProcessTaskStatus.DRAFT.getValue().equals(processTaskVo.getStatus())) {

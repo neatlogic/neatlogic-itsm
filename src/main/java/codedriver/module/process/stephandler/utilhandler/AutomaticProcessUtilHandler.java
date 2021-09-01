@@ -7,7 +7,6 @@ import java.util.Objects;
 import codedriver.framework.process.dto.processconfig.*;
 import codedriver.framework.process.util.ProcessConfigUtil;
 import codedriver.module.process.notify.handler.AutomaticNotifyPolicyHandler;
-import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -158,7 +157,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         ProcessTaskOperationType[] stepButtons = {
                 ProcessTaskOperationType.STEP_COMPLETE,
                 ProcessTaskOperationType.STEP_BACK,
-                ProcessTaskOperationType.TASK_TRANSFER,
+                ProcessTaskOperationType.PROCESSTASK_TRANSFER,
                 ProcessTaskOperationType.STEP_START
         };
         JSONArray customButtonList = configObj.getJSONArray("customButtonList");
@@ -220,7 +219,7 @@ public class AutomaticProcessUtilHandler extends ProcessStepInternalHandlerBase 
         ProcessTaskOperationType[] stepButtons = {
                 ProcessTaskOperationType.STEP_COMPLETE,
                 ProcessTaskOperationType.STEP_BACK,
-                ProcessTaskOperationType.TASK_TRANSFER,
+                ProcessTaskOperationType.PROCESSTASK_TRANSFER,
                 ProcessTaskOperationType.STEP_START
         };
         JSONArray customButtonList = configObj.getJSONArray("customButtonList");
