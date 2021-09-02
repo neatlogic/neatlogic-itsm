@@ -14,11 +14,15 @@ import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.dao.mapper.*;
+import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
+import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.restful.annotation.*;
@@ -26,46 +30,48 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.common.config.ProcessConfig;
-import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
 
-    @Autowired
+    @Resource
     private ProcessTaskStepDataMapper processTaskStepDataMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
-    @Autowired
+    @Resource
     private ScoreTemplateMapper scoreTemplateMapper;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
 
-    @Autowired
+    @Resource
     private ProcessCommentTemplateMapper commentTemplateMapper;
+
+    @Resource
+    private ProcessTaskStepTaskMapper processTaskStepTaskMapper;
 
     @Override
     public String getToken() {
@@ -163,7 +169,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
             // 获取当前用户有权限的所有子任务
             // 子任务列表
-            if (processTaskStepVo.getIsActive().intValue() == 1
+            if (processTaskStepVo.getIsActive() == 1
                     && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                 List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList =
                         processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
@@ -219,6 +225,42 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                             processTaskStepVo.getProcessTaskStepSubtaskList().add(processTaskStepSubtask);
                         }
                     }
+                }
+            }
+            //任务列表
+            if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                Map<String,List<ProcessTaskStepTaskVo>> stepTaskVoMap = new HashMap<>();
+                Map<Long, List<ProcessTaskStepTaskUserVo>> stepTaskUserVoMap = new HashMap<>();
+                Map<Long, List<ProcessTaskStepTaskUserContentVo>> stepTaskUserContentVoMap = new HashMap<>();
+                List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskByProcessTaskStepId(processTaskStepVo.getId());
+                List<ProcessTaskStepTaskUserVo> stepTaskUserVoList;
+                List<ProcessTaskStepTaskUserContentVo> stepTaskUserContentVoList;
+                if (CollectionUtils.isNotEmpty(stepTaskVoList)) {
+                    stepTaskUserVoList = processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(stepTaskVoList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList()));
+                    if (CollectionUtils.isNotEmpty(stepTaskUserVoList)) {
+                        stepTaskUserContentVoList = processTaskStepTaskMapper.getStepTaskUserContentByStepTaskUserIdList(stepTaskUserVoList.stream().map(ProcessTaskStepTaskUserVo::getId).collect(Collectors.toList()));
+                        stepTaskUserContentVoList.forEach(stuc->{
+                            if(!stepTaskUserContentVoMap.containsKey(stuc.getProcesstaskStepTaskUserId())){
+                                stepTaskUserContentVoMap.put(stuc.getProcesstaskStepTaskUserId(),new ArrayList<>());
+                            }
+                            stepTaskUserContentVoMap.get(stuc.getProcesstaskStepTaskUserId()).add(stuc);
+                        });
+                        stepTaskUserVoList.forEach(stu->{
+                            if(!stepTaskUserVoMap.containsKey(stu.getProcesstaskStepTaskId())){
+                                stepTaskUserVoMap.put(stu.getProcesstaskStepTaskId(),new ArrayList<>());
+                            }
+                            stu.setStepTaskUserContentVoList(stepTaskUserContentVoMap.get(stu.getId()));
+                            stepTaskUserVoMap.get(stu.getProcesstaskStepTaskId()).add(stu);
+                        });
+                        stepTaskVoList.forEach(st -> {
+                            if(!stepTaskVoMap.containsKey(st.getTaskConfigName())){
+                                stepTaskVoMap.put(st.getTaskConfigName(),new ArrayList<>());
+                            }
+                            st.setStepTaskUserVoList(stepTaskUserVoMap.get(st.getProcessTaskStepId()));
+                            stepTaskVoMap.get(st.getTaskConfigName()).add(st);
+                        });
+                    }
+                    processTaskStepVo.setProcessTaskStepTask(JSONObject.parseObject(JSONObject.toJSONString(stepTaskVoMap)));
                 }
             }
 

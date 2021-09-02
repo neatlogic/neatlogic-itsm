@@ -5,6 +5,7 @@
 
 package codedriver.module.process.service;
 
+import codedriver.framework.process.dto.ProcessTaskStepTaskUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 
 /**
@@ -19,4 +20,9 @@ public interface ProcessTaskStepTaskService {
      */
     void saveTask(ProcessTaskStepTaskVo processTaskStepTaskVo, boolean isCreate);
 
+    /**
+     * 完成任务
+     * @param processTaskStepTaskUserVo 任务用户参数
+     */
+    void completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo);
 }

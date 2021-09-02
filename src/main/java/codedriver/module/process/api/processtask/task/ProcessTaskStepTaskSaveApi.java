@@ -13,12 +13,15 @@ import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
+import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
+import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -30,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 /**
  * @author lvzk
@@ -42,7 +46,8 @@ import javax.annotation.Resource;
 public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
     @Resource
     ProcessTaskMapper processTaskMapper;
-
+    @Resource
+    ProcessTaskStepTaskMapper processTaskStepTaskMapper;
     @Resource
     ProcessTaskStepTaskService processTaskStepTaskService;
 
@@ -53,7 +58,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "任务创建接口";
+        return "保存任务";
     }
 
     @Override
@@ -67,7 +72,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             @Param(name = "userList", type = ApiParamType.STRING, isRequired = true, desc = "任务处理人userUuid,格式user#userUuid"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")})
     @Output({@Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")})
-    @Description(desc = "任务创建接口")
+    @Description(desc = "保存任务接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskStepTaskId = jsonObj.getLong("processTaskStepTaskId");
@@ -77,8 +82,8 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
         if (processTaskStepVo == null) {
             throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
         }
-        if (processTaskStepVo.getIsActive() != 1) {
-            throw new ProcessTaskRuntimeException("步骤未激活，不能创建|编辑子任务");
+        if (Objects.equals(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo.getStatus())) {
+            throw new ProcessTaskStepUnRunningException();
         }
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         try {
@@ -96,10 +101,15 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
         processTaskMapper.getProcessTaskLockById(processTaskId);
         boolean isCreate = true;
         if (processTaskStepTaskId != null) {
+            ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskById(processTaskStepTaskId);
+            if(stepTaskVo == null){
+                throw new ProcessTaskStepTaskNotFoundException(processTaskStepTaskId.toString());
+            }
             isCreate = false;
             processTaskStepTaskVo.setId(processTaskStepTaskId);
         }
         processTaskStepTaskService.saveTask(processTaskStepTaskVo, isCreate);
+        //TODO 活动&通知
         return null;
     }
 }

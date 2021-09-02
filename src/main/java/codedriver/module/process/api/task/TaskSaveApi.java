@@ -48,7 +48,7 @@ public class TaskSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, desc = "任务id,存在则修改，否则新增"),
             @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "关键字，匹配名称"),
-            @Param(name = "type", type = ApiParamType.ENUM, isRequired = true, desc = "单人：single, 多人：many", rule = "single,many"),
+            @Param(name = "num", type = ApiParamType.INTEGER, isRequired = true, desc = "参与人数。-1：不做限制", rule = "single,many"),
             @Param(name = "policy", type = ApiParamType.ENUM, isRequired = true, desc = "其中一个人完成即可：any,所有人完成：all", rule = "any,all"),
             @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活,激活：1，禁用：0", rule = "0,1"),
     })
@@ -60,6 +60,9 @@ public class TaskSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long taskId = jsonObj.getLong("id");
         TaskConfigVo taskConfigVo = JSONObject.toJavaObject(jsonObj, TaskConfigVo.class);
+        if(taskMapper.checkTaskConfigNameIsRepeat(taskConfigVo) > 0) {
+            return new FieldValidResultVo(new TaskConfigNameRepeatException(taskConfigVo.getName()));
+        }
         if (taskId != null) {
             TaskConfigVo taskConfigTmp = taskMapper.getTaskConfigById(taskId);
             if(taskConfigTmp == null){
@@ -69,7 +72,7 @@ public class TaskSaveApi extends PrivateApiComponentBase {
         }else{
             taskMapper.insertTaskConfig(taskConfigVo);
         }
-        return null;
+        return taskConfigVo.getId();
     }
 
     public IValid name() {
