@@ -1,16 +1,21 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.thread;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
+import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.process.audithandler.core.IProcessTaskAuditDetailType;
 import codedriver.framework.process.audithandler.core.IProcessTaskAuditType;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditDetailTypeFactory;
 import codedriver.framework.process.audithandler.core.ProcessTaskAuditTypeFactory;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
-import codedriver.framework.util.FreemarkerUtil;
 import codedriver.framework.process.service.ProcessTaskService;
+import codedriver.framework.util.FreemarkerUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -22,15 +27,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Objects;
 
-/**
- * @Title: AuditHandler
- * @Package codedriver.module.process.thread
- * @Description: TODO
- * @Author: linbq
- * @Date: 2021/1/20 17:29
- * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
 @Service
 public class ProcessTaskAuditThread extends CodeDriverThread {
     private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
@@ -46,6 +42,7 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
     public void setProcessTaskService(ProcessTaskService _processTaskService) {
         processTaskService = _processTaskService;
     }
+
     private ProcessTaskStepVo currentProcessTaskStepVo;
     private IProcessTaskAuditType action;
 
@@ -59,7 +56,7 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
 
     public static synchronized void audit(ProcessTaskStepVo currentProcessTaskStepVo, IProcessTaskAuditType action) {
         ProcessTaskAuditThread handler = new ProcessTaskAuditThread(currentProcessTaskStepVo, action);
-        CommonThreadPool.execute(handler);
+        CachedThreadPool.execute(handler);
     }
 
     @Override
@@ -67,7 +64,7 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
         String oldName = Thread.currentThread().getName();
         Thread.currentThread().setName("PROCESSTASK-AUDIT-" + currentProcessTaskStepVo.getId() + "-" + action.getValue());
         try {
-            /** 活动类型 **/
+            /* 活动类型 **/
             JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
             ProcessTaskStepAuditVo processTaskStepAuditVo = new ProcessTaskStepAuditVo();
             processTaskStepAuditVo.setAction(action.getValue());

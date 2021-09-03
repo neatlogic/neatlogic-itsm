@@ -1,12 +1,12 @@
 /*
- * Copyright (c)  2020 TechSure Co.,Ltd.  All Rights Reserved.
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
 package codedriver.module.process.api.processtask.test;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
-import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
+import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
@@ -94,7 +94,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                     endIndex = count;
                 }
                 MyCreateThread thread = new MyCreateThread(startIndex, endIndex);
-                CommonThreadPool.execute(thread);
+                CachedThreadPool.execute(thread);
             }
             try {
                 latch.await(); // 主线程等待
