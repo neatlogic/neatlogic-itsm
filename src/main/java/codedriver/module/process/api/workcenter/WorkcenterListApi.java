@@ -2,10 +2,10 @@ package codedriver.module.process.api.workcenter;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
-import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.auth.WORKCENTER_MODIFY;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
@@ -19,7 +19,6 @@ import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.service.NewWorkcenterService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,9 +76,9 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
         List<String> workcenterUuidList = workcenterMapper.getAuthorizedWorkcenterUuidList(userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList());
         List<WorkcenterVo> workcenterList = workcenterMapper.getAuthorizedWorkcenterListByUuidList(workcenterUuidList);
-        List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid, WORKCENTER_MODIFY.class.getSimpleName()));
         WorkcenterUserProfileVo userProfile = workcenterMapper.getWorkcenterUserProfileByUserUuid(userUuid);
         Map<String, Integer> workcenterUserSortMap = new HashMap<String, Integer>();
+        boolean isWorkcenterManager = AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName());
         String viewType = "table";//默认table展示
         if (userProfile != null) {
             JSONObject userConfig = JSONObject.parseObject(userProfile.getConfig());
@@ -97,14 +96,17 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
         for (WorkcenterVo workcenter : workcenterList) {
             if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
                 workcenter.setIsCanEdit(0);
+                if(Objects.equals(workcenter.getUuid(),"allProcessTask")&& isWorkcenterManager) {
+                    workcenter.setIsCanRole(1);
+                }
             }
-            if (workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue()) && CollectionUtils.isNotEmpty(userAuthList)) {
+            if (workcenter.getType().equals(ProcessWorkcenterType.SYSTEM.getValue()) && isWorkcenterManager) {
                 workcenter.setIsCanEdit(1);
                 workcenter.setIsCanRole(1);
             } else if (workcenter.getType().equals(ProcessWorkcenterType.CUSTOM.getValue())) {
                 if (UserContext.get().getUserUuid(true).equalsIgnoreCase(workcenter.getOwner())) {
                     workcenter.setIsCanEdit(1);
-                    if (CollectionUtils.isNotEmpty(userAuthList)) {
+                    if (AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
                         workcenter.setIsCanRole(1);
                     } else {
                         workcenter.setIsCanRole(0);

@@ -27,7 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
 @Transactional
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -58,7 +61,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 
 	@Input({
 		@Param(name="uuid", type = ApiParamType.STRING, desc="分类uuid"),
-		@Param(name="name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc="分类名",isRequired = true,xss = true),
+		@Param(name="name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc="分类名" ,xss = true),
 		@Param(name="type", type = ApiParamType.STRING, desc="分类类型，system|custom 默认custom"),
 		@Param(name="conditionConfig", type = ApiParamType.JSONOBJECT, desc="分类过滤配置，json格式",isRequired = true),
 		@Param(name="valueList", type = ApiParamType.JSONARRAY, desc="授权列表，如果是system,则必填", isRequired = false)
@@ -72,6 +75,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 		String uuid = jsonObj.getString("uuid");
 		String name = jsonObj.getString("name");
 		String type = StringUtils.isBlank(jsonObj.getString("type"))?ProcessWorkcenterType.CUSTOM.getValue():jsonObj.getString("type");
+		String originType = null;
 		JSONArray valueList = jsonObj.getJSONArray("valueList");
 		String userUuid = UserContext.get().getUserUuid(true);
 		WorkcenterVo workcenterVo = new WorkcenterVo(name);
@@ -80,6 +84,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 			workcenterList = workcenterMapper.getWorkcenterByNameAndUuid(null, uuid);
 			if(CollectionUtils.isNotEmpty(workcenterList)) {
 				workcenterVo = workcenterList.get(0);
+				originType = workcenterVo.getType();
 			}else {
 				throw new WorkcenterNotFoundException(uuid);
 			}
@@ -89,19 +94,19 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 		 * if(workcenterMapper.checkWorkcenterNameIsRepeat(name,uuid)>0) { throw new
 		 * WorkcenterNameRepeatException(name); }
 		 */
-		
-		if((CollectionUtils.isNotEmpty(workcenterList)&&ProcessWorkcenterType.SYSTEM.getValue().equals(workcenterList.get(0).getType()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
+		//判断原来的分类或要改成的分类如果是system 则需要鉴权
+		if((StringUtils.isNotBlank(originType)&& Objects.equals(originType,ProcessWorkcenterType.SYSTEM.getValue()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
 			//判断是否有管理员权限
 			if(!AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
 				throw new WorkcenterNoAuthException("管理");
 			}
 			workcenterMapper.deleteWorkcenterAuthorityByUuid(workcenterVo.getUuid());
 		}
-		if(type.equals(ProcessWorkcenterType.SYSTEM.getValue())) {
+		if(Arrays.asList(ProcessWorkcenterType.SYSTEM.getValue(),ProcessWorkcenterType.FACTORY.getValue()).contains(type)) {
 			if(CollectionUtils.isEmpty(valueList)) {
 				throw new WorkcenterParamException("valueList");
 			}
-			workcenterVo.setType(ProcessWorkcenterType.SYSTEM.getValue());
+			workcenterVo.setType(type);
 			//更新角色
 			for(Object value:valueList) {
 				AuthorityVo authorityVo = new AuthorityVo();
@@ -120,7 +125,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 				workcenterMapper.insertWorkcenterAuthority(authorityVo,workcenterVo.getUuid());
 			}
 		}else {
-			workcenterVo.setType(ProcessWorkcenterType.CUSTOM.getValue());
+			workcenterVo.setType(type);
 			if(StringUtils.isBlank(workcenterVo.getOwner())) {
 				workcenterMapper.insertWorkcenterOwner(userUuid, workcenterVo.getUuid());
 			}
