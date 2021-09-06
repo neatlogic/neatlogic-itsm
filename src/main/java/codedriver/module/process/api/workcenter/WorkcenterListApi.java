@@ -8,6 +8,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.auth.WORKCENTER_MODIFY;
+import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterUserProfileVo;
@@ -96,7 +97,7 @@ public class WorkcenterListApi extends PrivateApiComponentBase {
         for (WorkcenterVo workcenter : workcenterList) {
             if (workcenter.getType().equals(ProcessWorkcenterType.FACTORY.getValue())) {
                 workcenter.setIsCanEdit(0);
-                if(Objects.equals(workcenter.getUuid(),"allProcessTask")&& isWorkcenterManager) {
+                if(Arrays.asList(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue(), ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()).contains(workcenter.getUuid()) && isWorkcenterManager) {
                     workcenter.setIsCanRole(1);
                 }
             }

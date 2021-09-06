@@ -12,6 +12,7 @@ import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.bootstrap.CodedriverWebApplicationContext;
 import codedriver.framework.dao.mapper.TenantMapper;
 import codedriver.framework.dto.TenantVo;
+import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.process.constvalue.ProcessWorkcenterType;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -48,7 +49,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
      **/
     private WorkcenterVo all() {
         WorkcenterVo workcenterVo = new WorkcenterVo();
-        workcenterVo.setUuid("allProcessTask");
+        workcenterVo.setUuid(ProcessWorkcenterInitType.ALL_PROCESSTASK.getValue());
         workcenterVo.setName("所有工单");
         workcenterVo.setConditionConfig("{\n" +
                 "    \"handlerType\":\"simple\",\n" +
@@ -72,7 +73,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
 
     private WorkcenterVo draft() {
         WorkcenterVo workcenterVo = new WorkcenterVo();
-        workcenterVo.setUuid("draftProcessTask");
+        workcenterVo.setUuid(ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue());
         workcenterVo.setName("我的草稿");
         workcenterVo.setConditionConfig("{\n" +
                 "    \"valueList\":[\n" +

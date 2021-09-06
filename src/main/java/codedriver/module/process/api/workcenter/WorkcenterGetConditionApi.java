@@ -12,6 +12,7 @@ import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
+import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -76,7 +77,7 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
                     || condition.getName().equals(ProcessWorkcenterField.ENDTIME.getValue())
                     || condition.getName().equals(ProcessWorkcenterField.SERIAL_NUMBER.getValue())
                     || condition.getName().equals(ProcessWorkcenterField.STARTTIME.getValue())
-                    || (Objects.equals(workcenterUuid, "draftProcessTask") && condition.getName().equals(ProcessWorkcenterField.EXPIRED_TIME.getValue()))
+                    || (Objects.equals(workcenterUuid, ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue()) && condition.getName().equals(ProcessWorkcenterField.EXPIRED_TIME.getValue()))
                     || ProcessWorkcenterField.getValue(condition.getName()) == null
                     || !(condition instanceof IProcessTaskCondition)
                     || (!AuthActionChecker.check(PROCESSTASK_MODIFY.class.getSimpleName()) && (condition instanceof ProcessTaskIsShowCondition))
@@ -85,7 +86,7 @@ public class WorkcenterGetConditionApi extends PrivateApiComponentBase {
             }
             JSONObject config = condition.getConfig(ConditionConfigType.WORKCENTER);
             //非草稿的时候，过滤条件：工单状态去掉”未提交“
-            if (condition.getName().equals(ProcessWorkcenterField.STATUS.getValue()) && !Objects.equals(workcenterUuid, "draftProcessTask")) {
+            if (condition.getName().equals(ProcessWorkcenterField.STATUS.getValue()) && !Objects.equals(workcenterUuid, ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue())) {
                 JSONArray dataArray = config.getJSONArray("dataList");
                 config.put("dataList", dataArray.stream().filter(o -> !Objects.equals(ProcessTaskStatus.DRAFT.getValue(), ((ValueTextVo) o).getValue())).collect(Collectors.toList()));
             }

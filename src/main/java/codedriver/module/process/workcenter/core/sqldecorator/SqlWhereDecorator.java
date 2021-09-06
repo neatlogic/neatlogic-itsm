@@ -10,6 +10,7 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.constvalue.ProcessWorkcenterInitType;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -241,7 +242,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
         //其它条件过滤
         buildWhereMap.get(workcenterVo.getSqlFieldType()).build(workcenterVo, sqlSb);
         //只有”我的草稿“分类才显示工单状态”未提交“的工单
-        if(!Objects.equals("draftProcessTask",workcenterVo.getUuid()) && !sqlSb.toString().contains("draft")&&Arrays.asList(FieldTypeEnum.DISTINCT_ID.getValue(),FieldTypeEnum.LIMIT_COUNT.getValue()).contains(workcenterVo.getSqlFieldType())){
+        if(!Objects.equals(ProcessWorkcenterInitType.DRAFT_PROCESSTASK.getValue(),workcenterVo.getUuid()) && !sqlSb.toString().contains("draft")&&Arrays.asList(FieldTypeEnum.DISTINCT_ID.getValue(),FieldTypeEnum.LIMIT_COUNT.getValue()).contains(workcenterVo.getSqlFieldType())){
             sqlSb.append(" and pt.status != 'draft' ");
         }
 
