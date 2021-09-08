@@ -1,12 +1,18 @@
 package codedriver.module.process.stephandler.utilhandler;
 
-import java.util.*;
-
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.process.constvalue.*;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.process.dto.processconfig.ActionConfigActionVo;
 import codedriver.framework.process.dto.processconfig.ActionConfigVo;
 import codedriver.framework.process.dto.processconfig.NotifyPolicyConfigVo;
+import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
 import codedriver.framework.process.util.ProcessConfigUtil;
+import codedriver.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -14,24 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskStepUserStatus;
-import codedriver.framework.process.constvalue.ProcessUserType;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
-import codedriver.framework.process.dto.ProcessStepVo;
-import codedriver.framework.process.dto.ProcessStepWorkerPolicyVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
-import codedriver.framework.process.dto.ProcessTaskStepUserVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
-import codedriver.module.process.notify.handler.OmnipotentNotifyPolicyHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerBase;
+import java.util.*;
 
 @Service
 public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase {
@@ -119,7 +108,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 
     @Override
     public void updateProcessTaskStepUserAndWorker(Long processTaskId, Long processTaskStepId) {
-        /** 查出processtask_step_subtask表中当前步骤子任务处理人列表 **/
+        /* 查出processtask_step_subtask表中当前步骤子任务处理人列表 */
         Set<String> runningSubtaskUserUuidSet = new HashSet<>();
         Set<String> succeedSubtaskUserUuidSet = new HashSet<>();
         List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
@@ -131,7 +120,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
             }
         }
 
-        /** 查出processtask_step_worker表中当前步骤子任务处理人列表 **/
+        /* 查出processtask_step_worker表中当前步骤子任务处理人列表 */
         Set<String> workerMinorUserUuidSet = new HashSet<>();
         List<ProcessTaskStepWorkerVo> workerList = processTaskMapper.getProcessTaskStepWorkerByProcessTaskIdAndProcessTaskStepId(processTaskId, processTaskStepId);
         for (ProcessTaskStepWorkerVo workerVo : workerList) {
@@ -140,7 +129,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
             }
         }
 
-        /** 查出processtask_step_user表中当前步骤子任务处理人列表 **/
+        /* 查出processtask_step_user表中当前步骤子任务处理人列表 */
         Set<String> doingMinorUserUuidSet = new HashSet<>();
         Set<String> doneMinorUserUuidSet = new HashSet<>();
         List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
@@ -162,39 +151,39 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         processTaskStepUserVo.setProcessTaskId(processTaskId);
         processTaskStepUserVo.setProcessTaskStepId(processTaskStepId);
         processTaskStepUserVo.setUserType(ProcessUserType.MINOR.getValue());
-        /** 删除processtask_step_worker表中当前步骤多余的子任务处理人 **/
+        /* 删除processtask_step_worker表中当前步骤多余的子任务处理人 */
         List<String> needDeleteUserList = ListUtils.removeAll(workerMinorUserUuidSet, runningSubtaskUserUuidSet);
         for (String userUuid : needDeleteUserList) {
             processTaskStepWorkerVo.setUuid(userUuid);
             processTaskMapper.deleteProcessTaskStepWorker(processTaskStepWorkerVo);
             if (succeedSubtaskUserUuidSet.contains(userUuid)) {
                 if (doingMinorUserUuidSet.contains(userUuid)) {
-                    /** 完成子任务 **/
+                    /* 完成子任务 */
                     processTaskStepUserVo.setUserVo(new UserVo(userUuid));
                     processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
                     processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
                 }
             } else {
                 if (doingMinorUserUuidSet.contains(userUuid)) {
-                    /** 取消子任务 **/
+                    /* 取消子任务 */
                     processTaskStepUserVo.setUserVo(new UserVo(userUuid));
                     processTaskMapper.deleteProcessTaskStepUser(processTaskStepUserVo);
                 }
             }
         }
-        /** 向processtask_step_worker表中插入当前步骤的子任务处理人 **/
+        /* 向processtask_step_worker表中插入当前步骤的子任务处理人 */
         List<String> needInsertUserList = ListUtils.removeAll(runningSubtaskUserUuidSet, workerMinorUserUuidSet);
         for (String userUuid : needInsertUserList) {
             processTaskStepWorkerVo.setUuid(userUuid);
             processTaskMapper.insertProcessTaskStepWorker(processTaskStepWorkerVo);
 
             if (doneMinorUserUuidSet.contains(userUuid)) {
-                /** 重做子任务 **/
+                /* 重做子任务 */
                 processTaskStepUserVo.setUserVo(new UserVo(userUuid));
                 processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
                 processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
             } else if (!doingMinorUserUuidSet.contains(userUuid)) {
-                /** 创建子任务 **/
+                /* 创建子任务 */
                 processTaskStepUserVo.setUserVo(new UserVo(userUuid));
                 processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
                 processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
@@ -210,7 +199,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         }
         JSONObject resultObj = new JSONObject();
 
-        /** 授权 **/
+        /* 授权 */
         ProcessTaskOperationType[] stepActions = {
                 ProcessTaskOperationType.STEP_VIEW,
                 ProcessTaskOperationType.STEP_TRANSFER,
@@ -227,7 +216,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         JSONArray authorityArray = ProcessConfigUtil.regulateAuthorityList(authorityList, stepActions);
         resultObj.put("authorityList", authorityArray);
 
-        /** 按钮映射列表 **/
+        /* 按钮映射列表 */
         ProcessTaskOperationType[] stepButtons = {
                 ProcessTaskOperationType.STEP_COMPLETE,
                 ProcessTaskOperationType.STEP_BACK,
@@ -237,7 +226,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.PROCESSTASK_ABORT,
                 ProcessTaskOperationType.PROCESSTASK_RECOVER
         };
-        /** 子任务按钮映射列表 **/
+        /* 子任务按钮映射列表 */
         ProcessTaskOperationType[] subtaskButtons = {
                 ProcessTaskOperationType.SUBTASK_ABORT,
                 ProcessTaskOperationType.SUBTASK_COMMENT,
@@ -253,15 +242,15 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         customButtonArray.addAll(subtaskCustomButtonArray);
         resultObj.put("customButtonList", customButtonArray);
 
-        /** 状态映射列表 **/
+        /* 状态映射列表 */
         JSONArray customStatusList = configObj.getJSONArray("customStatusList");
         JSONArray customStatusArray = ProcessConfigUtil.regulateCustomStatusList(customStatusList);
         resultObj.put("customStatusList", customStatusArray);
 
-        /** 可替换文本列表 **/
+        /* 可替换文本列表 */
         resultObj.put("replaceableTextList", ProcessConfigUtil.regulateReplaceableTextList(configObj.getJSONArray("replaceableTextList")));
 
-        /** 通知 **/
+        /* 通知 */
         JSONObject notifyPolicyConfig = configObj.getJSONObject("notifyPolicyConfig");
         NotifyPolicyConfigVo notifyPolicyConfigVo = JSONObject.toJavaObject(notifyPolicyConfig, NotifyPolicyConfigVo.class);
         if (notifyPolicyConfigVo == null) {
@@ -269,6 +258,10 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         }
         notifyPolicyConfigVo.setHandler(OmnipotentNotifyPolicyHandler.class.getName());
         resultObj.put("notifyPolicyConfig", notifyPolicyConfigVo);
+
+        /* 任务 */
+        JSONObject taskConfig = configObj.getJSONObject("taskConfig");
+        resultObj.put("taskConfig",taskConfig);
         return resultObj;
     }
 
