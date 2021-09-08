@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.stephandler.component;
 
 import codedriver.framework.asynchronization.threadlocal.ConditionParamContext;
@@ -49,7 +54,6 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
         return ProcessStepHandlerType.CONDITION.getType();
     }
 
-    @SuppressWarnings("serial")
     @Override
     public JSONObject getChartConfig() {
         return new JSONObject() {
@@ -85,7 +89,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected int myHandle(ProcessTaskStepVo currentProcessTaskStepVo) {
-        /** 设置已完成标记位 **/
+        /* 设置已完成标记位 **/
         currentProcessTaskStepVo.setIsAllDone(true);
         return 0;
     }
@@ -96,8 +100,8 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
         UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
         Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
         if (CollectionUtils.isNotEmpty(nextStepList)) {
-            Map<String, ProcessTaskStepVo> processTaskStepMap = nextStepList.stream().collect(Collectors.toMap(e -> e.getProcessStepUuid(), e -> e));
-            Map<String, String> processStepNameMap = nextStepList.stream().collect(Collectors.toMap(e -> e.getProcessStepUuid(), e -> e.getName()));
+            Map<String, ProcessTaskStepVo> processTaskStepMap = nextStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, e -> e));
+            Map<String, String> processStepNameMap = nextStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, ProcessTaskStepVo::getName));
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
             String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
             if (StringUtils.isNotBlank(stepConfig)) {
@@ -110,7 +114,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                         if (CollectionUtils.isNotEmpty(targetStepList)) {
                             JSONObject ruleObj = new JSONObject();
                             String type = moveonConfig.getString("type");
-                            Boolean canRun = false;
+                            boolean canRun = false;
                             if ("always".equals(type)) {// 直接流转
                                 canRun = true;
                                 ruleObj.putAll(moveonConfig);
@@ -185,7 +189,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
             currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(),
                     currentProcessTaskStepVo.getError());
         }
-        /** 处理历史记录 **/
+        /* 处理历史记录 **/
         // String action = currentProcessTaskStepVo.getParamObj().getString("action");
         // AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
         IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.CONDITION);
@@ -218,7 +222,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                     if (stepAndKeyList.size() > 0) {
                         List<RelExpressionVo> relExpressionList = new ArrayList<>();
                         for (String stepAndKey : stepAndKeyList) {
-                            if (stepAndKey.indexOf(".") > -1 && stepAndKey.split("\\.").length == 2) {
+                            if (stepAndKey.contains(".") && stepAndKey.split("\\.").length == 2) {
                                 String stepUid = stepAndKey.split("\\.")[0];
                                 String key = stepAndKey.split("\\.")[1];
                                 RelExpressionVo relExpressionVo = new RelExpressionVo();
