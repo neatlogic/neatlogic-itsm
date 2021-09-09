@@ -345,6 +345,10 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         JSONObject workerPolicyObj = ProcessConfigUtil.regulateWorkerPolicyConfig(workerPolicyConfig);
         resultObj.put("workerPolicyConfig", workerPolicyObj);
 
+        /* 任务 */
+        JSONObject taskConfig = configObj.getJSONObject("taskConfig");
+        resultObj.put("taskConfig",taskConfig);
+
         JSONObject simpleSettings = ProcessConfigUtil.regulateSimpleSettings(configObj);
         resultObj.putAll(simpleSettings);
         return resultObj;
