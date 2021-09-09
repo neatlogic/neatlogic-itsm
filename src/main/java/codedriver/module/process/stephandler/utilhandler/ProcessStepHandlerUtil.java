@@ -468,7 +468,14 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         processTaskStepRemindVo.setAction(ation.getValue());
         processTaskStepRemindVo.setFcu(UserContext.get().getUserUuid(true));
         String title = ation.getTitle();
-        title = title.replace("processTaskStepName", currentProcessTaskStepVo.getName());
+        String processTaskStepName = currentProcessTaskStepVo.getName();
+        if (StringUtils.isBlank(processTaskStepName)) {
+            ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+            if (processTaskStepVo != null) {
+                processTaskStepName = processTaskStepVo.getName();
+            }
+        }
+        title = title.replace("processTaskStepName", processTaskStepName);
         processTaskStepRemindVo.setTitle(title);
         if (StringUtils.isNotBlank(reason)) {
             ProcessTaskContentVo contentVo = new ProcessTaskContentVo(reason);
