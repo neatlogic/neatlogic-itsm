@@ -85,6 +85,9 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 			if(CollectionUtils.isNotEmpty(workcenterList)) {
 				workcenterVo = workcenterList.get(0);
 				originType = workcenterVo.getType();
+				if(Objects.equals(originType,ProcessWorkcenterType.FACTORY.getValue())){//如果是出厂类型，则不允许修改类型
+					type = ProcessWorkcenterType.FACTORY.getValue();
+				}
 			}else {
 				throw new WorkcenterNotFoundException(uuid);
 			}
@@ -95,7 +98,7 @@ public class WorkcenterSaveApi extends PrivateApiComponentBase {
 		 * WorkcenterNameRepeatException(name); }
 		 */
 		//判断原来的分类或要改成的分类如果是system 则需要鉴权
-		if((StringUtils.isNotBlank(originType)&& Objects.equals(originType,ProcessWorkcenterType.SYSTEM.getValue()))||ProcessWorkcenterType.SYSTEM.getValue().equals(type)) {
+		if(Arrays.asList(ProcessWorkcenterType.SYSTEM.getValue(),ProcessWorkcenterType.FACTORY.getValue()).contains(originType)||Arrays.asList(ProcessWorkcenterType.SYSTEM.getValue(),ProcessWorkcenterType.FACTORY.getValue()).contains(type)) {
 			//判断是否有管理员权限
 			if(!AuthActionChecker.check(WORKCENTER_MODIFY.class.getSimpleName())) {
 				throw new WorkcenterNoAuthException("管理");
