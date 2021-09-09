@@ -104,6 +104,13 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         if (CollectionUtils.isNotEmpty(tagList)) {
             processStepVo.setTagList(tagList.toJavaList(String.class));
         }
+
+        //保存子任务
+        JSONObject taskConfig = stepConfigObj.getJSONObject("taskConfig");
+        if(MapUtils.isNotEmpty(taskConfig)){
+            ProcessStepTaskConfigVo taskConfigVo = JSONObject.toJavaObject(taskConfig,ProcessStepTaskConfigVo.class);
+            processStepVo.setTaskConfigVo(taskConfigVo);
+        }
     }
 
     @Override

@@ -14,13 +14,12 @@ import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
+import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
+import codedriver.framework.process.dao.mapper.task.TaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
+import codedriver.framework.process.exception.processtask.task.TaskConfigException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
@@ -31,6 +30,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.common.config.ProcessConfig;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -72,6 +72,12 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskStepTaskMapper processTaskStepTaskMapper;
+
+    @Resource
+    private SelectContentByHashMapper selectContentByHashMapper;
+
+    @Resource
+    private TaskMapper taskMapper;
 
     @Override
     public String getToken() {
@@ -229,7 +235,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             }
             //任务列表
             if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-                Map<String,List<ProcessTaskStepTaskVo>> stepTaskVoMap = new HashMap<>();
+                Map<String, List<ProcessTaskStepTaskVo>> stepTaskVoMap = new HashMap<>();
                 Map<Long, List<ProcessTaskStepTaskUserVo>> stepTaskUserVoMap = new HashMap<>();
                 Map<Long, List<ProcessTaskStepTaskUserContentVo>> stepTaskUserContentVoMap = new HashMap<>();
                 List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskByProcessTaskStepId(processTaskStepVo.getId());
@@ -239,29 +245,45 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     stepTaskUserVoList = processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(stepTaskVoList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList()));
                     if (CollectionUtils.isNotEmpty(stepTaskUserVoList)) {
                         stepTaskUserContentVoList = processTaskStepTaskMapper.getStepTaskUserContentByStepTaskUserIdList(stepTaskUserVoList.stream().map(ProcessTaskStepTaskUserVo::getId).collect(Collectors.toList()));
-                        stepTaskUserContentVoList.forEach(stuc->{
-                            if(!stepTaskUserContentVoMap.containsKey(stuc.getProcesstaskStepTaskUserId())){
-                                stepTaskUserContentVoMap.put(stuc.getProcesstaskStepTaskUserId(),new ArrayList<>());
+                        stepTaskUserContentVoList.forEach(stuc -> {
+                            if (!stepTaskUserContentVoMap.containsKey(stuc.getProcesstaskStepTaskUserId())) {
+                                stepTaskUserContentVoMap.put(stuc.getProcesstaskStepTaskUserId(), new ArrayList<>());
                             }
                             stepTaskUserContentVoMap.get(stuc.getProcesstaskStepTaskUserId()).add(stuc);
                         });
-                        stepTaskUserVoList.forEach(stu->{
-                            if(!stepTaskUserVoMap.containsKey(stu.getProcesstaskStepTaskId())){
-                                stepTaskUserVoMap.put(stu.getProcesstaskStepTaskId(),new ArrayList<>());
+                        stepTaskUserVoList.forEach(stu -> {
+                            if (!stepTaskUserVoMap.containsKey(stu.getProcesstaskStepTaskId())) {
+                                stepTaskUserVoMap.put(stu.getProcesstaskStepTaskId(), new ArrayList<>());
                             }
                             stu.setStepTaskUserContentVoList(stepTaskUserContentVoMap.get(stu.getId()));
                             stepTaskUserVoMap.get(stu.getProcesstaskStepTaskId()).add(stu);
                         });
                         stepTaskVoList.forEach(st -> {
-                            if(!stepTaskVoMap.containsKey(st.getTaskConfigName())){
-                                stepTaskVoMap.put(st.getTaskConfigName(),new ArrayList<>());
+                            if (!stepTaskVoMap.containsKey(st.getTaskConfigName())) {
+                                stepTaskVoMap.put(st.getTaskConfigName(), new ArrayList<>());
                             }
                             st.setStepTaskUserVoList(stepTaskUserVoMap.get(st.getProcessTaskStepId()));
                             stepTaskVoMap.get(st.getTaskConfigName()).add(st);
                         });
                     }
-                    processTaskStepVo.setProcessTaskStepTask(JSONObject.parseObject(JSONObject.toJSONString(stepTaskVoMap)));
                 }
+                JSONObject stepTaskJson = new JSONObject() {{
+                    put("taskTabList", JSONObject.parseObject(JSONObject.toJSONString(stepTaskVoMap)));
+                    String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+                    JSONObject stepConfigJson = JSONObject.parseObject(stepConfig);
+                    JSONObject stepTaskConfigJson = stepConfigJson.getJSONObject("taskConfig");
+                    JSONArray stepTaskIdList = stepTaskConfigJson.getJSONArray("idList");
+                    List<TaskConfigVo> taskConfigVoList = taskMapper.getTaskConfigByIdList(stepTaskIdList);
+                    if (taskConfigVoList.size() != stepTaskIdList.size()) {
+                        throw new TaskConfigException(processTaskStepVo.getName());
+                    }
+                    //todo 控制权限，目前仅允许处理人创建策略
+                    if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true))) > 0) {
+                        put("taskActionList", taskConfigVoList);
+                    }
+                    put("rangeList", stepTaskConfigJson.getJSONArray("rangeList"));
+                }};
+                processTaskStepVo.setProcessTaskStepTask(stepTaskJson);
             }
 
             // 获取可分配处理人的步骤列表

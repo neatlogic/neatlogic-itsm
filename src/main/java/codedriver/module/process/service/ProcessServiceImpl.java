@@ -1,26 +1,24 @@
 package codedriver.module.process.service;
 
-import java.util.List;
-
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dependency.core.DependencyManager;
+import codedriver.framework.exception.integration.IntegrationNotFoundException;
+import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.exception.FormNotFoundException;
+import codedriver.framework.integration.dao.mapper.IntegrationMapper;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
+import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.process.ProcessNameRepeatException;
 import codedriver.module.process.dependency.handler.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.exception.integration.IntegrationNotFoundException;
-import codedriver.framework.integration.dao.mapper.IntegrationMapper;
-import codedriver.framework.notify.dao.mapper.NotifyMapper;
-import codedriver.framework.form.dao.mapper.FormMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.form.exception.FormNotFoundException;
-import codedriver.framework.process.exception.process.ProcessNameRepeatException;
-
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 public class ProcessServiceImpl implements ProcessService {
@@ -148,6 +146,18 @@ public class ProcessServiceImpl implements ProcessService {
                             processStepTagVo.setTagId(processTagVo.getId());
                             processMapper.insertProcessStepTag(processStepTagVo);
                         }
+                    }
+                }
+
+                //子任务
+                ProcessStepTaskConfigVo taskConfigVo = stepVo.getTaskConfigVo();
+                processMapper.deleteProcessStepTaskByProcessStepUuid(stepVo.getUuid());
+                if (taskConfigVo != null) {
+                    if (CollectionUtils.isNotEmpty(taskConfigVo.getIdList())) {
+                        taskConfigVo.getIdList().forEach(id -> {
+                            ProcessStepTaskConfigVo tmpVo = new ProcessStepTaskConfigVo(stepVo.getUuid(), id);
+                            processMapper.insertProcessStepTask(tmpVo);
+                        });
                     }
                 }
             }
