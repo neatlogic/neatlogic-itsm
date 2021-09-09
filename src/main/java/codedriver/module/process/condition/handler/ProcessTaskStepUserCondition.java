@@ -3,6 +3,7 @@ package codedriver.module.process.condition.handler;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.*;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.dto.condition.ConditionVo;
 import codedriver.framework.form.constvalue.FormConditionModel;
@@ -15,20 +16,24 @@ import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
+import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
-    @Autowired
+    @Resource
     UserMapper userMapper;
+
+    @Resource
+    AuthenticationInfoService authenticationInfoService;
 
     @Override
     public String getName() {
@@ -195,11 +200,11 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
                 user = UserContext.get().getUserUuid();
             }
             //如果是待处理状态，则需额外匹配角色和组
-            UserVo userVo = userMapper.getUserByUuid(user);
-            if (userVo != null) {
+            AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(user);
+            if (authenticationInfoVo != null) {
                 userList.add(user);
-                teamList = userVo.getTeamUuidList();
-                roleList = userVo.getRoleUuidList();
+                teamList = authenticationInfoVo.getTeamUuidList();
+                roleList = authenticationInfoVo.getRoleUuidList();
             }
         }
         sqlSb.append(" (");
