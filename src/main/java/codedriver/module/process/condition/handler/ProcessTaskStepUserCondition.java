@@ -11,10 +11,10 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.process.constvalue.ProcessStepHandlerType;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
-import codedriver.framework.process.workcenter.table.ProcessTaskStepSqlTable;
+import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.framework.service.AuthenticationInfoService;
 import com.alibaba.fastjson.JSON;
@@ -26,6 +26,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
@@ -208,9 +210,11 @@ public class ProcessTaskStepUserCondition extends ProcessTaskConditionBase imple
             }
         }
         sqlSb.append(" (");
-        //非开始节点
-        sqlSb.append(Expression.getExpressionSql(Expression.UNEQUAL.getExpression(), new ProcessTaskStepSqlTable().getShortName(), ProcessTaskStepSqlTable.FieldEnum.TYPE.getValue(), ProcessStepHandlerType.START.getHandler()));
-        sqlSb.append(" and (");
+        // status
+        List<String> statusList = Stream.of(ProcessTaskStatus.RUNNING.getValue())
+                .map(String::toString).collect(Collectors.toList());
+        sqlSb.append(Expression.getExpressionSql(Expression.INCLUDE.getExpression(), new ProcessTaskSqlTable().getShortName(), ProcessTaskSqlTable.FieldEnum.STATUS.getValue(), String.join("','", statusList)));
+        sqlSb.append(" and ( ");
         //补充待处理人sql 条件
         getProcessingTaskOfMineSqlWhere(sqlSb, userList, teamList, roleList);
         sqlSb.append(" )) ");
