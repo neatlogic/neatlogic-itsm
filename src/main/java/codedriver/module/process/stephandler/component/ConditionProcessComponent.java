@@ -15,7 +15,6 @@ import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.dto.*;
-import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.util.RunScriptUtil;
@@ -96,7 +95,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
 
     @Override
     protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo,
-                                               List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
+                                               List<ProcessTaskStepVo> nextStepList, Long nextStepId) {
         UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
         Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
         if (CollectionUtils.isNotEmpty(nextStepList)) {
@@ -200,13 +199,13 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
         if (flowJobStepVo.getRelList() != null && flowJobStepVo.getRelList().size() > 0) {
             for (ProcessTaskStepRelVo relVo : flowJobStepVo.getRelList()) {
                 if (!StringUtils.isBlank(relVo.getCondition())) {
-                    Pattern pattern = null;
-                    Matcher matcher = null;
+                    Pattern pattern;
+                    Matcher matcher;
                     StringBuffer temp = new StringBuffer();
-                    String regex = "\\$\\{([^}]+)\\}";
+                    String regex = "\\$\\{([^}]+)}";
                     pattern = Pattern.compile(regex, Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
                     matcher = pattern.matcher(relVo.getCondition());
-                    List<String> stepAndKeyList = new ArrayList<String>();
+                    List<String> stepAndKeyList = new ArrayList<>();
                     while (matcher.find()) {
                         matcher.appendReplacement(temp, "map[\"" + matcher.group(1) + "\"]");
                         if (!stepAndKeyList.contains(matcher.group(1))) {
@@ -232,23 +231,22 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 // key);
                                 if (valueList.size() > 0) {
                                     if (valueList.size() > 1) {
-                                        script.append("map[\"" + stepUid + "." + key + "\"] = [");
-                                        String v = "[";
+                                        script.append("map[\"").append(stepUid).append(".").append(key).append("\"] = [");
+                                        StringBuilder v = new StringBuilder("[");
                                         for (int i = 0; i < valueList.size(); i++) {
                                             String value = valueList.get(i);
-                                            script.append("\"" + value + "\"");
-                                            v += "\"" + value + "\"";
+                                            script.append("\"").append(value).append("\"");
+                                            v.append("\"").append(value).append("\"");
                                             if (i < valueList.size() - 1) {
                                                 script.append(",");
-                                                v += ",";
+                                                v.append(",");
                                             }
                                         }
-                                        v += "]";
+                                        v.append("]");
                                         script.append("];");
-                                        relExpressionVo.setValue(v);
+                                        relExpressionVo.setValue(v.toString());
                                     } else {
-                                        script.append(
-                                                "map[\"" + stepUid + "." + key + "\"] = \"" + valueList.get(0) + "\";");
+                                        script.append("map[\"").append(stepUid).append(".").append(key).append("\"] = \"").append(valueList.get(0)).append("\";");
                                         relExpressionVo.setValue("\"" + valueList.get(0) + "\"");
                                     }
                                 }
@@ -257,7 +255,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                         }
                         relVo.setRelExpressionList(relExpressionList);
                     }
-                    script.append("return " + temp.toString() + ";");
+                    script.append("return ").append(temp).append(";");
                     script.append("}");
                     ScriptEngineManager sem = new ScriptEngineManager();
                     ScriptEngine se = sem.getEngineByName("nashorn");
@@ -286,8 +284,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     }
 
     @Override
-    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet)
-            throws ProcessTaskException {
+    protected int myAssign(ProcessTaskStepVo currentProcessTaskStepVo, Set<ProcessTaskStepWorkerVo> workerSet) {
         return 0;
     }
 
@@ -297,12 +294,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     }
 
     @Override
-    protected int myStart(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+    protected int myStart(ProcessTaskStepVo currentProcessTaskStepVo) {
         return 0;
     }
 
     @Override
-    protected int myRetreat(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+    protected int myRetreat(ProcessTaskStepVo currentProcessTaskStepVo) {
         return 0;
     }
 
@@ -312,12 +309,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     }
 
     @Override
-    protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+    protected int myBack(ProcessTaskStepVo currentProcessTaskStepVo) {
         return 0;
     }
 
     @Override
-    protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
+    protected int myStartProcess(ProcessTaskStepVo processTaskStepVo) {
         return 0;
     }
 
@@ -327,18 +324,17 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     }
 
     @Override
-    protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList)
-            throws ProcessTaskException {
+    protected int myTransfer(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepWorkerVo> workerList) {
         return 0;
     }
 
     @Override
-    protected int mySaveDraft(ProcessTaskStepVo processTaskStepVo) throws ProcessTaskException {
+    protected int mySaveDraft(ProcessTaskStepVo processTaskStepVo) {
         return 0;
     }
 
     @Override
-    protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+    protected int myPause(ProcessTaskStepVo currentProcessTaskStepVo) {
         return 0;
     }
 
