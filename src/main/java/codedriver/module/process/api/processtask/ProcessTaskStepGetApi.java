@@ -32,6 +32,7 @@ import codedriver.module.process.common.config.ProcessConfig;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.nacos.common.utils.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -272,16 +273,18 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
                     JSONObject stepConfigJson = JSONObject.parseObject(stepConfig);
                     JSONObject stepTaskConfigJson = stepConfigJson.getJSONObject("taskConfig");
-                    JSONArray stepTaskIdList = stepTaskConfigJson.getJSONArray("idList");
-                    List<TaskConfigVo> taskConfigVoList = taskMapper.getTaskConfigByIdList(stepTaskIdList);
-                    if (taskConfigVoList.size() != stepTaskIdList.size()) {
-                        throw new TaskConfigException(processTaskStepVo.getName());
+                    if(MapUtils.isNotEmpty(stepTaskConfigJson)) {
+                        JSONArray stepTaskIdList = stepTaskConfigJson.getJSONArray("idList");
+                        List<TaskConfigVo> taskConfigVoList = taskMapper.getTaskConfigByIdList(stepTaskIdList);
+                        if (taskConfigVoList.size() != stepTaskIdList.size()) {
+                            throw new TaskConfigException(processTaskStepVo.getName());
+                        }
+                        //todo 控制权限，目前仅允许处理人创建策略
+                        if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true))) > 0) {
+                            put("taskActionList", taskConfigVoList);
+                        }
+                        put("rangeList", stepTaskConfigJson.getJSONArray("rangeList"));
                     }
-                    //todo 控制权限，目前仅允许处理人创建策略
-                    if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true))) > 0) {
-                        put("taskActionList", taskConfigVoList);
-                    }
-                    put("rangeList", stepTaskConfigJson.getJSONArray("rangeList"));
                 }};
                 processTaskStepVo.setProcessTaskStepTask(stepTaskJson);
             }
