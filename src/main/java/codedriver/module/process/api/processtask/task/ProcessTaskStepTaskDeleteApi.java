@@ -59,13 +59,13 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "任务id"),
+            @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, isRequired = true, desc = "任务id"),
     })
-    @Output({@Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")})
+    @Output({})
     @Description(desc = "任务删除接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long processTaskStepTaskId = jsonObj.getLong("id");
+        Long processTaskStepTaskId = jsonObj.getLong("processTaskStepTaskId");
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskById(processTaskStepTaskId);
         if (stepTaskVo == null) {
             throw new ProcessTaskStepTaskNotFoundException(processTaskStepTaskId.toString());

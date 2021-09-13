@@ -1,14 +1,5 @@
 package codedriver.module.process.workerpolicy.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.constvalue.WorkerPolicy;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -17,6 +8,13 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.workerpolicy.core.IWorkerPolicyHandler;
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 @Service
 public class PreStepAssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 	
@@ -51,7 +49,7 @@ public class PreStepAssignWorkerPolicyHandler implements IWorkerPolicyHandler {
 				processTaskAssignWorkerVo.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
 				processTaskAssignWorkerVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
 				processTaskAssignWorkerVo.setFromProcessStepUuid(processStepUuid);
-				List<ProcessTaskAssignWorkerVo> processTaskAssignWorkerList = processTaskMapper.getPrcessTaskAssignWorker(processTaskAssignWorkerVo);
+				List<ProcessTaskAssignWorkerVo> processTaskAssignWorkerList = processTaskMapper.getProcessTaskAssignWorker(processTaskAssignWorkerVo);
 				for(ProcessTaskAssignWorkerVo processTaskAssignWorker : processTaskAssignWorkerList) {
 					processTaskStepWorkerList.add(new ProcessTaskStepWorkerVo(processTaskAssignWorker.getProcessTaskId(), processTaskAssignWorker.getProcessTaskStepId(), processTaskAssignWorker.getType(), processTaskAssignWorker.getUuid(), ProcessUserType.MAJOR.getValue()));
 				}

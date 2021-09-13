@@ -42,7 +42,7 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "任务创建接口";
+        return "任务完成接口";
     }
 
     @Override
@@ -51,11 +51,10 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, desc = "任务id，如果不为空则是编辑，为空则新增"),
-            @Param(name = "processTaskStepTaskUserId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
+            @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, desc = "任务id"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")})
-    @Output({@Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")})
-    @Description(desc = "任务创建接口")
+    @Output({ })
+    @Description(desc = "任务完成接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ProcessTaskStepTaskUserVo stepTaskUserVo = JSONObject.toJavaObject(jsonObj, ProcessTaskStepTaskUserVo.class);

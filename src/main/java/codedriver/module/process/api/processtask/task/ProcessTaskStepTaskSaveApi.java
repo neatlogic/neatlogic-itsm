@@ -70,6 +70,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, desc = "任务id，如果不为空则是编辑，为空则新增"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
             @Param(name = "userList", type = ApiParamType.STRING, isRequired = true, desc = "任务处理人userUuid,格式user#userUuid"),
+            @Param(name = "taskConfigId", type = ApiParamType.LONG, isRequired = true, desc = "任务策略id"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")})
     @Output({@Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")})
     @Description(desc = "保存任务接口")
@@ -82,7 +83,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
         if (processTaskStepVo == null) {
             throw new ProcessTaskStepNotFoundException(processTaskStepId.toString());
         }
-        if (Objects.equals(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo.getStatus())) {
+        if (!Objects.equals(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo.getStatus())) {
             throw new ProcessTaskStepUnRunningException();
         }
         Long processTaskId = processTaskStepVo.getProcessTaskId();
@@ -91,9 +92,10 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
-        if (CollectionUtils.isEmpty(processTaskStepVo.getUserList())) {
+        if (CollectionUtils.isEmpty(processTaskStepTaskVo.getUserList())) {
             throw new ParamIrregularException("userList");
         }
+        processTaskStepTaskVo.setProcessTaskId(processTaskId);
         processTaskStepTaskVo.setOwnerVo(new UserVo(UserContext.get().getUserUuid(true)));
         processTaskStepTaskVo.getParamObj().put("stepConfigHash", processTaskStepVo.getConfigHash());
         processTaskStepTaskVo.getParamObj().put("stepName", processTaskStepVo.getName());
@@ -108,7 +110,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             isCreate = false;
             processTaskStepTaskVo.setId(processTaskStepTaskId);
         }
-        processTaskStepTaskService.saveTask(processTaskStepTaskVo, isCreate);
+        processTaskStepTaskService.saveTask(processTaskStepVo,processTaskStepTaskVo, isCreate);
         //TODO 活动&通知
         return null;
     }
