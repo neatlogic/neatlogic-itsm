@@ -87,6 +87,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             throw new ProcessTaskStepUnRunningException();
         }
         Long processTaskId = processTaskStepVo.getProcessTaskId();
+        //校验执行权限
         try {
             new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.TASK_CREATE).build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
@@ -112,6 +113,6 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
         }
         processTaskStepTaskService.saveTask(processTaskStepVo,processTaskStepTaskVo, isCreate);
         //TODO 活动&通知
-        return null;
+        return processTaskStepTaskVo.getId();
     }
 }
