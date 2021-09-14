@@ -248,10 +248,10 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                         stepTaskUserContentVoList = processTaskStepTaskMapper.getStepTaskUserContentByStepTaskUserIdList(stepTaskUserVoList.stream().map(ProcessTaskStepTaskUserVo::getId).collect(Collectors.toList()));
                         //任务用户回复
                         stepTaskUserContentVoList.forEach(stuc -> {
-                            if (!stepTaskUserContentVoMap.containsKey(stuc.getProcesstaskStepTaskUserId())) {
-                                stepTaskUserContentVoMap.put(stuc.getProcesstaskStepTaskUserId(), new ArrayList<>());
+                            if (!stepTaskUserContentVoMap.containsKey(stuc.getProcessTaskStepTaskUserId())) {
+                                stepTaskUserContentVoMap.put(stuc.getProcessTaskStepTaskUserId(), new ArrayList<>());
                             }
-                            stepTaskUserContentVoMap.get(stuc.getProcesstaskStepTaskUserId()).add(stuc);
+                            stepTaskUserContentVoMap.get(stuc.getProcessTaskStepTaskUserId()).add(stuc);
                         });
                         //任务用户
                         stepTaskUserVoList.forEach(stu -> {
@@ -266,7 +266,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                             if (!stepTaskVoMap.containsKey(st.getTaskConfigName())) {
                                 stepTaskVoMap.put(st.getTaskConfigName(), new ArrayList<>());
                             }
-                            st.setStepTaskUserVoList(stepTaskUserVoMap.get(st.getProcessTaskStepId()));
+                            st.setStepTaskUserVoList(stepTaskUserVoMap.get(st.getId()));
                             stepTaskVoMap.get(st.getTaskConfigName()).add(st);
                         });
                     }
