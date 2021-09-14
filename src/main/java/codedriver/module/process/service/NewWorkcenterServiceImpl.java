@@ -120,7 +120,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 }
             }
             Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
-                    builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
+                    builder.addOperationType(ProcessTaskOperationType.PROCESSTASK_ABORT)
                             .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
                             .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
                             .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
@@ -195,7 +195,7 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 builder.addProcessTaskStepId(processStep.getId());
             }
             Map<Long, Set<ProcessTaskOperationType>> operateTypeSetMap =
-                    builder.addOperationType(ProcessTaskOperationType.TASK_ABORT)
+                    builder.addOperationType(ProcessTaskOperationType.PROCESSTASK_ABORT)
                             .addOperationType(ProcessTaskOperationType.PROCESSTASK_RECOVER)
                             .addOperationType(ProcessTaskOperationType.PROCESSTASK_URGE)
                             .addOperationType(ProcessTaskOperationType.STEP_WORK).build().getOperateMap();
