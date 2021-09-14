@@ -7,15 +7,17 @@ package codedriver.module.process.api.processtask.task;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
-import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
 import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskNotFoundException;
+import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -25,7 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Objects;
 
 /**
  * @author lvzk
@@ -74,8 +75,11 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         if (processTaskStepVo == null) {
             throw new ProcessTaskStepNotFoundException(stepTaskVo.getProcessTaskStepId().toString());
         }
-        if (Objects.equals(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo.getStatus())) {
-            throw new ProcessTaskStepUnRunningException();
+        //校验执行权限
+        try {
+            new ProcessAuthManager.StepOperationChecker(processTaskStepVo.getId(), ProcessTaskOperationType.TASK_DELETE).build().checkAndNoPermissionThrowException();
+        } catch (ProcessTaskNoPermissionException e) {
+            throw new PermissionDeniedException();
         }
         processTaskStepTaskMapper.deleteTaskById(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserByTaskId(processTaskStepTaskId);

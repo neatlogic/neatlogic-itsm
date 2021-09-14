@@ -69,7 +69,7 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "processTaskStepTaskId", type = ApiParamType.LONG, desc = "任务id，如果不为空则是编辑，为空则新增"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id"),
-            @Param(name = "userList", type = ApiParamType.STRING, isRequired = true, desc = "任务处理人userUuid,格式user#userUuid"),
+            @Param(name = "userList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "任务处理人userUuid,格式user#userUuid"),
             @Param(name = "taskConfigId", type = ApiParamType.LONG, isRequired = true, desc = "任务策略id"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")})
     @Output({@Param(name = "Return", type = ApiParamType.LONG, desc = "任务id")})

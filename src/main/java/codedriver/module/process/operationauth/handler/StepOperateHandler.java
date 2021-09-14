@@ -268,6 +268,21 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                     }
                     return false;
                 });
+
+        /**
+         * 步骤删除任务权限
+         * 判断userUuid用户是否有步骤删除任务权限逻辑：
+         * userUuid用户是步骤的处理人
+         */
+        operationBiPredicateMap.put(ProcessTaskOperationType.TASK_DELETE,
+                (processTaskVo, processTaskStepVo, userUuid) -> {
+                    if(processTaskVo.getIsShow() == 1) {
+                        if (processTaskStepVo.getIsActive() == 1) {
+                            return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
+                        }
+                    }
+                    return false;
+                });
     }
 
     @Override
