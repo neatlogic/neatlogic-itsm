@@ -66,6 +66,7 @@ public class ProcessTaskRepeatListApi extends PrivateApiComponentBase {
             return resultObj;
         }
         List<Long> repeatProcessTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
+        repeatProcessTaskIdList.remove(processTaskId);
         List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(repeatProcessTaskIdList);
         resultObj.put("tbodyList", processTaskList);
         return resultObj;
