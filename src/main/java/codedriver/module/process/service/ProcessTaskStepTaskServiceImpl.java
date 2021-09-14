@@ -105,7 +105,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             handler.insertMinorWorkerList(processTaskStepVo);
         }
         //重新插入pending任务用户到 工单步骤worker
-        List<ProcessTaskStepTaskUserVo> taskUserVoList = processTaskStepTaskMapper.getStepTaskUserListByTaskId(processTaskStepTaskVo.getId());
+        List<ProcessTaskStepTaskUserVo> taskUserVoList = processTaskStepTaskMapper.getPendingStepTaskUserListByTaskId(processTaskStepTaskVo.getId());
         for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
             if (taskUserVo.getIsDelete() != 1) {
                 processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), ProcessUserType.MINOR.getValue(), taskUserVo.getUserUuid(), GroupSearch.USER.getValue()));
@@ -120,27 +120,30 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      */
     @Override
     public void completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo) {
-        ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskById(processTaskStepTaskUserVo.getProcesstaskStepTaskId());
+        ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskById(processTaskStepTaskUserVo.getProcessTaskStepTaskId());
         if (stepTaskVo == null) {
-            throw new ProcessTaskStepTaskNotFoundException(processTaskStepTaskUserVo.getProcesstaskStepTaskId().toString());
+            throw new ProcessTaskStepTaskNotFoundException(processTaskStepTaskUserVo.getProcessTaskStepTaskId().toString());
         }
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(stepTaskVo.getProcessTaskStepId());
         if (processTaskStepVo == null) {
             throw new ProcessTaskStepNotFoundException(stepTaskVo.getProcessTaskStepId().toString());
         }
-        if (Objects.equals(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo.getStatus())) {
+        if (!Objects.equals(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo.getStatus())) {
             throw new ProcessTaskStepUnRunningException();
         }
         processTaskStepTaskUserVo.setUserUuid(UserContext.get().getUserUuid());
-        ProcessTaskStepTaskUserVo taskUserVo = processTaskStepTaskMapper.getStepTaskUserByTaskIdAndUserUuid(processTaskStepTaskUserVo.getProcesstaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
+        ProcessTaskStepTaskUserVo taskUserVo = processTaskStepTaskMapper.getStepTaskUserByTaskIdAndUserUuid(processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
         if (taskUserVo == null) {
             throw new ProcessTaskStepTaskUserNotFoundException();
         }
+        //update 更新内容
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(processTaskStepTaskUserVo.getContent());
         processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
-        processTaskStepTaskMapper.updateTaskUserByTaskIdAndUserUuid(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepTaskUserVo.getProcesstaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
+        processTaskStepTaskMapper.updateTaskUserByTaskIdAndUserUuid(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
         processTaskStepTaskUserVo.setContentHash(processTaskContentVo.getHash());
-        processTaskStepTaskMapper.insertTaskUserContent(processTaskStepTaskUserVo);
+        processTaskStepTaskMapper.insertTaskUserContent(new ProcessTaskStepTaskUserContentVo(processTaskStepTaskUserVo));
+        //刷新worker
+        refreshWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskUserVo.getProcessTaskStepTaskId()));
     }
 
     /**

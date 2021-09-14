@@ -255,11 +255,11 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                         });
                         //任务用户
                         stepTaskUserVoList.forEach(stu -> {
-                            if (!stepTaskUserVoMap.containsKey(stu.getProcesstaskStepTaskId())) {
-                                stepTaskUserVoMap.put(stu.getProcesstaskStepTaskId(), new ArrayList<>());
+                            if (!stepTaskUserVoMap.containsKey(stu.getProcessTaskStepTaskId())) {
+                                stepTaskUserVoMap.put(stu.getProcessTaskStepTaskId(), new ArrayList<>());
                             }
                             stu.setStepTaskUserContentVoList(stepTaskUserContentVoMap.get(stu.getId()));
-                            stepTaskUserVoMap.get(stu.getProcesstaskStepTaskId()).add(stu);
+                            stepTaskUserVoMap.get(stu.getProcessTaskStepTaskId()).add(stu);
                         });
                         //任务
                         stepTaskVoList.forEach(st -> {
@@ -278,15 +278,17 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                     JSONObject stepTaskConfigJson = stepConfigJson.getJSONObject("taskConfig");
                     if(MapUtils.isNotEmpty(stepTaskConfigJson)) {
                         JSONArray stepTaskIdList = stepTaskConfigJson.getJSONArray("idList");
-                        List<TaskConfigVo> taskConfigVoList = taskMapper.getTaskConfigByIdList(stepTaskIdList);
-                        if (taskConfigVoList.size() != stepTaskIdList.size()) {
-                            throw new TaskConfigException(processTaskStepVo.getName());
+                        if(CollectionUtils.isNotEmpty(stepTaskIdList)) {
+                            List<TaskConfigVo> taskConfigVoList = taskMapper.getTaskConfigByIdList(stepTaskIdList);
+                            if (taskConfigVoList.size() != stepTaskIdList.size()) {
+                                throw new TaskConfigException(processTaskStepVo.getName());
+                            }
+                            //todo 控制权限，目前仅允许处理人创建策略
+                            if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true))) > 0) {
+                                put("taskActionList", taskConfigVoList);
+                            }
+                            put("rangeList", stepTaskConfigJson.getJSONArray("rangeList"));
                         }
-                        //todo 控制权限，目前仅允许处理人创建策略
-                        if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskId, processTaskStepId, UserContext.get().getUserUuid(true))) > 0) {
-                            put("taskActionList", taskConfigVoList);
-                        }
-                        put("rangeList", stepTaskConfigJson.getJSONArray("rangeList"));
                     }
                 }};
                 processTaskStepVo.setProcessTaskStepTask(stepTaskJson);
