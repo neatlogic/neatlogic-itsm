@@ -26,5 +26,11 @@ public interface ProcessTaskStepTaskService {
      *
      * @param processTaskStepTaskUserVo 任务用户参数
      */
-    void completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo);
+    Long completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo);
+
+    /**
+     * 获取工单任务信息
+     * @param processTaskStepVo 步骤vo
+     */
+    void getProcessTaskStepTask(ProcessTaskStepVo processTaskStepVo);
 }

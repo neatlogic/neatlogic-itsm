@@ -14,6 +14,7 @@ import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
+import codedriver.framework.process.dao.mapper.task.TaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
@@ -29,8 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -50,6 +50,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
 
     @Resource
     SelectContentByHashMapper selectContentByHashMapper;
+    @Resource
+    TaskMapper taskMapper;
 
     /**
      * 创建任务
@@ -75,9 +77,9 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         } else {
             processTaskStepTaskMapper.updateTask(processTaskStepTaskVo);
             //用户删除标记
-            processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(),1);
+            processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(), 1);
             //去掉用户删除标记
-            processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(),0);
+            processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(), 0);
         }
         if (CollectionUtils.isNotEmpty(rangeList)) {
             //校验用户是否在配置范围内
@@ -119,7 +121,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      * @param processTaskStepTaskUserVo 任务用户参数
      */
     @Override
-    public void completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo) {
+    public Long completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo) {
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskById(processTaskStepTaskUserVo.getProcessTaskStepTaskId());
         if (stepTaskVo == null) {
             throw new ProcessTaskStepTaskNotFoundException(processTaskStepTaskUserVo.getProcessTaskStepTaskId().toString());
@@ -132,18 +134,33 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             throw new ProcessTaskStepUnRunningException();
         }
         processTaskStepTaskUserVo.setUserUuid(UserContext.get().getUserUuid());
-        ProcessTaskStepTaskUserVo taskUserVo = processTaskStepTaskMapper.getStepTaskUserByTaskIdAndUserUuid(processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
+        ProcessTaskStepTaskUserVo taskUserVo = processTaskStepTaskMapper.getStepTaskUserByTaskIdAndTaskUserIdAndUserUuid(processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getId(), processTaskStepTaskUserVo.getUserUuid());
         if (taskUserVo == null) {
             throw new ProcessTaskStepTaskUserNotFoundException();
         }
         //update 更新内容
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(processTaskStepTaskUserVo.getContent());
         processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
-        processTaskStepTaskMapper.updateTaskUserByTaskIdAndUserUuid(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
         processTaskStepTaskUserVo.setContentHash(processTaskContentVo.getHash());
-        processTaskStepTaskMapper.insertTaskUserContent(new ProcessTaskStepTaskUserContentVo(processTaskStepTaskUserVo));
-        //刷新worker
-        refreshWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskUserVo.getProcessTaskStepTaskId()));
+        //新增回复
+        if (processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId() == null) {
+
+            processTaskStepTaskMapper.updateTaskUserByTaskIdAndUserUuid(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
+            ProcessTaskStepTaskUserContentVo contentVo = new ProcessTaskStepTaskUserContentVo(processTaskStepTaskUserVo);
+            processTaskStepTaskMapper.insertTaskUserContent(contentVo);
+            //刷新worker
+            refreshWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskUserVo.getProcessTaskStepTaskId()));
+            return contentVo.getId();
+        } else {
+            ProcessTaskStepTaskUserContentVo userContentVo =  processTaskStepTaskMapper.getStepTaskUserContentById(processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId());
+            if(userContentVo == null){
+                throw new ProcessTaskStepTaskUserContentNotFoundException();
+            }
+            processTaskStepTaskMapper.updateTaskUserContent(processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId(), processTaskStepTaskUserVo.getContentHash(), UserContext.get().getUserUuid());
+            return processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId();
+        }
+
+
     }
 
     /**
@@ -186,6 +203,74 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (legalUserUuidList.size() != userUuidList.size()) {
             userUuidList.removeAll(legalUserUuidList);
             throw new TaskUserIllegalException(String.join(",", userUuidList));
+        }
+    }
+
+    /**
+     * 获取工单任务信息
+     *
+     * @param processTaskStepVo 步骤vo
+     */
+    @Override
+    public void getProcessTaskStepTask(ProcessTaskStepVo processTaskStepVo) {
+        //任务列表
+        if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+            Map<String, List<ProcessTaskStepTaskVo>> stepTaskVoMap = new HashMap<>();
+            Map<Long, List<ProcessTaskStepTaskUserVo>> stepTaskUserVoMap = new HashMap<>();
+            Map<Long, List<ProcessTaskStepTaskUserContentVo>> stepTaskUserContentVoMap = new HashMap<>();
+            List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskByProcessTaskStepId(processTaskStepVo.getId());
+            List<ProcessTaskStepTaskUserVo> stepTaskUserVoList;
+            List<ProcessTaskStepTaskUserContentVo> stepTaskUserContentVoList;
+            if (CollectionUtils.isNotEmpty(stepTaskVoList)) {
+                stepTaskUserVoList = processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(stepTaskVoList.stream().map(ProcessTaskStepTaskVo::getId).collect(Collectors.toList()));
+                if (CollectionUtils.isNotEmpty(stepTaskUserVoList)) {
+                    stepTaskUserContentVoList = processTaskStepTaskMapper.getStepTaskUserContentByStepTaskUserIdList(stepTaskUserVoList.stream().map(ProcessTaskStepTaskUserVo::getId).collect(Collectors.toList()));
+                    //任务用户回复
+                    stepTaskUserContentVoList.forEach(stuc -> {
+                        if (!stepTaskUserContentVoMap.containsKey(stuc.getProcessTaskStepTaskUserId())) {
+                            stepTaskUserContentVoMap.put(stuc.getProcessTaskStepTaskUserId(), new ArrayList<>());
+                        }
+                        stepTaskUserContentVoMap.get(stuc.getProcessTaskStepTaskUserId()).add(stuc);
+                    });
+                    //任务用户
+                    stepTaskUserVoList.forEach(stu -> {
+                        if (!stepTaskUserVoMap.containsKey(stu.getProcessTaskStepTaskId())) {
+                            stepTaskUserVoMap.put(stu.getProcessTaskStepTaskId(), new ArrayList<>());
+                        }
+                        stu.setStepTaskUserContentVoList(stepTaskUserContentVoMap.get(stu.getId()));
+                        stepTaskUserVoMap.get(stu.getProcessTaskStepTaskId()).add(stu);
+                    });
+                    //任务
+                    stepTaskVoList.forEach(st -> {
+                        if (!stepTaskVoMap.containsKey(st.getTaskConfigName())) {
+                            stepTaskVoMap.put(st.getTaskConfigName(), new ArrayList<>());
+                        }
+                        st.setStepTaskUserVoList(stepTaskUserVoMap.get(st.getId()));
+                        stepTaskVoMap.get(st.getTaskConfigName()).add(st);
+                    });
+                }
+            }
+            JSONObject stepTaskJson = new JSONObject() {{
+                put("taskTabList", JSONObject.parseObject(JSONObject.toJSONString(stepTaskVoMap)));
+                String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(processTaskStepVo.getConfigHash());
+                JSONObject stepConfigJson = JSONObject.parseObject(stepConfig);
+                JSONObject stepTaskConfigJson = stepConfigJson.getJSONObject("taskConfig");
+                if (com.alibaba.nacos.common.utils.MapUtils.isNotEmpty(stepTaskConfigJson)) {
+                    JSONArray stepTaskIdList = stepTaskConfigJson.getJSONArray("idList");
+                    if (CollectionUtils.isNotEmpty(stepTaskIdList)) {
+                        List<TaskConfigVo> taskConfigVoList = taskMapper.getTaskConfigByIdList(stepTaskIdList);
+                        if (taskConfigVoList.size() != stepTaskIdList.size()) {
+                            throw new TaskConfigException(processTaskStepVo.getName());
+                        }
+                        //todo 控制权限，目前仅允许处理人创建策略
+                        if (processTaskMapper.checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getStartProcessTaskStepId(), UserContext.get().getUserUuid(true))) > 0) {
+                            put("taskActionList", taskConfigVoList);
+                        }
+                        put("rangeList", stepTaskConfigJson.getJSONArray("rangeList"));
+                    }
+                }
+            }};
+            processTaskStepVo.setProcessTaskStepTask(stepTaskJson);
         }
     }
 }
