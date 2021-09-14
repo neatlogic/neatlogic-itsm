@@ -14,6 +14,7 @@ import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskRepeatVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
 import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
@@ -114,7 +115,9 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
                 //当前用户可能没有工单的取消权限，所以用系统用户操作
                 UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
                 ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
-                processStepHandlerUtil.notify(processTaskVo, TaskNotifyTriggerType.MARKREPEATPROCESSTASK);
+                ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                processTaskStepVo.setProcessTaskId(processTaskVo.getId());
+                processStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.MARKREPEATPROCESSTASK);
             }
             processTaskRepeatList.add(new ProcessTaskRepeatVo(processTaskVo.getId(), repeatGroupId));
             if (processTaskRepeatList.size() >= 1000) {
