@@ -28,6 +28,7 @@ import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.SnowflakeUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -107,18 +108,34 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
             }
             throw new ProcessTaskNotFoundException(String.join("、",processTaskIdStrList));
         }
+        List<Long> markedprocessTaskIdList = new ArrayList<>();
+        Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
+        if (repeatGroupId != null) {
+            markedprocessTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
+            repeatProcessTaskIdList.removeAll(markedprocessTaskIdList);
+        } else {
+            repeatGroupId = SnowflakeUtil.uniqueLong();
+        }
+
+        if (CollectionUtils.isEmpty(repeatProcessTaskIdList)) {
+            return null;
+        }
         Set<Long> allRepeatProcessTaskIdSet = new HashSet<>();
         for (Long repeatProcessTaskId : repeatProcessTaskIdList) {
-            allRepeatProcessTaskIdSet.addAll(getRepeatProcessTaskList(repeatProcessTaskId));
+            getRepeatProcessTaskList(repeatProcessTaskId, allRepeatProcessTaskIdSet);
+//            allRepeatProcessTaskIdSet.addAll();
         }
         List<Long> allRepeatProcessTaskIdList = new ArrayList<>(allRepeatProcessTaskIdSet);
+        allRepeatProcessTaskIdList.removeAll(markedprocessTaskIdList);
+        if (CollectionUtils.isEmpty(allRepeatProcessTaskIdList)) {
+            return null;
+        }
         List<Long> removeAll = ListUtils.removeAll(allRepeatProcessTaskIdList, repeatProcessTaskIdList);
         List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(allRepeatProcessTaskIdList);
         if (CollectionUtils.isNotEmpty(removeAll)) {
             return processTaskList;
         }
         List<ProcessTaskRepeatVo> processTaskRepeatList = new ArrayList<>();
-        Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
         for (ProcessTaskVo processTaskVo : processTaskList) {
             //1. 如果工单不是取消状态，则取消工单
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
@@ -131,16 +148,31 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
             }
             processTaskRepeatList.add(new ProcessTaskRepeatVo(processTaskVo.getId(), repeatGroupId));
             if (processTaskRepeatList.size() >= 1000) {
-                processTaskMapper.insertProcessTaskRepeatList(processTaskRepeatList);
+                processTaskMapper.replaceProcessTaskRepeatList(processTaskRepeatList);
                 processTaskRepeatList.clear();
             }
         }
         if (CollectionUtils.isNotEmpty(processTaskRepeatList)) {
-            processTaskMapper.insertProcessTaskRepeatList(processTaskRepeatList);
+            processTaskMapper.replaceProcessTaskRepeatList(processTaskRepeatList);
         }
 //        saveRepeatProcessTaskList(repeatGroupId, repeatProcessTaskIdList);
-        processTaskMapper.insertProcessTaskRepeat(new ProcessTaskRepeatVo(processTaskId, repeatGroupId));
+        processTaskMapper.replaceProcessTaskRepeat(new ProcessTaskRepeatVo(processTaskId, repeatGroupId));
         return null;
+    }
+
+    private void getRepeatProcessTaskList(Long processTaskId, Set<Long> resultSet) {
+        resultSet.add(processTaskId);
+        //2. 如果工单在另一个重复工单组A中，则把工单组A的所有工单加到新的重复工单组B
+        Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
+        if (repeatGroupId != null) {
+            List<Long> repeatProcessTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
+            for (Long repeatProcessTaskId : repeatProcessTaskIdList) {
+                if (resultSet.contains(repeatProcessTaskId)) {
+                    continue;
+                }
+                getRepeatProcessTaskList(repeatProcessTaskId, resultSet);
+            }
+        }
     }
 
 //    private void saveRepeatProcessTaskList(Long newRepeatGroupId, List<Long> repeatProcessTaskIdList) {
@@ -171,18 +203,4 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
 //            processTaskMapper.insertProcessTaskRepeatList(processTaskRepeatList);
 //        }
 //    }
-
-    private Set<Long> getRepeatProcessTaskList(Long processTaskId) {
-        Set<Long> resultSet = new HashSet<>();
-        resultSet.add(processTaskId);
-        //2. 如果工单在另一个重复工单组A中，则把工单组A的所有工单加到新的重复工单组B
-        Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
-        if (repeatGroupId != null) {
-            List<Long> repeatProcessTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
-            for (Long repeatProcessTaskId : repeatProcessTaskIdList) {
-                resultSet.addAll(getRepeatProcessTaskList(repeatProcessTaskId));
-            }
-        }
-        return resultSet;
-    }
 }
