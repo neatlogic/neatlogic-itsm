@@ -237,7 +237,9 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
                 }
             }
             //任务列表
-            processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+            if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
+            }
 
             // 获取可分配处理人的步骤列表
             processTaskStepVo.setAssignableWorkerStepList(processTaskService.getAssignableWorkerStepList(
