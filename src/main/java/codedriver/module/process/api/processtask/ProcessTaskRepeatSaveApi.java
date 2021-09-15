@@ -48,7 +48,7 @@ import java.util.Set;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
+public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -61,7 +61,7 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "processtask/repeat/mark";
+        return "processtask/repeat/save";
     }
 
     @Override
