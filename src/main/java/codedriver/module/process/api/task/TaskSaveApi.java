@@ -61,7 +61,7 @@ public class TaskSaveApi extends PrivateApiComponentBase {
         Long taskId = jsonObj.getLong("id");
         TaskConfigVo taskConfigVo = JSONObject.toJavaObject(jsonObj, TaskConfigVo.class);
         if(taskMapper.checkTaskConfigNameIsRepeat(taskConfigVo) > 0) {
-            return new FieldValidResultVo(new TaskConfigNameRepeatException(taskConfigVo.getName()));
+            throw new TaskConfigNameRepeatException(taskConfigVo.getName());
         }
         if (taskId != null) {
             TaskConfigVo taskConfigTmp = taskMapper.getTaskConfigById(taskId);
