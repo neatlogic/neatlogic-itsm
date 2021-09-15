@@ -123,7 +123,6 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
         Set<Long> allRepeatProcessTaskIdSet = new HashSet<>();
         for (Long repeatProcessTaskId : repeatProcessTaskIdList) {
             getRepeatProcessTaskList(repeatProcessTaskId, allRepeatProcessTaskIdSet);
-//            allRepeatProcessTaskIdSet.addAll();
         }
         List<Long> allRepeatProcessTaskIdList = new ArrayList<>(allRepeatProcessTaskIdSet);
         allRepeatProcessTaskIdList.removeAll(markedprocessTaskIdList);
@@ -155,7 +154,6 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(processTaskRepeatList)) {
             processTaskMapper.replaceProcessTaskRepeatList(processTaskRepeatList);
         }
-//        saveRepeatProcessTaskList(repeatGroupId, repeatProcessTaskIdList);
         processTaskMapper.replaceProcessTaskRepeat(new ProcessTaskRepeatVo(processTaskId, repeatGroupId));
         return null;
     }
@@ -174,33 +172,4 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
             }
         }
     }
-
-//    private void saveRepeatProcessTaskList(Long newRepeatGroupId, List<Long> repeatProcessTaskIdList) {
-//        List<ProcessTaskRepeatVo> processTaskRepeatList = new ArrayList<>();
-//        List<ProcessTaskVo> repeatProcessTaskList = processTaskMapper.getProcessTaskListByIdList(repeatProcessTaskIdList);
-//        for (ProcessTaskVo repeatProcessTaskVo : repeatProcessTaskList) {
-//            //1. 如果工单不是取消状态，则取消工单
-//            if (ProcessTaskStatus.RUNNING.getValue().equals(repeatProcessTaskVo.getStatus())) {
-//                //当前用户可能没有工单的取消权限，所以用系统用户操作
-//                UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
-//                ProcessStepHandlerFactory.getHandler().abortProcessTask(repeatProcessTaskVo);
-//                processStepHandlerUtil.notify(repeatProcessTaskVo, TaskNotifyTriggerType.MARKREPEATPROCESSTASK);
-//            }
-//            //2. 如果工单在另一个重复工单组A中，则把工单组A的所有工单加到新的重复工单组B
-//            Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(repeatProcessTaskVo.getId());
-//            if (repeatGroupId != null) {
-//                List<Long> repeatProcessTaskIdList2 = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
-//                processTaskMapper.deleteProcessTaskRepeatByRepeatGroupId(repeatGroupId);
-//                saveRepeatProcessTaskList(newRepeatGroupId, repeatProcessTaskIdList2);
-//            }
-//            processTaskRepeatList.add(new ProcessTaskRepeatVo(repeatProcessTaskVo.getId(), newRepeatGroupId));
-//            if (processTaskRepeatList.size() >= 1000) {
-//                processTaskMapper.insertProcessTaskRepeatList(processTaskRepeatList);
-//                processTaskRepeatList.clear();
-//            }
-//        }
-//        if (CollectionUtils.isNotEmpty(processTaskRepeatList)) {
-//            processTaskMapper.insertProcessTaskRepeatList(processTaskRepeatList);
-//        }
-//    }
 }
