@@ -128,7 +128,7 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                 ProcessTaskVo processTask = processTaskMap.get(processTaskRelation.getProcessTaskId());
                 if (processTask != null) {
                     processTaskRelation.setSerialNumber(processTask.getSerialNumber());
-                    processTaskRelation.setTilte(processTask.getTitle());
+                    processTaskRelation.setTitle(processTask.getTitle());
                     processTaskRelation.setStatusVo(new ProcessTaskStatusVo(processTask.getStatus()));
                     processTaskRelation.setChannelTypeVo(processTask.getChannelType().clone());
                 }

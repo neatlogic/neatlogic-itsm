@@ -10,12 +10,17 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.dto.ProcessTaskSearchVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,7 +38,6 @@ import java.util.List;
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskListForRepeatApi extends PrivateApiComponentBase {
-
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
@@ -70,32 +74,27 @@ public class ProcessTaskListForRepeatApi extends PrivateApiComponentBase {
     @Description(desc = "查询工单列表（重复工单专用）")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        JSONObject resultObj = new JSONObject();
         Long processTaskId = paramObj.getLong("processTaskId");
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         List<Long> processTaskIdList = new ArrayList<>();
         Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
         if (repeatGroupId != null) {
             processTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
-        }
-        processTaskIdList.add(processTaskId);
-        List<String> channelUuidList = new ArrayList<>();
-        channelUuidList.add(processTaskVo.getChannelUuid());
-        BasePageVo basePageVo = JSON.toJavaObject(paramObj, BasePageVo.class);
-        int rowNum = processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(basePageVo, processTaskIdList, channelUuidList);
-        if (rowNum > 0) {
-            basePageVo.setRowNum(rowNum);
-            if (basePageVo.getCurrentPage() <= basePageVo.getPageCount()) {
-                List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndChannelUuidList(basePageVo, processTaskIdList, channelUuidList);
-                resultObj.put("tbodyList", processTaskList);
-            }
         } else {
-            resultObj.put("tbodyList", new ArrayList<>());
+            processTaskIdList.add(processTaskId);
         }
-        resultObj.put("currentPage", basePageVo.getCurrentPage());
-        resultObj.put("pageSize", basePageVo.getPageSize());
-        resultObj.put("pageCount", basePageVo.getPageCount());
-        resultObj.put("rowNum", rowNum);
-        return resultObj;
+        List<ProcessTaskVo> processTaskList = new ArrayList<>();
+        ProcessTaskSearchVo processTaskSearchVo = JSON.toJavaObject(paramObj, ProcessTaskSearchVo.class);
+        processTaskSearchVo.setExcludeIdList(processTaskIdList);
+        processTaskSearchVo.setIncludeChannelUuid(processTaskVo.getChannelUuid());
+        processTaskSearchVo.setExcludeStatus(ProcessTaskStatus.DRAFT.getValue());
+        int rowNum = processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(processTaskSearchVo);
+        if (rowNum > 0) {
+            processTaskSearchVo.setRowNum(rowNum);
+            if (processTaskSearchVo.getCurrentPage() <= processTaskSearchVo.getPageCount()) {
+                processTaskList = processTaskMapper.getProcessTaskListByKeywordAndChannelUuidList(processTaskSearchVo);
+            }
+        }
+        return TableResultUtil.getResult(processTaskList, processTaskSearchVo);
     }
 }
