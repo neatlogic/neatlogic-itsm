@@ -5,19 +5,19 @@ import java.util.List;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.dto.ProcessTaskSearchVo;
 import codedriver.framework.process.service.ProcessTaskService;
+import codedriver.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.channeltype.ChannelTypeRelationNotFoundException;
@@ -34,9 +34,6 @@ import codedriver.module.process.service.CatalogService;
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
-    
-    @Autowired
-    private ChannelMapper channelMapper;
 
     @Autowired
     private ChannelTypeMapper channelTypeMapper;
@@ -100,25 +97,40 @@ public class ProcessTaskListForRelationApi extends PrivateApiComponentBase {
             throw new ChannelTypeRelationNotFoundException(channelTypeRelationId);
         }
         List<String> channelRelationTargetChannelUuidList = catalogService.getChannelRelationTargetChannelUuidList(processTaskVo.getChannelUuid(), channelTypeRelationId);
-        
-        BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
-        int pageCount = 0;
-        if(basePageVo.getNeedPage()) {
-            int rowNum = 0;
-            if(CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
-                rowNum = processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(basePageVo, relatedProcessTaskIdList, channelRelationTargetChannelUuidList);
-            }              
-            pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
-            resultObj.put("currentPage", basePageVo.getCurrentPage());
-            resultObj.put("pageSize", basePageVo.getPageSize());
-            resultObj.put("pageCount", pageCount);
-            resultObj.put("rowNum", rowNum);               
+
+        ProcessTaskSearchVo processTaskSearchVo = JSONObject.toJavaObject(jsonObj, ProcessTaskSearchVo.class);
+        List<ProcessTaskVo> processTaskList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
+            processTaskSearchVo.setExcludeIdList(relatedProcessTaskIdList);
+            processTaskSearchVo.setIncludeChannelUuidList(channelRelationTargetChannelUuidList);
+            processTaskSearchVo.setExcludeStatus(ProcessTaskStatus.DRAFT.getValue());
+            int rowNum = processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(processTaskSearchVo);
+            if (rowNum > 0) {
+                processTaskSearchVo.setRowNum(rowNum);
+                if (processTaskSearchVo.getCurrentPage() <= processTaskSearchVo.getPageCount()) {
+                    processTaskList = processTaskMapper.getProcessTaskListByKeywordAndChannelUuidList(processTaskSearchVo);
+                }
+            }
         }
-        if(!basePageVo.getNeedPage() || basePageVo.getCurrentPage() <= pageCount) {
-            List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndChannelUuidList(basePageVo, relatedProcessTaskIdList, channelRelationTargetChannelUuidList);
-            resultObj.put("tbodyList", processTaskList);
-        }
-        return resultObj;
+        return TableResultUtil.getResult(processTaskList, processTaskSearchVo);
+//        BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
+//        int pageCount = 0;
+//        if(basePageVo.getNeedPage()) {
+//            int rowNum = 0;
+//            if(CollectionUtils.isNotEmpty(channelRelationTargetChannelUuidList)) {
+//                rowNum = processTaskMapper.getProcessTaskCountByKeywordAndChannelUuidList(basePageVo, relatedProcessTaskIdList, channelRelationTargetChannelUuidList);
+//            }
+//            pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
+//            resultObj.put("currentPage", basePageVo.getCurrentPage());
+//            resultObj.put("pageSize", basePageVo.getPageSize());
+//            resultObj.put("pageCount", pageCount);
+//            resultObj.put("rowNum", rowNum);
+//        }
+//        if(!basePageVo.getNeedPage() || basePageVo.getCurrentPage() <= pageCount) {
+//            List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByKeywordAndChannelUuidList(basePageVo, relatedProcessTaskIdList, channelRelationTargetChannelUuidList);
+//            resultObj.put("tbodyList", processTaskList);
+//        }
+//        return resultObj;
     }
 
 }

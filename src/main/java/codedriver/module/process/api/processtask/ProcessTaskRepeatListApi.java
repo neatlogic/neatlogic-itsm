@@ -8,7 +8,11 @@ package codedriver.module.process.api.processtask;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.restful.annotation.*;
@@ -31,6 +35,13 @@ public class ProcessTaskRepeatListApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    private ChannelMapper channelMapper;
+
+    @Resource
+    private ChannelTypeMapper channelTypeMapper;
+
     @Resource
     private ProcessTaskService processTaskService;
 
@@ -49,6 +60,11 @@ public class ProcessTaskRepeatListApi extends PrivateApiComponentBase {
         return null;
     }
 
+    @Override
+    public boolean disableReturnCircularReferenceDetect() {
+        return true;
+    }
+
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id")
     })
@@ -60,7 +76,7 @@ public class ProcessTaskRepeatListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultObj = new JSONObject();
         Long processTaskId = paramObj.getLong("processTaskId");
-        processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
         if (repeatGroupId == null) {
             return resultObj;
@@ -68,6 +84,15 @@ public class ProcessTaskRepeatListApi extends PrivateApiComponentBase {
         List<Long> repeatProcessTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
         repeatProcessTaskIdList.remove(processTaskId);
         List<ProcessTaskVo> processTaskList = processTaskMapper.getProcessTaskListByIdList(repeatProcessTaskIdList);
+        ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+        if (channelVo != null) {
+            ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+            if (channelTypeVo != null) {
+                for (ProcessTaskVo processTask : processTaskList) {
+                    processTask.setChannelType(channelTypeVo);
+                }
+            }
+        }
         resultObj.put("tbodyList", processTaskList);
         return resultObj;
     }

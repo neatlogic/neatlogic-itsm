@@ -48,7 +48,7 @@ import java.util.Set;
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
+public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -61,7 +61,7 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "processtask/repeat/mark";
+        return "processtask/repeat/save";
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ProcessTaskRepeatMarkApi extends PrivateApiComponentBase {
             @Param(name = "repeatProcessTaskIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "重复工单id列表")
     })
     @Output({
-            @Param(name = "tbodyList", explode = ProcessTaskVo[].class, desc = "工单列表")
+            @Param(explode = ProcessTaskVo[].class, desc = "工单列表")
     })
     @Description(desc = "标记重复工单接口")
     @Override
