@@ -260,6 +260,15 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     }
                     return false;
                 });
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_ENABLEMARKREPEAT,
+                (processTaskVo, processTaskStepVo, userUuid) -> {
+                    if (processTaskVo.getIsShow() == 1) {
+                        String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
+                        Integer enableMarkRepeat = (Integer) JSONPath.read(taskConfig, "process.processConfig.enableMarkRepeat");
+                        return Objects.equals(enableMarkRepeat, 1);
+                    }
+                    return false;
+                });
         /**
          * 工单复杂上报权限
          * 判断userUuid用户是否有工单复杂上报权限逻辑：
