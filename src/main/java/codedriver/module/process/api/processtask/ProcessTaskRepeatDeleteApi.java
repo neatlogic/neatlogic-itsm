@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author linbq
@@ -57,7 +58,14 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long processTaskId = paramObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(processTaskId);
+        Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
+        if (repeatGroupId != null) {
+            processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(processTaskId);
+            List<Long> repeatProcessTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
+            if (repeatProcessTaskIdList.size() == 1) {
+                processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(repeatProcessTaskIdList.get(0));
+            }
+        }
         return null;
     }
 }
