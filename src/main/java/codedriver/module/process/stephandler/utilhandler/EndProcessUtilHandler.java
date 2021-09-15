@@ -154,6 +154,10 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
         }
         actionConfigVo.setHandler(TaskNotifyPolicyHandler.class.getName());
         processObj.put("actionConfig", actionConfigVo);
+
+        Integer enableMarkRepeat = processConfig.getInteger("enableMarkRepeat");
+        enableMarkRepeat = enableMarkRepeat == null ? 0 : enableMarkRepeat;
+        processObj.put("enableMarkRepeat", enableMarkRepeat);
         return processObj;
     }
 
