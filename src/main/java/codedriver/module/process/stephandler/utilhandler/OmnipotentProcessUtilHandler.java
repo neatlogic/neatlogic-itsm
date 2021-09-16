@@ -323,7 +323,8 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.PROCESSTASK_TRANSFER,
                 ProcessTaskOperationType.STEP_START,
                 ProcessTaskOperationType.PROCESSTASK_ABORT,
-                ProcessTaskOperationType.PROCESSTASK_RECOVER
+                ProcessTaskOperationType.PROCESSTASK_RECOVER,
+                ProcessTaskOperationType.STEP_ENABLEREAPPROVAL
         };
 
         /** 子任务按钮映射列表 **/
@@ -358,6 +359,10 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 
         JSONObject simpleSettings = ProcessConfigUtil.regulateSimpleSettings(configObj);
         resultObj.putAll(simpleSettings);
+
+        Integer enableReapproval = configObj.getInteger("enableReapproval");
+        enableReapproval = enableReapproval == null ? 0 : enableReapproval;
+        resultObj.put("enableReapproval", enableReapproval);
         return resultObj;
     }
 
