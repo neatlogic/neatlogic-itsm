@@ -87,7 +87,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
         Long processTaskId = paramObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         try {
-            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_ENABLEMARKREPEAT)
+            new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_MARKREPEAT)
                     .build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();

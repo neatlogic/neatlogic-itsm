@@ -6,16 +6,20 @@ import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
+import codedriver.framework.process.dto.ProcessTaskStepRelVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerBase;
 import codedriver.framework.process.operationauth.core.OperationAuthHandlerType;
 import codedriver.framework.process.operationauth.core.TernaryPredicate;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class StepOperateHandler extends OperationAuthHandlerBase {
@@ -224,6 +228,35 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
                 }
                 return false;
             });
+        /**
+         * 步骤重审权限
+         * 判断userUuid用户是否有步骤撤回权限逻辑：
+         * 首先工单状态是“处理中”，步骤状态是“处理中”，然后userUuid用户是步骤处理人，当前步骤是由回退线操作激活的
+         */
+        operationBiPredicateMap.put(ProcessTaskOperationType.STEP_REAPPROVAL,
+                (processTaskVo, processTaskStepVo, userUuid) -> {
+                    if(processTaskVo.getIsShow() == 1) {
+                        if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
+                            if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+                                if (checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid)) {
+                                    if (Objects.equals(processTaskStepVo.getEnableReapproval(), 1)){
+                                        List<ProcessTaskStepRelVo> relList = processTaskVo.getStepRelList();
+                                        if (CollectionUtils.isNotEmpty(relList)) {
+                                            for (ProcessTaskStepRelVo processTaskStepRelVo : relList) {
+                                                if (Objects.equals(processTaskStepVo.getId(), processTaskStepRelVo.getToProcessTaskStepId())) {
+                                                    if (Objects.equals(processTaskStepRelVo.getType(), ProcessFlowDirection.BACKWARD.getValue()) && Objects.equals(processTaskStepRelVo.getIsHit(), 1)) {
+                                                        return true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                });
         /**
          * 步骤处理权限
          * 判断userUuid用户是否有步骤处理权限逻辑：

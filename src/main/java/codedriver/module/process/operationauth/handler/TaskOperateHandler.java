@@ -260,7 +260,7 @@ public class TaskOperateHandler extends OperationAuthHandlerBase {
                     }
                     return false;
                 });
-        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_ENABLEMARKREPEAT,
+        operationBiPredicateMap.put(ProcessTaskOperationType.PROCESSTASK_MARKREPEAT,
                 (processTaskVo, processTaskStepVo, userUuid) -> {
                     if (processTaskVo.getIsShow() == 1) {
                         String taskConfig = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
