@@ -15,6 +15,7 @@ import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.dto.*;
+import codedriver.framework.process.exception.core.ProcessTaskException;
 import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerBase;
 import codedriver.framework.util.RunScriptUtil;
@@ -193,6 +194,16 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
         // AuditHandler.audit(currentProcessTaskStepVo, ProcessTaskAuditType.getProcessTaskAuditType(action));
         IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.CONDITION);
         return 1;
+    }
+
+    @Override
+    protected int myReapproval(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+        return 0;
+    }
+
+    @Override
+    protected int myReapprovalAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
+        return 0;
     }
 
     public void makeupFlowJobStepVo(ProcessTaskStepVo flowJobStepVo) {

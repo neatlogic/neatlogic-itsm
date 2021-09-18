@@ -324,7 +324,7 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.STEP_START,
                 ProcessTaskOperationType.PROCESSTASK_ABORT,
                 ProcessTaskOperationType.PROCESSTASK_RECOVER,
-                ProcessTaskOperationType.STEP_ENABLEREAPPROVAL
+                ProcessTaskOperationType.STEP_REAPPROVAL
         };
 
         /** 子任务按钮映射列表 **/

@@ -138,6 +138,21 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
+	protected int myReapprovalAudit(ProcessTaskStepVo currentProcessTaskStepVo) {
+		if(StringUtils.isNotBlank(currentProcessTaskStepVo.getError())) {
+			currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CAUSE.getParamName(), currentProcessTaskStepVo.getError());
+		}
+		/** 处理历史记录 **/
+		IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.REAPPROVAL);
+		return 1;
+	}
+
+	@Override
+	protected int myReapproval(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+		return 0;
+	}
+
+	@Override
 	protected int myRetreat(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
 		return 1;
 	}
