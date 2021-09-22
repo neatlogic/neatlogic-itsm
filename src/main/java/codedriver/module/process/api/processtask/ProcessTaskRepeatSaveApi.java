@@ -12,6 +12,7 @@ import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
@@ -36,10 +37,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author linbq
@@ -134,27 +132,38 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(removeAll)) {
             return processTaskList;
         }
+        List<ProcessTaskVo> runningProcessTaskList = new ArrayList<>();
         List<ProcessTaskRepeatVo> processTaskRepeatList = new ArrayList<>();
         for (ProcessTaskVo processTaskVo : processTaskList) {
             //1. 如果工单不是取消状态，则取消工单
             if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
-                //当前用户可能没有工单的取消权限，所以用系统用户操作
-                UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
-                ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
-                ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-                processTaskStepVo.setProcessTaskId(processTaskVo.getId());
-                processStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.MARKREPEATPROCESSTASK);
+                runningProcessTaskList.add(processTaskVo);
             }
             processTaskRepeatList.add(new ProcessTaskRepeatVo(processTaskVo.getId(), repeatGroupId));
             if (processTaskRepeatList.size() >= 1000) {
                 processTaskMapper.replaceProcessTaskRepeatList(processTaskRepeatList);
                 processTaskRepeatList.clear();
             }
+            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+            processTaskStepVo.setProcessTaskId(processTaskVo.getId());
+            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BINDREPEAT);
         }
         if (CollectionUtils.isNotEmpty(processTaskRepeatList)) {
             processTaskMapper.replaceProcessTaskRepeatList(processTaskRepeatList);
         }
         processTaskMapper.replaceProcessTaskRepeat(new ProcessTaskRepeatVo(processTaskId, repeatGroupId));
+        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+        processTaskStepVo.setProcessTaskId(processTaskId);
+        processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BINDREPEAT);
+
+        for (ProcessTaskVo processTaskVo : runningProcessTaskList) {
+            //当前用户可能没有工单的取消权限，所以用系统用户操作
+            UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
+            ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
+            ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
+            processTaskStep.setProcessTaskId(processTaskVo.getId());
+            processStepHandlerUtil.notify(processTaskStep, TaskNotifyTriggerType.MARKREPEATPROCESSTASK);
+        }
         return null;
     }
 
