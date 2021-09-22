@@ -8,8 +8,11 @@ package codedriver.module.process.api.processtask;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.service.ProcessTaskService;
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
@@ -36,6 +39,9 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
     @Resource
     private ProcessTaskService processTaskService;
 
+    @Resource
+    private IProcessStepHandlerUtil processStepHandlerUtil;
+
     @Override
     public String getToken() {
         return "processtask/repeat/delete";
@@ -61,9 +67,17 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
         Long repeatGroupId = processTaskMapper.getRepeatGroupIdByProcessTaskId(processTaskId);
         if (repeatGroupId != null) {
             processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(processTaskId);
+            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+            processTaskStepVo.setProcessTaskId(processTaskId);
+//        processTaskStepVo.setParamObj(jsonObj);
+            processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UNBINDREPEAT);
             List<Long> repeatProcessTaskIdList = processTaskMapper.getProcessTaskIdListByRepeatGroupId(repeatGroupId);
             if (repeatProcessTaskIdList.size() == 1) {
                 processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(repeatProcessTaskIdList.get(0));
+                ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
+                processTaskStep.setProcessTaskId(processTaskId);
+//        processTaskStepVo.setParamObj(jsonObj);
+                processStepHandlerUtil.audit(processTaskStep, ProcessTaskAuditType.UNBINDREPEAT);
             }
         }
         return null;
