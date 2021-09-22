@@ -148,18 +148,14 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
             }
             ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
             processTaskStepVo.setProcessTaskId(processTaskVo.getId());
-//            processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.CHANNELTYPERELATION.getParamName(), channelTypeRelationId);
-//            processTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(), JSON.toJSONString(Arrays.asList(processTaskId)));
             processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BINDREPEAT);
         }
         if (CollectionUtils.isNotEmpty(processTaskRepeatList)) {
             processTaskMapper.replaceProcessTaskRepeatList(processTaskRepeatList);
         }
         processTaskMapper.replaceProcessTaskRepeat(new ProcessTaskRepeatVo(processTaskId, repeatGroupId));
-//        jsonObj.put(ProcessTaskAuditDetailType.PROCESSTASKLIST.getParamName(), JSON.toJSONString(processTaskIdList));
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskId);
-//        processTaskStepVo.setParamObj(jsonObj);
         processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.BINDREPEAT);
 
         for (ProcessTaskVo processTaskVo : runningProcessTaskList) {
