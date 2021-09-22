@@ -1,6 +1,7 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.DeviceType;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.dao.mapper.CatalogMapper;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
@@ -227,6 +228,9 @@ public class CatalogServiceImpl implements CatalogService {
 		if(isNeedChannel ==null || isNeedChannel) {
     		channelList = channelMapper.getAuthorizedChannelListByParentUuid(UserContext.get().getUserUuid(),authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(),catalog.getUuid());
     		for(ChannelVo channelVo : channelList) {
+    			if (Objects.equals(channelVo.getSupport(), DeviceType.PC.getValue())) {
+    				continue;
+				}
     			JSONObject channelJson = (JSONObject) JSONObject.toJSON(channelVo);
     			channelJson.put("type", "channel");
     			sonListArray.add(channelJson);
