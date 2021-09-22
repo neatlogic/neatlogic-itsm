@@ -17,7 +17,6 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskStepTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -26,7 +25,6 @@ import javax.annotation.Resource;
  * @since 2021/8/31 11:03
  **/
 @Service
-@Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskStepTaskGetApi extends PrivateApiComponentBase {

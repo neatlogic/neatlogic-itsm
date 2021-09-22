@@ -88,11 +88,10 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (CollectionUtils.isNotEmpty(rangeList)) {
             //校验用户是否在配置范围内
             checkUserIsLegal(processTaskStepTaskVo.getUserList().stream().map(Object::toString).collect(Collectors.toList()), rangeList.stream().map(Object::toString).collect(Collectors.toList()));
-            processTaskStepTaskVo.getUserList().forEach(t -> {
-                processTaskStepTaskMapper.insertIgnoreTaskUser(new ProcessTaskStepTaskUserVo(processTaskStepTaskVo.getId(), t.toString(), ProcessTaskStatus.PENDING.getValue()));
-            });
-
         }
+        processTaskStepTaskVo.getUserList().forEach(t -> {
+            processTaskStepTaskMapper.insertIgnoreTaskUser(new ProcessTaskStepTaskUserVo(processTaskStepTaskVo.getId(), t, ProcessTaskStatus.PENDING.getValue()));
+        });
         refreshWorker(processTaskStepVo, processTaskStepTaskVo);
 
     }
@@ -114,7 +113,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         List<ProcessTaskStepTaskUserVo> taskUserVoList = processTaskStepTaskMapper.getPendingStepTaskUserListByTaskId(processTaskStepTaskVo.getId());
         for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
             if (taskUserVo.getIsDelete() != 1) {
-                processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), ProcessUserType.MINOR.getValue(), taskUserVo.getUserUuid(), GroupSearch.USER.getValue()));
+                processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), GroupSearch.USER.getValue(), taskUserVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
             }
         }
     }
@@ -253,7 +252,10 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                                 stepTaskUserVoMap.put(stu.getProcessTaskStepTaskId(), new ArrayList<>());
                             }
                             stu.setStepTaskUserContentVoList(stepTaskUserContentVoMap.get(stu.getId()));
-                            stepTaskUserVoMap.get(stu.getProcessTaskStepTaskId()).add(stu);
+                            //仅回显需要回复的 或 已经回复过的用户
+                            if(stu.getIsDelete() == 0 || CollectionUtils.isNotEmpty(stu.getStepTaskUserContentVoList())) {
+                                stepTaskUserVoMap.get(stu.getProcessTaskStepTaskId()).add(stu);
+                            }
                         });
                         //任务
                         stepTaskVoList.forEach(st -> {
