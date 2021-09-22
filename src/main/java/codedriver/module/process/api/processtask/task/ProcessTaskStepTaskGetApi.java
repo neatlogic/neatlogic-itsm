@@ -9,7 +9,6 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
-import codedriver.framework.process.dto.ProcessTaskStepTaskUserVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -28,7 +27,7 @@ import javax.annotation.Resource;
 @Transactional
 @OperationType(type = OperationTypeEnum.OPERATE)
 @AuthAction(action = PROCESS_BASE.class)
-public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
+public class ProcessTaskStepTaskGetApi extends PrivateApiComponentBase {
     @Resource
     ProcessTaskMapper processTaskMapper;
 
@@ -37,12 +36,12 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "processtask/step/task/complete";
+        return "processtask/step/task/get";
     }
 
     @Override
     public String getName() {
-        return "任务完成接口";
+        return "获取任务";
     }
 
     @Override
@@ -55,10 +54,9 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
             @Param(name = "processTaskStepTaskUserContentId", type = ApiParamType.LONG, desc = "任务用户回复id，不为空则修改该回复"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")})
     @Output({ })
-    @Description(desc = "任务完成接口")
+    @Description(desc = "获取完成接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ProcessTaskStepTaskUserVo stepTaskUserVo = JSONObject.toJavaObject(jsonObj, ProcessTaskStepTaskUserVo.class);
-        return processTaskStepTaskService.completeTask(stepTaskUserVo);
+        return null;
     }
 }

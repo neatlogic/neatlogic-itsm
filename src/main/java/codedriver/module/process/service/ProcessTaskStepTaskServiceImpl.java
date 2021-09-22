@@ -126,6 +126,14 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      */
     @Override
     public Long completeTask(ProcessTaskStepTaskUserVo processTaskStepTaskUserVo) {
+        Long id = processTaskStepTaskUserVo.getId();
+        Long userContentId = processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId();
+        String content = processTaskStepTaskUserVo.getContent();
+        processTaskStepTaskUserVo = processTaskStepTaskMapper.getStepTaskUserById(processTaskStepTaskUserVo.getId());
+        if (processTaskStepTaskUserVo == null) {
+            throw new ProcessTaskStepTaskUserNotFoundException(id);
+        }
+        processTaskStepTaskUserVo.setContent(content);
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskById(processTaskStepTaskUserVo.getProcessTaskStepTaskId());
         if (stepTaskVo == null) {
             throw new ProcessTaskStepTaskNotFoundException(processTaskStepTaskUserVo.getProcessTaskStepTaskId().toString());
@@ -138,17 +146,12 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             throw new ProcessTaskStepUnRunningException();
         }
         processTaskStepTaskUserVo.setUserUuid(UserContext.get().getUserUuid());
-        ProcessTaskStepTaskUserVo taskUserVo = processTaskStepTaskMapper.getStepTaskUserByTaskIdAndTaskUserIdAndUserUuid(processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getId(), processTaskStepTaskUserVo.getUserUuid());
-        if (taskUserVo == null) {
-            throw new ProcessTaskStepTaskUserNotFoundException();
-        }
         //update 更新内容
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(processTaskStepTaskUserVo.getContent());
         processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
         processTaskStepTaskUserVo.setContentHash(processTaskContentVo.getHash());
         //新增回复
-        if (processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId() == null) {
-
+        if (userContentId == null) {
             processTaskStepTaskMapper.updateTaskUserByTaskIdAndUserUuid(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
             ProcessTaskStepTaskUserContentVo contentVo = new ProcessTaskStepTaskUserContentVo(processTaskStepTaskUserVo);
             processTaskStepTaskMapper.insertTaskUserContent(contentVo);
