@@ -9,6 +9,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
@@ -18,10 +19,10 @@ import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissio
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
+import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.ProcessTaskStepTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +43,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
     @Resource
     ProcessTaskMapper processTaskMapper;
     @Resource
-    ProcessTaskStepTaskService processTaskStepTaskService;
+    IProcessStepHandlerUtil IProcessStepHandlerUtil;
 
     @Override
     public String getToken() {
@@ -67,7 +68,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskStepTaskId = jsonObj.getLong("processTaskStepTaskId");
-        ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskById(processTaskStepTaskId);
+        ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskDetailById(processTaskStepTaskId);
         if (stepTaskVo == null) {
             throw new ProcessTaskStepTaskNotFoundException(processTaskStepTaskId.toString());
         }
@@ -84,7 +85,12 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         processTaskStepTaskMapper.deleteTaskById(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserByTaskId(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserContentByTaskId(processTaskStepTaskId);
-        //TODO 活动&通知
+        //TODO 通知
+        //活动参数
+        JSONObject paramObj = new JSONObject();
+        paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
+        processTaskStepVo.setParamObj(paramObj);
+        IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETETASK);
         return null;
     }
 }
