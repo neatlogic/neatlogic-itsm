@@ -1,46 +1,35 @@
 package codedriver.module.process.api.processtask;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.process.auth.PROCESS_BASE;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
-import codedriver.framework.process.dto.ProcessTaskStepDataVo;
-import codedriver.framework.process.dto.ProcessTaskStepRelVo;
-import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
-import codedriver.framework.process.dto.ProcessTaskStepUserVo;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
+import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
-import codedriver.framework.process.service.ProcessTaskService;
-import codedriver.module.process.service.ProcessTaskStepSubtaskService;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.service.ProcessTaskStepSubtaskService;
+import codedriver.module.process.service.ProcessTaskStepTaskService;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -58,6 +47,9 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
+
+    @Resource
+    private ProcessTaskStepTaskService processTaskStepTaskService;
 
     @Override
     public String getToken() {
@@ -217,6 +209,9 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
             processTaskStepSubtask.setIsRedoable(0);
         }
         processTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
+
+        //任务列表
+        processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
         // 时效列表
         ProcessTaskVo processTaskVo =
             processTaskMapper.getProcessTaskBaseInfoById(processTaskStepVo.getProcessTaskId());

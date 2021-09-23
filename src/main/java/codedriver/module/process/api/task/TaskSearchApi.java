@@ -15,11 +15,15 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -67,6 +71,19 @@ public class TaskSearchApi extends PrivateApiComponentBase {
         taskConfigVo.setRowNum(rowNum);
         if(rowNum >0){
             taskConfigVoList = taskMapper.searchTaskConfig(taskConfigVo);
+            List<Map<String,Long>> taskConfigReferenceCountMapList =  taskMapper.getTaskConfigReferenceCountMap(taskConfigVoList.stream().map(TaskConfigVo::getId).collect(Collectors.toList()));
+            Map<Long,Long> taskConfigReferenceCountMap = new HashMap<>();
+            if(CollectionUtils.isNotEmpty(taskConfigReferenceCountMapList)){
+                for(Map<String,Long> referenceResultDataMap  : taskConfigReferenceCountMapList){
+                    taskConfigReferenceCountMap.put(referenceResultDataMap.get("taskConfigId"),referenceResultDataMap.get("count"));
+                }
+            }
+            for(TaskConfigVo configVo:taskConfigVoList){
+                Long count = taskConfigReferenceCountMap.get(configVo.getId());
+                if(count != null) {
+                    configVo.setReferenceCount(Math.toIntExact(count));
+                }
+            }
         }
         return TableResultUtil.getResult(taskConfigVoList,taskConfigVo);
     }
