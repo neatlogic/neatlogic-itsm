@@ -21,7 +21,7 @@ import codedriver.framework.process.dto.ActionVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.handler.ProcessRequestFrom;
-import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import codedriver.framework.util.ConditionUtil;
 import codedriver.framework.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSON;
@@ -100,7 +100,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
     protected void execute() {
         try {
             JSONArray actionList = null;
-            if (triggerType instanceof TaskNotifyTriggerType) {
+            if (triggerType instanceof ProcessTaskNotifyTriggerType) {
                 /** 获取工单配置信息 **/
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
                 String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());

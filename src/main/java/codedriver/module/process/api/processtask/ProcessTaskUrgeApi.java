@@ -12,7 +12,7 @@ import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
-import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -75,8 +75,8 @@ public class ProcessTaskUrgeApi extends PrivateApiComponentBase {
 		if(CollectionUtils.isNotEmpty(processTaskStepList)) {
 			for(ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
 				/** 触发通知 **/
-				IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.URGE);
-				IProcessStepHandlerUtil.action(processTaskStepVo, TaskNotifyTriggerType.URGE);
+				IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
+				IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskNotifyTriggerType.URGE);
 			}
 		}else {
 			try {

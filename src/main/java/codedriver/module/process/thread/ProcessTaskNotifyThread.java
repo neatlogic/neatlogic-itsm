@@ -16,7 +16,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
 import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
-import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.util.NotifyPolicyUtil;
@@ -93,7 +93,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
     protected void execute() {
         try {
             JSONObject notifyPolicyConfig = null;
-            if (notifyTriggerType instanceof TaskNotifyTriggerType) {
+            if (notifyTriggerType instanceof ProcessTaskNotifyTriggerType) {
                 /** 获取工单配置信息 **/
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
                 String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
