@@ -40,6 +40,7 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @AuthAction(action = PROCESS_BASE.class)
@@ -128,11 +129,13 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
             if (StringUtils.isNotBlank(formContent)) {
                 Map<String, String> labelUuidMap = new HashMap<>();
+                Map<String, String> labelHandlerMap = new HashMap<>();
                 FormVersionVo fromFormVersion = new FormVersionVo();
                 fromFormVersion.setFormConfig(formContent);
                 List<FormAttributeVo> fromFormAttributeList = fromFormVersion.getFormAttributeList();
                 for (FormAttributeVo formAttributeVo : fromFormAttributeList) {
                     labelUuidMap.put(formAttributeVo.getLabel(), formAttributeVo.getUuid());
+                    labelHandlerMap.put(formAttributeVo.getLabel(), formAttributeVo.getHandler());
                 }
                 Map<String, Object> formAttributeDataMap = new HashMap<>();
                 List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(fromProcessTaskId);
@@ -143,11 +146,14 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
                 FormVersionVo toFormVersion = new FormVersionVo();
                 toFormVersion.setFormConfig(JSONObject.toJSONString(toProcessTaskFormConfig));
                 for (FormAttributeVo formAttributeVo : toFormVersion.getFormAttributeList()) {
-                    String fromFormAttributeUuid = labelUuidMap.get(formAttributeVo.getLabel());
-                    if (StringUtils.isNotBlank(fromFormAttributeUuid)) {
-                        Object data = formAttributeDataMap.get(fromFormAttributeUuid);
-                        if (data != null) {
-                            resultObj.put(formAttributeVo.getUuid(), data);
+                    String fromFormAttributeHandler = labelHandlerMap.get(formAttributeVo.getLabel());
+                    if (Objects.equals(fromFormAttributeHandler, formAttributeVo.getHandler())) {
+                        String fromFormAttributeUuid = labelUuidMap.get(formAttributeVo.getLabel());
+                        if (StringUtils.isNotBlank(fromFormAttributeUuid)) {
+                            Object data = formAttributeDataMap.get(fromFormAttributeUuid);
+                            if (data != null) {
+                                resultObj.put(formAttributeVo.getUuid(), data);
+                            }
                         }
                     }
                 }
