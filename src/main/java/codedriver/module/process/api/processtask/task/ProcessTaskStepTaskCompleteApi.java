@@ -52,7 +52,7 @@ public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "任务用户id"),
-            @Param(name = "processTaskStepTaskUserContentId", type = ApiParamType.LONG, desc = "任务用户回复id，不为空则修改该回复"),
+            @Param(name = "processTaskStepTaskUserContentId", type = ApiParamType.LONG, desc = "任务用户回复id，不为空则修改该回复，为空则新增回复"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, minLength = 1, desc = "描述")})
     @Output({ })
     @Description(desc = "任务完成接口")

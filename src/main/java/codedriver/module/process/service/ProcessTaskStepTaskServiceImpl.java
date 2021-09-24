@@ -179,7 +179,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             if (userContentVo == null) {
                 throw new ProcessTaskStepTaskUserContentNotFoundException();
             }
-            processTaskStepTaskMapper.updateTaskUserContent(processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId(), processTaskStepTaskUserVo.getContentHash(), UserContext.get().getUserUuid());
+            processTaskStepTaskMapper.updateTaskUserContent(userContentId, processTaskStepTaskUserVo.getContentHash(), UserContext.get().getUserUuid());
             return processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId();
         }
 
