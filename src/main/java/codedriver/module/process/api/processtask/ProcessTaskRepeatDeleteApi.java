@@ -75,7 +75,7 @@ public class ProcessTaskRepeatDeleteApi extends PrivateApiComponentBase {
             if (repeatProcessTaskIdList.size() == 1) {
                 processTaskMapper.deleteProcessTaskRepeatByProcessTaskId(repeatProcessTaskIdList.get(0));
                 ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
-                processTaskStep.setProcessTaskId(processTaskId);
+                processTaskStep.setProcessTaskId(repeatProcessTaskIdList.get(0));
 //        processTaskStepVo.setParamObj(jsonObj);
                 processStepHandlerUtil.audit(processTaskStep, ProcessTaskAuditType.UNBINDREPEAT);
             }
