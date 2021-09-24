@@ -112,7 +112,6 @@ public class ProcessTaskStepTaskSaveApi extends PrivateApiComponentBase {
             processTaskStepTaskVo.setId(processTaskStepTaskId);
         }
         processTaskStepTaskService.saveTask(processTaskStepVo,processTaskStepTaskVo, isCreate);
-        //TODO 活动&通知
         return processTaskStepTaskVo.getId();
     }
 }
