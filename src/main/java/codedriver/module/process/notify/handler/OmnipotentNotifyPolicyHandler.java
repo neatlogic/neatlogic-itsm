@@ -17,8 +17,9 @@ import codedriver.framework.notify.dto.NotifyTriggerTemplateVo;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.notify.constvalue.ProcessNotifyPolicyHandlerGroup;
+import codedriver.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import codedriver.framework.process.notify.constvalue.SubtaskNotifyTriggerType;
-import codedriver.framework.process.notify.constvalue.TaskStepNotifyTriggerType;
+import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
 import codedriver.framework.process.notify.core.IDefaultTemplate;
 import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
 import com.alibaba.fastjson.JSON;
@@ -43,10 +44,14 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	@Override
 	public List<NotifyTriggerVo> myNotifyTriggerList() {
 		List<NotifyTriggerVo> returnList = new ArrayList<>();
-		for (TaskStepNotifyTriggerType notifyTriggerType : TaskStepNotifyTriggerType.values()) {
+		for (ProcessTaskStepNotifyTriggerType notifyTriggerType : ProcessTaskStepNotifyTriggerType.values()) {
 			returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
 		}
 		for (SubtaskNotifyTriggerType notifyTriggerType : SubtaskNotifyTriggerType.values()) {
+            returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
+        }
+		//任务
+        for (TaskNotifyTriggerType notifyTriggerType : TaskNotifyTriggerType.values()) {
             returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
         }
 		return returnList;
@@ -66,13 +71,20 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         List<IDefaultTemplate> templateList = NotifyDefaultTemplateFactory.getTemplate(type.getValue());
         if(CollectionUtils.isNotEmpty(templateList)){
             Map<String, List<IDefaultTemplate>> map = templateList.stream().collect(Collectors.groupingBy(IDefaultTemplate::getTrigger));
-            for (TaskStepNotifyTriggerType notifyTriggerType : TaskStepNotifyTriggerType.values()) {
+            for (ProcessTaskStepNotifyTriggerType notifyTriggerType : ProcessTaskStepNotifyTriggerType.values()) {
                 List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
                 for(IDefaultTemplate vo : templates){
                     list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
                 }
             }
             for (SubtaskNotifyTriggerType notifyTriggerType : SubtaskNotifyTriggerType.values()) {
+                List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
+                for(IDefaultTemplate vo : templates){
+                    list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
+                }
+            }
+            //任务
+            for (TaskNotifyTriggerType notifyTriggerType : TaskNotifyTriggerType.values()) {
                 List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
                 for(IDefaultTemplate vo : templates){
                     list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));

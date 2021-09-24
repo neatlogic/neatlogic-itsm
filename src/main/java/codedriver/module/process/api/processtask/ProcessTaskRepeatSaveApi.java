@@ -21,7 +21,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNotFoundException;
-import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
@@ -162,7 +162,7 @@ public class ProcessTaskRepeatSaveApi extends PrivateApiComponentBase {
             ProcessStepHandlerFactory.getHandler().abortProcessTask(processTaskVo);
             ProcessTaskStepVo processTaskStep = new ProcessTaskStepVo();
             processTaskStep.setProcessTaskId(processTaskVo.getId());
-            processStepHandlerUtil.notify(processTaskStep, TaskNotifyTriggerType.MARKREPEATPROCESSTASK);
+            processStepHandlerUtil.notify(processTaskStep, ProcessTaskNotifyTriggerType.MARKREPEATPROCESSTASK);
         }
         return null;
     }

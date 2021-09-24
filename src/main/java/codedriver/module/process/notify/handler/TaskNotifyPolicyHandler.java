@@ -1,38 +1,36 @@
 package codedriver.module.process.notify.handler;
 
+import codedriver.framework.auth.core.AuthFactory;
+import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.condition.core.ConditionHandlerFactory;
+import codedriver.framework.condition.core.IConditionHandler;
+import codedriver.framework.dto.ConditionParamVo;
+import codedriver.framework.dto.ExpressionVo;
+import codedriver.framework.form.constvalue.FormConditionModel;
+import codedriver.framework.notify.core.INotifyPolicyHandlerGroup;
+import codedriver.framework.notify.core.NotifyHandlerFactory;
+import codedriver.framework.notify.core.NotifyHandlerType;
+import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
+import codedriver.framework.notify.dto.NotifyTriggerTemplateVo;
+import codedriver.framework.notify.dto.NotifyTriggerVo;
+import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
+import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
+import codedriver.framework.process.constvalue.ProcessTaskParams;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
+import codedriver.framework.process.notify.core.IDefaultTemplate;
+import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import codedriver.framework.auth.core.AuthFactory;
-import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.notify.core.INotifyPolicyHandlerGroup;
-import codedriver.framework.notify.core.NotifyHandlerFactory;
-import codedriver.framework.notify.core.NotifyHandlerType;
-import codedriver.framework.notify.dto.NotifyTriggerTemplateVo;
-import codedriver.framework.notify.dto.NotifyTriggerVo;
-import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
-import codedriver.framework.process.notify.core.IDefaultTemplate;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.constvalue.Expression;
-import codedriver.framework.common.constvalue.ParamType;
-import codedriver.framework.condition.core.ConditionHandlerFactory;
-import codedriver.framework.condition.core.IConditionHandler;
-import codedriver.framework.dto.ConditionParamVo;
-import codedriver.framework.dto.ExpressionVo;
-import codedriver.framework.notify.core.NotifyPolicyHandlerBase;
-import codedriver.framework.process.constvalue.ConditionProcessTaskOptions;
-import codedriver.framework.form.constvalue.FormConditionModel;
-import codedriver.framework.process.constvalue.ProcessTaskGroupSearch;
-import codedriver.framework.process.constvalue.ProcessTaskParams;
-import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
 @Component
 public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 
@@ -44,7 +42,7 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 	@Override
 	public List<NotifyTriggerVo> myNotifyTriggerList() {
 		List<NotifyTriggerVo> returnList = new ArrayList<>();
-		for (TaskNotifyTriggerType notifyTriggerType : TaskNotifyTriggerType.values()) {
+		for (ProcessTaskNotifyTriggerType notifyTriggerType : ProcessTaskNotifyTriggerType.values()) {
 			returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
 		}
 		return returnList;
@@ -64,7 +62,7 @@ public class TaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         List<IDefaultTemplate> templateList = NotifyDefaultTemplateFactory.getTemplate(type.getValue());
         if(CollectionUtils.isNotEmpty(templateList)){
             Map<String, List<IDefaultTemplate>> map = templateList.stream().collect(Collectors.groupingBy(IDefaultTemplate::getTrigger));
-            for (TaskNotifyTriggerType notifyTriggerType : TaskNotifyTriggerType.values()) {
+            for (ProcessTaskNotifyTriggerType notifyTriggerType : ProcessTaskNotifyTriggerType.values()) {
                 List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
                 for(IDefaultTemplate vo : templates){
                     list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));

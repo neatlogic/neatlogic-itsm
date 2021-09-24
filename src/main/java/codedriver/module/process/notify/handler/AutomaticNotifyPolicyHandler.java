@@ -18,7 +18,7 @@ import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.notify.constvalue.ProcessNotifyPolicyHandlerGroup;
 import codedriver.framework.process.notify.constvalue.SubtaskNotifyTriggerType;
-import codedriver.framework.process.notify.constvalue.TaskStepNotifyTriggerType;
+import codedriver.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import codedriver.framework.process.notify.core.IDefaultTemplate;
 import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
 import com.alibaba.fastjson.JSON;
@@ -64,7 +64,7 @@ public class AutomaticNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     @Override
     protected List<NotifyTriggerVo> myNotifyTriggerList() {
         List<NotifyTriggerVo> returnList = new ArrayList<>();
-        for (TaskStepNotifyTriggerType notifyTriggerType : TaskStepNotifyTriggerType.values()) {
+        for (ProcessTaskStepNotifyTriggerType notifyTriggerType : ProcessTaskStepNotifyTriggerType.values()) {
             returnList.add(new NotifyTriggerVo(notifyTriggerType.getTrigger(), notifyTriggerType.getText(),notifyTriggerType.getDescription()));
         }
         return returnList;
@@ -84,7 +84,7 @@ public class AutomaticNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         List<IDefaultTemplate> templateList = NotifyDefaultTemplateFactory.getTemplate(type.getValue());
         if(CollectionUtils.isNotEmpty(templateList)){
             Map<String, List<IDefaultTemplate>> map = templateList.stream().collect(Collectors.groupingBy(IDefaultTemplate::getTrigger));
-            for (TaskStepNotifyTriggerType notifyTriggerType : TaskStepNotifyTriggerType.values()) {
+            for (ProcessTaskStepNotifyTriggerType notifyTriggerType : ProcessTaskStepNotifyTriggerType.values()) {
                 List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
                 for(IDefaultTemplate vo : templates){
                     list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
