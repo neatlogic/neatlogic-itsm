@@ -72,7 +72,8 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
             @Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
             @Param(name = "channelTypeUuid", type = ApiParamType.STRING, isRequired = true, desc = "服务类型uuid"),
             @Param(name = "allowTranferReport", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否允许转报"),
-            @Param(name = "channelRelationList", type = ApiParamType.JSONARRAY, desc = "转报设置列表")
+            @Param(name = "channelRelationList", type = ApiParamType.JSONARRAY, desc = "转报设置列表"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置信息")
     })
     @Output({
             @Param(name = "Return", type = ApiParamType.STRING, desc = "服务通道uuid")
