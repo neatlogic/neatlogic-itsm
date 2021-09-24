@@ -5,40 +5,22 @@
 
 package codedriver.module.process.api.channel;
 
-import java.util.List;
-
-import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.process.exception.channel.ChannelParentUuidCannotBeZeroException;
-import codedriver.framework.process.exception.priority.PriorityNotFoundException;
-import codedriver.framework.process.exception.process.ProcessNotFoundException;
-import codedriver.framework.worktime.exception.WorktimeNotFoundException;
-import codedriver.framework.restful.core.IValid;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dto.AuthorityVo;
-import codedriver.framework.process.dao.mapper.CatalogMapper;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
-import codedriver.framework.process.dao.mapper.PriorityMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
-import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
-import codedriver.framework.process.dto.CatalogVo;
-import codedriver.framework.process.dto.ChannelPriorityVo;
-import codedriver.framework.process.dto.ChannelRelationVo;
-import codedriver.framework.process.dto.ChannelVo;
-import codedriver.framework.process.exception.catalog.CatalogNotFoundException;
-import codedriver.framework.process.exception.channel.ChannelNameRepeatException;
-import codedriver.framework.process.exception.channel.ChannelRelationSettingException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.process.auth.CATALOG_MODIFY;
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dto.ChannelVo;
+import codedriver.framework.process.exception.channel.ChannelNameRepeatException;
+import codedriver.framework.process.service.ChannelService;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.IValid;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -52,16 +34,7 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
     private ChannelMapper channelMapper;
 
     @Resource
-    private CatalogMapper catalogMapper;
-
-    @Resource
-    private ProcessMapper processMapper;
-
-    @Resource
-    private PriorityMapper priorityMapper;
-
-    @Resource
-    private WorktimeMapper worktimeMapper;
+    private ChannelService channelService;
 
     @Override
     public String getToken() {
@@ -108,91 +81,7 @@ public class ChannelSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         ChannelVo channelVo = JSON.toJavaObject(jsonObj, ChannelVo.class);
-        //获取父级信息
-        String parentUuid = channelVo.getParentUuid();
-        if (CatalogVo.ROOT_UUID.equals(parentUuid)) {
-            throw new ChannelParentUuidCannotBeZeroException();
-        }
-        if (catalogMapper.checkCatalogIsExists(parentUuid) == 0) {
-            throw new CatalogNotFoundException(parentUuid);
-        }
-        if (channelMapper.checkChannelNameIsRepeat(channelVo) > 0) {
-            throw new ChannelNameRepeatException(channelVo.getName());
-        }
-        int sort;
-        String uuid = channelVo.getUuid();
-        ChannelVo existedChannel = channelMapper.getChannelByUuid(uuid);
-        if (existedChannel == null) {//新增
-            channelVo.setUuid(null);
-            uuid = channelVo.getUuid();
-            sort = channelMapper.getMaxSortByParentUuid(parentUuid) + 1;
-        } else {//修改
-            channelMapper.deleteChannelPriorityByChannelUuid(uuid);
-            channelMapper.deleteChannelAuthorityByChannelUuid(uuid);
-            sort = existedChannel.getSort();
-        }
-        channelVo.setSort(sort);
-        channelMapper.replaceChannel(channelVo);
-        if (processMapper.checkProcessIsExists(channelVo.getProcessUuid()) == 0) {
-            throw new ProcessNotFoundException(channelVo.getProcessUuid());
-        }
-        channelMapper.replaceChannelProcess(uuid, channelVo.getProcessUuid());
-
-        if (worktimeMapper.checkWorktimeIsExists(channelVo.getWorktimeUuid()) == 0) {
-            throw new WorktimeNotFoundException(channelVo.getWorktimeUuid());
-        }
-        channelMapper.replaceChannelWorktime(uuid, channelVo.getWorktimeUuid());
-        String defaultPriorityUuid = channelVo.getDefaultPriorityUuid();
-        List<String> priorityUuidList = channelVo.getPriorityUuidList();
-        for (String priorityUuid : priorityUuidList) {
-            if (priorityMapper.checkPriorityIsExists(priorityUuid) == 0) {
-                throw new PriorityNotFoundException(priorityUuid);
-            }
-            ChannelPriorityVo channelPriority = new ChannelPriorityVo();
-            channelPriority.setChannelUuid(uuid);
-            channelPriority.setPriorityUuid(priorityUuid);
-            if (defaultPriorityUuid.equals(priorityUuid)) {
-                channelPriority.setIsDefault(1);
-            } else {
-                channelPriority.setIsDefault(0);
-            }
-            channelMapper.insertChannelPriority(channelPriority);
-        }
-        List<AuthorityVo> authorityList = channelVo.getAuthorityVoList();
-        if (CollectionUtils.isNotEmpty(authorityList)) {
-            for (AuthorityVo authorityVo : authorityList) {
-                channelMapper.insertChannelAuthority(authorityVo, channelVo.getUuid());
-            }
-        }
-        /** 转报设置逻辑，允许转报后，转报设置必填 **/
-        channelMapper.deleteChannelRelationBySource(channelVo.getUuid());
-        channelMapper.deleteChannelRelationAuthorityBySource(channelVo.getUuid());
-        if (channelVo.getAllowTranferReport() == 1) {
-            if (CollectionUtils.isEmpty(channelVo.getChannelRelationList())) {
-                throw new ChannelRelationSettingException();
-            }
-            for (ChannelRelationVo channelRelationVo : channelVo.getChannelRelationList()) {
-                channelRelationVo.setSource(channelVo.getUuid());
-                for (String typeAndtarget : channelRelationVo.getTargetList()) {
-                    if (typeAndtarget.contains("#")) {
-                        String[] split = typeAndtarget.split("#");
-                        channelRelationVo.setType(split[0]);
-                        channelRelationVo.setTarget(split[1]);
-                        channelMapper.insertChannelRelation(channelRelationVo);
-                    }
-                }
-                for (String authority : channelRelationVo.getAuthorityList()) {
-                    if (authority.contains("#")) {
-                        String[] split = authority.split("#");
-                        channelRelationVo.setType(split[0]);
-                        channelRelationVo.setUuid(split[1]);
-                        channelMapper.insertChannelRelationAuthority(channelRelationVo);
-                    }
-
-                }
-            }
-        }
-        return uuid;
+        return channelService.saveChannel(channelVo);
     }
 
     public IValid name() {
