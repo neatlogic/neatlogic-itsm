@@ -175,7 +175,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             refreshWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskUserVo.getProcessTaskStepTaskId()));
             return contentVo.getId();
         } else {//编辑回复
-            ProcessTaskStepTaskUserContentVo userContentVo = processTaskStepTaskMapper.getStepTaskUserContentById(processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId());
+            ProcessTaskStepTaskUserContentVo userContentVo = processTaskStepTaskMapper.getStepTaskUserContentByIdAndUserUuid(userContentId, UserContext.get().getUserUuid());
             if (userContentVo == null) {
                 throw new ProcessTaskStepTaskUserContentNotFoundException();
             }
