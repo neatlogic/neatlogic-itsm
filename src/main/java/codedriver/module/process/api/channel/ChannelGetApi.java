@@ -1,20 +1,14 @@
 package codedriver.module.process.api.channel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
-import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +19,6 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.AuthorityVo;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dto.ChannelPriorityVo;
-import codedriver.framework.process.dto.ChannelRelationVo;
-import codedriver.framework.process.dto.ChannelTypeRelationVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.exception.channel.ChannelNotFoundException;
 
@@ -37,9 +29,6 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ChannelMapper channelMapper;
-
-	@Autowired
-	private ChannelTypeMapper channelTypeMapper;
 
 	@Override
 	public String getToken() {
@@ -92,37 +81,37 @@ public class ChannelGetApi extends PrivateApiComponentBase {
 		    channel.setIsFavorite(1);
 		}
 		/** 转报设置 **/
-		List<ChannelRelationVo> channelRelationList = channelMapper.getChannelRelationListBySource(uuid);
-		if(CollectionUtils.isNotEmpty(channelRelationList)) {
-		    Map<Long, List<String>> channelRelationTargetMap = new HashMap<>();
-		    for(ChannelRelationVo channelRelationVo : channelRelationList) {
-				channelRelationTargetMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getTarget());
-		    }
-		    Map<Long, List<String>> channelRelationAuthorityMap = new HashMap<>();
-	        List<ChannelRelationVo> channelRelationAuthorityList = channelMapper.getChannelRelationAuthorityListBySource(uuid);
-	        for(ChannelRelationVo channelRelationVo : channelRelationAuthorityList) {
-				channelRelationAuthorityMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getUuid());
-            }
-	        Long channelRelationId = null;
-			for(ChannelRelationVo channelRelation : channelRelationList) {
-				if(channelRelation.getChannelTypeRelationId().equals(channelRelationId)){
-					continue;
-				}
-				channelRelationId = channelRelation.getChannelTypeRelationId();
-				ChannelRelationVo channelRelationVo = new ChannelRelationVo();
-				channelRelationVo.setChannelTypeRelationId(channelRelationId);
-				List<String> targetList = channelRelationTargetMap.get(channelRelationId);
-				if(CollectionUtils.isNotEmpty(targetList)){
-					channelRelationVo.setTargetList(targetList);
-				}
-				List<String> authorityList = channelRelationAuthorityMap.get(channelRelationId);
-				if(CollectionUtils.isNotEmpty(authorityList)) {
-					channelRelationVo.setAuthorityList(authorityList);
-				}
-				channel.getChannelRelationList().add(channelRelationVo);
-			}
-			channel.setAllowTranferReport(1);
-		}
+//		List<ChannelRelationVo> channelRelationList = channelMapper.getChannelRelationListBySource(uuid);
+//		if(CollectionUtils.isNotEmpty(channelRelationList)) {
+//		    Map<Long, List<String>> channelRelationTargetMap = new HashMap<>();
+//		    for(ChannelRelationVo channelRelationVo : channelRelationList) {
+//				channelRelationTargetMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getTarget());
+//		    }
+//		    Map<Long, List<String>> channelRelationAuthorityMap = new HashMap<>();
+//	        List<ChannelRelationVo> channelRelationAuthorityList = channelMapper.getChannelRelationAuthorityListBySource(uuid);
+//	        for(ChannelRelationVo channelRelationVo : channelRelationAuthorityList) {
+//				channelRelationAuthorityMap.computeIfAbsent(channelRelationVo.getChannelTypeRelationId(), v ->new ArrayList<>()).add(channelRelationVo.getType() + "#" + channelRelationVo.getUuid());
+//            }
+//	        Long channelRelationId = null;
+//			for(ChannelRelationVo channelRelation : channelRelationList) {
+//				if(channelRelation.getChannelTypeRelationId().equals(channelRelationId)){
+//					continue;
+//				}
+//				channelRelationId = channelRelation.getChannelTypeRelationId();
+//				ChannelRelationVo channelRelationVo = new ChannelRelationVo();
+//				channelRelationVo.setChannelTypeRelationId(channelRelationId);
+//				List<String> targetList = channelRelationTargetMap.get(channelRelationId);
+//				if(CollectionUtils.isNotEmpty(targetList)){
+//					channelRelationVo.setTargetList(targetList);
+//				}
+//				List<String> authorityList = channelRelationAuthorityMap.get(channelRelationId);
+//				if(CollectionUtils.isNotEmpty(authorityList)) {
+//					channelRelationVo.setAuthorityList(authorityList);
+//				}
+//				channel.getChannelRelationList().add(channelRelationVo);
+//			}
+//			channel.setAllowTranferReport(1);
+//		}
 		return channel;
 	}
 
