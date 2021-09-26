@@ -153,6 +153,10 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (processTaskStepTaskUserVo == null) {
             throw new ProcessTaskStepTaskUserNotFoundException(id);
         }
+        //回复的stepUserId 的用户得和 当前登录用户一致
+        if(!Objects.equals(processTaskStepTaskUserVo.getUserUuid(),UserContext.get().getUserUuid())){
+            throw new ProcessTaskStepTaskUserException(processTaskStepTaskUserVo.getId());
+        }
         processTaskStepTaskUserVo.setContent(content);
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskDetailById(processTaskStepTaskUserVo.getProcessTaskStepTaskId());
         if (stepTaskVo == null) {
