@@ -93,11 +93,15 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
     protected void execute() {
         try {
             JSONObject notifyPolicyConfig = null;
+            Long policyId = null;
             if (notifyTriggerType instanceof ProcessTaskNotifyTriggerType) {
                 /** 获取工单配置信息 **/
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
                 String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
                 notifyPolicyConfig = (JSONObject) JSONPath.read(config, "process.processConfig.notifyPolicyConfig");
+                if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
+                    policyId = notifyPolicyConfig.getLong("policyId");
+                }
             } else {
                 /** 获取步骤配置信息 **/
                 ProcessTaskStepVo stepVo =  processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
@@ -107,7 +111,10 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                 }
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
                 notifyPolicyConfig = (JSONObject)JSONPath.read(stepConfig, "notifyPolicyConfig");
-                if (MapUtils.isEmpty(notifyPolicyConfig)) {
+                if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
+                    policyId = notifyPolicyConfig.getLong("policyId");
+                }
+                if (policyId == null) {
                     String processStepHandlerConfig = processStepHandlerMapper.getProcessStepHandlerConfigByHandler(stepVo.getHandler());
                     JSONObject globalConfig = null;
                     if (StringUtils.isNotBlank(processStepHandlerConfig)) {
@@ -115,30 +122,18 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                     }
                     globalConfig = processStepUtilHandler.makeupConfig(globalConfig);
                     notifyPolicyConfig = globalConfig.getJSONObject("notifyPolicyConfig");
+                    if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
+                        policyId = notifyPolicyConfig.getLong("policyId");
+                    }
                 }
             }
 
             /** 从步骤配置信息中获取通知策略信息 **/
-            if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
-                Long policyId = notifyPolicyConfig.getLong("policyId");
-                if (policyId != null) {
-                    String notifyPolicyHandler = null;
-                    NotifyPolicyConfigVo policyConfig = null;
-                    ProcessTaskStepNotifyPolicyVo processTaskStepNotifyPolicyVo = new ProcessTaskStepNotifyPolicyVo();
-                    processTaskStepNotifyPolicyVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-                    processTaskStepNotifyPolicyVo.setPolicyId(policyId);
-                    processTaskStepNotifyPolicyVo = processTaskMapper.getProcessTaskStepNotifyPolicy(processTaskStepNotifyPolicyVo);
-                    if (processTaskStepNotifyPolicyVo != null) {
-                        policyConfig = JSON.parseObject(processTaskStepNotifyPolicyVo.getPolicyConfig(), NotifyPolicyConfigVo.class);
-                        notifyPolicyHandler = processTaskStepNotifyPolicyVo.getPolicyHandler();
-                    } else {
-                        NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
-                        if (notifyPolicyVo != null) {
-                            policyConfig = notifyPolicyVo.getConfig();
-                            notifyPolicyHandler = notifyPolicyVo.getHandler();
-                        }
-                    }
-                    if (policyConfig != null && notifyPolicyHandler != null) {
+            if (policyId != null) {
+                NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
+                if (notifyPolicyVo != null) {
+                    NotifyPolicyConfigVo policyConfig = notifyPolicyVo.getConfig();
+                    if (policyConfig != null) {
                         ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(currentProcessTaskStepVo.getProcessTaskId());
                         processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
                         processTaskVo.setCurrentProcessTaskStep(processTaskService.getCurrentProcessTaskStepDetail(currentProcessTaskStepVo));
@@ -152,6 +147,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                         if (CollectionUtils.isNotEmpty(paramMappingArray)) {
                             paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
                         }
+                        String notifyPolicyHandler = notifyPolicyVo.getHandler();
                         NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData, conditionParamData, receiverMap);
                     }
                 }
