@@ -85,6 +85,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", taskConfigVo.getName());
         processTaskStepVo.setParamObj(paramObj);
+        processTaskStepVo.setProcessTaskStepTaskVo(processTaskStepTaskVo);
         if (isCreate) {
             processTaskStepTaskVo.setStatus(ProcessTaskStatus.PENDING.getValue());
             processTaskStepTaskMapper.insertTask(processTaskStepTaskVo);
