@@ -73,7 +73,6 @@ public class ProcessReferenceListApi extends PrivateApiComponentBase {
 				ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
 				channelVo.setChannelTypeVo(channelTypeVo.clone());
 				channelVo.setAllowDesc(null);
-				channelVo.setChannelRelationList(null);
 				channelVo.setParentUuid(null);
 				channelVo.setChannelTypeUuid(null);
 				channelVo.setColor(null);

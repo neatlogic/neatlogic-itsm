@@ -282,12 +282,23 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
         processTaskService.setProcessTaskFormInfo(processTaskVo);
         if (fromProcessTaskId != null) {
-            processTaskVo.getTranferReportProcessTaskList().add(processTaskService.getFromProcessTaskById(fromProcessTaskId));
+            ProcessTaskVo fromProcessTaskVo = processTaskService.getFromProcessTaskById(fromProcessTaskId);
+            JSONObject channelConfig = channel.getConfig();
+            if (MapUtils.isNotEmpty(channelConfig)) {
+                Integer isUsePreOwner = channelConfig.getInteger("isUsePreOwner");
+                if (Objects.equals(isUsePreOwner, 1)) {
+                    String owner = fromProcessTaskVo.getOwner();
+                    if (StringUtils.isNotBlank(owner)) {
+                        owner = GroupSearch.USER.getValuePlugin() + owner;
+                        processTaskVo.setOwner(owner);
+                    }
+                }
+            }
+            processTaskVo.getTranferReportProcessTaskList().add(fromProcessTaskVo);
             if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
                 processTaskVo.setFormAttributeDataMap(getFromFormAttributeDataMap(fromProcessTaskId, processTaskVo.getFormConfig()));
             }
         }
-
         return processTaskVo;
     }
 }
