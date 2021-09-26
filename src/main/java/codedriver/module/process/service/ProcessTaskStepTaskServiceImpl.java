@@ -81,24 +81,20 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
         processTaskStepTaskVo.setContentHash(processTaskContentVo.getHash());
         JSONArray rangeList = taskConfig.getJSONArray("rangeList");
-        //活动参数
-        JSONObject paramObj = new JSONObject();
-        paramObj.put("replaceable_task", taskConfigVo.getName());
-        processTaskStepVo.setParamObj(paramObj);
-        processTaskStepVo.setProcessTaskStepTaskVo(processTaskStepTaskVo);
+
+        ProcessTaskAuditType auditType = ProcessTaskAuditType.CREATETASK;
+        TaskNotifyTriggerType triggerType = TaskNotifyTriggerType.CREATETASK;
         if (isCreate) {
             processTaskStepTaskVo.setStatus(ProcessTaskStatus.PENDING.getValue());
             processTaskStepTaskMapper.insertTask(processTaskStepTaskVo);
-            IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.CREATETASK);
-            IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.CREATETASK);
         } else {
             processTaskStepTaskMapper.updateTask(processTaskStepTaskVo);
             //用户删除标记
             processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(), 1);
             //去掉用户删除标记
             processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(), 0);
-            IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.EDITTASK);
-            IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.EDITTASK);
+            auditType = ProcessTaskAuditType.EDITTASK;
+            triggerType = TaskNotifyTriggerType.EDITTASK;
         }
         if (CollectionUtils.isNotEmpty(rangeList)) {
             //校验用户是否在配置范围内
@@ -109,6 +105,16 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         });
         refreshWorker(processTaskStepVo, processTaskStepTaskVo);
 
+
+        //活动参数
+        JSONObject paramObj = new JSONObject();
+        paramObj.put("replaceable_task", taskConfigVo.getName());
+        processTaskStepVo.setParamObj(paramObj);
+        processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());
+        processTaskStepVo.setProcessTaskStepTaskVo(processTaskStepTaskVo);
+        processTaskStepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(processTaskStepTaskVo.getId())));
+        IProcessStepHandlerUtil.audit(processTaskStepVo, auditType);
+        IProcessStepHandlerUtil.notify(processTaskStepVo, triggerType);
     }
 
     /**

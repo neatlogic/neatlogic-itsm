@@ -1,7 +1,6 @@
 package codedriver.module.process.notify.template;
 
 import codedriver.framework.notify.core.NotifyHandlerType;
-import codedriver.framework.process.constvalue.ProcessTaskParams;
 import codedriver.framework.process.notify.core.IDefaultTemplate;
 import org.springframework.stereotype.Component;
 
@@ -681,22 +680,25 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
             return NotifyHandlerType.EMAIL.getValue();
         }
     }
-    /** 子流程触发点结束 */
+
+    /**
+     * 子流程触发点结束
+     */
     /* 任务 触发点开始 */
     @Component
     public static class CreateTask extends EmailDefaultTemplateBase {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+ "创建提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "创建提醒";
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(PROCESSTASK_STEP_WORKER + "为工单步骤" + PROCESSTASK_STEP_NAME + "创建"+ ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+"：\n")
+                    .append(PROCESSTASK_STEP_WORKER + "为工单步骤" + PROCESSTASK_STEP_NAME + "创建" + TASK_CONFIG_NAME + "：\n")
                     .append("内容:" + TASK_CONTENT + "\n")
-                    .append(ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+"处理人:" + TASK_WORKER + "\n")
+                    .append(TASK_CONFIG_NAME + "处理人:" + TASK_WORKER + "\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
         }
@@ -717,15 +719,15 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+ "跟新提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "跟新提醒";
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(PROCESSTASK_STEP_WORKER + "更新了"+ ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+"：\n")
+                    .append(PROCESSTASK_STEP_WORKER + "更新了" + TASK_CONFIG_NAME + "：\n")
                     .append("内容:" + TASK_CONTENT + "\n")
-                    .append(ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+"处理人:" + TASK_WORKER + "\n")
+                    .append(TASK_CONFIG_NAME + "处理人:" + TASK_WORKER + "\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
         }
@@ -746,13 +748,13 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+ "删除提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "删除提醒";
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(PROCESSTASK_STEP_WORKER + "删除了"+ ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+"：\n")
+                    .append(PROCESSTASK_STEP_WORKER + "删除了" + TASK_CONFIG_NAME + "：\n")
                     .append("内容:" + TASK_CONTENT + "\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
@@ -774,13 +776,13 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE +ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+"完成提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "完成提醒";
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(TASK_WORKER + "完成"+ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+"\n")
+                    .append(TASK_WORKER + "完成" + TASK_CONFIG_NAME + "\n")
                     .append("内容:" + TASK_CONTENT + "\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
@@ -802,13 +804,13 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "所有"+ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+"完成提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + "所有" + TASK_CONFIG_NAME + "完成提醒";
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("所有"+ProcessTaskParams.TASKCONFIGNAME.getFreemarkerTemplate()+"已全部完成\n")
+                    .append("所有" + TASK_CONFIG_NAME + "已全部完成\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
         }
