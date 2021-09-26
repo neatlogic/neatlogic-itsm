@@ -20,6 +20,7 @@ import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
 import codedriver.framework.process.exception.processtask.task.*;
+import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
@@ -88,6 +89,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             processTaskStepTaskVo.setStatus(ProcessTaskStatus.PENDING.getValue());
             processTaskStepTaskMapper.insertTask(processTaskStepTaskVo);
             IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.CREATETASK);
+            IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.CREATETASK);
         } else {
             processTaskStepTaskMapper.updateTask(processTaskStepTaskVo);
             //用户删除标记
@@ -95,6 +97,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             //去掉用户删除标记
             processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(), 0);
             IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.EDITTASK);
+            IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.EDITTASK);
         }
         if (CollectionUtils.isNotEmpty(rangeList)) {
             //校验用户是否在配置范围内
@@ -166,7 +169,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
         processTaskStepVo.setParamObj(paramObj);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMPLETETASK);
-
+        IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.DELETETASK);
         if (userContentId == null) {//新增回复
             processTaskStepTaskMapper.updateTaskUserByTaskIdAndUserUuid(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
             ProcessTaskStepTaskUserContentVo contentVo = new ProcessTaskStepTaskUserContentVo(processTaskStepTaskUserVo);

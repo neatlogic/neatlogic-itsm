@@ -18,6 +18,7 @@ import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskNotFoundException;
+import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.*;
@@ -91,6 +92,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
         processTaskStepVo.setParamObj(paramObj);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETETASK);
+        IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.DELETETASK);
         return null;
     }
 }
