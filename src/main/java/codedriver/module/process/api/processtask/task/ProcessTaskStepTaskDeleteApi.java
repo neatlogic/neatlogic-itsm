@@ -70,6 +70,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskStepTaskId = jsonObj.getLong("processTaskStepTaskId");
+        processTaskStepTaskMapper.getStepTaskLockById(processTaskStepTaskId);
         ProcessTaskStepTaskVo stepTaskVo = processTaskStepTaskMapper.getStepTaskDetailById(processTaskStepTaskId);
         if (stepTaskVo == null) {
             throw new ProcessTaskStepTaskNotFoundException(processTaskStepTaskId.toString());

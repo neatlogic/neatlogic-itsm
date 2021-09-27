@@ -90,6 +90,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             processTaskStepTaskVo.setStatus(ProcessTaskStatus.PENDING.getValue());
             processTaskStepTaskMapper.insertTask(processTaskStepTaskVo);
         } else {
+            processTaskStepTaskMapper.getStepTaskLockById(processTaskStepTaskVo.getId());
             processTaskStepTaskMapper.updateTask(processTaskStepTaskVo);
             //用户删除标记
             processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(), 1);
@@ -155,6 +156,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (processTaskStepTaskUserVo == null) {
             throw new ProcessTaskStepTaskUserNotFoundException(id);
         }
+        processTaskStepTaskMapper.getStepTaskLockById(processTaskStepTaskUserVo.getProcessTaskStepTaskId());
         //回复的stepUserId 的用户得和 当前登录用户一致
         if (!Objects.equals(processTaskStepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid())) {
             throw new ProcessTaskStepTaskUserException(processTaskStepTaskUserVo.getId());
