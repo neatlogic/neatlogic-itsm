@@ -24,6 +24,7 @@ import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
+import codedriver.framework.process.task.TaskConfigManager;
 import codedriver.framework.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -57,7 +58,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
     TaskMapper taskMapper;
     @Resource
     private IProcessStepHandlerUtil IProcessStepHandlerUtil;
-
+    @Resource
+    TaskConfigManager taskConfigManager;
 
     /**
      * 创建任务
@@ -154,7 +156,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             throw new ProcessTaskStepTaskUserNotFoundException(id);
         }
         //回复的stepUserId 的用户得和 当前登录用户一致
-        if(!Objects.equals(processTaskStepTaskUserVo.getUserUuid(),UserContext.get().getUserUuid())){
+        if (!Objects.equals(processTaskStepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid())) {
             throw new ProcessTaskStepTaskUserException(processTaskStepTaskUserVo.getId());
         }
         processTaskStepTaskUserVo.setContent(content);
@@ -179,9 +181,29 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
         processTaskStepVo.setParamObj(paramObj);
+        processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
+        stepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdListAndUserUuid(Collections.singletonList(stepTaskVo.getId()), UserContext.get().getUserUuid()));
+        stepTaskVo.setTaskStepTaskUserContent(content);
+        //判断满足任务流转条件，触发通知
+        List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskWithUserByProcessTaskStepId(stepTaskVo.getProcessTaskStepId());
+        if (CollectionUtils.isNotEmpty(stepTaskVoList)) {
+            boolean isCanStepComplete = true;
+            for (ProcessTaskStepTaskVo stepTask : stepTaskVoList) {
+                TaskConfigManager.Action<ProcessTaskStepTaskVo> action = taskConfigManager.getConfigMap().get(stepTaskVo.getTaskConfigPolicy());
+                if (action != null && !action.execute(stepTask)) {
+                    isCanStepComplete = false;
+                    break;
+                }
+            }
+            if (isCanStepComplete) {
+                IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.COMPLETEALLTASK);
+            }
+        }
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMPLETETASK);
-        IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.DELETETASK);
-        if (userContentId == null) {//新增回复
+        IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.COMPLETETASK);
+
+        //新增回复
+        if (userContentId == null) {
             processTaskStepTaskMapper.updateTaskUserByTaskIdAndUserUuid(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
             ProcessTaskStepTaskUserContentVo contentVo = new ProcessTaskStepTaskUserContentVo(processTaskStepTaskUserVo);
             processTaskStepTaskMapper.insertTaskUserContent(contentVo);
@@ -196,8 +218,6 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             processTaskStepTaskMapper.updateTaskUserContent(userContentId, processTaskStepTaskUserVo.getContentHash(), UserContext.get().getUserUuid());
             return processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId();
         }
-
-
     }
 
     /**

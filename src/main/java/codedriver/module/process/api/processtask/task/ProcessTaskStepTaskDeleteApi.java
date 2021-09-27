@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 
 /**
  * @author lvzk
@@ -83,14 +84,15 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
+        stepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(stepTaskVo.getId())));
         processTaskStepTaskMapper.deleteTaskById(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserByTaskId(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserContentByTaskId(processTaskStepTaskId);
-        //TODO 通知
         //活动参数
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
         processTaskStepVo.setParamObj(paramObj);
+        processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETETASK);
         IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.DELETETASK);
         return null;

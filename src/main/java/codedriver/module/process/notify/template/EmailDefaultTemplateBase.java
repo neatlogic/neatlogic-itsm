@@ -783,7 +783,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         public String getContent() {
             return new StringBuilder()
                     .append(TASK_WORKER + "完成" + TASK_CONFIG_NAME + "\n")
-                    .append("内容:" + TASK_CONTENT + "\n")
+                    .append("回复:" + TASK_USER_CONTENT + "\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
         }
@@ -804,13 +804,13 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + "所有" + TASK_CONFIG_NAME + "完成提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + "所有任务已满足完成条件提醒";
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append("所有" + TASK_CONFIG_NAME + "已全部完成\n")
+                    .append("所有任务已满足完成条件\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
         }
