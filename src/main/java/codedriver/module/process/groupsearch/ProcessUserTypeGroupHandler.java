@@ -37,6 +37,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
     @Override
     public <T> List<T> search(JSONObject jsonObj) {
         List<Object> includeList = jsonObj.getJSONArray("includeList");
+        List<Object> excludeList = jsonObj.getJSONArray("excludeList");
         if (CollectionUtils.isEmpty(includeList)) {
             includeList = new ArrayList<Object>();
         }
@@ -53,12 +54,14 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
             }
         }
         //任务
-        TaskConfigVo configParam = new TaskConfigVo();
-        configParam.setKeyword(jsonObj.getString("keyword"));
-        List<TaskConfigVo> taskConfigVoList = taskMapper.searchTaskConfig(configParam);
-        if (CollectionUtils.isNotEmpty(taskConfigVoList)) {
-            for (TaskConfigVo configVo : taskConfigVoList) {
-                userTypeList.add(new ValueTextVo(getHeader() + configVo.getId().toString(), configVo.getName() + "处理人"));
+        if(!excludeList.contains("processUserType#"+ProcessUserType.MINOR.getValue())) {
+            TaskConfigVo configParam = new TaskConfigVo();
+            configParam.setKeyword(jsonObj.getString("keyword"));
+            List<TaskConfigVo> taskConfigVoList = taskMapper.searchTaskConfig(configParam);
+            if (CollectionUtils.isNotEmpty(taskConfigVoList)) {
+                for (TaskConfigVo configVo : taskConfigVoList) {
+                    userTypeList.add(new ValueTextVo(getHeader() + configVo.getId().toString(), configVo.getName() + "处理人"));
+                }
             }
         }
         return (List<T>) userTypeList;
