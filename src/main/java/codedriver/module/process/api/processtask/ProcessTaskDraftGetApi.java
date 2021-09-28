@@ -108,7 +108,8 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
             return getProcessTaskVoByCopyProcessTaskId(copyProcessTaskId);
         } else if (channelUuid != null) {
             Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
-            return getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId);
+            Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
+            return getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, channelTypeRelationId);
         } else {
             throw new ParamNotExistsException("processTaskId", "copyProcessTaskId", "channelUuid");
         }
@@ -198,7 +199,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     private ProcessTaskVo getProcessTaskVoByCopyProcessTaskId(Long copyProcessTaskId) throws Exception {
         ProcessTaskVo oldProcessTaskVo = processTaskService.checkProcessTaskParamsIsLegal(copyProcessTaskId);
-        ProcessTaskVo processTaskVo = getProcessTaskVoByChannelUuid(oldProcessTaskVo.getChannelUuid(), null);
+        ProcessTaskVo processTaskVo = getProcessTaskVoByChannelUuid(oldProcessTaskVo.getChannelUuid(), null, null);
 
         processTaskVo.setTitle(oldProcessTaskVo.getTitle());
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(oldProcessTaskVo.getChannelUuid());
@@ -226,7 +227,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         return processTaskVo;
     }
 
-    private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid, Long fromProcessTaskId) throws PermissionDeniedException {
+    private ProcessTaskVo getProcessTaskVoByChannelUuid(String channelUuid, Long fromProcessTaskId, Long channelTypeRelationId) throws PermissionDeniedException {
         ChannelVo channel = channelMapper.getChannelByUuid(channelUuid);
         if (channel == null) {
             throw new ChannelNotFoundException(channelUuid);
@@ -283,15 +284,15 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         processTaskService.setProcessTaskFormInfo(processTaskVo);
         if (fromProcessTaskId != null) {
             ProcessTaskVo fromProcessTaskVo = processTaskService.getFromProcessTaskById(fromProcessTaskId);
-            JSONObject channelConfig = channel.getConfig();
-            if (MapUtils.isNotEmpty(channelConfig)) {
-                Integer isUsePreOwner = channelConfig.getInteger("isUsePreOwner");
-                if (Objects.equals(isUsePreOwner, 1)) {
-                    String owner = fromProcessTaskVo.getOwner();
-                    if (StringUtils.isNotBlank(owner)) {
-                        owner = GroupSearch.USER.getValuePlugin() + owner;
-                        processTaskVo.setOwner(owner);
-                    }
+            ChannelRelationVo channelRelationVo = new ChannelRelationVo();
+            channelRelationVo.setSource(fromProcessTaskVo.getChannelUuid());
+            channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
+            Integer isUsePreOwner = channelMapper.getChannelRelationIsUsePreOwnerBySourceAndChannelTypeRelationId(channelRelationVo);
+            if (Objects.equals(isUsePreOwner, 1)) {
+                String owner = fromProcessTaskVo.getOwner();
+                if (StringUtils.isNotBlank(owner)) {
+                    owner = GroupSearch.USER.getValuePlugin() + owner;
+                    processTaskVo.setOwner(owner);
                 }
             }
             processTaskVo.getTranferReportProcessTaskList().add(fromProcessTaskVo);
