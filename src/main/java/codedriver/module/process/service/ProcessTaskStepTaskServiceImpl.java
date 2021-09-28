@@ -79,7 +79,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             throw new ProcessTaskStepTaskConfigIllegalException(processTaskStepTaskVo.getTaskConfigId().toString());
         }
         //判断人数是否合法
-        if(processTaskStepTaskVo.getUserList() == null || taskConfigVo.getNum() < processTaskStepTaskVo.getUserList().size()){
+        if(processTaskStepTaskVo.getUserList() == null || ( taskConfigVo.getNum() != -1 && taskConfigVo.getNum() < processTaskStepTaskVo.getUserList().size())){
             throw new ProcessTaskStepTaskUserCountIllegalException(taskConfigVo.getNum());
         }
         processTaskStepTaskVo.setTaskConfigId(processTaskStepTaskVo.getTaskConfigId());
