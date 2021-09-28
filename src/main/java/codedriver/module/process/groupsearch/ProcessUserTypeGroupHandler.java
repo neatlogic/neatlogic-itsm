@@ -54,7 +54,7 @@ public class ProcessUserTypeGroupHandler implements IGroupSearchHandler {
             }
         }
         //任务
-        if(!excludeList.contains("processUserType#"+ProcessUserType.MINOR.getValue())) {
+        if (CollectionUtils.isNotEmpty(excludeList) && !excludeList.contains("processUserType#" + ProcessUserType.MINOR.getValue())) {
             TaskConfigVo configParam = new TaskConfigVo();
             configParam.setKeyword(jsonObj.getString("keyword"));
             List<TaskConfigVo> taskConfigVoList = taskMapper.searchTaskConfig(configParam);

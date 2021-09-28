@@ -8,7 +8,6 @@ package codedriver.module.process.api.processtask.task;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.process.auth.PROCESS_BASE;
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepTaskUserVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -29,9 +28,6 @@ import javax.annotation.Resource;
 @OperationType(type = OperationTypeEnum.OPERATE)
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskStepTaskCompleteApi extends PrivateApiComponentBase {
-    @Resource
-    ProcessTaskMapper processTaskMapper;
-
     @Resource
     ProcessTaskStepTaskService processTaskStepTaskService;
 

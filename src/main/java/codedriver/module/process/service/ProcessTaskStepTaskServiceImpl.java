@@ -79,7 +79,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             throw new ProcessTaskStepTaskConfigIllegalException(processTaskStepTaskVo.getTaskConfigId().toString());
         }
         //判断人数是否合法
-        if(processTaskStepTaskVo.getUserList() == null || ( taskConfigVo.getNum() != -1 && taskConfigVo.getNum() < processTaskStepTaskVo.getUserList().size())){
+        if(processTaskStepTaskVo.getUserList() == null || ( taskConfigVo.getNum() != -1 && taskConfigVo.getNum() !=  processTaskStepTaskVo.getUserList().size())){
             throw new ProcessTaskStepTaskUserCountIllegalException(taskConfigVo.getNum());
         }
         processTaskStepTaskVo.setTaskConfigId(processTaskStepTaskVo.getTaskConfigId());
@@ -131,9 +131,10 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
      * @param processTaskStepVo     步骤入参
      * @param processTaskStepTaskVo 步骤任务入参
      */
-    private void refreshWorker(ProcessTaskStepVo processTaskStepVo, ProcessTaskStepTaskVo processTaskStepTaskVo) {
+    @Override
+    public void refreshWorker(ProcessTaskStepVo processTaskStepVo, ProcessTaskStepTaskVo processTaskStepTaskVo) {
         //删除该step的所有minor工单步骤worker
-        processTaskMapper.deleteProcessTaskStepWorkerMinorByProcessTaskStepId(processTaskStepTaskVo.getId());
+        processTaskMapper.deleteProcessTaskStepWorkerMinorByProcessTaskStepId(processTaskStepVo.getId());
         //重新更新每个模块的minor worker
         for (IProcessStepHandler handler : ProcessStepHandlerFactory.getHandlerList()) {
             handler.insertMinorWorkerList(processTaskStepVo);

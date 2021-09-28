@@ -24,6 +24,7 @@ import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.process.service.ProcessTaskStepTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,8 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
     ProcessTaskMapper processTaskMapper;
     @Resource
     IProcessStepHandlerUtil IProcessStepHandlerUtil;
+    @Resource
+    ProcessTaskStepTaskService processTaskStepTaskService;
 
     @Override
     public String getToken() {
@@ -92,6 +95,8 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         processTaskStepTaskMapper.deleteTaskById(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserByTaskId(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserContentByTaskId(processTaskStepTaskId);
+
+        processTaskStepTaskService.refreshWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskId));
         //活动参数
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
