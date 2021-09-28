@@ -285,7 +285,7 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         if (fromProcessTaskId != null) {
             ProcessTaskVo fromProcessTaskVo = processTaskService.getFromProcessTaskById(fromProcessTaskId);
             ChannelRelationVo channelRelationVo = new ChannelRelationVo();
-            channelRelationVo.setSource(fromProcessTaskVo.getSource());
+            channelRelationVo.setSource(fromProcessTaskVo.getChannelUuid());
             channelRelationVo.setChannelTypeRelationId(channelTypeRelationId);
             Integer isUsePreOwner = channelMapper.getChannelRelationIsUsePreOwnerBySourceAndChannelTypeRelationId(channelRelationVo);
             if (Objects.equals(isUsePreOwner, 1)) {
