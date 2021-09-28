@@ -85,6 +85,9 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
+        // 锁定当前流程
+        processTaskMapper.getProcessTaskLockById(processTaskStepVo.getProcessTaskId());
+
         stepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(stepTaskVo.getId())));
         processTaskStepTaskMapper.deleteTaskById(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserByTaskId(processTaskStepTaskId);

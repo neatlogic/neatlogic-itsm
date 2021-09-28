@@ -1,12 +1,5 @@
 package codedriver.module.process.workcenter.column.handler;
 
-import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.RoleVo;
-import codedriver.framework.dto.TeamVo;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -15,31 +8,23 @@ import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
-import codedriver.framework.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSON;
+import codedriver.module.process.service.NewWorkcenterService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implements IProcessTaskColumn{
 	@Resource
-	UserMapper userMapper;
-	@Resource
-	RoleMapper roleMapper;
-	@Resource
-	TeamMapper teamMapper;
-	@Resource
-	ProcessTaskService processTaskService;
+	private NewWorkcenterService newWorkcenterService;
 	@Override
 	public String getName() {
 		return "currentstep";
@@ -227,50 +212,24 @@ public class ProcessTaskCurrentStepColumn extends ProcessTaskColumnBase implemen
 					currentStepStatusJson.put("color", ProcessTaskStatus.getColor(stepVo.getStatus()));
 					currentStepJson.put("status",currentStepStatusJson);
 
-					//补充处理人信息
+					//查询其它步骤handler minorList
 					JSONArray workerArray = new JSONArray();
-					for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
-						JSONObject workerJson = new JSONObject();
-						if ("changehandle".equals(stepVo.getHandler())
-								&& ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
-							workerJson.put("workTypename", "变更步骤");
-						} else if (ProcessUserType.MINOR.getValue().equals(workerVo.getUserType())) {
-							workerJson.put("workTypename", "子任务");
-							//子任务文案映射
-							JSONArray replaceTextArray = processTaskService.getReplaceableTextList(stepVo);
-							for(int i=0;i<replaceTextArray.size();i++){
-								JSONObject replaceText = replaceTextArray.getJSONObject(i);
-								if(Objects.equals(replaceText.getString("text"),"子任务") && StringUtils.isNotBlank(replaceText.getString("value"))){
-									workerJson.put("workTypename", replaceText.getString("value"));
-									break;
-								}
-							}
-						}
-						if (GroupSearch.USER.getValue().equals(workerVo.getType())) {
-							UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
-							if (userVo != null) {
-								workerJson.put("workerVo", JSON.parseObject(JSONObject.toJSONString(userVo)));
-								workerArray.add(workerJson);
-							}
-						} else if (GroupSearch.TEAM.getValue().equals(workerVo.getType())) {
-							TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
-							if (teamVo != null) {
-								JSONObject teamTmp = new JSONObject();
-								teamTmp.put("initType", GroupSearch.TEAM.getValue());
-								teamTmp.put("uuid", teamVo.getUuid());
-								teamTmp.put("name", teamVo.getName());
-								workerJson.put("workerVo", teamTmp);
-								workerArray.add(workerJson);
-							}
-						} else {
-							RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
-							if (roleVo != null) {
-								JSONObject roleTmp = new JSONObject();
-								roleTmp.put("initType", GroupSearch.ROLE.getValue());
-								roleTmp.put("uuid", roleVo.getUuid());
-								roleTmp.put("name", roleVo.getName());
-								workerJson.put("workerVo", roleTmp);
-								workerArray.add(workerJson);
+					Map<Long,List<ProcessTaskStepWorkerVo>> stepMinorWorkerListMap = new HashMap<>();
+					List<IProcessStepHandler>  handlerList = ProcessStepHandlerFactory.getHandlerList();
+					for(IProcessStepHandler stepHandler : handlerList) {
+						stepMinorWorkerListMap.put(stepVo.getId(),stepHandler.getMinorWorkerList(stepVo));
+					}
+					if (ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
+							ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
+							ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1
+					) {
+						for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
+							if (Objects.equals(workerVo.getUserType(), ProcessUserType.MAJOR.getValue())) {
+								JSONObject workerJson = new JSONObject();
+								newWorkcenterService.getWorkerInfo(workerVo, workerJson, workerArray);
+							} else {
+								newWorkcenterService.stepTaskWorker(workerVo, stepVo, workerArray);
+								newWorkcenterService.otherWorker(workerVo, stepVo, workerArray,stepMinorWorkerListMap);
 							}
 						}
 					}

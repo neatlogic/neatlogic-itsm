@@ -1,6 +1,8 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.process.column.core.IProcessTaskColumn;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
@@ -34,6 +36,7 @@ public interface NewWorkcenterService {
 
     /**
      * 根据工单号查询工单信息  目前主要用于单个工单刷新
+     *
      * @param processtaskId 工单号
      * @return json格式工单操作信息
      * @throws ParseException 转换异常
@@ -78,4 +81,30 @@ public interface NewWorkcenterService {
      **/
     public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList);
 
+    /**
+     * 任务处理人
+     *
+     * @param workerVo    处理人
+     * @param stepVo      工单步骤
+     * @param workerArray 处理人数组
+     */
+    void stepTaskWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray);
+
+    /**
+     * 其它模块协助处理人
+     *
+     * @param workerVo    处理人
+     * @param stepVo      工单步骤
+     * @param workerArray 处理人数组
+     */
+    void otherWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerMap);
+
+    /**
+     * 拼凑处理人column数据
+     *
+     * @param workerVo    处理人
+     * @param workerJson  处理人json
+     * @param workerArray 处理人数组
+     */
+    void getWorkerInfo(ProcessTaskStepWorkerVo workerVo, JSONObject workerJson, JSONArray workerArray);
 }

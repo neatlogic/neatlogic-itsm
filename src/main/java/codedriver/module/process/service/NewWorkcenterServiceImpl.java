@@ -2,9 +2,17 @@ package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleVo;
+import codedriver.framework.dto.TeamVo;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
@@ -12,18 +20,20 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import codedriver.framework.process.dao.mapper.workcenter.WorkcenterMapper;
-import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.dto.*;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
+import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
 import codedriver.framework.util.Md5Util;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.module.process.workcenter.core.SqlBuilder;
 import codedriver.module.process.workcenter.operate.WorkcenterOperateBuilder;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,6 +71,15 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     @Resource
     ProcessTaskMapper processTaskMapper;
+
+    @Resource
+    UserMapper userMapper;
+    @Resource
+    RoleMapper roleMapper;
+    @Resource
+    TeamMapper teamMapper;
+    @Resource
+    ProcessTaskStepTaskMapper processTaskStepTaskMapper;
 
     @Override
     public JSONObject doSearch(WorkcenterVo workcenterVo) {
@@ -435,6 +454,81 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             returnArray.add(titleObj);
         }
         return returnArray;
+    }
+
+    /**
+     * 任务处理人
+     * @param workerVo 处理人
+     * @param stepVo 工单步骤
+     * @param workerArray 处理人数组
+     */
+    @Override
+    public void stepTaskWorker(ProcessTaskStepWorkerVo workerVo,ProcessTaskStepVo stepVo,JSONArray workerArray){
+        if(Objects.equals(workerVo.getType(),GroupSearch.USER.getValue())) {
+            List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskWithUserByProcessTaskStepId(stepVo.getId());
+            for (ProcessTaskStepTaskVo stepTaskVo : stepTaskVoList) {
+                for (ProcessTaskStepTaskUserVo userVo : stepTaskVo.getStepTaskUserVoList()) {
+                    if (Objects.equals(userVo.getUserUuid(), workerVo.getUuid())){
+                        JSONObject workerJson = new JSONObject();
+                        workerJson.put("workTypename", stepTaskVo.getTaskConfigName());
+                        getWorkerInfo( workerVo,  workerJson , workerArray);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 其它模块协助处理人
+     * @param workerVo 处理人
+     * @param stepVo 工单步骤
+     * @param workerArray 处理人数组
+     */
+    @Override
+    public void otherWorker(ProcessTaskStepWorkerVo workerVo,ProcessTaskStepVo stepVo,JSONArray workerArray,Map<Long,List<ProcessTaskStepWorkerVo>> stepMinorWorkerMap){
+        List<IProcessStepHandler>  handlerList = ProcessStepHandlerFactory.getHandlerList();
+        for(IProcessStepHandler stepHandler : handlerList){
+            if(Objects.equals(stepHandler.getHandler(),stepVo.getHandler())){
+                List<ProcessTaskStepWorkerVo> workerVoList = stepMinorWorkerMap.get(stepVo.getId());
+                if (CollectionUtils.isNotEmpty(workerVoList)) {
+                    if (workerVoList.stream().anyMatch(w -> Objects.equals(workerVo.getUuid(), w.getUuid()))) {
+                        JSONObject workerJson = new JSONObject();
+                        workerJson.put("workTypename", stepHandler.getMinorName());
+                        getWorkerInfo(workerVo, workerJson, workerArray);
+                    }
+                }
+            }
+        }
+    }
+    @Override
+    public void getWorkerInfo(ProcessTaskStepWorkerVo workerVo, JSONObject workerJson , JSONArray workerArray){
+        if (GroupSearch.USER.getValue().equals(workerVo.getType())) {
+            UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
+            if (userVo != null) {
+                workerJson.put("workerVo", JSON.parseObject(JSONObject.toJSONString(userVo)));
+                workerArray.add(workerJson);
+            }
+        } else if (GroupSearch.TEAM.getValue().equals(workerVo.getType())) {
+            TeamVo teamVo = teamMapper.getTeamByUuid(workerVo.getUuid());
+            if (teamVo != null) {
+                JSONObject teamTmp = new JSONObject();
+                teamTmp.put("initType", GroupSearch.TEAM.getValue());
+                teamTmp.put("uuid", teamVo.getUuid());
+                teamTmp.put("name", teamVo.getName());
+                workerJson.put("workerVo", teamTmp);
+                workerArray.add(workerJson);
+            }
+        } else {
+            RoleVo roleVo = roleMapper.getRoleByUuid(workerVo.getUuid());
+            if (roleVo != null) {
+                JSONObject roleTmp = new JSONObject();
+                roleTmp.put("initType", GroupSearch.ROLE.getValue());
+                roleTmp.put("uuid", roleVo.getUuid());
+                roleTmp.put("name", roleVo.getName());
+                workerJson.put("workerVo", roleTmp);
+                workerArray.add(workerJson);
+            }
+        }
     }
 
     public static void main(String[] args) {

@@ -78,7 +78,12 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (!taskConfigIdList.contains(processTaskStepTaskVo.getTaskConfigId()) || taskConfigVo == null) {
             throw new ProcessTaskStepTaskConfigIllegalException(processTaskStepTaskVo.getTaskConfigId().toString());
         }
+        //判断人数是否合法
+        if(processTaskStepTaskVo.getUserList() == null || taskConfigVo.getNum() < processTaskStepTaskVo.getUserList().size()){
+            throw new ProcessTaskStepTaskUserCountIllegalException(taskConfigVo.getNum());
+        }
         processTaskStepTaskVo.setTaskConfigId(processTaskStepTaskVo.getTaskConfigId());
+        //content
         ProcessTaskContentVo processTaskContentVo = new ProcessTaskContentVo(processTaskStepTaskVo.getContent());
         processTaskMapper.insertIgnoreProcessTaskContent(processTaskContentVo);
         processTaskStepTaskVo.setContentHash(processTaskContentVo.getHash());
@@ -90,7 +95,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             processTaskStepTaskVo.setStatus(ProcessTaskStatus.PENDING.getValue());
             processTaskStepTaskMapper.insertTask(processTaskStepTaskVo);
         } else {
-            processTaskStepTaskMapper.getStepTaskLockById(processTaskStepTaskVo.getId());
+            //processTaskStepTaskMapper.getStepTaskLockById(processTaskStepTaskVo.getId());
             processTaskStepTaskMapper.updateTask(processTaskStepTaskVo);
             //用户删除标记
             processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(), 1);
@@ -156,7 +161,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (processTaskStepTaskUserVo == null) {
             throw new ProcessTaskStepTaskUserNotFoundException(id);
         }
-        processTaskStepTaskMapper.getStepTaskLockById(processTaskStepTaskUserVo.getProcessTaskStepTaskId());
+        //processTaskStepTaskMapper.getStepTaskLockById(processTaskStepTaskUserVo.getProcessTaskStepTaskId());
         //回复的stepUserId 的用户得和 当前登录用户一致
         if (!Objects.equals(processTaskStepTaskUserVo.getUserUuid(), UserContext.get().getUserUuid())) {
             throw new ProcessTaskStepTaskUserException(processTaskStepTaskUserVo.getId());
@@ -170,6 +175,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         if (processTaskStepVo == null) {
             throw new ProcessTaskStepNotFoundException(stepTaskVo.getProcessTaskStepId().toString());
         }
+        // 锁定当前流程
+        processTaskMapper.getProcessTaskLockById(processTaskStepVo.getProcessTaskId());
         if (!Objects.equals(ProcessTaskStatus.RUNNING.getValue(), processTaskStepVo.getStatus())) {
             throw new ProcessTaskStepUnRunningException();
         }
