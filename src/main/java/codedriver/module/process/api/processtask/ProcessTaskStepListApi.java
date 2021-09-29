@@ -20,7 +20,6 @@ import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerF
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import codedriver.module.process.service.ProcessTaskStepTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -45,8 +44,8 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     @Autowired
     ProcessTaskStepDataMapper processTaskStepDataMapper;
 
-    @Autowired
-    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
+//    @Autowired
+//    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
     @Resource
     private ProcessTaskStepTaskService processTaskStepTaskService;
@@ -166,15 +165,15 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         startProcessTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(
             startProcessTaskStepVo.getId(), Arrays.asList(ProcessTaskOperationType.STEP_COMMENT.getValue())));
         // 子任务列表
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService
-            .getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId());
-        for (ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-            processTaskStepSubtask.setIsAbortable(0);
-            processTaskStepSubtask.setIsCompletable(0);
-            processTaskStepSubtask.setIsEditable(0);
-            processTaskStepSubtask.setIsRedoable(0);
-        }
-        startProcessTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
+//        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService
+//            .getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId());
+//        for (ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+//            processTaskStepSubtask.setIsAbortable(0);
+//            processTaskStepSubtask.setIsCompletable(0);
+//            processTaskStepSubtask.setIsEditable(0);
+//            processTaskStepSubtask.setIsRedoable(0);
+//        }
+//        startProcessTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
         startProcessTaskStepVo.setIsView(1);
         return startProcessTaskStepVo;
     }
@@ -200,15 +199,15 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         processTaskStepVo.setCommentList(
             processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId(), typeList));
         // 子任务列表
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList =
-            processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId());
-        for (ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-            processTaskStepSubtask.setIsAbortable(0);
-            processTaskStepSubtask.setIsCompletable(0);
-            processTaskStepSubtask.setIsEditable(0);
-            processTaskStepSubtask.setIsRedoable(0);
-        }
-        processTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
+//        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList =
+//            processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId());
+//        for (ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+//            processTaskStepSubtask.setIsAbortable(0);
+//            processTaskStepSubtask.setIsCompletable(0);
+//            processTaskStepSubtask.setIsEditable(0);
+//            processTaskStepSubtask.setIsRedoable(0);
+//        }
+//        processTaskStepVo.setProcessTaskStepSubtaskList(processTaskStepSubtaskList);
 
         //任务列表
         processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);

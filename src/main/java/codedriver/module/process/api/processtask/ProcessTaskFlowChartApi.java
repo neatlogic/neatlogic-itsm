@@ -98,7 +98,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
                     processTaskStepVo.setForwardNextStepList(null);
                     processTaskStepVo.setIsCurrentUserDone(null);
                     processTaskStepVo.setProcessTaskStepRemindList(null);
-                    processTaskStepVo.setProcessTaskStepSubtaskList(null);
+//                    processTaskStepVo.setProcessTaskStepSubtaskList(null);
                     processTaskStepVo.setSlaTimeList(null);
                     processTaskStepVo.setUserList(null);
                     processTaskStepVo.setWorkerPolicyList(null);
@@ -136,7 +136,7 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             processTaskStepVo.setForwardNextStepList(null);
             processTaskStepVo.setIsCurrentUserDone(null);
             processTaskStepVo.setProcessTaskStepRemindList(null);
-            processTaskStepVo.setProcessTaskStepSubtaskList(null);
+//            processTaskStepVo.setProcessTaskStepSubtaskList(null);
             processTaskStepVo.setSlaTimeList(null);
             processTaskStepVo.setUserList(null);
             processTaskStepVo.setWorkerPolicyList(null);

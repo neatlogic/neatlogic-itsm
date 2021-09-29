@@ -277,15 +277,15 @@ public class StepOperateHandler extends OperationAuthHandlerBase {
          * 判断userUuid用户是否有步骤创建子任务权限逻辑：
          * 首先步骤状态是“处理中”，然后userUuid用户是步骤的处理人
          */
-        operationBiPredicateMap.put(ProcessTaskOperationType.SUBTASK_CREATE,
-            (processTaskVo, processTaskStepVo, userUuid) -> {
-                if(processTaskVo.getIsShow() == 1) {
-                    if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-                        return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
-                    }
-                }
-                return false;
-            });
+//        operationBiPredicateMap.put(ProcessTaskOperationType.SUBTASK_CREATE,
+//            (processTaskVo, processTaskStepVo, userUuid) -> {
+//                if(processTaskVo.getIsShow() == 1) {
+//                    if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+//                        return checkIsProcessTaskStepUser(processTaskStepVo, ProcessUserType.MAJOR.getValue(), userUuid);
+//                    }
+//                }
+//                return false;
+//            });
 
         /**
          * 步骤创建任务权限

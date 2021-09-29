@@ -3,7 +3,6 @@ package codedriver.module.process.stephandler.utilhandler;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.*;
-import codedriver.framework.process.dao.mapper.ProcessTaskStepSubtaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.dto.processconfig.ActionConfigActionVo;
 import codedriver.framework.process.dto.processconfig.ActionConfigVo;
@@ -17,7 +16,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -26,8 +24,8 @@ import java.util.*;
 public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase {
 
 
-    @Autowired
-    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
+//    @Autowired
+//    private ProcessTaskStepSubtaskMapper processTaskStepSubtaskMapper;
 
     @Override
     public String getHandler() {
@@ -118,14 +116,14 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         /* 查出processtask_step_subtask表中当前步骤子任务处理人列表 */
         Set<String> runningSubtaskUserUuidSet = new HashSet<>();
         Set<String> succeedSubtaskUserUuidSet = new HashSet<>();
-        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
-        for (ProcessTaskStepSubtaskVo subtaskVo : processTaskStepSubtaskList) {
-            if (ProcessTaskStatus.RUNNING.getValue().equals(subtaskVo.getStatus())) {
-                runningSubtaskUserUuidSet.add(subtaskVo.getUserUuid());
-            } else if (ProcessTaskStatus.SUCCEED.getValue().equals(subtaskVo.getStatus())) {
-                succeedSubtaskUserUuidSet.add(subtaskVo.getUserUuid());
-            }
-        }
+//        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+//        for (ProcessTaskStepSubtaskVo subtaskVo : processTaskStepSubtaskList) {
+//            if (ProcessTaskStatus.RUNNING.getValue().equals(subtaskVo.getStatus())) {
+//                runningSubtaskUserUuidSet.add(subtaskVo.getUserUuid());
+//            } else if (ProcessTaskStatus.SUCCEED.getValue().equals(subtaskVo.getStatus())) {
+//                succeedSubtaskUserUuidSet.add(subtaskVo.getUserUuid());
+//            }
+//        }
 
         /* 查出processtask_step_worker表中当前步骤子任务处理人列表 */
         Set<String> workerMinorUserUuidSet = new HashSet<>();
@@ -234,19 +232,19 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
                 ProcessTaskOperationType.PROCESSTASK_RECOVER
         };
         /* 子任务按钮映射列表 */
-        ProcessTaskOperationType[] subtaskButtons = {
-                ProcessTaskOperationType.SUBTASK_ABORT,
-                ProcessTaskOperationType.SUBTASK_COMMENT,
-                ProcessTaskOperationType.SUBTASK_COMPLETE,
-                ProcessTaskOperationType.SUBTASK_CREATE,
-                ProcessTaskOperationType.SUBTASK_REDO,
-                ProcessTaskOperationType.SUBTASK_EDIT
-        };
+//        ProcessTaskOperationType[] subtaskButtons = {
+//                ProcessTaskOperationType.SUBTASK_ABORT,
+//                ProcessTaskOperationType.SUBTASK_COMMENT,
+//                ProcessTaskOperationType.SUBTASK_COMPLETE,
+//                ProcessTaskOperationType.SUBTASK_CREATE,
+//                ProcessTaskOperationType.SUBTASK_REDO,
+//                ProcessTaskOperationType.SUBTASK_EDIT
+//        };
 
         JSONArray customButtonList = configObj.getJSONArray("customButtonList");
         JSONArray customButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, stepButtons);
-        JSONArray subtaskCustomButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, subtaskButtons, "子任务");
-        customButtonArray.addAll(subtaskCustomButtonArray);
+//        JSONArray subtaskCustomButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, subtaskButtons, "子任务");
+//        customButtonArray.addAll(subtaskCustomButtonArray);
         resultObj.put("customButtonList", customButtonArray);
 
         /* 状态映射列表 */
@@ -328,17 +326,17 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         };
 
         /** 子任务按钮映射列表 **/
-        ProcessTaskOperationType[] subtaskButtons = {
-                ProcessTaskOperationType.SUBTASK_ABORT,
-                ProcessTaskOperationType.SUBTASK_COMMENT,
-                ProcessTaskOperationType.SUBTASK_COMPLETE,
-                ProcessTaskOperationType.SUBTASK_CREATE,
-                ProcessTaskOperationType.SUBTASK_REDO,
-                ProcessTaskOperationType.SUBTASK_EDIT
-        };
+//        ProcessTaskOperationType[] subtaskButtons = {
+//                ProcessTaskOperationType.SUBTASK_ABORT,
+//                ProcessTaskOperationType.SUBTASK_COMMENT,
+//                ProcessTaskOperationType.SUBTASK_COMPLETE,
+//                ProcessTaskOperationType.SUBTASK_CREATE,
+//                ProcessTaskOperationType.SUBTASK_REDO,
+//                ProcessTaskOperationType.SUBTASK_EDIT
+//        };
         JSONArray customButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, stepButtons);
-        JSONArray subtaskCustomButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, subtaskButtons, "子任务");
-        customButtonArray.addAll(subtaskCustomButtonArray);
+//        JSONArray subtaskCustomButtonArray = ProcessConfigUtil.regulateCustomButtonList(customButtonList, subtaskButtons, "子任务");
+//        customButtonArray.addAll(subtaskCustomButtonArray);
         resultObj.put("customButtonList", customButtonArray);
         /** 状态映射列表 **/
         JSONArray customStatusList = configObj.getJSONArray("customStatusList");
