@@ -97,6 +97,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         processTaskStepTaskMapper.deleteTaskUserContentByTaskId(processTaskStepTaskId);
 
         processTaskService.refreshStepMinorWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskId));
+        processTaskService.refreshStepMinorUser(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskId));
         //活动参数
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());

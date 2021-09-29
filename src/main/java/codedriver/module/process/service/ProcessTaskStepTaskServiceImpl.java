@@ -111,7 +111,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             processTaskStepTaskMapper.insertIgnoreTaskUser(new ProcessTaskStepTaskUserVo(processTaskStepTaskVo.getId(), t, ProcessTaskStatus.PENDING.getValue()));
         });
         processTaskService.refreshStepMinorWorker(processTaskStepVo, processTaskStepTaskVo);
-
+        processTaskService.refreshStepMinorUser(processTaskStepVo, processTaskStepTaskVo);
 
         //活动参数
         JSONObject paramObj = new JSONObject();
@@ -191,21 +191,26 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.COMPLETETASK);
 
         //新增回复
+        Long processTaskStepTaskUserContentId;
+        processTaskStepTaskMapper.updateTaskUserByTaskIdAndUserUuid(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
         if (userContentId == null) {
-            processTaskStepTaskMapper.updateTaskUserByTaskIdAndUserUuid(ProcessTaskStatus.SUCCEED.getValue(), processTaskStepTaskUserVo.getProcessTaskStepTaskId(), processTaskStepTaskUserVo.getUserUuid());
             ProcessTaskStepTaskUserContentVo contentVo = new ProcessTaskStepTaskUserContentVo(processTaskStepTaskUserVo);
             processTaskStepTaskMapper.insertTaskUserContent(contentVo);
             //刷新worker
             processTaskService.refreshStepMinorWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskUserVo.getProcessTaskStepTaskId()));
-            return contentVo.getId();
+            processTaskStepTaskUserContentId =  contentVo.getId();
         } else {//编辑回复
             ProcessTaskStepTaskUserContentVo userContentVo = processTaskStepTaskMapper.getStepTaskUserContentByIdAndUserUuid(userContentId, UserContext.get().getUserUuid());
             if (userContentVo == null) {
                 throw new ProcessTaskStepTaskUserContentNotFoundException();
             }
             processTaskStepTaskMapper.updateTaskUserContent(userContentId, processTaskStepTaskUserVo.getContentHash(), UserContext.get().getUserUuid());
-            return processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId();
+            processTaskStepTaskUserContentId =  processTaskStepTaskUserVo.getProcessTaskStepTaskUserContentId();
         }
+
+        //跟新stepUser
+        processTaskService.refreshStepMinorUser(processTaskStepVo,stepTaskVo);
+        return processTaskStepTaskUserContentId;
     }
 
     /**
