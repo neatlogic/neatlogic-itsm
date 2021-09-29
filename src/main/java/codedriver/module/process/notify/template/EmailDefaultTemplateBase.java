@@ -509,7 +509,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
     /**
      * 子流程触发点开始
      */
-    @Component
+    //@Component
     public static class CreateSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -521,8 +521,8 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         public String getContent() {
             return new StringBuilder()
                     .append(PROCESSTASK_STEP_WORKER + "为工单步骤" + PROCESSTASK_STEP_NAME + "创建子任务：\n")
-                    .append("内容:" + SUBTASK_CONTENT + "\n")
-                    .append("子任务处理人:" + SUBTASK_WORKER + "\n")
+//                    .append("内容:" + SUBTASK_CONTENT + "\n")
+//                    .append("子任务处理人:" + SUBTASK_WORKER + "\n")
                     .append("期望完成时间:【${DATA.subtaskdeadline}】\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
@@ -539,7 +539,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class EditSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -551,8 +551,8 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         public String getContent() {
             return new StringBuilder()
                     .append(PROCESSTASK_STEP_WORKER + "更新了子任务\n")
-                    .append("内容:" + SUBTASK_CONTENT + "\n")
-                    .append("子任务处理人:" + SUBTASK_WORKER + "\n")
+//                    .append("内容:" + SUBTASK_CONTENT + "\n")
+//                    .append("子任务处理人:" + SUBTASK_WORKER + "\n")
                     .append("期望完成时间:【${DATA.subtaskdeadline}】\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
@@ -569,7 +569,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class AbortSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -581,8 +581,8 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         public String getContent() {
             return new StringBuilder()
                     .append(PROCESSTASK_STEP_WORKER + "取消子任务\n")
-                    .append("内容:" + SUBTASK_CONTENT + "\n")
-                    .append("子任务处理人:" + SUBTASK_WORKER + "\n")
+//                    .append("内容:" + SUBTASK_CONTENT + "\n")
+//                    .append("子任务处理人:" + SUBTASK_WORKER + "\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
         }
@@ -598,7 +598,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class RedoSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -609,8 +609,8 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(PROCESSTASK_STEP_WORKER + "打回子任务给" + SUBTASK_WORKER + "重做\n")
-                    .append("内容:" + SUBTASK_CONTENT + "\n")
+//                    .append(PROCESSTASK_STEP_WORKER + "打回子任务给" + SUBTASK_WORKER + "重做\n")
+//                    .append("内容:" + SUBTASK_CONTENT + "\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
         }
@@ -626,7 +626,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class CompleteSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -637,8 +637,8 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(SUBTASK_WORKER + "完成子任务\n")
-                    .append("内容:" + SUBTASK_CONTENT + "\n")
+//                    .append(SUBTASK_WORKER + "完成子任务\n")
+//                    .append("内容:" + SUBTASK_CONTENT + "\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
         }
@@ -654,7 +654,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class CompleteAllSubtask extends EmailDefaultTemplateBase {
 
         @Override
