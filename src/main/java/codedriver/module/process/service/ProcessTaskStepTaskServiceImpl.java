@@ -6,12 +6,10 @@
 package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
@@ -21,9 +19,8 @@ import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoun
 import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
 import codedriver.framework.process.exception.processtask.task.*;
 import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
+import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.task.TaskConfigManager;
 import codedriver.framework.service.UserService;
 import com.alibaba.fastjson.JSON;
@@ -60,6 +57,8 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
     private IProcessStepHandlerUtil IProcessStepHandlerUtil;
     @Resource
     TaskConfigManager taskConfigManager;
+    @Resource
+    ProcessTaskService processTaskService;
 
     /**
      * 创建任务
@@ -111,7 +110,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         processTaskStepTaskVo.getUserList().forEach(t -> {
             processTaskStepTaskMapper.insertIgnoreTaskUser(new ProcessTaskStepTaskUserVo(processTaskStepTaskVo.getId(), t, ProcessTaskStatus.PENDING.getValue()));
         });
-        refreshWorker(processTaskStepVo, processTaskStepTaskVo);
+        processTaskService.refreshStepMinorWorker(processTaskStepVo, processTaskStepTaskVo);
 
 
         //活动参数
@@ -125,28 +124,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         IProcessStepHandlerUtil.notify(processTaskStepVo, triggerType);
     }
 
-    /**
-     * 刷新worker
-     *
-     * @param processTaskStepVo     步骤入参
-     * @param processTaskStepTaskVo 步骤任务入参
-     */
-    @Override
-    public void refreshWorker(ProcessTaskStepVo processTaskStepVo, ProcessTaskStepTaskVo processTaskStepTaskVo) {
-        //删除该step的所有minor工单步骤worker
-        processTaskMapper.deleteProcessTaskStepWorkerMinorByProcessTaskStepId(processTaskStepVo.getId());
-        //重新更新每个模块的minor worker
-        for (IProcessStepHandler handler : ProcessStepHandlerFactory.getHandlerList()) {
-            handler.insertMinorWorkerList(processTaskStepVo);
-        }
-        //重新插入pending任务用户到 工单步骤worker
-        List<ProcessTaskStepTaskUserVo> taskUserVoList = processTaskStepTaskMapper.getPendingStepTaskUserListByTaskId(processTaskStepTaskVo.getId());
-        for (ProcessTaskStepTaskUserVo taskUserVo : taskUserVoList) {
-            if (taskUserVo.getIsDelete() != 1) {
-                processTaskMapper.insertIgnoreProcessTaskStepWorker(new ProcessTaskStepWorkerVo(processTaskStepVo.getProcessTaskId(), processTaskStepVo.getId(), GroupSearch.USER.getValue(), taskUserVo.getUserUuid(), ProcessUserType.MINOR.getValue()));
-            }
-        }
-    }
+
 
     /**
      * 完成任务
@@ -218,7 +196,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             ProcessTaskStepTaskUserContentVo contentVo = new ProcessTaskStepTaskUserContentVo(processTaskStepTaskUserVo);
             processTaskStepTaskMapper.insertTaskUserContent(contentVo);
             //刷新worker
-            refreshWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskUserVo.getProcessTaskStepTaskId()));
+            processTaskService.refreshStepMinorWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskUserVo.getProcessTaskStepTaskId()));
             return contentVo.getId();
         } else {//编辑回复
             ProcessTaskStepTaskUserContentVo userContentVo = processTaskStepTaskMapper.getStepTaskUserContentByIdAndUserUuid(userContentId, UserContext.get().getUserUuid());

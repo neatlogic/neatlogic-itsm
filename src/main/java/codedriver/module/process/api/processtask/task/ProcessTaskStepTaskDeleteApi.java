@@ -20,11 +20,11 @@ import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoun
 import codedriver.framework.process.exception.processtask.task.ProcessTaskStepTaskNotFoundException;
 import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
+import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.process.service.ProcessTaskStepTaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +48,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
     @Resource
     IProcessStepHandlerUtil IProcessStepHandlerUtil;
     @Resource
-    ProcessTaskStepTaskService processTaskStepTaskService;
+    ProcessTaskService processTaskService;
 
     @Override
     public String getToken() {
@@ -96,7 +96,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         processTaskStepTaskMapper.deleteTaskUserByTaskId(processTaskStepTaskId);
         processTaskStepTaskMapper.deleteTaskUserContentByTaskId(processTaskStepTaskId);
 
-        processTaskStepTaskService.refreshWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskId));
+        processTaskService.refreshStepMinorWorker(processTaskStepVo, new ProcessTaskStepTaskVo(processTaskStepTaskId));
         //活动参数
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());

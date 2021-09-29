@@ -34,11 +34,4 @@ public interface ProcessTaskStepTaskService {
      */
     void getProcessTaskStepTask(ProcessTaskStepVo processTaskStepVo);
 
-    /**
-     * 刷新worker
-     *
-     * @param processTaskStepVo     步骤入参
-     * @param processTaskStepTaskVo 步骤任务入参
-     */
-    void refreshWorker(ProcessTaskStepVo processTaskStepVo, ProcessTaskStepTaskVo processTaskStepTaskVo);
 }

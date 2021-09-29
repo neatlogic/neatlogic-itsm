@@ -100,9 +100,11 @@ public class ProcessTaskStepTaskCondition extends ProcessTaskConditionBase imple
     public Object getConditionParamData(ProcessTaskVo processTaskVo){
         List<Long> dataList = new ArrayList<>();
         ProcessTaskStepVo currentTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
-        ProcessTaskStepTaskVo stepTaskVo = currentTaskStepVo.getProcessTaskStepTaskVo();
-        if(stepTaskVo != null) {
-            dataList = Collections.singletonList(stepTaskVo.getTaskConfigId());
+        if(currentTaskStepVo != null) {
+            ProcessTaskStepTaskVo stepTaskVo = currentTaskStepVo.getProcessTaskStepTaskVo();
+            if (stepTaskVo != null) {
+                dataList = Collections.singletonList(stepTaskVo.getTaskConfigId());
+            }
         }
         return dataList;
     }
