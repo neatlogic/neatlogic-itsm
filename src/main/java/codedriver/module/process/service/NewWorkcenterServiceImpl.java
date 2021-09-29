@@ -18,6 +18,7 @@ import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepTaskMapper;
@@ -456,22 +457,55 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
         return returnArray;
     }
 
+    @Override
+    public void getStepTaskWorkerList(JSONArray workerArray,ProcessTaskStepVo stepVo){
+        Map<Long,List<ProcessTaskStepWorkerVo>> stepMinorWorkerListMap = new HashMap<>();
+        List<IProcessStepHandler>  handlerList = ProcessStepHandlerFactory.getHandlerList();
+        for(IProcessStepHandler stepHandler : handlerList) {
+            stepMinorWorkerListMap.put(stepVo.getId(),stepHandler.getMinorWorkerList(stepVo));
+        }
+        if (ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
+                ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
+                ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1
+        ) {
+            ProcessTaskStepWorkerVo majorWorker = stepVo.getWorkerList().stream().filter(o->Objects.equals(o.getUserType(), ProcessUserType.MAJOR.getValue())).findFirst().orElse(null);
+            if (majorWorker != null) {
+                JSONObject workerJson = new JSONObject();
+                getWorkerInfo(majorWorker, workerJson, workerArray);
+            }
+            List<String> workerUuidTypeList = new ArrayList<>();
+            for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
+                if (Objects.equals(workerVo.getUserType(), ProcessUserType.MINOR.getValue())) {
+                    stepTaskWorker(workerVo, stepVo, workerArray,workerUuidTypeList);
+                    otherWorker(workerVo, stepVo, workerArray,stepMinorWorkerListMap,workerUuidTypeList);
+                }
+            }
+        }
+    }
+
+
     /**
      * 任务处理人
-     * @param workerVo 处理人
-     * @param stepVo 工单步骤
-     * @param workerArray 处理人数组
+     *
+     * @param workerVo           处理人
+     * @param stepVo             工单步骤
+     * @param workerArray        处理人数组
+     * @param workerUuidTypeList 用于去重
      */
     @Override
-    public void stepTaskWorker(ProcessTaskStepWorkerVo workerVo,ProcessTaskStepVo stepVo,JSONArray workerArray){
-        if(Objects.equals(workerVo.getType(),GroupSearch.USER.getValue())) {
+    public void stepTaskWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, List<String> workerUuidTypeList) {
+        if (Objects.equals(workerVo.getType(), GroupSearch.USER.getValue())) {
             List<ProcessTaskStepTaskVo> stepTaskVoList = processTaskStepTaskMapper.getStepTaskWithUserByProcessTaskStepId(stepVo.getId());
             for (ProcessTaskStepTaskVo stepTaskVo : stepTaskVoList) {
                 for (ProcessTaskStepTaskUserVo userVo : stepTaskVo.getStepTaskUserVoList()) {
-                    if (Objects.equals(userVo.getUserUuid(), workerVo.getUuid())){
-                        JSONObject workerJson = new JSONObject();
-                        workerJson.put("workTypename", stepTaskVo.getTaskConfigName());
-                        getWorkerInfo( workerVo,  workerJson , workerArray);
+                    if (Objects.equals(userVo.getUserUuid(), workerVo.getUuid())) {
+                        String workerUuidType = workerVo.getUuid() + stepTaskVo.getTaskConfigName();
+                        if (!workerUuidTypeList.contains(workerUuidType)) {
+                            JSONObject workerJson = new JSONObject();
+                            workerJson.put("workTypename", stepTaskVo.getTaskConfigName());
+                            getWorkerInfo(workerVo, workerJson, workerArray);
+                            workerUuidTypeList.add(workerUuidType);
+                        }
                     }
                 }
             }
@@ -480,28 +514,35 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
     /**
      * 其它模块协助处理人
-     * @param workerVo 处理人
-     * @param stepVo 工单步骤
-     * @param workerArray 处理人数组
+     *
+     * @param workerVo           处理人
+     * @param stepVo             工单步骤
+     * @param workerArray        处理人数组
+     * @param workerUuidTypeList 用于去重
      */
     @Override
-    public void otherWorker(ProcessTaskStepWorkerVo workerVo,ProcessTaskStepVo stepVo,JSONArray workerArray,Map<Long,List<ProcessTaskStepWorkerVo>> stepMinorWorkerMap){
-        List<IProcessStepHandler>  handlerList = ProcessStepHandlerFactory.getHandlerList();
-        for(IProcessStepHandler stepHandler : handlerList){
-            if(Objects.equals(stepHandler.getHandler(),stepVo.getHandler())){
+    public void otherWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerMap, List<String> workerUuidTypeList) {
+        List<IProcessStepHandler> handlerList = ProcessStepHandlerFactory.getHandlerList();
+        for (IProcessStepHandler stepHandler : handlerList) {
+            if (Objects.equals(stepHandler.getHandler(), stepVo.getHandler())) {
                 List<ProcessTaskStepWorkerVo> workerVoList = stepMinorWorkerMap.get(stepVo.getId());
                 if (CollectionUtils.isNotEmpty(workerVoList)) {
                     if (workerVoList.stream().anyMatch(w -> Objects.equals(workerVo.getUuid(), w.getUuid()))) {
-                        JSONObject workerJson = new JSONObject();
-                        workerJson.put("workTypename", stepHandler.getMinorName());
-                        getWorkerInfo(workerVo, workerJson, workerArray);
+                        String workerUuidType = workerVo.getUuid() + stepHandler.getMinorName();
+                        if (!workerUuidTypeList.contains(workerUuidType)) {
+                            JSONObject workerJson = new JSONObject();
+                            workerJson.put("workTypename", stepHandler.getMinorName());
+                            getWorkerInfo(workerVo, workerJson, workerArray);
+                            workerUuidTypeList.add(workerUuidType);
+                        }
                     }
                 }
             }
         }
     }
+
     @Override
-    public void getWorkerInfo(ProcessTaskStepWorkerVo workerVo, JSONObject workerJson , JSONArray workerArray){
+    public void getWorkerInfo(ProcessTaskStepWorkerVo workerVo, JSONObject workerJson, JSONArray workerArray) {
         if (GroupSearch.USER.getValue().equals(workerVo.getType())) {
             UserVo userVo = userMapper.getUserBaseInfoByUuid(workerVo.getUuid());
             if (userVo != null) {

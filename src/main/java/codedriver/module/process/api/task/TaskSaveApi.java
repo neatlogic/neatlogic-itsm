@@ -37,7 +37,7 @@ public class TaskSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "新增|更新任务";
+        return "新增|更新子任务";
     }
 
     @Override
@@ -55,7 +55,7 @@ public class TaskSaveApi extends PrivateApiComponentBase {
     @Output({
 
     })
-    @Description(desc = "新增|更新任务接口")
+    @Description(desc = "新增|更新子任务接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long taskId = jsonObj.getLong("id");

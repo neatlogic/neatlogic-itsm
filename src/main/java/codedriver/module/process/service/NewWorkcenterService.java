@@ -41,7 +41,7 @@ public interface NewWorkcenterService {
      * @return json格式工单操作信息
      * @throws ParseException 转换异常
      */
-    public JSONObject doSearch(Long processtaskId) throws ParseException;
+    JSONObject doSearch(Long processtaskId) throws ParseException;
 
     /**
      * @Description: 搜索工单数
@@ -60,7 +60,7 @@ public interface NewWorkcenterService {
      * @Params: [workcenterVo]
      * @Returns: com.alibaba.fastjson.JSONObject
      **/
-    public List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo);
+    List<ProcessTaskVo> doSearchKeyword(WorkcenterVo workcenterVo);
 
     /**
      * @Description: 根据标题 id获取所有过滤选项 pc端
@@ -69,7 +69,7 @@ public interface NewWorkcenterService {
      * @Params: [keyword, pageSize]
      * @Returns: com.alibaba.fastjson.JSONArray
      **/
-    public JSONArray getKeywordOptionsPCNew(WorkcenterVo workcenterVo);
+    JSONArray getKeywordOptionsPCNew(WorkcenterVo workcenterVo);
 
 
     /**
@@ -79,7 +79,14 @@ public interface NewWorkcenterService {
      * @Params: [workcenterVo, columnComponentMap, sortColumnList]
      * @Returns: java.util.List<codedriver.framework.process.workcenter.dto.WorkcenterTheadVo>
      **/
-    public List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList);
+    List<WorkcenterTheadVo> getWorkcenterTheadList(WorkcenterVo workcenterVo, Map<String, IProcessTaskColumn> columnComponentMap, JSONArray sortColumnList);
+
+    /**
+     * 获取步骤待处理人
+     * @param workerArray 处理人数组
+     * @param stepVo 工单步骤
+     */
+    void getStepTaskWorkerList(JSONArray workerArray,ProcessTaskStepVo stepVo);
 
     /**
      * 任务处理人
@@ -88,7 +95,7 @@ public interface NewWorkcenterService {
      * @param stepVo      工单步骤
      * @param workerArray 处理人数组
      */
-    void stepTaskWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray);
+    void stepTaskWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, List<String> workerUuidTypeList);
 
     /**
      * 其它模块协助处理人
@@ -97,7 +104,7 @@ public interface NewWorkcenterService {
      * @param stepVo      工单步骤
      * @param workerArray 处理人数组
      */
-    void otherWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerMap);
+    void otherWorker(ProcessTaskStepWorkerVo workerVo, ProcessTaskStepVo stepVo, JSONArray workerArray, Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerMap, List<String> workerUuidTypeList);
 
     /**
      * 拼凑处理人column数据

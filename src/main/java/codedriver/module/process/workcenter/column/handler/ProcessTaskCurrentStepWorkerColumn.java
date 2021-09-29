@@ -4,12 +4,8 @@ import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnBase;
 import codedriver.framework.process.constvalue.ProcessFieldType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.dto.ProcessTaskStepWorkerVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
-import codedriver.framework.process.stephandler.core.IProcessStepHandler;
-import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.workcenter.dto.JoinTableColumnVo;
 import codedriver.framework.process.workcenter.dto.SelectColumnVo;
 import codedriver.framework.process.workcenter.dto.TableSelectColumnVo;
@@ -20,11 +16,12 @@ import codedriver.framework.process.workcenter.table.UserTable;
 import codedriver.framework.process.workcenter.table.util.SqlTableUtil;
 import codedriver.module.process.service.NewWorkcenterService;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase implements IProcessTaskColumn {
@@ -198,25 +195,7 @@ public class ProcessTaskCurrentStepWorkerColumn extends ProcessTaskColumnBase im
         if (ProcessTaskStatus.RUNNING.getValue().equals(processTaskVo.getStatus())) {
             for (ProcessTaskStepVo stepVo : stepVoList) {
                 //查询其它步骤handler minorList
-                Map<Long,List<ProcessTaskStepWorkerVo>> stepMinorWorkerListMap = new HashMap<>();
-                List<IProcessStepHandler>  handlerList = ProcessStepHandlerFactory.getHandlerList();
-                for(IProcessStepHandler stepHandler : handlerList) {
-                    stepMinorWorkerListMap.put(stepVo.getId(),stepHandler.getMinorWorkerList(stepVo));
-                }
-                if (ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
-                        ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
-                        ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1
-                ) {
-                    for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
-                        if (Objects.equals(workerVo.getUserType(), ProcessUserType.MAJOR.getValue())) {
-                            JSONObject workerJson = new JSONObject();
-                            newWorkcenterService.getWorkerInfo(workerVo, workerJson, workerArray);
-                        } else {
-                            newWorkcenterService.stepTaskWorker(workerVo, stepVo, workerArray);
-                            newWorkcenterService.otherWorker(workerVo, stepVo, workerArray,stepMinorWorkerListMap);
-                        }
-                    }
-                }
+                newWorkcenterService.getStepTaskWorkerList(workerArray,stepVo);
             }
         }
         return workerArray;
