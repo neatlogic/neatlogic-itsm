@@ -509,7 +509,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
     /**
      * 子流程触发点开始
      */
-    @Component
+    //@Component
     public static class CreateSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -539,7 +539,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class EditSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -569,7 +569,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class AbortSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -598,7 +598,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class RedoSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -626,7 +626,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class CompleteSubtask extends EmailDefaultTemplateBase {
 
         @Override
@@ -654,7 +654,7 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
         }
     }
 
-    @Component
+    //@Component
     public static class CompleteAllSubtask extends EmailDefaultTemplateBase {
 
         @Override
