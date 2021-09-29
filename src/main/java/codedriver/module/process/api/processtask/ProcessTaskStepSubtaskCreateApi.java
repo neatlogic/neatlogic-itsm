@@ -9,24 +9,22 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.process.auth.PROCESS_BASE;
-import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepSubtaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.exception.core.ProcessTaskRuntimeException;
 import codedriver.framework.process.exception.processtask.ProcessTaskNoPermissionException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
-import codedriver.framework.process.operationauth.core.ProcessAuthManager;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+//@Service
+@Deprecated
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
 @AuthAction(action = PROCESS_BASE.class)
@@ -72,8 +70,8 @@ public class ProcessTaskStepSubtaskCreateApi extends PrivateApiComponentBase {
         }
         Long processTaskId = processTaskStepVo.getProcessTaskId();
         try {
-            new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.SUBTASK_CREATE)
-                .build().checkAndNoPermissionThrowException();
+//            new ProcessAuthManager.StepOperationChecker(processTaskStepId, ProcessTaskOperationType.SUBTASK_CREATE)
+//                .build().checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }

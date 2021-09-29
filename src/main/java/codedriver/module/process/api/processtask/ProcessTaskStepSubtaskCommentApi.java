@@ -15,12 +15,12 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
+//@Service
+@Deprecated
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
 @AuthAction(action = PROCESS_BASE.class)
@@ -72,7 +72,6 @@ public class ProcessTaskStepSubtaskCommentApi extends PrivateApiComponentBase {
 			List<ProcessTaskStepSubtaskContentVo> contentList = processTaskStepSubtaskService.commentSubtask(processTaskStepSubtaskVo);
 			resultObj.put("contentList", contentList);
 		}else {
-			//throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.COMMENTSUBTASK.getText());
             throw new PermissionDeniedException();
 		}
 		return resultObj;

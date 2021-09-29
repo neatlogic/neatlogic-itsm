@@ -17,7 +17,6 @@ import codedriver.framework.notify.dto.NotifyTriggerTemplateVo;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.notify.constvalue.ProcessNotifyPolicyHandlerGroup;
-import codedriver.framework.process.notify.constvalue.SubtaskNotifyTriggerType;
 import codedriver.framework.process.notify.constvalue.ProcessTaskStepNotifyTriggerType;
 import codedriver.framework.process.notify.core.IDefaultTemplate;
 import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
@@ -90,12 +89,12 @@ public class AutomaticNotifyPolicyHandler extends NotifyPolicyHandlerBase {
                     list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
                 }
             }
-            for (SubtaskNotifyTriggerType notifyTriggerType : SubtaskNotifyTriggerType.values()) {
-                List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
-                for(IDefaultTemplate vo : templates){
-                    list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
-                }
-            }
+//            for (SubtaskNotifyTriggerType notifyTriggerType : SubtaskNotifyTriggerType.values()) {
+//                List<IDefaultTemplate> templates = map.get(notifyTriggerType.getTrigger().toLowerCase());
+//                for(IDefaultTemplate vo : templates){
+//                    list.add(new NotifyTriggerTemplateVo(notifyTriggerType.getText(),notifyTriggerType.getDescription(),vo.getTitle(),vo.getContent(),handler));
+//                }
+//            }
         }
         return list;
     }

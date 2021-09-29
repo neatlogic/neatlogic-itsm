@@ -14,10 +14,10 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+//@Service
+@Deprecated
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = PROCESS_BASE.class)
@@ -65,7 +65,6 @@ public class ProcessTaskStepSubtaskAbortApi extends PrivateApiComponentBase {
 			processTaskStepSubtaskVo.setParamObj(jsonObj);
 			processTaskStepSubtaskService.abortSubtask(processTaskStepSubtaskVo);
 		}else {
-			//throw new ProcessTaskNoPermissionException(ProcessTaskOperationType.ABORTSUBTASK.getText());
 			throw new PermissionDeniedException();
 		}
 		return null;

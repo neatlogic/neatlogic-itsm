@@ -5,7 +5,6 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.common.constvalue.UserType;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.UserVo;
@@ -16,7 +15,6 @@ import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.dao.mapper.*;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
-import codedriver.framework.process.dao.mapper.task.TaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.operationauth.core.ProcessAuthManager;
@@ -28,11 +26,8 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.common.config.ProcessConfig;
-import codedriver.module.process.service.ProcessTaskStepSubtaskService;
 import codedriver.module.process.service.ProcessTaskStepTaskService;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -55,8 +50,8 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
     @Resource
     private ProcessTaskStepDataMapper processTaskStepDataMapper;
 
-    @Resource
-    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
+//    @Resource
+//    private ProcessTaskStepSubtaskService processTaskStepSubtaskService;
 
     @Resource
     private ScoreTemplateMapper scoreTemplateMapper;
@@ -69,15 +64,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessCommentTemplateMapper commentTemplateMapper;
-
-    @Resource
-    private ProcessTaskStepTaskMapper processTaskStepTaskMapper;
-
-    @Resource
-    private SelectContentByHashMapper selectContentByHashMapper;
-
-    @Resource
-    private TaskMapper taskMapper;
 
     @Resource
     private ProcessTaskStepTaskService processTaskStepTaskService;
@@ -178,64 +164,64 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
             // 获取当前用户有权限的所有子任务
             // 子任务列表
-            if (processTaskStepVo.getIsActive() == 1
-                    && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
-                List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList =
-                        processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
-                if (CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
-                    Map<String, String> customButtonMap = processStepUtilHandler.getCustomButtonMapByConfigHashAndHandler(
-                            processTaskStepVo.getConfigHash(), processTaskStepVo.getHandler());
-                    for (ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
-                        String currentUser = UserContext.get().getUserUuid(true);
-                        if ((currentUser.equals(processTaskStepSubtask.getMajorUser())
-                                && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
-                                || (currentUser.equals(processTaskStepSubtask.getUserUuid())
-                                && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
-                            if (processTaskStepSubtask.getIsAbortable() == 1) {
-                                String value = ProcessTaskOperationType.SUBTASK_ABORT.getValue();
-                                String text = customButtonMap.get(value);
-                                if (StringUtils.isBlank(text)) {
-                                    text = ProcessTaskOperationType.SUBTASK_ABORT.getText();
-                                }
-                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                            }
-                            if (processTaskStepSubtask.getIsCommentable() == 1) {
-                                String value = ProcessTaskOperationType.SUBTASK_COMMENT.getValue();
-                                String text = customButtonMap.get(value);
-                                if (StringUtils.isBlank(text)) {
-                                    text = ProcessTaskOperationType.SUBTASK_COMMENT.getText();
-                                }
-                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                            }
-                            if (processTaskStepSubtask.getIsCompletable() == 1) {
-                                String value = ProcessTaskOperationType.SUBTASK_COMPLETE.getValue();
-                                String text = customButtonMap.get(value);
-                                if (StringUtils.isBlank(text)) {
-                                    text = ProcessTaskOperationType.SUBTASK_COMPLETE.getText();
-                                }
-                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                            }
-                            if (processTaskStepSubtask.getIsEditable() == 1) {
-                                String value = ProcessTaskOperationType.SUBTASK_EDIT.getValue();
-                                String text = customButtonMap.get(value);
-                                if (StringUtils.isBlank(text)) {
-                                    text = ProcessTaskOperationType.SUBTASK_EDIT.getText();
-                                }
-                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                            }
-                            if (processTaskStepSubtask.getIsRedoable() == 1) {
-                                String value = ProcessTaskOperationType.SUBTASK_REDO.getValue();
-                                String text = customButtonMap.get(value);
-                                if (StringUtils.isBlank(text)) {
-                                    text = ProcessTaskOperationType.SUBTASK_REDO.getText();
-                                }
-                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
-                            }
-                            processTaskStepVo.getProcessTaskStepSubtaskList().add(processTaskStepSubtask);
-                        }
-                    }
-                }
-            }
+//            if (processTaskStepVo.getIsActive() == 1
+//                    && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+//                List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList =
+//                        processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
+//                if (CollectionUtils.isNotEmpty(processTaskStepSubtaskList)) {
+//                    Map<String, String> customButtonMap = processStepUtilHandler.getCustomButtonMapByConfigHashAndHandler(
+//                            processTaskStepVo.getConfigHash(), processTaskStepVo.getHandler());
+//                    for (ProcessTaskStepSubtaskVo processTaskStepSubtask : processTaskStepSubtaskList) {
+//                        String currentUser = UserContext.get().getUserUuid(true);
+//                        if ((currentUser.equals(processTaskStepSubtask.getMajorUser())
+//                                && !ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepSubtask.getStatus()))
+//                                || (currentUser.equals(processTaskStepSubtask.getUserUuid())
+//                                && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepSubtask.getStatus()))) {
+//                            if (processTaskStepSubtask.getIsAbortable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_ABORT.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_ABORT.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            if (processTaskStepSubtask.getIsCommentable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_COMMENT.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_COMMENT.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            if (processTaskStepSubtask.getIsCompletable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_COMPLETE.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_COMPLETE.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            if (processTaskStepSubtask.getIsEditable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_EDIT.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_EDIT.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            if (processTaskStepSubtask.getIsRedoable() == 1) {
+//                                String value = ProcessTaskOperationType.SUBTASK_REDO.getValue();
+//                                String text = customButtonMap.get(value);
+//                                if (StringUtils.isBlank(text)) {
+//                                    text = ProcessTaskOperationType.SUBTASK_REDO.getText();
+//                                }
+//                                processTaskStepSubtask.getActionList().add(new ValueTextVo(value, text));
+//                            }
+//                            processTaskStepVo.getProcessTaskStepSubtaskList().add(processTaskStepSubtask);
+//                        }
+//                    }
+//                }
+//            }
             //任务列表
             if (processTaskStepVo.getIsActive() == 1 && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
                 processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
