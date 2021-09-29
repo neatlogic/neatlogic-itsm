@@ -229,7 +229,7 @@ public class DateTimeAndAutoIncrementPolicy implements IProcessTaskSerialNumberP
         @Override
         public void initJob(String tenantUuid) {
             JobObject.Builder jobObjectBuilder = new JobObject.Builder(
-                    UuidUtil.randomUuid(),
+                    this.getGroupName(),
                     this.getGroupName(),
                     this.getClassName(),
                     TenantContext.get().getTenantUuid())
