@@ -776,14 +776,14 @@ public abstract class EmailDefaultTemplateBase implements IDefaultTemplate {
 
         @Override
         public String getTitle() {
-            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "完成提醒";
+            return PROCESSTASK_SERIALNUMBER_TITLE + TASK_CONFIG_NAME + "回复提醒";
         }
 
         @Override
         public String getContent() {
             return new StringBuilder()
-                    .append(TASK_WORKER + "完成" + TASK_CONFIG_NAME + "\n")
-                    .append("回复:" + TASK_USER_CONTENT + "\n")
+                    .append(TASK_WORKER + "回复" + TASK_CONFIG_NAME + "\n")
+                    .append("回复内容:" + TASK_USER_CONTENT + "\n")
                     .append(PROCESSTASK_DETAILS_LINK)
                     .toString();
         }
