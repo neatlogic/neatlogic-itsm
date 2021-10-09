@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -70,6 +70,7 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
     public String getConfig() {
         return null;
     }
+
     @Input({
             @Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
             @Param(name = "processTaskStepId", type = ApiParamType.LONG, isRequired = true, desc = "步骤id")
@@ -82,7 +83,7 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         ProcessTaskStepVo processTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
-        if(handler == null) {
+        if (handler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
         }
 //        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepId);
@@ -115,36 +116,36 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
         processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
         ProcessTaskStepDataVo stepDraftSaveData = processTaskStepDataMapper.getProcessTaskStepData(processTaskStepDataVo);
-        if(stepDraftSaveData != null) {
+        if (stepDraftSaveData != null) {
             JSONObject dataObj = stepDraftSaveData.getData();
-            if(MapUtils.isNotEmpty(dataObj)) {
+            if (MapUtils.isNotEmpty(dataObj)) {
                 JSONArray formAttributeDataList = dataObj.getJSONArray("formAttributeDataList");
-                if(CollectionUtils.isNotEmpty(formAttributeDataList)) {
+                if (CollectionUtils.isNotEmpty(formAttributeDataList)) {
                     paramObj.put("formAttributeDataList", formAttributeDataList);
                 }
                 JSONArray hidecomponentList = dataObj.getJSONArray("hidecomponentList");
-                if(CollectionUtils.isNotEmpty(hidecomponentList)) {
+                if (CollectionUtils.isNotEmpty(hidecomponentList)) {
                     paramObj.put("hidecomponentList", hidecomponentList);
                 }
                 JSONArray readcomponentList = dataObj.getJSONArray("readcomponentList");
-                if(CollectionUtils.isNotEmpty(readcomponentList)) {
+                if (CollectionUtils.isNotEmpty(readcomponentList)) {
                     paramObj.put("readcomponentList", readcomponentList);
                 }
                 JSONObject handlerStepInfo = dataObj.getJSONObject("handlerStepInfo");
-                if(MapUtils.isNotEmpty(handlerStepInfo)) {
+                if (MapUtils.isNotEmpty(handlerStepInfo)) {
                     paramObj.put("handlerStepInfo", handlerStepInfo);
                 }
                 String priorityUuid = dataObj.getString("priorityUuid");
-                if(StringUtils.isNotBlank(priorityUuid)) {
+                if (StringUtils.isNotBlank(priorityUuid)) {
                     paramObj.put("priorityUuid", priorityUuid);
                 }
                 JSONArray fileIdList = dataObj.getJSONArray("fileIdList");
-                if(CollectionUtils.isNotEmpty(fileIdList)){
+                if (CollectionUtils.isNotEmpty(fileIdList)) {
                     paramObj.put("fileIdList", fileIdList);
                 }
-                if(!paramObj.containsKey("content")){
+                if (!paramObj.containsKey("content")) {
                     String content = dataObj.getString("content");
-                    if(StringUtils.isNotBlank(content)){
+                    if (StringUtils.isNotBlank(content)) {
                         paramObj.put("content", content);
                     }
                 }
@@ -153,13 +154,13 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
         processTaskStepVo.setParamObj(paramObj);
         try {
             handler.reapproval(processTaskStepVo);
-        }catch(ProcessTaskNoPermissionException e) {
+        } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 
         //创建全文检索索引
-        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK);
+        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
         if (indexFormHandler != null) {
             indexFormHandler.createIndex(processTaskStepVo.getProcessTaskId());
         }

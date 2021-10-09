@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -75,12 +80,12 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "processTaskId", type = ApiParamType.LONG, isRequired = true, desc = "工单id"),
-        @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
-        @Param(name = "title", type = ApiParamType.STRING, xss = true, maxLength = 80, desc = "标题"),
-        @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
-        @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
-        @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "标签列表"),
-        @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表")})
+            @Param(name = "processTaskStepId", type = ApiParamType.LONG, desc = "步骤id"),
+            @Param(name = "title", type = ApiParamType.STRING, xss = true, maxLength = 80, desc = "标题"),
+            @Param(name = "priorityUuid", type = ApiParamType.STRING, desc = "优先级uuid"),
+            @Param(name = "content", type = ApiParamType.STRING, desc = "描述"),
+            @Param(name = "tagList", type = ApiParamType.JSONARRAY, desc = "标签列表"),
+            @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, desc = "附件id列表")})
     @Description(desc = "更新工单信息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -90,7 +95,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 
         try {
             new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_UPDATE).build()
-                .checkAndNoPermissionThrowException();
+                    .checkAndNoPermissionThrowException();
         } catch (ProcessTaskNoPermissionException e) {
             throw new PermissionDeniedException();
         }
@@ -126,7 +131,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
 
         // 跟新标签
         List<String> tagNameList =
-            JSONObject.parseArray(JSON.toJSONString(jsonObj.getJSONArray("tagList")), String.class);
+                JSONObject.parseArray(JSON.toJSONString(jsonObj.getJSONArray("tagList")), String.class);
         if (tagNameList != null) {
             List<ProcessTagVo> oldTagList = processTaskMapper.getProcessTaskTagListByProcessTaskId(processTaskId);
             processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
@@ -134,7 +139,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                 jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
                 List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
                 List<String> existTagNameList =
-                    existTagList.stream().map(ProcessTagVo::getName).collect(Collectors.toList());
+                        existTagList.stream().map(ProcessTagVo::getName).collect(Collectors.toList());
                 List<String> notExistTagList = ListUtils.removeAll(tagNameList, existTagNameList);
                 for (String tagName : notExistTagList) {
                     ProcessTagVo tagVo = new ProcessTagVo(tagName);
@@ -146,12 +151,12 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                     processTaskTagVoList.add(new ProcessTaskTagVo(processTaskId, processTagVo.getId()));
                 }
                 processTaskMapper.insertProcessTaskTag(processTaskTagVoList);
-            }else{
+            } else {
                 jsonObj.remove(ProcessTaskAuditDetailType.TAGLIST.getParamName());
             }
             int diffCount = tagNameList.stream()
-                .filter(a -> !oldTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a))
-                .collect(Collectors.toList()).size();
+                    .filter(a -> !oldTagList.stream().map(b -> b.getName()).collect(Collectors.toList()).contains(a))
+                    .collect(Collectors.toList()).size();
             if (tagNameList.size() != oldTagList.size() || diffCount > 0) {
                 List<String> oldTagNameList = new ArrayList<>();
                 for (ProcessTagVo tag : oldTagList) {
@@ -171,7 +176,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         Long startProcessTaskStepId = startProcessTaskStepVo.getId();
         String content = jsonObj.getString("content");
         List<Long> fileIdList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("fileIdList")), Long.class);
-        if(content != null || fileIdList != null){
+        if (content != null || fileIdList != null) {
             ProcessTaskStepReplyVo oldReplyVo = null;
             List<ProcessTaskStepContentVo> processTaskStepContentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(startProcessTaskStepId);
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
@@ -181,13 +186,13 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
                 }
             }
             if (oldReplyVo == null) {
-                if(StringUtils.isNotBlank(content) || CollectionUtils.isNotEmpty(fileIdList)){
+                if (StringUtils.isNotBlank(content) || CollectionUtils.isNotEmpty(fileIdList)) {
                     oldReplyVo = new ProcessTaskStepReplyVo();
                     oldReplyVo.setProcessTaskId(processTaskId);
                     oldReplyVo.setProcessTaskStepId(startProcessTaskStepId);
                     isUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
                 }
-            }else{
+            } else {
                 isUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
             }
         }
@@ -203,7 +208,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
         }
 
         //创建全文检索索引
-        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK);
+        IFullTextIndexHandler indexHandler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
         if (indexHandler != null) {
             indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
         }

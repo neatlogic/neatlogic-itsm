@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.api.processtask.fulltextindex;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -47,7 +52,7 @@ public class ProcessTaskFulltextIndexRebuildApi extends PrivateApiComponentBase 
         JSONArray idArray = jsonObj.getJSONArray("idList");
         List<Long> idList = null;
         //创建全文检索索引
-        IFullTextIndexHandler handler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK);
+        IFullTextIndexHandler handler = FullTextIndexHandlerFactory.getHandler(ProcessFullTextIndexType.PROCESSTASK);
         if (handler != null) {
             if(CollectionUtils.isNotEmpty(idArray)){
                 idList = JSONObject.parseArray(idArray.toJSONString(), Long.class);

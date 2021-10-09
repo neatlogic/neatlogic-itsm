@@ -1,10 +1,16 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.fulltextindex;
 
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerBase;
 import codedriver.framework.fulltextindex.core.IFullTextIndexType;
-import codedriver.framework.fulltextindex.dto.FullTextIndexVo;
+import codedriver.framework.fulltextindex.dto.fulltextindex.FullTextIndexVo;
+import codedriver.framework.fulltextindex.dto.globalsearch.DocumentVo;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
@@ -65,11 +71,16 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
                     IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
                     List<String> dataList = handler.indexFieldContentList(attributeDataVo.getData());
                     for (String data : dataList) {
-                        fullTextIndexVo.addFieldContent(attributeDataVo.getAttributeUuid(),  new FullTextIndexVo.WordVo(handler.isNeedSliceWord(),data));
+                        fullTextIndexVo.addFieldContent(attributeDataVo.getAttributeUuid(), new FullTextIndexVo.WordVo(handler.isNeedSliceWord(), data));
                     }
                 }
             }
         }
+    }
+
+    @Override
+    protected void myMakeupDocument(DocumentVo documentVo) {
+
     }
 
     @Override
