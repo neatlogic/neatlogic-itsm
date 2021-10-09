@@ -114,10 +114,6 @@ public class ProcessTaskDeleteApi extends PrivateApiComponentBase {
         if (indexHandler != null) {
             indexHandler.deleteIndex(processTaskId);
         }
-        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK_FORM);
-        if (indexFormHandler != null) {
-            indexFormHandler.deleteIndex(processTaskId);
-        }
         return null;
     }
 

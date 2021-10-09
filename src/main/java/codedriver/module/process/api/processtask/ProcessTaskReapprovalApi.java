@@ -159,7 +159,7 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
 
         //创建全文检索索引
-        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK_FORM);
+        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK);
         if (indexFormHandler != null) {
             indexFormHandler.createIndex(processTaskStepVo.getProcessTaskId());
         }

@@ -183,7 +183,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
         }
 
         if (StringUtils.isNotBlank(startTime)) {
-            sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` WHERE ff.`target_id` = pt.id  AND ff.`target_type` = 'processtask_form' AND ff.`target_field` = '%s' AND fw.word between '%s' and '%s' ) ",
+            sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` WHERE ff.`target_id` = pt.id  AND ff.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word between '%s' and '%s' ) ",
                     conditionVo.getName(), startTime, endTime));
         }
 
@@ -218,7 +218,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                 }
             }
         }
-        sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` WHERE ff.`target_id` = pt.id  AND ff.`target_type` = 'processtask_form' AND ff.`target_field` = '%s' AND fw.word IN ('%s')) ",
+        sqlSb.append(String.format(" EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` WHERE ff.`target_id` = pt.id  AND ff.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s')) ",
                 conditionVo.getName(), String.join("','", valueList)));
     }
 }

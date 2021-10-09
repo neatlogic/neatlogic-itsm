@@ -183,10 +183,6 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
         if (indexHandler != null) {
             indexHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
         }
-        IFullTextIndexHandler indexFormHandler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK_FORM);
-        if (indexFormHandler != null) {
-            indexFormHandler.createIndex(startProcessTaskStepVo.getProcessTaskId());
-        }
         return resultObj;
     }
 

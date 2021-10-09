@@ -48,7 +48,6 @@ public class ProcessTaskFulltextIndexRebuildApi extends PrivateApiComponentBase 
         List<Long> idList = null;
         //创建全文检索索引
         IFullTextIndexHandler handler = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK);
-        IFullTextIndexHandler handlerForm = FullTextIndexHandlerFactory.getComponent(ProcessFullTextIndexType.PROCESSTASK_FORM);
         if (handler != null) {
             if(CollectionUtils.isNotEmpty(idArray)){
                 idList = JSONObject.parseArray(idArray.toJSONString(), Long.class);
@@ -57,7 +56,6 @@ public class ProcessTaskFulltextIndexRebuildApi extends PrivateApiComponentBase 
             }
             for(Long idObj : idList ){
                 handler.createIndex(idObj);
-                handlerForm.createIndex(idObj);
             }
         }
         return null;
