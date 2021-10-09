@@ -3,18 +3,19 @@ package codedriver.module.process.condition.handler;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.constvalue.FormConditionModel;
 import codedriver.framework.form.constvalue.FormHandlerTypeBak;
+import codedriver.framework.form.dto.AttributeDataVo;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.fulltextindex.utils.FullTextIndexUtil;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
-import codedriver.framework.form.dto.AttributeDataVo;
-import codedriver.framework.form.dto.FormAttributeVo;
-import codedriver.framework.form.dto.FormVersionVo;
-import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.process.constvalue.ProcessWorkcenterField;
 import codedriver.framework.util.Md5Util;
 import codedriver.framework.util.TimeUtil;
@@ -150,7 +151,13 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
         ConditionVo conditionVo = conditionList.get(index);
+        if(StringUtils.isBlank(conditionVo.getHandler())){
+            throw new ParamIrregularException("ConditionGroup"," lost handler");
+        }
         IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(conditionVo.getHandler());
+        if(formAttributeHandler == null){
+            throw new ParamIrregularException("ConditionGroup"," handler illegal");
+        }
         JSONArray valueArray = JSONArray.parseArray(conditionVo.getValueList().toString());
 
         if (FormHandlerTypeBak.FORMDATE.getHandler().equals(conditionVo.getHandler())) {
