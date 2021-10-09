@@ -622,15 +622,18 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 formAttributeDataMap.put(formAttributeDataObj.getString("attributeUuid"), formAttributeDataObj.get("dataList"));
             }
             /** 隐藏的属性uuid列表 **/
-            List<String> hidecomponentList = JSON.parseArray(paramObj.getString("hidecomponentList"), String.class);
-            if (hidecomponentList == null) {
-                hidecomponentList = new ArrayList<>();
+            List<String> hidecomponentList = new ArrayList<>();
+            JSONArray hidecomponentArray = paramObj.getJSONArray("hidecomponentList");
+            if (CollectionUtils.isNotEmpty(hidecomponentArray)) {
+                hidecomponentList = hidecomponentArray.toJavaList(String.class);
             }
             /** 只读的属性uuid列表 **/
-            List<String> readcomponentList = JSON.parseArray(paramObj.getString("readcomponentList"), String.class);
-            if (readcomponentList == null) {
-                readcomponentList = new ArrayList<>();
+            List<String> readcomponentList = new ArrayList<>();
+            JSONArray readcomponentArray = paramObj.getJSONArray("readcomponentList");
+            if (CollectionUtils.isNotEmpty(readcomponentArray)) {
+                readcomponentList = readcomponentArray.toJavaList(String.class);
             }
+
             /** 校验表单属性是否合法 **/
             String formContent = selectContentByHashMapper.getProcessTaskFromContentByHash(processTaskFormVo.getFormContentHash());
             FormVersionVo formVersionVo = new FormVersionVo();
