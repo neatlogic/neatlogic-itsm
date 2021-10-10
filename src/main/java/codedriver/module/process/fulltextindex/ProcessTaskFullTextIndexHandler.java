@@ -25,6 +25,7 @@ import java.util.List;
 
 /**
  * 创建工单分词索引
+ *
  * @author lvzk
  * @since 2021/03/23
  */
@@ -52,7 +53,7 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
             for (ProcessTaskStepContentVo processTaskStepContent : processTaskStepContentList) {
                 if (ProcessTaskOperationType.PROCESSTASK_START.getValue().equals(processTaskStepContent.getType())) {
                     ProcessTaskContentVo processTaskContentVo = selectContentByHashMapper.getProcessTaskContentByHash(processTaskStepContent.getContentHash());
-                    if(processTaskContentVo != null) {
+                    if (processTaskContentVo != null) {
                         fullTextIndexVo.addFieldContent("content", new FullTextIndexVo.WordVo(processTaskContentVo.getContent()));
                     }
                     break;
@@ -61,13 +62,13 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
         }
         //标题、工单id
         ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(fullTextIndexVo.getTargetId());
-        fullTextIndexVo.addFieldContent("title",new FullTextIndexVo.WordVo(processTaskVo.getTitle()));
-        fullTextIndexVo.addFieldContent("serial_number",new FullTextIndexVo.WordVo(processTaskVo.getSerialNumber()));
+        fullTextIndexVo.addFieldContent("title", new FullTextIndexVo.WordVo(processTaskVo.getTitle()));
+        fullTextIndexVo.addFieldContent("serial_number", new FullTextIndexVo.WordVo(processTaskVo.getSerialNumber()));
         //表单
         List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(fullTextIndexVo.getTargetId());
-        if(CollectionUtils.isNotEmpty(processTaskFormAttributeDataVoList)){
-            for (ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataVoList){
-                if(StringUtils.isNotBlank(attributeDataVo.getData())) {
+        if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataVoList)) {
+            for (ProcessTaskFormAttributeDataVo attributeDataVo : processTaskFormAttributeDataVoList) {
+                if (StringUtils.isNotBlank(attributeDataVo.getData())) {
                     IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(attributeDataVo.getType());
                     List<String> dataList = handler.indexFieldContentList(attributeDataVo.getData());
                     for (String data : dataList) {
@@ -89,7 +90,7 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
     }
 
     @Override
-    public void rebuildIndex(Boolean isRebuildAll) {
+    public void myRebuildIndex(String type, Boolean isRebuildAll) {
 
     }
 }
