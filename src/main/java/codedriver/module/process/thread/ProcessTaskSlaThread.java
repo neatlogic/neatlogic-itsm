@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.thread;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
@@ -34,15 +39,6 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.util.*;
 
-/**
- * @Title: SlaHandler
- * @Package codedriver.module.process.thread
- * @Description: TODO
- * @Author: linbq
- * @Date: 2021/1/20 16:43
- * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
 @Service
 public class ProcessTaskSlaThread extends CodeDriverThread {
     private static Logger logger = LoggerFactory.getLogger(ProcessTaskSlaThread.class);
@@ -51,38 +47,44 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
     private static ProcessTaskStepTimeAuditMapper processTaskStepTimeAuditMapper;
     private static TransactionUtil transactionUtil;
     private static ProcessTaskService processTaskService;
+
     @Autowired
     public void setProcessTaskService(ProcessTaskService _processTaskService) {
         processTaskService = _processTaskService;
     }
+
     @Autowired
     public void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
         processTaskMapper = _processTaskMapper;
     }
+
     @Autowired
     public void setWorktimeMapper(WorktimeMapper _worktimeMapper) {
         worktimeMapper = _worktimeMapper;
     }
+
     @Autowired
     public void setProcessTaskStepTimeAuditMapper(ProcessTaskStepTimeAuditMapper _processTaskStepTimeAuditMapper) {
         processTaskStepTimeAuditMapper = _processTaskStepTimeAuditMapper;
     }
+
     @Autowired
     public void setTransactionUtil(TransactionUtil _transactionUtil) {
         transactionUtil = _transactionUtil;
     }
+
     private ProcessTaskStepVo currentProcessTaskStepVo;
     private ProcessTaskVo currentProcessTaskVo;
 
-    public ProcessTaskSlaThread(){}
+    public ProcessTaskSlaThread() {
+        super("PROCESSTASK-SLA");
+    }
+
     public ProcessTaskSlaThread(ProcessTaskVo _currentProcessTaskVo, ProcessTaskStepVo _currentProcessTaskStepVo) {
+        super("PROCESSTASK-SLA" + (_currentProcessTaskStepVo != null ? "-" + _currentProcessTaskStepVo.getId() : "")
+                + (_currentProcessTaskVo != null ? "-" + _currentProcessTaskVo.getId() : ""));
         currentProcessTaskVo = _currentProcessTaskVo;
         currentProcessTaskStepVo = _currentProcessTaskStepVo;
-        if (_currentProcessTaskStepVo != null) {
-            this.setThreadName("PROCESSTASK-SLA-" + _currentProcessTaskStepVo.getId());
-        } else if (_currentProcessTaskVo != null) {
-            this.setThreadName("PROCESSTASK-SLA-" + _currentProcessTaskVo.getId());
-        }
     }
 
     private static long getTimeCost(List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList,
@@ -344,9 +346,9 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
     }
 
     private void adjustJob(ProcessTaskSlaTimeVo slaTimeVo, JSONObject slaConfigObj, Date oldExpireTime) {
-        /** 有超时时间点 **/
+        /* 有超时时间点 **/
         if (slaTimeVo.getExpireTime() != null) {
-            /** 是否需要启动作业 **/
+            /* 是否需要启动作业 **/
             boolean isStartJob = false;
             List<Long> processTaskStepIdList =
                     processTaskMapper.getProcessTaskStepIdListBySlaId(slaTimeVo.getSlaId());
@@ -363,7 +365,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                     }
                 }
             }
-            /** 作业是否已启动 **/
+            /* 作业是否已启动 **/
             boolean jobStarted = false;
             List<ProcessTaskSlaNotifyVo> processTaskSlaNotifyList =
                     processTaskMapper.getProcessTaskSlaNotifyBySlaId(slaTimeVo.getSlaId());
@@ -380,7 +382,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                     jobStarted = false;
                 }
             }
-            /** 作业需要启动，且未启动时，加载定时作业 **/
+            /* 作业需要启动，且未启动时，加载定时作业 **/
             if (isStartJob && !jobStarted) {
                 // 加载定时作业，执行超时通知操作
                 JSONArray notifyPolicyList = slaConfigObj.getJSONArray("notifyPolicyList");
@@ -506,14 +508,14 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                             if (Objects.equals(timeSum, oldTimeSum)) {
                                 long expireTimeLong = 0L;
                                 long oldExpireTimeLong = 0L;
-                                if(slaTimeVo.getExpireTime() != null){
+                                if (slaTimeVo.getExpireTime() != null) {
                                     expireTimeLong = slaTimeVo.getExpireTime().getTime();
                                 }
-                                if(oldExpireTime != null){
+                                if (oldExpireTime != null) {
                                     oldExpireTimeLong = oldExpireTime.getTime();
                                 }
                                 /** 由于Date类型数据保存到MySql数据库时会丢失毫秒数值，只保留到秒的精度，所以两次计算超时时间点的差值小于1000时，说明时效没有被条件改变，不用更新 **/
-                                if(expireTimeLong - oldExpireTimeLong < 1000){
+                                if (expireTimeLong - oldExpireTimeLong < 1000) {
                                     continue;
                                 }
                             }

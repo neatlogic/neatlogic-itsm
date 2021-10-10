@@ -29,7 +29,7 @@ import java.util.Objects;
 
 @Service
 public class ProcessTaskAuditThread extends CodeDriverThread {
-    private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
     private static ProcessTaskMapper processTaskMapper;
     private static ProcessTaskService processTaskService;
 
@@ -47,9 +47,11 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
     private IProcessTaskAuditType action;
 
     public ProcessTaskAuditThread() {
+        super("PROCESSTASK-AUDIT");
     }
 
     public ProcessTaskAuditThread(ProcessTaskStepVo _currentProcessTaskStepVo, IProcessTaskAuditType _action) {
+        super("PROCESSTASK-AUDIT-" + _currentProcessTaskStepVo.getId() + "-" + _action.getValue());
         currentProcessTaskStepVo = _currentProcessTaskStepVo;
         action = _action;
     }
@@ -61,8 +63,6 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
 
     @Override
     public void execute() {
-        String oldName = Thread.currentThread().getName();
-        Thread.currentThread().setName("PROCESSTASK-AUDIT-" + currentProcessTaskStepVo.getId() + "-" + action.getValue());
         try {
             /* 活动类型 **/
             JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
@@ -114,7 +114,7 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
                 processTaskStepAuditVo.setDescriptionHash(descriptionVo.getHash());
             }
             processTaskMapper.insertProcessTaskStepAudit(processTaskStepAuditVo);
-            /** 活动内容 **/
+            /* 活动内容 **/
             for (IProcessTaskAuditDetailType auditDetailType : ProcessTaskAuditDetailTypeFactory.getAuditDetailTypeList()) {
                 String newData = paramObj.getString(auditDetailType.getParamName());
                 String oldData = paramObj.getString(auditDetailType.getOldDataParamName());
@@ -139,8 +139,6 @@ public class ProcessTaskAuditThread extends CodeDriverThread {
 
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-        } finally {
-            Thread.currentThread().setName(oldName);
         }
     }
 }

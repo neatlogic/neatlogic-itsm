@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.thread;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
@@ -39,15 +44,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Title: ActionHandler
- * @Package codedriver.module.process.thread
- * @Description: TODO
- * @Author: linbq
- * @Date: 2021/1/20 17:13
- * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
 @Service
 public class ProcessTaskActionThread extends CodeDriverThread {
     private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
@@ -86,14 +82,13 @@ public class ProcessTaskActionThread extends CodeDriverThread {
     private INotifyTriggerType triggerType;
 
     public ProcessTaskActionThread() {
+        super("PROCESSTASK-ACTION-HANDLER");
     }
 
     public ProcessTaskActionThread(ProcessTaskStepVo _currentProcessTaskStepVo, INotifyTriggerType _trigger) {
+        super("PROCESSTASK-ACTION-HANDLER" + (_currentProcessTaskStepVo != null ? "-" + _currentProcessTaskStepVo.getId() : ""));
         currentProcessTaskStepVo = _currentProcessTaskStepVo;
         triggerType = _trigger;
-        if (_currentProcessTaskStepVo != null) {
-            this.setThreadName("PROCESSTASK-ACTION-" + _currentProcessTaskStepVo.getId());
-        }
     }
 
     @Override
@@ -101,18 +96,18 @@ public class ProcessTaskActionThread extends CodeDriverThread {
         try {
             JSONArray actionList = null;
             if (triggerType instanceof ProcessTaskNotifyTriggerType) {
-                /** 获取工单配置信息 **/
+                /* 获取工单配置信息 **/
                 ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(currentProcessTaskStepVo.getProcessTaskId());
                 String config = selectContentByHashMapper.getProcessTaskConfigStringByHash(processTaskVo.getConfigHash());
                 actionList = (JSONArray) JSONPath.read(config, "process.processConfig.actionConfig.actionList");
             } else {
-                /** 获取步骤配置信息 **/
+                /* 获取步骤配置信息 **/
                 ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
                 actionList = (JSONArray) JSONPath.read(stepConfig, "actionConfig.actionList");
             }
 
-            /** 从步骤配置信息中获取动作列表 **/
+            /* 从步骤配置信息中获取动作列表 **/
             if (CollectionUtils.isNotEmpty(actionList)) {
                 for (int i = 0; i < actionList.size(); i++) {
                     JSONObject actionObj = actionList.getJSONObject(i);

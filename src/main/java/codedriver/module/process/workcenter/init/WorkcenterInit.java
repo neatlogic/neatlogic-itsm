@@ -487,18 +487,20 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
             CachedThreadPool.execute(new InsertWorkcenterRunner(tenantVo.getUuid()));
         }
     }
+
     class InsertWorkcenterRunner extends CodeDriverThread {
         private final String tenantUuid;
-        public InsertWorkcenterRunner(String tenantUuid){
+
+        public InsertWorkcenterRunner(String tenantUuid) {
+            super("WORKCENTER-INIT-" + tenantUuid);
             this.tenantUuid = tenantUuid;
         }
 
         @Override
         protected void execute() {
-            Thread.currentThread().setName("WORKCENTER-INIT-" + tenantUuid);
             // 切换租户数据源
             TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
-            for (WorkcenterVo workcenterVo :workcenterList){
+            for (WorkcenterVo workcenterVo : workcenterList) {
                 workcenterMapper.insertWorkcenter(workcenterVo);
             }
         }

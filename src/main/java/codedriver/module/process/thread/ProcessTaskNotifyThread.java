@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.thread;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
@@ -11,17 +16,15 @@ import codedriver.framework.process.column.core.ProcessTaskUtil;
 import codedriver.framework.process.dao.mapper.ProcessStepHandlerMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
-import codedriver.framework.process.dto.ProcessTaskStepNotifyPolicyVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.exception.process.ProcessStepUtilHandlerNotFoundException;
-import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyTriggerType;
+import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepInternalHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepInternalHandlerFactory;
 import codedriver.framework.util.NotifyPolicyUtil;
-import codedriver.framework.process.service.ProcessTaskService;
-import com.alibaba.fastjson.JSON;
+import codedriver.module.process.message.handler.ProcessTaskMessageHandler;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -38,31 +41,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Title: NotifyHandler
- * @Package codedriver.module.process.thread
- * @Description: TODO
- * @Author: linbq
- * @Date: 2021/1/20 17:21
- * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
 @Service
 public class ProcessTaskNotifyThread extends CodeDriverThread {
-    private static Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProcessTaskActionThread.class);
     private static ProcessTaskMapper processTaskMapper;
     private static SelectContentByHashMapper selectContentByHashMapper;
     private static ProcessStepHandlerMapper processStepHandlerMapper;
     private static NotifyMapper notifyMapper;
     private static ProcessTaskService processTaskService;
+
     @Autowired
     public void setProcessTaskService(ProcessTaskService _processTaskService) {
         processTaskService = _processTaskService;
     }
+
     @Autowired
     public void setProcessTaskMapper(ProcessTaskMapper _processTaskMapper) {
         processTaskMapper = _processTaskMapper;
     }
+
     @Autowired
     public void setSelectContentByHashMapper(SelectContentByHashMapper _selectContentByHashMapper) {
         selectContentByHashMapper = _selectContentByHashMapper;
@@ -72,6 +69,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
     public void setProcessStepHandlerMapper(ProcessStepHandlerMapper _processStepHandlerMapper) {
         processStepHandlerMapper = _processStepHandlerMapper;
     }
+
     @Autowired
     public void setNotifyMapper(NotifyMapper _notifyMapper) {
         notifyMapper = _notifyMapper;
@@ -80,13 +78,14 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
     private ProcessTaskStepVo currentProcessTaskStepVo;
     private INotifyTriggerType notifyTriggerType;
 
-    public ProcessTaskNotifyThread(){}
+    public ProcessTaskNotifyThread() {
+        super("PROCESSTASK-NOTIFY");
+    }
+
     public ProcessTaskNotifyThread(ProcessTaskStepVo _currentProcessTaskStepVo, INotifyTriggerType _trigger) {
+        super("PROCESSTASK-NOTIFY" + (_currentProcessTaskStepVo != null ? "-" + _currentProcessTaskStepVo.getId() : ""));
         currentProcessTaskStepVo = _currentProcessTaskStepVo;
         notifyTriggerType = _trigger;
-        if (_currentProcessTaskStepVo != null) {
-            this.setThreadName("PROCESSTASK-NOTIFY-" + _currentProcessTaskStepVo.getId());
-        }
     }
 
     @Override
@@ -103,14 +102,14 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                     policyId = notifyPolicyConfig.getLong("policyId");
                 }
             } else {
-                /** 获取步骤配置信息 **/
-                ProcessTaskStepVo stepVo =  processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
+                /* 获取步骤配置信息 **/
+                ProcessTaskStepVo stepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
                 IProcessStepInternalHandler processStepUtilHandler = ProcessStepInternalHandlerFactory.getHandler(stepVo.getHandler());
                 if (processStepUtilHandler == null) {
                     throw new ProcessStepUtilHandlerNotFoundException(stepVo.getHandler());
                 }
                 String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(stepVo.getConfigHash());
-                notifyPolicyConfig = (JSONObject)JSONPath.read(stepConfig, "notifyPolicyConfig");
+                notifyPolicyConfig = (JSONObject) JSONPath.read(stepConfig, "notifyPolicyConfig");
                 if (MapUtils.isNotEmpty(notifyPolicyConfig)) {
                     policyId = notifyPolicyConfig.getLong("policyId");
                 }
@@ -128,7 +127,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                 }
             }
 
-            /** 从步骤配置信息中获取通知策略信息 **/
+            /* 从步骤配置信息中获取通知策略信息 **/
             if (policyId != null) {
                 NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
                 if (notifyPolicyVo != null) {
@@ -141,7 +140,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                         JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
                         Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
                         processTaskService.getReceiverMap(currentProcessTaskStepVo, receiverMap);
-                        /** 参数映射列表 **/
+                        /* 参数映射列表 **/
                         List<ParamMappingVo> paramMappingList = new ArrayList<>();
                         JSONArray paramMappingArray = notifyPolicyConfig.getJSONArray("paramMappingList");
                         if (CollectionUtils.isNotEmpty(paramMappingArray)) {

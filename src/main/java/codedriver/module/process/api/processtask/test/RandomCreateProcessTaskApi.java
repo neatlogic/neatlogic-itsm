@@ -126,7 +126,7 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                 completeJson.put("processTaskStepId", stepUserVo.getProcessTaskStepId());
                 completeJson.put("action", "complete");
                 completeJson.put("nextStepId", processTaskNextStepMap.get(String.format("%s_%s", stepUserVo.getProcessTaskId(), stepUserVo.getProcessTaskStepId())));
-                completeProcessApi.doService(PrivateApiComponentFactory.getApiByToken(completeProcessApi.getToken()), completeJson,null);
+                completeProcessApi.doService(PrivateApiComponentFactory.getApiByToken(completeProcessApi.getToken()), completeJson, null);
             }
         });
     }
@@ -166,11 +166,12 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
         private final Integer startIndex;
         private final Integer endIndex;
 
-        public MyCreateThread(Integer startIndex,Integer endIndex) {
-            super();
+        public MyCreateThread(Integer startIndex, Integer endIndex) {
+            super("RANDOM-CREATE-PROCESSTASK");
             this.startIndex = startIndex;
             this.endIndex = endIndex;
         }
+
         @SuppressWarnings("unchecked")
         public void execute() {
             JSONObject paramJson = new JSONObject();
@@ -186,9 +187,9 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
             for (int i = startIndex; i < endIndex; i++) {
 
                 try {
-                    int randomChannelIndex = (int) Math.round(Math.random() * (channelKeyValueList.size()-1));
-                    int randomUserIndex = (int) Math.round(Math.random() * (userList.size()-1));
-                    int randomPriorityIndex = (int) Math.round(Math.random() * (priorityKeyValueList.size()-1));
+                    int randomChannelIndex = (int) Math.round(Math.random() * (channelKeyValueList.size() - 1));
+                    int randomUserIndex = (int) Math.round(Math.random() * (userList.size() - 1));
+                    int randomPriorityIndex = (int) Math.round(Math.random() * (priorityKeyValueList.size() - 1));
                     ValueTextVo channelValueText = channelKeyValueList.get(randomChannelIndex);
                     UserVo ownerVo = userList.get(randomUserIndex);
                     ValueTextVo priorityValueText = priorityKeyValueList.get(randomPriorityIndex);
@@ -197,28 +198,28 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                     paramJson.put("title", String.format("%s 上报了 服务为 '%s' ,优先级为 '%s' 的工单", ownerVo.getUserName(), channelValueText.getText(), priorityValueText.getText()));
                     paramJson.put("owner", ownerVo.getUuid());
                     paramJson.put("priorityUuid", priorityValueText.getValue());
-                    int startContentIndex = (int) Math.round(Math.random() * (Text.text.length()-1));
-                    int endContentIndex = (int) Math.round(Math.random() * (Text.text.length()-1));
-                    if(startContentIndex > endContentIndex){
-                        int tmpIndex = startContentIndex ;
+                    int startContentIndex = (int) Math.round(Math.random() * (Text.text.length() - 1));
+                    int endContentIndex = (int) Math.round(Math.random() * (Text.text.length() - 1));
+                    if (startContentIndex > endContentIndex) {
+                        int tmpIndex = startContentIndex;
                         startContentIndex = endContentIndex;
                         endContentIndex = tmpIndex;
                     }
-                    paramJson.put("content", Text.text.substring(startContentIndex,endContentIndex));
+                    paramJson.put("content", Text.text.substring(startContentIndex, endContentIndex));
                     //暂存
                     paramJson.put("isNeedValid", 1);
                     paramJson.put("hidecomponentList", new JSONArray());
                     paramJson.put("readcomponentList", new JSONArray());
 
                     ProcessTaskDraftSaveApi draftSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
-                    JSONObject saveResultObj = JSONObject.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson,null).toString());
+                    JSONObject saveResultObj = JSONObject.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson, null).toString());
                     saveResultObj.put("action", "start");
                     //查询可执行下一步骤
-                    List<ProcessTaskStepVo> nextStepList =  processtaskMapper.getToProcessTaskStepByFromIdAndType(saveResultObj.getLong("processTaskStepId"), null);
-                    saveResultObj.put("nextStepId", nextStepList.get((int) Math.round(Math.random() * (nextStepList.size()-1))).getId());
+                    List<ProcessTaskStepVo> nextStepList = processtaskMapper.getToProcessTaskStepByFromIdAndType(saveResultObj.getLong("processTaskStepId"), null);
+                    saveResultObj.put("nextStepId", nextStepList.get((int) Math.round(Math.random() * (nextStepList.size() - 1))).getId());
                     //流转
                     ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
-                    startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()), saveResultObj,null);
+                    startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()), saveResultObj, null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
