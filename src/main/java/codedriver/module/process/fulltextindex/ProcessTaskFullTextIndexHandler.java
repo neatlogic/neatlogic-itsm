@@ -9,6 +9,7 @@ import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerBase;
 import codedriver.framework.fulltextindex.core.IFullTextIndexType;
+import codedriver.framework.fulltextindex.dto.fulltextindex.FullTextIndexTypeVo;
 import codedriver.framework.fulltextindex.dto.fulltextindex.FullTextIndexVo;
 import codedriver.framework.fulltextindex.dto.globalsearch.DocumentVo;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
@@ -90,7 +91,7 @@ public class ProcessTaskFullTextIndexHandler extends FullTextIndexHandlerBase {
     }
 
     @Override
-    public void myRebuildIndex(String type, Boolean isRebuildAll) {
+    public void myRebuildIndex(FullTextIndexTypeVo fullTextIndexTypeVo) {
 
     }
 }

@@ -19,7 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+@Deprecated
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
 @AuthAction(action = PROCESS_BASE.class)
