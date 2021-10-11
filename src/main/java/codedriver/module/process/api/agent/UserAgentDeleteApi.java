@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Deprecated
 @Service
 @OperationType(type = OperationTypeEnum.DELETE)
 @AuthAction(action = PROCESS_BASE.class)
