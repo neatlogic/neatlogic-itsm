@@ -32,6 +32,7 @@ import codedriver.module.process.service.CatalogService;
 import codedriver.framework.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -102,17 +103,26 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         Long processTaskId = jsonObj.getLong("processTaskId");
         Long copyProcessTaskId = jsonObj.getLong("copyProcessTaskId");
         String channelUuid = jsonObj.getString("channelUuid");
+        ProcessTaskVo processTaskVo = null;
         if (processTaskId != null) {
-            return getProcessTaskVoByProcessTaskId(processTaskId);
+            processTaskVo=  getProcessTaskVoByProcessTaskId(processTaskId);
         } else if (copyProcessTaskId != null) {
-            return getProcessTaskVoByCopyProcessTaskId(copyProcessTaskId);
+            processTaskVo =  getProcessTaskVoByCopyProcessTaskId(copyProcessTaskId);
         } else if (channelUuid != null) {
             Long fromProcessTaskId = jsonObj.getLong("fromProcessTaskId");
             Long channelTypeRelationId = jsonObj.getLong("channelTypeRelationId");
-            return getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, channelTypeRelationId);
+            processTaskVo =  getProcessTaskVoByChannelUuid(channelUuid, fromProcessTaskId, channelTypeRelationId);
         } else {
             throw new ParamNotExistsException("processTaskId", "copyProcessTaskId", "channelUuid");
         }
+        //如果不存在优先级List则默认不显示优先级
+        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
+        if (CollectionUtils.isNotEmpty(channelPriorityList)) {
+            processTaskVo.setIsNeedPriority(1);
+        }else{
+            processTaskVo.setIsNeedPriority(0);
+        }
+        return processTaskVo;
     }
 
     /**
