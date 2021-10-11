@@ -8,6 +8,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -58,6 +59,9 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 
 	@Resource
 	private AuthenticationInfoService authenticationInfoService;
+
+	@Resource
+	private ProcessTaskAgentService processTaskAgentService;
 
 	@Override
 	public String getToken() {
