@@ -317,11 +317,15 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             throw new UserNotFoundException(processTaskVo.getOwner());
         }
         if (StringUtils.isBlank(processTaskVo.getPriorityUuid())) {
-            throw new ProcessTaskPriorityIsEmptyException();
+            //且存在channelPriorityList,则优先级必填
+            List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
+            if (CollectionUtils.isNotEmpty(channelPriorityList)) {
+                throw new ProcessTaskPriorityIsEmptyException();
+            }
         }
         List<ChannelPriorityVo> channelPriorityList =
                 channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
-        if (!channelPriorityList.stream().anyMatch(o -> o.getPriorityUuid().equals(processTaskVo.getPriorityUuid()))) {
+        if (CollectionUtils.isNotEmpty(channelPriorityList) && channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(processTaskVo.getPriorityUuid()))) {
             throw new ProcessTaskPriorityNotMatchException();
         }
 

@@ -27,14 +27,15 @@ import codedriver.framework.process.exception.core.ProcessTaskPriorityNotMatchEx
 import codedriver.framework.process.exception.process.ProcessNotFoundException;
 import codedriver.framework.process.exception.process.ProcessStepHandlerNotFoundException;
 import codedriver.framework.process.fulltextindex.ProcessFullTextIndexType;
+import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.process.service.CatalogService;
-import codedriver.framework.process.service.ProcessTaskService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -130,8 +131,11 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
          * 如果不校验优先级，那么会出现批量上报记录显示上报失败，
          * 而实际上已经生成工单，只是状态是草稿
          */
+        if(StringUtils.isBlank(jsonObj.getString("priorityUuid"))){//如果为空字符串，则为null
+            jsonObj.put("priorityUuid",null);
+        }
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
-        if (!channelPriorityList.stream().anyMatch(o -> o.getPriorityUuid().equals(jsonObj.getString("priorityUuid")))) {
+        if (CollectionUtils.isNotEmpty(channelPriorityList) && channelPriorityList.stream().noneMatch(o -> o.getPriorityUuid().equals(jsonObj.getString("priorityUuid")))) {
             throw new ProcessTaskPriorityNotMatchException();
         }
         String owner = jsonObj.getString("owner");
