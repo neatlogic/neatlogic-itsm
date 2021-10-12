@@ -1,7 +1,6 @@
 package codedriver.module.process.api.channeltype.relation;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessUserType;
@@ -22,7 +21,6 @@ import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.framework.process.service.ProcessTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -42,17 +40,14 @@ import javax.annotation.Resource;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ChannelTypeMapper channelTypeMapper;
 
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
 
-    @Autowired
+    @Resource
     private ProcessTaskMapper processTaskMapper;
-
-    @Autowired
-    private UserMapper userMapper;
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
@@ -106,11 +101,12 @@ public class ChannelTypeRelationListForSelectApi extends PrivateApiComponentBase
             AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
             Long processTaskId = jsonObj.getLong("processTaskId");
             channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, authenticationInfoVo));
-            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
-            if(StringUtils.isNotBlank(agentUuid)){
-                AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
-                channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, agentAuthenticationInfoVo));
-            }
+            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+//            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
+//            if(StringUtils.isNotBlank(agentUuid)){
+//                AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
+//                channelTypeRelationIdSet.addAll(getChannelTypeRelationIdList(sourceChannelUuid, processTaskId, agentAuthenticationInfoVo));
+//            }
             channelTypeRelationVo.setIdList(new ArrayList<>(channelTypeRelationIdSet));
         }
         if (!channelTypeRelationVo.isUseIdList() || CollectionUtils.isNotEmpty(channelTypeRelationVo.getIdList())) {

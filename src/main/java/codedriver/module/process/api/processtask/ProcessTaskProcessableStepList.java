@@ -6,17 +6,17 @@ import java.util.concurrent.TimeUnit;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessUserType;
@@ -35,17 +35,16 @@ import javax.annotation.Resource;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	private ProcessTaskMapper processTaskMapper;
     
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
-    
-    @Autowired
-    private UserMapper userMapper;
 
 	@Resource
 	private AuthenticationInfoService authenticationInfoService;
+	@Resource
+	private ProcessTaskAgentService processTaskAgentService;
 
 	@Override
 	public String getToken() {
@@ -73,7 +72,7 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long processTaskId = jsonObj.getLong("processTaskId");
-		processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		for(int i = 0; i < 10; i++) {
 		    if(processTaskMapper.getProcessTaskStepInOperationCountByProcessTaskId(processTaskId) == 0) {
 		        break;
@@ -83,14 +82,22 @@ public class ProcessTaskProcessableStepList extends PrivateApiComponentBase {
 		    
 		List<ProcessTaskStepVo> processableStepList = getProcessableStepList(processTaskId, UserContext.get().getUserUuid(true));
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
-        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-        if(StringUtils.isNotBlank(userUuid)) {
-            for(ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid)) {
-                if(!processableStepList.contains(processTaskStepVo)) {
-                    processableStepList.add(processTaskStepVo);
-                }
-            }
-        }
+		List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
+		for (String userUuid : fromUserUUidList) {
+			for(ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid)) {
+				if(!processableStepList.contains(processTaskStepVo)) {
+					processableStepList.add(processTaskStepVo);
+				}
+			}
+		}
+//        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+//        if(StringUtils.isNotBlank(userUuid)) {
+//            for(ProcessTaskStepVo processTaskStepVo : getProcessableStepList(processTaskId, userUuid)) {
+//                if(!processableStepList.contains(processTaskStepVo)) {
+//                    processableStepList.add(processTaskStepVo);
+//                }
+//            }
+//        }
 		String action = jsonObj.getString("action");
 		if(StringUtils.isNotBlank(action)) {
 			Iterator<ProcessTaskStepVo> iterator = processableStepList.iterator();

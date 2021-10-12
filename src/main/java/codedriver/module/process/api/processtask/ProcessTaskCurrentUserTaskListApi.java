@@ -9,12 +9,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.service.AuthenticationInfoService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,9 +47,6 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
 
     @Autowired
     private ProcessTaskMapper processTaskMapper;
-
-    @Autowired
-    private UserMapper userMapper;
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
@@ -100,17 +95,17 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
         ProcessTaskStepWorkerVo searchVo = JSON.toJavaObject(jsonObj, ProcessTaskStepWorkerVo.class);
         List<String> userUuidList = new ArrayList<>();
         userUuidList.add(currentUserUuid);
-        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(currentUserUuid, "processtask");
-        if (StringUtils.isNotBlank(userUuid)) {
-            userUuidList.add(userUuid);
-        }
+        //TODO linbq 没想好怎么改
+//        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(currentUserUuid, "processtask");
+//        if (StringUtils.isNotBlank(userUuid)) {
+//            userUuidList.add(userUuid);
+//        }
         searchVo.setProcessTaskId(currentProcessTaskId);
         searchVo.setUserUuidList(userUuidList);
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuidList);
         searchVo.setTeamUuidList(authenticationInfoVo.getTeamUuidList());
         searchVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
-        int rowNum =
-            processTaskMapper.getProcessTaskStepWorkerCountByProcessTaskIdUserUuidTeamUuidListRoleUuidList(searchVo);
+        int rowNum = processTaskMapper.getProcessTaskStepWorkerCountByProcessTaskIdUserUuidTeamUuidListRoleUuidList(searchVo);
         if (rowNum > 0) {
             int pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
             if (!searchVo.getNeedPage() || searchVo.getCurrentPage() <= pageCount) {

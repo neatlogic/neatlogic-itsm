@@ -4,15 +4,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
 import codedriver.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -41,20 +38,17 @@ import javax.annotation.Resource;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	private CatalogService catalogService;
 
-	@Autowired
+	@Resource
 	private CatalogMapper catalogMapper;
 	
-	@Autowired
+	@Resource
 	private ChannelMapper channelMapper;
 
-	@Autowired
+	@Resource
 	private ChannelTypeMapper channelTypeMapper;
-
-	@Autowired
-	private UserMapper userMapper;
 
 	@Resource
 	private AuthenticationInfoService authenticationInfoService;
@@ -118,16 +112,17 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 		AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
 		//已授权的服务uuid
 		List<String> currentUserAuthorizedChannelUuidList = channelMapper.getAuthorizedChannelUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
-		String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-		if(StringUtils.isNotBlank(agentUuid)){
-			AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
-			for(String authorizedChannelUuid : channelMapper.getAuthorizedChannelUuidList(agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), null)){
-				if(currentUserAuthorizedChannelUuidList.contains(authorizedChannelUuid)){
-					continue;
-				}
-				currentUserAuthorizedChannelUuidList.add(authorizedChannelUuid);
-			}
-		}
+		/** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+//		String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+//		if(StringUtils.isNotBlank(agentUuid)){
+//			AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
+//			for(String authorizedChannelUuid : channelMapper.getAuthorizedChannelUuidList(agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), null)){
+//				if(currentUserAuthorizedChannelUuidList.contains(authorizedChannelUuid)){
+//					continue;
+//				}
+//				currentUserAuthorizedChannelUuidList.add(authorizedChannelUuid);
+//			}
+//		}
 		if(CollectionUtils.isEmpty(currentUserAuthorizedChannelUuidList)) {
 			return resultObj;
 		}
@@ -153,15 +148,16 @@ public class CalalogBreadcrumbApi extends PrivateApiComponentBase {
 			}
 			//已授权的目录uuid
 			List<String> currentUserAuthorizedCatalogUuidList = catalogMapper.getAuthorizedCatalogUuidList(UserContext.get().getUserUuid(true), authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), null);
-			if(StringUtils.isNotBlank(agentUuid)){
-				AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
-				for(String authorizedCatalogUuid : catalogMapper.getAuthorizedCatalogUuidList(agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), null)){
-					if(currentUserAuthorizedCatalogUuidList.contains(authorizedCatalogUuid)){
-						continue;
-					}
-					currentUserAuthorizedCatalogUuidList.add(authorizedCatalogUuid);
-				}
-			}
+			/** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+//			if(StringUtils.isNotBlank(agentUuid)){
+//				AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
+//				for(String authorizedCatalogUuid : catalogMapper.getAuthorizedCatalogUuidList(agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), null)){
+//					if(currentUserAuthorizedCatalogUuidList.contains(authorizedCatalogUuid)){
+//						continue;
+//					}
+//					currentUserAuthorizedCatalogUuidList.add(authorizedCatalogUuid);
+//				}
+//			}
 			Map<String, CatalogVo> uuidKeyMap = new HashMap<>();
 			for(CatalogVo catalogVo : catalogList) {
 				if(currentUserAuthorizedCatalogUuidList.contains(catalogVo.getUuid())) {

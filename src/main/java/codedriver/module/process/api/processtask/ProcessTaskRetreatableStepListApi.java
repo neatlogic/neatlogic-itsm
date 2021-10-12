@@ -2,33 +2,35 @@ package codedriver.module.process.api.processtask;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.service.ProcessTaskAgentService;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.service.ProcessTaskService;
+
+import javax.annotation.Resource;
+
 @Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase {
     
-    @Autowired
+    @Resource
     private ProcessTaskService processTaskService;
-    @Autowired
-    private UserMapper userMapper;
+	@Resource
+	private ProcessTaskAgentService processTaskAgentService;
 	
 	@Override
 	public String getToken() {
@@ -57,15 +59,24 @@ public class ProcessTaskRetreatableStepListApi extends PrivateApiComponentBase {
 		ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
 		Set<ProcessTaskStepVo> resultList = processTaskService.getRetractableStepListByProcessTask(processTaskVo, UserContext.get().getUserUuid(true));
 		/** 如果当前用户接受了其他用户的授权，查出其他用户拥有的权限，叠加当前用户权限里 **/
-        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-        if(StringUtils.isNotBlank(userUuid)) {
-            Set<ProcessTaskStepVo> retractableStepList = processTaskService.getRetractableStepListByProcessTask(processTaskVo, userUuid);
-            for(ProcessTaskStepVo processTaskStepVo : retractableStepList) {
-                if(!resultList.contains(processTaskStepVo)) {
-                    resultList.add(processTaskStepVo);
-                }
-            }
-        }
+		List<String> fromUserUUidList = processTaskAgentService.getFromUserUuidListByToUserUuidAndChannelUuid(UserContext.get().getUserUuid(true), processTaskVo.getChannelUuid());
+		for (String userUuid : fromUserUUidList) {
+			Set<ProcessTaskStepVo> retractableStepList = processTaskService.getRetractableStepListByProcessTask(processTaskVo, userUuid);
+			for(ProcessTaskStepVo processTaskStepVo : retractableStepList) {
+				if(!resultList.contains(processTaskStepVo)) {
+					resultList.add(processTaskStepVo);
+				}
+			}
+		}
+//        String userUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+//        if(StringUtils.isNotBlank(userUuid)) {
+//            Set<ProcessTaskStepVo> retractableStepList = processTaskService.getRetractableStepListByProcessTask(processTaskVo, userUuid);
+//            for(ProcessTaskStepVo processTaskStepVo : retractableStepList) {
+//                if(!resultList.contains(processTaskStepVo)) {
+//                    resultList.add(processTaskStepVo);
+//                }
+//            }
+//        }
         return resultList;
 	}
 
