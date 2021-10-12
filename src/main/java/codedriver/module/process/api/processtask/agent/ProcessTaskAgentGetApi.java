@@ -29,53 +29,54 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ProcessTaskAgentGetApi extends PrivateApiComponentBase {
 
-	@Resource
-	private ProcessTaskAgentMapper processTaskAgentMapper;
-	
-	@Override
-	public String getToken() {
-		return "processtask/agent/get";
-	}
+    @Resource
+    private ProcessTaskAgentMapper processTaskAgentMapper;
 
-	@Override
-	public String getName() {
-		return "获取用户任务授权信息";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/agent/get";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return "获取用户任务授权信息";
+    }
 
-	@Input({})
-	@Output({
-			@Param(explode = ProcessTaskAgentInfoVo.class, desc = "任务授权信息")
-	})
-	@Description(desc = "获取用户任务授权信息")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String fromUserUuid = UserContext.get().getUserUuid(true);
-		List<ProcessTaskAgentVo> processTaskAgentList = processTaskAgentMapper.getProcessTaskAgentListByFromUserUuid(fromUserUuid);
-		if (CollectionUtils.isNotEmpty(processTaskAgentList)) {
-			List<ProcessTaskAgentCompobVo> combopList = new ArrayList<>();
-			for (ProcessTaskAgentVo processTaskAgentVo : processTaskAgentList) {
-				List<String> targetList = new ArrayList<>();
-				List<ProcessTaskAgentTargetVo> processTaskAgentTargetList = processTaskAgentMapper.getProcessTaskAgentTargetListByProcessTaskAgentId(processTaskAgentVo.getId());
-				for (ProcessTaskAgentTargetVo processTaskAgentTargetVo : processTaskAgentTargetList) {
-					targetList.add(processTaskAgentTargetVo.getType() + "#" + processTaskAgentTargetVo.getTarget());
-				}
-				ProcessTaskAgentCompobVo processTaskAgentCompobVo = new ProcessTaskAgentCompobVo();
-				processTaskAgentCompobVo.setToUserUuid(processTaskAgentVo.getToUserUuid());
-				processTaskAgentCompobVo.setTargetList(targetList);
-				combopList.add(processTaskAgentCompobVo);
-			}
-			ProcessTaskAgentVo processTaskAgentVo = processTaskAgentList.get(0);
-			ProcessTaskAgentInfoVo processTaskAgentInfoVo = new ProcessTaskAgentInfoVo();
-			processTaskAgentInfoVo.setBeginTime(processTaskAgentVo.getBeginTime());
-			processTaskAgentInfoVo.setEndTime(processTaskAgentVo.getEndTime());
-			processTaskAgentInfoVo.setCompobList(combopList);
-			return processTaskAgentInfoVo;
-		}
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({})
+    @Output({
+            @Param(explode = ProcessTaskAgentInfoVo.class, desc = "任务授权信息")
+    })
+    @Description(desc = "获取用户任务授权信息")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        String fromUserUuid = UserContext.get().getUserUuid(true);
+        List<ProcessTaskAgentVo> processTaskAgentList = processTaskAgentMapper.getProcessTaskAgentListByFromUserUuid(fromUserUuid);
+        if (CollectionUtils.isNotEmpty(processTaskAgentList)) {
+            List<ProcessTaskAgentCompobVo> combopList = new ArrayList<>();
+            for (ProcessTaskAgentVo processTaskAgentVo : processTaskAgentList) {
+                List<String> targetList = new ArrayList<>();
+                List<ProcessTaskAgentTargetVo> processTaskAgentTargetList = processTaskAgentMapper.getProcessTaskAgentTargetListByProcessTaskAgentId(processTaskAgentVo.getId());
+                for (ProcessTaskAgentTargetVo processTaskAgentTargetVo : processTaskAgentTargetList) {
+                    targetList.add(processTaskAgentTargetVo.getType() + "#" + processTaskAgentTargetVo.getTarget());
+                }
+                ProcessTaskAgentCompobVo processTaskAgentCompobVo = new ProcessTaskAgentCompobVo();
+                processTaskAgentCompobVo.setToUserUuid(processTaskAgentVo.getToUserUuid());
+                processTaskAgentCompobVo.setTargetList(targetList);
+                combopList.add(processTaskAgentCompobVo);
+            }
+            ProcessTaskAgentVo processTaskAgentVo = processTaskAgentList.get(0);
+            ProcessTaskAgentInfoVo processTaskAgentInfoVo = new ProcessTaskAgentInfoVo();
+            processTaskAgentInfoVo.setBeginTime(processTaskAgentVo.getBeginTime());
+            processTaskAgentInfoVo.setEndTime(processTaskAgentVo.getEndTime());
+            processTaskAgentInfoVo.setIsActive(processTaskAgentVo.getIsActive());
+            processTaskAgentInfoVo.setCompobList(combopList);
+            return processTaskAgentInfoVo;
+        }
+        return null;
+    }
 }
