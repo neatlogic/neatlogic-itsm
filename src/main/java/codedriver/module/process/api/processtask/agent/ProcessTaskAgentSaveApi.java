@@ -30,7 +30,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -100,30 +99,19 @@ public class ProcessTaskAgentSaveApi extends PrivateApiComponentBase {
             }
             processTaskAgentVo.setToUserUuid(toUserUuid);
             processTaskAgentMapper.insertProcessTaskAgent(processTaskAgentVo);
-//            ProcessTaskAgentTargetVo processTaskAgentTargetVo = new ProcessTaskAgentTargetVo();
-//            processTaskAgentTargetVo.setProcessTaskAgentId(processTaskAgentVo.getId());
             List<ProcessTaskAgentTargetVo> targetList = compobVo.getTargetList();
             for (ProcessTaskAgentTargetVo target : targetList) {
+                if ("channel".equals(target.getType())) {
+                    if (channelMapper.checkChannelIsExists(target.getTarget()) == 0) {
+                        throw new ChannelNotFoundException(target.getTarget());
+                    }
+                } else if ("catalog".equals(target.getType())) {
+                    if (catalogMapper.checkCatalogIsExists(target.getTarget()) == 0) {
+                        throw new CatalogNotFoundException(target.getTarget());
+                    }
+                }
                 target.setProcessTaskAgentId(processTaskAgentVo.getId());
                 processTaskAgentMapper.insertProcessTaskAgentTarget(target);
-//                if (target.contains("#")) {
-//                    String[] split = target.split("#");
-//                    if ("channel".equals(split[0])) {
-//                        if (channelMapper.checkChannelIsExists(split[1]) == 0) {
-//                            throw new ChannelNotFoundException(split[1]);
-//                        }
-//                        processTaskAgentTargetVo.setType(split[0]);
-//                        processTaskAgentTargetVo.setTarget(split[1]);
-//                        processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
-//                    } else if ("catalog".equals(split[0])) {
-//                        if (catalogMapper.checkCatalogIsExists(split[1]) == 0) {
-//                            throw new CatalogNotFoundException(split[1]);
-//                        }
-//                        processTaskAgentTargetVo.setType(split[0]);
-//                        processTaskAgentTargetVo.setTarget(split[1]);
-//                        processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
-//                    }
-//                }
             }
         }
         return null;
