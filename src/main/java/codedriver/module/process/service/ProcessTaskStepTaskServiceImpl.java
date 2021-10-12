@@ -122,6 +122,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         processTaskStepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(processTaskStepTaskVo.getId())));
         IProcessStepHandlerUtil.audit(processTaskStepVo, auditType);
         IProcessStepHandlerUtil.notify(processTaskStepVo, triggerType);
+        IProcessStepHandlerUtil.action(processTaskStepVo, triggerType);
     }
 
 
@@ -189,6 +190,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         }
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMPLETETASK);
         IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.COMPLETETASK);
+        IProcessStepHandlerUtil.action(processTaskStepVo, TaskNotifyTriggerType.COMPLETETASK);
 
         //新增回复
         Long processTaskStepTaskUserContentId;

@@ -105,6 +105,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETETASK);
         IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.DELETETASK);
+        IProcessStepHandlerUtil.action(processTaskStepVo, TaskNotifyTriggerType.DELETETASK);
         return null;
     }
 }
