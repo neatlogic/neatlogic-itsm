@@ -8,6 +8,7 @@ package codedriver.module.process.api.processtask.agent;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.exception.user.*;
@@ -91,33 +92,38 @@ public class ProcessTaskAgentSaveApi extends PrivateApiComponentBase {
         for (ProcessTaskAgentCompobVo compobVo : compobList) {
             processTaskAgentVo.setId(null);
             String toUserUuid = compobVo.getToUserUuid();
+            if (toUserUuid.contains(GroupSearch.USER.getValuePlugin())) {
+                toUserUuid = toUserUuid.substring(5);
+            }
             if (userMapper.checkUserIsExists(toUserUuid) == 0) {
                 throw new UserNotFoundException(toUserUuid);
             }
             processTaskAgentVo.setToUserUuid(toUserUuid);
             processTaskAgentMapper.insertProcessTaskAgent(processTaskAgentVo);
-            ProcessTaskAgentTargetVo processTaskAgentTargetVo = new ProcessTaskAgentTargetVo();
-            processTaskAgentTargetVo.setProcessTaskAgentId(processTaskAgentVo.getId());
-            List<String> targetList = compobVo.getTargetList();
-            for (String target : targetList) {
-                if (target.contains("#")) {
-                    String[] split = target.split("#");
-                    if ("channel".equals(split[0])) {
-                        if (channelMapper.checkChannelIsExists(split[1]) == 0) {
-                            throw new ChannelNotFoundException(split[1]);
-                        }
-                        processTaskAgentTargetVo.setType(split[0]);
-                        processTaskAgentTargetVo.setTarget(split[1]);
-                        processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
-                    } else if ("catalog".equals(split[0])) {
-                        if (catalogMapper.checkCatalogIsExists(split[1]) == 0) {
-                            throw new CatalogNotFoundException(split[1]);
-                        }
-                        processTaskAgentTargetVo.setType(split[0]);
-                        processTaskAgentTargetVo.setTarget(split[1]);
-                        processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
-                    }
-                }
+//            ProcessTaskAgentTargetVo processTaskAgentTargetVo = new ProcessTaskAgentTargetVo();
+//            processTaskAgentTargetVo.setProcessTaskAgentId(processTaskAgentVo.getId());
+            List<ProcessTaskAgentTargetVo> targetList = compobVo.getTargetList();
+            for (ProcessTaskAgentTargetVo target : targetList) {
+                target.setProcessTaskAgentId(processTaskAgentVo.getId());
+                processTaskAgentMapper.insertProcessTaskAgentTarget(target);
+//                if (target.contains("#")) {
+//                    String[] split = target.split("#");
+//                    if ("channel".equals(split[0])) {
+//                        if (channelMapper.checkChannelIsExists(split[1]) == 0) {
+//                            throw new ChannelNotFoundException(split[1]);
+//                        }
+//                        processTaskAgentTargetVo.setType(split[0]);
+//                        processTaskAgentTargetVo.setTarget(split[1]);
+//                        processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
+//                    } else if ("catalog".equals(split[0])) {
+//                        if (catalogMapper.checkCatalogIsExists(split[1]) == 0) {
+//                            throw new CatalogNotFoundException(split[1]);
+//                        }
+//                        processTaskAgentTargetVo.setType(split[0]);
+//                        processTaskAgentTargetVo.setTarget(split[1]);
+//                        processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
+//                    }
+//                }
             }
         }
         return null;
