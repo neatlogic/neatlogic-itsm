@@ -37,90 +37,90 @@ import java.util.List;
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskAgentSaveApi extends PrivateApiComponentBase {
 
-	@Resource
-	private ProcessTaskAgentMapper processTaskAgentMapper;
-	@Resource
-	private UserMapper userMapper;
-	@Resource
-	private ChannelMapper channelMapper;
-	@Resource
-	private CatalogMapper catalogMapper;
+    @Resource
+    private ProcessTaskAgentMapper processTaskAgentMapper;
+    @Resource
+    private UserMapper userMapper;
+    @Resource
+    private ChannelMapper channelMapper;
+    @Resource
+    private CatalogMapper catalogMapper;
 
-	@Override
-	public String getToken() {
-		return "processtask/agent/save";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/agent/save";
+    }
 
-	@Override
-	public String getName() {
-		return "保存用户任务授权信息";
-	}
+    @Override
+    public String getName() {
+        return "保存用户任务授权信息";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Input({
-		@Param(name = "beginTime", type = ApiParamType.LONG, isRequired = true,desc = "开始时间"),
-		@Param(name = "endTime", type = ApiParamType.LONG, isRequired = true,desc = "结束时间"),
-		@Param(name = "compobList", type = ApiParamType.JSONARRAY, isRequired = true,desc = "授权对象列表")
-	})
-	@Output({})
-	@Description(desc = "保存用户任务授权信息")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		ProcessTaskAgentInfoVo processTaskAgentInfoVo = JSONObject.toJavaObject(jsonObj, ProcessTaskAgentInfoVo.class);
-		List<ProcessTaskAgentCompobVo> compobList = processTaskAgentInfoVo.getCompobList();
-		if (CollectionUtils.isEmpty(compobList)) {
-			throw new ParamIrregularException("compobList");
-		}
-		String fromUserUuid = UserContext.get().getUserUuid(true);
-		List<Long> processTaskAgentIdList = processTaskAgentMapper.getProcessTaskAgentIdListByFromUserUuid(fromUserUuid);
-		if (CollectionUtils.isNotEmpty(processTaskAgentIdList)) {
-			processTaskAgentMapper.deleteProcessTaskAgentByFromUserUuid(fromUserUuid);
-			processTaskAgentMapper.deleteProcessTaskAgentTargetByProcessTaskAgentIdList(processTaskAgentIdList);
-		}
+    @Input({
+            @Param(name = "beginTime", type = ApiParamType.LONG, isRequired = true, desc = "开始时间"),
+            @Param(name = "endTime", type = ApiParamType.LONG, isRequired = true, desc = "结束时间"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "启用"),
+            @Param(name = "compobList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "授权对象列表")
+    })
+    @Output({})
+    @Description(desc = "保存用户任务授权信息")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        ProcessTaskAgentInfoVo processTaskAgentInfoVo = JSONObject.toJavaObject(jsonObj, ProcessTaskAgentInfoVo.class);
+        List<ProcessTaskAgentCompobVo> compobList = processTaskAgentInfoVo.getCompobList();
+        if (CollectionUtils.isEmpty(compobList)) {
+            throw new ParamIrregularException("compobList");
+        }
+        String fromUserUuid = UserContext.get().getUserUuid(true);
+        List<Long> processTaskAgentIdList = processTaskAgentMapper.getProcessTaskAgentIdListByFromUserUuid(fromUserUuid);
+        if (CollectionUtils.isNotEmpty(processTaskAgentIdList)) {
+            processTaskAgentMapper.deleteProcessTaskAgentByFromUserUuid(fromUserUuid);
+            processTaskAgentMapper.deleteProcessTaskAgentTargetByProcessTaskAgentIdList(processTaskAgentIdList);
+        }
 
-		Date beginTime = processTaskAgentInfoVo.getBeginTime();
-		Date endTime = processTaskAgentInfoVo.getEndTime();
-		ProcessTaskAgentVo processTaskAgentVo = new ProcessTaskAgentVo();
-		processTaskAgentVo.setBeginTime(beginTime);
-		processTaskAgentVo.setEndTime(endTime);
-		processTaskAgentVo.setFromUserUuid(fromUserUuid);
-		for (ProcessTaskAgentCompobVo compobVo : compobList) {
-			processTaskAgentVo.setId(null);
-			String toUserUuid = compobVo.getToUserUuid();
-			if (userMapper.checkUserIsExists(toUserUuid) == 0) {
-				throw new UserNotFoundException(toUserUuid);
-			}
-			processTaskAgentVo.setToUserUuid(toUserUuid);
-			processTaskAgentMapper.insertProcessTaskAgent(processTaskAgentVo);
-			ProcessTaskAgentTargetVo processTaskAgentTargetVo = new ProcessTaskAgentTargetVo();
-			processTaskAgentTargetVo.setProcessTaskAgentId(processTaskAgentVo.getId());
-			List<String> targetList = compobVo.getTargetList();
-			for (String target : targetList) {
-				if (target.contains("#")) {
-					String[] split = target.split("#");
-					if ("channel".equals(split[0])) {
-						if (channelMapper.checkChannelIsExists(split[1]) == 0) {
-							throw new ChannelNotFoundException(split[1]);
-						}
-						processTaskAgentTargetVo.setType(split[0]);
-						processTaskAgentTargetVo.setTarget(split[1]);
-						processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
-					} else if ("catalog".equals(split[0])) {
-						if (catalogMapper.checkCatalogIsExists(split[1]) == 0) {
-							throw new CatalogNotFoundException(split[1]);
-						}
-						processTaskAgentTargetVo.setType(split[0]);
-						processTaskAgentTargetVo.setTarget(split[1]);
-						processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
-					}
-				}
-			}
-		}
-		return null;
-	}
+        ProcessTaskAgentVo processTaskAgentVo = new ProcessTaskAgentVo();
+        processTaskAgentVo.setBeginTime(processTaskAgentInfoVo.getBeginTime());
+        processTaskAgentVo.setEndTime(processTaskAgentInfoVo.getEndTime());
+        processTaskAgentVo.setIsActive(processTaskAgentInfoVo.getIsActive());
+        processTaskAgentVo.setFromUserUuid(fromUserUuid);
+        for (ProcessTaskAgentCompobVo compobVo : compobList) {
+            processTaskAgentVo.setId(null);
+            String toUserUuid = compobVo.getToUserUuid();
+            if (userMapper.checkUserIsExists(toUserUuid) == 0) {
+                throw new UserNotFoundException(toUserUuid);
+            }
+            processTaskAgentVo.setToUserUuid(toUserUuid);
+            processTaskAgentMapper.insertProcessTaskAgent(processTaskAgentVo);
+            ProcessTaskAgentTargetVo processTaskAgentTargetVo = new ProcessTaskAgentTargetVo();
+            processTaskAgentTargetVo.setProcessTaskAgentId(processTaskAgentVo.getId());
+            List<String> targetList = compobVo.getTargetList();
+            for (String target : targetList) {
+                if (target.contains("#")) {
+                    String[] split = target.split("#");
+                    if ("channel".equals(split[0])) {
+                        if (channelMapper.checkChannelIsExists(split[1]) == 0) {
+                            throw new ChannelNotFoundException(split[1]);
+                        }
+                        processTaskAgentTargetVo.setType(split[0]);
+                        processTaskAgentTargetVo.setTarget(split[1]);
+                        processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
+                    } else if ("catalog".equals(split[0])) {
+                        if (catalogMapper.checkCatalogIsExists(split[1]) == 0) {
+                            throw new CatalogNotFoundException(split[1]);
+                        }
+                        processTaskAgentTargetVo.setType(split[0]);
+                        processTaskAgentTargetVo.setTarget(split[1]);
+                        processTaskAgentMapper.insertProcessTaskAgentTarget(processTaskAgentTargetVo);
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
 }

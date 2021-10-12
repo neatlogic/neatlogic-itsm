@@ -27,36 +27,36 @@ import java.util.List;
 @AuthAction(action = PROCESS_BASE.class)
 public class ProcessTaskAgentDeleteApi extends PrivateApiComponentBase {
 
-	@Resource
-	private ProcessTaskAgentMapper processTaskAgentMapper;
-	
-	@Override
-	public String getToken() {
-		return "processtask/agent/delete";
-	}
+    @Resource
+    private ProcessTaskAgentMapper processTaskAgentMapper;
 
-	@Override
-	public String getName() {
-		return "删除用户任务授权信息";
-	}
+    @Override
+    public String getToken() {
+        return "processtask/agent/delete";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return "删除用户任务授权信息";
+    }
 
-	@Input({})
-	@Output({})
-	@Description(desc = "删除用户任务授权信息")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String fromUserUuid = UserContext.get().getUserUuid(true);
-		List<Long> processTaskAgentIdList = processTaskAgentMapper.getProcessTaskAgentIdListByFromUserUuid(fromUserUuid);
-		if (CollectionUtils.isNotEmpty(processTaskAgentIdList)) {
-			processTaskAgentMapper.deleteProcessTaskAgentByFromUserUuid(fromUserUuid);
-			processTaskAgentMapper.deleteProcessTaskAgentTargetByProcessTaskAgentIdList(processTaskAgentIdList);
-		}
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({})
+    @Output({})
+    @Description(desc = "删除用户任务授权信息")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        String fromUserUuid = UserContext.get().getUserUuid(true);
+        List<Long> processTaskAgentIdList = processTaskAgentMapper.getProcessTaskAgentIdListByFromUserUuid(fromUserUuid);
+        if (CollectionUtils.isNotEmpty(processTaskAgentIdList)) {
+            processTaskAgentMapper.deleteProcessTaskAgentByFromUserUuid(fromUserUuid);
+            processTaskAgentMapper.deleteProcessTaskAgentTargetByProcessTaskAgentIdList(processTaskAgentIdList);
+        }
+        return null;
+    }
 
 }
