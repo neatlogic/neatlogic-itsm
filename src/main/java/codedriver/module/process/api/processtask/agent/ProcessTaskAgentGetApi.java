@@ -7,6 +7,7 @@ package codedriver.module.process.api.processtask.agent;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ProcessTaskAgentMapper;
 import codedriver.framework.process.dto.agent.ProcessTaskAgentCompobVo;
@@ -59,14 +60,14 @@ public class ProcessTaskAgentGetApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(processTaskAgentList)) {
             List<ProcessTaskAgentCompobVo> combopList = new ArrayList<>();
             for (ProcessTaskAgentVo processTaskAgentVo : processTaskAgentList) {
-                List<String> targetList = new ArrayList<>();
+//                List<String> targetList = new ArrayList<>();
                 List<ProcessTaskAgentTargetVo> processTaskAgentTargetList = processTaskAgentMapper.getProcessTaskAgentTargetListByProcessTaskAgentId(processTaskAgentVo.getId());
-                for (ProcessTaskAgentTargetVo processTaskAgentTargetVo : processTaskAgentTargetList) {
-                    targetList.add(processTaskAgentTargetVo.getType() + "#" + processTaskAgentTargetVo.getTarget());
-                }
+//                for (ProcessTaskAgentTargetVo processTaskAgentTargetVo : processTaskAgentTargetList) {
+//                    targetList.add(processTaskAgentTargetVo.getType() + "#" + processTaskAgentTargetVo.getTarget());
+//                }
                 ProcessTaskAgentCompobVo processTaskAgentCompobVo = new ProcessTaskAgentCompobVo();
-                processTaskAgentCompobVo.setToUserUuid(processTaskAgentVo.getToUserUuid());
-                processTaskAgentCompobVo.setTargetList(targetList);
+                processTaskAgentCompobVo.setToUserUuid(GroupSearch.USER.getValuePlugin() + processTaskAgentVo.getToUserUuid());
+                processTaskAgentCompobVo.setTargetList(processTaskAgentTargetList);
                 combopList.add(processTaskAgentCompobVo);
             }
             ProcessTaskAgentVo processTaskAgentVo = processTaskAgentList.get(0);
