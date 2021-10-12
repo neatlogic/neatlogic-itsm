@@ -115,13 +115,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         } else {
             throw new ParamNotExistsException("processTaskId", "copyProcessTaskId", "channelUuid");
         }
-        //如果不存在优先级List则默认不显示优先级
-        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
-        if (CollectionUtils.isNotEmpty(channelPriorityList)) {
-            processTaskVo.setIsNeedPriority(1);
-        }else{
-            processTaskVo.setIsNeedPriority(0);
-        }
         return processTaskVo;
     }
 
@@ -213,11 +206,16 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
         processTaskVo.setTitle(oldProcessTaskVo.getTitle());
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(oldProcessTaskVo.getChannelUuid());
-        for (ChannelPriorityVo channelPriority : channelPriorityList) {
-            if (oldProcessTaskVo.getPriorityUuid().equals(channelPriority.getPriorityUuid())) {
-                processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
-                break;
+        if(CollectionUtils.isNotEmpty(channelPriorityList)) {
+            processTaskVo.setIsNeedPriority(1);
+            for (ChannelPriorityVo channelPriority : channelPriorityList) {
+                if (oldProcessTaskVo.getPriorityUuid().equals(channelPriority.getPriorityUuid())) {
+                    processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+                    break;
+                }
             }
+        }else{
+            processTaskVo.setIsNeedPriority(0);
         }
 
         ProcessTaskStepVo oldStartProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(copyProcessTaskId);
@@ -275,10 +273,15 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         String worktimeUuid = channelMapper.getWorktimeUuidByChannelUuid(channelUuid);
         processTaskVo.setWorktimeUuid(worktimeUuid);
         List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
-        for (ChannelPriorityVo channelPriority : channelPriorityList) {
-            if (channelPriority.getIsDefault().intValue() == 1) {
-                processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+        if(CollectionUtils.isNotEmpty(channelPriorityList)) {
+            processTaskVo.setIsNeedPriority(1);
+            for (ChannelPriorityVo channelPriority : channelPriorityList) {
+                if (channelPriority.getIsDefault().intValue() == 1) {
+                    processTaskVo.setPriorityUuid(channelPriority.getPriorityUuid());
+                }
             }
+        }else{
+            processTaskVo.setIsNeedPriority(0);
         }
 
         ProcessStepVo startProcessStepVo = processMapper.getStartProcessStepByProcessUuid(processUuid);

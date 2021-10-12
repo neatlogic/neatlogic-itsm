@@ -31,7 +31,6 @@ import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.module.process.common.config.ProcessConfig;
 import codedriver.module.process.service.ProcessTaskStepTaskService;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -133,14 +132,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
         // 移动端默认展开表单
         processTaskVo.setMobileFormUIType(Integer.valueOf(ProcessConfig.MOBILE_FORM_UI_TYPE()));
         JSONObject resultObj = new JSONObject();
-
-        //如果不存在优先级List则默认不显示优先级
-        List<ChannelPriorityVo> channelPriorityList = channelMapper.getChannelPriorityListByChannelUuid(processTaskVo.getChannelUuid());
-        if (CollectionUtils.isEmpty(channelPriorityList)) {
-            processTaskVo.setIsNeedPriority(0);
-        }else{
-            processTaskVo.setIsNeedPriority(1);
-        }
         resultObj.put("processTask", processTaskVo);
         return resultObj;
     }
