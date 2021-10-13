@@ -27,10 +27,13 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.docx4j.wml.P;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
@@ -83,22 +86,31 @@ public class ProcessTaskAgentSaveApi extends PrivateApiComponentBase {
             processTaskAgentMapper.deleteProcessTaskAgentTargetByProcessTaskAgentIdList(processTaskAgentIdList);
         }
 
+        Map<String, Long> toUserUuidProcessTaskAgentIdMap = new HashMap<>();
         ProcessTaskAgentVo processTaskAgentVo = new ProcessTaskAgentVo();
         processTaskAgentVo.setBeginTime(processTaskAgentInfoVo.getBeginTime());
         processTaskAgentVo.setEndTime(processTaskAgentInfoVo.getEndTime());
         processTaskAgentVo.setIsActive(processTaskAgentInfoVo.getIsActive());
         processTaskAgentVo.setFromUserUuid(fromUserUuid);
         for (ProcessTaskAgentCompobVo compobVo : compobList) {
-            processTaskAgentVo.setId(null);
             String toUserUuid = compobVo.getToUserUuid();
             if (toUserUuid.contains(GroupSearch.USER.getValuePlugin())) {
                 toUserUuid = toUserUuid.substring(5);
             }
-            if (userMapper.checkUserIsExists(toUserUuid) == 0) {
-                throw new UserNotFoundException(toUserUuid);
+            Long processTaskAgentId = toUserUuidProcessTaskAgentIdMap.get(toUserUuid);
+            if (processTaskAgentId == null) {
+                if (fromUserUuid.equals(toUserUuid)) {
+                    throw new AgentIsUserSelfException();
+                }
+                if (userMapper.checkUserIsExists(toUserUuid) == 0) {
+                    throw new UserNotFoundException(toUserUuid);
+                }
+                processTaskAgentVo.setId(null);
+                processTaskAgentVo.setToUserUuid(toUserUuid);
+                processTaskAgentMapper.insertProcessTaskAgent(processTaskAgentVo);
+                processTaskAgentId = processTaskAgentVo.getId();
+                toUserUuidProcessTaskAgentIdMap.put(toUserUuid, processTaskAgentId);
             }
-            processTaskAgentVo.setToUserUuid(toUserUuid);
-            processTaskAgentMapper.insertProcessTaskAgent(processTaskAgentVo);
             List<ProcessTaskAgentTargetVo> targetList = compobVo.getTargetList();
             for (ProcessTaskAgentTargetVo target : targetList) {
                 if ("channel".equals(target.getType())) {
@@ -110,8 +122,8 @@ public class ProcessTaskAgentSaveApi extends PrivateApiComponentBase {
                         throw new CatalogNotFoundException(target.getTarget());
                     }
                 }
-                target.setProcessTaskAgentId(processTaskAgentVo.getId());
-                processTaskAgentMapper.insertProcessTaskAgentTarget(target);
+                target.setProcessTaskAgentId(processTaskAgentId);
+                processTaskAgentMapper.insertIgnoreProcessTaskAgentTarget(target);
             }
         }
         return null;

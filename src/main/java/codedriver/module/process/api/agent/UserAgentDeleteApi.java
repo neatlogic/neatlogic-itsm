@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Deprecated
-@Service
+//@Service
 @OperationType(type = OperationTypeEnum.DELETE)
 @AuthAction(action = PROCESS_BASE.class)
 public class UserAgentDeleteApi extends PrivateApiComponentBase {
@@ -43,7 +43,7 @@ public class UserAgentDeleteApi extends PrivateApiComponentBase {
 	@Description(desc = "删除用户授权代理")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		userMapper.deleteUserAgent(UserContext.get().getUserUuid());
+//		userMapper.deleteUserAgent(UserContext.get().getUserUuid());
 		return null;
 	}
 
