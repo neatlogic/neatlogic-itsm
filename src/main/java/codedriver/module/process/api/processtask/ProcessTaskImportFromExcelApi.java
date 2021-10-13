@@ -195,8 +195,12 @@ public class ProcessTaskImportFromExcelApi extends PrivateBinaryStreamApiCompone
             if(CollectionUtils.isNotEmpty(headerList) && CollectionUtils.isNotEmpty(contentList)){
                 /** 去除表头中的必填提示文字 */
                 headerList = headerList.stream().map(header -> header = header.replace("(必填)","")).collect(Collectors.toList());
-                if (!headerList.contains("标题") || !headerList.contains("请求人") || !headerList.contains("优先级")) {
-                    throw new ExcelMissColumnException("标题、请求人或者优先级");
+                if (!headerList.contains("标题") || !headerList.contains("请求人")) {
+                    throw new ExcelMissColumnException("标题、请求人");
+                }
+                List<ChannelPriorityVo> priorityVos = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+                if(CollectionUtils.isNotEmpty(priorityVos)&&!headerList.contains("优先级")){
+                    throw new ExcelMissColumnException("优先级");
                 }
                 if(CollectionUtils.isNotEmpty(formAttributeList)){
                     for(FormAttributeVo att : formAttributeList){

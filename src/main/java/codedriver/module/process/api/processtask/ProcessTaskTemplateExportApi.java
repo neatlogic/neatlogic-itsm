@@ -3,14 +3,13 @@ package codedriver.module.process.api.processtask;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.module.framework.form.attribute.handler.DivideHandler;
-import codedriver.module.framework.form.attribute.handler.LinkHandler;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessFormVo;
 import codedriver.framework.process.dto.ProcessVo;
@@ -21,6 +20,8 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.ExcelUtil;
+import codedriver.module.framework.form.attribute.handler.DivideHandler;
+import codedriver.module.framework.form.attribute.handler.LinkHandler;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -151,7 +152,11 @@ public class ProcessTaskTemplateExportApi extends PrivateBinaryStreamApiComponen
         }
         headerList.add(0,"标题(必填)");
         headerList.add(1,"请求人(必填)");
-        headerList.add(2,"优先级(必填)");
+        List<ChannelPriorityVo> priorityVos = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+        if(CollectionUtils.isNotEmpty(priorityVos)){
+            headerList.add(2,"优先级(必填)");
+        }
+
         if(isNeedContent == 1){
             headerList.add(headerList.size(),"描述");
         }

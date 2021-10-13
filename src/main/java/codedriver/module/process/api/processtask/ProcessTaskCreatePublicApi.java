@@ -10,6 +10,7 @@ import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dto.ChannelPriorityVo;
 import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessFormVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -129,18 +130,23 @@ public class ProcessTaskCreatePublicApi extends PublicApiComponentBase {
             }
         }
         /** 如果优先级使用名称时，需要转换成uuid **/
-        String priorityUuid = jsonObj.getString("priorityUuid");
-        if (StringUtils.isBlank(priorityUuid)) {
-            String priorityName = jsonObj.getString("priorityName");
-            if (StringUtils.isBlank(priorityName)) {
-                throw new ParamNotExistsException("priorityUuid", "priorityName");
+        List<ChannelPriorityVo> priorityVos = channelMapper.getChannelPriorityListByChannelUuid(channelUuid);
+        if(CollectionUtils.isNotEmpty(priorityVos)){
+            String priorityUuid = jsonObj.getString("priorityUuid");
+            if (StringUtils.isBlank(priorityUuid)) {
+                String priorityName = jsonObj.getString("priorityName");
+                if (StringUtils.isBlank(priorityName)) {
+                    throw new ParamNotExistsException("priorityUuid", "priorityName");
+                }else {
+                    PriorityVo priorityVo = priorityMapper.getPriorityByName(priorityName);
+                    if (priorityVo == null) {
+                        throw new PriorityNotFoundException(priorityName);
+                    }
+                    jsonObj.put("priorityUuid", priorityVo.getUuid());
+                }
             }
-            PriorityVo priorityVo = priorityMapper.getPriorityByName(priorityName);
-            if (priorityVo == null) {
-                throw new PriorityNotFoundException(priorityName);
-            }
-            jsonObj.put("priorityUuid", priorityVo.getUuid());
         }
+
         //暂存
         jsonObj.put("isNeedValid", 1);
         ProcessTaskDraftSaveApi drafSaveApi = (ProcessTaskDraftSaveApi) PrivateApiComponentFactory.getInstance(ProcessTaskDraftSaveApi.class.getName());
