@@ -96,11 +96,7 @@ public class ProcessTaskPriorityColumn extends ProcessTaskColumnBase implements 
     @Override
     public Object getValue(ProcessTaskVo processTaskVo) {
         JSONObject priorityJson = new JSONObject();
-        if (processTaskVo.getPriority() == null) {
-            priorityJson.put("value", "");
-            priorityJson.put("text", "");
-            priorityJson.put("color", "rgb(255, 102, 102)");
-        } else {
+        if (processTaskVo.getPriority() != null) {
             priorityJson.put("value", processTaskVo.getPriority().getUuid());
             priorityJson.put("text", processTaskVo.getPriority().getName());
             priorityJson.put("color", processTaskVo.getPriority().getColor());
