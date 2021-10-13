@@ -151,15 +151,16 @@ public class ProcessTaskBatchMergeReportActionApi extends PrivateApiComponentBas
             List<String> processUserTypeList = processTaskService.getProcessUserTypeList(processTaskId, authenticationInfoVo);
             String channelUuid = processTaskVo.getChannelUuid();
             List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(channelUuid, userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), processUserTypeList);
-            if (CollectionUtils.isEmpty(channelTypeRelationIdList)) {
-                String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
-                if (StringUtils.isNotBlank(agentUuid)) {
-                    AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
-                    processUserTypeList = processTaskService.getProcessUserTypeList(processTaskId, agentAuthenticationInfoVo);
-                    channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(channelUuid, agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), processUserTypeList);
-
-                }
-            }
+            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+//            if (CollectionUtils.isEmpty(channelTypeRelationIdList)) {
+//                String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
+//                if (StringUtils.isNotBlank(agentUuid)) {
+//                    AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
+//                    processUserTypeList = processTaskService.getProcessUserTypeList(processTaskId, agentAuthenticationInfoVo);
+//                    channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(channelUuid, agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), processUserTypeList);
+//
+//                }
+//            }
             if (CollectionUtils.isNotEmpty(channelTypeRelationIdList)) {
                 channelTypeRelationIdList.sort(Long::compareTo);
                 Long channelTypeRelationId = channelTypeRelationIdList.get(0);

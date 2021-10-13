@@ -9,7 +9,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.process.auth.PROCESS_BASE;
@@ -54,9 +53,6 @@ public class ChannelListForBatchMergeReportApi extends PrivateApiComponentBase {
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
-
-    @Resource
-    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -109,14 +105,15 @@ public class ChannelListForBatchMergeReportApi extends PrivateApiComponentBase {
         AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid);
         List<String> processUserTypeList = processTaskService.getProcessUserTypeList(processTaskId, authenticationInfoVo);
         List<Long> channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(channelUuid, userUuid, authenticationInfoVo.getTeamUuidList(), authenticationInfoVo.getRoleUuidList(), processUserTypeList);
-        if (CollectionUtils.isEmpty(channelTypeRelationIdList)) {
-            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
-            if(StringUtils.isNotBlank(agentUuid)){
-                AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
-                processUserTypeList = processTaskService.getProcessUserTypeList(processTaskId, agentAuthenticationInfoVo);
-                channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(channelUuid, agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), processUserTypeList);
-            }
-        }
+        /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+//        if (CollectionUtils.isEmpty(channelTypeRelationIdList)) {
+//            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(userUuid, "processtask");
+//            if(StringUtils.isNotBlank(agentUuid)){
+//                AuthenticationInfoVo agentAuthenticationInfoVo = authenticationInfoService.getAuthenticationInfo(agentUuid);
+//                processUserTypeList = processTaskService.getProcessUserTypeList(processTaskId, agentAuthenticationInfoVo);
+//                channelTypeRelationIdList = channelTypeMapper.getAuthorizedChannelTypeRelationIdListBySourceChannelUuid(channelUuid, agentUuid, agentAuthenticationInfoVo.getTeamUuidList(), agentAuthenticationInfoVo.getRoleUuidList(), processUserTypeList);
+//            }
+//        }
         if (CollectionUtils.isEmpty(channelTypeRelationIdList)) {
             return resultObj;
         }

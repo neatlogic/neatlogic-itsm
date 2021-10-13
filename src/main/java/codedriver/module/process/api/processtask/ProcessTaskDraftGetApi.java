@@ -9,7 +9,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.form.dto.FormAttributeVo;
@@ -68,9 +67,6 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
 
     @Resource
     private SelectContentByHashMapper selectContentByHashMapper;
-
-    @Resource
-    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -174,14 +170,16 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         ProcessTaskVo processTaskVo = processTaskService.getProcessTaskDetailById(processTaskId);
         /* 判断当前用户是否拥有channelUuid服务的上报权限 **/
         if (!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), UserContext.get().getUserUuid(true))) {
-            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-            if(StringUtils.isNotBlank(agentUuid)){
-                if(!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), agentUuid)){
-                    throw new PermissionDeniedException();
-                }
-            }else{
-                throw new PermissionDeniedException();
-            }
+            throw new PermissionDeniedException();
+            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+//            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+//            if(StringUtils.isNotBlank(agentUuid)){
+//                if(!catalogService.channelIsAuthority(processTaskVo.getChannelUuid(), agentUuid)){
+//                    throw new PermissionDeniedException();
+//                }
+//            }else{
+//                throw new PermissionDeniedException();
+//            }
         }
 
         String owner = processTaskVo.getOwner();
@@ -242,14 +240,16 @@ public class ProcessTaskDraftGetApi extends PrivateApiComponentBase {
         }
         /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
         if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
-            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-            if(StringUtils.isNotBlank(agentUuid)){
-                if(!catalogService.channelIsAuthority(channelUuid, agentUuid)){
-                    throw new PermissionDeniedException();
-                }
-            }else{
-                throw new PermissionDeniedException();
-            }
+            throw new PermissionDeniedException();
+            /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+//            String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+//            if(StringUtils.isNotBlank(agentUuid)){
+//                if(!catalogService.channelIsAuthority(channelUuid, agentUuid)){
+//                    throw new PermissionDeniedException();
+//                }
+//            }else{
+//                throw new PermissionDeniedException();
+//            }
         }
         ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channel.getChannelTypeUuid());
         if (channelTypeVo == null) {

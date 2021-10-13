@@ -8,7 +8,6 @@ package codedriver.module.process.api.processtask;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import codedriver.framework.fulltextindex.core.IFullTextIndexHandler;
@@ -64,9 +63,6 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private CatalogService catalogService;
-
-    @Resource
-    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -152,14 +148,16 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
         } else {
             /** 判断当前用户是否拥有channelUuid服务的上报权限 **/
             if (!catalogService.channelIsAuthority(channelUuid, UserContext.get().getUserUuid(true))) {
-                String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
-                if (StringUtils.isNotBlank(agentUuid)) {
-                    if (!catalogService.channelIsAuthority(channelUuid, agentUuid)) {
-                        throw new PermissionDeniedException();
-                    }
-                } else {
-                    throw new PermissionDeniedException();
-                }
+                throw new PermissionDeniedException();
+                /** 2021-10-11 开晚会时确认用户个人设置任务授权不包括服务上报权限 **/
+//                String agentUuid = userMapper.getUserUuidByAgentUuidAndFunc(UserContext.get().getUserUuid(true), "processtask");
+//                if (StringUtils.isNotBlank(agentUuid)) {
+//                    if (!catalogService.channelIsAuthority(channelUuid, agentUuid)) {
+//                        throw new PermissionDeniedException();
+//                    }
+//                } else {
+//                    throw new PermissionDeniedException();
+//                }
             }
             startProcessTaskStepVo = new ProcessTaskStepVo();
             startProcessTaskStepVo.setProcessUuid(processUuid);

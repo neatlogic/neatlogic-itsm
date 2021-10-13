@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 @Deprecated
-@Service
+//@Service
 @AuthAction(action = PROCESS_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class UserAgentGetApi extends PrivateApiComponentBase {
@@ -58,14 +58,15 @@ public class UserAgentGetApi extends PrivateApiComponentBase {
 	@Description(desc = "获取用户授权代理")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		UserVo agent = userMapper.getUserAgent(UserContext.get().getUserUuid());
-		if(agent != null){
-			List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid()));
-			agent.setUserAuthList(userAuthList);
-		}
-		JSONObject result = new JSONObject();
-		result.put("agent",agent);
-		return result;
+//		UserVo agent = userMapper.getUserAgent(UserContext.get().getUserUuid());
+//		if(agent != null){
+//			List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid()));
+//			agent.setUserAuthList(userAuthList);
+//		}
+//		JSONObject result = new JSONObject();
+//		result.put("agent",agent);
+//		return result;
+		return null;
 	}
 
 }
