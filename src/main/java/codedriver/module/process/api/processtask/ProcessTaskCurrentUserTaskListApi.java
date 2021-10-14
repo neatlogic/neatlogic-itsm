@@ -120,9 +120,11 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
         List<ProcessTaskAgentVo> processTaskAgentList = processTaskAgentMapper.getProcessTaskAgentListByToUserUuid(currentUserUuid);
         for (ProcessTaskAgentVo processTaskAgentVo : processTaskAgentList) {
             List<String> channelUuidList = processTaskAgentService.getChannelUuidListByProcessTaskAgentId(processTaskAgentVo.getId());
-            authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(processTaskAgentVo.getFromUserUuid());
-            processTaskStepIdSet = processTaskMapper.getProcessTaskStepIdSetByChannelUuidListAndAuthenticationInfo(keyword, channelUuidList, authenticationInfoVo);
-            allProcessTaskStepIdSet.addAll(processTaskStepIdSet);
+            if (CollectionUtils.isNotEmpty(channelUuidList)) {
+                authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(processTaskAgentVo.getFromUserUuid());
+                processTaskStepIdSet = processTaskMapper.getProcessTaskStepIdSetByChannelUuidListAndAuthenticationInfo(keyword, channelUuidList, authenticationInfoVo);
+                allProcessTaskStepIdSet.addAll(processTaskStepIdSet);
+            }
         }
         allProcessTaskStepIdSet.removeAll(currentProcessTaskProcessableStepIdList);
         List<Long> allProcessTaskStepIdList = new ArrayList<>(allProcessTaskStepIdSet);
