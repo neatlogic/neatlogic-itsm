@@ -8,6 +8,9 @@ import codedriver.framework.process.condition.core.IProcessTaskCondition;
 import codedriver.framework.process.condition.core.ProcessTaskConditionBase;
 import codedriver.framework.process.constvalue.ConditionConfigType;
 import codedriver.framework.process.constvalue.ProcessFieldType;
+import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -15,10 +18,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class ProcessSubTaskIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
+public class ProcessTaskStepTaskIdCondition extends ProcessTaskConditionBase implements IProcessTaskCondition {
     @Override
     public String getName() {
-        return "subtaskid";
+        return "steptaskid";
     }
 
     @Override
@@ -26,15 +29,15 @@ public class ProcessSubTaskIdCondition extends ProcessTaskConditionBase implemen
         return "子任务id";
     }
 
-	@Override
-	public String getHandler(FormConditionModel processWorkcenterConditionType) {
-		return FormHandlerType.INPUT.toString();
-	}
-	
-	@Override
-	public String getType() {
-		return ProcessFieldType.COMMON.getValue();
-	}
+    @Override
+    public String getHandler(FormConditionModel processWorkcenterConditionType) {
+        return FormHandlerType.INPUT.toString();
+    }
+
+    @Override
+    public String getType() {
+        return ProcessFieldType.COMMON.getValue();
+    }
 
     @Override
     public JSONObject getConfig(ConditionConfigType type) {
@@ -50,7 +53,7 @@ public class ProcessSubTaskIdCondition extends ProcessTaskConditionBase implemen
 
     @Override
     public Integer getSort() {
-        return 1;
+        return 20;
     }
 
     @Override
@@ -71,5 +74,17 @@ public class ProcessSubTaskIdCondition extends ProcessTaskConditionBase implemen
     @Override
     public void getSqlConditionWhere(List<ConditionVo> conditionList, Integer index, StringBuilder sqlSb) {
 
+    }
+
+    @Override
+    public Object getConditionParamData(ProcessTaskVo processTaskVo) {
+        ProcessTaskStepVo currentTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
+        if (currentTaskStepVo != null) {
+            ProcessTaskStepTaskVo stepTaskVo = currentTaskStepVo.getProcessTaskStepTaskVo();
+            if (stepTaskVo != null) {
+                return stepTaskVo.getId();
+            }
+        }
+        return null;
     }
 }
