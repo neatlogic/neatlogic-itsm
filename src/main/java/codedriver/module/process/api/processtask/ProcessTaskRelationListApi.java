@@ -10,6 +10,7 @@ import java.util.Set;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -110,19 +111,21 @@ public class ProcessTaskRelationListApi extends PrivateApiComponentBase {
                 }
             }
             Map<Long, ProcessTaskVo> processTaskMap = new HashMap<>();
-            List<ProcessTaskVo> processTaskList =
-                processTaskMapper.getProcessTaskListByIdListAndStartTime(new ArrayList<>(processTaskIdSet), null, null);
-            for (ProcessTaskVo processTask : processTaskList) {
-                ChannelVo channelVo = channelMapper.getChannelByUuid(processTask.getChannelUuid());
-                if (channelVo != null && StringUtils.isNotBlank(channelVo.getChannelTypeUuid())) {
-                    ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
-                    if (channelTypeVo == null) {
-                        channelTypeVo = new ChannelTypeVo();
-                        channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
+            if (CollectionUtils.isNotEmpty(processTaskIdSet)) {
+                List<ProcessTaskVo> processTaskList =
+                        processTaskMapper.getProcessTaskListByIdList(new ArrayList<>(processTaskIdSet));
+                for (ProcessTaskVo processTask : processTaskList) {
+                    ChannelVo channelVo = channelMapper.getChannelByUuid(processTask.getChannelUuid());
+                    if (channelVo != null && StringUtils.isNotBlank(channelVo.getChannelTypeUuid())) {
+                        ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+                        if (channelTypeVo == null) {
+                            channelTypeVo = new ChannelTypeVo();
+                            channelTypeVo.setUuid(channelVo.getChannelTypeUuid());
+                        }
+                        processTask.setChannelType(channelTypeVo.clone());
                     }
-                    processTask.setChannelType(channelTypeVo.clone());
+                    processTaskMap.put(processTask.getId(), processTask);
                 }
-                processTaskMap.put(processTask.getId(), processTask);
             }
             for (ProcessTaskRelationVo processTaskRelation : processTaskRelationList) {
                 ProcessTaskVo processTask = processTaskMap.get(processTaskRelation.getProcessTaskId());
