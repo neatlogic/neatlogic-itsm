@@ -127,6 +127,7 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
         allProcessTaskStepIdSet.removeAll(currentProcessTaskProcessableStepIdList);
         List<Long> allProcessTaskStepIdList = new ArrayList<>(allProcessTaskStepIdSet);
         allProcessTaskStepIdList.sort(Comparator.reverseOrder());
+        currentProcessTaskProcessableStepIdList.sort(Comparator.reverseOrder());
         allProcessTaskStepIdList.addAll(0, currentProcessTaskProcessableStepIdList);
         int rowNum = allProcessTaskStepIdList.size();
         BasePageVo searchVo = JSONObject.toJavaObject(jsonObj, BasePageVo.class);
@@ -176,8 +177,6 @@ public class ProcessTaskCurrentUserTaskListApi extends PrivateApiComponentBase {
                     taskList.add(task);
                 }
                 resultObj = TableResultUtil.getResult(taskList, searchVo);
-                resultObj.remove("tbodyList");
-                resultObj.put("taskList", taskList);
             }
         }
         return resultObj;
