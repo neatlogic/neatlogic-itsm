@@ -5,7 +5,6 @@ import codedriver.framework.asynchronization.threadpool.TransactionSynchronizati
 import codedriver.framework.common.RootComponent;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.notify.core.INotifyTriggerType;
@@ -57,9 +56,7 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
     @Resource
     private ChannelMapper channelMapper;
     @Resource
-    private FileMapper fileMapper;
-    @Resource
-    private ProcessMapper processMapper;
+    private ProcessTagMapper processTagMapper;
 
     /**
      * @param currentProcessTaskStepVo
@@ -558,12 +555,12 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         JSONArray tagArray = paramObj.getJSONArray("tagList");
         if (CollectionUtils.isNotEmpty(tagArray)) {
             List<String> tagNameList = JSONObject.parseArray(tagArray.toJSONString(), String.class);
-            List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
+            List<ProcessTagVo> existTagList = processTagMapper.getProcessTagByNameList(tagNameList);
             List<String> existTagNameList = existTagList.stream().map(ProcessTagVo::getName).collect(Collectors.toList());
             List<String> notExistTagList = ListUtils.removeAll(tagNameList, existTagNameList);
             for (String tagName : notExistTagList) {
                 ProcessTagVo tagVo = new ProcessTagVo(tagName);
-                processMapper.insertProcessTag(tagVo);
+                processTagMapper.insertProcessTag(tagVo);
                 existTagList.add(tagVo);
             }
             List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<ProcessTaskTagVo>();

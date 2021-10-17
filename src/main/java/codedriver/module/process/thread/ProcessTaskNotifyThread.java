@@ -147,7 +147,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                             paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
                         }
                         String notifyPolicyHandler = notifyPolicyVo.getHandler();
-                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData, conditionParamData, receiverMap);
+                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData, conditionParamData, receiverMap, currentProcessTaskStepVo);
                     }
                 }
             }

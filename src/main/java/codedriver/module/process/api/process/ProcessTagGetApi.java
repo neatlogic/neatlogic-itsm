@@ -3,6 +3,7 @@ package codedriver.module.process.api.process;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
+import codedriver.framework.process.dao.mapper.ProcessTagMapper;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
 import codedriver.framework.process.dto.ProcessTagVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
@@ -33,7 +32,7 @@ import java.util.List;
 public class ProcessTagGetApi extends PrivateApiComponentBase {
 
     @Autowired
-    private ProcessMapper processMapper;
+    private ProcessTagMapper processTagMapper;
 
     @Override
     public String getToken() {
@@ -75,14 +74,14 @@ public class ProcessTagGetApi extends PrivateApiComponentBase {
 			}
 			resultObj.put("list", valueTextList);
 		} else {
-			int rowNum = processMapper.getProcessTagCount(processTagVo);
+			int rowNum = processTagMapper.getProcessTagCount(processTagVo);
 			processTagVo.setRowNum(rowNum);
 			resultObj.put("rowNum", rowNum);
 			resultObj.put("pageSize", processTagVo.getPageSize());
 			resultObj.put("currentPage", processTagVo.getCurrentPage());
 			resultObj.put("pageCount", processTagVo.getPageCount());
 			if (rowNum > 0) {
-				resultObj.put("list", processMapper.getProcessTagForSelect(processTagVo));
+				resultObj.put("list", processTagMapper.getProcessTagForSelect(processTagVo));
 			} else {
 				resultObj.put("list", new ArrayList<>());
 			}

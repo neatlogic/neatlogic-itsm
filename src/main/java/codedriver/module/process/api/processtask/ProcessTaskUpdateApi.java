@@ -15,7 +15,7 @@ import codedriver.framework.process.constvalue.ProcessTaskAuditDetailType;
 import codedriver.framework.process.constvalue.ProcessTaskAuditType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.dao.mapper.PriorityMapper;
-import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dao.mapper.ProcessTagMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.priority.PriorityNotFoundException;
@@ -56,7 +56,7 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
     private PriorityMapper priorityMapper;
 
     @Resource
-    private ProcessMapper processMapper;
+    private ProcessTagMapper processTagMapper;
 
     @Resource
     private ProcessTaskService processTaskService;
@@ -137,13 +137,13 @@ public class ProcessTaskUpdateApi extends PrivateApiComponentBase {
             processTaskMapper.deleteProcessTaskTagByProcessTaskId(processTaskId);
             if (CollectionUtils.isNotEmpty(tagNameList)) {
                 jsonObj.put(ProcessTaskAuditDetailType.TAGLIST.getParamName(), String.join(",", tagNameList));
-                List<ProcessTagVo> existTagList = processMapper.getProcessTagByNameList(tagNameList);
+                List<ProcessTagVo> existTagList = processTagMapper.getProcessTagByNameList(tagNameList);
                 List<String> existTagNameList =
                         existTagList.stream().map(ProcessTagVo::getName).collect(Collectors.toList());
                 List<String> notExistTagList = ListUtils.removeAll(tagNameList, existTagNameList);
                 for (String tagName : notExistTagList) {
                     ProcessTagVo tagVo = new ProcessTagVo(tagName);
-                    processMapper.insertProcessTag(tagVo);
+                    processTagMapper.insertProcessTag(tagVo);
                     existTagList.add(tagVo);
                 }
                 List<ProcessTaskTagVo> processTaskTagVoList = new ArrayList<>();

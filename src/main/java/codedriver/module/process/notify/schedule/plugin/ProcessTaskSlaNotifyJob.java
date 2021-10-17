@@ -193,8 +193,10 @@ public class ProcessTaskSlaNotifyJob extends JobBase {
                         for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
                             processTaskService.getReceiverMap(processTaskStepVo, receiverMap);
                         }
+                        ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
+                        processTaskStepVo.setProcessTaskId(processTaskSlaVo.getProcessTaskId());
                         NotifyPolicyUtil.execute(notifyPolicyVo.getHandler(), SlaNotifyTriggerType.TIMEOUT, ProcessTaskMessageHandler.class, notifyPolicyVo.getConfig(), paramMappingList,
-                            templateParamData, conditionParamData, receiverMap);
+                                templateParamData, conditionParamData, receiverMap, processTaskStepVo);
                     }
                 }
                 Date nextFireTime = context.getNextFireTime();
