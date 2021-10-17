@@ -5,9 +5,12 @@
 
 package codedriver.module.process.notify.handler.param;
 
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author linbq
@@ -15,6 +18,9 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class TaskContentParamHandler extends ProcessTaskNotifyParamHandlerBase {
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
 
     @Override
     public String getValue() {

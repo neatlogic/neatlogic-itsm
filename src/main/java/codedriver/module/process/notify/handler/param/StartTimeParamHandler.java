@@ -5,9 +5,16 @@
 
 package codedriver.module.process.notify.handler.param;
 
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @author linbq
@@ -16,13 +23,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class StartTimeParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+
     @Override
     public String getValue() {
-        return null;
+        return ProcessTaskNotifyParam.STARTTIME.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo != null) {
+            Date startTime = processTaskVo.getStartTime();
+            if (startTime != null) {
+                return sdf.format(startTime);
+            }
+        }
         return null;
     }
 }

@@ -5,7 +5,9 @@
 
 package codedriver.module.process.notify.handler.param;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +20,11 @@ public class OperatorParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public String getValue() {
-        return null;
+        return ProcessTaskNotifyParam.OPERATOR.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
-        return null;
+        return UserContext.get().getUserUuid(true);
     }
 }

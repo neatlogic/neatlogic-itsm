@@ -5,9 +5,18 @@
 
 package codedriver.module.process.notify.handler.param;
 
+import codedriver.framework.process.dao.mapper.ChannelMapper;
+import codedriver.framework.process.dao.mapper.ChannelTypeMapper;
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ChannelTypeVo;
+import codedriver.framework.process.dto.ChannelVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author linbq
@@ -16,13 +25,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChannelTypeNameParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+    @Resource
+    private ChannelMapper channelMapper;
+    @Resource
+    private ChannelTypeMapper channelTypeMapper;
+
     @Override
     public String getValue() {
-        return null;
+        return ProcessTaskNotifyParam.CHANNELTYPENAME.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo != null) {
+            ChannelVo channelVo = channelMapper.getChannelByUuid(processTaskVo.getChannelUuid());
+            if (channelVo != null) {
+                ChannelTypeVo channelTypeVo = channelTypeMapper.getChannelTypeByUuid(channelVo.getChannelTypeUuid());
+                if (channelTypeVo != null) {
+                    return channelTypeVo.getName();
+                }
+            }
+        }
+
         return null;
     }
 }

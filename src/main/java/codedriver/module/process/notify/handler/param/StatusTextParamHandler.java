@@ -5,9 +5,15 @@
 
 package codedriver.module.process.notify.handler.param;
 
+import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStatusVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author linbq
@@ -16,13 +22,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class StatusTextParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
+    @Resource
+    private ProcessTaskMapper processTaskMapper;
+
     @Override
     public String getValue() {
-        return null;
+        return ProcessTaskNotifyParam.STATUSTEXT.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo != null) {
+            ProcessTaskStatusVo processTaskStatusVo = processTaskVo.getStatusVo();
+            if (processTaskStatusVo != null) {
+                return processTaskStatusVo.getText();
+            }
+        }
         return null;
     }
 }

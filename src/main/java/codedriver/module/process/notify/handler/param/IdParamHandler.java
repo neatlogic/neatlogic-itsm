@@ -6,6 +6,7 @@
 package codedriver.module.process.notify.handler.param;
 
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +19,11 @@ public class IdParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public String getValue() {
-        return null;
+        return ProcessTaskNotifyParam.ID.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
-        return null;
+        return processTaskStepVo.getProcessTaskId();
     }
 }
