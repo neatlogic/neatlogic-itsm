@@ -5,13 +5,26 @@
 
 package codedriver.module.process.notify.handler.param;
 
+import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
+import codedriver.framework.form.dto.FormAttributeVo;
+import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskFormAttributeDataVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author linbq
@@ -30,6 +43,34 @@ public class FormParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo != null) {
+            List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataList = processTaskMapper.getProcessTaskStepFormAttributeDataByProcessTaskId(processTaskVo.getId());
+            if (CollectionUtils.isNotEmpty(processTaskFormAttributeDataList)) {
+                Map<String, ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataMap = processTaskFormAttributeDataList.stream().collect(Collectors.toMap(e -> e.getAttributeUuid(), e -> e));
+                if (MapUtils.isNotEmpty(processTaskVo.getFormConfig())) {
+                    List<ProcessTaskFormAttributeDataVo> processTaskFormAttributeDataVoList = new ArrayList<>();
+                    FormVersionVo formVersionVo = new FormVersionVo();
+                    formVersionVo.setFormConfig(processTaskVo.getFormConfig().toJSONString());
+                    List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+                    for (FormAttributeVo formAttribute : formAttributeList) {
+                        ProcessTaskFormAttributeDataVo attributeDataVo = processTaskFormAttributeDataMap.get(formAttribute.getUuid());
+                        if (attributeDataVo != null) {
+                            attributeDataVo.setLabel(formAttribute.getLabel());
+                            if (attributeDataVo.getData() != null) {
+                                IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
+                                if (handler != null) {
+                                    Object value = handler.dataTransformationForEmail(attributeDataVo, JSONObject.parseObject(formAttribute.getConfig()));
+                                    attributeDataVo.setDataObj(value);
+                                    processTaskFormAttributeDataVoList.add(attributeDataVo);
+                                }
+                            }
+                        }
+                    }
+                    return processTaskFormAttributeDataVoList;
+                }
+            }
+        }
         return null;
     }
 }

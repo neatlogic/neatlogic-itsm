@@ -5,12 +5,11 @@
 
 package codedriver.module.process.notify.handler.param;
 
-import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.notify.constvalue.TaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 /**
  * @author linbq
@@ -19,16 +18,17 @@ import javax.annotation.Resource;
 @Component
 public class TaskConfigNameParamHandler extends ProcessTaskNotifyParamHandlerBase {
 
-    @Resource
-    private ProcessTaskMapper processTaskMapper;
-
     @Override
     public String getValue() {
-        return null;
+        return TaskNotifyParam.TASKCONFIGNAME.getValue();
     }
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskStepTaskVo stepTaskVo = processTaskStepVo.getProcessTaskStepTaskVo();
+        if(stepTaskVo != null ){
+            return stepTaskVo.getTaskConfigName();
+        }
         return null;
     }
 }

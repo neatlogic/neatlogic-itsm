@@ -5,8 +5,11 @@
 
 package codedriver.module.process.notify.handler.param;
 
+import codedriver.framework.process.dao.mapper.PriorityMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.PriorityVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
+import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
@@ -23,6 +26,9 @@ public class PriorityNameParamHandler extends ProcessTaskNotifyParamHandlerBase 
     @Resource
     private ProcessTaskMapper processTaskMapper;
 
+    @Resource
+    private PriorityMapper priorityMapper;
+
     @Override
     public String getValue() {
         return ProcessTaskNotifyParam.PRIORITYNAME.getValue();
@@ -30,6 +36,13 @@ public class PriorityNameParamHandler extends ProcessTaskNotifyParamHandlerBase 
 
     @Override
     public Object getMyText(ProcessTaskStepVo processTaskStepVo) {
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskById(processTaskStepVo.getProcessTaskId());
+        if (processTaskVo != null) {
+            PriorityVo priorityVo = priorityMapper.getPriorityByUuid(processTaskVo.getPriorityUuid());
+            if (priorityVo != null) {
+                return priorityVo.getName();
+            }
+        }
         return null;
     }
 }
