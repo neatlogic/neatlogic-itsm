@@ -98,11 +98,14 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
                                         }
                                     }
                                     if (StringUtils.isBlank(teamName)) {
-                                        List<TeamVo> teamList =  teamMapper.getTeamListByUserUuid(lcu);
-                                        for (TeamVo teamVo : teamList) {
-                                            if (TeamLevel.DEPARTMENT.getValue().equals(teamVo.getLevel())) {
-                                                teamName = teamVo.getName();
-                                                break;
+                                        List<String> teamUuidList =  teamMapper.getTeamUuidListByUserUuid(lcu);
+                                        for (String teamUuid : teamUuidList) {
+                                            TeamVo teamVo = teamMapper.getTeamByUuid(teamUuid);
+                                            if (teamVo != null) {
+                                                if (TeamLevel.DEPARTMENT.getValue().equals(teamVo.getLevel())) {
+                                                    teamName = teamVo.getName();
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
@@ -124,7 +127,6 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
                                 commentStringBuilder.append(sdf.format(contentVo.getLcd()));
                             }
                             commentStringBuilder.append("</p>");
-                            commentStringBuilder.append("<br>");
                             commentList.add(commentStringBuilder.toString());
                         }
                     }
