@@ -135,7 +135,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
     public Object valueConversionText(Object value, JSONObject config) {
         if (value != null) {
             if (value instanceof String) {
-                UserVo userVo = userMapper.getUserByUuid(value.toString().substring(5));
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(value.toString().substring(5));
                 if (userVo != null) {
                     return userVo.getUserName();
                 }
@@ -143,7 +143,7 @@ public class ProcessTaskOwnerCondition extends ProcessTaskConditionBase implemen
                 List<String> valueList = JSON.parseArray(JSON.toJSONString(value), String.class);
                 List<String> textList = new ArrayList<>();
                 for (String valueStr : valueList) {
-                    UserVo userVo = userMapper.getUserByUuid(valueStr.substring(5));
+                    UserVo userVo = userMapper.getUserBaseInfoByUuid(valueStr.substring(5));
                     if (userVo != null) {
                         textList.add(userVo.getUserName());
                     } else {

@@ -40,7 +40,7 @@ public class OwnerNameParamHandler extends ProcessTaskNotifyParamHandlerBase {
         if (processTaskVo != null) {
             String owner = processTaskVo.getOwner();
             if (StringUtils.isNotBlank(owner)) {
-                UserVo userVo = userMapper.getUserByUuid(owner);
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(owner);
                 if (userVo != null) {
                     return userVo.getUserName();
                 }
