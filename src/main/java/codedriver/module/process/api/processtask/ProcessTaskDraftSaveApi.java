@@ -173,10 +173,11 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
         ProcessTaskStepDataVo processTaskStepDataVo = new ProcessTaskStepDataVo();
         processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
-        processTaskStepDataVo.setData(jsonObj.toJSONString());
 
         startProcessTaskStepVo.setParamObj(jsonObj);
         handler.saveDraft(startProcessTaskStepVo);
+
+        processTaskStepDataVo.setData(jsonObj.toJSONString());
         processTaskStepDataVo.setProcessTaskId(startProcessTaskStepVo.getProcessTaskId());
         processTaskStepDataVo.setProcessTaskStepId(startProcessTaskStepVo.getId());
         processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);
