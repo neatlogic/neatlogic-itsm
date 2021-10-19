@@ -7,7 +7,6 @@ package codedriver.module.process.notify.handler.param;
 
 import codedriver.framework.dto.UrlInfoVo;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
-import codedriver.framework.process.constvalue.ProcessTaskParams;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.SelectContentByHashMapper;
 import codedriver.framework.process.dto.ProcessTaskStepContentVo;
@@ -17,7 +16,6 @@ import codedriver.framework.process.dto.ProcessTaskVo;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import codedriver.framework.util.HtmlUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
