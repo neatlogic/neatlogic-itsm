@@ -9,6 +9,7 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.process.dao.mapper.ProcessMapper;
+import codedriver.framework.process.dao.mapper.ProcessTagMapper;
 import codedriver.framework.process.dao.mapper.score.ScoreTemplateMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.process.ProcessNameRepeatException;
@@ -25,6 +26,9 @@ public class ProcessServiceImpl implements ProcessService {
 
     @Resource
     private ProcessMapper processMapper;
+
+    @Resource
+    private ProcessTagMapper processTagMapper;
 
     @Resource
     private FormMapper formMapper;
@@ -133,7 +137,7 @@ public class ProcessServiceImpl implements ProcessService {
                     ProcessStepTagVo processStepTagVo = new ProcessStepTagVo();
                     processStepTagVo.setProcessUuid(stepVo.getProcessUuid());
                     processStepTagVo.setProcessStepUuid(stepVo.getUuid());
-                    List<ProcessTagVo> processTagList = processMapper.getProcessTagByNameList(tagNameList);
+                    List<ProcessTagVo> processTagList = processTagMapper.getProcessTagByNameList(tagNameList);
                     for (ProcessTagVo processTagVo : processTagList) {
                         processStepTagVo.setTagId(processTagVo.getId());
                         tagNameList.remove(processTagVo.getName());
@@ -142,7 +146,7 @@ public class ProcessServiceImpl implements ProcessService {
                     if (CollectionUtils.isNotEmpty(tagNameList)) {
                         for (String tagName : tagNameList) {
                             ProcessTagVo processTagVo = new ProcessTagVo(tagName);
-                            processMapper.insertProcessTag(processTagVo);
+                            processTagMapper.insertProcessTag(processTagVo);
                             processStepTagVo.setTagId(processTagVo.getId());
                             processMapper.insertProcessStepTag(processStepTagVo);
                         }

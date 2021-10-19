@@ -137,7 +137,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                         processTaskVo.setStartProcessTaskStep(processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskVo.getId()));
                         processTaskVo.setCurrentProcessTaskStep(processTaskService.getCurrentProcessTaskStepDetail(currentProcessTaskStepVo));
                         JSONObject conditionParamData = ProcessTaskUtil.getProcessFieldData(processTaskVo, true);
-                        JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
+//                        JSONObject templateParamData = ProcessTaskUtil.getProcessTaskParamData(processTaskVo);
                         Map<String, List<NotifyReceiverVo>> receiverMap = new HashMap<>();
                         processTaskService.getReceiverMap(currentProcessTaskStepVo, receiverMap);
                         /* 参数映射列表 **/
@@ -147,7 +147,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                             paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
                         }
                         String notifyPolicyHandler = notifyPolicyVo.getHandler();
-                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, templateParamData, conditionParamData, receiverMap);
+                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, conditionParamData, receiverMap, currentProcessTaskStepVo);
                     }
                 }
             }

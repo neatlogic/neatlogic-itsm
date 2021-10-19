@@ -30,14 +30,14 @@ public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
         return "定时任务";
     }
 
-    @Override
-    public List<NotifyTriggerVo> getNotifyTriggerListForNotifyTree() {
-        List<NotifyTriggerVo> returnList = new ArrayList<>();
-        for (TimedTaskTriggerType type : TimedTaskTriggerType.values()) {
-            returnList.add(new NotifyTriggerVo(type.getTrigger(), type.getText(), type.getDescription()));
-        }
-        return returnList;
-    }
+//    @Override
+//    public List<NotifyTriggerVo> getNotifyTriggerListForNotifyTree() {
+//        List<NotifyTriggerVo> returnList = new ArrayList<>();
+//        for (TimedTaskTriggerType type : TimedTaskTriggerType.values()) {
+//            returnList.add(new NotifyTriggerVo(type.getTrigger(), type.getText(), type.getDescription()));
+//        }
+//        return returnList;
+//    }
 
     @Override
     protected List<NotifyTriggerVo> myNotifyTriggerList() {

@@ -18,7 +18,7 @@ import codedriver.framework.process.dto.*;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepNotFoundException;
 import codedriver.framework.process.exception.processtask.ProcessTaskStepUnRunningException;
 import codedriver.framework.process.exception.processtask.task.*;
-import codedriver.framework.process.notify.constvalue.TaskNotifyTriggerType;
+import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyTriggerType;
 import codedriver.framework.process.service.ProcessTaskService;
 import codedriver.framework.process.stephandler.core.IProcessStepHandlerUtil;
 import codedriver.framework.process.task.TaskConfigManager;
@@ -89,7 +89,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         JSONArray rangeList = taskConfig.getJSONArray("rangeList");
 
         ProcessTaskAuditType auditType = ProcessTaskAuditType.CREATETASK;
-        TaskNotifyTriggerType triggerType = TaskNotifyTriggerType.CREATETASK;
+        ProcessTaskStepTaskNotifyTriggerType triggerType = ProcessTaskStepTaskNotifyTriggerType.CREATETASK;
         if (isCreate) {
             processTaskStepTaskVo.setStatus(ProcessTaskStatus.PENDING.getValue());
             processTaskStepTaskMapper.insertTask(processTaskStepTaskVo);
@@ -101,7 +101,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
             //去掉用户删除标记
             processTaskStepTaskMapper.updateDeleteTaskUserByUserListAndId(processTaskStepTaskVo.getUserList(), processTaskStepTaskVo.getId(), 0);
             auditType = ProcessTaskAuditType.EDITTASK;
-            triggerType = TaskNotifyTriggerType.EDITTASK;
+            triggerType = ProcessTaskStepTaskNotifyTriggerType.EDITTASK;
         }
         if (CollectionUtils.isNotEmpty(rangeList)) {
             //校验用户是否在配置范围内
@@ -185,12 +185,12 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
                 }
             }
             if (isCanStepComplete) {
-                IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.COMPLETEALLTASK);
+                IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETEALLTASK);
             }
         }
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMPLETETASK);
-        IProcessStepHandlerUtil.notify(processTaskStepVo, TaskNotifyTriggerType.COMPLETETASK);
-        IProcessStepHandlerUtil.action(processTaskStepVo, TaskNotifyTriggerType.COMPLETETASK);
+        IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETETASK);
+        IProcessStepHandlerUtil.action(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.COMPLETETASK);
 
         //新增回复
         Long processTaskStepTaskUserContentId;
