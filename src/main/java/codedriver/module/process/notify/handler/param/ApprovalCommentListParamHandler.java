@@ -74,60 +74,68 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
                     for (ProcessTaskStepContentVo contentVo : processTaskStepContentList) {
                         String content = selectContntByHashMapper.getProcessTaskContentStringByHash(contentVo.getContentHash());
                         if (StringUtils.isNotBlank(content)) {
-                            StringBuilder commentStringBuilder = new StringBuilder();
-                            commentStringBuilder.append("<p>");
-                            commentStringBuilder.append(content);
-                            commentStringBuilder.append("<br>");
-                            String lcu = contentVo.getLcu();
-                            if (StringUtils.isNotBlank(lcu)) {
-                                UserVo userVo = userMapper.getUserBaseInfoByUuid(lcu);
-                                if (userVo != null) {
-                                    String teamName = null;
-                                    String titleName = null;
-                                    List<TeamUserTitleVo> teamUserTitleList = teamMapper.getTeamUserTitleListByUserUuid(lcu);
-                                    if (CollectionUtils.isNotEmpty(teamUserTitleList)) {
-                                        for (TeamUserTitleVo teamUserTitleVo : teamUserTitleList) {
-                                            TeamVo teamVo = teamMapper.getTeamByUuid(teamUserTitleVo.getTeamUuid());
-                                            if (TeamLevel.DEPARTMENT.getValue().equals(teamVo.getLevel())) {
-                                                teamName = teamVo.getName();
-                                                UserTitleVo userTitleVo = userMapper.getUserTitleById(teamUserTitleVo.getTitleId());
-                                                if (userTitleVo != null) {
-                                                    titleName = userTitleVo.getName();
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (StringUtils.isBlank(teamName)) {
-                                        List<String> teamUuidList =  teamMapper.getTeamUuidListByUserUuid(lcu);
-                                        for (String teamUuid : teamUuidList) {
-                                            TeamVo teamVo = teamMapper.getTeamByUuid(teamUuid);
-                                            if (teamVo != null) {
+                            if (content.startsWith("<p>")) {
+                                content = content.substring(3);
+                            }
+                            if (content.endsWith("</p>")) {
+                                content = content.substring(0, content.length() - 4);
+                            }
+                            if (StringUtils.isNotBlank(content)) {
+                                StringBuilder commentStringBuilder = new StringBuilder();
+                                commentStringBuilder.append("<p>");
+                                commentStringBuilder.append(content);
+                                commentStringBuilder.append("<br>");
+                                String lcu = contentVo.getLcu();
+                                if (StringUtils.isNotBlank(lcu)) {
+                                    UserVo userVo = userMapper.getUserBaseInfoByUuid(lcu);
+                                    if (userVo != null) {
+                                        String teamName = null;
+                                        String titleName = null;
+                                        List<TeamUserTitleVo> teamUserTitleList = teamMapper.getTeamUserTitleListByUserUuid(lcu);
+                                        if (CollectionUtils.isNotEmpty(teamUserTitleList)) {
+                                            for (TeamUserTitleVo teamUserTitleVo : teamUserTitleList) {
+                                                TeamVo teamVo = teamMapper.getTeamByUuid(teamUserTitleVo.getTeamUuid());
                                                 if (TeamLevel.DEPARTMENT.getValue().equals(teamVo.getLevel())) {
                                                     teamName = teamVo.getName();
-                                                    break;
+                                                    UserTitleVo userTitleVo = userMapper.getUserTitleById(teamUserTitleVo.getTitleId());
+                                                    if (userTitleVo != null) {
+                                                        titleName = userTitleVo.getName();
+                                                    }
                                                 }
                                             }
                                         }
+                                        if (StringUtils.isBlank(teamName)) {
+                                            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(lcu);
+                                            for (String teamUuid : teamUuidList) {
+                                                TeamVo teamVo = teamMapper.getTeamByUuid(teamUuid);
+                                                if (teamVo != null) {
+                                                    if (TeamLevel.DEPARTMENT.getValue().equals(teamVo.getLevel())) {
+                                                        teamName = teamVo.getName();
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (StringUtils.isNotBlank(teamName)) {
+                                            commentStringBuilder.append(teamName);
+                                            commentStringBuilder.append("/");
+                                        }
+                                        if (StringUtils.isNotBlank(titleName)) {
+                                            commentStringBuilder.append(titleName);
+                                            commentStringBuilder.append("/");
+                                        }
+                                        commentStringBuilder.append(userVo.getUserName());
                                     }
-                                    if (StringUtils.isNotBlank(teamName)) {
-                                        commentStringBuilder.append(teamName);
-                                        commentStringBuilder.append("/");
-                                    }
-                                    if (StringUtils.isNotBlank(titleName)) {
-                                        commentStringBuilder.append(titleName);
-                                        commentStringBuilder.append("/");
-                                    }
-                                    commentStringBuilder.append(userVo.getUserName());
+                                    commentStringBuilder.append(" ");
                                 }
                                 commentStringBuilder.append(" ");
+                                Date lcd = contentVo.getLcd();
+                                if (lcd != null) {
+                                    commentStringBuilder.append(sdf.format(contentVo.getLcd()));
+                                }
+                                commentStringBuilder.append("</p>");
+                                commentList.add(commentStringBuilder.toString());
                             }
-                            commentStringBuilder.append(" ");
-                            Date lcd = contentVo.getLcd();
-                            if (lcd != null) {
-                                commentStringBuilder.append(sdf.format(contentVo.getLcd()));
-                            }
-                            commentStringBuilder.append("</p>");
-                            commentList.add(commentStringBuilder.toString());
                         }
                     }
                     return commentList;
