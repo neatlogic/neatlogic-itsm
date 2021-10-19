@@ -16,7 +16,7 @@ import codedriver.framework.notify.dto.NotifyTriggerTemplateVo;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.process.constvalue.*;
 import codedriver.framework.process.notify.constvalue.ProcessTaskStepNotifyParam;
-import codedriver.framework.process.notify.constvalue.TaskNotifyParam;
+import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyParam;
 import codedriver.framework.process.notify.core.NotifyDefaultTemplateFactory;
 import codedriver.framework.process.notify.core.IDefaultTemplate;
 import codedriver.framework.process.notify.constvalue.ProcessTaskNotifyParam;
@@ -109,7 +109,7 @@ public class SlaNotifyPolicyHandler extends NotifyPolicyHandlerBase {
             paramVo.setIsEditable(0);
             notifyPolicyParamList.add(paramVo);
         }
-        for(TaskNotifyParam param : TaskNotifyParam.values()) {
+        for(ProcessTaskStepTaskNotifyParam param : ProcessTaskStepTaskNotifyParam.values()) {
             ConditionParamVo paramVo = new ConditionParamVo();
             paramVo.setName(param.getValue());
             paramVo.setLabel(param.getText());

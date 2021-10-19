@@ -7,7 +7,7 @@ package codedriver.module.process.notify.handler.param;
 
 import codedriver.framework.process.dto.ProcessTaskStepTaskVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
-import codedriver.framework.process.notify.constvalue.TaskNotifyParam;
+import codedriver.framework.process.notify.constvalue.ProcessTaskStepTaskNotifyParam;
 import codedriver.framework.process.notify.core.ProcessTaskNotifyParamHandlerBase;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ public class TaskConfigNameParamHandler extends ProcessTaskNotifyParamHandlerBas
 
     @Override
     public String getValue() {
-        return TaskNotifyParam.TASKCONFIGNAME.getValue();
+        return ProcessTaskStepTaskNotifyParam.TASKCONFIGNAME.getValue();
     }
 
     @Override

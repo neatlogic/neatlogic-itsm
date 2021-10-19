@@ -40,14 +40,12 @@ public class StepStayTimeParamHandler extends ProcessTaskNotifyParamHandlerBase 
                 Date activeTime = stepVo.getActiveTime();
                 if (activeTime != null) {
                     long stayTime = System.currentTimeMillis() - activeTime.getTime();
-                    stayTime = 26 * 60 * 60 * 1000 + 123;
                     return millisecondsTransferDayHourTimeUnit(stayTime);
                 }
             } else if (ProcessTaskStatus.RUNNING.getValue().equals(status)) {
                 Date startTime = stepVo.getStartTime();
                 if (startTime != null) {
                     long stayTime = System.currentTimeMillis() - startTime.getTime();
-                    stayTime = 26 * 60 * 60 * 1000 + 123;
                     return millisecondsTransferDayHourTimeUnit(stayTime);
                 }
             }
