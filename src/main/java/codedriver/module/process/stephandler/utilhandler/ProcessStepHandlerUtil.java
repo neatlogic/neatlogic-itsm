@@ -535,7 +535,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
             String content = paramObj.getString("content");
             if (StringUtils.isBlank(content)) {
-                throw new ProcessTaskStepContentIsEmptyException();
+                List<ProcessTaskStepContentVo> contentList = processTaskMapper.getProcessTaskStepContentByProcessTaskStepId(currentProcessTaskStepVo.getId());
+                if (CollectionUtils.isEmpty(contentList)) {
+                    throw new ProcessTaskStepContentIsEmptyException();
+                }
             }
         }
     }
