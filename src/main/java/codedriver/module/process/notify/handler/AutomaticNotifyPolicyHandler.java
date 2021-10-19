@@ -135,18 +135,6 @@ public class AutomaticNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     }
 
     @Override
-    protected List<String> getMyParamNameList(){
-        List<String> resultList = new ArrayList<>();
-        for (ProcessTaskNotifyParam param : ProcessTaskNotifyParam.values()) {
-            resultList.add(param.getValue());
-        }
-        for (ProcessTaskStepNotifyParam param : ProcessTaskStepNotifyParam.values()) {
-            resultList.add(param.getValue());
-        }
-        return resultList;
-    }
-
-    @Override
     protected List<ConditionParamVo> mySystemConditionOptionList() {
         List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();
         for(ConditionProcessTaskOptions option : ConditionProcessTaskOptions.values()) {

@@ -137,21 +137,6 @@ public class OmnipotentNotifyPolicyHandler extends NotifyPolicyHandlerBase {
 		return notifyPolicyParamList;
 	}
 
-	@Override
-    protected List<String> getMyParamNameList(){
-	    List<String> resultList = new ArrayList<>();
-	    for (ProcessTaskNotifyParam param : ProcessTaskNotifyParam.values()) {
-            resultList.add(param.getValue());
-        }
-        for (ProcessTaskStepNotifyParam param : ProcessTaskStepNotifyParam.values()) {
-            resultList.add(param.getValue());
-        }
-        for (TaskNotifyParam param : TaskNotifyParam.values()) {
-            resultList.add(param.getValue());
-        }
-	    return resultList;
-    }
-
     @Override
     protected List<ConditionParamVo> mySystemConditionOptionList() {
         List<ConditionParamVo> notifyPolicyParamList = new ArrayList<>();

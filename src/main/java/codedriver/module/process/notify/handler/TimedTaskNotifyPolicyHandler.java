@@ -59,11 +59,6 @@ public class TimedTaskNotifyPolicyHandler extends NotifyPolicyHandlerBase {
     }
 
     @Override
-    protected List<String> getMyParamNameList(){
-        return null;
-    }
-
-    @Override
     protected List<ConditionParamVo> mySystemConditionOptionList() {
         return null;
     }
