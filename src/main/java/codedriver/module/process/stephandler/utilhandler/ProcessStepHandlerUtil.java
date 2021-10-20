@@ -539,6 +539,15 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                 if (CollectionUtils.isEmpty(contentList)) {
                     throw new ProcessTaskStepContentIsEmptyException();
                 }
+                Date startTime = currentProcessTaskStepVo.getStartTime();
+                if (startTime != null) {
+                    for (ProcessTaskStepContentVo contentVo : contentList) {
+                        if (startTime.before(contentVo.getLcd())) {
+                            return;
+                        }
+                    }
+                    throw new ProcessTaskStepContentIsEmptyException();
+                }
             }
         }
     }
