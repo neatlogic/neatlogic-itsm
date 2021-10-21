@@ -6,6 +6,8 @@
 package codedriver.module.process.thread;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.notify.core.INotifyTriggerType;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
@@ -40,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ProcessTaskNotifyThread extends CodeDriverThread {
@@ -48,6 +51,7 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
     private static SelectContentByHashMapper selectContentByHashMapper;
     private static ProcessStepHandlerMapper processStepHandlerMapper;
     private static NotifyMapper notifyMapper;
+    private static FileMapper fileMapper;
     private static ProcessTaskService processTaskService;
 
     @Autowired
@@ -73,6 +77,11 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
     @Autowired
     public void setNotifyMapper(NotifyMapper _notifyMapper) {
         notifyMapper = _notifyMapper;
+    }
+
+    @Autowired
+    public void setFileMapper(FileMapper _fileMapper) {
+        fileMapper = _fileMapper;
     }
 
     private ProcessTaskStepVo currentProcessTaskStepVo;
@@ -146,8 +155,12 @@ public class ProcessTaskNotifyThread extends CodeDriverThread {
                         if (CollectionUtils.isNotEmpty(paramMappingArray)) {
                             paramMappingList = paramMappingArray.toJavaList(ParamMappingVo.class);
                         }
+                        List<FileVo> fileList = fileMapper.getFileListByProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
+                        if (CollectionUtils.isNotEmpty(fileList)) {
+                            fileList = fileList.stream().filter(o -> o.getSize() <= 10 * 1024 * 1024).collect(Collectors.toList());
+                        }
                         String notifyPolicyHandler = notifyPolicyVo.getHandler();
-                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, conditionParamData, receiverMap, currentProcessTaskStepVo);
+                        NotifyPolicyUtil.execute(notifyPolicyHandler, notifyTriggerType, ProcessTaskMessageHandler.class, policyConfig, paramMappingList, conditionParamData, receiverMap, currentProcessTaskStepVo, fileList);
                     }
                 }
             }
