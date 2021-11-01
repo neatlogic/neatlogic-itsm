@@ -72,15 +72,15 @@ public class ProcessTaskAutomaticCompleteApi extends PrivateApiComponentBase {
 			flowDirection = ProcessFlowDirection.BACKWARD.getValue();
 		}
 		/** 不允许多个后续步骤 **/
-		List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(processTaskStepId,flowDirection);
-		if(CollectionUtils.isEmpty(processTaskStepList)||(CollectionUtils.isNotEmpty(processTaskStepList) && processTaskStepList.size()>1)) {
+		List<Long> processTaskStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(processTaskStepId, flowDirection);
+		if(CollectionUtils.isEmpty(processTaskStepIdList)||(CollectionUtils.isNotEmpty(processTaskStepIdList) && processTaskStepIdList.size()>1)) {
 			throw new ProcessTaskAutomaticNotAllowNextStepsException();
 		}
 		
 		IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(processTaskStepVo.getHandler());
 		if(handler != null) {
-			jsonObj.put("nextStepId", processTaskStepList.get(0).getId());
-			processTaskStepVo.setParamObj(jsonObj);
+			jsonObj.put("nextStepId", processTaskStepIdList.get(0));
+			processTaskStepVo.getParamObj().putAll(jsonObj);
 			handler.complete(processTaskStepVo);
 		}else {
 			throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());

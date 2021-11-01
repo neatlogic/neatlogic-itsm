@@ -86,7 +86,7 @@ public class ProcessTaskStartProcessApi extends PrivateApiComponentBase {
                 jsonObj.putAll(dataObj);
             }
         }
-        startProcessTaskStepVo.setParamObj(jsonObj);
+        startProcessTaskStepVo.getParamObj().putAll(jsonObj);
         try {
             handler.startProcess(startProcessTaskStepVo);
 			processTaskStepDataMapper.deleteProcessTaskStepData(processTaskStepDataVo);

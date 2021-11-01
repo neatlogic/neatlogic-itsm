@@ -174,7 +174,7 @@ public class ProcessTaskDraftSaveApi extends PrivateApiComponentBase {
         processTaskStepDataVo.setType(ProcessTaskStepDataType.STEPDRAFTSAVE.getValue());
         processTaskStepDataVo.setFcu(UserContext.get().getUserUuid(true));
 
-        startProcessTaskStepVo.setParamObj(jsonObj);
+        startProcessTaskStepVo.getParamObj().putAll(jsonObj);
         handler.saveDraft(startProcessTaskStepVo);
 
         processTaskStepDataVo.setData(jsonObj.toJSONString());

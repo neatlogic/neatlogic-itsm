@@ -116,7 +116,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         //活动参数
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", taskConfigVo.getName());
-        processTaskStepVo.setParamObj(paramObj);
+        processTaskStepVo.getParamObj().putAll(paramObj);
         processTaskStepTaskVo.setTaskConfigName(taskConfigVo.getName());
         processTaskStepVo.setProcessTaskStepTaskVo(processTaskStepTaskVo);
         processTaskStepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdList(Collections.singletonList(processTaskStepTaskVo.getId())));
@@ -169,7 +169,7 @@ public class ProcessTaskStepTaskServiceImpl implements ProcessTaskStepTaskServic
         //活动参数
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
-        processTaskStepVo.setParamObj(paramObj);
+        processTaskStepVo.getParamObj().putAll(paramObj);
         processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
         stepTaskVo.setStepTaskUserVoList(processTaskStepTaskMapper.getStepTaskUserByStepTaskIdListAndUserUuid(Collections.singletonList(stepTaskVo.getId()), UserContext.get().getUserUuid()));
         stepTaskVo.setTaskStepTaskUserContent(content);

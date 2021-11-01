@@ -172,7 +172,7 @@ public class ProcessTaskCompleteApi extends PrivateApiComponentBase {
                 }
             }
         }
-        processTaskStepVo.setParamObj(jsonObj);
+        processTaskStepVo.getParamObj().putAll(jsonObj);
         try {
             handler.complete(processTaskStepVo);
         } catch (ProcessTaskNoPermissionException e) {

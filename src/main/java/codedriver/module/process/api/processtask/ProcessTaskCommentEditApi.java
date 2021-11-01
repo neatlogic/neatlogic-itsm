@@ -87,10 +87,8 @@ public class ProcessTaskCommentEditApi extends PrivateApiComponentBase {
         boolean isUpdate = processTaskService.saveProcessTaskStepReply(jsonObj, oldReplyVo);
         if(isUpdate) {
             //生成活动
-            ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
-            processTaskStepVo.setProcessTaskId(oldReplyVo.getProcessTaskId());
-            processTaskStepVo.setId(oldReplyVo.getProcessTaskStepId());
-            processTaskStepVo.setParamObj(jsonObj);
+            ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(oldReplyVo.getProcessTaskStepId());
+            processTaskStepVo.getParamObj().putAll(jsonObj);
 			IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.EDITCOMMENT);
         }
         
