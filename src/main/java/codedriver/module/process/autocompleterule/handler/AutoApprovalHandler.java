@@ -11,11 +11,12 @@ import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
-import codedriver.framework.process.constvalue.AutoCompleteType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTagMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepInOperationVo;
 import codedriver.framework.process.dto.ProcessTaskStepTagVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -47,44 +48,72 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
 
     @Override
     public String getHandler() {
-        return AutoCompleteType.AUTOAPPROVAL.getValue();
+        return "autoApproval";
     }
 
     @Override
-    public void execute(ProcessTaskStepVo currentProcessTaskStepVo) {
-        if (Objects.equals(currentProcessTaskStepVo.getIsActive(), 1)) {
-            if (ProcessTaskStatus.RUNNING.getValue().equals(currentProcessTaskStepVo.getStatus())) {
-                List<ProcessTaskStepUserVo> stepUserVoList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
-                if (stepUserVoList.size() == 1) {
-                    Long tagId = processTagMapper.getProcessTagIdByName("审批");
-                    if (tagId != null) {
-                        ProcessTaskStepTagVo processTaskStepTagVo = new ProcessTaskStepTagVo();
-                        processTaskStepTagVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
-                        processTaskStepTagVo.setTagId(tagId);
-                        if (processTaskMapper.checkProcessTaskStepTagIsExists(processTaskStepTagVo) > 0) {
-                            Long startStepId = currentProcessTaskStepVo.getFromProcessTaskStepId();
-                            if (startStepId != null) {
-                                ProcessTaskStepVo startStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(startStepId);
-                                if (startStepVo != null) {
-                                    if (Objects.equals(startStepVo.getIsActive(), 2)) {
-                                        if (ProcessTaskStatus.SUCCEED.getValue().equals(startStepVo.getStatus())) {
-                                            List<ProcessTaskStepUserVo> startStepUserVoList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getStartProcessTaskStepId(), ProcessUserType.MAJOR.getValue());
-                                            if (startStepUserVoList.size() == 1) {
-                                                if (Objects.equals(startStepUserVoList.get(0).getUserUuid(), stepUserVoList.get(0).getUserUuid())) {
-                                                    UserVo currentUserVo = userMapper.getUserBaseInfoByUuid(stepUserVoList.get(0).getUserUuid());
-                                                    IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                                                    TransactionSynchronizationPool.execute(new ProcessStepThread(currentProcessTaskStepVo, currentUserVo) {
-                                                        @Override
-                                                        public void myExecute() {
-                                                            UserContext.init(currentUserVo, SystemUser.SYSTEM.getTimezone());
-                                                            currentProcessTaskStepVo.getParamObj().put("action", "complete");
-                                                            handler.complete(currentProcessTaskStepVo);
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        }
-                                    }
+    public String getName() {
+        return "自动审批";
+    }
+
+    @Override
+    public int getPriority() {
+        return 1;
+    }
+
+    @Override
+    public boolean execute(ProcessTaskStepVo currentProcessTaskStepVo) {
+        String currentStepMajorUserUuid = getCurrentStepMajorUserUuid(currentProcessTaskStepVo);
+        if (currentStepMajorUserUuid != null) {
+            String preStepMajorUserUuid = getPreStepMajorUserUuid(currentProcessTaskStepVo);
+            if (preStepMajorUserUuid != null) {
+                if (Objects.equals(currentStepMajorUserUuid, preStepMajorUserUuid)) {
+                    UserVo currentUserVo = userMapper.getUserBaseInfoByUuid(currentStepMajorUserUuid);
+                    IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
+                    ProcessStepThread thread = new ProcessStepThread(currentProcessTaskStepVo, currentUserVo) {
+                        @Override
+                        public void myExecute() {
+                            UserContext.init(currentUserVo, SystemUser.SYSTEM.getTimezone());
+                            currentProcessTaskStepVo.getParamObj().put("action", "complete");
+                            handler.complete(currentProcessTaskStepVo);
+                        }
+                    };
+                    ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
+                            currentProcessTaskStepVo.getProcessTaskId(),
+                            currentProcessTaskStepVo.getId(),
+                            ProcessTaskOperationType.STEP_COMPLETE.getValue()
+                    );
+                    processTaskMapper.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
+                    thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskStepIdAndOperationType(processTaskStepInOperationVo));
+                    TransactionSynchronizationPool.execute(thread);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 如果上游节点是审批节点，则返回处理人
+     * @param currentProcessTaskStepVo
+     * @return
+     */
+    private String getPreStepMajorUserUuid(ProcessTaskStepVo currentProcessTaskStepVo) {
+        Long startStepId = currentProcessTaskStepVo.getFromProcessTaskStepId();
+        if (startStepId != null) {
+            ProcessTaskStepVo startStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(startStepId);
+            if (startStepVo != null) {
+                if (Objects.equals(startStepVo.getIsActive(), 2)) {
+                    if (ProcessTaskStatus.SUCCEED.getValue().equals(startStepVo.getStatus())) {
+                        Long tagId = processTagMapper.getProcessTagIdByName("审批");
+                        if (tagId != null) {
+                            ProcessTaskStepTagVo processTaskStepTagVo = new ProcessTaskStepTagVo();
+                            processTaskStepTagVo.setProcessTaskStepId(startStepVo.getId());
+                            processTaskStepTagVo.setTagId(tagId);
+                            if (processTaskMapper.checkProcessTaskStepTagIsExists(processTaskStepTagVo) > 0) {
+                                List<ProcessTaskStepUserVo> startStepUserVoList = processTaskMapper.getProcessTaskStepUserByStepId(startStepId, ProcessUserType.MAJOR.getValue());
+                                if (startStepUserVoList.size() == 1) {
+                                    return startStepUserVoList.get(0).getUserUuid();
                                 }
                             }
                         }
@@ -92,5 +121,31 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
                 }
             }
         }
+        return null;
+    }
+
+    /**
+     * 如果当前节点是审批节点，则返回处理人
+     * @param currentProcessTaskStepVo
+     * @return
+     */
+    private String getCurrentStepMajorUserUuid(ProcessTaskStepVo currentProcessTaskStepVo) {
+        if (Objects.equals(currentProcessTaskStepVo.getIsActive(), 1)) {
+            if (ProcessTaskStatus.RUNNING.getValue().equals(currentProcessTaskStepVo.getStatus())) {
+                Long tagId = processTagMapper.getProcessTagIdByName("审批");
+                if (tagId != null) {
+                    ProcessTaskStepTagVo processTaskStepTagVo = new ProcessTaskStepTagVo();
+                    processTaskStepTagVo.setProcessTaskStepId(currentProcessTaskStepVo.getId());
+                    processTaskStepTagVo.setTagId(tagId);
+                    if (processTaskMapper.checkProcessTaskStepTagIsExists(processTaskStepTagVo) > 0) {
+                        List<ProcessTaskStepUserVo> stepUserVoList = processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
+                        if (stepUserVoList.size() == 1) {
+                            return stepUserVoList.get(0).getUserUuid();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

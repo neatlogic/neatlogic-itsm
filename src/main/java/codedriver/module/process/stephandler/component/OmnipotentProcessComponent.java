@@ -3,6 +3,10 @@ package codedriver.module.process.stephandler.component;
 import java.util.List;
 import java.util.Set;
 
+import codedriver.framework.process.autocompleterule.core.AutoCompleteRuleHandlerFactory;
+import codedriver.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
+import com.alibaba.fastjson.JSONPath;
+import com.alibaba.nacos.common.utils.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,19 +67,22 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
-//		System.out.println("OmnipotentProcessComponent.myActive...start");
-//		String configHash = currentProcessTaskStepVo.getConfigHash();
-//		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
-//		if (StringUtils.isNotBlank(stepConfig)) {
-//			String autoCompleteRule = (String) JSONPath.read(stepConfig, "autoCompleteRule");
-//			if (StringUtils.isNotBlank(autoCompleteRule)) {
-//				IAutoCompleteRuleHandler autoCompleteRuleHandler = AutoCompleteRuleHandlerFactory.getHandler(autoCompleteRule);
-//				if (autoCompleteRuleHandler != null) {
-//					autoCompleteRuleHandler.execute(currentProcessTaskStepVo);
-//				}
-//			}
-//		}
-//		System.out.println("OmnipotentProcessComponent.myActive...end");
+		String configHash = currentProcessTaskStepVo.getConfigHash();
+		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
+		if (StringUtils.isNotBlank(stepConfig)) {
+			int size = AutoCompleteRuleHandlerFactory.getHandlerSize();
+			for (int i = 0; i < size; i++) {
+				IAutoCompleteRuleHandler autoCompleteRuleHandler = AutoCompleteRuleHandlerFactory.getHandler(i);
+				if (autoCompleteRuleHandler != null) {
+					Integer autoCompleteRule = (Integer) JSONPath.read(stepConfig, autoCompleteRuleHandler.getHandler());
+					if (Objects.equals(autoCompleteRule, 1)) {
+						if (autoCompleteRuleHandler.execute(currentProcessTaskStepVo)) {
+							break;
+						}
+					}
+				}
+			}
+		}
 		return 0;
 	}
 	

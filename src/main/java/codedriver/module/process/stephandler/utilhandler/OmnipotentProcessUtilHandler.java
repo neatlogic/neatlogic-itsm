@@ -367,10 +367,15 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         enableReapproval = enableReapproval == null ? 0 : enableReapproval;
         resultObj.put("enableReapproval", enableReapproval);
 
-        /** 自动流转规则 **/
-//        String autoCompleteRule = configObj.getString("autoCompleteRule");
-//        autoCompleteRule = autoCompleteRule == null ? "" : autoCompleteRule;
-//        resultObj.put("autoCompleteRule", autoCompleteRule);
+        /** 自动流转 **/
+        Integer autoComplete = configObj.getInteger("autoComplete");
+        autoComplete = autoComplete == null ? 0 : autoComplete;
+        resultObj.put("autoComplete", autoComplete);
+
+        /** 自动审批 **/
+        Integer autoApproval = configObj.getInteger("autoApproval");
+        autoApproval = autoApproval == null ? 0 : autoApproval;
+        resultObj.put("autoApproval", autoApproval);
         return resultObj;
     }
 

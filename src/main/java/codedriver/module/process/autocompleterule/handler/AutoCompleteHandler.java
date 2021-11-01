@@ -11,10 +11,11 @@ import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.autocompleterule.core.IAutoCompleteRuleHandler;
-import codedriver.framework.process.constvalue.AutoCompleteType;
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
+import codedriver.framework.process.dto.ProcessTaskStepInOperationVo;
 import codedriver.framework.process.dto.ProcessTaskStepUserVo;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -42,35 +43,48 @@ public class AutoCompleteHandler implements IAutoCompleteRuleHandler {
 
     @Override
     public String getHandler() {
-        return AutoCompleteType.AUTOCOMPLETE.getValue();
+        return "autoComplete";
     }
 
     @Override
-    public void execute(ProcessTaskStepVo currentProcessTaskStepVo) {
+    public String getName() {
+        return "自动流转";
+    }
+
+    @Override
+    public int getPriority() {
+        return 0;
+    }
+
+    @Override
+    public boolean execute(ProcessTaskStepVo currentProcessTaskStepVo) {
         if (Objects.equals(currentProcessTaskStepVo.getIsActive(), 1)) {
             if (ProcessTaskStatus.RUNNING.getValue().equals(currentProcessTaskStepVo.getStatus())) {
                 List<ProcessTaskStepUserVo> stepUserVoList =  processTaskMapper.getProcessTaskStepUserByStepId(currentProcessTaskStepVo.getId(), ProcessUserType.MAJOR.getValue());
                 if (stepUserVoList.size() == 1) {
                     UserVo currentUserVo = userMapper.getUserBaseInfoByUuid(stepUserVoList.get(0).getUserUuid());
                     IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-                    //        doNext(ProcessTaskOperationType.STEP_COMPLETE, new ProcessStepThread(currentProcessTaskStepVo) {
-                    //            @Override
-                    //            public void myExecute() {
-                    //                handler.complete(currentProcessTaskStepVo);
-                    //            }
-                    //        });
-                    TransactionSynchronizationPool.execute(new ProcessStepThread(currentProcessTaskStepVo, currentUserVo) {
+                    ProcessStepThread thread = new ProcessStepThread(currentProcessTaskStepVo, currentUserVo) {
                         @Override
                         public void myExecute() {
                             UserContext.init(currentUserVo, SystemUser.SYSTEM.getTimezone());
                             currentProcessTaskStepVo.getParamObj().put("action", "complete");
                             handler.complete(currentProcessTaskStepVo);
                         }
-                    });
+                    };
+                    ProcessTaskStepInOperationVo processTaskStepInOperationVo = new ProcessTaskStepInOperationVo(
+                            currentProcessTaskStepVo.getProcessTaskId(),
+                            currentProcessTaskStepVo.getId(),
+                            ProcessTaskOperationType.STEP_COMPLETE.getValue()
+                    );
+                    processTaskMapper.insertProcessTaskStepInOperation(processTaskStepInOperationVo);
+                    thread.setSupplier(() -> processTaskMapper.deleteProcessTaskStepInOperationByProcessTaskStepIdAndOperationType(processTaskStepInOperationVo));
+                    TransactionSynchronizationPool.execute(thread);
+                    return true;
                 }
             }
         }
 
-
+        return false;
     }
 }
