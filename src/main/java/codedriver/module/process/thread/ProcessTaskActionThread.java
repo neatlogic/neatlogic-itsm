@@ -203,9 +203,7 @@ public class ProcessTaskActionThread extends CodeDriverThread {
                         actionVo.setTrigger(triggerType.getTrigger());
                         actionVo.setTriggerText(triggerType.getText());
                         actionVo.setSucceed(isSucceed);
-                        JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
-                        paramObj.put(ProcessTaskAuditDetailType.RESTFULACTION.getParamName(),
-                                JSON.toJSONString(actionVo));
+                        currentProcessTaskStepVo.getParamObj().put(ProcessTaskAuditDetailType.RESTFULACTION.getParamName(), JSON.toJSONString(actionVo));
                         ProcessTaskAuditThread.audit(currentProcessTaskStepVo, ProcessTaskAuditType.RESTFULACTION);
                     }
                 }
