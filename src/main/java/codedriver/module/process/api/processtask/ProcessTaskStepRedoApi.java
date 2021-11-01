@@ -55,7 +55,7 @@ public class ProcessTaskStepRedoApi extends PrivateApiComponentBase {
         ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId, processTaskStepId);
         ProcessTaskStepVo currentProcessTaskStepVo = processTaskVo.getCurrentProcessTaskStep();
         IProcessStepHandler handler = ProcessStepHandlerFactory.getHandler(currentProcessTaskStepVo.getHandler());
-        currentProcessTaskStepVo.setParamObj(jsonObj);
+        currentProcessTaskStepVo.getParamObj().putAll(jsonObj);
         try {
             handler.redo(currentProcessTaskStepVo);
         }catch(ProcessTaskNoPermissionException e) {

@@ -215,8 +215,8 @@ class RandomCreateProcessTaskApi extends PrivateApiComponentBase {
                     JSONObject saveResultObj = JSONObject.parseObject(draftSaveApi.doService(PrivateApiComponentFactory.getApiByToken(draftSaveApi.getToken()), paramJson, null).toString());
                     saveResultObj.put("action", "start");
                     //查询可执行下一步骤
-                    List<ProcessTaskStepVo> nextStepList = processtaskMapper.getToProcessTaskStepByFromIdAndType(saveResultObj.getLong("processTaskStepId"), null);
-                    saveResultObj.put("nextStepId", nextStepList.get((int) Math.round(Math.random() * (nextStepList.size() - 1))).getId());
+                    List<Long> nextStepIdList = processtaskMapper.getToProcessTaskStepIdListByFromIdAndType(saveResultObj.getLong("processTaskStepId"), null);
+                    saveResultObj.put("nextStepId", nextStepIdList.get((int) Math.round(Math.random() * (nextStepIdList.size() - 1))));
                     //流转
                     ProcessTaskStartProcessApi startProcessApi = (ProcessTaskStartProcessApi) PrivateApiComponentFactory.getInstance(ProcessTaskStartProcessApi.class.getName());
                     startProcessApi.doService(PrivateApiComponentFactory.getApiByToken(startProcessApi.getToken()), saveResultObj, null);

@@ -74,7 +74,7 @@ public class EndProcessComponent extends ProcessStepHandlerBase {
 
 
 	@Override
-	protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo processTaskStepVo, List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
+	protected Set<Long> myGetNext(ProcessTaskStepVo processTaskStepVo, List<Long> nextStepIdList, Long nextStepId) throws ProcessTaskException {
 		return null;
 	}
 

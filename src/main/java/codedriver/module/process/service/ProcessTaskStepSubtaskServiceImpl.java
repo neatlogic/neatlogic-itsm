@@ -76,7 +76,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             subtaskVo.setTargetTime(processTaskStepSubtaskVo.getTargetTime());
             subtaskVo.setContentHash(processTaskContentVo.getHash());
 //            paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getParamName(), JSON.toJSONString(subtaskVo));
-            currentProcessTaskStepVo.setParamObj(paramObj);
+            currentProcessTaskStepVo.getParamObj().putAll(paramObj);
 //            IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.CREATESUBTASK);
 //            currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
 //            currentProcessTaskStepVo.setCurrentSubtaskVo(processTaskStepSubtaskVo);
@@ -153,7 +153,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
             oldSubtaskVo.setTargetTime(oldProcessTaskStepSubtask.getTargetTime());
             oldSubtaskVo.setContentHash(oldProcessTaskStepSubtask.getContentHash());
 //            paramObj.put(ProcessTaskAuditDetailType.SUBTASK.getOldDataParamName(), JSON.toJSONString(oldSubtaskVo));
-            currentProcessTaskStepVo.setParamObj(paramObj);
+            currentProcessTaskStepVo.getParamObj().putAll(paramObj);
 //            IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.EDITSUBTASK);
 //            currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
             processTaskStepSubtaskVo.setContent(content);
@@ -186,7 +186,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if (handler != null) {
             handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
             //记录活动
-            currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
+            currentProcessTaskStepVo.getParamObj().putAll(processTaskStepSubtaskVo.getParamObj());
 //            IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.REDOSUBTASK);
 //            currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
             List<ProcessTaskStepSubtaskContentVo> subtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
@@ -227,7 +227,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         }
         handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
         //记录活动
-        currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
+        currentProcessTaskStepVo.getParamObj().putAll(processTaskStepSubtaskVo.getParamObj());
 //        IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.COMPLETESUBTASK);
 //        currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
         List<ProcessTaskStepSubtaskContentVo> subtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());
@@ -269,7 +269,7 @@ public class ProcessTaskStepSubtaskServiceImpl implements ProcessTaskStepSubtask
         if (handler != null) {
             handler.updateProcessTaskStepUserAndWorker(processTaskStepSubtaskVo.getProcessTaskId(), processTaskStepSubtaskVo.getProcessTaskStepId());
             //记录活动
-            currentProcessTaskStepVo.setParamObj(processTaskStepSubtaskVo.getParamObj());
+            currentProcessTaskStepVo.getParamObj().putAll(processTaskStepSubtaskVo.getParamObj());
 //            IProcessStepHandlerUtil.audit(currentProcessTaskStepVo, ProcessTaskAuditType.ABORTSUBTASK);
 //            currentProcessTaskStepVo.setCurrentSubtaskId(processTaskStepSubtaskVo.getId());
             List<ProcessTaskStepSubtaskContentVo> subtaskContentList = processTaskStepSubtaskMapper.getProcessTaskStepSubtaskContentBySubtaskId(processTaskStepSubtaskVo.getId());

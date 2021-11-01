@@ -101,7 +101,7 @@ public class ProcessTaskStepTaskDeleteApi extends PrivateApiComponentBase {
         //活动参数
         JSONObject paramObj = new JSONObject();
         paramObj.put("replaceable_task", stepTaskVo.getTaskConfigName());
-        processTaskStepVo.setParamObj(paramObj);
+        processTaskStepVo.getParamObj().putAll(paramObj);
         processTaskStepVo.setProcessTaskStepTaskVo(stepTaskVo);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETETASK);
         IProcessStepHandlerUtil.notify(processTaskStepVo, ProcessTaskStepTaskNotifyTriggerType.DELETETASK);

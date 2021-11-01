@@ -140,9 +140,9 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         List<ProcessTaskStepUserVo> minorUserList = processTaskMapper.getProcessTaskStepUserByStepId(processTaskStepId, ProcessUserType.MINOR.getValue());
         for (ProcessTaskStepUserVo userVo : minorUserList) {
             if (ProcessTaskStepUserStatus.DOING.getValue().equals(userVo.getStatus())) {
-                doingMinorUserUuidSet.add(userVo.getUserVo().getUuid());
+                doingMinorUserUuidSet.add(userVo.getUserUuid());
             } else if (ProcessTaskStepUserStatus.DONE.getValue().equals(userVo.getStatus())) {
-                doneMinorUserUuidSet.add(userVo.getUserVo().getUuid());
+                doneMinorUserUuidSet.add(userVo.getUserUuid());
             }
         }
 
@@ -164,14 +164,14 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
             if (succeedSubtaskUserUuidSet.contains(userUuid)) {
                 if (doingMinorUserUuidSet.contains(userUuid)) {
                     /* 完成子任务 */
-                    processTaskStepUserVo.setUserVo(new UserVo(userUuid));
+                    processTaskStepUserVo.setUserUuid(userUuid);
                     processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DONE.getValue());
                     processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
                 }
             } else {
                 if (doingMinorUserUuidSet.contains(userUuid)) {
                     /* 取消子任务 */
-                    processTaskStepUserVo.setUserVo(new UserVo(userUuid));
+                    processTaskStepUserVo.setUserUuid(userUuid);
                     processTaskMapper.deleteProcessTaskStepUser(processTaskStepUserVo);
                 }
             }
@@ -184,14 +184,18 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
 
             if (doneMinorUserUuidSet.contains(userUuid)) {
                 /* 重做子任务 */
-                processTaskStepUserVo.setUserVo(new UserVo(userUuid));
+                processTaskStepUserVo.setUserUuid(userUuid);
                 processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
                 processTaskMapper.updateProcessTaskStepUserStatus(processTaskStepUserVo);
             } else if (!doingMinorUserUuidSet.contains(userUuid)) {
                 /* 创建子任务 */
-                processTaskStepUserVo.setUserVo(new UserVo(userUuid));
-                processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
-                processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
+                UserVo userVo = userMapper.getUserBaseInfoByUuid(userUuid);
+                if (userVo != null) {
+                    processTaskStepUserVo.setUserUuid(userVo.getUuid());
+                    processTaskStepUserVo.setUserName(userVo.getUserName());
+                    processTaskStepUserVo.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
+                    processTaskMapper.insertProcessTaskStepUser(processTaskStepUserVo);
+                }
             }
         }
     }
@@ -358,9 +362,15 @@ public class OmnipotentProcessUtilHandler extends ProcessStepInternalHandlerBase
         JSONObject simpleSettings = ProcessConfigUtil.regulateSimpleSettings(configObj);
         resultObj.putAll(simpleSettings);
 
+        /** 重审 **/
         Integer enableReapproval = configObj.getInteger("enableReapproval");
         enableReapproval = enableReapproval == null ? 0 : enableReapproval;
         resultObj.put("enableReapproval", enableReapproval);
+
+        /** 自动流转规则 **/
+//        String autoCompleteRule = configObj.getString("autoCompleteRule");
+//        autoCompleteRule = autoCompleteRule == null ? "" : autoCompleteRule;
+//        resultObj.put("autoCompleteRule", autoCompleteRule);
         return resultObj;
     }
 

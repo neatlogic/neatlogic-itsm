@@ -111,7 +111,7 @@ public class ProcessTaskRelationSaveApi extends PrivateApiComponentBase {
                     JSON.toJSONString(processTaskIdList));
                 ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
                 processTaskStepVo.setProcessTaskId(processTaskId);
-                processTaskStepVo.setParamObj(jsonObj);
+                processTaskStepVo.getParamObj().putAll(jsonObj);
                 processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
             }
         }

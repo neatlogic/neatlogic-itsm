@@ -82,7 +82,7 @@ public class ProcessTaskFocusUserUpdateApi extends PrivateApiComponentBase {
 
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskVo.getId());
-        processTaskStepVo.setParamObj(paramObj);
+        processTaskStepVo.getParamObj().putAll(paramObj);
         IProcessStepHandlerUtil.saveFocusUserList(processTaskStepVo);
         /** 生成活动 **/
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.UPDATEFOCUSUSER);

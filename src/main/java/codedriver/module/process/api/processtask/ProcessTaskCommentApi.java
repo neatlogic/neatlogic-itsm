@@ -158,7 +158,7 @@ public class ProcessTaskCommentApi extends PrivateApiComponentBase {
         }
 
         // 生成活动
-        processTaskStepVo.setParamObj(jsonObj);
+        processTaskStepVo.getParamObj().putAll(jsonObj);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.COMMENT);
 
         JSONObject resultObj = new JSONObject();
