@@ -151,7 +151,7 @@ public class ProcessTaskReapprovalApi extends PrivateApiComponentBase {
                 }
             }
         }
-        processTaskStepVo.setParamObj(paramObj);
+        processTaskStepVo.getParamObj().putAll(paramObj);
         try {
             handler.reapproval(processTaskStepVo);
         } catch (ProcessTaskNoPermissionException e) {

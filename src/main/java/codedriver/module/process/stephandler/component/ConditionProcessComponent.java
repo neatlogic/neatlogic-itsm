@@ -95,11 +95,12 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
     }
 
     @Override
-    protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo,
-                                               List<ProcessTaskStepVo> nextStepList, Long nextStepId) {
+    protected Set<Long> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo,
+                                  List<Long> nextStepIdList, Long nextStepId) {
         UserContext.init(SystemUser.SYSTEM.getUserVo(), SystemUser.SYSTEM.getTimezone());
-        Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(nextStepList)) {
+        Set<Long> nextStepIdSet = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(nextStepIdList)) {
+            List<ProcessTaskStepVo> nextStepList = processTaskMapper.getProcessTaskStepListByIdList(nextStepIdList);
             Map<String, ProcessTaskStepVo> processTaskStepMap = nextStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, e -> e));
             Map<String, String> processStepNameMap = nextStepList.stream().collect(Collectors.toMap(ProcessTaskStepVo::getProcessStepUuid, ProcessTaskStepVo::getName));
             ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(currentProcessTaskStepVo.getId());
@@ -156,7 +157,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
                                 if (canRun) {
                                     ProcessTaskStepVo stepVo = processTaskStepMap.get(targetStepUuid);
                                     if (stepVo != null) {
-                                        nextStepSet.add(stepVo);
+                                        nextStepIdSet.add(stepVo.getId());
                                     }
                                 }
                             }
@@ -170,7 +171,7 @@ public class ConditionProcessComponent extends ProcessStepHandlerBase {
             }
         }
 
-        return nextStepSet;
+        return nextStepIdSet;
     }
 
     @Override

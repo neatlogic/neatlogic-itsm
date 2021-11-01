@@ -62,7 +62,7 @@ public class ProcessTaskTransferKnowledgeAuditApi extends PrivateApiComponentBas
         //生成活动  
         ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
         processTaskStepVo.setProcessTaskId(processTaskId);
-        processTaskStepVo.setParamObj(jsonObj);
+        processTaskStepVo.getParamObj().putAll(jsonObj);
         IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.TRANSFERKNOWLEDGE);
         return null;
     }

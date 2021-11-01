@@ -186,7 +186,7 @@ public class ProcessTaskBatchMergeReportActionApi extends PrivateApiComponentBas
                         JSON.toJSONString(checkedProcessTaskIdList));
                 ProcessTaskStepVo processTaskStepVo = new ProcessTaskStepVo();
                 processTaskStepVo.setProcessTaskId(processTaskId);
-                processTaskStepVo.setParamObj(paramObj);
+                processTaskStepVo.getParamObj().putAll(paramObj);
                 processStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.RELATION);
             }
             //关联工单结束

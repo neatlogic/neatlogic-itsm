@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.dto.ProcessTaskStepVo;
@@ -74,14 +74,14 @@ public class DistributaryProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
-		Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
-		for(ProcessTaskStepVo processTaskStep : nextStepList) {
-			if(ProcessFlowDirection.FORWARD.getValue().equals(processTaskStep.getFlowDirection())) {
-				nextStepSet.add(processTaskStep);
-			}
+	protected Set<Long> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<Long> nextStepIdList, Long nextStepId) throws ProcessTaskException {
+		JSONObject paramObj = currentProcessTaskStepVo.getParamObj();
+		String action = paramObj.getString("action");
+		if (ProcessTaskOperationType.STEP_BACK.getValue().equals(action)) {
+			return new HashSet<>();
+		} else {
+			return new HashSet<>(nextStepIdList);
 		}
-		return nextStepSet;
 	}
 
 	@Override

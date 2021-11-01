@@ -9,7 +9,6 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.process.auth.PROCESS_BASE;
-import codedriver.framework.process.constvalue.ProcessFlowDirection;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
@@ -107,7 +106,7 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
             if (processTaskScoreTemplateVo != null) {
                 processTaskVo.setScoreTemplateVo(scoreTemplateMapper.getScoreTemplateById(processTaskScoreTemplateVo.getScoreTemplateId()));
                 ProcessTaskStepVo endProcessTaskStepVo = processTaskMapper.getEndProcessTaskStepByProcessTaskId(processTaskId);
-                List<ProcessTaskStepVo> processTaskStepVoList = processTaskMapper.getToProcessTaskStepByFromIdAndType(endProcessTaskStepVo.getId(), ProcessFlowDirection.BACKWARD.getValue());
+                List<ProcessTaskStepVo> processTaskStepVoList = processTaskService.getBackwardNextStepListByProcessTaskStepId(endProcessTaskStepVo.getId());
                 processTaskVo.setRedoStepList(processTaskStepVoList);
             }
         }

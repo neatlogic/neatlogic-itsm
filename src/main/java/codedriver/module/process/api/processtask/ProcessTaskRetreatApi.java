@@ -59,7 +59,7 @@ public class ProcessTaskRetreatApi extends PrivateApiComponentBase {
 		if(handler == null) {
             throw new ProcessStepHandlerNotFoundException(processTaskStepVo.getHandler());
 		}
-        processTaskStepVo.setParamObj(jsonObj);
+        processTaskStepVo.getParamObj().putAll(jsonObj);
         try {
             handler.retreat(processTaskStepVo);
         }catch(ProcessTaskNoPermissionException e) {

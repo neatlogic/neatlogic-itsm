@@ -122,8 +122,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                 audit.put("status", ProcessTaskStatus.getJson(ProcessTaskStatus.SUCCEED.getValue()));
                 if (!automaticConfigVo.getIsRequest() || !automaticConfigVo.getIsHasCallback()) {// 第一次请求
                     //补充下一步骤id
-                    List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
-                    currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepList.get(0).getId());
+                    List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+                    currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
                     processHandler.complete(currentProcessTaskStepVo);
                 } else {// 回调请求
                     if (CallbackType.WAIT.getValue().equals(automaticConfigVo.getCallbackType())) {
@@ -168,11 +168,10 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     if (backStepList.size() == 1) {
                         ProcessTaskStepVo nextProcessTaskStepVo = backStepList.get(0);
                         if (processHandler != null) {
-                            JSONObject jsonParam = new JSONObject();
+                            JSONObject jsonParam = currentProcessTaskStepVo.getParamObj();
                             jsonParam.put("action", ProcessTaskOperationType.STEP_BACK.getValue());
                             jsonParam.put("nextStepId", nextProcessTaskStepVo.getId());
                             jsonParam.put("content", failedReason);
-                            currentProcessTaskStepVo.setParamObj(jsonParam);
                             processHandler.complete(currentProcessTaskStepVo);
                         }
                     } else {// 如果存在多个回退线，保持running
@@ -180,8 +179,8 @@ public class ProcessTaskAutomaticServiceImpl implements ProcessTaskAutomaticServ
                     }
                 } else if (FailPolicy.KEEP_ON.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
                     //补充下一步骤id
-                    List<ProcessTaskStepVo> nextStepList = processTaskMapper.getToProcessTaskStepByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
-                    currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepList.get(0).getId());
+                    List<Long> nextStepIdList = processTaskMapper.getToProcessTaskStepIdListByFromIdAndType(currentProcessTaskStepVo.getId(), ProcessFlowDirection.FORWARD.getValue());
+                    currentProcessTaskStepVo.getParamObj().put("nextStepId", nextStepIdList.get(0));
                     processHandler.complete(currentProcessTaskStepVo);
                 } else if (FailPolicy.CANCEL.getValue().equals(automaticConfigVo.getBaseFailPolicy())) {
                     processHandler.abortProcessTask(new ProcessTaskVo(currentProcessTaskStepVo.getProcessTaskId()));

@@ -86,7 +86,7 @@ public class ProcessTaskCommentDeleteApi extends PrivateApiComponentBase {
         processTaskMapper.deleteProcessTaskStepFileByContentId(id);
         //生成活动
         ProcessTaskStepVo processTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(replyVo.getProcessTaskStepId());    
-        processTaskStepVo.setParamObj(jsonObj);
+        processTaskStepVo.getParamObj().putAll(jsonObj);
 		IProcessStepHandlerUtil.audit(processTaskStepVo, ProcessTaskAuditType.DELETECOMMENT);
         
         JSONObject resultObj = new JSONObject();

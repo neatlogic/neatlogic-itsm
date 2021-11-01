@@ -141,8 +141,10 @@ public class ProcessTaskFlowChartApi extends PrivateApiComponentBase {
             processTaskStepVo.setUserList(null);
             processTaskStepVo.setWorkerPolicyList(null);
             ProcessTaskStepUserVo majorUser = new ProcessTaskStepUserVo();
-            UserVo userVo = userMapper.getUserBaseInfoByUuid(UserContext.get().getUserUuid(true));
-            majorUser.setUserVo(userVo);
+            majorUser.setUserUuid(UserContext.get().getUserUuid(true));
+            majorUser.setUserName(UserContext.get().getUserName());
+//            UserVo userVo = userMapper.getUserBaseInfoByUuid(UserContext.get().getUserUuid(true));
+//            majorUser.setUserVo(userVo);
             majorUser.setUserType(ProcessUserType.MAJOR.getValue());
             majorUser.setStatus(ProcessTaskStepUserStatus.DOING.getValue());
             majorUser.setStartTime(startTime);

@@ -1,6 +1,5 @@
 package codedriver.module.process.stephandler.component;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -64,6 +63,19 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 
 	@Override
 	protected int myActive(ProcessTaskStepVo currentProcessTaskStepVo) throws ProcessTaskException {
+//		System.out.println("OmnipotentProcessComponent.myActive...start");
+//		String configHash = currentProcessTaskStepVo.getConfigHash();
+//		String stepConfig = selectContentByHashMapper.getProcessTaskStepConfigByHash(configHash);
+//		if (StringUtils.isNotBlank(stepConfig)) {
+//			String autoCompleteRule = (String) JSONPath.read(stepConfig, "autoCompleteRule");
+//			if (StringUtils.isNotBlank(autoCompleteRule)) {
+//				IAutoCompleteRuleHandler autoCompleteRuleHandler = AutoCompleteRuleHandlerFactory.getHandler(autoCompleteRule);
+//				if (autoCompleteRuleHandler != null) {
+//					autoCompleteRuleHandler.execute(currentProcessTaskStepVo);
+//				}
+//			}
+//		}
+//		System.out.println("OmnipotentProcessComponent.myActive...end");
 		return 0;
 	}
 	
@@ -83,22 +95,8 @@ public class OmnipotentProcessComponent extends ProcessStepHandlerBase {
 	}
 
 	@Override
-	protected Set<ProcessTaskStepVo> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<ProcessTaskStepVo> nextStepList, Long nextStepId) throws ProcessTaskException {
-		Set<ProcessTaskStepVo> nextStepSet = new HashSet<>();
-		if (nextStepList.size() == 1) {
-			nextStepSet.add(nextStepList.get(0));
-		} else if (nextStepList.size() > 1) {
-			if(nextStepId == null) {
-				throw new ProcessTaskException("找到多个后续节点");
-			}
-			for (ProcessTaskStepVo processTaskStepVo : nextStepList) {
-				if (processTaskStepVo.getId().equals(nextStepId)) {
-					nextStepSet.add(processTaskStepVo);
-					break;
-				}
-			}
-		}
-		return nextStepSet;
+	protected Set<Long> myGetNext(ProcessTaskStepVo currentProcessTaskStepVo, List<Long> nextStepIdList, Long nextStepId) throws ProcessTaskException {
+		return defaultGetNext(nextStepIdList, nextStepId);
 	}
 
 	@Override
