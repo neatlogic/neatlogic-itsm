@@ -501,6 +501,7 @@ public class WorkcenterInit extends ModuleInitializedListenerBase {
             // 切换租户数据源
             TenantContext.get().switchTenant(tenantUuid).setUseDefaultDatasource(false);
             for (WorkcenterVo workcenterVo : workcenterList) {
+                //TODO 刚开始需要控制授权
                 workcenterMapper.insertWorkcenter(workcenterVo);
             }
         }
