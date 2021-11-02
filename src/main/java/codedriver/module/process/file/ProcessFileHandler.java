@@ -25,9 +25,6 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
         return "IT服务附件";
     }
 
-    @Override
-    public void afterUpload(FileVo fileVo, JSONObject jsonObj) {
-    }
 
     @Override
     public String getName() {
@@ -35,7 +32,7 @@ public class ProcessFileHandler extends FileTypeHandlerBase {
     }
 
     @Override
-    protected boolean myDeleteFile(Long fileId) {
+    protected boolean myDeleteFile(FileVo fileVo, JSONObject paramObj) {
         return true;
     }
 }
