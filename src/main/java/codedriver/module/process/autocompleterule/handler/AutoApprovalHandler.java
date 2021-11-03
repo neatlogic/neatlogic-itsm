@@ -99,7 +99,7 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
      * @return
      */
     private String getPreStepMajorUserUuid(ProcessTaskStepVo currentProcessTaskStepVo) {
-        Long startStepId = currentProcessTaskStepVo.getFromProcessTaskStepId();
+        Long startStepId = currentProcessTaskStepVo.getStartProcessTaskStepId();
         if (startStepId != null) {
             ProcessTaskStepVo startStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(startStepId);
             if (startStepVo != null) {
