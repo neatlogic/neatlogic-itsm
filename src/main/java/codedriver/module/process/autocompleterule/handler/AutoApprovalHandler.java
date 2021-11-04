@@ -124,6 +124,11 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
         return false;
     }
 
+    /**
+     * 获取上游节点步骤id列表
+     * @param fromProcessTaskStepId
+     * @return
+     */
     private List<Long> getPreStepIdList(Long fromProcessTaskStepId) {
         List<Long> resultList = new ArrayList<>();
         ProcessTaskStepVo fromProcessTaskStepVo = processTaskMapper.getProcessTaskStepBaseInfoById(fromProcessTaskStepId);
