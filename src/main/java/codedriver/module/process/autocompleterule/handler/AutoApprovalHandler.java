@@ -21,6 +21,7 @@ import codedriver.framework.process.dto.*;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
 import codedriver.framework.process.stephandler.core.ProcessStepHandlerFactory;
 import codedriver.framework.process.stephandler.core.ProcessStepThread;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -72,8 +73,8 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
                     continue;
                 }
                 searchList.add(parallelActivateStepId);
-                Long tagId = processTaskMapper.getSameTagIdByProcessTaskStepIdList(searchList);
-                if (tagId != null) {
+                List<Long> tagIdList = processTaskMapper.getSameTagIdListByProcessTaskStepIdList(searchList);
+                if (CollectionUtils.isNotEmpty(tagIdList)) {
                     return false;
                 }
                 searchList.remove(parallelActivateStepId);
@@ -84,8 +85,8 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
         List<Long> preStepIdList = getPreStepIdList(currentProcessTaskStepVo.getFromProcessTaskStepId());
         for (Long preStepId : preStepIdList) {
             searchList.add(preStepId);
-            Long tagId = processTaskMapper.getSameTagIdByProcessTaskStepIdList(searchList);
-            if (tagId != null) {
+            List<Long> tagIdList = processTaskMapper.getSameTagIdListByProcessTaskStepIdList(searchList);
+            if (CollectionUtils.isNotEmpty(tagIdList)) {
                 preApprovalStepIdList.add(preStepId);
             }
             searchList.remove(preStepId);
