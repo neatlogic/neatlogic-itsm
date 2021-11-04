@@ -72,24 +72,22 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
         processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
-        new ProcessAuthManager.TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW).build()
-            .checkAndNoPermissionThrowException();
+        new ProcessAuthManager
+                .TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW)
+                .build()
+                .checkAndNoPermissionThrowException();
         ProcessTaskStepVo startProcessTaskStepVo = getStartProcessTaskStepByProcessTaskId(processTaskId);
         startProcessTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(startProcessTaskStepVo));
         Map<Long, ProcessTaskStepVo> processTaskStepMap = new HashMap<>();
-        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper
-            .getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
-        if (CollectionUtils.isNotEmpty(processTaskStepList)) {
-            for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
-                if (processTaskStepVo.getStartTime() != null) {
-                    processTaskStepMap.put(processTaskStepVo.getId(), processTaskStepVo);
-                }
+        List<ProcessTaskStepVo> processTaskStepList = processTaskMapper.getProcessTaskStepByProcessTaskIdAndType(processTaskId, ProcessStepType.PROCESS.getValue());
+        for (ProcessTaskStepVo processTaskStepVo : processTaskStepList) {
+            if (processTaskStepVo.getActiveTime() != null) {
+                processTaskStepMap.put(processTaskStepVo.getId(), processTaskStepVo);
             }
         }
 
         Map<Long, List<Long>> fromStepIdMap = new HashMap<>();
-        List<ProcessTaskStepRelVo> prcessTaskStepRelList =
-            processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
+        List<ProcessTaskStepRelVo> prcessTaskStepRelList = processTaskMapper.getProcessTaskStepRelByProcessTaskId(processTaskId);
         for (ProcessTaskStepRelVo processTaskStepRelVo : prcessTaskStepRelList) {
             if (ProcessFlowDirection.FORWARD.getValue().equals(processTaskStepRelVo.getType())) {
                 Long fromStepId = processTaskStepRelVo.getFromProcessTaskStepId();
@@ -122,7 +120,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
                 }
                 if (toStepList.size() > 1) {
                     // 按开始时间正序排序
-                    toStepList.sort((step1, step2) -> step1.getStartTime().compareTo(step2.getStartTime()));
+                    toStepList.sort(Comparator.comparing(ProcessTaskStepVo::getActiveTime));
                 }
                 resultList.addAll(toStepList);
             }
@@ -132,20 +130,20 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
 
         // 其他处理步骤
         if (CollectionUtils.isNotEmpty(resultList)) {
-            Long[] processTaskStepIds = new Long[resultList.size()];
-            resultList.stream().map(ProcessTaskStepVo::getId).collect(Collectors.toList()).toArray(processTaskStepIds);
-            Map<Long, Set<ProcessTaskOperationType>> operateMap =
-                new ProcessAuthManager.Builder().addProcessTaskStepId(processTaskStepIds)
-                    .addOperationType(ProcessTaskOperationType.STEP_VIEW).build().getOperateMap();
+            List<Long> processTaskStepIdList = resultList.stream().map(ProcessTaskStepVo::getId).collect(Collectors.toList());
+            Map<Long, Set<ProcessTaskOperationType>> operateMap = new ProcessAuthManager.Builder()
+                    .addProcessTaskStepId(processTaskStepIdList)
+                    .addOperationType(ProcessTaskOperationType.STEP_VIEW)
+                    .build()
+                    .getOperateMap();
             for (ProcessTaskStepVo processTaskStepVo : resultList) {
                 // 判断当前用户是否有权限查看该节点信息
-                IProcessStepInternalHandler handler =
-                        ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
+                IProcessStepInternalHandler handler = ProcessStepInternalHandlerFactory.getHandler(processTaskStepVo.getHandler());
                 if (handler == null) {
                     throw new ProcessStepUtilHandlerNotFoundException(processTaskStepVo.getHandler());
                 }
-                if (operateMap.computeIfAbsent(processTaskStepVo.getId(), k -> new HashSet<>())
-                        .contains(ProcessTaskOperationType.STEP_VIEW)) {
+                Set<ProcessTaskOperationType> processTaskStepOperateSet = operateMap.get(processTaskStepVo.getId());
+                if (CollectionUtils.isNotEmpty(processTaskStepOperateSet) && processTaskStepOperateSet.contains(ProcessTaskOperationType.STEP_VIEW)) {
                     processTaskStepVo.setIsView(1);
                     getProcessTaskStepDetail(processTaskStepVo);
                 } else {
@@ -161,9 +159,13 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         ProcessTaskStepVo startProcessTaskStepVo = processTaskService.getStartProcessTaskStepByProcessTaskId(processTaskId);
         processTaskService.setProcessTaskStepUser(startProcessTaskStepVo);
 
+        // 时效列表
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskId);
+        startProcessTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(
+                processTaskId, processTaskVo.getWorktimeUuid()));
         // 步骤评论列表
         startProcessTaskStepVo.setCommentList(processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(
-            startProcessTaskStepVo.getId(), Arrays.asList(ProcessTaskOperationType.STEP_COMMENT.getValue())));
+                startProcessTaskStepVo.getId(), Arrays.asList(ProcessTaskOperationType.STEP_COMMENT.getValue())));
         // 子任务列表
 //        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList = processTaskStepSubtaskService
 //            .getProcessTaskStepSubtaskListByProcessTaskStepId(startProcessTaskStepVo.getId());
@@ -197,7 +199,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         typeList.add(ProcessTaskOperationType.STEP_RETREAT.getValue());
         typeList.add(ProcessTaskOperationType.STEP_TRANSFER.getValue());
         processTaskStepVo.setCommentList(
-            processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId(), typeList));
+                processTaskService.getProcessTaskStepReplyListByProcessTaskStepId(processTaskStepVo.getId(), typeList));
         // 子任务列表
 //        List<ProcessTaskStepSubtaskVo> processTaskStepSubtaskList =
 //            processTaskStepSubtaskService.getProcessTaskStepSubtaskListByProcessTaskStepId(processTaskStepVo.getId());
@@ -212,20 +214,19 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
         //任务列表
         processTaskStepTaskService.getProcessTaskStepTask(processTaskStepVo);
         // 时效列表
-        ProcessTaskVo processTaskVo =
-            processTaskMapper.getProcessTaskBaseInfoById(processTaskStepVo.getProcessTaskId());
+        ProcessTaskVo processTaskVo = processTaskMapper.getProcessTaskBaseInfoById(processTaskStepVo.getProcessTaskId());
         processTaskStepVo.setSlaTimeList(processTaskService.getSlaTimeListByProcessTaskStepIdAndWorktimeUuid(
-            processTaskStepVo.getId(), processTaskVo.getWorktimeUuid()));
+                processTaskStepVo.getId(), processTaskVo.getWorktimeUuid()));
         // automatic processtaskStepData
         ProcessTaskStepDataVo stepDataVo = processTaskStepDataMapper
-            .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
-                processTaskStepVo.getId(), processTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserId()));
+                .getProcessTaskStepData(new ProcessTaskStepDataVo(processTaskStepVo.getProcessTaskId(),
+                        processTaskStepVo.getId(), processTaskStepVo.getHandler(), SystemUser.SYSTEM.getUserId()));
         if (stepDataVo != null) {
             JSONObject stepDataJson = stepDataVo.getData();
             stepDataJson.put("isStepUser",
-                processTaskMapper
-                    .checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(),
-                        processTaskStepVo.getId(), UserContext.get().getUserUuid())) > 0 ? 1 : 0);
+                    processTaskMapper
+                            .checkIsProcessTaskStepUser(new ProcessTaskStepUserVo(processTaskStepVo.getProcessTaskId(),
+                                    processTaskStepVo.getId(), UserContext.get().getUserUuid())) > 0 ? 1 : 0);
             processTaskStepVo.setProcessTaskStepData(stepDataJson);
         }
         processTaskStepVo.setReplaceableTextList(processTaskService.getReplaceableTextList(processTaskStepVo));
