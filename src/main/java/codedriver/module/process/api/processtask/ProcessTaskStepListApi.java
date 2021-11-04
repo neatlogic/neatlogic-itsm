@@ -71,7 +71,7 @@ public class ProcessTaskStepListApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long processTaskId = jsonObj.getLong("processTaskId");
-        ProcessTaskVo processTaskVo = processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
+        processTaskService.checkProcessTaskParamsIsLegal(processTaskId);
         new ProcessAuthManager
                 .TaskOperationChecker(processTaskId, ProcessTaskOperationType.PROCESSTASK_VIEW)
                 .build()
