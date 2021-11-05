@@ -2,6 +2,7 @@ package codedriver.module.process.api.commenttemplate;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.process.auth.PROCESS_BASE;
@@ -56,7 +57,7 @@ public class ProcessCommentTemplateDeleteApi extends PrivateApiComponentBase {
         ProcessCommentTemplateVo vo = commentTemplateMapper.getTemplateById(id);
         /** 没有权限则不允许删除系统模版 */
         if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())){
-            throw new PermissionDeniedException();
+            throw new PermissionDeniedException(AuthFactory.getAuthInstance(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName()).getAuthDisplayName());
         }
         commentTemplateMapper.deleteTemplate(id);
         commentTemplateMapper.deleteTemplateAuthority(id);

@@ -3,6 +3,7 @@ package codedriver.module.process.api.commenttemplate;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.exception.type.PermissionDeniedException;
@@ -79,7 +80,7 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
             /** 没有权限则不允许编辑系统模版 */
             ProcessCommentTemplateVo _vo = commentTemplateMapper.getTemplateById(id);
             if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(_vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())){
-                throw new PermissionDeniedException();
+                throw new PermissionDeniedException(AuthFactory.getAuthInstance(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName()).getAuthDisplayName());
             }
             vo.setType(_vo.getType());
             commentTemplateMapper.updateTemplate(vo);
@@ -88,7 +89,7 @@ public class ProcessCommentTemplateSaveApi extends PrivateApiComponentBase {
             vo.setType(type);
             /** 没有权限则不允许创建系统模版 */
             if(ProcessCommentTemplateVo.TempalteType.SYSTEM.getValue().equals(vo.getType()) && !AuthActionChecker.check(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName())){
-                throw new PermissionDeniedException();
+                throw new PermissionDeniedException(AuthFactory.getAuthInstance(PROCESS_COMMENT_TEMPLATE_MODIFY.class.getSimpleName()).getAuthDisplayName());
             }
             vo.setFcu(UserContext.get().getUserUuid(true));
             commentTemplateMapper.insertTemplate(vo);
