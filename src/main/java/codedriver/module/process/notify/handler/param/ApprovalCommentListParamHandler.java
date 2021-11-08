@@ -95,7 +95,7 @@ public class ApprovalCommentListParamHandler extends ProcessTaskNotifyParamHandl
                                         if (CollectionUtils.isNotEmpty(teamUserTitleList)) {
                                             for (TeamUserTitleVo teamUserTitleVo : teamUserTitleList) {
                                                 TeamVo teamVo = teamMapper.getTeamByUuid(teamUserTitleVo.getTeamUuid());
-                                                if (TeamLevel.DEPARTMENT.getValue().equals(teamVo.getLevel())) {
+                                                if (teamVo != null && TeamLevel.DEPARTMENT.getValue().equals(teamVo.getLevel())) {
                                                     teamName = teamVo.getName();
                                                     UserTitleVo userTitleVo = userMapper.getUserTitleById(teamUserTitleVo.getTitleId());
                                                     if (userTitleVo != null) {
