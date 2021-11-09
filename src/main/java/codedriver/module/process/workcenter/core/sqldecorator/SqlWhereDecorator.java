@@ -230,7 +230,7 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                 }else if(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue().equals(condition.getString("name"))){
                     sqlSb.append(String.format(" AND pt.serial_number in (%s) ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining(","))));
                 }else {
-                    sqlSb.append(String.format("  AND EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` WHERE ff.`target_id` = pt.id  AND ff.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s') )", condition.getString("name"), condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
+                    sqlSb.append(String.format("  AND EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s') )", condition.getString("name"), condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
                 }
             }
         }
