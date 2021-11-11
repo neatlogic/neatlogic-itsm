@@ -653,8 +653,10 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
             formVersionVo.setFormConfig(formContent);
             List<FormAttributeVo> formAttributeVoList = formVersionVo.getFormAttributeList();
 //            FormVersionVo formVersionVo = formMapper.getActionFormVersionByFormUuid(processTaskFormVo.getFormUuid());
+            Map<String, String> attributeLabelMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(formAttributeVoList)) {
                 for (FormAttributeVo formAttributeVo : formAttributeVoList) {
+                    attributeLabelMap.put(formAttributeVo.getUuid(), formAttributeVo.getLabel());
                     if (formAttributeVo.isRequired()) {
                         if (hidecomponentList.contains(formAttributeVo.getUuid())) {
                             continue;
@@ -717,7 +719,9 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
                         ProcessTaskFormAttributeDataVo attributeData = new ProcessTaskFormAttributeDataVo();
                         attributeData.setProcessTaskId(currentProcessTaskStepVo.getProcessTaskId());
                         attributeData.setData(formAttributeDataObj.getString("dataList"));
-                        attributeData.setAttributeUuid(formAttributeDataObj.getString("attributeUuid"));
+                        attributeData.setAttributeUuid(attributeUuid);
+                        String attributeLabel = attributeLabelMap.get(attributeUuid);
+                        attributeData.setAttributeLabel(attributeLabel);
                         attributeData.setType(formAttributeDataObj.getString("handler"));
                         attributeData.setSort(i);
                         processTaskFormAttributeDataList.add(attributeData);

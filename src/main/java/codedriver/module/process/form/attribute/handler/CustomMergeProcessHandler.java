@@ -213,7 +213,7 @@ public class CustomMergeProcessHandler extends FormHandlerBase {
                                 for (FormAttributeVo formAttribute : formAttributeList) {
                                     ProcessTaskFormAttributeDataVo attributeData = processTaskFormAttributeDataMap.get(formAttribute.getUuid());
                                     if (attributeData != null) {
-                                        attributeData.setLabel(formAttribute.getLabel());
+                                        attributeData.setAttributeLabel(formAttribute.getLabel());
                                         if (attributeData.getData() != null) {
                                             IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
                                             if (handler != null) {

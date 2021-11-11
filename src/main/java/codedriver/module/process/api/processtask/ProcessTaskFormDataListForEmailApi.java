@@ -83,7 +83,7 @@ public class ProcessTaskFormDataListForEmailApi extends PrivateApiComponentBase 
                 for (FormAttributeVo formAttribute : formAttributeList) {
                     ProcessTaskFormAttributeDataVo attributeDataVo = processTaskFormAttributeDataMap.get(formAttribute.getUuid());
                     if (attributeDataVo != null) {
-                        attributeDataVo.setLabel(formAttribute.getLabel());
+                        attributeDataVo.setAttributeLabel(formAttribute.getLabel());
                         if (attributeDataVo.getData() != null) {
                             IFormAttributeHandler handler = FormAttributeHandlerFactory.getHandler(formAttribute.getHandler());
                             if (handler != null) {
