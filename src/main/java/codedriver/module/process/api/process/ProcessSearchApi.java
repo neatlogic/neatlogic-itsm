@@ -70,10 +70,6 @@ public class ProcessSearchApi extends PrivateApiComponentBase {
 			resultObj.put("processList", processList);
 			return resultObj;
 		}
-		int isICreated = jsonObj.getIntValue("isICreated");
-		if(isICreated == 1) {
-			processVo.setFcu(UserContext.get().getUserUuid(true));
-		}
 		if(processVo.getNeedPage()) {
 			int rowNum = processMapper.searchProcessCount(processVo);
 			int pageCount = PageUtil.getPageCount(rowNum, processVo.getPageSize());

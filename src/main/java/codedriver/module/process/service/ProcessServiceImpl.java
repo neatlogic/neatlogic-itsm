@@ -72,7 +72,7 @@ public class ProcessServiceImpl implements ProcessService {
 
         ProcessDraftVo processDraftVo = new ProcessDraftVo();
         processDraftVo.setProcessUuid(uuid);
-        processDraftVo.setFcu(UserContext.get().getUserUuid(true));
+        processDraftVo.setIsICreated(1);
         processMapper.deleteProcessDraft(processDraftVo);
 
         String formUuid = processVo.getFormUuid();
