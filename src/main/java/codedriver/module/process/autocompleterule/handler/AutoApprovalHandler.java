@@ -15,7 +15,6 @@ import codedriver.framework.process.constvalue.ProcessStepMode;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
 import codedriver.framework.process.constvalue.ProcessUserType;
-import codedriver.framework.process.dao.mapper.ProcessTagMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dto.*;
 import codedriver.framework.process.stephandler.core.IProcessStepHandler;
@@ -38,9 +37,6 @@ public class AutoApprovalHandler implements IAutoCompleteRuleHandler {
 
     @Resource
     private ProcessTaskMapper processTaskMapper;
-
-    @Resource
-    private ProcessTagMapper processTagMapper;
 
     @Resource
     private UserMapper userMapper;
