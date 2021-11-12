@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.condition.handler;
 
 import codedriver.framework.common.constvalue.Expression;
@@ -221,7 +226,7 @@ public class ProcessTaskFormAttributeCondition extends ProcessTaskConditionBase 
                         valueList.addAll(new ArrayList<>(sliceKeySet));
                     }
                 } else {//否则直接md5作为整体搜索
-                    valueList.add(Md5Util.encryptBASE64(valueTmp).toLowerCase(Locale.ROOT));
+                    valueList.add(Md5Util.encryptMD5(valueTmp).toLowerCase(Locale.ROOT));
                 }
             }
         }

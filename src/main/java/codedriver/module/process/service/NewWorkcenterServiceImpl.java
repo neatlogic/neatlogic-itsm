@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.process.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -31,7 +36,6 @@ import codedriver.framework.process.workcenter.dto.WorkcenterTheadVo;
 import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
-import codedriver.framework.util.Md5Util;
 import codedriver.module.process.workcenter.core.SqlBuilder;
 import codedriver.module.process.workcenter.operate.WorkcenterOperateBuilder;
 import com.alibaba.fastjson.JSON;
@@ -47,15 +51,6 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Title: NewWorkcenterServiceImpl
- * @Package: codedriver.module.process.service
- * @Description: TODO
- * @Author: 89770
- * @Date: 2021/1/19 20:09
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
 @Service
 public class NewWorkcenterServiceImpl implements NewWorkcenterService {
 
@@ -458,17 +453,17 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
     }
 
     @Override
-    public void getStepTaskWorkerList(JSONArray workerArray,ProcessTaskStepVo stepVo){
-        Map<Long,List<ProcessTaskStepWorkerVo>> stepMinorWorkerListMap = new HashMap<>();
-        List<IProcessStepHandler>  handlerList = ProcessStepHandlerFactory.getHandlerList();
-        for(IProcessStepHandler stepHandler : handlerList) {
-            stepMinorWorkerListMap.put(stepVo.getId(),stepHandler.getMinorWorkerList(stepVo));
+    public void getStepTaskWorkerList(JSONArray workerArray, ProcessTaskStepVo stepVo) {
+        Map<Long, List<ProcessTaskStepWorkerVo>> stepMinorWorkerListMap = new HashMap<>();
+        List<IProcessStepHandler> handlerList = ProcessStepHandlerFactory.getHandlerList();
+        for (IProcessStepHandler stepHandler : handlerList) {
+            stepMinorWorkerListMap.put(stepVo.getId(), stepHandler.getMinorWorkerList(stepVo));
         }
         if (ProcessTaskStatus.DRAFT.getValue().equals(stepVo.getStatus()) ||
                 ProcessTaskStatus.RUNNING.getValue().equals(stepVo.getStatus()) ||
                 ProcessTaskStatus.PENDING.getValue().equals(stepVo.getStatus()) && stepVo.getIsActive() == 1
         ) {
-            ProcessTaskStepWorkerVo majorWorker = stepVo.getWorkerList().stream().filter(o->Objects.equals(o.getUserType(), ProcessUserType.MAJOR.getValue())).findFirst().orElse(null);
+            ProcessTaskStepWorkerVo majorWorker = stepVo.getWorkerList().stream().filter(o -> Objects.equals(o.getUserType(), ProcessUserType.MAJOR.getValue())).findFirst().orElse(null);
             if (majorWorker != null) {
                 JSONObject workerJson = new JSONObject();
                 getWorkerInfo(majorWorker, workerJson, workerArray);
@@ -476,8 +471,8 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
             List<String> workerUuidTypeList = new ArrayList<>();
             for (ProcessTaskStepWorkerVo workerVo : stepVo.getWorkerList()) {
                 if (Objects.equals(workerVo.getUserType(), ProcessUserType.MINOR.getValue())) {
-                    stepTaskWorker(workerVo, stepVo, workerArray,workerUuidTypeList);
-                    otherWorker(workerVo, stepVo, workerArray,stepMinorWorkerListMap,workerUuidTypeList);
+                    stepTaskWorker(workerVo, stepVo, workerArray, workerUuidTypeList);
+                    otherWorker(workerVo, stepVo, workerArray, stepMinorWorkerListMap, workerUuidTypeList);
                 }
             }
         }
@@ -570,9 +565,5 @@ public class NewWorkcenterServiceImpl implements NewWorkcenterService {
                 workerArray.add(workerJson);
             }
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Md5Util.encryptBASE64("A"));
     }
 }
