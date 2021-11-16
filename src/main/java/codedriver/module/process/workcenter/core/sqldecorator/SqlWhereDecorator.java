@@ -6,6 +6,9 @@ import codedriver.framework.dto.condition.ConditionGroupRelVo;
 import codedriver.framework.dto.condition.ConditionGroupVo;
 import codedriver.framework.dto.condition.ConditionRelVo;
 import codedriver.framework.dto.condition.ConditionVo;
+import codedriver.framework.fulltextindex.dto.fulltextindex.FullTextIndexWordOffsetVo;
+import codedriver.framework.fulltextindex.utils.FullTextIndexUtil;
+import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.framework.process.column.core.IProcessTaskColumn;
 import codedriver.framework.process.column.core.ProcessTaskColumnFactory;
 import codedriver.framework.process.condition.core.IProcessTaskCondition;
@@ -17,16 +20,18 @@ import codedriver.framework.process.workcenter.dto.WorkcenterVo;
 import codedriver.framework.process.workcenter.table.ISqlTable;
 import codedriver.framework.process.workcenter.table.ProcessTaskSqlTable;
 import codedriver.framework.process.workcenter.table.constvalue.FieldTypeEnum;
-import codedriver.framework.process.auth.PROCESSTASK_MODIFY;
 import codedriver.module.process.condition.handler.ProcessTaskStartTimeCondition;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +47,7 @@ import java.util.stream.Collectors;
 @Component
 public class SqlWhereDecorator extends SqlDecoratorBase {
     private final Map<String, BuildWhere<WorkcenterVo, StringBuilder>> buildWhereMap = new HashMap<>();
+    Logger logger = LoggerFactory.getLogger(SqlWhereDecorator.class);
 
     @FunctionalInterface
     public interface BuildWhere<T, StringBuilder> {
@@ -230,7 +236,13 @@ public class SqlWhereDecorator extends SqlDecoratorBase {
                 }else if(ProcessTaskSqlTable.FieldEnum.SERIAL_NUMBER.getValue().equals(condition.getString("name"))){
                     sqlSb.append(String.format(" AND pt.serial_number in (%s) ", condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining(","))));
                 }else {
-                    sqlSb.append(String.format("  AND EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s') )", condition.getString("name"), condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("','"))));
+                    try {
+                        List<FullTextIndexWordOffsetVo> wordOffsetVoList = FullTextIndexUtil.sliceWord(condition.getJSONArray("valueList").stream().map(Object::toString).collect(Collectors.joining("")));
+                        String contentWord = wordOffsetVoList.stream().map(FullTextIndexWordOffsetVo::getWord).collect(Collectors.joining("','"));
+                        sqlSb.append(String.format("  AND EXISTS (SELECT 1 FROM `fulltextindex_word` fw JOIN fulltextindex_field_process ff ON fw.id = ff.`word_id` JOIN `fulltextindex_target_process` ft ON ff.`target_id` = ft.`target_id` WHERE ff.`target_id` = pt.id  AND ft.`target_type` = 'processtask' AND ff.`target_field` = '%s' AND fw.word IN ('%s') )", condition.getString("name"), contentWord));
+                    } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
+                    }
                 }
             }
         }
