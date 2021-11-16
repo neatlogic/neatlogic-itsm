@@ -41,7 +41,7 @@ import java.util.*;
 
 @Service
 public class ProcessTaskSlaThread extends CodeDriverThread {
-    private static Logger logger = LoggerFactory.getLogger(ProcessTaskSlaThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProcessTaskSlaThread.class);
     private static ProcessTaskMapper processTaskMapper;
     private static WorktimeMapper worktimeMapper;
     private static ProcessTaskStepTimeAuditMapper processTaskStepTimeAuditMapper;
@@ -123,23 +123,20 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 timeList.add(etimeMap);
             }
         }
-        timeList.sort(new Comparator<Map<String, Long>>() {
-            @Override
-            public int compare(Map<String, Long> o1, Map<String, Long> o2) {
-                Long t1 = null, t2 = null;
-                if (o1.containsKey("s")) {
-                    t1 = o1.get("s");
-                } else if (o1.containsKey("e")) {
-                    t1 = o1.get("e");
-                }
-
-                if (o2.containsKey("s")) {
-                    t2 = o2.get("s");
-                } else if (o2.containsKey("e")) {
-                    t2 = o2.get("e");
-                }
-                return t1.compareTo(t2);
+        timeList.sort((o1, o2) -> {
+            Long t1 = null, t2 = null;
+            if (o1.containsKey("s")) {
+                t1 = o1.get("s");
+            } else if (o1.containsKey("e")) {
+                t1 = o1.get("e");
             }
+
+            if (o2.containsKey("s")) {
+                t2 = o2.get("s");
+            } else if (o2.containsKey("e")) {
+                t2 = o2.get("e");
+            }
+            return t1.compareTo(t2);
         });
         Stack<Long> timeStack = new Stack<>();
         List<Map<String, Long>> newTimeList = new ArrayList<>();
@@ -206,23 +203,20 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                     timeZoneList.add(emap);
                 }
             }
-            timeZoneList.sort(new Comparator<Map<String, Long>>() {
-                @Override
-                public int compare(Map<String, Long> o1, Map<String, Long> o2) {
-                    Long t1 = null, t2 = null;
-                    if (o1.containsKey("s")) {
-                        t1 = o1.get("s");
-                    } else if (o1.containsKey("e")) {
-                        t1 = o1.get("e");
-                    }
-
-                    if (o2.containsKey("s")) {
-                        t2 = o2.get("s");
-                    } else if (o2.containsKey("e")) {
-                        t2 = o2.get("e");
-                    }
-                    return t1.compareTo(t2);
+            timeZoneList.sort((o1, o2) -> {
+                Long t1 = null, t2 = null;
+                if (o1.containsKey("s")) {
+                    t1 = o1.get("s");
+                } else if (o1.containsKey("e")) {
+                    t1 = o1.get("e");
                 }
+
+                if (o2.containsKey("s")) {
+                    t2 = o2.get("s");
+                } else if (o2.containsKey("e")) {
+                    t2 = o2.get("e");
+                }
+                return t1.compareTo(t2);
             });
 
             Stack<Long> timeStack = new Stack<>();
@@ -234,8 +228,8 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                     if (!timeStack.isEmpty()) {
                         Long currentStartTimeLong = timeStack.pop();
                         if (timeStack.isEmpty()) {
-                            Long tmp = timeMap.get("e") - currentStartTimeLong;
-                            timeCost += tmp.intValue();
+                            long tmp = timeMap.get("e") - currentStartTimeLong;
+                            timeCost += (int) tmp;
                         }
                     }
                 }
@@ -247,11 +241,11 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
 
     private static long getRealtime(int time, String unit) {
         if ("hour".equals(unit)) {
-            return time * 60 * 60 * 1000;
+            return (long) time * 60 * 60 * 1000;
         } else if ("day".equals(unit)) {
-            return time * 24 * 60 * 60 * 1000;
+            return (long) time * 24 * 60 * 60 * 1000;
         } else {
-            return time * 60 * 1000;
+            return (long) time * 60 * 1000;
         }
     }
 
@@ -265,7 +259,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 String unit = policyObj.getString("unit");
                 JSONArray priorityList = policyObj.getJSONArray("priorityList");
                 JSONArray conditionGroupList = policyObj.getJSONArray("conditionGroupList");
-                /** 如果没有规则，则默认生效，如果有规则，以规则计算结果判断是否生效 **/
+                /* 如果没有规则，则默认生效，如果有规则，以规则计算结果判断是否生效 **/
                 boolean isHit = true;
                 if (CollectionUtils.isNotEmpty(conditionGroupList)) {
                     try {
@@ -485,14 +479,14 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                     String config = processTaskMapper.getProcessTaskSlaConfigById(slaId);
                     JSONObject slaConfigObj = JSON.parseObject(config);
                     if (MapUtils.isNotEmpty(slaConfigObj)) {
-                        /** 旧的超时时间点 **/
+                        /* 旧的超时时间点 **/
                         Date oldExpireTime = null;
                         Long oldTimeSum = null;
                         boolean isSlaTimeExists = false;
-                        /** 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
+                        /* 如果没有超时时间，证明第一次进入SLA标签范围，开始计算超时时间 **/
                         ProcessTaskSlaTimeVo oldSlaTimeVo = processTaskMapper.getProcessTaskSlaTimeBySlaId(slaId);
                         if (oldSlaTimeVo != null) {
-                            /** 记录旧的超时时间点 **/
+                            /* 记录旧的超时时间点 **/
                             oldExpireTime = oldSlaTimeVo.getExpireTime();
                             oldTimeSum = oldSlaTimeVo.getTimeSum();
                             isSlaTimeExists = true;
@@ -514,7 +508,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                                 if (oldExpireTime != null) {
                                     oldExpireTimeLong = oldExpireTime.getTime();
                                 }
-                                /** 由于Date类型数据保存到MySql数据库时会丢失毫秒数值，只保留到秒的精度，所以两次计算超时时间点的差值小于1000时，说明时效没有被条件改变，不用更新 **/
+                                /* 由于Date类型数据保存到MySql数据库时会丢失毫秒数值，只保留到秒的精度，所以两次计算超时时间点的差值小于1000时，说明时效没有被条件改变，不用更新 **/
                                 if (expireTimeLong - oldExpireTimeLong < 1000) {
                                     continue;
                                 }
