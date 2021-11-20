@@ -87,11 +87,15 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         currentProcessTaskStepVo = _currentProcessTaskStepVo;
     }
 
-    private static long getTimeCost(List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList,
-                                    long currentTimeMillis, String worktimeUuid) {
+    /**
+     * 将时效关联的步骤操作时间记录转换成时间段列表
+     * @param timeAuditList
+     * @param currentTimeMillis
+     * @return
+     */
+    private static List<Map<String, Long>> timeAuditListToTimePeriodList(List<ProcessTaskStepTimeAuditVo> timeAuditList, long currentTimeMillis) {
         List<Map<String, Long>> timeList = new ArrayList<>();
-        for (ProcessTaskStepTimeAuditVo auditVo : processTaskStepTimeAuditList) {
-            // System.out.println(auditVo);
+        for (ProcessTaskStepTimeAuditVo auditVo : timeAuditList) {
             Long startTime = null, endTime = null;
             if (auditVo.getActiveTimeLong() != null) {
                 startTime = auditVo.getActiveTimeLong();
@@ -139,9 +143,8 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
             return t1.compareTo(t2);
         });
         Stack<Long> timeStack = new Stack<>();
-        List<Map<String, Long>> newTimeList = new ArrayList<>();
+        List<Map<String, Long>> timePeriodList = new ArrayList<>();
         for (Map<String, Long> timeMap : timeList) {
-            // System.out.println(timeMap);
             if (timeMap.containsKey("s")) {
                 timeStack.push(timeMap.get("s"));
             } else if (timeMap.containsKey("e")) {
@@ -151,95 +154,209 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                         Map<String, Long> newTimeMap = new HashMap<>();
                         newTimeMap.put("s", currentStartTimeLong);
                         newTimeMap.put("e", timeMap.get("e"));
-                        newTimeList.add(newTimeMap);
+                        timePeriodList.add(newTimeMap);
                     }
                 }
             }
         }
+        return timePeriodList;
+    }
 
+    /**
+     * 计算出时效关联的步骤已经消耗的时长（直接计算）
+     * @param timePeriodList
+     * @return
+     */
+    private static long getRealTimeCost(List<Map<String, Long>> timePeriodList) {
         long sum = 0;
-        for (Map<String, Long> timeMap : newTimeList) {
-            sum += worktimeMapper.calculateCostTime(worktimeUuid, timeMap.get("s"), timeMap.get("e"));
+        for (Map<String, Long> timeMap : timePeriodList) {
+            sum += timeMap.get("e") - timeMap.get("s");
         }
         return sum;
     }
 
-    private static long getRealTimeCost(List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList,
-                                        long currentTimeMillis) {
-        int timeCost = 0;
-        if (CollectionUtils.isNotEmpty(processTaskStepTimeAuditList)) {
-            List<Map<String, Long>> timeZoneList = new ArrayList<>();
-            for (ProcessTaskStepTimeAuditVo auditVo : processTaskStepTimeAuditList) {
-                // System.out.println(auditVo);
-                Long startTime = null, endTime = null;
-                if (auditVo.getActiveTimeLong() != null) {
-                    startTime = auditVo.getActiveTimeLong();
-                } else if (auditVo.getStartTimeLong() != null) {
-                    startTime = auditVo.getStartTimeLong();
-                }
-
-                if (auditVo.getCompleteTimeLong() != null) {
-                    endTime = auditVo.getCompleteTimeLong();
-                } else if (auditVo.getAbortTimeLong() != null) {
-                    endTime = auditVo.getAbortTimeLong();
-                } else if (auditVo.getBackTimeLong() != null) {
-                    endTime = auditVo.getBackTimeLong();
-                } else if (auditVo.getPauseTimeLong() != null) {
-                    endTime = auditVo.getPauseTimeLong();
-                }
-                if (startTime != null && endTime != null) {
-                    Map<String, Long> smap = new HashMap<>();
-                    smap.put("s", startTime);
-                    timeZoneList.add(smap);
-                    Map<String, Long> emap = new HashMap<>();
-                    emap.put("e", endTime);
-                    timeZoneList.add(emap);
-                } else if (startTime != null) {
-                    Map<String, Long> smap = new HashMap<>();
-                    smap.put("s", startTime);
-                    timeZoneList.add(smap);
-                    Map<String, Long> emap = new HashMap<>();
-                    emap.put("e", currentTimeMillis);
-                    timeZoneList.add(emap);
-                }
-            }
-            timeZoneList.sort((o1, o2) -> {
-                Long t1 = null, t2 = null;
-                if (o1.containsKey("s")) {
-                    t1 = o1.get("s");
-                } else if (o1.containsKey("e")) {
-                    t1 = o1.get("e");
-                }
-
-                if (o2.containsKey("s")) {
-                    t2 = o2.get("s");
-                } else if (o2.containsKey("e")) {
-                    t2 = o2.get("e");
-                }
-                return t1.compareTo(t2);
-            });
-
-            Stack<Long> timeStack = new Stack<>();
-            for (Map<String, Long> timeMap : timeZoneList) {
-                // System.out.println(timeMap);
-                if (timeMap.containsKey("s")) {
-                    timeStack.push(timeMap.get("s"));
-                } else if (timeMap.containsKey("e")) {
-                    if (!timeStack.isEmpty()) {
-                        Long currentStartTimeLong = timeStack.pop();
-                        if (timeStack.isEmpty()) {
-                            long tmp = timeMap.get("e") - currentStartTimeLong;
-                            timeCost += (int) tmp;
-                        }
-                    }
-                }
-            }
+    /**
+     * 计算出时效关联的步骤已经消耗的时长（根据工作日历计算）
+     * @param timePeriodList
+     * @param worktimeUuid
+     * @return
+     */
+    private static long getTimeCost(List<Map<String, Long>> timePeriodList, String worktimeUuid) {
+        long sum = 0;
+        for (Map<String, Long> timeMap : timePeriodList) {
+            sum += worktimeMapper.calculateCostTime(worktimeUuid, timeMap.get("s"), timeMap.get("e"));
         }
-        // System.out.println("timeCost:" + timeCost);
-        return timeCost;
+        return sum;
     }
+    /**
+     * 计算出时效关联的步骤已经消耗的时长（根据工作日历计算）
+     * @param processTaskStepTimeAuditList
+     * @param currentTimeMillis
+     * @return
+     */
+//    private static long getTimeCost(List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList,
+//                                    long currentTimeMillis, String worktimeUuid) {
+//        List<Map<String, Long>> timeList = new ArrayList<>();
+//        for (ProcessTaskStepTimeAuditVo auditVo : processTaskStepTimeAuditList) {
+//            // System.out.println(auditVo);
+//            Long startTime = null, endTime = null;
+//            if (auditVo.getActiveTimeLong() != null) {
+//                startTime = auditVo.getActiveTimeLong();
+//            } else if (auditVo.getStartTimeLong() != null) {
+//                startTime = auditVo.getStartTimeLong();
+//            }
+//            if (auditVo.getCompleteTimeLong() != null) {
+//                endTime = auditVo.getCompleteTimeLong();
+//            } else if (auditVo.getAbortTimeLong() != null) {
+//                endTime = auditVo.getAbortTimeLong();
+//            } else if (auditVo.getBackTimeLong() != null) {
+//                endTime = auditVo.getBackTimeLong();
+//            } else if (auditVo.getPauseTimeLong() != null) {
+//                endTime = auditVo.getPauseTimeLong();
+//            }
+//            if (startTime != null && endTime != null) {
+//                Map<String, Long> stimeMap = new HashMap<>();
+//                stimeMap.put("s", startTime);
+//                timeList.add(stimeMap);
+//                Map<String, Long> etimeMap = new HashMap<>();
+//                etimeMap.put("e", endTime);
+//                timeList.add(etimeMap);
+//            } else if (startTime != null) {
+//                Map<String, Long> stimeMap = new HashMap<>();
+//                stimeMap.put("s", startTime);
+//                timeList.add(stimeMap);
+//                Map<String, Long> etimeMap = new HashMap<>();
+//                etimeMap.put("e", currentTimeMillis);
+//                timeList.add(etimeMap);
+//            }
+//        }
+//        timeList.sort((o1, o2) -> {
+//            Long t1 = null, t2 = null;
+//            if (o1.containsKey("s")) {
+//                t1 = o1.get("s");
+//            } else if (o1.containsKey("e")) {
+//                t1 = o1.get("e");
+//            }
+//
+//            if (o2.containsKey("s")) {
+//                t2 = o2.get("s");
+//            } else if (o2.containsKey("e")) {
+//                t2 = o2.get("e");
+//            }
+//            return t1.compareTo(t2);
+//        });
+//        Stack<Long> timeStack = new Stack<>();
+//        List<Map<String, Long>> newTimeList = new ArrayList<>();
+//        for (Map<String, Long> timeMap : timeList) {
+//            // System.out.println(timeMap);
+//            if (timeMap.containsKey("s")) {
+//                timeStack.push(timeMap.get("s"));
+//            } else if (timeMap.containsKey("e")) {
+//                if (!timeStack.isEmpty()) {
+//                    Long currentStartTimeLong = timeStack.pop();
+//                    if (timeStack.isEmpty()) {// 栈被清空时计算时间段
+//                        Map<String, Long> newTimeMap = new HashMap<>();
+//                        newTimeMap.put("s", currentStartTimeLong);
+//                        newTimeMap.put("e", timeMap.get("e"));
+//                        newTimeList.add(newTimeMap);
+//                    }
+//                }
+//            }
+//        }
+//
+//        long sum = 0;
+//        for (Map<String, Long> timeMap : newTimeList) {
+//            sum += worktimeMapper.calculateCostTime(worktimeUuid, timeMap.get("s"), timeMap.get("e"));
+//        }
+//        return sum;
+//    }
 
-    private static long getRealtime(int time, String unit) {
+    /**
+     * 计算出时效关联的步骤已经消耗的时长（直接计算）
+     * @param processTaskStepTimeAuditList
+     * @param currentTimeMillis
+     * @return
+     */
+//    private static long getRealTimeCost(List<ProcessTaskStepTimeAuditVo> processTaskStepTimeAuditList,
+//                                        long currentTimeMillis) {
+//        int timeCost = 0;
+//        List<Map<String, Long>> timeZoneList = new ArrayList<>();
+//        for (ProcessTaskStepTimeAuditVo auditVo : processTaskStepTimeAuditList) {
+//            // System.out.println(auditVo);
+//            Long startTime = null, endTime = null;
+//            if (auditVo.getActiveTimeLong() != null) {
+//                startTime = auditVo.getActiveTimeLong();
+//            } else if (auditVo.getStartTimeLong() != null) {
+//                startTime = auditVo.getStartTimeLong();
+//            }
+//
+//            if (auditVo.getCompleteTimeLong() != null) {
+//                endTime = auditVo.getCompleteTimeLong();
+//            } else if (auditVo.getAbortTimeLong() != null) {
+//                endTime = auditVo.getAbortTimeLong();
+//            } else if (auditVo.getBackTimeLong() != null) {
+//                endTime = auditVo.getBackTimeLong();
+//            } else if (auditVo.getPauseTimeLong() != null) {
+//                endTime = auditVo.getPauseTimeLong();
+//            }
+//            if (startTime != null && endTime != null) {
+//                Map<String, Long> smap = new HashMap<>();
+//                smap.put("s", startTime);
+//                timeZoneList.add(smap);
+//                Map<String, Long> emap = new HashMap<>();
+//                emap.put("e", endTime);
+//                timeZoneList.add(emap);
+//            } else if (startTime != null) {
+//                Map<String, Long> smap = new HashMap<>();
+//                smap.put("s", startTime);
+//                timeZoneList.add(smap);
+//                Map<String, Long> emap = new HashMap<>();
+//                emap.put("e", currentTimeMillis);
+//                timeZoneList.add(emap);
+//            }
+//        }
+//        timeZoneList.sort((o1, o2) -> {
+//            Long t1 = null, t2 = null;
+//            if (o1.containsKey("s")) {
+//                t1 = o1.get("s");
+//            } else if (o1.containsKey("e")) {
+//                t1 = o1.get("e");
+//            }
+//
+//            if (o2.containsKey("s")) {
+//                t2 = o2.get("s");
+//            } else if (o2.containsKey("e")) {
+//                t2 = o2.get("e");
+//            }
+//            return t1.compareTo(t2);
+//        });
+//
+//        Stack<Long> timeStack = new Stack<>();
+//        for (Map<String, Long> timeMap : timeZoneList) {
+//            // System.out.println(timeMap);
+//            if (timeMap.containsKey("s")) {
+//                timeStack.push(timeMap.get("s"));
+//            } else if (timeMap.containsKey("e")) {
+//                if (!timeStack.isEmpty()) {
+//                    Long currentStartTimeLong = timeStack.pop();
+//                    if (timeStack.isEmpty()) {
+//                        long tmp = timeMap.get("e") - currentStartTimeLong;
+//                        timeCost += (int) tmp;
+//                    }
+//                }
+//            }
+//        }
+//        // System.out.println("timeCost:" + timeCost);
+//        return timeCost;
+//    }
+
+    /**
+     * 转换成毫秒单位值
+     * @param time 时长
+     * @param unit 单位
+     * @return
+     */
+    private static long toMillis(int time, String unit) {
         if ("hour".equals(unit)) {
             return (long) time * 60 * 60 * 1000;
         } else if ("day".equals(unit)) {
@@ -249,6 +366,12 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         }
     }
 
+    /**
+     * 根据时效配置信息和工单详情，计算生效的时效时长
+     * @param slaConfigObj 时效配置信息
+     * @param processTaskVo 工单详情
+     * @return
+     */
     private Long getSlaTimeSumBySlaConfig(JSONObject slaConfigObj, ProcessTaskVo processTaskVo) {
         JSONArray policyList = slaConfigObj.getJSONArray("calculatePolicyList");
         if (CollectionUtils.isNotEmpty(policyList)) {
@@ -277,13 +400,13 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 }
                 if (isHit) {
                     if (enablePriority == 0) {
-                        return getRealtime(time, unit);
+                        return toMillis(time, unit);
                     } else {// 关联优先级
                         if (CollectionUtils.isNotEmpty(priorityList)) {
                             for (int p = 0; p < priorityList.size(); p++) {
                                 JSONObject priorityObj = priorityList.getJSONObject(p);
                                 if (priorityObj.getString("priorityUuid").equals(processTaskVo.getPriorityUuid())) {
-                                    return getRealtime(priorityObj.getIntValue("time"),
+                                    return toMillis(priorityObj.getIntValue("time"),
                                             priorityObj.getString("unit"));
                                 }
                             }
@@ -295,7 +418,17 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         return null;
     }
 
-    private void calculateExpireTime(ProcessTaskSlaTimeVo slaTimeVo, String worktimeUuid) {
+    /**
+     * 计算realTimeLeft（直接剩余时间）、timeLeft(工作日历剩余时间)、realExpireTime（直接超时时间点）、expireTime(工作日历超时时间点)
+     * @param slaId 时效id
+     * @param timeSum 时效生效时长
+     * @param worktimeUuid 工作时间窗口uuid
+     * @return 时效信息
+     */
+    private ProcessTaskSlaTimeVo calculateExpireTime(Long slaId, Long timeSum, String worktimeUuid) {
+        ProcessTaskSlaTimeVo slaTimeVo = new ProcessTaskSlaTimeVo();
+        slaTimeVo.setTimeSum(timeSum);
+        slaTimeVo.setSlaId(slaId);
         long realTimeCost = 0;
         long timeCost = 0;
 
@@ -304,39 +437,31 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 processTaskStepTimeAuditMapper.getProcessTaskStepTimeAuditBySlaId(slaTimeVo.getSlaId());
         if (CollectionUtils.isNotEmpty(processTaskStepTimeAuditList)) {
             // 非第一次进入，进行时间扣减
-            realTimeCost = getRealTimeCost(processTaskStepTimeAuditList, currentTimeMillis);
+            List<Map<String, Long>> timePeriodList = timeAuditListToTimePeriodList(processTaskStepTimeAuditList, currentTimeMillis);
+            realTimeCost = getRealTimeCost(timePeriodList);
             timeCost = realTimeCost;
             if (StringUtils.isNotBlank(worktimeUuid)) {// 如果有工作时间，则计算实际消耗的工作时间
-                timeCost = getTimeCost(processTaskStepTimeAuditList, currentTimeMillis, worktimeUuid);
+                timeCost = getTimeCost(timePeriodList, worktimeUuid);
             }
         }
+        long realTimeLeft = timeSum - realTimeCost;
+        long timeLeft = timeSum - timeCost;
+        slaTimeVo.setRealTimeLeft(realTimeLeft);
+        slaTimeVo.setTimeLeft(timeLeft);
 
-        slaTimeVo.setRealTimeLeft(slaTimeVo.getTimeSum() - realTimeCost);
-        slaTimeVo.setTimeLeft(slaTimeVo.getTimeSum() - timeCost);
-
-        slaTimeVo.setRealExpireTime(new Date(currentTimeMillis + slaTimeVo.getRealTimeLeft()));
+        slaTimeVo.setRealExpireTime(new Date(currentTimeMillis + realTimeLeft));
         if (StringUtils.isNotBlank(worktimeUuid)) {
-            if (slaTimeVo.getTimeLeft() != null) {
-                if (slaTimeVo.getTimeLeft() > 0) {
-                    long expireTime =
-                            WorkTimeUtil.calculateExpireTime(currentTimeMillis, slaTimeVo.getTimeLeft(), worktimeUuid);
-                    slaTimeVo.setExpireTime(new Date(expireTime));
-                } else {
-                    long expireTime = WorkTimeUtil.calculateExpireTimeForTimedOut(currentTimeMillis,
-                            -slaTimeVo.getTimeLeft(), worktimeUuid);
-                    slaTimeVo.setExpireTime(new Date(expireTime));
-                }
-
+            if (timeLeft > 0) {
+                long expireTime = WorkTimeUtil.calculateExpireTime(currentTimeMillis, timeLeft, worktimeUuid);
+                slaTimeVo.setExpireTime(new Date(expireTime));
             } else {
-                throw new RuntimeException("计算剩余时间失败");
+                long expireTime = WorkTimeUtil.calculateExpireTimeForTimedOut(currentTimeMillis, -timeLeft, worktimeUuid);
+                slaTimeVo.setExpireTime(new Date(expireTime));
             }
         } else {
-            if (slaTimeVo.getTimeLeft() != null) {
-                slaTimeVo.setExpireTime(new Date(currentTimeMillis + slaTimeVo.getTimeLeft()));
-            } else {
-                throw new RuntimeException("计算剩余时间失败");
-            }
+            slaTimeVo.setExpireTime(new Date(currentTimeMillis + timeLeft));
         }
+        return slaTimeVo;
     }
 
     private void adjustJob(ProcessTaskSlaTimeVo slaTimeVo, JSONObject slaConfigObj, Date oldExpireTime) {
@@ -432,6 +557,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
 
     @Override
     public void execute() {
+        // 开始事务
         TransactionStatus transactionStatus = transactionUtil.openTx();
         try {
             Long processTaskId = null;
@@ -441,6 +567,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                 processTaskId = currentProcessTaskStepVo.getProcessTaskId();
             } else if (currentProcessTaskVo != null) {
                 slaIdList = processTaskMapper.getSlaIdListByProcessTaskId(currentProcessTaskVo.getId());
+                /** 遍历删除不需要计算的slaId **/
                 Iterator<Long> iterator = slaIdList.iterator();
                 while (iterator.hasNext()) {
                     Long slaId = iterator.next();
@@ -495,10 +622,7 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
 
                         // 修正最终超时日期
                         if (timeSum != null) {
-                            ProcessTaskSlaTimeVo slaTimeVo = new ProcessTaskSlaTimeVo();
-                            slaTimeVo.setTimeSum(timeSum);
-                            slaTimeVo.setSlaId(slaId);
-                            calculateExpireTime(slaTimeVo, worktimeUuid);
+                            ProcessTaskSlaTimeVo slaTimeVo = calculateExpireTime(slaId, timeSum, worktimeUuid);
                             if (Objects.equals(timeSum, oldTimeSum)) {
                                 long expireTimeLong = 0L;
                                 long oldExpireTimeLong = 0L;
@@ -528,9 +652,11 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                     }
                 }
             }
+            /** 提交事务 **/
             transactionUtil.commitTx(transactionStatus);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
+            /** 回滚事务 **/
             transactionUtil.rollbackTx(transactionStatus);
         }
     }
