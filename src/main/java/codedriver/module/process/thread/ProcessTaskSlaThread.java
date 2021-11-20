@@ -128,16 +128,12 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
             }
         }
         timeList.sort((o1, o2) -> {
-            Long t1 = null, t2 = null;
-            if (o1.containsKey("s")) {
-                t1 = o1.get("s");
-            } else if (o1.containsKey("e")) {
+            Long t1 = o1.get("s");
+            if (t1 == null) {
                 t1 = o1.get("e");
             }
-
-            if (o2.containsKey("s")) {
-                t2 = o2.get("s");
-            } else if (o2.containsKey("e")) {
+            Long t2 = o2.get("s");
+            if (t2 == null) {
                 t2 = o2.get("e");
             }
             return t1.compareTo(t2);
@@ -145,15 +141,17 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
         Stack<Long> timeStack = new Stack<>();
         List<Map<String, Long>> timePeriodList = new ArrayList<>();
         for (Map<String, Long> timeMap : timeList) {
-            if (timeMap.containsKey("s")) {
-                timeStack.push(timeMap.get("s"));
-            } else if (timeMap.containsKey("e")) {
+            Long s = timeMap.get("s");
+            Long e = timeMap.get("e");
+            if (s != null) {
+                timeStack.push(s);
+            } else if (e != null) {
                 if (!timeStack.isEmpty()) {
                     Long currentStartTimeLong = timeStack.pop();
                     if (timeStack.isEmpty()) {// 栈被清空时计算时间段
                         Map<String, Long> newTimeMap = new HashMap<>();
                         newTimeMap.put("s", currentStartTimeLong);
-                        newTimeMap.put("e", timeMap.get("e"));
+                        newTimeMap.put("e", e);
                         timePeriodList.add(newTimeMap);
                     }
                 }
