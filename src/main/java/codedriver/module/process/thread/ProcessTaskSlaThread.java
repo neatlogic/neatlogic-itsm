@@ -155,13 +155,13 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
      * @param worktimeUuid 工作时间窗口uuid
      * @return 时效信息
      */
-    private ProcessTaskSlaTimeVo getSlaTime(Long slaId, Long timeSum, long currentTimeMillis, String worktimeUuid,long realTimeCost, long timeCost) {
+    private ProcessTaskSlaTimeVo getSlaTime(Long slaId, Long timeSum, long currentTimeMillis, String worktimeUuid, ProcessTaskSlaTimeCostVo timeCostVo) {
         ProcessTaskSlaTimeVo slaTimeVo = new ProcessTaskSlaTimeVo();
         slaTimeVo.setTimeSum(timeSum);
         slaTimeVo.setSlaId(slaId);
         /** 非第一次进入，进行时间扣减 **/
-        long realTimeLeft = timeSum - realTimeCost;
-        long timeLeft = timeSum - timeCost;
+        long realTimeLeft = timeSum - timeCostVo.getRealTimeCost();
+        long timeLeft = timeSum - timeCostVo.getTimeCost();
         slaTimeVo.setRealTimeLeft(realTimeLeft);
         slaTimeVo.setTimeLeft(timeLeft);
 
@@ -348,8 +348,9 @@ public class ProcessTaskSlaThread extends CodeDriverThread {
                                 throw new SlaCalculateHandlerNotFoundException(calculateHandler);
                             }
                             long currentTimeMillis = System.currentTimeMillis();
-                            long[] timeCostArray = handler.calculateTimeCost(slaId, currentTimeMillis, worktimeUuid);
-                            ProcessTaskSlaTimeVo slaTimeVo = getSlaTime(slaId, timeSum, currentTimeMillis, worktimeUuid, timeCostArray[0], timeCostArray[1]);
+                            ProcessTaskSlaTimeCostVo timeCostVo = handler.calculateTimeCost(slaId, currentTimeMillis, worktimeUuid);
+                            ProcessTaskSlaTimeVo slaTimeVo = getSlaTime(slaId, timeSum, currentTimeMillis, worktimeUuid, timeCostVo);
+                            System.out.println(slaTimeVo);
                             if (Objects.equals(timeSum, oldTimeSum)) {
                                 long expireTimeLong = 0L;
                                 long oldExpireTimeLong = 0L;

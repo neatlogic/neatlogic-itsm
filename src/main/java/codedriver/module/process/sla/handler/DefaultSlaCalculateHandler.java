@@ -5,6 +5,7 @@
 
 package codedriver.module.process.sla.handler;
 
+import codedriver.framework.process.dto.ProcessTaskSlaTimeCostVo;
 import codedriver.framework.process.dto.ProcessTaskStepTimeAuditVo;
 import codedriver.framework.process.sla.core.SlaCalculateHandlerBase;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +34,7 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
     }
 
     @Override
-    protected long[] myCalculateTimeCost(List<ProcessTaskStepTimeAuditVo> timeAuditList, long currentTimeMillis, String worktimeUuid) {
+    protected ProcessTaskSlaTimeCostVo myCalculateTimeCost(List<ProcessTaskStepTimeAuditVo> timeAuditList, long currentTimeMillis, String worktimeUuid) {
         long[] timeCostArray = new long[2];
         List<Map<String, Long>> timePeriodList = timeAuditListToTimePeriodList(timeAuditList, currentTimeMillis);
         long realTimeCost = getRealTimeCost(timePeriodList);
@@ -41,9 +42,10 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
         if (StringUtils.isNotBlank(worktimeUuid)) {// 如果有工作时间，则计算实际消耗的工作时间
             timeCost = getTimeCost(timePeriodList, worktimeUuid);
         }
-        timeCostArray[0] = realTimeCost;
-        timeCostArray[1] = timeCost;
-        return timeCostArray;
+        ProcessTaskSlaTimeCostVo timeCostVo = new ProcessTaskSlaTimeCostVo();
+        timeCostVo.setRealTimeCost(realTimeCost);
+        timeCostVo.setTimeCost(timeCost);
+        return timeCostVo;
     }
 
     /**
