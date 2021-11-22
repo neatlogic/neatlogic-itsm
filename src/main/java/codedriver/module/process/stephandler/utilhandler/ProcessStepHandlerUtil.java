@@ -163,10 +163,6 @@ public class ProcessStepHandlerUtil implements IProcessStepHandlerUtil {
         switch (action) {
             case STEP_ACTIVE:
                 newAuditVo.setActiveTime("now");
-//                if (processTaskStepTimeAuditVo == null
-//                        || StringUtils.isNotBlank(processTaskStepTimeAuditVo.getActiveTime())) {
-//                    processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
-//                }
                 processTaskStepTimeAuditMapper.insertProcessTaskStepTimeAudit(newAuditVo);
                 break;
             case STEP_START:
