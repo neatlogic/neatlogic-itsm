@@ -55,6 +55,7 @@ public class SzbankSingleStepProcessSlaCalculateHandler extends SlaCalculateHand
      */
     private static List<Map<String, Long>> timeAuditListToTimePeriodList(List<ProcessTaskStepTimeAuditVo> timeAuditList, long currentTimeMillis) {
         List<Map<String, Long>> timeList = new ArrayList<>();
+        /** 筛选出最后一次激活后的操作时间列表 **/
         List<ProcessTaskStepTimeAuditVo> lastTimeAuditList = new ArrayList<>();
         int size = timeAuditList.size();
         for (int i = size - 1; i >= 0; i--) {
