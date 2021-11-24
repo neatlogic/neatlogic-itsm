@@ -18,19 +18,18 @@ import java.util.*;
  * @since 2021/11/22 14:59
  **/
 @Component
-public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
+public class SzbankSingleStepProcessSlaCalculateHandler extends SlaCalculateHandlerBase {
     @Override
     public String getName() {
-        return "处理时效计算规则（出厂默认）";
+        return "单步骤处理时效计算规则（苏州银行）";
     }
 
     @Override
     public String getDescription() {
         return "耗时计算规则如下：<br>" +
-                "1.正常一个步骤的处理耗时是完成时间减去激活时间。<br>" +
+                "1.正常一个步骤的处理耗时是完成时间减去开始时间。<br>" +
                 "2.如果一个步骤处理过程有暂停操作，则从暂停到恢复之间的时间段不算耗时。<br>" +
-                "3.如果一个步骤被多次重新激活，则每次处理时间段都累计为耗时。<br>" +
-                "4.如果两个或两个以上步骤的处理时间段有重合部分的话，则重合部分去重，只取一份时间。";
+                "3.如果一个步骤被多次重新激活，则每次激活后处理耗时重新统计。";
     }
 
     @Override
@@ -56,11 +55,20 @@ public class DefaultSlaCalculateHandler extends SlaCalculateHandlerBase {
      */
     private static List<Map<String, Long>> timeAuditListToTimePeriodList(List<ProcessTaskStepTimeAuditVo> timeAuditList, long currentTimeMillis) {
         List<Map<String, Long>> timeList = new ArrayList<>();
-        for (ProcessTaskStepTimeAuditVo auditVo : timeAuditList) {
+        /** 筛选出最后一次激活后的操作时间列表 **/
+        List<ProcessTaskStepTimeAuditVo> lastTimeAuditList = new ArrayList<>();
+        int size = timeAuditList.size();
+        for (int i = size - 1; i >= 0; i--) {
+            ProcessTaskStepTimeAuditVo timeAuditVo = timeAuditList.get(i);
+            lastTimeAuditList.add(timeAuditVo);
+            if (timeAuditVo.getActiveTimeLong() != null) {
+                break;
+            }
+        }
+        lastTimeAuditList.sort(Comparator.comparing(ProcessTaskStepTimeAuditVo::getId));
+        for (ProcessTaskStepTimeAuditVo auditVo : lastTimeAuditList) {
             Long startTime = null, endTime = null;
-            if (auditVo.getActiveTimeLong() != null) {
-                startTime = auditVo.getActiveTimeLong();
-            } else if (auditVo.getStartTimeLong() != null) {
+            if (auditVo.getStartTimeLong() != null) {
                 startTime = auditVo.getStartTimeLong();
             }
             if (auditVo.getCompleteTimeLong() != null) {

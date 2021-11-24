@@ -12,7 +12,6 @@ import codedriver.framework.process.auth.PROCESS_BASE;
 import codedriver.framework.process.constvalue.ProcessStepHandlerType;
 import codedriver.framework.process.constvalue.ProcessTaskOperationType;
 import codedriver.framework.process.constvalue.ProcessTaskStatus;
-import codedriver.framework.process.dao.mapper.ChannelMapper;
 import codedriver.framework.process.dao.mapper.ProcessCommentTemplateMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskMapper;
 import codedriver.framework.process.dao.mapper.ProcessTaskStepDataMapper;
@@ -69,9 +68,6 @@ public class ProcessTaskStepGetApi extends PrivateApiComponentBase {
 
     @Resource
     private ProcessTaskStepTaskService processTaskStepTaskService;
-
-    @Resource
-    private ChannelMapper channelMapper;
 
     @Override
     public String getToken() {
