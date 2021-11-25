@@ -5,8 +5,11 @@
 
 package codedriver.module.process.sla.handler;
 
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.SlaStatus;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeCostVo;
 import codedriver.framework.process.dto.ProcessTaskStepTimeAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.sla.core.SlaCalculateHandlerBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -29,6 +32,26 @@ public class SzbankSingleStepResponseSlaCalculateHandler extends SlaCalculateHan
         return "耗时计算规则如下：<br>" +
                 "1.正常一个步骤的响应耗时是开始时间减去激活时间。<br>" +
                 "2.如果一个步骤被多次重新激活，则每次激活后响应耗时重新统计。";
+    }
+
+    @Override
+    public SlaStatus getStatus(List<ProcessTaskStepVo> processTaskStepList) {
+        ProcessTaskStepVo processTaskStepVo = processTaskStepList.get(0);
+//        System.out.println("步骤id=" + processTaskStepVo.getId());
+//        System.out.println("步骤name=" + processTaskStepVo.getName());
+//        System.out.println("步骤isActive=" + processTaskStepVo.getIsActive());
+//        System.out.println("步骤status=" + processTaskStepVo.getStatus());
+        if (Objects.equals(processTaskStepVo.getIsActive(), 1) && ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
+            return SlaStatus.DOING;
+        } else if (Objects.equals(processTaskStepVo.getIsActive(), 1) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+            return SlaStatus.DONE;
+        }
+        return null;
+    }
+
+    @Override
+    public boolean needDelete(List<ProcessTaskStepVo> processTaskStepList) {
+        return false;
     }
 
     @Override

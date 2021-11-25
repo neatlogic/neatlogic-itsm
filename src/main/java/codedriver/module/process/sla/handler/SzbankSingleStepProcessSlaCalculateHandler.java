@@ -5,8 +5,11 @@
 
 package codedriver.module.process.sla.handler;
 
+import codedriver.framework.process.constvalue.ProcessTaskStatus;
+import codedriver.framework.process.constvalue.SlaStatus;
 import codedriver.framework.process.dto.ProcessTaskSlaTimeCostVo;
 import codedriver.framework.process.dto.ProcessTaskStepTimeAuditVo;
+import codedriver.framework.process.dto.ProcessTaskStepVo;
 import codedriver.framework.process.sla.core.SlaCalculateHandlerBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -30,6 +33,32 @@ public class SzbankSingleStepProcessSlaCalculateHandler extends SlaCalculateHand
                 "1.正常一个步骤的处理耗时是完成时间减去开始时间。<br>" +
                 "2.如果一个步骤处理过程有暂停操作，则从暂停到恢复之间的时间段不算耗时。<br>" +
                 "3.如果一个步骤被多次重新激活，则每次激活后处理耗时重新统计。";
+    }
+
+    @Override
+    public SlaStatus getStatus(List<ProcessTaskStepVo> processTaskStepList) {
+        ProcessTaskStepVo processTaskStepVo = processTaskStepList.get(0);
+//        System.out.println("步骤id=" + processTaskStepVo.getId());
+//        System.out.println("步骤name=" + processTaskStepVo.getName());
+//        System.out.println("步骤isActive=" + processTaskStepVo.getIsActive());
+//        System.out.println("步骤status=" + processTaskStepVo.getStatus());
+        if (Objects.equals(processTaskStepVo.getIsActive(), 1) && ProcessTaskStatus.RUNNING.getValue().equals(processTaskStepVo.getStatus())) {
+            return SlaStatus.DOING;
+        } else if (Objects.equals(processTaskStepVo.getIsActive(), 1) && ProcessTaskStatus.HANG.getValue().equals(processTaskStepVo.getStatus())) {
+            return SlaStatus.PAUSE;
+        } else if (ProcessTaskStatus.SUCCEED.getValue().equals(processTaskStepVo.getStatus()) || ProcessTaskStatus.ABORTED.getValue().equals(processTaskStepVo.getStatus())) {
+            return SlaStatus.DONE;
+        }
+        return null;
+    }
+
+    @Override
+    public boolean needDelete(List<ProcessTaskStepVo> processTaskStepList) {
+        ProcessTaskStepVo processTaskStepVo = processTaskStepList.get(0);
+        if (Objects.equals(processTaskStepVo.getIsActive(), 1) && ProcessTaskStatus.PENDING.getValue().equals(processTaskStepVo.getStatus())) {
+            return true;
+        }
+        return false;
     }
 
     @Override
