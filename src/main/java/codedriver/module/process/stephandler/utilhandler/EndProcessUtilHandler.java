@@ -271,8 +271,10 @@ public class EndProcessUtilHandler extends ProcessStepInternalHandlerBase {
                     slaObj.put("notifyPolicyList", notifyPolicyArray);
                     String slaUuid = sla.getString("uuid");
                     String slaName = sla.getString("name");
+                    String calculateHandler = sla.getString("calculateHandler");
                     slaObj.put("uuid", slaUuid);
                     slaObj.put("name", slaName);
+                    slaObj.put("calculateHandler", calculateHandler);
                     slaArray.add(slaObj);
                 }
             }
